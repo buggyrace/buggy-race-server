@@ -1,0 +1,343 @@
+/* =============================================================================
+   App specific CSS file.
+   ========================================================================== */
+
+/* universal */
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+}
+
+section {
+  overflow: auto;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.container-narrow{
+  margin: 0 auto;
+  max-width: 700px;
+}
+
+/* home */
+
+.buggy-img {
+  width: 100%;
+}
+
+/* Forms */
+
+.navbar-form input[type="text"],
+.navbar-form input[type="password"] {
+  width: 180px;
+}
+
+
+.form-register {
+  width: 50%;
+}
+
+.form-register .form-control {
+  position: relative;
+  font-size: 16px;
+  height: auto;
+  padding: 10px;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+/* the buggy project page */
+
+.buggy-project .task-breakdown  {
+  margin-top: 3em;
+}
+
+.buggy-project .phase-list {
+  margin:1em auto;
+  border:1px solid gray;
+  padding:0.5em 1em;
+}
+.buggy-project .phase-list ul {
+  list-style: none;
+  margin-left:0;
+  padding-left:1em;
+}
+.buggy-project .phase-list li {
+  padding:0.25em 0.5em;
+  background-color: #f5f5f5;
+}
+.buggy-project .phase-list li:nth-child(2n) {
+  background-color: #f0f0f0;
+}
+.buggy-project .phase-list a span {
+  min-width:5em;
+  display: inline-block;
+  padding-right:0.3em;
+}
+.buggy-project h2 {
+  margin-top: 2em;
+}
+.buggy-project .task {
+  margin:4em 0 1em 0;
+  padding:0;
+}
+.buggy-project .task:before{
+  content: "";
+  display:block;
+  padding:1em;
+  background: repeating-linear-gradient(-45deg, yellow, yellow 1em, black 1em, black 2em);
+}
+.buggy-project .task h3 {
+  padding:0.5em;
+  margin:0 0 0.5em 0;
+  background-color:#ffffbb;
+}
+.buggy-project .task .item {
+  padding:0 0 0.5em 0;
+  margin:0 1em 1em 3em;
+}
+.buggy-project .task .problem {
+  background:#ffeeee;
+}
+.buggy-project .task .solution {
+  background:#eeffee;
+}
+.buggy-project .task .hints {
+  background:#fff9e9;
+}
+.buggy-project .task .item p, .buggy-project .task .item ul {
+  margin:1em 1em 0.5em 2em;
+  padding-bottom:0.5em;
+}
+.buggy-project .task .hints ul li {
+  margin: 0.5em 0;
+}
+.buggy-project .task .item:before {
+  display:block;
+  font-weight:bold;
+  padding:0.5em 1em 0.5em 2em;
+  background:inherit;
+}
+.buggy-project .task .problem:before {
+  content: "Problem";
+  background-color: #eedddd;
+}
+.buggy-project .task .solution:before {
+  content: "Solution";
+  background-color: #ddeedd;
+}
+.buggy-project .task .hints:before {
+  content: "Hints";
+  background:#fff9e9;
+  background:#eee6d6;
+}
+
+.buggy-project .task h3 a{
+  float:right;
+  color:#999;
+  padding:0.1em 0.5em;
+  border-radius:0.2em;
+  text-decoration: none;
+  background-color:inherit;
+}
+.buggy-project .task h3 a::before{
+  content:"#";
+  opacity:0.5;
+}
+.buggy-project .task a:hover{
+  background-color:#666;
+  color:white;
+}
+
+.buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
+.buggy-project .phase-0 .task h3 { background-color: #ffffbb; }
+.buggy-project .phase-1 .task:before{ background: repeating-linear-gradient(-45deg, #ffe600, #ffe600 1em, black 1em, black 2em);}
+.buggy-project .phase-1 .task h3 { background-color: #ffeebb; }
+.buggy-project .phase-2 .task:before{ background: repeating-linear-gradient(-45deg, #ffc100, #ffc100 1em, black 1em, black 2em);}
+.buggy-project .phase-2 .task h3 { background-color: #ffe3bb; }
+.buggy-project .phase-3 .task:before{ background: repeating-linear-gradient(-45deg, #ff9c00, #ff9c00 1em, black 1em, black 2em);}
+.buggy-project .phase-3 .task h3 { background-color: #ffd2bb; }
+.buggy-project .phase-4 .task:before{ background: repeating-linear-gradient(-45deg, #ff7600, #ff7600 1em, black 1em, black 2em);}
+.buggy-project .phase-4 .task h3 { background-color: #ffc6bb; }
+.buggy-project .phase-5 .task:before{ background: repeating-linear-gradient(-45deg, #ff0000, #ff0000 1em, black 1em, black 2em);}
+.buggy-project .phase-5 .task h3 { background-color: #ffbbbb; }
+
+.buggy-text-overlay {
+  background-color: rgba(0,0,0,0.333);
+  color:white;
+  font-weight:bold;
+  padding:0.333em 0.666em;
+}
+
+.buggy-table {
+  box-shadow: 6px 5px 5px rgba(0,0,0,0.333);
+}
+.buggy-table thead th {
+  background-image:url('/static/build/img/metal-floor-plate.jpg');
+}
+
+/* footer */
+
+footer {
+  margin-top: 45px;
+  padding-top: 5px;
+  background: repeating-linear-gradient(
+    -45deg,
+    black,
+    black 2rem,
+    yellow 2rem,
+    yellow 4rem
+  );
+  opacity: 0.666;
+  min-height: 6rem;
+}
+footer a {
+  color: black;
+  border-bottom: 1px dotted black;
+}
+
+footer p {
+  float: right;
+  margin-right: 25px;
+}
+
+footer ul {
+  margin-top:2rem;
+  list-style: none;
+}
+
+footer ul li {
+  font-weight: bold;
+  background-color:white;
+  padding: 0.5em 1em;
+  background-color: yellow;
+  color: black;
+  box-shadow: 6px 5px 5px rgba(30,30,30,30);
+}
+
+footer .company {
+  float: left;
+  margin-left: 25px;
+}
+
+footer .footer-nav {
+  float: right;
+  margin-right: 25px;
+  list-style: none;
+}
+
+body {
+  background-color: #ffffcc;
+  background-image:url('/static/build/img/metal-floor-plate.jpg');
+}
+main {
+  background-color:white;
+}
+
+/* icons */
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?7wqaa4');
+  src:  url('fonts/icomoon.eot?7wqaa4#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?7wqaa4') format('truetype'),
+    url('fonts/icomoon.woff?7wqaa4') format('woff'),
+    url('fonts/icomoon.svg?7wqaa4#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-book:before {
+  content: "\e91f";
+}
+.icon-bubbles:before {
+  content: "\e96c";
+}
+.icon-wrench:before {
+  content: "\e991";
+}
+.icon-cog:before {
+  content: "\e994";
+}
+.icon-trophy:before {
+  content: "\e99e";
+}
+.icon-info:before {
+  content: "\ea0c";
+}
+.icon-exit:before {
+  content: "\ea14";
+}
+.icon-github:before {
+  content: "\eab0";
+}
+
+.table .bool-false {
+  background-color: #ffdddd;
+}
+.table.table-hover tr:hover .bool-false {
+  background-color: #ffcccc;
+}
+.table.table-striped tbody tr:nth-of-type(odd) td.bool-false {
+  background-color:  #f0c9c9;
+}
+.table.table-striped tbody tr:nth-of-type(odd):hover td.bool-false {
+  background-color:  #f0b9b9;
+}
+.table tr td.number {
+  text-align:right;
+}
+.table.elastic tr td:last-child {
+  width:100%;;
+}
+
+.buggy-warn{
+  padding:0.5em 0.5em;
+  background-color: red;
+  color: white;
+}
+
+.buggy-stripes {
+    background: repeating-linear-gradient(
+      -45deg,
+      black,
+      black 2rem,
+      yellow 2rem,
+      yellow 4rem
+    );
+    background-transform:rotate(20deg);
+    min-height: 2rem;
+}
+.finish-chequers{
+  position: relative;
+  overflow: hidden;
+  background-image:url('/static/build/img/black-white-chequer.png');
+  height:4em;
+  background-size: 4em 4em;
+}
+
+
+.mt-2 {
+  margin-top: 1rem;
+}

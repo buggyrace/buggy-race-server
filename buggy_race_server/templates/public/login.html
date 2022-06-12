@@ -1,0 +1,31 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <h1 class="mt-5">Login</h1>
+  <p>
+    If you're a student on the Foundation course, you'll have been given
+    your login credentials individually.
+  </p>
+  <form class="form p-3" id="loginForm" method="POST" action="" role="login">
+    {{ form.csrf_token }}
+    <div class="row">
+      <div class="form-group">
+          {{form.username.label}}
+          {{ form.username(placeholder="hamster", class_="form-control mr-sm-1 my-auto") }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="form-group">
+          {{form.password.label}}
+          {{ form.password(placeholder="password", class_="form-control mr-sm-1 my-auto") }}
+      </div>
+    </div>
+    <button class="btn btn-primary my-3" type="submit">Login</button>
+  </form>
+  <p class="mt-5">
+    <a href="{{ url_for('public.register') }}">Register instead</a>.
+  </p>
+</div>
+{% endblock %}
+

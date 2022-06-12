@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1>Site settings</h1>
+  </div>
+  <div class="row">
+    <h3>Config sanity-check for admins</h3>
+  </div>
+  <div class="row">
+    <p>
+      These are settings that <em>should</em> be set in the config, i.e., 
+      as environment variables. If you're running locally (e.g., in
+      development), that probably means in an <code>.env</code> file (see   
+      <code>/env.example</code>, which is the template). If you're running on
+      Heroku, change these in the <em>settings→&nbsp;config&nbsp;vars</em>
+      section.
+    </p>
+    <p>
+      This page is just a sanity check: you can't change them here!
+    </p>
+    <p>
+      Note that the tech notes, which are published at
+      <code>GITHUB_PAGES_URL</code> by Jekyll/GitHub Pages, do not get their
+      URL settings from the environment. Instead, look in
+      <code>/docs/_config.yml</code> and check that the settings in there match
+      with what you see here.
+    </p>
+  </div>
+  <div class="row">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Setting</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <code>ADMIN_USERNAMES</code>
+            <br>
+            (specified as a comma-separated list)
+          </td>
+          <td>
+            <code>
+              {% for u in admin_usernames %}
+                {{ u }}<br>
+              {% endfor %}
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>REGISTRATION_AUTH_CODE</code></td>
+          <td>
+            {% if has_auth_code %}
+              <code>[redacted]</code> <em>(but set OK)</em>
+            {% else %}
+              <em>none set</em>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><code>DEBUG</code></td>
+          <td><code>{{ is_debug or "(not set)" }}</code></td>
+        </tr>
+        <tr>
+          <td><code>BUGGY_EDITOR_GITHUB_URL</code></td>
+          <td><code><a href="{{ editor_url }}">{{ editor_url }}</a></code></td>
+        </tr>
+        <tr>
+          <td><code>BUGGY_EDITOR_REPO_OWNER</code></td>
+          <td><code>{{ editor_repo_owner }}</code></td>
+        </tr>
+        <tr>
+          <td><code>BUGGY_EDITOR_REPO_NAME</code></td>
+          <td><code>{{ editor_repo_name }}</code></td>
+        </tr>
+        <tr>
+          <td><code>BUGGY_RACE_SERVER_URL</code></td>
+          <td><code><a href="{{ server_url }}">{{ server_url }}</a></code></td>
+        </tr>
+        <tr>
+          <td><code>GITHUB_PAGES_URL</code></td>
+          <td><code><a href="{{ github_pages_url }}">{{ github_pages_url }}</a></code></td>
+        </tr>
+        <tr>
+          <td><code>MOODLE_URL</code></td>
+          <td><code><a href="{{ moodle_url }}">{{ moodle_url }}</a></code></td>
+        </tr>
+        <tr>
+          <td><code>PIAZZA_URL</code></td>
+          <td><code><a href="{{ piazza_url }}">{{ piazza_url }}</a></code></td>
+        </tr>
+        <tr>
+          <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
+          <td><code>{{ max_file_age }}</code></td>
+        </tr>
+        <tr>
+          <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
+          <td><code>{{ force_redirect_http_to_https }}</code></td>
+        </tr>
+        <tr>
+          <th colspan="2">
+            GitHub Client: see
+            <a href="https://docs.github.com/en/developers/apps/managing-github-apps">GitHub apps</a>
+          </th>
+        </tr>
+        <tr>
+          <td><code>GITHUB_CLIENT_ID</code></td>
+          <td><code>{{ github_client_id }}</code></td>
+        </tr>
+        <tr>
+          <td><code>GITHUB_CLIENT_SECRET</code></td>
+          <td><code>{{ github_client_secret|length }} chars</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

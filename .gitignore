@@ -1,0 +1,76 @@
+# buggies.csv used for import into race
+# race.log used for report of race
+buggies.csv
+race.log
+
+docs/_site
+docs/.jekyll-cache/
+docs/.ruby-version
+docs/Gemfile.lock
+
+**/__pycache__/
+*.py[cod]
+buggy_race_server/static
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+# needed to use nested lib folders
+/lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx
+docs/_build
+
+.webassets-cache
+
+# Virtualenvs
+env/
+venv/
+
+# npm
+/node_modules/
+
+# webpack-built files
+/buggy_race_server/static/build/
+
+# Configuration
+.env
+
+# Development database
+*.db
+
+# Mac finder
+**/.DS_Store
+

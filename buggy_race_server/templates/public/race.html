@@ -1,0 +1,135 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Next buggy race</h1>
+  </div>
+  <div class="row">
+    {% if next_race %}
+      <div class="d-flex align-items-start w-100">
+        <div class="col">
+          <div class="w-100 buggy-stripes">&nbsp;</div>
+          <div class="alert alert-info text-center">
+            <h4>
+              {% if next_race.title %}
+                <strong>{{ next_race.title }}</strong>
+              {% else %}
+                <strong>Next Race</strong>
+              {% endif %}
+            </h4>
+            {% if next_race.desc %}
+              <div class="m-3">
+                {{ next_race.desc|safe }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-start w-100">
+        <div class="col">
+          <div class="alert alert-success text-center">
+            <h2 class="m-3">
+              <strong>
+              {{ next_race.start_at.strftime('%A') }}
+              <br>
+              {{ next_race.start_at.strftime('%Y-%m-%d') }}
+              <br>
+              {{ next_race.start_at.strftime('%H:%M') }}
+              </strong>
+            </h2>
+          </div>
+        </div>
+        <div class="col">
+          <div class="alert alert-danger text-center">
+            <h2 class="m-3">
+              <strong>
+                Cost limit<br>
+                <span style="font-size:200%">{{ next_race.cost_limit }}</span>
+              </strong>
+              </h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-start w-100">
+        <div class="col">
+          <div class="alert alert-warning text-center">
+            <p class="m-3">
+              Make sure you've uploaded a buggy with a total cost less than or
+              equal to {{ next_race.cost_limit }} <em>before</em> the race starts.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+    {% else %}
+      <div class="alert alert-warning w-100 text-center">
+        <p class="m-3"><strong>Next race not yet announced.</strong></p>
+      </div>
+    {% endif %}  
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Previous race results</h1>
+  </div>  
+  {% if races|length == 0 %}
+    <div class="alert alert-warning w-100 text-center">
+      <p class="m-3"><strong>No races have been run yet. No results to show.</strong></p>
+    </div>
+  {% else %}
+    <div class="row">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th><i class="icon-trophy"></i></th>
+            <th>race time</th>
+            <th>cost limit</th>
+            <th>title & details</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for r in races %}
+              <tr class="race-visible-{{ r.is_visible }}">
+                <td>
+                  {#
+                  <a class="btn btn-outline-secondary"
+                  href="{{ url_for('r.race_results', league=r.league, race_slug=r.slug())}}">results &rtri;</a>
+                  #}
+                  <em>awaiting race report</em>
+                </td>
+                <td>
+                  {{ r.start_at.strftime('%Y-%m-%d %H:%M') }}
+                </td>
+                <td>
+                  {{ r.cost_limit }}
+                </td>
+                <td>
+                  <strong>{{ r.title }}</strong>
+                  {% if r.desc %}
+                  <div style="padding:0.2em 0.2em 0.2em 2em;">{{ r.desc|safe }}</div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+<div class="container pb-5">
+  <div class="row">
+    <p class="lead">
+      This is the race-buggy server for the RHUL Foundation Year
+      Computer Science project.
+    </p>
+    <img class="img-fluid" src="/static/build/img/rene-buggy-1.png" />
+  </div>
+</div>
+
+{% endblock %}
+

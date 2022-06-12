@@ -1,0 +1,14 @@
+{
+	"folders": [],
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+		  {
+        "label": "CS1999: Download from GitHub",
+        "type": "shell",
+        "command": "echo \"Please enter your RHUL College password: \" && ssh {{ current_user.rhul_username }}@linux.cim.rhul.ac.uk \"git clone {{ current_user.course_repository }} buggy-editor\""
+      }
+		]
+  },
+	"remoteAuthority": "ssh-remote+{{ current_user.rhul_username }}@linux.cim.rhul.ac.uk"
+}

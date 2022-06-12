@@ -1,0 +1,1099 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Buggy Specifications/Race Rules</h1>
+  </div>
+  <div class="row">
+    <p class="lead">
+      These are the buggy specifications. Any you don't provide will use the
+      default setting.
+      <br>
+      Also available as <a href="{{ url_for('public.showspecs_data') }}">tabulated data</a>.
+    </p>
+    <div class="alert alert-danger w-100 text-center" role="alert">
+      If there are <strong> rule violations</strong> in your buggy's
+      specification, it will be excluded from the race.
+      <br>
+      <em>(hint: fix that in your buggy editor)</em>
+    </div>
+    <div class="alert alert-danger w-100 text-center" role="alert">
+      If the total <strong>cost</strong> of your buggy is greater
+      that the race limit, it will be excluded from that race.
+    </div>
+    <div class="alert alert-warning w-100 text-center" role="alert">
+      Prices and masses may change with 24 hours' notice.
+    </div>
+    <div class="alert alert-info w-100 text-center" role="alert">
+      <strong>JSON name</strong> is the name you <strong>must</strong> use
+      for this item when you upload your buggy's data.
+      <br>
+      <strong>Default value</strong> is what the buggy gets for this item if
+      you don't provide a value.
+      <br>
+      <strong>Value</strong> indicates what values are acceptable.
+    </div>
+    
+  </div>
+  <div class="row">
+    <table class="table table-striped table-bordered table-hover table-responsive">
+      <thead class="thead-light">
+        <tr>
+          <th>
+            Item
+          </th>
+          <th>
+            Description/rules
+          </th>
+          <th>
+            Cost
+          </th>
+          <th>
+            JSON name
+          </th>
+          <th>
+            Default value
+          </th>
+          <th>
+            Value
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Number of wheels
+          </td>
+          <td>
+            The more wheels, the more traction. But more importantly, quantity
+            of wheels is also a measure of the buggy's size, so an indicator of
+            strength. The chassis of a heavy buggy with too few wheels might
+            break.
+            <br>
+            To put it another way, if you add a lot of mass to your buggy,
+            you'll need to add extra pairs of wheels.
+           <br>
+           Wheels are free: you pay for the tyres.
+           <br>
+            <strong>Must be even</strong>.
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              qty_wheels
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.qty_wheels }}
+            </code>
+          </td>
+          <td>
+              <em>integer<br>&gt;=&nbsp;4</em>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Primary motive power
+          </td>
+          <td>
+            The main source of motive power that moves your buggy forward.
+            <br>
+            See <a href="#types-of-motive-power">power table</a> for details.
+          </td>
+          <td><em>varies, per unit</em></td>
+          <td>
+            <code>
+              power_type
+            </code>
+          </td>
+          <td>
+            <code>
+              petrol
+            </code>
+          </td>
+          <td>
+            {% for t in data['power_type'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Primary motive power units
+          </td>
+          <td>
+            The quantity of primary motive power units. For consumable fuel
+            types this could be quite high; for large expensive types (e.g.,
+            nuclear reactors) it may be singular.
+            <br>
+            Consumable power units are depleted during the race: your buggy
+            gets lighter but you risk running out of fuel.
+            <br>
+            <em>1 unit of petrol might not get you very far.</em>
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              power_units
+            </code>
+          </td>
+          <td>
+            <code>
+              1
+            </code>
+          </td>
+          <td>
+            <em>integer</em><br>&gt;=&nbsp;1
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Auxiliary motive power
+          </td>
+          <td>
+            The backup plan for motive power for your buggy. You'll only need
+            this if your primary motive power fails catastrophically, or it
+            runs out of fuel.
+            <br>
+            You don't <strong>need</strong> a backup. Nobody <em>needs</em> a
+            backup. Until they do.
+            <br>
+            See <a href="#types-of-motive-power">power table</a> for details.
+          </td>
+          <td><em>varies, per unit</em></td>
+          <td>
+            <code>
+              aux_power_type
+            </code>
+          </td>
+          <td>
+              <em>none</em>
+          </td>
+          <td>
+            {% for t in data['power_type'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Auxiliary motive power units
+          </td>
+          <td>
+            The quantity of auxiliary motive power units.
+            <br>
+            Consumable power units are depleted during the race.
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              aux_power_units
+            </code>
+          </td>
+          <td>
+            <code>
+              0
+            </code>
+          </td>
+          <td>
+            <em>integer</em><br>&gt;=&nbsp;0
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Hamster booster
+          </td>
+          <td>
+            Steroids for hamsters.
+            <br>
+            Only effective if you have hamster motive power. 
+            <br>
+            Cost is per booster.
+            <br>
+            Hamsters can multiboost.
+          </td>
+          <td><code>{{ data['special']['hamster_booster']['cost'] }}</code></td>
+          <td>
+            <code>
+              hamster_booster
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.hamster_booster }}
+            </code>
+          </td>
+          <td>
+            <em><code>integer</code></em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Flag's colour
+          </td>
+          <td>
+            Racing buggies must fly a pennant so they can be recognised by the
+            spectators and the race commentators. This is the primary colour of
+            the buggy's pennant.
+            <br>
+            <em>Note: American spelling of <code>color</code>!</em>
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              flag_color
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.flag_color }}
+              
+            </code>
+          </td>
+          <td>
+            <code><em><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">CSS-colour</a></em></code>:<br>
+            example: <code>#ff0000</code> or <code>red</code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Flag's pattern
+          </td>
+          <td>
+            The pattern on the buggy's pennant. Every pattern except
+            <code>plain</code> needs two colours (a primary colour, and a
+            secondary). Stripes may be vertical, horizontal, or diagonal.
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              flag_pattern
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.flag_pattern }}
+            </code>
+          </td>
+          <td>
+            {% for t in data['flag_pattern'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Flag's other colour
+          </td>
+          <td>
+            The <em>other</em> colour of the buggy's pennant, if its
+            <code>pattern</code> has two.
+            <br>
+            <strong>Must be different from <code>flag_color</code>
+            (unless pattern is <code>plain</code>)</strong>.
+            <br>
+            <em>Note: American spelling of <code>color</code>!</em>
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              flag_color_secondary
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.flag_color_secondary }}
+            </code>
+          </td>
+          <td>
+            <code><em><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">CSS-colour</a></em></code>:<br>
+            example: <code>#ff0000</code> or <code>red</code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Type of tyres
+          </td>
+          <td>
+            The type of tyres. Appropriate for different conditions and budgets.
+            <br>
+            You can only carry one type of tyre (that is, for <em>all</em> your tyres)
+            in any race.
+            <br>
+            See <a href="#types-of-tyre">tyre table</a> for details.
+          </td>
+          <td><em>varies, per unit</em></td>
+          <td>
+            <code>
+              tyres
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.tyres }}
+            </code>
+          </td>
+          <td>
+            {% for t in data['tyres'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Number of tyres
+          </td>
+          <td>
+            The number of tyres (includes spares). <p><strong>Must be equal to
+            or greater than the number of wheels</strong></p>
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              qty_tyres
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.qty_tyres }}
+            </code>
+          </td>
+          <td>
+            <em>integer</em> &gt;= <em>qty_wheels</em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Armour
+          </td>
+          <td>
+            The predominant protection carried by the buggy. A triple-trade-off
+            between safety, encumbrance, and cost.
+            <br>
+            Only needed if other buggies come equipped for hostilities.
+            <em>Surely</em> nobody brings weapons to a race, right?
+            <br>
+            See <a href="#types-of-armour">armour table</a> for details.
+          </td>
+          <td><em>varies</em></td>
+          <td>
+            <code>
+              armour
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.armour }}
+            </code>
+          </td>
+          <td>
+            {% for t in data['armour'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+        
+        <tr>
+          <td>
+            Offensive capability
+          </td>
+          <td>
+            Just in case you think you'll win better if you can also spoil
+            other buggies' days, some weapons are available. All can cause
+            operational damage or punctures.<br> Options are classic spikes,
+            flame throwers, electric lances, or infectious spores.
+            <br>
+            All except spikes carry a risk of karmic self-injury.
+            <br>
+            See <a href="#types-of-offensive-capability">attack table</a> for details.
+          </td>
+          <td><em>varies, per unit</em></td>
+          <td>
+            <code>
+              attack
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.attack }}
+            </code>
+          </td>
+          <td>
+            {% for t in data['attack'] %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
+          </td>
+        </tr>
+
+
+        <tr>
+          <td>
+            Number of attacks
+          </td>
+          <td>
+            Every attack is an opportunity to be kind, wasted.
+            <br>
+            This is the <em>maximum</em> number of attacks that will be
+            attempted during the race.
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              qty_attacks
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.qty_attacks }}
+            </code>
+          </td>
+          <td>
+            <em>integer</em><br> &gt;=&nbsp;0
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Fireproof?
+          </td>
+          <td>
+            Is the buggy coated with fire-retardant paint?
+          </td>
+          <td><code>{{ data['special']['fireproof']['cost'] }}</code></td>
+          <td>
+            <code>
+              fireproof
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.fireproof | lower }}
+            </code>
+          </td>
+          <td>
+            <em>Boolean</em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Insulated?
+          </td>
+          <td>
+            Is the buggy protected with a rubber mesh protecting itself from
+            electric lance attacks?
+          </td>
+          <td><code>{{ data['special']['insulated']['cost'] }}</code></td>
+          <td>
+            <code>
+              insulated
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.insulated |lower }}
+            </code>
+          </td>
+          <td>
+            <em>Boolean</em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Antibiotic?
+          </td>
+          <td>
+            Is the buggy equipped with with the latest defences against
+            virulent biohazards and nasty scratches?
+          </td>
+          <td><code>{{ data['special']['antibiotic']['cost'] }}</code></td>
+          <td>
+            <code>
+              antibiotic
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.antibiotic | lower}}
+            </code>
+          </td>
+          <td>
+            <em>Boolean</em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Banging sound system?
+          </td>
+          <td>
+            Is the buggy wired up with some decent lungs for blasting
+            motivational rock during the more demanding sections of the race?
+          </td>
+          <td><code>{{ data['special']['banging']['cost'] }}</code></td>
+          <td>
+            <code>
+              banging
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.antibiotic | lower }}
+            </code>
+          </td>
+          <td>
+            <em>Boolean</em>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Race computer algorithm
+          </td>
+          <td>
+            Yes, your buggy has a race computer. The primary behavioural
+            characteristic of the program that is loaded affects how it
+            interacts with the other vehicles around it.
+            <br>
+            Don't start with "buggy". Buggy is what happens when your race
+            computer goes wrong: it's not a state you choose.
+            <br>
+            <strong>Must not be buggy.</strong>
+            <br>
+            See <a href="#types-of-race-computer-algorithm">algorithm table</a> for details.
+          </td>
+          <td>—</td>
+          <td>
+            <code>
+              algo
+            </code>
+          </td>
+          <td>
+            <code>
+              {{ defaults.algo }}
+            </code>
+          </td>
+          <td>
+            <code>defensive</code>,
+            <code>steady</code>,
+            <code>offensive</code>,
+            <code>titfortat</code>,
+            <code>random</code>,
+            <code>buggy</code>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <h2 id="types-of-motive-power" class="mt-5">Types of motive power</h2>
+  </div>
+  <div class="row">
+    <p class="lead">
+      These are the different fuel types you can use in each of your engines
+      (<code>power_type</code> and (optionally) <code>aux_power_type</code>).
+    </p>
+    <p>
+      Consumable fuel is depleted while the race progresses, until it's gone
+      (but, with the exception of electric, your buggy gets lighter).
+    </p>
+    <p>
+      * You can only have <strong>one</strong> unit of non-consumable power
+        (e.g., a single reactor) per motive force.
+    </p>
+    <table class="table table-striped table-bordered table-hover" style="width:auto">
+      <thead class="thead-light">
+        <tr>
+          <th>
+            Power source
+          </th>
+          <th>
+            Description/rules
+          </th>
+          <th>
+            JSON value
+          </th>
+          <th>
+            cost/unit
+          </th>
+          <th>
+            Kg/unit
+          </th>
+          <th>
+            Consumable?
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Petroleum-fuelled internal combustion engine
+          </td>
+          <td>
+            Explosive petrochemical fuel extracted from beneath the planet's
+            surface. The classic. Favoured by petrolheads.
+          </td>
+          <td>
+            <code>
+              petrol
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['petrol']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['petrol']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Fusion reactor
+          </td>
+          <td>
+            State-of-the-art nuclear technology. Powerful. Safe. Expensive.
+          </td>
+          <td>
+            <code>
+              fusion
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['fusion']['cost'] }}</code><sup>*</sup>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['fusion']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              no
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Steam engine
+          </td>
+          <td>
+            Water heated by burning coal and/or logs from sustainably sourced
+            forests (unit represents fuel <em>and</em> water combined).
+          </td>
+          <td>
+            <code>
+              steam
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['steam']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['steam']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Bio-fuelled internal combustion engine
+          </td>
+          <td>
+            Clean fuel, moderately powerful, safe. Smells like chips.
+          </td>
+          <td>
+            <code>
+              bio
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['bio']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['bio']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Lithium-ion battery
+          </td>
+          <td>
+            Fast acceleration. High torque, safe, but heavy.
+          </td>
+          <td>
+            <code>
+              electric
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['electric']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['electric']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Rocket fuel
+          </td>
+          <td>
+            Very powerful acceleration but limited duration.
+          </td>
+          <td>
+            <code>
+              rocket
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['rocket']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['rocket']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Hamster 
+          </td>
+          <td>
+            A race-fit hamster that has been trained to run around inside the
+            motive wheel. Slow to accelerate, limited top power, but cheaper
+            and cuter than most alternatives.
+            <br>
+            <a href="#hamster"><img src="/static/build/img/rene-hamster-1.png" alt="buggy-racing hamster" style="max-width:3em"/></a>
+            
+            <br>
+            <em>Note: Expired hamsters do not die; they jump off (safely).</em>
+          </td>
+          <td>
+            <code>
+              hamster
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['hamster']['cost'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['hamster']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              yes
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Thermonuclear reactor
+          </td>
+          <td>
+            Powerful but prone to catastrophic failure.
+          </td>
+          <td>
+            <code>
+              thermo
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['thermo']['cost'] }}</code><sup>*</sup>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['thermo']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              no
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Bank of solar panels
+          </td>
+          <td>
+            Low cost, zero to low power.
+            But good for endurance except on cloudy or night-races.
+          </td>
+          <td>
+            <code>
+              solar
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['solar']['cost'] }}</code><sup>*</sup>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['solar']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              no
+            </code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Sailing rig
+          </td>
+          <td>
+            Low cost, zero moderate power.
+            Risky: depends on prevailing winds being kind.
+          </td>
+          <td>
+            <code>
+              wind
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['wind']['cost'] }}</code><sup>*</sup>
+            </code>
+          </td>
+          <td>
+            <code>
+              <code>{{ data['power_type']['wind']['mass'] }}</code>
+            </code>
+          </td>
+          <td>
+            <code>
+              no
+            </code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <h2 id="types-of-tyre" class="mt-5">Types of tyre</h2>
+  </div>
+  <div class="row">
+    <p>
+      You must have at least as many tyres as you have wheels. Any surplus are
+      spare tyres, and those are deployed immediately to replace punctured
+      tyres. Your buggy's speed is multiplied by the percentage of
+      non-punctured tyres you currently have on your wheels: so if half your
+      wheels are punctured, you'll be going at 50%. If all your wheels are
+      punctured, that's 0% and you are no longer racing, you're parking.
+    </p>
+    <table class="table table-striped table-bordered table-hover" style="width:auto">
+      <thead class="thead-light">
+        <tr>
+          <th>Tyre type</th>
+          <th>Description/rules</th>
+          <th class="text-right">cost/unit</th>
+          <th>Kg/unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in data['tyres'] %}
+          <tr>
+            <td><code>{{ t }}</code></td>
+            <td>{{ data['tyres'][t]['desc'] }}</td>
+            <td><code>{{ data['tyres'][t]['cost'] }}</code></td>
+            <td><code>{{ data['tyres'][t]['mass'] }}</code></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row">
+    <h2 id="types-of-armour" class="mt-5">Types of armour</h2>
+  </div>
+  <div class="row">
+    <p>
+      The armour cladding on your buggy is taken into consideration when you
+      suffer an attack from another buggy, or perhaps if there is an
+      environmental incident on the track (feral hamsters, often with
+      justifiable grievances arising from their treatment whilst part of the
+      racing community, have been known to lob rocks at passing buggies).
+      Armour adds significantly to the mass of the vehicle. Armour is not a
+      requirement for entry in any race.
+    </p>
+    <p class="alert alert-warning">
+      Specifically, the <em>number of wheels</em> is used as an indication of
+      the size of your buggy, so the cost and mass of whichever armour you
+      choose is increased by this percentage: 
+      <strong>+10% for every wheel your buggy has over four</strong>.
+    </p>
+    <p>
+      So, for a four-wheeled buggy, use the figures shown in the table. For a
+      six-wheeled buggy (that's 2 wheels more than four, so +2×10%=+20%),
+      use these figures multiplied by 120%. For a ten-wheeled juggernaught,
+      multiply these figures by (+6×10%=+60%) 160%.
+    </p>
+
+    <table class="table table-striped table-bordered table-hover" style="width:auto">
+      <thead class="thead-light">
+        <tr>
+          <th rowspan="2">Armour type</th>
+          <th rowspan="2">Description/rules</th>
+          <th class="text-right">cost/unit<br>
+          </th>
+          <th >Kg/unit</th>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-weight:normal">
+            (increased by +10% per wheel&nbsp;&gt;&nbsp;4)
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in data['armour'] %}
+          <tr>
+            <td><code>{{ t }}</code></td>
+            <td>{{ data['armour'][t]['desc'] }}</td>
+            <td><code>{{ data['armour'][t]['cost'] }}</code></td>
+            <td><code>{{ data['armour'][t]['mass'] }}</code></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row">
+    <h2 id="types-of-offensive-capability" class="mt-5">Types of offensive capability</h2>
+  </div>
+  <div class="row">
+    <p>
+      Each attack can be deployed once and only once. (Yes even spikes).
+      Those attacks happen when there is another buggy in proximity, so
+      it's possible that if the race is spread out you won't get to deploy
+      all your attacks (but then... it's a race not a fight anyway). It's
+      also why attacks are probably more likely to occur near the start of
+      the race. When an opportunity to attack presents itself, the likelihood
+      of being able to execute the attack is influenced by your buggy's
+      race computer algorithm.
+    </p>
+    <p>
+      <em>Every</em> form of attack except spikes carries a karmic risk of
+      going wrong and applying to your own buggy instead of your intended
+      target.
+    </p>
+    <table class="table table-striped table-bordered table-hover" style="width:auto">
+      <thead class="thead-light">
+        <tr>
+          <th>Attack type</th>
+          <th>Description/rules</th>
+          <th class="text-right">cost/unit</th>
+          <th>Kg/unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in data['attack'] %}
+          <tr>
+            <td><code>{{ t }}</code></td>
+            <td>{{ data['attack'][t]['desc'] }}</td>
+            <td><code>{{ data['attack'][t]['cost'] }}</code></td>
+            <td><code>{{ data['attack'][t]['mass'] }}</code></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row">
+    <h2 id="types-of-race-computer-algorithm" class="mt-5">Types of race computer algorithm</h2>
+  </div>
+  <div class="row">
+    <p>
+      Your race computer primarily affects how your manage your offensive
+      capabilities and your reaction to others who attack you.
+    </p>
+    <p>
+      If you have equipped your buggy with no offensive capabilities, choose
+      either <code>defensive</code> or <code>steady</code>. The former actively
+      seeks to avoid proximity with potentially offensive buggies, so you're
+      less likely to be attacked but perhaps your race line is compromised.
+    </p>
+    <table class="table table-striped table-bordered table-hover" style="width:auto">
+      <thead class="thead-light">
+        <tr>
+          <th>Algo type</th>
+          <th>Description/rules</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in data['algo'] %}
+          <tr>
+            <td><code>{{ t }}</code></td>
+            <td>{{ data['algo'][t]['desc'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <div class="row mt-5" id="hamster">
+    <img src="/static/build/img/rene-hamster-1.png" alt="buggy-racing hamster" class="float-right"/>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Race result</h1>
+  </div>
+  
+  <div class="row">
+    <div class="d-flex align-items-start w-100">
+      <div class="col">
+        <div class="w-100 finish-chequers" style="height:4em">&nbsp;</div>
+        <div class="alert alert-info text-center">
+          <h4>
+            {% if race.title %}
+              <strong>{{ race.title }}</strong>
+            {% else %}
+              <strong>Race</strong>
+            {% endif %}
+          </h4>
+          {% if race.desc %}
+            <div class="m-3">
+              {{ race.desc|safe }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex align-items-start w-100">
+      <div class="col">
+        <div class="alert alert-success text-center">
+          <h2 class="m-3">
+            <strong>
+            {{ race.start_at.strftime('%A') }}
+            <br>
+            {{ race.start_at.strftime('%Y-%m-%d') }}
+            <br>
+            {{ race.start_at.strftime('%H:%M') }}
+            </strong>
+          </h2>
+        </div>
+      </div>
+      <div class="col">
+        <div class="alert alert-danger text-center">
+          <h2 class="m-3">
+            <strong>
+              Cost limit<br>
+              <span style="font-size:200%">{{ race.cost_limit }}</span>
+            </strong>
+            </h2>
+        </div>
+      </div>
+    </div>
+  
+  
+  
+  
+  <div class="row">
+    <p>
+      All buggies in the race ({{ buggies|length }}).
+    </p>
+  </div>
+  <div class="row">
+    <div style="overflow:auto; width:100%;outline:1px solid red">
+      <table class="table table-striped table-bordered table-hover" style="background-color:white">
+        <thead>
+          <tr>
+            <th>position</th>
+            <th>owner</th>
+            <th>id</th>
+            <th colspan="2">flag</th>
+            <th>pattern</th>
+            <th>mass</th>
+            <th>qty_wheels</th>
+            <th>primary</th>
+            <th>auxilliary</th>
+            <th>hb+</th>
+            <th>tyres</th>
+            <th>armour</th>
+            <th>attacks</th>
+            <th>F?</th>
+            <th>I?</th>
+            <th>A?</th>
+            <th>B?</th>
+            <th>algo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set last_buggy = { 'is_placed': True } %}
+          {% for b in buggies %}
+            {% if last_buggy.is_placed and not b.position %}
+              <tr>
+                <td colspan=19><em>Non-finishers:</em>
+              </tr>
+              {% set last_buggy = {'is_placed':False} %}
+            {% endif %}
+          <tr>
+            <td>  {{ b.position }} </td>
+            <td>  {{ b.username | title }} </td>
+            <td>  {{ b.buggy_id }} </td>
+            <td style="background:{{ b.flag_color }}">&nbsp;</td>
+            <td style="background:{{ b.flag_color_secondary }}">&nbsp;</td>
+            <td>  {{ b.flag_pattern }} </td>
+            <td>  {{ b.mass }} </td>
+            <td>  {{ b.qty_wheels }} </td>
+            <td>  {{ b.power_units }}&times;{{ b.power_type }}</td>
+            <td>  {{ b.aux_power_units }}&times;{{ b.aux_power_type }} </td>
+            <td>  {{ b.hamster_booster }} </td>
+            <td>  {{ b.qty_tyres }}&times;{{ b.tyres }} </td>
+            <td>  {{ b.armour }} </td>
+            <td>  {{ b.qty_attacks }}&times;{{ b.attack }} </td>
+            <td>  {% if b.fireproof %} ✔ {% endif %} </td>
+            <td>  {% if b.insulated %} ✔ {% endif %} </td>
+            <td>  {% if b.antibiotic %} ✔ {% endif %} </td>
+            <td>  {% if b.banging %} ✔ {% endif %} </td>
+            <td>  {{ b.algo }} </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

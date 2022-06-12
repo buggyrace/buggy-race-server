@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1>Bulk Register</h1>
+  </div>
+  <div class="row">
+    <form id="registerForm" class="form form-register" method="POST" action="" role="form">
+      {{ form.csrf_token }}
+      {% if has_auth_code is sameas true %}
+        <div class="alert alert-danger">
+          Registration is not public on this server:<br>
+          you <strong>must</strong> provide a valid authorisation code to register users!
+        </div>
+        <div class="form-group">
+            {{form.authorisation_code.label}}
+            {{form.authorisation_code(class_="form-control")}}
+        </div>
+      {% endif %}
+      <div class="form-group">
+        <p>
+          Bulk upload by pasting a CSV in here, with a header row as
+          the first line (no spaces). Probably best in small batches.
+        </p>
+          {{form.userdata.label}}
+          {{form.userdata(placeholder="username,password", class_="form-control")}}
+      </div>
+      <p><input class="btn btn-primary" type="submit" value="Register"></p>
+    </form>
+  </div>
+  <div class="row">
+    <p class="mt-5">
+      Alternatively: <a href="{{ url_for('public.register') }}">individual registration</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1>
+      {%if want_detail %}
+         All Users
+      {% else %}
+         Students
+      {% endif %}
+    </h1>
+  </div>
+  {%if want_detail %}
+    <div class="row">
+      <p>
+        All {{ users|length }} users in the system.
+        {{ qty_students}} are students (&Sopf;).
+        {{ admin_usernames|count }} have admin powers (&star;).
+      </p>
+    </div>
+  {% endif %}
+  <div class="row">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Username</th>
+          {%if want_detail %}
+            <th>Email</th>
+            <th>Created</th>
+            <th>Active?</th>
+          {% endif %}
+          <th>last login</th>
+          <th>GitHub (&rarr; repo)</th>
+          <th colspan="2">Uploaded JSON? (&rarr; buggy)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          {% if qty_students > 0 %}
+            <td colspan="2">Total <strong>students</strong>: {{ qty_students }}</td>
+            {%if want_detail %}
+              <td></td>
+              <td></td>
+              <td>{{ qty_students_active }}   ({{ "%d" | format(100 * qty_students_active/qty_students) }}%) </td>
+            {% endif %}
+            <td>{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td>{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
+            <td colspan="2">{{ qty_students_uploaded_json }} ({{ "%d" | format(100 * qty_students_uploaded_json/qty_students) }}%)</td>
+          {% else %}
+            <td colspan="9">No users enrolled as students</td>
+          {% endif %}
+        </tr>
+        {% for u in users %}
+          {% if want_detail or u.is_student %}
+            <tr>
+              <td style="width:1em">
+                {% if u.username in admin_usernames %} &star; {% endif %}
+                {% if u.is_student %} &Sopf; {% endif %}
+              </td>
+              <td>  
+                {{ u.username | title }} 
+                {% if u.notes %}
+                 <a href="#" class="show-notes"
+                   data-notes="{{ u.notes|replace('"', '\\"')|replace("\\n", "\\n") }}"
+                   onclick='alert(this.dataset.notes.replace(/\\\"/g,"\""))'
+                 >*</a>
+                {% endif %}
+              </td>
+              {%if want_detail %}
+                <td>  {{ u.email }} </td>
+                <td>  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
+                <td class="bool-{{ u.active | lower }}">
+                    {{ u.active | lower }}
+                </td>
+              {% endif %}
+              <td>
+                {{ u.pretty_login_at }}
+              </td>
+              <td>  
+                {% if u.github_username %}
+                  <a href="https://github.com/{{ u.github_username }}" title="GitHub account">{{u.github_username}}</a>
+                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo">&rarr;</a>
+                {% endif %}
+              </td>
+              <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }}"> 
+                {% if u.latest_json|length is greaterthan 1 %}
+                  <span  data-username='{{ u.username  | replace("-","_") }}' class="json-btn">
+                    {{ u.latest_json|length }} chars
+                  </span>
+                {% else %}
+                  none
+                {% endif %}
+                <a href="{{ url_for('public.show_buggy', username=u.username) }}">&rarr;</a>
+              </td>
+              <td>
+                {{ u.pretty_uploaded_at }}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="container pb-5">
+  <div class="d-flex align-items-start w-100">
+    <div class="col">
+      <div class="row">
+        <a class="btn btn-outline-secondary" href="/admin/users/csv">download students CSV &dtri;</a>
+      </div>
+    </div>
+    {%if want_detail %}
+      <div class="col">
+        <div class="row">
+          <a class="btn btn-outline-secondary" href="/admin/bulk-register">bulk register new users &rtri;</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="json-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"><pre id="json-payload"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const USER_BUGGY_JSON = {
+    {% for u in users %}
+      {# note: probably better to not use tojson filter on a *string*  #}
+      {#       here but it is the safest way to escape quotes maybe?   #}
+      {{ u.username | replace("-","_") }}: {{ u.latest_json | tojson }},
+    {% endfor %}
+    _note: "code in script.js runs if USER_BUGGY_JSON is found"
+  };
+</script>
+
+{% endblock %}
+

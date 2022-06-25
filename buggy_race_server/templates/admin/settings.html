@@ -45,7 +45,7 @@
           </td>
           <td>
             <code>
-              {% for u in admin_usernames %}
+              {% for u in config['ADMIN_USERNAMES_LIST'] %}
                 {{ u }}<br>
               {% endfor %}
             </code>
@@ -54,7 +54,7 @@
         <tr>
           <td><code>REGISTRATION_AUTH_CODE</code></td>
           <td>
-            {% if has_auth_code %}
+            {% if config['HAS_AUTH_CODE']  %}
               <code>[redacted]</code> <em>(but set OK)</em>
             {% else %}
               <em>none set</em>
@@ -63,43 +63,43 @@
         </tr>
         <tr>
           <td><code>DEBUG</code></td>
-          <td><code>{{ is_debug or "(not set)" }}</code></td>
+          <td><code>{{ config['DEBUG'] or "(not set)" }}</code></td>
         </tr>
         <tr>
           <td><code>BUGGY_EDITOR_GITHUB_URL</code></td>
-          <td><code><a href="{{ editor_url }}">{{ editor_url }}</a></code></td>
+          <td><code><a href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">{{ config['BUGGY_EDITOR_GITHUB_URL'] }}</a></code></td>
         </tr>
         <tr>
           <td><code>BUGGY_EDITOR_REPO_OWNER</code></td>
-          <td><code>{{ editor_repo_owner }}</code></td>
+          <td><code>{{ config['BUGGY_EDITOR_REPO_OWNER'] }}</code></td>
         </tr>
         <tr>
           <td><code>BUGGY_EDITOR_REPO_NAME</code></td>
-          <td><code>{{ editor_repo_name }}</code></td>
+          <td><code>{{ config['BUGGY_EDITOR_REPO_NAME'] }}</code></td>
         </tr>
         <tr>
           <td><code>BUGGY_RACE_SERVER_URL</code></td>
-          <td><code><a href="{{ server_url }}">{{ server_url }}</a></code></td>
+          <td><code><a href="{{ config['BUGGY_RACE_SERVER_URL'] }}">{{ config['BUGGY_RACE_SERVER_URL'] }}</a></code></td>
         </tr>
         <tr>
           <td><code>GITHUB_PAGES_URL</code></td>
-          <td><code><a href="{{ github_pages_url }}">{{ github_pages_url }}</a></code></td>
+          <td><code><a href="{{ config['GITHUB_PAGES_URL'] }}">{{ config['GITHUB_PAGES_URL'] }}</a></code></td>
         </tr>
         <tr>
           <td><code>MOODLE_URL</code></td>
-          <td><code><a href="{{ moodle_url }}">{{ moodle_url }}</a></code></td>
+          <td><code><a href="{{ config['MOODLE_URL'] }}">{{ config['MOODLE_URL'] }}</a></code></td>
         </tr>
         <tr>
           <td><code>PIAZZA_URL</code></td>
-          <td><code><a href="{{ piazza_url }}">{{ piazza_url }}</a></code></td>
+          <td><code><a href="{{ config['PIAZZA_URL'] }}">{{ config['PIAZZA_URL'] }}</a></code></td>
         </tr>
         <tr>
           <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
-          <td><code>{{ max_file_age }}</code></td>
+          <td><code>{{ config['SEND_FILE_MAX_AGE_DEFAULT'] }}</code></td>
         </tr>
         <tr>
           <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
-          <td><code>{{ force_redirect_http_to_https }}</code></td>
+          <td><code>{{ config['FORCE_REDIRECT_HTTP_TO_HTTPS'] }}</code></td>
         </tr>
         <tr>
           <th colspan="2">
@@ -109,11 +109,17 @@
         </tr>
         <tr>
           <td><code>GITHUB_CLIENT_ID</code></td>
-          <td><code>{{ github_client_id }}</code></td>
+          <td><code>{{ config['GITHUB_CLIENT_ID'] }}</code></td>
         </tr>
         <tr>
           <td><code>GITHUB_CLIENT_SECRET</code></td>
-          <td><code>{{ github_client_secret|length }} chars</code></td>
+          <td>
+            {% if config['GITHUB_CLIENT_ID'] %}
+              <code>[redacted]</code> <em>{{ config['GITHUB_CLIENT_ID']|length }} chars</em>
+            {% else %}
+              <em>None</em>
+            {% endif %}
+          </td>
         </tr>
       </tbody>
     </table>

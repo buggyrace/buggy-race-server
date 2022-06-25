@@ -1,8 +1,8 @@
 # CS1999-buggy-race-server Development
 
-## Jasper's Notes:
+## Jasper's Notes:
 
-### Getting started
+### Getting started
 
 1. `pip install -r requirements.txt`
     * Requires gevent which sometimes needs special treatment on macos. Specifically, if homebrew is used to install stuff then it may have installed some header files (`/usr/local/header/uuid/uuid.h`) from `util-linux`. I had to remove them to get gevent to compile.
@@ -23,10 +23,67 @@
 
 ## Dave's Notes
 
-OAuth Application registered on GitHub by owner davewhiteland
-(currently organisation's can't register apps)
 
-* https://github.com/settings/applications/1613423
+### Oauth application
+
+The OAuth Application registered on GitHub by owner `davewhiteland`
+(currently organisations can't register apps):
+
+* for RHUL: https://github.com/settings/applications/1613423
+
+### Common new install error: static files give 403
+
+If you haven't run `webpack` (which requires node, so do `npm start`),
+the static resources don't exist but Flask won't look, so you get an
+unstyed response from the server with the CSS, JS and images giving
+a `403` instead of `404`. Run webpack once (or keep it running
+in listening mode if you're changing static stuff) to populate
+those assets.
+
+If webpack won't run (sigh) because something something run-script-os, 
+you might need to do 
+
+    npm install --save-dev run-script-os
+
+
+### How to connect to sqlite (in dev)
+
+The env variable needs to be something like (which is cheekily our default in the example
+environment file):
+
+    DATABASE_URL=sqlite:////tmp/dev.db
+    
+... but (sigh) SQLAlchemy makes migrations that break in sqlite (something about `ALTER TABLE` or
+`COLUMN`) so in the end I switched to using mySQL for local quick-and-dirty dev (see below).
+
+Might be worth dumping a `dev.db` into the repo with the current schema and a default
+admin user so just pointing DATABASE_URL to it could get going quickly (avoiding any `flask db`
+setup that hits the migration problem). Currently there's a register-an-admin dance in dev that
+this would bypass (Might only be handy for me cos I'm currently avoiding
+using containers: possibly more useful to have a latest `dev.sql` to load up bypassing the migrations
+entirely.
+
+### How to connect to mySQL
+
+Turns out [`mysqldb` is no longer supported](https://stackoverflow.com/questions/53024891/modulenotfounderror-no-module-named-mysqldb).
+The workaround is to use `mysql-connector-python` (which is now in the project's (Python/pip) requirements) and
+something like this:
+
+    DATABASE_URL=mysql+mysqlconnector://username:password@localhost:8889/databasename
+
+
+### How to connect to postgres
+
+For completeness — and it's our production db of choice — here's what the URL looks like for postgreSQL:
+
+    DATABASE_URL=postgres://username:password@host:port/dbname
+
+(e.g., Heroku uses port 5432 and generates this whole string for you).
+If you try to connect to mySQL credentials with the `postgres` scheme, you get this cryptic error:
+
+    psycopg2.OperationalError: received invalid response to SSL negotiation: J
+
+Oops.
 
 
 ### How to run a race 

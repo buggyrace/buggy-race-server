@@ -17,14 +17,21 @@ from buggy_race_server.extensions import (
     migrate,
 )
 
+from buggy_race_server import init_config
 
-def create_app(config_object="buggy_race_server.settings"):
+def create_app():
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
-    :param config_object: The configuration object to use.
+    See init_config.py which loads config from env vars:
+    specify all non-defaulted settings with environment variables
+    (either using .env or explicit exports/settings (e.g., via Heroku's dialogue))
+    ...but access them through the Flask's app.config['KEY_NAME']
     """
     app = Flask(__name__.split(".")[0])
+
+    config_object = init_config.FromEnvConfig()
     app.config.from_object(config_object)
+    
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)

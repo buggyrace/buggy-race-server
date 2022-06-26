@@ -23,7 +23,7 @@ class RegisterForm(FlaskForm):
         "Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
     org_username = StringField(
-        f"{config['INSTITUTION_SHORT_NAME']} Username", validators=[DataRequired(), Length(min=3, max=80)]
+        f"{config.INSTITUTION_SHORT_NAME} Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
     email = StringField(
         "Email", validators=[Email(), Length(min=6, max=80)]

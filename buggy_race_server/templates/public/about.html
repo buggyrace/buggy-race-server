@@ -4,21 +4,19 @@
 {% block content %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5">About CS1999 buggy races</h1>
+    <h1 class="mt-5">About Buggy Racing</h1>
   </div>
   <div class="row">
     <p class="lead">
-      This is the race-buggy server for the <strong>RHUL Foundation Year
-      Computer Science</strong> project
+      This is the race-buggy server for the 
+      {{config['INSTITUTION_SHORT_NAME']}}
+      <strong>{{config['PROJECT_CODE']}}</strong> project
     </p>
   </div>
   <div class="row">
     <p>
-      (CS1999 is a course number, not a date).
-    <p>
-    <p>
       The project requires you to 
-      <a hef="{{ url_for( 'public.show_project' ) }}">develop a separate web app</a>
+      <a href="{{ url_for( 'public.show_project' ) }}">develop a separate web app</a>
       using Python and Flask that lets you edit your own buggy. When you've
       got that working, you can <a href="{{ url_for('user.submit_buggy_data')}}">enter
       your buggy</a> into the races that happen on this server.

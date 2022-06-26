@@ -325,7 +325,7 @@ def admin_settings():
     if not current_user.is_buggy_admin:
       abort(403)
     else:
-      return render_template("admin/settings.html", config=current_app.config)
+      return render_template("admin/settings.html")
 
 @blueprint.route("/buggy/")
 @blueprint.route("/buggy/<username>")

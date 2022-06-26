@@ -15,7 +15,7 @@ from buggy_race_server.database import (
 )
 
 # get the config settings (without the app context):
-from buggy_race_server.init_config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigFromEnv as config
 
 class Race(SurrogatePK, Model):
     """A race."""

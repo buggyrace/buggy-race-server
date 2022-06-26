@@ -6,7 +6,7 @@ from sqlalchemy import orm
 from flask_login import UserMixin
 
 # get the config settings (without the app context):
-from buggy_race_server.init_config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigFromEnv as config
 
 from buggy_race_server.database import (
     Column,

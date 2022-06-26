@@ -7,7 +7,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from .models import User
 
 # get the config settings (without the app context):
-from buggy_race_server.init_config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigFromEnv as config
 
 # prevent unauthorised registration if there is an auth code in the environment
 def is_authorised(form, field):

@@ -9,6 +9,8 @@ from .models import User
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigFromEnv as config
 
+import os
+
 # prevent unauthorised registration if there is an auth code in the environment
 def is_authorised(form, field):
   auth_code = config.REGISTRATION_AUTH_CODE
@@ -22,8 +24,8 @@ class RegisterForm(FlaskForm):
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
-    rhul_username = StringField(
-        "RHUL Username", validators=[DataRequired(), Length(min=3, max=80)]
+    org_username = StringField(
+        f"{os.environ['INSTITUTION_SHORT_NAME']} Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
     email = StringField(
         "Email", validators=[Email(), Length(min=6, max=80)]
@@ -118,7 +120,7 @@ class ApiSecretForm(FlaskForm):
 class BulkRegisterForm(FlaskForm):
     """Bulk register form."""
     userdata = TextAreaField(
-        "Userdata (username, rhul_username, password)", validators=[DataRequired()]
+        "Userdata (username, org_username, password)", validators=[DataRequired()]
     )
     authorisation_code = StringField("Authorisation code",  [is_authorised])
 

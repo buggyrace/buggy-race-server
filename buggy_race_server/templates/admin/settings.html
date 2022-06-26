@@ -86,6 +86,19 @@
           <td><code><a href="{{ config['GITHUB_PAGES_URL'] }}">{{ config['GITHUB_PAGES_URL'] }}</a></code></td>
         </tr>
         <tr>
+          <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
+          <td><code>{{ config['SEND_FILE_MAX_AGE_DEFAULT'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
+          <td><code>{{ config['FORCE_REDIRECT_HTTP_TO_HTTPS'] }}</code></td>
+        </tr>
+        <tr>
+          <th colspan="2">
+            Supporting/external sites
+          </th>
+        </tr>
+        <tr>
           <td><code>MOODLE_URL</code></td>
           <td><code><a href="{{ config['MOODLE_URL'] }}">{{ config['MOODLE_URL'] }}</a></code></td>
         </tr>
@@ -94,12 +107,29 @@
           <td><code><a href="{{ config['PIAZZA_URL'] }}">{{ config['PIAZZA_URL'] }}</a></code></td>
         </tr>
         <tr>
-          <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
-          <td><code>{{ config['SEND_FILE_MAX_AGE_DEFAULT'] }}</code></td>
+          <th colspan="2">
+            Default race settings
+          </th>
         </tr>
         <tr>
-          <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
-          <td><code>{{ config['FORCE_REDIRECT_HTTP_TO_HTTPS'] }}</code></td>
+          <td><code>DEFAULT_RACE_LEAGUE</code></td>
+          <td><code>{{ config['DEFAULT_RACE_LEAGUE'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>DEFAULT_RACE_COST_LIMIT</code></td>
+          <td><code>{{ config['DEFAULT_RACE_COST_LIMIT'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>DEFAULT_RACE_IS_VISIBLE</code></td>
+          <td><code>{{ config['DEFAULT_RACE_IS_VISIBLE'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code><del>DEFAULT_RACE_START</del></code></td>
+          <td>
+            <code>two minutes to midnight, tomorrow</code>
+            <br>(you can't change this default: avoid it by always specifying
+            a date when you make a new race)
+          </td>
         </tr>
         <tr>
           <th colspan="2">

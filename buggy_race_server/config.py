@@ -51,10 +51,11 @@ class ConfigFromEnv():
     BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
 
     DEBUG_TB_ENABLED = DEBUG
-    DEBUG_TB_INTERCEPT_REDIRECTS = False
+    DEBUG_TB_INTERCEPT_REDIRECTS = env.bool("DEBUG_TB_INTERCEPT_REDIRECTS", default=False)
 
-    CACHE_TYPE = env.str("CACHE_TYPE", default="simple")  # Can be "memcached", "redis", etc.
-
+    # Can be "memcached", "redis", etc.
+    CACHE_TYPE = env.str("CACHE_TYPE", default="simple")
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = env.bool("BCRYPT_LOG_ROUNDS", default=False)
     
     FORCE_REDIRECT_HTTP_TO_HTTPS = env.bool("FORCE_REDIRECT_HTTP_TO_HTTPS", default=False)
@@ -98,7 +99,9 @@ class ConfigFromEnv():
     ADMIN_USERNAMES = env.str("ADMIN_USERNAMES", default="").strip()
     ADMIN_USERNAMES_LIST = [user.strip() for user in ADMIN_USERNAMES.split(",")]
 
-    RACE_LEAGUE = env.str("RACE_LEAGUE", default="races").strip()
+    DEFAULT_RACE_LEAGUE = env.str("DEFAULT_RACE_LEAGUE", default="races").strip()
+    DEFAULT_RACE_COST_LIMIT = env.int("DEFAULT_RACE_COST_LIMIT", 200)
+    DEFAULT_RACE_IS_VISIBLE = env.bool("DEFAULT_RACE_IS_VISIBLE", False)
 
     # A special id used to identify the app asking for access to a github acc.
     # Read more here: https://docs.github.com/en/developers/apps/authorizing-oauth-apps#web-application-flow

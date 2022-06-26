@@ -14,7 +14,8 @@ from buggy_race_server.database import (
     relationship,
 )
 
-DEFAULT_RACE_LEAGUE = os.environ.get('RACE_LEAGUE', 'fy')
+# get the config settings (without the app context):
+from buggy_race_server.init_config import ConfigFromEnv as config
 
 class Race(SurrogatePK, Model):
     """A race."""
@@ -45,7 +46,7 @@ class Race(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
         if self.league is None or self.league == "":
-            self.league = DEFAULT_RACE_LEAGUE
+            self.league = config.RACE_LEAGUE
 
     def log_path(self):
         return os.path.join(self.league, self.start_at.strftime('%Y-%m-%d-%H-%M'))

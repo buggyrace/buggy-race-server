@@ -16,6 +16,8 @@ from environs import Env
 env = Env()
 env.read_env()
 
+from enum import Enum
+
 class Config(object):
     TESTING = False
 
@@ -35,11 +37,11 @@ def remove_slashes(s):
        s = s[:-1]
     return s
 
-class FromEnvConfig(Config):
+class ConfigFromEnv(Config):
   
     # make sure that every config variable used is being picked up here
     # (avoid reaching directly into the environment variable elsewhere)
-  
+
     FLASK_APP = env.str("FLASK_APP", default="autoapp.py")
     FLASK_ENV = env.str("FLASK_ENV", default="production")    
     FLASK_DEBUG = DEBUG = FLASK_ENV == "development"
@@ -110,3 +112,4 @@ class FromEnvConfig(Config):
     # Special secret used to authorize our application making requests for 
     # oauth access tokens
     GITHUB_CLIENT_SECRET = env.str("GITHUB_CLIENT_SECRET", default="").strip()
+

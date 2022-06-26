@@ -3,14 +3,16 @@
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, PasswordField, StringField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
-import os
 
 from .models import User
 
+# get the config settings (without the app context):
+from buggy_race_server.init_config import ConfigFromEnv as config
+
 # prevent unauthorised registration if there is an auth code in the environment
 def is_authorised(form, field):
-  auth_code = os.environ.get("REGISTRATION_AUTH_CODE", "").lower()
-  if auth_code and field.data.lower() != auth_code:
+  auth_code = config.REGISTRATION_AUTH_CODE
+  if auth_code is not None and field.data.lower() != auth_code.lower():
     raise ValidationError("You must provide a valid authorisation code")
 
 

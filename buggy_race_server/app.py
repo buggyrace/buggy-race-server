@@ -5,7 +5,7 @@ import sys
 
 from flask import Flask, render_template
 
-from buggy_race_server import commands, public, user, buggy, race, api, oauth
+from buggy_race_server import commands, public, user, buggy, race, api, oauth, init_config
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -17,8 +17,6 @@ from buggy_race_server.extensions import (
     migrate,
 )
 
-from buggy_race_server import init_config
-
 def create_app():
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
@@ -29,7 +27,7 @@ def create_app():
     """
     app = Flask(__name__.split(".")[0])
 
-    config_object = init_config.FromEnvConfig()
+    config_object = init_config.ConfigFromEnv()
     app.config.from_object(config_object)
     
     register_extensions(app)

@@ -5,10 +5,8 @@ import datetime as dt
 from sqlalchemy import orm
 from flask_login import UserMixin
 
-import os
-admin_user_env = os.environ.get("ADMIN_USERNAMES", "")
-admin_usernames = admin_user_env.lower().split(",") if admin_user_env else []
-BUGGY_EDITOR_REPO_NAME = os.environ.get('BUGGY_EDITOR_REPO_NAME')
+# get the config settings (without the app context):
+from buggy_race_server.init_config import ConfigFromEnv as config
 
 from buggy_race_server.database import (
     Column,
@@ -91,7 +89,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def is_buggy_admin(self):
-      return self.username in admin_usernames
+      return self.username in config.ADMIN_USERNAMES_LIST
 
     @property
     def full_name(self):
@@ -136,7 +134,7 @@ class User(UserMixin, SurrogatePK, Model):
         """Check if the course repo exists for this user"""
         if not self._has_course_repository:
             # This only matches on repo name, not if it is a fork of the og repo.
-            repo = self.github.get(f"/repos/{self.github_username}/{BUGGY_EDITOR_REPO_NAME}").json()
+            repo = self.github.get(f"/repos/{self.github_username}/{config.BUGGY_EDITOR_REPO_NAME}").json()
             if not 'html_url' in repo:
                 return False
 
@@ -146,7 +144,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def course_repository(self):
-        return f"https://github.com/{self.github_username}/{BUGGY_EDITOR_REPO_NAME}"
+        return f"https://github.com/{self.github_username}/{config.BUGGY_EDITOR_REPO_NAME}"
 
     @property
     def github(self):

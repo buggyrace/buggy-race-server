@@ -16,20 +16,15 @@ from environs import Env
 env = Env()
 env.read_env()
 
-from enum import Enum
-
-class Config(object):
-    TESTING = False
-
-def force_slashes(s):
+def _force_slashes(s):
     s = s.strip()
     if not s.startswith("/"):
         s = "/" + s
     if not s.endswith("/"):
-        s= s + "/"
+        s = s + "/"
     return s
 
-def remove_slashes(s):
+def _remove_slashes(s):
     s = s.strip()
     if s.startswith("/"):
        s = s[1:]
@@ -37,7 +32,7 @@ def remove_slashes(s):
        s = s[:-1]
     return s
 
-class ConfigFromEnv(Config):
+class ConfigFromEnv():
   
     # make sure that every config variable used is being picked up here
     # (avoid reaching directly into the environment variable elsewhere)
@@ -83,8 +78,8 @@ class ConfigFromEnv(Config):
     # (e.g., the GitHub pages URL of the docs/ directory of this repo)
     GITHUB_PAGES_URL = env.str("GITHUB_PAGES_URL", default="").strip()
 
-    BUGGY_RACE_SERVER_URL = remove_slashes(env.str("BUGGY_RACE_SERVER_URL", default="http://localhost:5000"))
-    SERVER_PROJECT_PAGE_PATH = force_slashes(env.str("BUGGY_RACE_SERVER_URL", default="/project/"))
+    BUGGY_RACE_SERVER_URL = _remove_slashes(env.str("BUGGY_RACE_SERVER_URL", default="http://localhost:5000"))
+    SERVER_PROJECT_PAGE_PATH = _force_slashes(env.str("BUGGY_RACE_SERVER_URL", default="/project/"))
 
     # URL to the course page for the project course
     MOODLE_URL = env.str("MOODLE_URL", default="").strip()
@@ -112,4 +107,3 @@ class ConfigFromEnv(Config):
     # Special secret used to authorize our application making requests for 
     # oauth access tokens
     GITHUB_CLIENT_SECRET = env.str("GITHUB_CLIENT_SECRET", default="").strip()
-

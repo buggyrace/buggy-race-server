@@ -11,7 +11,6 @@ from flask import (
     url_for,
     make_response,
     jsonify,
-    current_app
 )
 from flask_login import login_required, login_user, logout_user, current_user
 from datetime import datetime
@@ -24,7 +23,6 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors, warn_if_insecure
 
-import os
 import csv
 import io # for CSV dump
 

@@ -59,15 +59,22 @@
           Flask webserver (we'll automatically fork this into
           your GitHub account).
         </p>
-        <p><a class="btn btn-outline-secondary" href="{{ editor_url }}">See the code &rtri;</a></p>
+        <p><a class="btn btn-outline-secondary" href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">See the code &rtri;</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><i class="icon-bubbles"></i> Moodle</h2>
-        <p>
-          The definitive home of the project, including
-          the <strong>forum</strong>.
-        </p>
-        <p><a class="btn btn-outline-secondary" href="{{ moodle_url }}">Go to the Moodle &rtri;</a></p>
+        {% if config['SOCIAL_LINKS'] %}
+          <h2><i class="icon-bubbles"></i> Other places</h2>
+          {% for site in config['SOCIAL_LINKS'] %}
+              <p>
+                {{ site['TEXT'] }}
+              </p>
+              <p>
+                <a class="btn btn-outline-secondary" href="{{ site['URL'] }}">{{ site['NAME'] }} &rtri;</a>
+                <br>
+                <br>
+              </p>
+          {% endfor %}
+        {% endif %}
       </div>
     </div>
   </div>

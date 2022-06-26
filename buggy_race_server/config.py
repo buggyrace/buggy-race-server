@@ -36,8 +36,29 @@ def _remove_slashes(s):
 def _slug(s):
     return re.sub(r'\W+', '-', s.lower().strip())
 
+# first social link is SOCIAL_NAME, SOCIAL_URL, SOCIAL_TEXT
+# ...subsequent ones are SOCIAL_1_NAME, SOCIAL_1_URL, SOCIAL_1_TEXT
+# and then 2 and 3 and...
+def _extract_social_links():
+    social_links = []
+    if env.str("SOCIAL_URL", default="").strip():
+        social_links.append({
+          'NAME': env.str(f"SOCIAL_NAME", default=""),
+          'URL':  env.str(f"SOCIAL_URL", default="").strip(),
+          'TEXT': env.str(f"SOCIAL_TEXT", default="")
+        })
+    i = 1
+    while env.str(f"SOCIAL_{i}_URL", default="").strip() != "":
+        social_links.append({
+          'NAME': env.str(f"SOCIAL_{i}_NAME", default=""),
+          'URL':  env.str(f"SOCIAL_{i}_URL", default="").strip(),
+          'TEXT': env.str(f"SOCIAL_{i}_TEXT", default="")
+        })
+        i += 1
+    return social_links
+
 class ConfigFromEnv():
-  
+
     # make sure that every config variable used is being picked up here
     # (avoid reaching directly into the environment variable elsewhere)
 
@@ -83,9 +104,6 @@ class ConfigFromEnv():
     # servers root path e.g. /buggy_race_server
     BUGGY_EDITOR_ISSUES_FILE = env.str("BUGGY_EDITOR_ISSUES_FILE", default="../project/issues.csv").strip()
 
-    # URL to the Piazza for Q&A discussion
-    PIAZZA_URL = env.str("PIAZZA_URL", default="").strip()
-
     # URL to the published docs
     # (e.g., the GitHub pages URL of the docs/ directory of this repo)
     GITHUB_PAGES_URL = env.str("GITHUB_PAGES_URL", default="").strip()
@@ -93,8 +111,10 @@ class ConfigFromEnv():
     BUGGY_RACE_SERVER_URL = _remove_slashes(env.str("BUGGY_RACE_SERVER_URL", default="http://localhost:5000"))
     SERVER_PROJECT_PAGE_PATH = _force_slashes(env.str("BUGGY_RACE_SERVER_URL", default="/project/"))
 
-    # URL to the course page for the project course
-    MOODLE_URL = env.str("MOODLE_URL", default="").strip()
+    # note that the env settings are not explicitly passed into the config:
+    # they exist as the NAME/URL/TEXT fields of the objects in
+    # this SOCIAL_LINKS list:
+    SOCIAL_LINKS = _extract_social_links()
 
     # registration only allowed with an auth code: (case insensitive)
     # if not set, registration is public, which probably isn't what you want

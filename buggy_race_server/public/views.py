@@ -40,13 +40,8 @@ def load_user(user_id):
 @blueprint.route("/", methods=["GET", "POST"])
 def home():
     """Home page."""
-    # current_app.logger.info("Hello from the home page!")
     warn_if_insecure()
-    return render_template("public/home.html",
-        editor_url=current_app.config['BUGGY_EDITOR_GITHUB_URL'],
-        piazza_url=current_app.config['PIAZZA_URL'],
-        moodle_url=current_app.config['MOODLE_URL']
-    )
+    return render_template("public/home.html")
 
 
 @blueprint.route("/logout/")

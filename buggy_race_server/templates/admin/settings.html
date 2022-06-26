@@ -111,17 +111,30 @@
         </tr>
         <tr>
           <th colspan="2">
-            Supporting/external sites
+            Social/external sites
           </th>
         </tr>
-        <tr>
-          <td><code>MOODLE_URL</code></td>
-          <td><code><a href="{{ config['MOODLE_URL'] }}">{{ config['MOODLE_URL'] }}</a></code></td>
-        </tr>
-        <tr>
-          <td><code>PIAZZA_URL</code></td>
-          <td><code><a href="{{ config['PIAZZA_URL'] }}">{{ config['PIAZZA_URL'] }}</a></code></td>
-        </tr>
+        {% for site in config['SOCIAL_LINKS'] %}
+            <tr>
+              <td>
+                {% set i = "{}_".format(loop.index0) if loop.index0 %}
+                <code>SOCIAL_{{ "{}_".format(loop.index0) if loop.index0 }}NAME/URL/TEXT</code>
+              </td>
+              <td>
+                <strong>{{ site['NAME'] }}</strong> &rarr;
+                <code><a href="{{ site['URL'] }}">{{ site['URL'] }}</a></code>
+                <br>
+                {{ site['TEXT'] }}
+              </td>
+            </tr>
+        {% else %}
+            <tr>
+              <td><code>SOCIAL_NAME/URL/TEXT</code></td>
+              <td>
+                <em>None</em>
+              </td>
+            </tr>
+        {% endfor %}
         <tr>
           <th colspan="2">
             Default race settings

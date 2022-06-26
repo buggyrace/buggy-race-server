@@ -1,4 +1,4 @@
-# CS1999-buggy-race-server Development
+# buggy-race-server Development
 
 ## Jasper's Notes:
 
@@ -90,7 +90,7 @@ Oops.
 
 Here's how I ran the race, having cloned the repo:
 
-    $ cd CS1999-buggy-race-server
+    $ cd buggy-race-server
 
 Set up a venv to keep things tidy
 

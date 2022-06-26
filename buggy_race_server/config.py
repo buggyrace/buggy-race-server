@@ -12,6 +12,7 @@ you can wash or cast type (e.g., admin usernames as a list))
 
 """
 from environs import Env
+import re
 
 env = Env()
 env.read_env()
@@ -32,10 +33,20 @@ def _remove_slashes(s):
        s = s[:-1]
     return s
 
+def _slug(s):
+    return re.sub(r'\W+', '-', s.lower().strip())
+
 class ConfigFromEnv():
   
     # make sure that every config variable used is being picked up here
     # (avoid reaching directly into the environment variable elsewhere)
+
+    INSTITUTION_SHORT_NAME = env.str("INSTITUTION_SHORT_NAME", default="Acme")
+    INSTITUTION_FULL_NAME = env.str("INSTITUTION_FULL_NAME", default="Acme School of Buggy Programming")
+    INSTITUTION_HOME_URL = env.str("INSTITUTION_HOME_URL", default="https://acme.example.com/")
+
+    PROJECT_CODE = env.str("PROJECT_CODE", default="buggy")
+    PROJECT_SLUG = env.str("PROJECT_SLUG", default=_slug(PROJECT_CODE))
 
     FLASK_APP = env.str("FLASK_APP", default="autoapp.py")
     FLASK_ENV = env.str("FLASK_ENV", default="production")    

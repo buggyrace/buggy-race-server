@@ -1,18 +1,17 @@
-# CS1999-buggy-race-server
+# buggy-race-server
 
-This is the central (staff, private) repo in the CS1999 Foundation Year "Buggy
-Racing" project.
+This is the central (staff, private) repo in the "Buggy Racing" project.
 
 ## About the project
 
 The project requires students to develop a Python Flask web app that lets them
-edit a [racing buggy](https://rhul.buggyrace.net/specs/). It produces JSON data
+edit a racing buggy. It produces JSON data
 describing the buggy which they can upload to the central race server. Races
 happen every night; the results are irrelevant to the student's success — they
 are marked on the quality of the editor they have built.
 
 We provide the skeleton of their editor
-([buggy-race-editor](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-editor))
+([buggy-race-editor](https://github.com/buggyrace/buggy-race-editor))
 and a **set of tasks** for them to complete. How thoroughly they complete
 the tasks is up to them, but the tasks are grouped in phases, and they _must_
 complete the phases in the given order. The final task (phase 6) is completely
@@ -21,25 +20,18 @@ wild-carded (_do anything_), but most of the tasks are actually open-ended.
 
 ### Structure of the project software
 
-There are three repos:
+There are two repos:
 
-* [buggy-race-server](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-server) (this repo)
+* [buggy-race-server](https://github.com/buggyrace/buggy-race-server) (this repo)
 
   Contains a Flask web app that accepts students' racing buggy specifications
   as JSON data, manages login/setup, and publishes information both on the
   server itself (racing specs) and as GitHub pages (the "tech notes").
 
-* [buggy-race-editor](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-editor)
+* [buggy-race-editor](https://github.com/buggyrace/buggy-race-editor)
 
    Contains the skeleton Flask web app that runs the Racing Buggy editor that
    every student is given, and which they must develop according to the tasks.
-
-* [buggy-race-runner](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-runner)
-
-  Contains a script that accepts the (usually nightly) `buggies.csv` data from
-  the race server and actually runs the race, producing results and race logs.
-  Also JavaScript for replaying a race in a browser (when this is done it'll
-  probably be integrated into the main server).
 
 ![diagram of the project](project/buggy-racing-repos.png)
 
@@ -60,9 +52,8 @@ published material. (Fixing typos may be necessary, but do not change task IDs).
 `utils/generate_tasks.py` currently updates three files:
 
 * the task list in `docs/projects/tasks.md` which is published on the 
-  [GitHub pages site](https://info-rhul.buggyrace.net/project/tasks)
-* the project's 
-  ["poster" template page](https://info-rhul.buggyrace.net/project/poster)
+  GitHub pages site
+* the project's "poster" template page
 * a file, `issues.csv` which is used to automatically inject these tasks as
   GitHub issues when the student's editor repo is forked
 
@@ -76,12 +67,10 @@ The five main things in this repo:
 
 * the **definitive** list of tasks students are invited to tackle
 
-* the `docs/` directory is published as GitHub pages with a custom (CNAMEd) subdomain at
-  [info-rhul.buggyrace.net/](https://info-rhul.buggyrace.net/) (for development work, you can run this
+* the `docs/` directory is published as GitHub pages with a custom (CNAMEd) subdomain (for development work, you can run this
   locally if you install Jekyll)
 
-* the `main` branch is deployed at Heroku (currently via Dave Whiteland's
-  heroku account) at [rhul.buggyrace.net](https://rhul.buggyrace.net).
+* the `main` branch is deployed, e.g., on Heroku.
   See `env.example` for settings (which on Heroku are set via the
   config/environment variable web interface)
 
@@ -124,15 +113,13 @@ Races are _not_ run automatically. A human admin needs to download the
 `buggies.csv` from the server, run the race, and upload the results. Currently
 this is delegated to `buggy-race-runner` and _is not yet implemented_.
 
-### rhul.buggyrace.net & info-rhul.buggyrace.net
+### instance.buggyrace.net
 
-Domain registration & heroku accounts: currently Dave Whiteland.
 The GitHub app client (needed for the client ID and secret needed to allow
 use of the GitHub API for forking into students' accounts) registered under
 Dave's GitHub account (organisations cannot do this; must be an individual).
 
-The domain is registered by Dave too, and has the two subdomains (one
-for the race server on Heroku and one for the GitHub pages (`docs/`) site).
+We're managing the different instances by mapping subdomains via Cloudflare.
 
 ## Installation
 
@@ -149,8 +136,7 @@ See `INSTALL.md`
 The tech notes are a GitHub pages site (via Jekyll), published from the `/docs`
 directory.
 
-However, the project task list (which appears as
-[info-rhul.buggyrace.net/project/tasks](https://info-rhul.buggyrace.net/project/tasks))
+However, the project task list 
 is generated from `/project/tasks.md` (careful! **not** in the `/docs`
 directory — don't edit that one!).
 To change that, edit the tasks file and run `/utils/generate_tasks.py` to create
@@ -178,7 +164,7 @@ accidental publication :-)
 Informal steps for setting up the project:
 
 > For 2021 there was extra work because we changed the 
-> [editor code](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-editor),
+> [editor code](https://github.com/buggyrace/buggy-race-editor),
 > so needed to re-record all the videos and update tech-notes. That won't
 > always be necessary!
 
@@ -191,8 +177,7 @@ Informal steps for setting up the project:
     — that includes the `REGISTRATION_AUTH_CODE` code you'll need to set up
     administrators
 
-1. Go onto the server and
-  [register your own user](https://rhul.buggyrace.net/register) —
+1. Go onto the server and register your own user —
   make yourself an admin by adding your username to the `ADMIN_USERNAMES`
   config
   
@@ -202,7 +187,7 @@ Informal steps for setting up the project:
    list on the Moodle, and associated passwords (use a simple password
    generator like [dinopass](https://www.dinopass.com)).
 
-3. Use the [bulk registration](https://rhul.buggyrace.net/admin/bulk-register/)
+3. Use the bulk registration
    feature on the server to add them — warning: that's so poorly implemented
    it's best to do it in batches of no more than 10 (see issue #32)
 
@@ -240,14 +225,13 @@ Informal steps for setting up the project:
      * up on the server there's an environment variable called `MOODLE_URL`
        (go onto Heroku and find settings → reveal config vars)
      * the GitHub pages files also have a varibale: see `moodle_url` in
-       the [`_config.yml`](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-server/blob/main/docs/_config.yml)
+       the `_config.yml`
 
 10. manually (yes) run races
 
    Once you're running, students can and will upload their buggies to the
    server at any time — in theory, you can run a race by logging in (as admin)
-   and downloading `buggies.csv`, running the race (see
-   [buggy-race-runner](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-runner))
+   and downloading `buggies.csv`, running the race
    and uploading the results (all this is a bit arm-waving because it's not
    implemented yet — in 2020 we, uh, _did not run any races_ due to time
    pressures). Race results aren't crucial to the project at the very start,

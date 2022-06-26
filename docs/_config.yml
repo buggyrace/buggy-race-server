@@ -7,9 +7,9 @@ show_downloads: false
 # custom URLs:
 # these are used within the pages: check they are right!
 #---------------------------------------------------------------------
-editor_url: https://github.com/RHUL-CS-Projects/CS1999-buggy-race-editor
-moodle_url: https://moodle2021.royalholloway.ac.uk/course/view.php?id=8381
-server_url: https://rhul.buggyrace.net
+editor_url: https://github.com/buggyrace/buggy-race-editor
+moodle_url: https://moodle.example.com/course/view.php?id=8381
+server_url: https://www.buggyrace.net
 
 plugins:
   - jekyll-redirect-from

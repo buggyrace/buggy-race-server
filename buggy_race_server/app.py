@@ -37,7 +37,6 @@ def create_app():
     configure_logger(app)
 
     csrf.exempt(app.blueprints['api'])
-
     return app
 
 

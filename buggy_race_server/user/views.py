@@ -169,6 +169,6 @@ def set_api_secret():
 @login_required
 def vscode_workspace():
   response = Response(render_template("users/vscode_workspace.json"))
-  response.headers['content-disposition'] = 'attachment; filename="cs1999.code-workspace"'
+  response.headers['content-disposition'] = f"attachment; filename=\"{current_app.config['PROJECT_SLUG']}.code-workspace\""
   print(response.headers.__dict__)
   return response

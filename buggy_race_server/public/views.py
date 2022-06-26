@@ -10,7 +10,8 @@ from flask import (
     request,
     url_for,
     make_response,
-    jsonify
+    jsonify,
+    current_app
 )
 from flask_login import login_required, login_user, logout_user, current_user
 from datetime import datetime
@@ -31,18 +32,6 @@ from buggy_race_server.extensions import db
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
-moodle_url = os.environ.get('MOODLE_URL', '#MISSING-SERVER-URL')
-server_url = os.environ.get('BUGGY_RACE_SERVER_URL', '#MISSING-SERVER-URL')
-editor_url = os.environ.get('BUGGY_EDITOR_GITHUB_URL', '#MISSING-GITHUB-URL')
-editor_repo_name = os.environ.get('BUGGY_EDITOR_REPO_NAME', '#')
-piazza_url = os.environ.get('PIAZZA_URL', '#MISSING-PIAZZA-URL')
-github_pages_url = os.environ.get('GITHUB_PAGES_URL', 'https://rhul-cs-projects.github.io/CS1999-buggy-race-server')
-has_auth_code = os.environ.get('REGISTRATION_AUTH_CODE', "") != ""
-admin_user_env = os.environ.get("ADMIN_USERNAMES", "")
-admin_usernames = admin_user_env.lower().split(",") if admin_user_env else []
-
-PLACEHOLDER_EMAIL = 'buggy@example.com'
-
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
@@ -54,7 +43,10 @@ def home():
     # current_app.logger.info("Hello from the home page!")
     warn_if_insecure()
     return render_template("public/home.html",
-      editor_url=editor_url, piazza_url=piazza_url, moodle_url=moodle_url)
+        editor_url=current_app.config['BUGGY_EDITOR_GITHUB_URL'],
+        piazza_url=current_app.config['PIAZZA_URL'],
+        moodle_url=current_app.config['MOODLE_URL']
+    )
 
 
 @blueprint.route("/logout/")
@@ -102,7 +94,11 @@ def register():
         return redirect(url_for("public.home"))
     else:
         flash_errors(form)
-    return render_template("public/register.html", form=form, has_auth_code=has_auth_code)
+    return render_template(
+        "public/register.html",
+        form=form,
+        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+    )
 
 @blueprint.route("/admin/bulk-register/", methods=["GET", "POST"])
 @login_required
@@ -110,7 +106,7 @@ def bulk_register():
     """Register multiple user."""
     if not current_user.is_buggy_admin:
       abort(403)
-    if not has_auth_code:
+    if not current_app.config["HAS_AUTH_CODE"]:
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
     form = BulkRegisterForm(request.form)
@@ -163,7 +159,11 @@ def bulk_register():
         return redirect(url_for("public.home"))
     else:
         flash_errors(form)
-    return render_template("admin/bulk_register.html", form=form, has_auth_code=has_auth_code)
+    return render_template(
+        "admin/bulk_register.html",
+        form=form,
+        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+    )
 
 
 @blueprint.route("/specs/")
@@ -202,7 +202,7 @@ def about():
 @blueprint.route("/project/task/<task_id>")
 def show_project(task_id=None):
   """Redirect projects and tasks to GitHub pages"""
-  url = github_pages_url
+  url = current_app.config["GITHUB_PAGES_URL"]
   if not url.endswith("/"):
     url += "/"
   if task_id:
@@ -275,9 +275,9 @@ def admin(data_format=None):
       else:
         return render_template("admin/users.html",
           want_detail = want_detail,
-          editor_repo_name = editor_repo_name,
+          editor_repo_name = current_app.config["BUGGY_EDITOR_REPO_NAME"],
           users = users,
-          admin_usernames = admin_usernames,
+          admin_usernames = current_app.config['ADMIN_USERNAMES_LIST'],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_active = len([s for s in students if s.is_active]),
@@ -325,23 +325,7 @@ def admin_settings():
     if not current_user.is_buggy_admin:
       abort(403)
     else:
-      return render_template("admin/settings.html",
-        admin_usernames=admin_usernames,
-        admin_user_env=admin_user_env,
-        debug=os.environ.get("DEBUG", ""),
-        editor_url=editor_url,
-        github_pages_url=github_pages_url,
-        has_auth_code=has_auth_code,
-        max_file_age=os.environ.get("SEND_FILE_MAX_AGE_DEFAULT", ""),
-        moodle_url=moodle_url,
-        piazza_url=piazza_url,
-        server_url=server_url,
-        editor_repo_name=os.environ.get("BUGGY_EDITOR_REPO_NAME", ""),
-        editor_repo_owner=os.environ.get("BUGGY_EDITOR_REPO_OWNER", ""),
-        github_client_id=os.environ.get("GITHUB_CLIENT_ID", ""),
-        github_client_secret=os.environ.get("GITHUB_CLIENT_SECRET", ""),
-        force_redirect_http_to_https=os.environ.get("FORCE_REDIRECT_HTTP_TO_HTTPS", ""),
-      )
+      return render_template("admin/settings.html", config=current_app.config)
 
 @blueprint.route("/buggy/")
 @blueprint.route("/buggy/<username>")

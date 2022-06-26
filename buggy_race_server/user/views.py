@@ -17,12 +17,6 @@ from datetime import datetime
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
-server_url = os.environ.get('BUGGY_RACE_SERVER_URL', '#MISSING-SERVER-URL')
-
-BUGGY_EDITOR_REPO_NAME = os.environ.get('BUGGY_EDITOR_REPO_NAME')
-BUGGY_EDITOR_REPO_OWNER = os.environ.get('BUGGY_EDITOR_REPO_OWNER')
-BUGGY_EDITOR_ISSUES_FILE = os.environ.get('BUGGY_EDITOR_ISSUES_FILE', "../project/issues.csv")
-
 DELAY_BEFORE_INJECTING_ISSUES = 30 # give repo generous time to get issue auth before starting
 
 def flash_explanation_if_unauth(function):
@@ -50,7 +44,11 @@ def submit_buggy_data():
 @login_required
 def settings():
     form = ChangePasswordForm()
-    return render_template("users/settings.html", form=form, server_url=server_url)
+    return render_template(
+        "users/settings.html",
+        form=form,
+        server_url=current_app.config['BUGGY_RACE_SERVER_URL']
+    )
 
 @blueprint.route('/setup-course-repository', methods=['POST'])
 @login_required
@@ -61,17 +59,22 @@ def setup_course_repository():
         return redirect(url_for('user.settings'))
 
     # Forking is async so we assume we're successful and hope for the best!
-    repo = current_user.github.post(f"/repos/{BUGGY_EDITOR_REPO_OWNER}/{BUGGY_EDITOR_REPO_NAME}/forks")
+    repo = current_user.github.post(f"/repos/{current_app.config['BUGGY_EDITOR_REPO_OWNER']}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}/forks")
 
     # Forks don't get issues by default
-    current_user.github.patch(f"/repos/{current_user.github_username}/{BUGGY_EDITOR_REPO_NAME}", {}, {
-        'has_issues': 'true'
-    })
+    current_user.github.patch(
+        f"/repos/{current_user.github_username}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}",
+        {}, { 'has_issues': 'true'}
+    )
 
 
     # this could probably be cached?
     # needs to run in current app context (same thread)
-    issues_parser = IssueParser(os.path.join(current_app.root_path, BUGGY_EDITOR_ISSUES_FILE))
+    issues_parser = IssueParser(
+        os.path.join(
+          current_app.root_path, current_app.config['BUGGY_EDITOR_ISSUES_FILE']
+        )
+    )
 
     def create_issues(user):
         # CONTEXT ONY: ---Issues appear in most recent order and we want the first task
@@ -80,11 +83,15 @@ def setup_course_repository():
         # Except then when the github api rate limits us, the first issues
         # don't get delivered :(
         for i, issue in enumerate(issues_parser.parse_issues()):
-            response = user.github.post(f"/repos/{user.github_username}/{BUGGY_EDITOR_REPO_NAME}/issues", {}, {
-                'title': issue['title'],
-                'body': issue['body'],
-                'assignees': [user.github_username]
-            })
+            response = user.github.post(
+                f"/repos/{user.github_username}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}/issues",
+                {},
+                {
+                    'title': issue['title'],
+                    'body': issue['body'],
+                    'assignees': [user.github_username]
+                }
+            )
 
             # We were trigger abuse stuff from github so go slowly!
             # See here: https://docs.github.com/en/rest/guides/best-practices-for-integrators#dealing-with-abuse-rate-limits
@@ -92,7 +99,11 @@ def setup_course_repository():
 
     # delay here in case the has_issues patch is taking a while to authenticate...
     # since the repo is always being made but the first 1d6 issues aren't making it
-    threading.Timer(DELAY_BEFORE_INJECTING_ISSUES, create_issues, args=[current_user._get_current_object()]).start()
+    threading.Timer(
+        DELAY_BEFORE_INJECTING_ISSUES,
+        create_issues,
+        args=[current_user._get_current_object()]
+    ).start()
 
     return redirect(url_for('user.settings'))
 

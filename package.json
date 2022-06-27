@@ -18,17 +18,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davewhiteland/buggy_race_server.git"
+    "url": "git+https://github.com/buggyrace/buggy_race_server.git"
   },
-  "author": "Dave Whiteland",
+  "author": "Buggy Race",
   "license": "MIT",
   "engines": {
     "node": "15.x"
   },
   "bugs": {
-    "url": "https://github.com/davewhiteland/buggy_race_server/issues"
+    "url": "https://github.com/buggyrace/buggy_race_server/issues"
   },
-  "homepage": "https://github.com/davewhiteland/buggy_race_server#readme",
+  "homepage": "https://github.com/buggyrace/buggy_race_server#readme",
   "dependencies": {
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",

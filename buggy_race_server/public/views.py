@@ -11,7 +11,6 @@ from flask import (
     url_for,
     make_response,
     jsonify,
-    current_app
 )
 from flask_login import login_required, login_user, logout_user, current_user
 from datetime import datetime
@@ -24,7 +23,6 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors, warn_if_insecure
 
-import os
 import csv
 import io # for CSV dump
 
@@ -78,7 +76,7 @@ def register():
     if form.validate_on_submit():
         User.create(
             username=form.username.data,
-            rhul_username=form.rhul_username.data,
+            org_username=form.org_username.data,
             email=form.email.data,
             password=form.password.data,
             is_student=form.is_student.data,
@@ -114,8 +112,8 @@ def bulk_register():
         clean_user_data = []
         if len(lines) < 2:
           flash("Need CSV with a header row, then at least one line of data", "danger")
-        elif not ('username' in reader.fieldnames and 'rhul_username' in reader.fieldnames and 'password' in reader.fieldnames):
-          flash("CSV header row did not contain 'username', 'rhul_username' and 'password'", "danger")
+        elif not ('username' in reader.fieldnames and 'org_username' in reader.fieldnames and 'password' in reader.fieldnames):
+          flash("CSV header row did not contain 'username', 'org_username' and 'password'", "danger")
         else:
           for row in reader:
             line_no += 1
@@ -123,13 +121,13 @@ def bulk_register():
             #   problem_lines.append(line_no)
             #   continue
             username = row['username'].strip().lower() if 'username' in row else None
-            rhul_username = row['rhul_username'].strip().lower() if 'rhul_username' in row else None
+            org_username = row['org_username'].strip().lower() if 'org_username' in row else None
             email = row['email'].strip().lower() if 'email' in row else None
             password = row['password'].strip() if 'password' in row else None
             current_app.logger.info("{}, pw:{}".format(username, password))
             if password and len(password) >= 4: # passwords longer than 4
               qty_users += 1
-              clean_user_data.append({'username': username, 'rhul_username': rhul_username, 'email': email, 'password': password})
+              clean_user_data.append({'username': username, 'org_username': org_username, 'email': email, 'password': password})
             else:
               problem_lines.append("{}".format(line_no))
           if len(problem_lines) > 0:
@@ -142,7 +140,7 @@ def bulk_register():
               try:
                 User.create(
                   username=user_data['username'],
-                  rhul_username=user_data['rhul_username'],
+                  org_username=user_data['org_username'],
                   email=user_data['email'],
                   password=user_data['password'],
                   active=True,

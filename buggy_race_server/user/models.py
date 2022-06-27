@@ -44,7 +44,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     __tablename__ = "users"
     username = Column(db.String(80), unique=True, nullable=False)
-    rhul_username = Column(db.String(80), unique=True, nullable=False)
+    org_username = Column(db.String(80), unique=True, nullable=False)
     email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
@@ -64,9 +64,9 @@ class User(UserMixin, SurrogatePK, Model):
     api_secret_at = Column(db.DateTime, nullable=True)
     notes = Column(db.Text(), default=False)
 
-    def __init__(self, username, rhul_username, email, password=None, **kwargs):
+    def __init__(self, username, org_username, email, password=None, **kwargs):
         """Create instance."""
-        db.Model.__init__(self, username=username, rhul_username=rhul_username, email=email, **kwargs)
+        db.Model.__init__(self, username=username, org_username=org_username, email=email, **kwargs)
         if password:
             self.set_password(password)
         else:

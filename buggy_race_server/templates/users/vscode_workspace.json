@@ -6,7 +6,7 @@
 		  {
         "label": "CS1999: Download from GitHub",
         "type": "shell",
-        "command": "echo \"Please enter your RHUL College password: \" && ssh {{ current_user.rhul_username }}@linux.cim.rhul.ac.uk \"git clone {{ current_user.course_repository }} buggy-editor\""
+        "command": "echo \"Please enter your RHUL College password: \" && ssh {{ current_user.org_username }}@linux.cim.rhul.ac.uk \"git clone {{ current_user.course_repository }} buggy-editor\""
       }
 		]
   },

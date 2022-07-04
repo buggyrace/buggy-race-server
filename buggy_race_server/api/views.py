@@ -31,6 +31,12 @@ def create_buggy_with_json_via_api():
     username = request.form['user'].strip()
   else:
     return Response("{'error':'missing user'}", status=401, mimetype='application/json')
+
+  if "key" in request.form:
+    api_key = request.form['key'].strip()
+  else:
+    return Response("{'error':'missing API key'}", status=401, mimetype='application/json')
+
   if "secret" in request.form:
     secret = request.form['secret'].strip()
   else:
@@ -39,13 +45,16 @@ def create_buggy_with_json_via_api():
     buggy_json = request.form['buggy_json'].strip()
   if username and secret:
     user = User.query.filter_by(username=username).first()
-    if user is not None and user.api_secret is not None and user.api_secret_at is not None and user.api_secret == secret:
-      if (datetime.now() - user.api_secret_at).seconds/60 > API_SECRET_LIFESPAN_MINS:
-        return Response("{'error':'not authorised (secret has expired)'}", status=401, mimetype='application/json')
-      elif buggy_json:
-        response_to_update = handle_uploaded_json(BuggyJsonForm(request.form), user, True)
-      else:
-        response_to_update = {"error": "no JSON (buggy_json) provided"}
-      # note send 200 even if there was an error
-      return Response(json.dumps(response_to_update), status=200, mimetype='application/json')
+    if user is not None:
+      if user.api_key != api_key:
+        return Response("{'error':'not authorised (wrong API key for this user)'}", status=401, mimetype='application/json')
+      if user.api_secret is not None and user.api_secret_at is not None and user.api_secret == secret:
+        if (datetime.now() - user.api_secret_at).seconds/60 > API_SECRET_LIFESPAN_MINS:
+          return Response("{'error':'not authorised (secret has expired)'}", status=401, mimetype='application/json')
+        elif buggy_json:
+          response_to_update = handle_uploaded_json(BuggyJsonForm(request.form), user, True)
+        else:
+          response_to_update = {"error": "no JSON (buggy_json) provided"}
+        # note send 200 even if there was an error
+        return Response(json.dumps(response_to_update), status=200, mimetype='application/json')
   return Response("{'error':'not authorised'}", status=401, mimetype='application/json')

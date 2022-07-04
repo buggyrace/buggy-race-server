@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">
+      Generate or clear API keys
+    </h1>
+  </div>
+  <div class="row">
+    <p>
+      A user cannot use the API until they have an API key set. Use this to
+      grant or deny a user (or all users) access to the API. This is only needed
+      in one of the more advanced tasks (5-API).
+      <br>
+      Note that the API key does not expire (unless you clear it). Compare this to the
+      the <a href="{{  url_for('user.set_api_secret') }}">API secret</a>, which each
+      user must set for themselves before using the API (simulating a timely token
+      <em>like a payment</em>).
+      
+    </p>
+  </div>
+  <form class="form p-3" id="ApiKeyForm" method="POST" action="{{ url_for('public.api_keys') }}" role="form">
+    {{ form.csrf_token }}
+    <div class="row">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>API key</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td class="check">
+                <input type="checkbox" name="usernames" id="user-{{ user.username }}" value="{{ user.username }}">
+                <label for="user-{{ user.username }}">{{ user.username | title }}</label>
+              </td>
+              {% if user.api_key == None %}
+                <td class="has-no-key">
+                  —
+                </td>
+              {% else %}
+                <td class="has-key">
+                  <code>{{ user.api_key }}</code>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <p class="text-right">
+        <button class="btn btn-outline-secondary" id="check-all-btn">Check all &utri;</button>
+        &nbsp;
+        <button class="btn btn-outline-secondary" id="toggle-all-btn">Toggle all &utri;</button>
+        &nbsp;
+        <!-- note: manually transcrined WTForms (e.g., form.submit_generate_keys) cos &rtri; HTML is escaped -->
+        <input id="submit_clear_keys" name="submit_clear_keys" type="submit" class="btn btn-primary" value="Clear API keys &rtri;">
+        &nbsp;
+        <input id="submit_generate_keys" name="submit_generate_keys" type="submit" class="btn btn-primary" value="Generate API keys &rtri;">
+      </p>
+    </div>
+  </form>
+  <script>
+    let checkboxes = document.querySelectorAll(".check input");
+    document.getElementById("check-all-btn").addEventListener("click", function(e){
+      e.preventDefault();
+      for (let checkbox of checkboxes){
+        checkbox.checked = true;
+      }
+    });
+    document.getElementById("toggle-all-btn").addEventListener("click", function(e){
+      e.preventDefault();
+      for (let checkbox of checkboxes){
+        checkbox.checked = !checkbox.checked;
+      }
+    })
+  </script>
+
+{% endblock %}
+

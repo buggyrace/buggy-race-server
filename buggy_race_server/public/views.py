@@ -17,7 +17,7 @@ from datetime import datetime
 
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
-from buggy_race_server.user.forms import RegisterForm, BulkRegisterForm
+from buggy_race_server.user.forms import RegisterForm, BulkRegisterForm, ApiKeyForm
 from buggy_race_server.user.models import User
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.race.models import Race
@@ -27,6 +27,12 @@ import csv
 import io # for CSV dump
 
 from buggy_race_server.extensions import db
+
+def _user_summary(username_list):
+    if len(username_list) == 1:
+        return f"user '{username_list[0]}'"
+    else:
+        return f"{len(username_list)} users"
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -158,6 +164,56 @@ def bulk_register():
         has_auth_code=current_app.config["HAS_AUTH_CODE"]
     )
 
+@blueprint.route("/admin/api-keys", methods=['GET','POST'])
+@login_required
+def api_keys():
+    if not current_user.is_buggy_admin:
+      abort(403)
+    users = User.query.all()
+    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
+    form = ApiKeyForm(request.form)
+    if request.method == "POST":
+      want_api_key_generated = None
+      if form.submit_generate_keys.data:
+        want_api_key_generated = True
+      elif form.submit_clear_keys.data:
+        want_api_key_generated = False
+      if want_api_key_generated is None:
+        flash("Did not change any API keys: error in form (missing submit action)", "danger")
+      else:
+        valid_usernames = [user.username for user in users]
+        bad_usernames = []
+        good_usernames = []
+        for username in form.usernames.data:
+          if username in valid_usernames:
+            good_usernames.append(username)
+          else:
+            bad_usernames.append(username)
+        if bad_usernames:
+          flash(f"Error: unrecognised users:{', '.join(bad_usernames)}", "danger")
+        if good_usernames:
+          changed_usernames = []
+          unchanged_usernames = []
+          for username in good_usernames:
+            user = User.query.filter_by(username=username).first()
+            old_key = user.api_key
+            user.generate_api_key(want_api_key_generated)
+            if user.api_key == old_key:
+              unchanged_usernames.append(username)
+            else:
+              user.save()
+              changed_usernames.append(username)
+          if unchanged_usernames:
+            flash(f"API key was the same as before so nothing changed for {_user_summary(unchanged_usernames)}.", "warning")
+          if changed_usernames:
+            if want_api_key_generated:
+              flash(f"OK, generated new API key for {_user_summary(changed_usernames)}.", "success")
+            else:
+              flash(f"OK, cleared API key for {_user_summary(changed_usernames)}.", "success")
+        else:
+            flash(f"Did not change any API keys: no users selected", "warning")
+    form.usernames.choices = [u.username for u in users]
+    return render_template("admin/api_key.html", form=form, users=users)
 
 @blueprint.route("/specs/")
 def showspecs():
@@ -347,4 +403,3 @@ def show_buggy(username=None):
         buggy=users_buggy,
         is_plain_flag=is_plain_flag
     )
-

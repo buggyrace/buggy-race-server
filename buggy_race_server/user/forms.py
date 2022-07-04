@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, PasswordField, StringField, BooleanField, ValidationError
+from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField, SubmitField, SelectMultipleField, ValidationError
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 from .models import User
@@ -114,6 +114,25 @@ class ApiSecretForm(FlaskForm):
             return False
         return initial_validation
 
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+class ApiKeyForm(FlaskForm):
+    """API secret form."""
+    usernames = MultiCheckboxField('usernames', coerce=str, choices=[])
+    submit_clear_keys = SubmitField(label='Clear API keys &rtri;')
+    submit_generate_keys = SubmitField(label='Generate API keys &rtri;')
+
+    def __init__(self, *args, **kwargs):
+        """Create instance."""
+        super(ApiKeyForm, self).__init__(*args, **kwargs)
+        self.user = None
+
+    def validate(self):
+        """Validate the form *manually* because couldn't get the MultiCheckboxField
+           to work as expected via setup."""
+        return True
 
 class BulkRegisterForm(FlaskForm):
     """Bulk register form."""

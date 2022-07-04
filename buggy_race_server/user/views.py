@@ -11,7 +11,7 @@ from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.issues import IssueParser
-from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
+from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm, ApiKeyForm
 from buggy_race_server.utils import flash_errors, warn_if_insecure, flash_suggest_if_not_yet_githubbed
 from datetime import datetime
 
@@ -146,8 +146,8 @@ def change_password():
 def set_api_secret():
     # note: the API secret's lifespan is hardcoded (1 hour): see pretty_lifespan below
     warn_if_insecure()
-    is_confirmation = False
     form = ApiSecretForm()
+    is_confirmation = False
     if request.method == "POST":
         if form.validate_on_submit():
             if current_user.api_secret == form.api_secret.data:

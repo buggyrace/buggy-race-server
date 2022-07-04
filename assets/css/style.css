@@ -336,7 +336,9 @@ main {
   height:4em;
   background-size: 4em 4em;
 }
-
+table td.check input {
+  margin-right:1em;
+}
 
 .mt-2 {
   margin-top: 1rem;

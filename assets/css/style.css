@@ -343,3 +343,6 @@ table td.check input {
 .mt-2 {
   margin-top: 1rem;
 }
+
+.btn-outline-secondary.btn-admin { background-color: #ffffdd;}
+.btn-outline-secondary.btn-admin:hover { color:black; }

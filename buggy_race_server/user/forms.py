@@ -121,8 +121,8 @@ class MultiCheckboxField(SelectMultipleField):
 class ApiKeyForm(FlaskForm):
     """API secret form."""
     usernames = MultiCheckboxField('usernames', coerce=str, choices=[])
-    submit_clear_keys = SubmitField(label='Clear API keys &rtri;')
-    submit_generate_keys = SubmitField(label='Generate API keys &rtri;')
+    submit_clear_keys = SubmitField(label='Clear API keys')
+    submit_generate_keys = SubmitField(label='Generate API keys')
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

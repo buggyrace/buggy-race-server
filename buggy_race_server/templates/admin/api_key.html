@@ -9,15 +9,13 @@
   </div>
   <div class="row">
     <p>
-      A user cannot use the API until they have an API key set. Use this to
-      grant or deny a user (or all users) access to the API. This is only needed
-      in one of the more advanced tasks (5-API).
+      A user can only access the API (used by task 5-API) if they provide an API key that matches what is
+      set here. 
       <br>
-      Note that the API key does not expire (unless you clear it). Compare this to the
-      the <a href="{{  url_for('user.set_api_secret') }}">API secret</a>, which each
-      user must set for themselves before using the API (simulating a timely token
-      <em>like a payment</em>).
-      
+      Note that the API key is required in addition to the
+      <a href="{{  url_for('user.set_api_secret') }}">API secret</a>, which each user must set for
+      themselves. The <code>key</code> allows you to grant or deny access to the API, whereas the
+      <code>secret</code> is simulating a timely token (such as those used in payment transactions).
     </p>
   </div>
   <form class="form p-3" id="ApiKeyForm" method="POST" action="{{ url_for('public.api_keys') }}" role="form">
@@ -57,10 +55,9 @@
         &nbsp;
         <button class="btn btn-outline-secondary" id="toggle-all-btn">Toggle all &utri;</button>
         &nbsp;
-        <!-- note: manually transcrined WTForms (e.g., form.submit_generate_keys) cos &rtri; HTML is escaped -->
-        <input id="submit_clear_keys" name="submit_clear_keys" type="submit" class="btn btn-primary" value="Clear API keys &rtri;">
+        {{ form.submit_generate_keys(class="btn btn-primary") }}
         &nbsp;
-        <input id="submit_generate_keys" name="submit_generate_keys" type="submit" class="btn btn-primary" value="Generate API keys &rtri;">
+        {{ form.submit_clear_keys(class="btn btn-primary") }}
       </p>
     </div>
   </form>

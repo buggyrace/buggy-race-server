@@ -106,7 +106,7 @@ def showspecs_data(data_filename=""):
       return jsonify(Buggy.DEFAULTS)
     elif data_filename != "":
         abort(404)
-    return render_template("public/specs-data.html", 
+    return render_template("public/specs_data.html", 
       defaults=Buggy.DEFAULTS,
       data=Buggy.game_data,
       is_showing_mass=want_mass

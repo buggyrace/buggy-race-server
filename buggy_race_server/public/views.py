@@ -25,6 +25,7 @@ from buggy_race_server.utils import flash_errors, warn_if_insecure
 
 import csv
 import io # for CSV dump
+import random # for API test
 
 from buggy_race_server.extensions import db
 
@@ -214,6 +215,13 @@ def api_keys():
             flash(f"Did not change any API keys: no users selected", "warning")
     form.usernames.choices = [u.username for u in users]
     return render_template("admin/api_key.html", form=form, users=users)
+
+@blueprint.route("/admin/api-test", methods=["GET"])
+@login_required
+def api_test():
+    if not current_user.is_buggy_admin:
+      abort(403)
+    return render_template("admin/api_test.html", random_qty_wheels=random.randint(1,100))
 
 @blueprint.route("/specs/")
 def showspecs():

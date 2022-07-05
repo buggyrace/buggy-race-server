@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">
+      API test
+    </h1>
+  </div>
+  <div class="row">
+    <p>
+      Use this page to test the API (admin accounts only).
+      <br>
+      Be careful: successful requests update buggy data (so maybe only test with your own username).
+      <br>
+      You'll get raw JSON back as the response.
+      <br>
+      Example JSON contains a random number of wheels.
+      <br><br>
+      <a href="{{ url_for('public.api_test') }}" class="btn btn-outline-secondary">refresh values</a>
+    </p>
+  </div>
+  <form class="form p-3" method="POST" action="/api/upload" role="form">
+    <div class="row">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>request</th>
+            <th><code>POST /api/upload</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <code>user:</code>
+            </td>
+            <td>
+              <input type="text" name="user" value="{{ current_user.username }}"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>key:</code>
+            </td>
+            <td>
+              <input type="text" name="key" value="{{ current_user.api_key }}"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>secret:</code>
+            </td>
+            <td>
+              <input type="text" name="secret" value="{{ current_user.api_secret }}"/>
+              <a style="margin-left:1em;" href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary">set API secret &rtri;</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>buggy_json:</code>
+            </td>
+            <td>
+              <textarea name="buggy_json" style="height:8rem">
+{
+  "qty_wheels": {{ random_qty_wheels }}
+}
+              </textarea>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <button class="btn btn-primary" id="check-all-btn">submit API request</button>
+    </div>
+  </form>
+{% endblock %}

@@ -1,7 +1,7 @@
 // App initialization code goes here
 
 $( document ).ready(function() {
-  if (USER_BUGGY_JSON) {
+  if (typeof USER_BUGGY_JSON !== "undefined") {
     //----------------------------------------------------------
     // if this page has users' buggy json available,
     // turn any json-btn (spans) into clickable buttons that

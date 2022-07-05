@@ -21,7 +21,7 @@
       <li><a href="{{ url_for('public.about') }}">About</a></li>
       {% if current_user and current_user.is_authenticated %}
           {% if current_user.is_buggy_admin %}
-            <li><a href="{{ url_for('public.admin') }}">Admin  <i class="icon-cog"></i></a></li>
+            <li><a href="{{ url_for('admin.admin') }}">Admin  <i class="icon-cog"></i></a></li>
           {% endif %}
           <li><a href="{{ url_for('public.logout') }}">Logout <i class="icon-exit"></i></a></li>
       {% else %}

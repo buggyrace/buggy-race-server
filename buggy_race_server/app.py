@@ -5,7 +5,7 @@ import sys
 
 from flask import Flask, render_template
 
-from buggy_race_server import commands, public, user, buggy, race, api, oauth, config
+from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -55,6 +55,7 @@ def register_extensions(app):
 
 def register_blueprints(app):
     """Register Flask blueprints."""
+    app.register_blueprint(admin.views.blueprint)
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
     app.register_blueprint(buggy.views.blueprint)

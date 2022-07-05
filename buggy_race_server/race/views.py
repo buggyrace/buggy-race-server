@@ -48,7 +48,7 @@ def new_race():
         else:
             flash("Did not create a race!", "danger")
             flash_errors(form)
-      return render_template("races/new-race.html", form=form)
+      return render_template("admin/new_race.html", form=form)
 
 @blueprint.route("/<league>/<race_slug>/<data_format>")
 @blueprint.route("/<league>/<race_slug>")

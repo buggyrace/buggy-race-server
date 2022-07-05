@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """User models."""
 import datetime as dt
+from random import randint
 
 from sqlalchemy import orm
 from flask_login import UserMixin
@@ -21,6 +22,8 @@ from buggy_race_server.extensions import bcrypt
 from buggy_race_server.buggy.models import Buggy
 
 from buggy_race_server.lib.http import Http
+
+API_KEY_LENGTH = 16
 
 class Role(SurrogatePK, Model):
     """A role for a user."""
@@ -62,6 +65,7 @@ class User(UserMixin, SurrogatePK, Model):
     uploaded_at = Column(db.DateTime, nullable=True)
     api_secret =  Column(db.String(30), nullable=True)
     api_secret_at = Column(db.DateTime, nullable=True)
+    api_key = Column(db.String(30), nullable=True)
     notes = Column(db.Text(), default=False)
 
     def __init__(self, username, org_username, email, password=None, **kwargs):
@@ -86,6 +90,12 @@ class User(UserMixin, SurrogatePK, Model):
     def check_password(self, value):
         """Check password."""
         return bcrypt.check_password_hash(self.password, value)
+
+    def generate_api_key(self, want_key):
+        if want_key:
+          self.api_key = "".join([f"{randint(0,15):0x}" for i in range(API_KEY_LENGTH)]).upper()
+        else:
+          self.api_key = None
 
     @property
     def is_buggy_admin(self):

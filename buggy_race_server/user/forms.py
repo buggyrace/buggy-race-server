@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField, SubmitField, SelectMultipleField, ValidationError
+from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
-from .models import User
+from buggy_race_server.utils import is_authorised
+from buggy_race_server.user.models import User
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigFromEnv as config
-
-# prevent unauthorised registration if there is an auth code in the environment
-def is_authorised(form, field):
-  auth_code = config.REGISTRATION_AUTH_CODE
-  if auth_code is not None and field.data.lower() != auth_code.lower():
-    raise ValidationError("You must provide a valid authorisation code")
-
 
 class RegisterForm(FlaskForm):
     """Register form."""
@@ -112,41 +106,4 @@ class ApiSecretForm(FlaskForm):
         initial_validation = super(ApiSecretForm, self).validate()
         if not initial_validation:
             return False
-        return initial_validation
-
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
-
-class ApiKeyForm(FlaskForm):
-    """API secret form."""
-    usernames = MultiCheckboxField('usernames', coerce=str, choices=[])
-    submit_clear_keys = SubmitField(label='Clear API keys')
-    submit_generate_keys = SubmitField(label='Generate API keys')
-
-    def __init__(self, *args, **kwargs):
-        """Create instance."""
-        super(ApiKeyForm, self).__init__(*args, **kwargs)
-        self.user = None
-
-    def validate(self):
-        """Validate the form *manually* because couldn't get the MultiCheckboxField
-           to work as expected via setup."""
-        return True
-
-class BulkRegisterForm(FlaskForm):
-    """Bulk register form."""
-    userdata = TextAreaField(
-        "Userdata (username, org_username, password)", validators=[DataRequired()]
-    )
-    authorisation_code = StringField("Authorisation code",  [is_authorised])
-
-    def __init__(self, *args, **kwargs):
-        """Create instance."""
-        super(BulkRegisterForm, self).__init__(*args, **kwargs)
-        self.user = None
-
-    def validate(self):
-        """Validate the form."""
-        initial_validation = super(BulkRegisterForm, self).validate()
         return initial_validation

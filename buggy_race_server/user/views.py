@@ -3,17 +3,17 @@
 import os
 import csv
 import time
+from datetime import datetime
 import threading
 from flask import Blueprint, render_template, request, abort, flash, redirect, url_for, current_app, Markup, Response
 from flask_login import login_required, current_user
 from functools import wraps
+
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.issues import IssueParser
-from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm, ApiKeyForm
+from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
 from buggy_race_server.utils import flash_errors, warn_if_insecure, flash_suggest_if_not_yet_githubbed
-from datetime import datetime
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 

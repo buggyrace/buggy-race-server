@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1>
+      {% if id %}
+        Edit
+      {% else %}
+        New
+      {% endif %}
+      Announcement
+    </h1>
+  </div>
+  <form id="AnnounceForm" class="form form-announce" method="POST" action="" role="form">
+    <div class="row">
+      {{ form.csrf_token }}
+      <input type="hidden" name="id" value="{{ id }}"/>
+      <div>
+        {{form.type.label}}
+        {{form.type(placeholder="info", class_="form-control")}}
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        {{form.text.label}}
+        {{form.text(placeholder="Message text", class_="form-control", style="width:100%")}}
+      </div>
+    </div>
+    {% if id %}
+      <div class="row">
+        <div class="form-group">
+          {{form.is_visible.label}}
+          {{form.is_visible(placeholder="Currently displayed?", class_="form-control")}}
+        </div>
+      </div>
+    {% endif %}
+    <div class="row">
+      <div>
+        {{form.is_html.label}}
+        {{form.is_html(placeholder="Enable HTML?", class_="form-control")}}
+      </div>
+    </div>
+    <div class="row">
+      {{ form.submit }}
+      <p><input class="btn btn-primary" type="submit" value="Submit announcment"></p>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

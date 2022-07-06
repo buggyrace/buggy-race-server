@@ -54,13 +54,14 @@ class AnnouncementForm(FlaskForm):
     def validate(self):
         return super(AnnouncementForm, self).validate()
 
-class AnnouncementPublishForm(FlaskForm):
+class AnnouncementActionForm(FlaskForm):
     id = IntegerField(validators=[DataRequired()])
     submit_publish = SubmitField(label='publish')
     submit_hide = SubmitField(label='hide')
+    submit_delete = SubmitField(label='Delete announcement')
 
     def __init__(self, *args, **kwargs):
-        super(AnnouncementPublishForm, self).__init__(*args, **kwargs)
+        super(AnnouncementActionForm, self).__init__(*args, **kwargs)
 
     def validate(self):
-        return super(AnnouncementPublishForm, self).validate()
+        return super(AnnouncementActionForm, self).validate()

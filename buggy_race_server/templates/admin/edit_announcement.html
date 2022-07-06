@@ -4,7 +4,7 @@
 <div class="container pb-5">
   <div class="row">
     <h1>
-      {% if id %}
+      {% if announcement %}
         Edit
       {% else %}
         New
@@ -12,10 +12,10 @@
       Announcement
     </h1>
   </div>
-  <form id="AnnounceForm" class="form form-announce" method="POST" action="" role="form">
+  <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=announcement.id)}}" role="form">
     <div class="row">
       {{ form.csrf_token }}
-      <input type="hidden" name="id" value="{{ id }}"/>
+      <input type="hidden" name="id" value="{{ announcement.id }}"/>
       <div>
         {{form.type.label}}
         {{form.type(placeholder="info", class_="form-control")}}
@@ -27,18 +27,21 @@
         {{form.text(placeholder="Message text", class_="form-control", style="width:100%")}}
       </div>
     </div>
-    {% if id %}
-      <div class="row">
+    <div class="row">
         <div class="form-group">
           {{form.is_visible.label}}
-          {{form.is_visible(placeholder="Currently displayed?", class_="form-control")}}
+          {% if announcement == None %}
+            <input type="checkbox" disabled class="form-control" />
+            (no: create the announcement first, then publish it)
+          {% else %}
+            {{form.is_visible(placeholder="Currently displayed?", checked=announcement.is_visible, class_="form-control")}}
+          {% endif %}
         </div>
       </div>
-    {% endif %}
     <div class="row">
       <div>
         {{form.is_html.label}}
-        {{form.is_html(placeholder="Enable HTML?", class_="form-control")}}
+        {{form.is_html(placeholder="Enable HTML?", checked=announcement.is_html, class_="form-control")}}
       </div>
     </div>
     <div class="row">
@@ -46,6 +49,15 @@
       <p><input class="btn btn-primary" type="submit" value="Submit announcment"></p>
     </div>
   </form>
+  {% if announcement %}
+    <div class="row" style="margin-top:2em">
+      <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement')}}" role="form">
+        {{ delete_form.csrf_token }}
+        {{ delete_form.submit_delete(class="btn btn-danger")}}
+        <input type="hidden" name="id" value="{{ announcement.id }}" />
+      </form>
+    </div>
+  {% endif %}
 </div>
 
 {% endblock %}

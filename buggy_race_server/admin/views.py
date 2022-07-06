@@ -19,7 +19,7 @@ from datetime import datetime
 
 from py import process
 
-from buggy_race_server.admin.forms import AnnouncementForm, AnnouncementPublishForm, ApiKeyForm, BulkRegisterForm
+from buggy_race_server.admin.forms import AnnouncementForm, AnnouncementActionForm, ApiKeyForm, BulkRegisterForm
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.user.models import User
 from buggy_race_server.buggy.models import Buggy
@@ -266,7 +266,7 @@ def settings():
 @login_required
 def list_announcements():
     # only using the form for the CSRF token at this point
-    form = AnnouncementPublishForm(request.form)
+    form = AnnouncementActionForm(request.form)
     if not current_user.is_buggy_admin:
       abort(403)
     announcements = Announcement.query.all()
@@ -286,6 +286,7 @@ def edit_announcement(id=None):
         flash(f"No such announcement (id={id})", "danger")
         return redirect(url_for("admin.list_announcements"))
     form = AnnouncementForm(request.form, obj=announcement)
+    delete_form = AnnouncementActionForm()
     if request.method == "GET":
       print("FIXME GET method:")
       if announcement:
@@ -314,14 +315,14 @@ def edit_announcement(id=None):
       else:
           flash("Did not create an announcement!", "danger")
           flash_errors(form)
-    return render_template("admin/edit_announcement.html", form=form, id=id)
+    return render_template("admin/edit_announcement.html", form=form, announcement=announcement, delete_form=delete_form)
 
 @blueprint.route("/announcements/publish", methods=["POST"])
 @login_required
 def publish_announcement():
     if not current_user.is_buggy_admin:
       abort(403)
-    form = AnnouncementPublishForm(request.form)
+    form = AnnouncementActionForm(request.form)
     want_to_publish = None
     if form.submit_hide.data:
       want_to_publish = False
@@ -337,8 +338,26 @@ def publish_announcement():
         announcement.is_visible = want_to_publish
         announcement.save()
         if want_to_publish:
-          flash("OK, published an announcement")
+          flash("OK, published an announcement", "success")
         else:
-          flash("OK, hid an announcement")
+          flash("OK, hid an announcement", "success")
     announcements = Announcement.query.all() # lazy but no need for efficiency here
     return render_template("admin/announcements.html", announcements=announcements, form=form)
+
+@blueprint.route("/annoucement/delete", methods=["POST"])
+@login_required
+def delete_announcement():
+    if not current_user.is_buggy_admin:
+      abort(403)
+    form = AnnouncementActionForm(request.form)
+    if form.submit_delete.data:
+      announcement = Announcement.query.filter_by(id=form.id.data).first()
+      if announcement is None:
+        flash("Error: coudldn't find announcement to delete", "danger")
+      else:
+        announcement.delete()
+        flash("OK, deleted announcement", "success")
+    else:
+      flash("Error: incorrect button wiring, nothing deleted", "danger")
+    return redirect(url_for("admin.list_announcements"))
+

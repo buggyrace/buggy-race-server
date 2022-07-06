@@ -22,6 +22,17 @@
           {% for announcement in announcements %}
             <tr>
               <td>
+                <a href="{{ url_for('admin.edit_announcement', id=announcement.id)}}" class="btn btn-outline-secondary btn-admin">edit&nbsp;&rtri;</a>
+              </td>
+              <td>{{announcement.type}}</td>
+              <td>
+                {% if announcement.is_html %}
+                  {{announcement.text|safe}}
+                {% else %}
+                  {{announcement.text}}
+                {% endif %}
+              </td>
+              <td>
                 <form action="{{ url_for('admin.publish_announcement')}}" method="POST">
                   {{ form.csrf_token }}
                   <input type="hidden" name="id" value="{{announcement.id}}"/>
@@ -31,11 +42,6 @@
                     {{ form.submit_publish(class="btn btn-danger") }}
                   {% endif %}
                 </form>
-              </td>
-              <td>{{announcement.type}}</td>
-              <td>{{announcement.text}}</td>
-              <td>
-                <a href="{{ url_for('admin.edit_announcement', id=announcement.id)}}" class="btn btn-outline-secondary btn-admin">edit&nbsp;&rtri;</a>
               </td>
             </tr>
             </form>

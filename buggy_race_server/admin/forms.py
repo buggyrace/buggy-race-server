@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""User forms."""
+
 from flask_wtf import FlaskForm
-from wtforms import widgets, BooleanField, IntegerField, TextAreaField, StringField, SubmitField, SelectMultipleField
+from wtforms import widgets, BooleanField, IntegerField, TextAreaField, SelectField, StringField, SubmitField, SelectMultipleField
 from wtforms.validators import DataRequired, Length
 from buggy_race_server.utils import is_authorised
+from buggy_race_server.config import ConfigFromEnv
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -44,7 +45,11 @@ class BulkRegisterForm(FlaskForm):
 
 class AnnouncementForm(FlaskForm):
     text = TextAreaField("Message text", validators=[DataRequired()])
-    type = StringField("Type", validators=[Length(min=0, max=32)])
+    type = SelectField(
+      'Type',
+      validators=[DataRequired()],
+      choices=[(t,t) for t in ConfigFromEnv.ANNOUNCEMENT_TYPES]
+    )
     is_visible = BooleanField("Display now?")
     is_html = BooleanField("Allow HTML?")
 

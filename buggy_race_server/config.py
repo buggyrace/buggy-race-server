@@ -142,6 +142,11 @@ class ConfigFromEnv():
     # oauth access tokens
     GITHUB_CLIENT_SECRET = env.str("GITHUB_CLIENT_SECRET", default="").strip()
 
+    # Supported announcement types:
+    # roughly, xyz maps to "announcement-xyz" CSS class — but see layout.html)
+    # If you add more here, make sure you've also added support for them first
+    ANNOUNCEMENT_TYPES = ['info', 'warning', 'special']
+
     # these are loaded from the database on the first request and then effectively
     # cached in the config to avoid repeated hits on the database
     CURRENT_ANNOUNCEMENTS = None

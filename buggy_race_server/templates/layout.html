@@ -38,20 +38,34 @@
 
     <header>{% block header %}{% endblock %}</header>
     <main role="main">
-
- <!-- = = = = = = = = = = =  SUSPENDED WARNING  = = = = = = = = = = = -->
-       <div class="row buggy-stripes">
-         <div class="col-md-12" style="background-color:#f0f000;box-shadow: inset 0px 4em 2em -1em #cccc88; margin:1rem">
-           <div class="alert text-center" style="margin:0;padding:0.5em;">
-             <strong>
-             BUGGY RACING IS CURRENTLY SUSPENDED
-             <br>
-             pending the start of the new racing season
-           </strong>
-           </div>
-         </div>
-       </div>
-<!-- = = = = = = = = = = =  SUSPENDED WARNING  = = = = = = = = = = = -->
+      {% for banner in config['CURRENT_ANNOUNCEMENTS'] %}
+        {% if banner.type == 'special' %}
+          <div class="row buggy-stripes">
+            <div class="col-md-12" style="background-color:#f0f000;box-shadow: inset 0px 4em 2em -1em #cccc88; margin:1rem 0">
+              <div class="alert text-center" style="margin:0;padding:0.5em;">
+                {% if banner.is_html %}
+                  {{ banner.text|safe }}
+                {% else %}
+                  {{ banner.text }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+         {% else %}
+          <div class="row announce-{{ banner.type }}">
+              <div class="col-md-12" style="background-color:#cccccc; margin:0 0;border-bottom:1px solid #333333;">
+                <div class="alert text-center" style="margin:0;padding:0.5em;">
+                  {% if banner.is_html %}
+                    {{ banner.text|safe }}
+                  {% else %}
+                    {{ banner.text }}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
 
       <div class="row">
         <div class="col-md-12">

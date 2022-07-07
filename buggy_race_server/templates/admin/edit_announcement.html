@@ -12,11 +12,12 @@
       Announcement
     </h1>
   </div>
-  <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=announcement.id)}}" role="form">
+  <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=id)}}" role="form">
     <div class="row">
       {{ form.csrf_token }}
-      <input type="hidden" name="id" value="{{ announcement.id }}"/>
+      <input type="hidden" name="id" value="{{ id }}"/>
       <div>
+        <p>Currently: only special type is <code>special</code></p>
         {{form.type.label}}
         {{form.type(placeholder="info", class_="form-control")}}
       </div>
@@ -28,24 +29,12 @@
       </div>
     </div>
     <div class="row">
-        <div class="form-group">
-          {{form.is_visible.label}}
-          {% if announcement == None %}
-            <input type="checkbox" disabled class="form-control" />
-            (no: create the announcement first, then publish it)
-          {% else %}
-            {{form.is_visible(placeholder="Currently displayed?", checked=announcement.is_visible, class_="form-control")}}
-          {% endif %}
-        </div>
-      </div>
-    <div class="row">
       <div>
         {{form.is_html.label}}
-        {{form.is_html(placeholder="Enable HTML?", checked=announcement.is_html, class_="form-control")}}
+        {{form.is_html(placeholder="Enable HTML?", checked=is_html, class_="form-control")}}
       </div>
     </div>
     <div class="row">
-      {{ form.submit }}
       <p><input class="btn btn-primary" type="submit" value="Submit announcment"></p>
     </div>
   </form>

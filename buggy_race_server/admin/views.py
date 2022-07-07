@@ -23,7 +23,7 @@ from buggy_race_server.admin.forms import AnnouncementForm, AnnouncementActionFo
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.user.models import User
 from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.utils import flash_errors
+from buggy_race_server.utils import flash_errors, refresh_global_announcements
 
 import csv
 import io # for CSV dump
@@ -280,6 +280,8 @@ def edit_announcement(id=None):
     if not current_user.is_buggy_admin:
       abort(403)
     announcement = None
+    is_visible = None
+    is_html =  None
     if id:
       announcement = Announcement.query.filter_by(id=id).first()
       if announcement is None:
@@ -290,9 +292,8 @@ def edit_announcement(id=None):
     if request.method == "GET":
       print("FIXME GET method:")
       if announcement:
-        print(f"             id={announcement.id}")
-        print(f"        is_html={announcement.is_html}")
-        print(f"     is_visible={announcement.is_visible}")
+        is_html=announcement.is_html
+        is_visible=announcement.is_visible
     if request.method == "POST":
       if form.validate_on_submit():
         if announcement is not None:
@@ -315,7 +316,15 @@ def edit_announcement(id=None):
       else:
           flash("Did not create an announcement!", "danger")
           flash_errors(form)
-    return render_template("admin/edit_announcement.html", form=form, announcement=announcement, delete_form=delete_form)
+    return render_template(
+      "admin/edit_announcement.html", 
+      form=form, 
+      id=id,
+      is_html=is_html,
+      is_visible=is_visible,
+      announcement=announcement,
+      delete_form=delete_form
+    )
 
 @blueprint.route("/announcements/publish", methods=["POST"])
 @login_required
@@ -341,7 +350,8 @@ def publish_announcement():
           flash("OK, published an announcement", "success")
         else:
           flash("OK, hid an announcement", "success")
-    announcements = Announcement.query.all() # lazy but no need for efficiency here
+        refresh_global_announcements(current_app)
+    announcements=Announcement.query.all()
     return render_template("admin/announcements.html", announcements=announcements, form=form)
 
 @blueprint.route("/annoucement/delete", methods=["POST"])

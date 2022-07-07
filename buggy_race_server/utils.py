@@ -4,6 +4,10 @@ from flask import flash, request, Markup, url_for, config
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user
+from buggy_race_server.admin.models import Announcement
+
+def refresh_global_announcements(app):
+  app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
 
 def flash_errors(form, category="warning"):
     """Flash all errors for a form."""

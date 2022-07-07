@@ -141,3 +141,7 @@ class ConfigFromEnv():
     # Special secret used to authorize our application making requests for 
     # oauth access tokens
     GITHUB_CLIENT_SECRET = env.str("GITHUB_CLIENT_SECRET", default="").strip()
+
+    # these are loaded from the database on the first request and then effectively
+    # cached in the config to avoid repeated hits on the database
+    CURRENT_ANNOUNCEMENTS = None

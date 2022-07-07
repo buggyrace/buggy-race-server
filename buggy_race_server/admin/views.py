@@ -280,8 +280,8 @@ def edit_announcement(id=None):
     if not current_user.is_buggy_admin:
       abort(403)
     announcement = None
-    is_visible = None
-    is_html =  None
+    is_visible = False
+    is_html =  False
     if id:
       announcement = Announcement.query.filter_by(id=id).first()
       if announcement is None:

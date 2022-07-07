@@ -17,7 +17,6 @@
       {{ form.csrf_token }}
       <input type="hidden" name="id" value="{{ id }}"/>
       <div>
-        <p>Currently: only special type is <code>special</code></p>
         {{form.type.label}}
         {{form.type(placeholder="info", class_="form-control")}}
       </div>
@@ -31,13 +30,20 @@
     <div class="row">
       <div>
         {{form.is_html.label}}
-        {{form.is_html(placeholder="Enable HTML?", checked=is_html, class_="form-control")}}
+        {{form.is_html(checked=is_html, class_="form-control")}}
       </div>
     </div>
     <div class="row">
       <p><input class="btn btn-primary" type="submit" value="Submit announcment"></p>
     </div>
   </form>
+  <div class="row">
+    <p>
+      You may need to hide/publish announcements to see changes take
+      effect after you have submitted them.
+    </p>
+  </div>
+
   {% if announcement %}
     <div class="row" style="margin-top:2em">
       <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement')}}" role="form">

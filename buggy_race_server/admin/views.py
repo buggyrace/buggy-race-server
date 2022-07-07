@@ -303,6 +303,7 @@ def edit_announcement(id=None):
             announcement.is_html = form.is_html.data
             announcement.save()
             flash("OK, updated announcement", "success")
+            refresh_global_announcements(current_app)
             return redirect(url_for("admin.list_announcements"))
         else:
           Announcement.create(
@@ -367,6 +368,7 @@ def delete_announcement():
       else:
         announcement.delete()
         flash("OK, deleted announcement", "success")
+        refresh_global_announcements(current_app)
     else:
       flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for("admin.list_announcements"))

@@ -318,7 +318,28 @@ main {
   color: white;
 }
 
-.buggy-stripes {
+.announcement-wrapper {
+  margin: 0 0 0.666em 0;
+}
+.announcement-inner-box {
+  width:100%;
+  margin:0;
+  box-shadow: 0px 0.25em 0.666em rgba(0,0,0,0.5);
+}
+.announcement-inner-box .alert {
+  margin:0;
+  padding:0.5em;
+}
+.announcement-special .announcement-inner-box {
+  background-color:#f0f000;
+}
+.announcement-info .announcement-inner-box {
+  background-color: #ffffcc;
+}
+.announcement-warning .announcement-inner-box {
+  background-color: #ffaaaa;
+}
+.announcement-special, .buggy-stripes {
     background: repeating-linear-gradient(
       -45deg,
       black,
@@ -326,9 +347,9 @@ main {
       yellow 2rem,
       yellow 4rem
     );
-    background-transform:rotate(20deg);
-    min-height: 2rem;
-}
+    padding:1em 0;
+  }
+
 .finish-chequers{
   position: relative;
   overflow: hidden;

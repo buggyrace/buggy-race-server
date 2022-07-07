@@ -38,20 +38,19 @@
 
     <header>{% block header %}{% endblock %}</header>
     <main role="main">
-
- <!-- = = = = = = = = = = =  SUSPENDED WARNING  = = = = = = = = = = = -->
-       <div class="row buggy-stripes">
-         <div class="col-md-12" style="background-color:#f0f000;box-shadow: inset 0px 4em 2em -1em #cccc88; margin:1rem">
-           <div class="alert text-center" style="margin:0;padding:0.5em;">
-             <strong>
-             BUGGY RACING IS CURRENTLY SUSPENDED
-             <br>
-             pending the start of the new racing season
-           </strong>
-           </div>
-         </div>
-       </div>
-<!-- = = = = = = = = = = =  SUSPENDED WARNING  = = = = = = = = = = = -->
+      {% for banner in config['CURRENT_ANNOUNCEMENTS'] %}
+        <div class="row announcement-wrapper announcement-{{ banner.type }}">
+          <div class="announcement-inner-box">
+            <div class="alert text-center">
+              {% if banner.is_html %}
+                {{ banner.text|safe }}
+              {% else %}
+                {{ banner.text }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
 
       <div class="row">
         <div class="col-md-12">

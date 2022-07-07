@@ -6,6 +6,7 @@ import sys
 from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
+
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -16,6 +17,8 @@ from buggy_race_server.extensions import (
     login_manager,
     migrate,
 )
+from buggy_race_server.admin.models import Announcement
+
 
 def create_app():
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.

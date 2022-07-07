@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1>
+      {% if announcement %}
+        Edit
+      {% else %}
+        New
+      {% endif %}
+      Announcement
+    </h1>
+  </div>
+  <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=id)}}" role="form">
+    <div class="row">
+      {{ form.csrf_token }}
+      <input type="hidden" name="id" value="{{ id }}"/>
+      <div>
+        {{form.type.label}}
+        {{form.type(placeholder="info", class_="form-control")}}
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        {{form.text.label}}
+        {{form.text(placeholder="Message text", class_="form-control", style="width:100%")}}
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        {{form.is_html.label}}
+        {{form.is_html(checked=is_html, class_="form-control")}}
+      </div>
+    </div>
+    <div class="row">
+      <p><input class="btn btn-primary" type="submit" value="Submit announcment"></p>
+    </div>
+  </form>
+  <div class="row">
+    <p>
+      You may need to hide/publish announcements to see changes take
+      effect after you have submitted them.
+    </p>
+  </div>
+
+  {% if announcement %}
+    <div class="row" style="margin-top:2em">
+      <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement')}}" role="form">
+        {{ delete_form.csrf_token }}
+        {{ delete_form.submit_delete(class="btn btn-danger")}}
+        <input type="hidden" name="id" value="{{ announcement.id }}" />
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

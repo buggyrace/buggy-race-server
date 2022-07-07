@@ -22,4 +22,4 @@ if app.config["FORCE_REDIRECT_HTTP_TO_HTTPS"]:
 @app.before_request
 def load_announcements():
     if app.config['CURRENT_ANNOUNCEMENTS'] is None:
-        refresh_global_announcements(app)
+        refresh_global_announcements(app, init=True)

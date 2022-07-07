@@ -6,7 +6,18 @@ from functools import wraps
 from flask_login import current_user
 from buggy_race_server.admin.models import Announcement
 
-def refresh_global_announcements(app):
+def refresh_global_announcements(app, init=False):
+  if init:
+    # TODO this is effectively hardcoded for now, as it's really just
+    #      to help: if there are no announcements, inject a (useful)
+    #      example into the database when the app fires up
+    if app.config['EXAMPLE_ANNOUNCEMENT'] and Announcement.query.count()==0:
+      announcement = Announcement.create(
+        type="special",
+        text=app.config['EXAMPLE_ANNOUNCEMENT'],
+        is_html=True,
+        is_visible=False,
+      )
   app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
 
 def flash_errors(form, category="warning"):

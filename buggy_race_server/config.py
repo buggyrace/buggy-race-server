@@ -150,3 +150,8 @@ class ConfigFromEnv():
     # these are loaded from the database on the first request and then effectively
     # cached in the config to avoid repeated hits on the database
     CURRENT_ANNOUNCEMENTS = None
+
+    # this is an example announcement to populate the database with a demo
+    # (only if there are no announcements already loaded)
+    # Be careful with this: broken HTML here will cause problems!
+    EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"

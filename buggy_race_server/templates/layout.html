@@ -38,20 +38,21 @@
 
     <header>{% block header %}{% endblock %}</header>
     <main role="main">
-      {% for banner in config['CURRENT_ANNOUNCEMENTS'] %}
-        <div class="row announcement-wrapper announcement-{{ banner.type }}">
-          <div class="announcement-inner-box">
-            <div class="alert text-center">
-              {% if banner.is_html %}
-                {{ banner.text|safe }}
-              {% else %}
-                {{ banner.text }}
-              {% endif %}
+      {% if config['CURRENT_ANNOUNCEMENTS'] %}
+        {% for banner in config['CURRENT_ANNOUNCEMENTS'] %}
+          <div class="row announcement-wrapper announcement-{{ banner.type }}">
+            <div class="announcement-inner-box">
+              <div class="alert text-center">
+                {% if banner.is_html %}
+                  {{ banner.text|safe }}
+                {% else %}
+                  {{ banner.text }}
+                {% endif %}
+              </div>
             </div>
           </div>
-        </div>
-      {% endfor %}
-
+        {% endfor %}
+      {% endif %}
       <div class="row">
         <div class="col-md-12">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if

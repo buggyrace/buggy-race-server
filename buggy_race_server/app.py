@@ -6,6 +6,7 @@ import sys
 from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
+from buggy_race_server.utils import refresh_global_announcements
 
 from buggy_race_server.extensions import (
     bcrypt,
@@ -17,12 +18,9 @@ from buggy_race_server.extensions import (
     login_manager,
     migrate,
 )
-from buggy_race_server.admin.models import Announcement
-
 
 def create_app():
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
-
     See config.py which loads config from env vars:
     specify all non-defaulted settings with environment variables
     (either using .env or explicit exports/settings (e.g., via Heroku's dialogue))
@@ -81,6 +79,7 @@ def register_errorhandlers(app):
         app.errorhandler(errcode)(render_error)
     return None
 
+
 def register_shellcontext(app):
     """Register shell context objects."""
 
@@ -106,3 +105,12 @@ def configure_logger(app):
     handler = logging.StreamHandler(sys.stdout)
     if not app.logger.handlers:
         app.logger.addHandler(handler)
+
+
+app = create_app()
+
+@app.before_first_request
+def load_announcements():
+    app.logger.info("[ANNOUNCEMENT TEST] Running load_announcement function")
+    if app.config['CURRENT_ANNOUNCEMENTS'] is None:
+        refresh_global_announcements(app, init=True)

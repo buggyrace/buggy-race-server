@@ -1,28 +1,24 @@
 # -*- coding: utf-8 -*-
 """Race model."""
-import datetime as dt
+import datetime as datetime
 import os
 
-from sqlalchemy import orm
-
+# get the config settings (without the app context):
+from buggy_race_server.config import ConfigFromEnv as config
 from buggy_race_server.database import (
     Column,
     Model,
     SurrogatePK,
     db,
-    reference_col,
-    relationship,
 )
 
-# get the config settings (without the app context):
-from buggy_race_server.config import ConfigFromEnv as config
 
 class Race(SurrogatePK, Model):
     """A race."""
 
     def get_default_race_time():
         # two minutes to midnight ;-)
-        tomorrow = dt.datetime.today() + dt.timedelta(days=1)
+        tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
         tomorrow = tomorrow.replace(hour=23, minute=58, second=0, microsecond=0)
         return tomorrow
 
@@ -30,7 +26,7 @@ class Race(SurrogatePK, Model):
     id = db.Column(db.Integer, primary_key=True)
     title = Column(db.String(80), unique=False, nullable=False, default="")
     desc = Column(db.Text(), unique=False, nullable=False, default="")
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=config.DEFAULT_RACE_COST_LIMIT)
     is_visible = db.Column(db.Boolean(), default=config.DEFAULT_RACE_IS_VISIBLE)

@@ -2,17 +2,15 @@
 """API views."""
 
 import json
-from flask import Blueprint, request, Response, current_app
-from flask_login import login_required, current_user
-from flask_wtf import CSRFProtect
 from datetime import datetime
 
-blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../static")
+from flask import Blueprint, Response, request
 
-from buggy_race_server.user.models import User
-from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.views import handle_uploaded_json
+from buggy_race_server.user.models import User
+
+blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../static")
 
 API_SECRET_LIFESPAN_MINS = 60
 

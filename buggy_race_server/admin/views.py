@@ -1,35 +1,33 @@
 # -*- coding: utf-8 -*-
 """Admin views/controllers."""
-import re
+import csv
+import io  # for CSV dump
+import random  # for API test
+from datetime import datetime
+
 from flask import (
-    abort,
     Blueprint,
+    abort,
     current_app,
     flash,
+    make_response,
     redirect,
     render_template,
     request,
     url_for,
-    make_response,
-    jsonify,
 )
-from flask_wtf import FlaskForm
-from flask_login import login_required, login_user, logout_user, current_user
-from datetime import datetime
+from flask_login import current_user, login_required
 
-from py import process
-
-from buggy_race_server.admin.forms import AnnouncementForm, AnnouncementActionForm, ApiKeyForm, BulkRegisterForm
+from buggy_race_server.admin.forms import (
+    AnnouncementActionForm,
+    AnnouncementForm,
+    ApiKeyForm,
+    BulkRegisterForm,
+)
 from buggy_race_server.admin.models import Announcement
-from buggy_race_server.user.models import User
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, refresh_global_announcements
-
-import csv
-import io # for CSV dump
-import random # for API test
-
-from buggy_race_server.extensions import db
 
 blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
 

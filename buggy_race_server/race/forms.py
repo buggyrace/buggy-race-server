@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 """Race forms."""
-from flask_wtf import FlaskForm
-from wtforms import TextAreaField, StringField, IntegerField, DateTimeField, BooleanField, ValidationError
-from wtforms.validators import DataRequired, EqualTo, Length, Optional, NumberRange
-import os
 
-from .models import Race
+from flask_wtf import FlaskForm
+from wtforms import (
+    BooleanField,
+    DateTimeField,
+    IntegerField,
+    StringField,
+    TextAreaField,
+)
+from wtforms.validators import Length, NumberRange, Optional
+
+from buggy_race_server.race.models import Race
+
 
 class RaceForm(FlaskForm):
     """Race form."""

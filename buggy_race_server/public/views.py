@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 """Public section, including homepage and signup."""
+from datetime import datetime
+
 from flask import (
-    abort,
     Blueprint,
+    abort,
     current_app,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
     url_for,
-    make_response,
-    jsonify,
 )
-from flask_login import login_required, login_user, logout_user, current_user
-from datetime import datetime
+from flask_login import current_user, login_required, login_user, logout_user
 
+from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
+from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
-from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors, warn_if_insecure
-
-from buggy_race_server.extensions import db
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 

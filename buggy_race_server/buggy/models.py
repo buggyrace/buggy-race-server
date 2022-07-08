@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 """Buggy model."""
-import datetime as dt
-
-from buggy_race_server.database import (
-    Column,
-    Model,
-    SurrogatePK,
-    db,
-    reference_col,
-    relationship,
-)
-from buggy_race_server.extensions import bcrypt
+import datetime as datetime
 
 from sqlalchemy import event
+
+from buggy_race_server.database import Column, Model, SurrogatePK, db
+
 
 class Buggy(SurrogatePK, Model):
     """A buggy ready to race."""
@@ -135,7 +128,7 @@ class Buggy(SurrogatePK, Model):
 
     __tablename__ = "buggies"
     id = db.Column(db.Integer, primary_key=True)
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     buggy_id = Column(db.Integer(), default=1) # TODO risky default?
     qty_wheels = Column(db.Integer(),
                            default=DEFAULTS['qty_wheels'])

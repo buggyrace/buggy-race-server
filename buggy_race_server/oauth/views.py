@@ -4,7 +4,6 @@
 from flask import Blueprint, redirect, request, url_for, current_app
 from flask_login import login_required, current_user
 from buggy_race_server.lib.http import Http, Url
-import os
 
 blueprint = Blueprint("oauth", __name__, url_prefix="/oauth")
 

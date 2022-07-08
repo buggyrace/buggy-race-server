@@ -288,7 +288,6 @@ def edit_announcement(id=None):
     form = AnnouncementForm(request.form, obj=announcement)
     delete_form = AnnouncementActionForm()
     if request.method == "GET":
-      print("FIXME GET method:")
       if announcement:
         is_html=announcement.is_html
         is_visible=announcement.is_visible

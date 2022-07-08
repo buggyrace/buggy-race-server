@@ -107,10 +107,15 @@ def configure_logger(app):
         app.logger.addHandler(handler)
 
 
+# Instead of having gunicorn call the create_app function as the entry point,
+# we just need to allow this Python file to run, create the app (WSGI callable)
+# and the app context, ORM etc are all established.
+# Decorators now start to work too, and here seems the best place to put them.
 app = create_app()
 
 @app.before_first_request
 def load_announcements():
     app.logger.info("[ANNOUNCEMENT TEST] Running load_announcement function")
     if app.config['CURRENT_ANNOUNCEMENTS'] is None:
+        app.logger.info("[ANNOUNCEMENT TEST] Refreshing announcements")
         refresh_global_announcements(app, init=True)

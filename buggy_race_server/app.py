@@ -44,7 +44,7 @@ def create_app():
         app.logger.info("app create: Running load_announcement function")
         # TODO this is effectively hardcoded for now:
         # note: this is *not* publishing an announcement, it's seeding an example
-        if app.config['EXAMPLE_ANNOUNCEMENT'] and Announcement.query.count()==0:
+        if app.config['EXAMPLE_ANNOUNCEMENT'] and Announcement.query.count() == 0:
             announcement = Announcement.create(
                 type="special",
                 text=app.config['EXAMPLE_ANNOUNCEMENT'],

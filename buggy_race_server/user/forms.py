@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField
+from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 from buggy_race_server.utils import is_authorised
@@ -38,7 +38,6 @@ class RegisterForm(FlaskForm):
 
     authorisation_code = StringField("Authorisation code",  [is_authorised])
 
-
     def __init__(self, *args, **kwargs):
         """Create instance."""
         super(RegisterForm, self).__init__(*args, **kwargs)
@@ -62,8 +61,8 @@ class RegisterForm(FlaskForm):
 
 class ChangePasswordForm(FlaskForm):
     """Register form."""
-    username = StringField(
-        "Username", validators=[Optional(), Length(min=3, max=80)]
+    username = SelectField(
+        "Username", validators=[Optional()], choices=[], validate_choice=False
     )
     password = PasswordField(
         "New password", validators=[DataRequired(), Length(min=4, max=40)]

@@ -119,7 +119,7 @@ def change_password():
             username = form.username.data
             user = current_user
             if current_user.username != username:
-                if username == "":
+                if username is None or username == "":
                     username = current_user.username
                 elif not current_user.is_buggy_admin:
                     flash("Cannot change another user's password", "danger")
@@ -138,6 +138,9 @@ def change_password():
         else:
             flash(f"Password was not changed", "danger")
             flash_errors(form)
+    usernames = []
+    if current_user.is_buggy_admin:
+        form.username.choices =  [""]+sorted([user.username for user in User.query.all()])
     return render_template("users/password.html", form=form)
   
 @blueprint.route("/secret", methods=['GET','POST'])

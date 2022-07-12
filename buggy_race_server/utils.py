@@ -4,6 +4,7 @@ from flask import flash, request, Markup, url_for, config
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user
+from buggy_race_server.config import ConfigFromEnv
 from buggy_race_server.admin.models import Announcement
 
 def refresh_global_announcements(app):
@@ -27,7 +28,7 @@ def flash_suggest_if_not_yet_githubbed(function):
   return wrapper
 
 # prevent unauthorised registration if there is an auth code in the environment
-def is_authorised(field):
-  auth_code = config.REGISTRATION_AUTH_CODE
+def is_authorised(form, field):
+  auth_code = ConfigFromEnv.REGISTRATION_AUTH_CODE
   if auth_code is not None and field.data.lower() != auth_code.lower():
     raise ValidationError("You must provide a valid authorisation code")

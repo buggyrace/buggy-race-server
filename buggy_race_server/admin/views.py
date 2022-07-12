@@ -37,17 +37,21 @@ def _user_summary(username_list):
     else:
         return f"{len(username_list)} users"
 
+@blueprint.route("/")
+def admin():
+    # for now the admin home page lists the students on the basis it's the
+    # most useful day-to-day admin page... might change in future
+    return list_users(want_detail=False)
+
 @blueprint.route("/users")
 @blueprint.route("/users/<data_format>")
-@blueprint.route("/")
 @login_required
-def admin(data_format=None):
+def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     if not current_user.is_buggy_admin:
       abort(403)
     else:
       # want_detail shows all users (otherwise it's only students)
-      want_detail = request.path == '/admin/users'
       users = User.query.all()
       users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
       students = [s for s in users if s.is_student]

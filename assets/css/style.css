@@ -292,6 +292,8 @@ main {
 .icon-github:before {
   content: "\eab0";
 }
+.nav-link .icon-cog {color:#dddd00}
+.nav-link .icon-cog:hover {color:#ffff00}
 
 .table .bool-false {
   background-color: #ffdddd;

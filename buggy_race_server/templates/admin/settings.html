@@ -39,6 +39,30 @@
       <tbody>
         <tr>
           <td>
+            <code>INSTITUTION_SHORT_NAME</code>
+          </td>
+          <td>
+            <code>{{ config['INSTITUTION_SHORT_NAME'] }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>INSTITUTION_FULL_NAME</code>
+          </td>
+          <td>
+            <code>{{ config['INSTITUTION_FULL_NAME'] }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>INSTITUTION_FULL_NAME</code>
+          </td>
+          <td>
+            <code><a href="{{ config['INSTITUTION_HOME_URL'] }}"">{{ config['INSTITUTION_HOME_URL'] }}</a></code>
+          </td>
+        </tr>
+        <tr>
+          <td>
             <code>PROJECT_CODE</code>
           </td>
           <td>
@@ -56,8 +80,6 @@
         <tr>
           <td>
             <code>ADMIN_USERNAMES</code>
-            <br>
-            (specified as a comma-separated list)
           </td>
           <td>
             <code>
@@ -78,10 +100,6 @@
           </td>
         </tr>
         <tr>
-          <td><code>DEBUG</code></td>
-          <td><code>{{ config['DEBUG'] or "(not set)" }}</code></td>
-        </tr>
-        <tr>
           <td><code>BUGGY_EDITOR_GITHUB_URL</code></td>
           <td><code><a href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">{{ config['BUGGY_EDITOR_GITHUB_URL'] }}</a></code></td>
         </tr>
@@ -100,14 +118,6 @@
         <tr>
           <td><code>GITHUB_PAGES_URL</code></td>
           <td><code><a href="{{ config['GITHUB_PAGES_URL'] }}">{{ config['GITHUB_PAGES_URL'] }}</a></code></td>
-        </tr>
-        <tr>
-          <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
-          <td><code>{{ config['SEND_FILE_MAX_AGE_DEFAULT'] }}</code></td>
-        </tr>
-        <tr>
-          <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
-          <td><code>{{ config['FORCE_REDIRECT_HTTP_TO_HTTPS'] }}</code></td>
         </tr>
         <tr>
           <th colspan="2">
@@ -179,6 +189,47 @@
               <em>None</em>
             {% endif %}
           </td>
+        </tr>
+        <tr>
+          <th colspan="2">
+            Tech stuff
+          </th>
+        </tr>
+
+        <tr>
+          <td><code>BCRYPT_LOG_ROUNDS</code></td>
+          <td><code>{{ config['BCRYPT_LOG_ROUNDS'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>CACHE_TYPE</code></td>
+          <td><code>{{ config['CACHE_TYPE'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>DATABASE_URL</code>...</td>
+          <td>
+            <!-- truncated shows database type, no point showing details (e.g., password) -->
+            <code>{{ config['DATABASE_URL'] | truncate(8, True, '...') }}</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>DEBUG</code></td>
+          <td><code>{{ config['DEBUG'] or "(not set)" }}</code></td>
+        </tr>
+        <tr>
+          <td><code>FORCE_REDIRECT_HTTP_TO_HTTPS</code></td>
+          <td><code>{{ config['FORCE_REDIRECT_HTTP_TO_HTTPS'] }}</code> (not&nbsp;used)</td>
+        </tr>
+        <tr>
+          <td><code>GUNICORN_WORKERS</code></td>
+          <td><code>{{ config['GUNICORN_WORKERS'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>LOG_LEVEL</code></td>
+          <td><code>{{ config['LOG_LEVEL'] }}</code></td>
+        </tr>
+        <tr>
+          <td><code>SEND_FILE_MAX_AGE_DEFAULT</code></td>
+          <td><code>{{ config['SEND_FILE_MAX_AGE_DEFAULT'] }}</code></td>
         </tr>
       </tbody>
     </table>

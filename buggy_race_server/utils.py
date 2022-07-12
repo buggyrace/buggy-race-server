@@ -16,13 +16,7 @@ def flash_errors(form, category="warning"):
             flash(f"{getattr(form, field).label.text} - {error}", category)
 
 def warn_if_insecure():
-  if not request.is_secure:
-    url = request.url.replace('http://', 'https://', 1)
-    flash(Markup(
-      "<span class='buggy-warn'>DANGER!</span> You are not using the secure server! "
-      f"<a href='{ url }' class='btn btn-warning'>Switch to &rarr; { url }</a>"),
-      "danger"
-    )
+  pass # TODO delegating this to (Cloudflare) host/DNS config, not application level
 
 def flash_suggest_if_not_yet_githubbed(function):
   @wraps(function)

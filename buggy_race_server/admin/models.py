@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 """Buggy model."""
-import datetime as dt
 
-from buggy_race_server.database import (
-    Column,
-    Model,
-    SurrogatePK,
-    db,
-)
+from datetime import datetime
+
+from buggy_race_server.database import Column, Model, SurrogatePK, db
+
 
 class Announcement(SurrogatePK, Model):
     """An announcement to display on top of all pages."""
 
     __tablename__ = "announcements"
     id = db.Column(db.Integer, primary_key=True)
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
     text = Column(db.Text(), unique=False, nullable=False, default="")
     type = Column(db.String(32), unique=False, nullable=True)
     is_visible = db.Column(db.Boolean(), default=False)

@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """Buggy views."""
-import os
+
 import csv
-import time
 import re
-import threading
-from datetime import datetime
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-from functools import wraps
-from flask_login import login_required, current_user
-from buggy_race_server.race.models import Race
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from buggy_race_server.race.forms import RaceForm
+from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")

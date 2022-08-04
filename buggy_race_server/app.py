@@ -6,7 +6,8 @@ import sys
 from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
-
+from buggy_race_server.utils import refresh_global_announcements
+from buggy_race_server.admin.models import Announcement
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -17,12 +18,9 @@ from buggy_race_server.extensions import (
     login_manager,
     migrate,
 )
-from buggy_race_server.admin.models import Announcement
-
 
 def create_app():
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
-
     See config.py which loads config from env vars:
     specify all non-defaulted settings with environment variables
     (either using .env or explicit exports/settings (e.g., via Heroku's dialogue))
@@ -40,6 +38,22 @@ def create_app():
     configure_logger(app)
 
     csrf.exempt(app.blueprints['api'])
+
+    # prepare the announcements:
+    with app.app_context():
+        app.logger.info("app create: Running load_announcement function")
+        # TODO this is effectively hardcoded for now:
+        # note: this is *not* publishing an announcement, it's seeding an example
+        if app.config['EXAMPLE_ANNOUNCEMENT'] and Announcement.query.count() == 0:
+            announcement = Announcement.create(
+                type="special",
+                text=app.config['EXAMPLE_ANNOUNCEMENT'],
+                is_html=True,
+                is_visible=False,
+            )
+        # and now load any published (is_visible=True) announcements into the config
+        refresh_global_announcements(app)
+
     return app
 
 
@@ -81,6 +95,7 @@ def register_errorhandlers(app):
         app.errorhandler(errcode)(render_error)
     return None
 
+
 def register_shellcontext(app):
     """Register shell context objects."""
 
@@ -106,3 +121,10 @@ def configure_logger(app):
     handler = logging.StreamHandler(sys.stdout)
     if not app.logger.handlers:
         app.logger.addHandler(handler)
+
+
+# Instead of having gunicorn call the create_app function as the entry point,
+# we just need to allow this Python file to run, create the app (WSGI callable)
+# and the app context, ORM etc are all established.
+# Decorators now start to work too, and here seems the best place to put them.
+app = create_app()

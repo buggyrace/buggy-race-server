@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """Buggy forms."""
+
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
-
-from buggy_race_server.user.models import User
-
+from wtforms.validators import DataRequired, Length
 
 class BuggyJsonForm(FlaskForm):
     """Buggy (JSON) form."""

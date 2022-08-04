@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Http Library because the python ecosystem for this is pants."""
 
-from urllib.parse import urlencode, urlparse
-from http.client import HTTPConnection, HTTPSConnection
-import os
 import json
+from http.client import HTTPConnection, HTTPSConnection
+from urllib.parse import urlencode, urlparse
+
 
 class Url:
     def of(url_string, params={}):

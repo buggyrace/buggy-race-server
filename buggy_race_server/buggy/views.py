@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """Buggy views."""
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify, Response
-from flask_login import login_required, current_user
-
-blueprint = Blueprint("buggy", __name__, url_prefix="/buggies", static_folder="../static")
-
-from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.utils import flash_errors
-
 import json
 import string
 from datetime import datetime
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+
+from buggy_race_server.buggy.forms import BuggyJsonForm
+from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.utils import flash_errors
+
+
+blueprint = Blueprint("buggy", __name__, url_prefix="/buggies", static_folder="../static")
 
 # if is_api responds differently
 def handle_uploaded_json(form, user, is_api=False):

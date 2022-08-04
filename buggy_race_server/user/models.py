@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """User models."""
-import datetime as dt
+import datetime as datetime
 from random import randint
 
-from sqlalchemy import orm
 from flask_login import UserMixin
+from sqlalchemy import orm
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigFromEnv as config
-
 from buggy_race_server.database import (
     Column,
     Model,
@@ -18,9 +17,6 @@ from buggy_race_server.database import (
     relationship,
 )
 from buggy_race_server.extensions import bcrypt
-
-from buggy_race_server.buggy.models import Buggy
-
 from buggy_race_server.lib.http import Http
 
 API_KEY_LENGTH = 16
@@ -51,7 +47,7 @@ class User(UserMixin, SurrogatePK, Model):
     email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     first_name = Column(db.String(30), nullable=True)
     last_name = Column(db.String(30), nullable=True)
     active = Column(db.Boolean(), default=False)

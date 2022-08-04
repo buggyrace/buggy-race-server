@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from flask_wtf import FlaskForm
-from wtforms import widgets, BooleanField, IntegerField, TextAreaField, SelectField, StringField, SubmitField, SelectMultipleField
-from wtforms.validators import DataRequired, Length
-from buggy_race_server.utils import is_authorised
+from wtforms import (
+    BooleanField,
+    IntegerField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+    widgets,
+)
+from wtforms.validators import DataRequired
+
 from buggy_race_server.config import ConfigFromEnv
+from buggy_race_server.utils import is_authorised
+
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)

@@ -155,3 +155,21 @@ class ConfigFromEnv():
     # (only if there are no announcements already loaded)
     # Be careful with this: broken HTML here will cause problems!
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
+
+    # control which user fields are needed:
+    # users always have a username...
+    # ...but if you don't need the other fields, disable them
+    # If you're running a small class, username might already be first name, so you
+    # don't need to store other names.
+    # Note:
+    #   - the database still has all the columns, but their values won't
+    #     be enforced
+    #   - be aware of privacy issues (in general, and between other students)
+    #     when setting these. The server may also storing (but not publishing)
+    #     GitHub account information so even if you are disabling all of these
+    #     you are still resonsible for securely and responsibly handling
+    #     private data.
+    USERS_HAVE_EMAIL = env.bool("USERS_HAVE_EMAIL", default=False)
+    USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
+    USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
+    USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)

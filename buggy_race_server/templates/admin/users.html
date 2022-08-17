@@ -18,6 +18,7 @@
         {{ qty_students}} are students (&Sopf;).
         {{ admin_usernames|count }} have admin powers (&star;).
       </p>
+      </p>
     </div>
   {% endif %}
   <div class="row">
@@ -27,7 +28,12 @@
           <th></th>
           <th>Username</th>
           {%if want_detail %}
-            <th>Email</th>
+            {% if config['USERS_HAVE_EMAIL'] %}
+              <th>Email</th>
+            {% endif %}
+            {% if config['USERS_HAVE_ORG_USERNAME'] %}
+              <th>Account</th>
+            {% endif %}
             <th>Created</th>
             <th>Active?</th>
           {% endif %}
@@ -41,7 +47,12 @@
           {% if qty_students > 0 %}
             <td colspan="2">Total <strong>students</strong>: {{ qty_students }}</td>
             {%if want_detail %}
-              <td></td>
+              {% if config['USERS_HAVE_EMAIL'] %}
+                <td></td>
+              {% endif %}
+              {% if config['USERS_HAVE_ORG_USERNAME'] %}
+                <td></td>
+              {% endif %}
               <td></td>
               <td>{{ qty_students_active }}   ({{ "%d" | format(100 * qty_students_active/qty_students) }}%) </td>
             {% endif %}
@@ -69,7 +80,12 @@
                 {% endif %}
               </td>
               {%if want_detail %}
-                <td>  {{ u.email }} </td>
+                {% if config['USERS_HAVE_EMAIL'] %}
+                  <td>  {{ u.email }} </td>
+                {% endif %}
+                {% if config['USERS_HAVE_ORG_USERNAME'] %}
+                  <td>  {{ u.org_username }} </td>
+                {% endif %}
                 <td>  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.active | lower }}">
                     {{ u.active | lower }}

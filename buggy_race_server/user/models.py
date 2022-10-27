@@ -93,6 +93,10 @@ class User(UserMixin, SurrogatePK, Model):
         else:
           self.api_key = None
 
+    def get_missing_fieldnames(fieldnames):
+        required_fieldnames = ["username", "password"] + config.USERS_ADDITIONAL_FIELDNAMES
+        return [name for name in required_fieldnames if name not in fieldnames]
+
     @property
     def is_buggy_admin(self):
       return self.username in config.ADMIN_USERNAMES_LIST

@@ -37,6 +37,16 @@ def _user_summary(username_list):
     else:
         return f"{len(username_list)} users"
 
+def _csv_tidy_string(row, fieldname, want_lower=False):
+  # incoming CSV fields might be None (i.e., not "")
+  # e.g. if the row wasn't long enough
+  s = row[fieldname] if fieldname in row else None
+  if s is not None:
+    s = str(s).strip()
+    if want_lower:
+      s = s.lower()
+  return s
+
 @blueprint.route("/")
 def admin():
     # for now the admin home page lists the students on the basis it's the
@@ -102,7 +112,7 @@ def list_users(data_format=None, want_detail=True):
 @blueprint.route("/bulk-register/", methods=["GET", "POST"])
 @login_required
 def bulk_register():
-    """Register multiple user."""
+    """Register multiple users."""
     if not current_user.is_buggy_admin:
       abort(403)
     if not current_app.config["HAS_AUTH_CODE"]:
@@ -118,22 +128,30 @@ def bulk_register():
         clean_user_data = []
         if len(lines) < 2:
           flash("Need CSV with a header row, then at least one line of data", "danger")
-        elif not ('username' in reader.fieldnames and 'org_username' in reader.fieldnames and 'password' in reader.fieldnames):
-          flash("CSV header row did not contain 'username', 'org_username' and 'password'", "danger")
+        elif missing := User.get_missing_fieldnames(reader.fieldnames):
+          flash(f"CSV header row is missing some required fields: {', '.join(missing)}", "danger")
         else:
           for row in reader:
             line_no += 1
-            # if len(row) != 3:
-            #   problem_lines.append(line_no)
-            #   continue
             username = row['username'].strip().lower() if 'username' in row else None
             org_username = row['org_username'].strip().lower() if 'org_username' in row else None
-            email = row['email'].strip().lower() if 'email' in row else None
-            password = row['password'].strip() if 'password' in row else None
+            email = _csv_tidy_string(row, 'email', want_lower=True)
+            password = _csv_tidy_string(row, 'password', want_lower=False)
+            first_name = _csv_tidy_string(row, 'first_name', want_lower=False)
+            last_name = _csv_tidy_string(row, 'last_name', want_lower=False)
             current_app.logger.info("{}, pw:{}".format(username, password))
             if password and len(password) >= 4: # passwords longer than 4
               qty_users += 1
-              clean_user_data.append({'username': username, 'org_username': org_username, 'email': email, 'password': password})
+              clean_user_data.append(
+                {
+                  'username': username,
+                  'org_username': org_username,
+                  'email': email,
+                  'password': password,
+                  'first_name': first_name,
+                  'last_name': last_name,
+                }
+              )
             else:
               problem_lines.append("{}".format(line_no))
           if len(problem_lines) > 0:
@@ -149,6 +167,8 @@ def bulk_register():
                   org_username=user_data['org_username'],
                   email=user_data['email'],
                   password=user_data['password'],
+                  first_name=user_data['first_name'],
+                  last_name=user_data['last_name'],
                   active=True,
                 )
               except Exception as e:

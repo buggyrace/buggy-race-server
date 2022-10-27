@@ -121,11 +121,21 @@
         </tr>
         <tr>
           <th colspan="2">
-            User data fields
+            Additional (required) user data fields
             <span style="font-weight:normal">
-              (what you need depends on what you're using as "username")
+              (what you need typically depends on what you're using as "username")
             </span>
           </th>
+        </tr>
+        <tr>
+          <td>Summary</td>
+          <td>
+            {%if config['USERS_ADDITIONAL_FIELDNAMES'] %}
+              <code>{{ config['USERS_ADDITIONAL_FIELDNAMES'] | join(", ") }}</code>
+            {% else %}
+              <em>no additional fields enabled<em>
+            {% endif %}
+          </td>
         </tr>
         <tr>
           <td><code>USERS_HAVE_EMAIL</code></td>

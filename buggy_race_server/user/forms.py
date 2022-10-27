@@ -24,6 +24,14 @@ class RegisterForm(FlaskForm):
         "Email",
         validators=[Email(), Length(min=6, max=80)] if config.USERS_HAVE_EMAIL else []
     )
+    first_name = StringField(
+        "First name",
+        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_FIRST_NAME else []
+    )
+    last_name = StringField(
+        "Last name",
+        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_LAST_NAME else []
+    )
     password = PasswordField(
         "Password", validators=[DataRequired(), Length(min=4, max=40)]
     )

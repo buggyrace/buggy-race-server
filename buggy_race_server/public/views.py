@@ -70,6 +70,8 @@ def register():
             username=form.username.data,
             org_username=form.org_username.data,
             email=form.email.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
             password=form.password.data,
             is_student=form.is_student.data,
             notes=form.notes.data,

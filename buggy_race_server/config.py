@@ -173,3 +173,11 @@ class ConfigFromEnv():
     USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
     USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
     USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)
+
+    # note: explicit mapping of name of field/column
+    USERS_ADDITIONAL_FIELDNAMES = [fieldname for fieldname, is_enabled in {
+        "email": USERS_HAVE_EMAIL,
+        "org_username": USERS_HAVE_ORG_USERNAME,
+        "first_name": USERS_HAVE_FIRST_NAME,
+        "last_name": USERS_HAVE_LAST_NAME
+    }.items() if is_enabled ]

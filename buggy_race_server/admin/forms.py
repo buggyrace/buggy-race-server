@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask_wtf import FlaskForm
+from gevent import config
 from wtforms import (
     BooleanField,
     IntegerField,
@@ -40,7 +41,7 @@ class ApiKeyForm(FlaskForm):
 class BulkRegisterForm(FlaskForm):
     """Bulk register form."""
     userdata = TextAreaField(
-        "Userdata (username, org_username, password)", validators=[DataRequired()]
+        f"Userdata (CSV including header)", validators=[DataRequired()]
     )
     authorisation_code = StringField("Authorisation code",  [is_authorised])
 

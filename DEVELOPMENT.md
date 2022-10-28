@@ -28,6 +28,12 @@ When running locally (on my mac) I'm now kicking the app off by
 1. being in a local `venv` virtual environment that has all the requirements
 2. `gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1 --timeout 60`
 
+To use `flask` tools, probably need to set `FLASK_APP` (because the default expects `app.py` to be in `.`, and it isn't):
+
+    export FLASK_APP=buggy_race_server/app.py
+
+(e.g., for `db` commands that follow)
+
 
 ### Oauth application
 

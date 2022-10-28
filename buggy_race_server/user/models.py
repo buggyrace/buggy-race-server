@@ -43,13 +43,13 @@ class User(UserMixin, SurrogatePK, Model):
 
     __tablename__ = "users"
     username = Column(db.String(80), unique=True, nullable=False)
-    org_username = Column(db.String(80), unique=True, nullable=config.USERS_HAVE_ORG_USERNAME)
-    email = Column(db.String(80), unique=True, nullable=config.USERS_HAVE_EMAIL)
+    org_username = Column(db.String(80), unique=True, nullable=True)
+    email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
     created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
-    first_name = Column(db.String(30), nullable=config.USERS_HAVE_FIRST_NAME)
-    last_name = Column(db.String(30), nullable=config.USERS_HAVE_LAST_NAME)
+    first_name = Column(db.String(30), nullable=True)
+    last_name = Column(db.String(30), nullable=True)
     active = Column(db.Boolean(), default=False)
     is_admin = Column(db.Boolean(), default=False)
     buggies = db.relationship("Buggy", backref="users", lazy=True)

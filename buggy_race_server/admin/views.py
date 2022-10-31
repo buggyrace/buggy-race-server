@@ -4,6 +4,7 @@ import csv
 import io  # for CSV dump
 import random  # for API test
 from datetime import datetime
+from sqlalchemy import insert, String
 
 from flask import (
     Blueprint,
@@ -24,8 +25,10 @@ from buggy_race_server.admin.forms import (
     ApiKeyForm,
     BulkRegisterForm,
 )
+
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.database import db
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, refresh_global_announcements
 
@@ -133,47 +136,51 @@ def bulk_register():
         else:
           for row in reader:
             line_no += 1
-            username = row['username'].strip().lower() if 'username' in row else None
-            org_username = row['org_username'].strip().lower() if 'org_username' in row else None
-            email = _csv_tidy_string(row, 'email', want_lower=True)
-            password = _csv_tidy_string(row, 'password', want_lower=False)
-            first_name = _csv_tidy_string(row, 'first_name', want_lower=False)
-            last_name = _csv_tidy_string(row, 'last_name', want_lower=False)
-            current_app.logger.info("{}, pw:{}".format(username, password))
-            if password and len(password) >= 4: # passwords longer than 4
+            new_user = User(
+              username=row['username'].strip().lower() if 'username' in row else None,
+              org_username=row['org_username'].strip().lower() if 'org_username' in row else None,
+              email=_csv_tidy_string(row, 'email', want_lower=True),
+              password=_csv_tidy_string(row, 'password', want_lower=False),
+              first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
+              last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
+              created_at=datetime.now(),
+              active=True,
+              is_student=True,
+              latest_json="",
+              notes=_csv_tidy_string(row, 'notes', want_lower=False),
+            )
+            #current_app.logger.info("{}, pw:{}".format(username, password))
+            if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
               qty_users += 1
-              clean_user_data.append(
-                {
-                  'username': username,
-                  'org_username': org_username,
-                  'email': email,
-                  'password': password,
-                  'first_name': first_name,
-                  'last_name': last_name,
-                }
-              )
+              clean_user_data.append(new_user.get_fields_as_dict())
             else:
-              problem_lines.append("{}".format(line_no))
+              problem_lines.append(line_no)
           if len(problem_lines) > 0:
             pl = "s" if len(problem_lines)>1 else ""
             flash("Bulk registration aborted with {} problem{}: see line{}: {}".format(
               len(problem_lines), pl, pl, ", ".join(map(str,problem_lines))), "danger")
           else:
             qty_fails = 0
-            for user_data in clean_user_data:
-              try:
-                User.create(
-                  username=user_data['username'],
-                  org_username=user_data['org_username'],
-                  email=user_data['email'],
-                  password=user_data['password'],
-                  first_name=user_data['first_name'],
-                  last_name=user_data['last_name'],
-                  active=True,
-                )
-              except Exception as e:
-                qty_fails += 1
-                flash("Error creating user {}: {}".format(user_data['username'], e.message), "danger")
+            result = db.session.execute(
+                insert(User.__table__),
+                clean_user_data
+                # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
+            )
+            db.session.commit()
+
+              # try:
+              #   User.create(
+              #     username=user_data['username'],
+              #     org_username=user_data['org_username'],
+              #     email=user_data['email'],
+              #     password=user_data['password'],
+              #     first_name=user_data['first_name'],
+              #     last_name=user_data['last_name'],
+              #     active=True,
+              #   )
+              # except Exception as e:
+              #   qty_fails += 1
+              #   flash("Error creating user {}: {}".format(user_data['username'], e.message), "danger")
             flash("Bulk registered {} users".format(qty_users-qty_fails), "warning")
         return redirect(url_for("public.home"))
     else:

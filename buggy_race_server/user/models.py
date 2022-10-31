@@ -71,7 +71,10 @@ class User(UserMixin, SurrogatePK, Model):
             self.set_password(password)
         else:
             self.password = None
-
+        # disallow optional fields to be set unless they are explicitly enabled
+        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
+                setattr(self, fieldname, None)
         self.init_on_load()
 
     @orm.reconstructor
@@ -93,8 +96,27 @@ class User(UserMixin, SurrogatePK, Model):
         else:
           self.api_key = None
 
+    def get_fields_as_dict(self):
+        return {
+            'username': self.username,
+            'org_username': self.org_username,
+            'email': self.email,
+            'password': self.password,
+            'created_at': self.created_at,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'active': self.active,
+            'is_admin': self.is_admin,
+            'latest_json': self.latest_json,
+            'is_student': self.is_student,
+            'notes': self.notes,
+        }
+
     def get_missing_fieldnames(fieldnames):
-        required_fieldnames = ["username", "password"] + config.USERS_ADDITIONAL_FIELDNAMES
+        required_fieldnames = ["username", "password"] + [
+            field for field in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED
+            if config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[field]
+        ]
         return [name for name in required_fieldnames if name not in fieldnames]
 
     @property

@@ -174,10 +174,14 @@ class ConfigFromEnv():
     USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
     USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)
 
-    # note: explicit mapping of name of field/column
-    USERS_ADDITIONAL_FIELDNAMES = [fieldname for fieldname, is_enabled in {
+    # note: explicit mapping between name of field/column and enable/disable
+    #   Developers: see users/models.py to see this in use: it's a bit messy
+    #   if these settings are changed _after_ any records have been created
+    #   (but that is why this is not implemented in the database schema, which
+    #   might be generated before these config settings have been fixed)
+    _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED = {
         "email": USERS_HAVE_EMAIL,
         "org_username": USERS_HAVE_ORG_USERNAME,
         "first_name": USERS_HAVE_FIRST_NAME,
         "last_name": USERS_HAVE_LAST_NAME
-    }.items() if is_enabled ]
+    }

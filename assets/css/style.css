@@ -369,3 +369,24 @@ table td.check input {
 
 .btn-outline-secondary.btn-admin { background-color: #ffffdd;}
 .btn-outline-secondary.btn-admin:hover { color:black; }
+
+#registration-progress {
+  display:none;
+}
+#registration-progress ul {
+  list-style-type:none;
+  padding-inline-start: 0;
+}
+#registration-progress ul li {
+  float:left;
+  margin:0.33em;
+  padding:0.33em;
+  border-radius:0.33em;
+}
+#registration-progress ul li span {
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 0.25em;
+  margin-left: 0.5em;
+  padding: 0.25em;
+  text-align:center;
+}

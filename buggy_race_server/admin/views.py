@@ -8,6 +8,7 @@ from sqlalchemy import insert, String
 
 from flask import (
     Blueprint,
+    Response,
     abort,
     current_app,
     flash,
@@ -122,7 +123,9 @@ def bulk_register():
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
     form = BulkRegisterForm(request.form)
+    err_msgs = []
     if form.validate_on_submit():
+        is_json = form.is_json.data
         lines = form.userdata.data.splitlines()
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
@@ -130,9 +133,9 @@ def bulk_register():
         problem_lines = []
         clean_user_data = []
         if len(lines) < 2:
-          flash("Need CSV with a header row, then at least one line of data", "danger")
+          err_msgs.append("Need CSV with a header row, then at least one line of data")
         elif missing := User.get_missing_fieldnames(reader.fieldnames):
-          flash(f"CSV header row is missing some required fields: {', '.join(missing)}", "danger")
+          err_msgs.append(f"CSV header row is missing some required fields: {', '.join(missing)}")
         else:
           for row in reader:
             line_no += 1
@@ -157,32 +160,25 @@ def bulk_register():
               problem_lines.append(line_no)
           if len(problem_lines) > 0:
             pl = "s" if len(problem_lines)>1 else ""
-            flash("Bulk registration aborted with {} problem{}: see line{}: {}".format(
-              len(problem_lines), pl, pl, ", ".join(map(str,problem_lines))), "danger")
+            err_msgs.append("Bulk registration aborted with {} problem{}: see line{}: {}".format(
+              len(problem_lines), pl, pl, ", ".join(map(str,problem_lines))))
           else:
-            qty_fails = 0
             result = db.session.execute(
                 insert(User.__table__),
                 clean_user_data
                 # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
             )
             db.session.commit()
-
-              # try:
-              #   User.create(
-              #     username=user_data['username'],
-              #     org_username=user_data['org_username'],
-              #     email=user_data['email'],
-              #     password=user_data['password'],
-              #     first_name=user_data['first_name'],
-              #     last_name=user_data['last_name'],
-              #     active=True,
-              #   )
-              # except Exception as e:
-              #   qty_fails += 1
-              #   flash("Error creating user {}: {}".format(user_data['username'], e.message), "danger")
-            flash("Bulk registered {} users".format(qty_users-qty_fails), "warning")
-        return redirect(url_for("public.home"))
+            if not is_json:
+                flash("Bulk registered {} users".format(qty_users), "warning")
+        if is_json:
+          if err_msgs:
+            return Response("{'error': 'FIXME'}", status=401, mimetype="application/json")
+          else:
+            return Response('{"status": "OK"}', status=200, mimetype="application/json")
+        else:
+            for err_msg in err_msgs:
+                flash(err_msg, "danger")
     else:
         flash_errors(form)
     return render_template(

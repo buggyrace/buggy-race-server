@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from gevent import config
 from wtforms import (
     BooleanField,
+    HiddenField,
     IntegerField,
     SelectField,
     SelectMultipleField,
@@ -44,6 +45,7 @@ class BulkRegisterForm(FlaskForm):
         f"Userdata (CSV including header)", validators=[DataRequired()]
     )
     authorisation_code = StringField("Authorisation code",  [is_authorised])
+    is_json = HiddenField(default="") # used by AJAX registration
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

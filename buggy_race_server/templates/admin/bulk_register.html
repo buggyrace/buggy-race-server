@@ -8,6 +8,7 @@
   <div class="row">
     <form id="registerForm" class="form form-register" method="POST" action="" role="form">
       {{ form.csrf_token }}
+      {{ form.is_json() }}
       {% if has_auth_code is sameas true %}
         <div class="alert alert-danger">
           Registration is not public on this server:<br>
@@ -28,6 +29,19 @@
       </div>
       <p><input class="btn btn-primary" type="submit" value="Register"></p>
     </form>
+  </div>
+  <div id="registration-progress" style="display:none">
+    <div class="row">
+      <div id="registration-summary" class="alert alert-warning">
+        Bulk registration in progress... don't interrupt until it's finished.
+      </div>
+    </div>
+    <div class="row m-3" id="registration-status">
+    </div>
+    <div class="row">
+      <ul>
+      </ul> 
+    </div>
   </div>
   <div class="row">
     <p class="mt-5">

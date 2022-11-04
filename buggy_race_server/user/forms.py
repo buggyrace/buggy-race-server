@@ -45,7 +45,6 @@ class RegisterForm(FlaskForm):
     notes = TextAreaField(
         "Notes for staff", validators=[Optional(), Length(max=255)]
     )
-
     authorisation_code = StringField("Authorisation code",  [is_authorised])
 
     def __init__(self, *args, **kwargs):

@@ -5,6 +5,7 @@ const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
 
 function bulk_registration_by_ajax(bulk_register_form){
+  const BULK_REGISTER_URL = "/admin/bulk-register/";
   const USER_REGISTER_AUTH_ID = "authorisation_code";
   const USER_REGISTER_IS_JSON_ID = "is_json";
   const USER_REGISTER_CSRF_ID = "csrf_token";
@@ -17,20 +18,49 @@ function bulk_registration_by_ajax(bulk_register_form){
   const authcode = bulk_register_form[USER_REGISTER_AUTH_ID].value;
   const csrf_token = bulk_register_form[USER_REGISTER_CSRF_ID].value;
 
+  const USER_REGISTER_QTY_RECORDS = "reg-qty-records";
+  const USER_REGISTER_QTY_FAIL = "reg-qty-fail";
+  const USER_REGISTER_QTY_OK = "reg-qty-ok";
+  const USER_REGISTER_QTY_DONE = "reg-qty-done";
+  const USER_REGISTER_QTY_PERCENT = "reg-qty-done-percent";
+
+  const $qty_displays = {}
+  $qty_displays[USER_REGISTER_QTY_RECORDS] = $("#"+USER_REGISTER_QTY_RECORDS);
+  $qty_displays[USER_REGISTER_QTY_FAIL] = $("#"+USER_REGISTER_QTY_FAIL);
+  $qty_displays[USER_REGISTER_QTY_OK] = $("#"+USER_REGISTER_QTY_OK);
+  $qty_displays[USER_REGISTER_QTY_DONE] = $("#"+USER_REGISTER_QTY_DONE);
+  $qty_displays[USER_REGISTER_QTY_PERCENT] = $("#"+USER_REGISTER_QTY_PERCENT);
+
   let qty_reg_ok = 0;
   let qty_reg_fail = 0;
   let qty_reg_total = 0;
 
-  function get_reg_progress_str() {
+  function reset_display(){
+    qty_reg_ok = 0;
+    qty_reg_fail = 0;
+    qty_reg_total = 0;
+    update_reg_progress();
+    update_status("", "");
+    $progress_list.empty();
+  }
+
+  function update_status(message, css_class) {
+    $status_div[0].className="";
+    $status_div.addClass([css_class, "p-3"]);
+    $status_div.text(message);
+  }
+
+  function update_reg_progress() {
     if (qty_reg_total === 0) {
-      return "No CSV lines to process";
+      // should be caught before calling
     } else {
       let running_total = qty_reg_ok + qty_reg_fail;
-      let percent = Math.round(100 * running_total/qty_reg_total);
-      return (
-        percent + "% " + running_total
-        + " (OK: " + qty_reg_ok  + ", fail: " + qty_reg_fail + ") of "
-        + qty_reg_total
+      $qty_displays[USER_REGISTER_QTY_RECORDS].text(qty_reg_total);
+      $qty_displays[USER_REGISTER_QTY_FAIL].text(qty_reg_fail);
+      $qty_displays[USER_REGISTER_QTY_OK].text(qty_reg_ok);
+      $qty_displays[USER_REGISTER_QTY_DONE].text(running_total);
+      $qty_displays[USER_REGISTER_QTY_PERCENT].text(
+        Math.round(100 * running_total/qty_reg_total)
       );
     }
   }
@@ -40,18 +70,16 @@ function bulk_registration_by_ajax(bulk_register_form){
     if (reg_index < qty_reg_total) {
       register_by_ajax(csv_rows_as_dicts, reg_index);
     } else {
-      $status_div.text(
-        get_reg_progress_str(reg_index, qty_reg_total)
-        + " FINISHED"
-      );
-      console.log("FIXME NO MORE CSV ROWS TO INSERT: update the 'don't interrupt' message")
+      if (qty_reg_total > 0 && qty_reg_ok === qty_reg_total) {
+        update_status("OK, finished!", "alert-success");
+      }
+      $(bulk_register_form).slideDown("slow");
     }
-
   }
 
   function register_by_ajax(csv_rows_as_dicts, reg_index){
     qty_reg_total = csv_rows_as_dicts.length;
-    $status_div.text(get_reg_progress_str());
+    update_reg_progress();
     let userdata = csv_rows_as_dicts[reg_index];
     let $user_element = $("<li>");
     let $user_status = $("<span>");
@@ -76,15 +104,14 @@ function bulk_registration_by_ajax(bulk_register_form){
     request_data[USER_REGISTER_IS_JSON_ID] = 1
     request_data[USER_REGISTER_CSV_ID] = userdata_as_csv;
     let new_status = "danger";
-    $.post(
-        "/admin/bulk-register/", request_data
-    ).done(function(data, textStatus, errorThrown) {
+    $.post(BULK_REGISTER_URL, request_data)
+    .done(function(data, textStatus, errorThrown) {
       if (data && data.status === "OK") {
         new_status = "ok";
       }
     })
     .always(function() {
-      $user_element.removeClass("list-group-item-warning");
+      $user_element[0].className = "";
       if (new_status === "ok") {
         qty_reg_ok += 1;
         $user_element.addClass("list-group-item-success");
@@ -94,10 +121,12 @@ function bulk_registration_by_ajax(bulk_register_form){
         $user_element.addClass("list-group-item-danger");
         $user_status.text("fail");
       }
+      update_reg_progress();
       register_next(csv_rows_as_dicts, reg_index);
     })
   }
 
+  reset_display();
   $reg_container.slideDown("slow");
   let csv_raw_rows = bulk_register_form[USER_REGISTER_CSV_ID].value.split("\n");
   let csv_rows_as_dicts = [];
@@ -107,7 +136,8 @@ function bulk_registration_by_ajax(bulk_register_form){
     let row = csv_raw_rows[i].split(/\s*,\s*/);
     if (i === 0) {
       if (row.length < 2 || row[0] != "username") {
-        $status_div.text("Cannot process CSV: missing header row?");
+        $status_div.text("No CSV lines to process");
+        $status_div.addClass("list-group-item-danger");  
         break;
       } else {
         header_row = row;
@@ -123,9 +153,12 @@ function bulk_registration_by_ajax(bulk_register_form){
     }
   }
   if (csv_rows_as_dicts.length === 0) {
-    $status_div.text("Cannot process CSV: only found a header row, no data");
+    update_status(
+      "Cannot process CSV: only found a header row, no data",
+      "alert-danger"
+    );
+    $(bulk_register_form).slideDown("slow");
   } else {
-    console.log(csv_rows_as_dicts);
     register_by_ajax(csv_rows_as_dicts, 0);
   }
 }
@@ -153,7 +186,6 @@ $( document ).ready(function() {
     };
     $json_buttons.addClass("btn btn-outline-secondary btn-sm");
     $json_buttons.on("click", display_json);
-
   }
 
   // for bulk registration, try to intervene with JavaScript to send

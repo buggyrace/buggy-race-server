@@ -42,7 +42,7 @@
       {{ form.csrf_token }}
       {{ form.is_json() }}
       {% if has_auth_code is sameas true %}
-        <div class="alert alert-danger">
+        <div class="alert alert-warning">
           Registration is not public on this server:<br>
           you <strong>must</strong> provide a valid authorisation code to register users!
         </div>

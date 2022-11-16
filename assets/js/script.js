@@ -132,12 +132,12 @@ function bulk_registration_by_ajax(bulk_register_form){
   let csv_rows_as_dicts = [];
   let header_row = [];
   console.log("number of rows: " + csv_raw_rows.length);
+  let err_msg = null;
   for (let i=0; i<csv_raw_rows.length; i++) {
     let row = csv_raw_rows[i].split(/\s*,\s*/);
     if (i === 0) {
       if (row.length < 2 || row[0] != "username") {
-        $status_div.text("No CSV lines to process");
-        $status_div.addClass("list-group-item-danger");  
+        err_msg = "Missing header row: the first line should be something like 'username,password,...";
         break;
       } else {
         header_row = row;
@@ -152,11 +152,11 @@ function bulk_registration_by_ajax(bulk_register_form){
       }
     }
   }
-  if (csv_rows_as_dicts.length === 0) {
-    update_status(
-      "Cannot process CSV: only found a header row, no data",
-      "alert-danger"
-    );
+  if (! err_msg && csv_rows_as_dicts.length === 0) {
+    err_msg = "Cannot process CSV: found a header row, but no data"
+  }
+  if (err_msg) {
+    update_status(err_msg, "alert-danger");
     $(bulk_register_form).slideDown("slow");
   } else {
     register_by_ajax(csv_rows_as_dicts, 0);

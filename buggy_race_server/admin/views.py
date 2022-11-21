@@ -4,7 +4,7 @@ import csv
 import io  # for CSV dump
 import random  # for API test
 from datetime import datetime
-from sqlalchemy import insert, String
+from sqlalchemy import insert
 
 from flask import (
     Blueprint,
@@ -17,6 +17,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    jsonify,
 )
 from flask_login import current_user, login_required
 
@@ -26,6 +27,9 @@ from buggy_race_server.admin.forms import (
     ApiKeyForm,
     BulkRegisterForm,
 )
+from buggy_race_server.user.forms import UserForm
+
+from buggy_race_server.config import ConfigFromEnv as config
 
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.buggy.models import Buggy
@@ -55,12 +59,12 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
 def admin():
     # for now the admin home page lists the students on the basis it's the
     # most useful day-to-day admin page... might change in future
-    return list_users(want_detail=False)
+    return list_users(want_detail=False, is_admin_can_edit=False)
 
 @blueprint.route("/users")
 @blueprint.route("/users/<data_format>")
 @login_required
-def list_users(data_format=None, want_detail=True):
+def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     if not current_user.is_buggy_admin:
       abort(403)
@@ -102,6 +106,7 @@ def list_users(data_format=None, want_detail=True):
       else:
         return render_template("admin/users.html",
           want_detail = want_detail,
+          is_admin_can_edit = is_admin_can_edit,
           editor_repo_name = current_app.config["BUGGY_EDITOR_REPO_NAME"],
           users = users,
           admin_usernames = current_app.config['ADMIN_USERNAMES_LIST'],
@@ -173,7 +178,11 @@ def bulk_register():
                 flash("Bulk registered {} users".format(qty_users), "warning")
         if is_json:
           if err_msgs:
-            return Response("{'error': 'FIXME'}", status=401, mimetype="application/json")
+            return Response(jsonify({
+              'status': "error",
+              'error': err_msgs.first,
+              'errors': err_msgs
+            }), status=401, mimetype="application/json")
           else:
             return Response('{"status": "OK"}', status=200, mimetype="application/json")
         else:
@@ -186,6 +195,47 @@ def bulk_register():
         form=form,
         has_auth_code=current_app.config["HAS_AUTH_CODE"]
     )
+
+# user_id may be username or id
+@blueprint.route("/user/<user_id>", methods=['GET','POST'])
+@login_required
+def edit_user(user_id):
+  if not current_user.is_buggy_admin:
+      abort(403)
+  if str(user_id).isdigit():
+    user = User.get_by_id(int(user_id))
+  else:
+    user = User.query.filter_by(username=user_id).first()
+  if user is None:
+    abort(404)
+  form = UserForm(request.form, obj=user)
+  if request.method == "POST":
+    if form.validate_on_submit():
+      user.notes = form.notes.data
+      user.is_student = form.is_student.data
+      if config.USERS_HAVE_FIRST_NAME:
+          user.first_name = form.first_name
+      if config.USERS_HAVE_LAST_NAME:
+          user.last_name = form.last_name.data
+      if config.USERS_HAVE_EMAIL:
+          user.email = form.email.data
+      if config.USERS_HAVE_ORG_USERNAME:
+          user.org_username = form.org_username.data
+      # if username wasn't unique, validation should have caught it
+      user.username = form.username.data
+      user.save()
+      flash(f"OK, updated user {user.username}", "success")
+      return redirect(url_for("admin.list_users"))
+    else:
+      flash(f"Did not update user {user.username}", "danger")
+      flash_errors(form)
+  return render_template(
+    "admin/user.html",
+    form=form,
+    user=user,
+    has_auth_code=current_app.config["HAS_AUTH_CODE"]
+  )
+#  return redirect(url_for("admin.admin"))
 
 @blueprint.route("/api-keys", methods=['GET','POST'])
 @login_required

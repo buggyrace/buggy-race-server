@@ -25,6 +25,9 @@
     <table class="table table-striped table-bordered table-hover">
       <thead>
         <tr>
+          {% if is_admin_can_edit %}
+            <th></th>
+          {% endif %}
           <th></th>
           <th>Username</th>
           {%if want_detail %}
@@ -45,6 +48,9 @@
       <tbody>
         <tr>
           {% if qty_students > 0 %}
+            {% if is_admin_can_edit %}
+              <td></td>
+            {% endif %}
             <td colspan="2">Total <strong>students</strong>: {{ qty_students }}</td>
             {%if want_detail %}
               {% if config['USERS_HAVE_EMAIL'] %}
@@ -66,6 +72,12 @@
         {% for u in users %}
           {% if want_detail or u.is_student %}
             <tr>
+              {% if is_admin_can_edit %}
+                <td>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">edit</a>
+                </td>
+              {% endif %}
+              </td>
               <td style="width:1em">
                 {% if u.username in admin_usernames %} &star; {% endif %}
                 {% if u.is_student %} &Sopf; {% endif %}

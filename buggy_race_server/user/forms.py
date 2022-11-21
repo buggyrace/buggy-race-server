@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import widgets, TextAreaField, PasswordField, StringField, BooleanField, SelectField
+from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 from buggy_race_server.utils import is_authorised
@@ -9,6 +9,52 @@ from buggy_race_server.user.models import User
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigFromEnv as config
+
+class UserForm(FlaskForm):
+    """User form (for editing user details)."""
+    id = HiddenField(DataRequired())
+    username = StringField(
+        "Username", validators=[DataRequired(), Length(min=3, max=80)]
+    )
+    org_username = StringField(
+        f"{config.INSTITUTION_SHORT_NAME} Username",
+        validators=[DataRequired(), Length(min=3, max=80)] if config.USERS_HAVE_ORG_USERNAME else []
+    )
+    email = StringField(
+        "Email",
+        validators=[Email(), Length(min=6, max=80)] if config.USERS_HAVE_EMAIL else []
+    )
+    first_name = StringField(
+        "First name",
+        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_FIRST_NAME else []
+    )
+    last_name = StringField(
+        "Last name",
+        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_LAST_NAME else []
+    )
+    is_student = BooleanField(
+        "Is an enrolled student?"
+    )
+    notes = TextAreaField(
+        "Notes for staff", validators=[Optional(), Length(max=255)]
+    )
+    authorisation_code = StringField("Authorisation code",  [is_authorised])
+
+    def __init__(self, *args, **kwargs):
+        """Create instance."""
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.user = None
+
+    def validate(self):
+        """Validate the form."""
+        initial_validation = super(UserForm, self).validate()
+        if not initial_validation:
+            return False
+        user = User.query.filter_by(username=self.username.data).first()
+        if user and int(user.id) != int(self.id.data):
+            self.username.errors.append(f"Username \"{self.username}\" already registered")
+            return False
+        return True
 
 class RegisterForm(FlaskForm):
     """Register form."""

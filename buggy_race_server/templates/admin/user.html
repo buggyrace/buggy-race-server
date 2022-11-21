@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Edit user {{ user.username }}</h1>
+  </div>
+  <div class="row">
+    <form id="userForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_user', user_id=user.id)}}" role="form">
+      {{ form.csrf_token }}
+      {% if has_auth_code is sameas true %}
+        <div class="alert alert-danger">
+          you <strong>must</strong> provide a valid authorisation code to
+          edit user data!
+        </div>
+        <div class="form-group">
+            {{form.authorisation_code.label}}
+            {{form.authorisation_code(class_="form-control")}}
+        </div>
+      {% endif %}
+      {{form.id()}}
+      <div class="form-group">
+          {{form.username.label}}
+          {{form.username(placeholder="Username", class_="form-control")}}
+      </div>
+      {% if config['USERS_HAVE_ORG_USERNAME'] %}
+        <div class="form-group">
+            {{form.org_username.label}}
+            {{form.org_username(placeholder="Org Username", class_="form-control")}}
+        </div>
+      {% endif %}
+      {% if config['USERS_HAVE_FIRST_NAME'] %}
+        <div class="form-group">
+            {{form.first_name.label}}
+            {{form.first_name(placeholder="Ada", class_="form-control")}}
+        </div>
+      {% endif %}
+      {% if config['USERS_HAVE_LAST_NAME'] %}
+        <div class="form-group">
+            {{form.last_name.label}}
+            {{form.last_name(placeholder="Lovelace", class_="form-control")}}
+        </div>
+      {% endif %}
+      {% if config['USERS_HAVE_EMAIL'] %}
+        <div class="form-group">
+            {{form.email.label}}
+            {{form.email(placeholder="Email", class_="form-control")}}
+        </div>
+      {% endif %}
+      <div class="form-group">
+          {{form.is_student.label}}
+          {{form.is_student(class_="form-control", checked=user.is_student)}}
+      </div>
+      <div class="form-group">
+          {{form.notes.label}}
+          {{form.notes(class_="form-control")}}
+      </div>
+      <p><input class="btn btn-primary" type="submit" value="Submit changes"></p>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

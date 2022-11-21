@@ -56,28 +56,10 @@ class UserForm(FlaskForm):
             return False
         return True
 
-class RegisterForm(FlaskForm):
+# registration same as user form except needs password (and confirmation)
+# and the username can never already exist
+class RegisterForm(UserForm):
     """Register form."""
-
-    username = StringField(
-        "Username", validators=[DataRequired(), Length(min=3, max=80)]
-    )
-    org_username = StringField(
-        f"{config.INSTITUTION_SHORT_NAME} Username",
-        validators=[DataRequired(), Length(min=3, max=80)] if config.USERS_HAVE_ORG_USERNAME else []
-    )
-    email = StringField(
-        "Email",
-        validators=[Email(), Length(min=6, max=80)] if config.USERS_HAVE_EMAIL else []
-    )
-    first_name = StringField(
-        "First name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_FIRST_NAME else []
-    )
-    last_name = StringField(
-        "Last name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_LAST_NAME else []
-    )
     password = PasswordField(
         "Password", validators=[DataRequired(), Length(min=4, max=40)]
     )
@@ -85,13 +67,6 @@ class RegisterForm(FlaskForm):
         "Verify password",
         [DataRequired(), EqualTo("password", message="Passwords must match")],
     )
-    is_student = BooleanField(
-        "Is an enrolled student?"
-    )
-    notes = TextAreaField(
-        "Notes for staff", validators=[Optional(), Length(max=255)]
-    )
-    authorisation_code = StringField("Authorisation code",  [is_authorised])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

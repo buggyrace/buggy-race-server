@@ -201,4 +201,54 @@ $( document ).ready(function() {
       );
     });
   }
+
+  const CSS_BTN_COLUMN_SHOWN = "btn-dark";
+  const CSS_BTN_COLUMN_HIDDEN = "btn-outline-secondary";
+  const ALL_COLUMNS = "all-columns";
+
+  let $user_column_toggle_div = $("#user-column-toggles");
+  if ($user_column_toggle_div){
+
+    let all_col_btn = undefined;
+
+    function show_or_hide_col_by_button(btn, want_to_hide){
+      let css_class = btn.dataset.column;
+      localStorage.setItem(css_class, want_to_hide);
+      console.log("FIXME css_class: " + css_class + ", want_to_hide? " + want_to_hide);
+      if (want_to_hide) {
+        btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
+        btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
+        $("."+css_class).fadeOut("slow");
+      } else {
+        btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
+        btn.classList.add(CSS_BTN_COLUMN_SHOWN);
+        $("."+css_class).fadeIn("slow");
+      }
+      if (css_class === ALL_COLUMNS) {
+        $user_column_toggle_div.find("button").each(function(){
+          if ($(this)[0].dataset.column != ALL_COLUMNS) {
+            show_or_hide_col_by_button($(this)[0], want_to_hide)
+          }
+        });
+      }
+    }
+
+    $user_column_toggle_div.find("button").each(function(){
+      $(this).on("click", function(e){
+        show_or_hide_col_by_button(
+          e.target,
+          e.target.classList.contains(CSS_BTN_COLUMN_SHOWN)
+        )
+      });
+      let want_to_hide = localStorage.getItem(this.dataset.column)=="true";
+      console.log(this.dataset.column + " = " + want_to_hide, want_to_hide);
+      if ($(this)[0].dataset.column != ALL_COLUMNS) {
+        show_or_hide_col_by_button(
+          $(this)[0],
+          want_to_hide
+        );
+      }
+    });
+
+  }
 });

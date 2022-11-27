@@ -18,7 +18,19 @@
         {{ qty_students}} are students (&Sopf;).
         {{ admin_usernames|count }} have admin powers (&star;).
       </p>
-      </p>
+    </div>
+    <div class="row my-3" id="user-column-toggles">
+      <p class="my-2">Show/hide:&nbsp;</p>
+      <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">all&nbsp;columns</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">first&nbsp;name</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">last&nbsp;name</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-email">email</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">account</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">created</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">active?</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">logged&nbsp;in?</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+      <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">uploaded</button>
     </div>
   {% endif %}
   <div class="row">
@@ -29,20 +41,26 @@
             <th></th>
           {% endif %}
           <th></th>
-          <th>Username</th>
+          <th class="u-username">Username</th>
           {%if want_detail %}
+            {% if config['USERS_HAVE_FIRST_NAME'] %}
+              <th class="u-first-name">Name</th>
+            {% endif %}
+            {% if config['USERS_HAVE_LAST_NAME'] %}
+              <th class="u-last-name">Last name</th>
+            {% endif %}
             {% if config['USERS_HAVE_EMAIL'] %}
-              <th>Email</th>
+              <th class="u-email">Email</th>
             {% endif %}
             {% if config['USERS_HAVE_ORG_USERNAME'] %}
-              <th>Account</th>
+              <th  class="u-org-username">Account</th>
             {% endif %}
-            <th>Created</th>
-            <th>Active?</th>
+            <th  class="u-created-at">Created</th>
+            <th  class="u-is-active">Active?</th>
           {% endif %}
-          <th>last login</th>
-          <th>GitHub (&rarr; repo)</th>
-          <th colspan="2">Uploaded JSON? (&rarr; buggy)</th>
+          <th class="u-login-at">last login</th>
+          <th class="u-github">GitHub (&rarr; repo)</th>
+          <th colspan="2" class="u-uploaded">Uploaded JSON? (&rarr; buggy)</th>
         </tr>
       </thead>
       <tbody>
@@ -51,20 +69,27 @@
             {% if is_admin_can_edit %}
               <td></td>
             {% endif %}
-            <td colspan="2">Total <strong>students</strong>: {{ qty_students }}</td>
+            <td></td>
+            <td class="u-username"></td>
             {%if want_detail %}
+              {% if config['USERS_HAVE_FIRST_NAME'] %}
+                <td class="u-first-name"></td>
+              {% endif %}
+              {% if config['USERS_HAVE_LAST_NAME'] %}
+                <td class="u-last-name"></td>
+              {% endif %}
               {% if config['USERS_HAVE_EMAIL'] %}
-                <td></td>
+                <td class="u-email"></td>
               {% endif %}
               {% if config['USERS_HAVE_ORG_USERNAME'] %}
-                <td></td>
+                <td class="u-org-username"></td>
               {% endif %}
-              <td></td>
-              <td>{{ qty_students_active }}   ({{ "%d" | format(100 * qty_students_active/qty_students) }}%) </td>
+              <td class="u-created-at"></td>
+              <td class="u-is-active">{{ qty_students_active }}   ({{ "%d" | format(100 * qty_students_active/qty_students) }}%) </td>
             {% endif %}
-            <td>{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
-            <td>{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
-            <td colspan="2">{{ qty_students_uploaded_json }} ({{ "%d" | format(100 * qty_students_uploaded_json/qty_students) }}%)</td>
+            <td class="u-login-at">{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
+            <td colspan="2" class="u-uploaded">{{ qty_students_uploaded_json }} ({{ "%d" | format(100 * qty_students_uploaded_json/qty_students) }}%)</td>
           {% else %}
             <td colspan="9">No users enrolled as students</td>
           {% endif %}
@@ -77,12 +102,11 @@
                   <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">edit</a>
                 </td>
               {% endif %}
-              </td>
               <td style="width:1em">
                 {% if u.username in admin_usernames %} &star; {% endif %}
                 {% if u.is_student %} &Sopf; {% endif %}
               </td>
-              <td>  
+              <td class="u-username">  
                 {{ u.username | title }} 
                 {% if u.notes %}
                  <a href="#" class="show-notes"
@@ -92,27 +116,33 @@
                 {% endif %}
               </td>
               {%if want_detail %}
+                {% if config['USERS_HAVE_FIRST_NAME'] %}
+                  <td class="u-first-name">{{ u.first_name }}</td>
+                {% endif %}
+                {% if config['USERS_HAVE_LAST_NAME'] %}
+                  <td class="u-last-name">{{ u.last_name }}</td>
+                {% endif %}
                 {% if config['USERS_HAVE_EMAIL'] %}
-                  <td>  {{ u.email }} </td>
+                  <td class="u-email">  {{ u.email }} </td>
                 {% endif %}
                 {% if config['USERS_HAVE_ORG_USERNAME'] %}
-                  <td>  {{ u.org_username }} </td>
+                  <td class="u-org-username"> {{ u.org_username }} </td>
                 {% endif %}
-                <td>  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
-                <td class="bool-{{ u.active | lower }}">
+                <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
+                <td class="bool-{{ u.active | lower }} u-is-active">
                     {{ u.active | lower }}
                 </td>
               {% endif %}
-              <td>
+              <td class="u-login-at">
                 {{ u.pretty_login_at }}
               </td>
-              <td>  
+              <td class="u-github">  
                 {% if u.github_username %}
                   <a href="https://github.com/{{ u.github_username }}" title="GitHub account">{{u.github_username}}</a>
                   <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo">&rarr;</a>
                 {% endif %}
               </td>
-              <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }}"> 
+              <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
                   <span  data-username='{{ u.username  | replace("-","_") }}' class="json-btn">
                     {{ u.latest_json|length }} chars
@@ -122,7 +152,7 @@
                 {% endif %}
                 <a href="{{ url_for('public.show_buggy', username=u.username) }}">&rarr;</a>
               </td>
-              <td>
+              <td  class="u-uploaded">
                 {{ u.pretty_uploaded_at }}
               </td>
             </tr>

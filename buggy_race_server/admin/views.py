@@ -214,7 +214,7 @@ def edit_user(user_id):
       user.notes = form.notes.data
       user.is_student = form.is_student.data
       if config.USERS_HAVE_FIRST_NAME:
-          user.first_name = form.first_name
+          user.first_name = form.first_name.data
       if config.USERS_HAVE_LAST_NAME:
           user.last_name = form.last_name.data
       if config.USERS_HAVE_EMAIL:

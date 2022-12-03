@@ -41,10 +41,16 @@ def create_app():
 
     # prepare the announcements:
     with app.app_context():
-        app.logger.info("app create: Running load_announcement function")
-        # TODO this is effectively hardcoded for now:
-        # note: this is *not* publishing an announcement, it's seeding an example
-        if app.config['EXAMPLE_ANNOUNCEMENT'] and Announcement.query.count() == 0:
+        err_msg = None
+        try:
+            qty_announcements = Announcement.query.count()
+        except Exception as e:
+            err_msg = f"init error: {e}"
+            print(err_msg)
+            return app # no more work: allows flask db init, etc
+
+        if app.config['EXAMPLE_ANNOUNCEMENT'] and qty_announcements == 0:
+            # note: this is *not* publishing an announcement, it's seeding an example
             announcement = Announcement.create(
                 type="special",
                 text=app.config['EXAMPLE_ANNOUNCEMENT'],

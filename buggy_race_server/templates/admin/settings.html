@@ -130,8 +130,8 @@
         <tr>
           <td>Summary</td>
           <td>
-            {%if config['USERS_ADDITIONAL_FIELDNAMES'] %}
-              <code>{{ config['USERS_ADDITIONAL_FIELDNAMES'] | join(", ") }}</code>
+            {%if config['_USERS_ADDITIONAL_FIELDNAMES'] %}
+              <code>{{ config['_USERS_ADDITIONAL_FIELDNAMES'] | join(", ") }}</code>
             {% else %}
               <em>no additional fields enabled<em>
             {% endif %}

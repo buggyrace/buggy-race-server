@@ -185,3 +185,10 @@ class ConfigFromEnv():
         "first_name": USERS_HAVE_FIRST_NAME,
         "last_name": USERS_HAVE_LAST_NAME
     }
+
+    # list of additional fieldnames (will be empty if there are none)
+    #   this is a convenience for summarising user settings
+    _USERS_ADDITIONAL_FIELDNAMES = []
+    for name in _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+        if _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[name]:
+            _USERS_ADDITIONAL_FIELDNAMES.append(name)

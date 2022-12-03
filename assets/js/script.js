@@ -208,21 +208,29 @@ $( document ).ready(function() {
 
   let $user_column_toggle_div = $("#user-column-toggles");
   if ($user_column_toggle_div){
-
-    let all_col_btn = undefined;
+    let is_init_done = false;
 
     function show_or_hide_col_by_button(btn, want_to_hide){
       let css_class = btn.dataset.column;
       localStorage.setItem(css_class, want_to_hide);
       console.log("FIXME css_class: " + css_class + ", want_to_hide? " + want_to_hide);
+      let $elements = $("."+css_class);
       if (want_to_hide) {
         btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
         btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
-        $("."+css_class).fadeOut("slow");
+        if (is_init_done) {
+          $elements.fadeOut("slow");
+        } else {
+          $elements.hide();
+        }
       } else {
         btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
         btn.classList.add(CSS_BTN_COLUMN_SHOWN);
-        $("."+css_class).fadeIn("slow");
+        if (is_init_done) {
+          $elements.fadeIn("slow");
+        } else {
+          $elements.show();
+        }
       }
       if (css_class === ALL_COLUMNS) {
         $user_column_toggle_div.find("button").each(function(){
@@ -249,6 +257,6 @@ $( document ).ready(function() {
         );
       }
     });
-
+    is_init_done = true; // now show/hide uses slow fade, so user notices
   }
 });

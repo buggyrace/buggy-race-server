@@ -3,7 +3,7 @@
 import csv
 import io  # for CSV dump
 import random  # for API test
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import insert
 
 from flask import (
@@ -59,7 +59,28 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
 def admin():
     # for now the admin home page lists the students on the basis it's the
     # most useful day-to-day admin page... might change in future
-    return list_users(want_detail=False, is_admin_can_edit=False)
+    if not current_user.is_buggy_admin:
+      abort(403)
+    today = datetime.now().date()
+    one_week_ago = today - timedelta(days=7)
+    users = User.query.all()
+    buggies = Buggy.query.all()
+    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
+    students = [s for s in users if s.is_student]
+    students_active = [s for s in students if s.is_active]
+    students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
+    students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
+    return render_template(
+      "admin/dashboard.html",
+      qty_users=len(users),
+      qty_students=len(students),
+      qty_students_active=len(students_active),
+      qty_buggies=len(buggies),
+      qty_students_login_today = len([s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]),
+      qty_students_login_week = len(students_logged_in_this_week),
+      qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
+      qty_uploads_week=len(students_uploaded_this_week)
+    )
 
 @blueprint.route("/users")
 @blueprint.route("/users/<data_format>")

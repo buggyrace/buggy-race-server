@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">Admin dashboard</h1>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <table class="table table-striped table-bordered table-hover">
+        <tr>
+          <td colspan="2">Active students</td>
+          <td class="text-right">{{ qty_students_active }}</td>
+        </tr>
+        <tr>
+          <td>Logged in today</td>
+          <td class="text-right">
+            {% if qty_students_active > 0 %}
+              {{ (100 * qty_students_login_today/qty_students_active) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_students_login_today }}</td>
+        </tr>
+        <tr>
+          <td>Logged in last 7 days</td>
+          <td class="text-right">
+            {% if qty_students_active > 0 %}
+              {{ (100 * qty_students_login_week/qty_students_active) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_students_login_week }}</td>
+        </tr>
+        <tr>
+          <td colspan="2">Students</td>
+          <td class="text-right">{{ qty_students }}</td>
+        </tr>
+        <tr>
+          <td colspan="2">Users</td>
+          <td class="text-right">{{ qty_users }}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="col-sm-6">
+      <table class="table table-striped table-bordered table-hover">
+        <tr>
+          <td>Buggies uploaded</td>
+          <td class="text-right">
+            {% if qty_students > 0 %}
+              {{ (100 * qty_buggies/qty_students) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_buggies }}</td>
+        </tr>
+        <tr>
+          <td>Uploaded today</td>
+          <td class="text-right">
+            {% if qty_students > 0 %}
+              {{ (100 * qty_uploads_today/qty_students) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_uploads_today }}</td>
+        </tr>
+        <tr>
+          <td>Uploaded in last 7 days</td>
+          <td class="text-right">
+            {% if qty_students > 0 %}
+              {{ (100 * qty_uploads_week/qty_students) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_uploads_week}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

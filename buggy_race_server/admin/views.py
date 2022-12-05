@@ -68,17 +68,30 @@ def admin():
     students = [s for s in users if s.is_student]
     students_active = [s for s in students if s.is_active]
     students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
+    students_logged_in_today = [s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]
+    students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
+    users_deactivated = [u for u in users if not u.is_active]
+    admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
     return render_template(
       "admin/dashboard.html",
+      students_active = students_active,
       qty_users=len(users),
       qty_students=len(students),
-      qty_students_enabled=len(students_active),
+      qty_students_active=len(students_active),
       qty_buggies=len(buggies),
-      qty_students_login_today = len([s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]),
-      qty_students_login_week = len(students_logged_in_this_week),
+      qty_students_logged_in_today=len(students_logged_in_today),
+      students_logged_in_today=students_logged_in_today,
+      qty_students_logged_in_this_week=len(students_logged_in_this_week),
+      students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
+      qty_students_never_logged_in=len(students_never_logged_in),
+      students_never_logged_in=students_never_logged_in,
       qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
-      qty_uploads_week=len(students_uploaded_this_week)
+      qty_uploads_week=len(students_uploaded_this_week),
+      users_deactivated=users_deactivated,
+      qty_users_deactivated=len(users_deactivated),
+      admin_users=admin_users,
+      qty_admin_users=len(admin_users),
     )
 
 @blueprint.route("/users")

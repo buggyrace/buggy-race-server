@@ -9,37 +9,106 @@
     <div class="col-sm-6">
       <table class="table table-striped table-bordered table-hover">
         <tr>
-          <td colspan="2">Enabled students</td>
-          <td class="text-right">{{ qty_students_enabled }}</td>
+          <td colspan="2">Students</td>
+          <td class="text-right">{{ qty_students_active }}</td>
         </tr>
         <tr>
           <td>Logged in today</td>
           <td class="text-right">
-            {% if qty_students_enabled > 0 %}
-              {{ (100 * qty_students_login_today/qty_students_enabled) | int }}%
+            {% if qty_students_active > 0 %}
+              {{ (100 * qty_students_logged_in_today/qty_students_active) | int }}%
             {% endif %}
           </td>
-          <td class="text-right">{{ qty_students_login_today }}</td>
+          <td class="text-right">{{ qty_students_logged_in_today }}</td>
         </tr>
+        {% if students_logged_in_today %}
+          <tr>
+            <td colspan="3">
+              <ul class="user-list">
+                {% for s in students_logged_in_today %}
+                  <li>{{ s.username }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endif %}
         <tr>
           <td>Logged in last 7 days</td>
           <td class="text-right">
-            {% if qty_students_enabled > 0 %}
-              {{ (100 * qty_students_login_week/qty_students_enabled) | int }}%
+            {% if qty_students_active > 0 %}
+              {{ (100 * qty_students_logged_in_this_week/qty_students_active) | int }}%
             {% endif %}
           </td>
-          <td class="text-right">{{ qty_students_login_week }}</td>
+          <td class="text-right">{{ qty_students_logged_in_this_week }}</td>
+        </tr>
+        {% if students_logged_in_this_week %}
+          <tr>
+            <td colspan="3">
+              <ul class="user-list">
+                {% for s in students_logged_in_this_week %}
+                  <li>{{ s.username }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td>Never loggerd in</td>
+          <td class="text-right">
+            {% if qty_students_never_logged_in > 0 %}
+              {{ (100 * qty_students_never_logged_in/qty_students_active) | int }}%
+            {% endif %}
+          </td>
+          <td class="text-right">{{ qty_students_never_logged_in }}</td>
+        </tr>
+        {% if students_never_logged_in %}
+          <tr>
+            <td colspan="3">
+              <ul class="user-list">
+                {% for u in students_never_logged_in %}
+                  <li>{{ u.username }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endif %}
+
+
+        <tr>
+          <td colspan="2">Deactivated users</td>
+          <td class="text-right">{{ qty_users_deactivated }}</td>
+        </tr>
+        {% if users_deactivated %}
+          <tr>
+            <td colspan="3">
+              <ul class="user-list">
+                {% for u in users_deactivated %}
+                  <li>{{ u.username }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endif %}
+        <tr>
+          <td colspan="2">Admin users</td>
+          <td class="text-right">{{ qty_admin_users }}</td>
         </tr>
         <tr>
-          <td colspan="2">Students</td>
-          <td class="text-right">{{ qty_students }}</td>
+          <td colspan="3">
+            <ul class="user-list">
+              {% for u in admin_users %}
+                <li>{{ u.username }}</li>
+              {% endfor %}
+            </ul>
+          </td>
         </tr>
         <tr>
-          <td colspan="2">Users</td>
+          <td colspan="2">Total users</td>
           <td class="text-right">{{ qty_users }}</td>
         </tr>
       </table>
     </div>
+
     <div class="col-sm-6">
       <table class="table table-striped table-bordered table-hover">
         <tr>

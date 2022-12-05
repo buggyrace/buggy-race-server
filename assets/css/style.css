@@ -373,13 +373,14 @@ table td.check input {
 #registration-progress {
   display:none;
 }
-#registration-progress ul {
+#registration-progress ul, ul.user-list {
   list-style-type:none;
   padding-inline-start: 0;
+  margin-bottom:0.1em;
 }
-#registration-progress ul li {
-  float:left;
-  margin:0.33em;
+#registration-progress ul li, ul.user-list li {
+  display:inline-block;
+  margin:0.1em 0.33em;
   padding:0.33em;
   border-radius:0.33em;
 }
@@ -393,4 +394,8 @@ table td.check input {
 
 #user-column-toggles button {
   margin:4px 4px 0 0;
+}
+
+ul.user-list li{
+  background-color: #dddddd;
 }

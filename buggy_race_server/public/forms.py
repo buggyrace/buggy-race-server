@@ -35,6 +35,6 @@ class LoginForm(FlaskForm):
             return False
 
         if not self.user.is_active:
-            self.username.errors.append("User is inactive")
+            self.username.errors.append(f"User \"{self.username.data}\" is inactive: cannot log in")
             return False
         return True

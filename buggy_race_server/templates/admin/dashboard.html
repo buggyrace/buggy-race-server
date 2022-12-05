@@ -9,14 +9,14 @@
     <div class="col-sm-6">
       <table class="table table-striped table-bordered table-hover">
         <tr>
-          <td colspan="2">Active students</td>
-          <td class="text-right">{{ qty_students_active }}</td>
+          <td colspan="2">Enabled students</td>
+          <td class="text-right">{{ qty_students_enabled }}</td>
         </tr>
         <tr>
           <td>Logged in today</td>
           <td class="text-right">
-            {% if qty_students_active > 0 %}
-              {{ (100 * qty_students_login_today/qty_students_active) | int }}%
+            {% if qty_students_enabled > 0 %}
+              {{ (100 * qty_students_login_today/qty_students_enabled) | int }}%
             {% endif %}
           </td>
           <td class="text-right">{{ qty_students_login_today }}</td>
@@ -24,8 +24,8 @@
         <tr>
           <td>Logged in last 7 days</td>
           <td class="text-right">
-            {% if qty_students_active > 0 %}
-              {{ (100 * qty_students_login_week/qty_students_active) | int }}%
+            {% if qty_students_enabled > 0 %}
+              {{ (100 * qty_students_login_week/qty_students_enabled) | int }}%
             {% endif %}
           </td>
           <td class="text-right">{{ qty_students_login_week }}</td>

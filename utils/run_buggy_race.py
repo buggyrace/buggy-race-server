@@ -97,7 +97,7 @@ def load_csv(csv_filename=None):
           username=username,
           email=email,
           password='password',
-          active=True,
+          is_active=True,
         )
         #print("[:] read user: {} id={}".format(newbie.username, newbie.id ))
       b["user_id"]=user.id

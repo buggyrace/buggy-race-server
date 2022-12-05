@@ -75,7 +75,7 @@ def register():
             password=form.password.data,
             is_student=form.is_student.data,
             notes=form.notes.data,
-            active=True,
+            is_active=True,
         )
         flash("Thank you for registering. You can now log in.", "success")
         return redirect(url_for("public.home"))

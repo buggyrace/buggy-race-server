@@ -93,7 +93,7 @@
                 <td class="u-org-username"></td>
               {% endif %}
               <td class="u-created-at"></td>
-              <td class="u-is-active">{{ qty_students_active }}   ({{ "%d" | format(100 * qty_students_active/qty_students) }}%) </td>
+              <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
             {% endif %}
             <td class="u-login-at">{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
             <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
@@ -137,8 +137,8 @@
                   <td class="u-org-username"> {{ u.org_username }} </td>
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
-                <td class="bool-{{ u.active | lower }} u-is-active">
-                    {{ u.active | lower }}
+                <td class="bool-{{ u.is_active | lower }} u-is-active">
+                    {{ u.is_active | lower }}
                 </td>
               {% endif %}
               <td class="u-login-at">

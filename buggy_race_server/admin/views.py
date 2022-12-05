@@ -66,14 +66,14 @@ def admin():
     users = User.query.all()
     buggies = Buggy.query.all()
     students = [s for s in users if s.is_student]
-    students_active = [s for s in students if s.active]
+    students_active = [s for s in students if s.is_active]
     students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     return render_template(
       "admin/dashboard.html",
       qty_users=len(users),
       qty_students=len(students),
-      qty_students_active=len(students_active),
+      qty_students_enabled=len(students_active),
       qty_buggies=len(buggies),
       qty_students_login_today = len([s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]),
       qty_students_login_week = len(students_logged_in_this_week),
@@ -132,7 +132,7 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
           admin_usernames = current_app.config['ADMIN_USERNAMES_LIST'],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
-          qty_students_active = len([s for s in students if s.is_active]),
+          qty_students_enabled = len([s for s in students if s.is_active]),
           qty_students_github = len([s for s in students if s.github_username]),
           qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
       )
@@ -172,7 +172,7 @@ def bulk_register():
               first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
               last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
               created_at=datetime.now(),
-              active=True,
+              is_active=True,
               is_student=True,
               latest_json="",
               notes=_csv_tidy_string(row, 'notes', want_lower=False),
@@ -191,7 +191,7 @@ def bulk_register():
             result = db.session.execute(
                 insert(User.__table__),
                 clean_user_data
-                # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
+                # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
             )
             db.session.commit()
             if not is_json:
@@ -233,7 +233,7 @@ def edit_user(user_id):
     if form.validate_on_submit():
       user.notes = form.notes.data
       user.is_student = form.is_student.data
-      user.active = form.active.data
+      user.is_active = form.is_active.data
       if config.USERS_HAVE_FIRST_NAME:
           user.first_name = form.first_name.data
       if config.USERS_HAVE_LAST_NAME:

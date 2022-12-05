@@ -50,7 +50,7 @@ class User(UserMixin, SurrogatePK, Model):
     created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     first_name = Column(db.String(30), nullable=True)
     last_name = Column(db.String(30), nullable=True)
-    active = Column(db.Boolean(), default=False)
+    is_active = Column(db.Boolean(), default=True)
     is_admin = Column(db.Boolean(), default=False)
     buggies = db.relationship("Buggy", backref="users", lazy=True)
     latest_json = Column(db.Text(), default=False)
@@ -105,7 +105,7 @@ class User(UserMixin, SurrogatePK, Model):
             'created_at': self.created_at,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'active': self.active,
+            'is_active': self.is_active,
             'is_admin': self.is_admin,
             'latest_json': self.latest_json,
             'is_student': self.is_student,

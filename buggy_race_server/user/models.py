@@ -121,7 +121,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def is_buggy_admin(self):
-      return self.username in config.ADMIN_USERNAMES_LIST
+      return self.is_active and self.username in config.ADMIN_USERNAMES_LIST
 
     @property
     def full_name(self):

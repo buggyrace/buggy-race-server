@@ -35,6 +35,9 @@ class UserForm(FlaskForm):
     is_student = BooleanField(
         "Is an enrolled student?"
     )
+    active = BooleanField(
+        "Is an active user? (Inactive students are effectively suspended)"
+    )
     notes = TextAreaField(
         "Notes for staff", validators=[Optional(), Length(max=255)]
     )

@@ -65,9 +65,8 @@ def admin():
     one_week_ago = today - timedelta(days=7)
     users = User.query.all()
     buggies = Buggy.query.all()
-    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
     students = [s for s in users if s.is_student]
-    students_active = [s for s in students if s.is_active]
+    students_active = [s for s in students if s.active]
     students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     return render_template(
@@ -234,6 +233,7 @@ def edit_user(user_id):
     if form.validate_on_submit():
       user.notes = form.notes.data
       user.is_student = form.is_student.data
+      user.active = form.active.data
       if config.USERS_HAVE_FIRST_NAME:
           user.first_name = form.first_name.data
       if config.USERS_HAVE_LAST_NAME:

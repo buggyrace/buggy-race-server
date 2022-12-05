@@ -51,6 +51,10 @@
           {{form.is_student(class_="form-control", checked=user.is_student)}}
       </div>
       <div class="form-group">
+        {{form.active.label}}
+        {{form.active(class_="form-control", checked=user.active)}}
+    </div>
+    <div class="form-group">
           {{form.notes.label}}
           {{form.notes(class_="form-control")}}
       </div>

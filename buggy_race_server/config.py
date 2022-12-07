@@ -156,6 +156,13 @@ class ConfigFromEnv():
     # Be careful with this: broken HTML here will cause problems!
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
 
+
+    # should usernames be capitalised when displayed?
+    # usernames are always considered lowercase, but (if they are
+    # student's names) you can choose to display them in titlecase
+    # (so Ada instead of ada)
+    IS_PRETTY_USERNAME_TITLECASE = env.bool("IS_PRETTY_USERNAME_TITLECASE", False)
+
     # control which user fields are needed:
     # users always have a username...
     # ...but if you don't need the other fields, disable them

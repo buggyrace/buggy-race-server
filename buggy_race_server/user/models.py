@@ -158,6 +158,10 @@ class User(UserMixin, SurrogatePK, Model):
       return self.is_active and self.username in config.ADMIN_USERNAMES_LIST
 
     @property
+    def pretty_username(self):
+        return self.username.title() if config.IS_PRETTY_USERNAME_TITLECASE else self.username
+
+    @property
     def full_name(self):
         """Full user name."""
         return f"{self.first_name} {self.last_name}"

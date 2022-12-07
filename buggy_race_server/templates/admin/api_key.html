@@ -33,7 +33,7 @@
             <tr>
               <td class="check">
                 <input type="checkbox" name="usernames" id="user-{{ user.username }}" value="{{ user.username }}">
-                <label for="user-{{ user.username }}">{{ user.username | title }}</label>
+                <label for="user-{{ user.username }}">{{ user.pretty_username }}</label>
               </td>
               {% if user.api_key == None %}
                 <td class="has-no-key">

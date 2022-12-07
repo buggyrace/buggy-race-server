@@ -27,7 +27,7 @@
     {% if current_user and current_user.is_authenticated %}
     <ul class="navbar-nav my-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('user.submit_buggy_data') }}">Logged in as {{ current_user.username | title }}</a>
+        <a class="nav-link" href="{{ url_for('user.submit_buggy_data') }}">Logged in as {{ current_user.pretty_username }}</a>
       </li>
         {% if current_user.is_buggy_admin %}
           <li class="nav-item">

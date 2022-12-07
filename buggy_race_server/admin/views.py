@@ -360,6 +360,7 @@ def list_buggies(data_format=None):
       buggies = Buggy.query.all()
       for b in buggies:
         b.username = users_by_id[b.user_id].username
+        b.pretty_username = users_by_id[b.user_id].pretty_username
       if data_format == "csv":
         si = io.StringIO()
         cw = csv.writer(si)

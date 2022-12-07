@@ -115,7 +115,7 @@
                 {% if u.is_student %} &Sopf; {% endif %}
               </td>
               <td class="u-username">  
-                {{ u.username | title }} 
+                {{ u.pretty_username }} 
                 {% if u.notes %}
                  <a href="#" class="show-notes"
                    data-notes="{{ u.notes|replace('"', '\\"')|replace("\\n", "\\n") }}"

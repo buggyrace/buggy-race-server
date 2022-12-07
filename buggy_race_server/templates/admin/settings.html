@@ -120,6 +120,16 @@
           <td><code><a href="{{ config['GITHUB_PAGES_URL'] }}">{{ config['GITHUB_PAGES_URL'] }}</a></code></td>
         </tr>
         <tr>
+          <td><code>IS_PRETTY_USERNAME_TITLECASE</code></td>
+          <td>
+            <code>{{ config['IS_PRETTY_USERNAME_TITLECASE'] }}</code>
+            <em>
+              (example: <code>ada</code> is 
+              {% if config['IS_PRETTY_USERNAME_TITLECASE'] %}Ada{% else %}ada{% endif %})
+            </em>
+          </td>
+        </tr>
+        <tr>
           <th colspan="2">
             Additional (required) user data fields
             <span style="font-weight:normal">

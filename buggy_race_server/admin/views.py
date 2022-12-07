@@ -56,6 +56,7 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
   return s
 
 @blueprint.route("/")
+@login_required
 def admin():
     # for now the admin home page lists the students on the basis it's the
     # most useful day-to-day admin page... might change in future
@@ -102,41 +103,24 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
     if not current_user.is_buggy_admin:
       abort(403)
     else:
-      # want_detail shows all users (otherwise it's only students)
       users = User.query.all()
       users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
       students = [s for s in users if s.is_student]
-      if data_format == "csv":
+      if data_format == "csv": # note: CSV is only students
         si = io.StringIO()
         cw = csv.writer(si)
-        col_names = [
-          'username',
-          'logged_in',
-          'json_length',
-          'json_upload_at',
-          'github_username',
-          'github_repo',
-          'is_student',
-          'is_active'
-        ]
-        cw.writerow(col_names)
-        for s in students: # note: CSV is only students
-          cw.writerow([
-                  s.username,
-                  s.pretty_login_at,
-                  s.pretty_json_length,
-                  s.pretty_uploaded_at,
-                  s.github_username,
-                  s.course_repository if s.has_course_repository() else None,
-                  s.is_student,
-                  s.is_active
-                 ])
+        # To get the column names, use the current_user (admin) even though
+        # we're not going to save the data (there might not be any students)
+        cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
+        for s in students:
+          cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
         output = make_response(si.getvalue())
         yyyy_mm_dd_today = datetime.now().strftime("%Y-%m-%d")
-        output.headers["Content-Disposition"] = f"attachment; filename=users-{yyyy_mm_dd_today}.csv"
+        output.headers["Content-Disposition"] = f"attachment; filename=buggyrace-users-{yyyy_mm_dd_today}.csv"
         output.headers["Content-type"] = "text/csv"
         return output
       else:
+        # TODO want_detail shows all users (otherwise it's only students)
         return render_template("admin/users.html",
           want_detail = want_detail,
           is_admin_can_edit = is_admin_can_edit,
@@ -152,18 +136,19 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
 
 
 @blueprint.route("/bulk-register/", methods=["GET", "POST"])
+@blueprint.route("/bulk-register/<data_format>", methods=["POST"])
 @login_required
-def bulk_register():
+def bulk_register(data_format=None):
     """Register multiple users."""
+    is_json = data_format == "json"
     if not current_user.is_buggy_admin:
       abort(403)
     if not current_app.config["HAS_AUTH_CODE"]:
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
-    form = BulkRegisterForm(request.form)
     err_msgs = []
+    form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
-        is_json = form.is_json.data
         lines = form.userdata.data.splitlines()
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
@@ -175,10 +160,14 @@ def bulk_register():
         elif missing := User.get_missing_fieldnames(reader.fieldnames):
           err_msgs.append(f"CSV header row is missing some required fields: {', '.join(missing)}")
         else:
+          usernames = []
           for row in reader:
             line_no += 1
+            username = row['username'].strip().lower() if 'username' in row else None
+            if username is not None:
+              usernames.append(username)
             new_user = User(
-              username=row['username'].strip().lower() if 'username' in row else None,
+              username=username,
               org_username=row['org_username'].strip().lower() if 'org_username' in row else None,
               email=_csv_tidy_string(row, 'email', want_lower=True),
               password=_csv_tidy_string(row, 'password', want_lower=False),
@@ -193,36 +182,56 @@ def bulk_register():
             #current_app.logger.info("{}, pw:{}".format(username, password))
             if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
               qty_users += 1
-              clean_user_data.append(new_user.get_fields_as_dict())
+              clean_user_data.append(new_user.get_fields_as_dict_for_insert())
             else:
               problem_lines.append(line_no)
           if len(problem_lines) > 0:
             pl = "s" if len(problem_lines)>1 else ""
-            err_msgs.append("Bulk registration aborted with {} problem{}: see line{}: {}".format(
-              len(problem_lines), pl, pl, ", ".join(map(str,problem_lines))))
+            line_nos = ", ".join(map(str,problem_lines))
+            err_msgs.append(f"Bulk registration aborted with {len(problem_lines)} problem{pl}: see line{pl}: {line_nos}")
           else:
-            result = db.session.execute(
-                insert(User.__table__),
-                clean_user_data
-                # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
-            )
-            db.session.commit()
+            try:
+              result = db.session.execute(
+                  insert(User.__table__),
+                  clean_user_data
+                  # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
+              )
+              db.session.commit()
+            except Exception as e:
+                # risky but frustratingly no easy way to get the specific database
+                # error as it's coming back from the connection: e.g.,
+                # (mysql.connector.errors.IntegrityError) 1062 (23000): Duplicate entry 'aaaa' for key 'username'
+                ex_str = str(e).split("\n")[0] # mySQL sends the SQL back too after a newline: don't want
+                # for JSON, users are being updated one user(name) at a time
+                bad_username = f"\"{usernames[0]}\": " if len(usernames) == 1 else ""
+                err_msgs.append(f"{bad_username}{ex_str}")
             if not is_json:
-                flash("Bulk registered {} users".format(qty_users), "warning")
+                flash(f"Bulk registered {qty_users} users", "warning")
         if is_json:
           if err_msgs:
-            return Response(jsonify({
+            payload = {
               'status': "error",
-              'error': err_msgs.first,
+              'error': err_msgs[0],
               'errors': err_msgs
-            }), status=401, mimetype="application/json")
+            }
           else:
-            return Response('{"status": "OK"}', status=200, mimetype="application/json")
+            payload = {"status": "OK"}
+          return jsonify(payload)
         else:
             for err_msg in err_msgs:
                 flash(err_msg, "danger")
     else:
-        flash_errors(form)
+        if is_json:
+          errors = []
+          for err_key in form.errors:
+            errors.append(form.errors[err_key])
+          return jsonify({
+            "status": "error",
+            "error": errors[0],
+            "errors": errors
+          })
+        else:
+          flash_errors(form)
     return render_template(
         "admin/bulk_register.html",
         form=form,

@@ -7,40 +7,41 @@
   </div>
 
   <div id="registration-progress" style="display:none">
-    <div class="d-inline-block">
-      <table id="registration-summary" class="table table-striped table-bordered table-hover">
-        <thead>
-          <tr class="text-right">
-              <th>Records</th>
-              <th>Fail</th>
-              <th>OK</th>
-              <th>Completed</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="text-right">
-            <td id="reg-qty-records">0</td>
-            <td id="reg-qty-fail" class="list-group-item-danger">0</td>
-            <td id="reg-qty-ok" class="list-group-item-success">0</td>
-            <td id="reg-qty-done">0</td>
-          </tr>
-          <tr>
-            <td colspan="3">Progress</td>
-            <td class="text-right"><span id="reg-qty-done-percent">0</span>%</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="row">
+      <div class="col-sm-4">
+        <table id="registration-summary" class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr class="text-right">
+                <th>Records</th>
+                <th>Fail</th>
+                <th>OK</th>
+                <th>Completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="text-right">
+              <td id="reg-qty-records">0</td>
+              <td id="reg-qty-fail" class="list-group-item-danger">0</td>
+              <td id="reg-qty-ok" class="list-group-item-success">0</td>
+              <td id="reg-qty-done">0</td>
+            </tr>
+            <tr>
+              <td colspan="3">Progress</td>
+              <td class="text-right"><span id="reg-qty-done-percent">0</span>%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert col-sm-8" id="registration-status">
+      </div>
     </div>
     <ul class="row">
     </ul>
-    <div class="alert" id="registration-status">
-    </div>
   </div>
 
   <div class="row my-3">
     <form id="registerForm" class="form form-register" method="POST" action="" role="form">
       {{ form.csrf_token }}
-      {{ form.is_json() }}
       {% if has_auth_code is sameas true %}
         <div class="alert alert-warning">
           Registration is not public on this server:<br>

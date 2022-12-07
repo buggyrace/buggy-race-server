@@ -5,9 +5,8 @@ const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
 
 function bulk_registration_by_ajax(bulk_register_form){
-  const BULK_REGISTER_URL = "/admin/bulk-register/";
+  const BULK_REGISTER_URL = "/admin/bulk-register/json";
   const USER_REGISTER_AUTH_ID = "authorisation_code";
-  const USER_REGISTER_IS_JSON_ID = "is_json";
   const USER_REGISTER_CSRF_ID = "csrf_token";
   const USER_REGISTER_PROGRESS_ID = "registration-progress";
   const USER_REGISTER_STATUS_ID = "registration-status";
@@ -40,14 +39,20 @@ function bulk_registration_by_ajax(bulk_register_form){
     qty_reg_fail = 0;
     qty_reg_total = 0;
     update_reg_progress();
-    update_status("", "");
+    $status_div.empty();
     $progress_list.empty();
   }
 
   function update_status(message, css_class) {
-    $status_div[0].className="";
-    $status_div.addClass([css_class, "p-3"]);
-    $status_div.text(message);
+    for (let msg_div of $status_div.children()){
+      if (msg_div.innerText == message){
+        return; // already displaying this message, break out
+      }
+    }
+    let $new_msg = $("<div/>");
+    $new_msg.addClass([css_class, "alert"]);
+    $new_msg.text(message);
+    $status_div.append($new_msg);
   }
 
   function update_reg_progress() {
@@ -101,13 +106,16 @@ function bulk_registration_by_ajax(bulk_register_form){
     let request_data = {};
     request_data[USER_REGISTER_CSRF_ID] = csrf_token;
     request_data[USER_REGISTER_AUTH_ID] = authcode;
-    request_data[USER_REGISTER_IS_JSON_ID] = 1
     request_data[USER_REGISTER_CSV_ID] = userdata_as_csv;
     let new_status = "danger";
     $.post(BULK_REGISTER_URL, request_data)
     .done(function(data, textStatus, errorThrown) {
-      if (data && data.status === "OK") {
-        new_status = "ok";
+      if (data) {
+        if (data.status === "OK") {
+          new_status = "ok";
+        } else {
+          update_status(data.error, "alert-danger");
+        }
       }
     })
     .always(function() {
@@ -213,7 +221,6 @@ $( document ).ready(function() {
     function show_or_hide_col_by_button(btn, want_to_hide){
       let css_class = btn.dataset.column;
       localStorage.setItem(css_class, want_to_hide);
-      console.log("FIXME css_class: " + css_class + ", want_to_hide? " + want_to_hide);
       let $elements = $("."+css_class);
       if (want_to_hide) {
         btn.classList.remove(CSS_BTN_COLUMN_SHOWN);

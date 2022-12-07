@@ -96,7 +96,8 @@ class User(UserMixin, SurrogatePK, Model):
         else:
           self.api_key = None
 
-    def get_fields_as_dict(self):
+    def get_fields_as_dict_for_insert(self):
+        """ Fields needed to create (insert) new user (absent fields are defaulted) """
         return {
             'username': self.username,
             'org_username': self.org_username,
@@ -111,6 +112,32 @@ class User(UserMixin, SurrogatePK, Model):
             'is_student': self.is_student,
             'notes': self.notes,
         }
+
+    def get_fields_as_dict_for_csv(self):
+        """ Fields used for saving to CSV """
+        if self.github_username and self.has_course_repository:
+            repo = self.course_repository
+        else:
+            repo = None
+
+        fields = {
+            'username': self.username,
+            'org_username': self.org_username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'is_active': 1 if self.is_active else 0,
+            'last_login': self.pretty_login_at,
+            'last_upload_at': self.pretty_uploaded_at,
+            'json_length': self.pretty_json_length,
+            'github_username': self.github_username,
+            'github_repo': repo,
+            'notes': self.notes,
+        }
+        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
+                del fields[fieldname]
+        return fields
 
     def get_missing_fieldnames(fieldnames):
         required_fieldnames = ["username", "password"] + [

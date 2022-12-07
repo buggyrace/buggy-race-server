@@ -41,7 +41,7 @@ class UserForm(FlaskForm):
     notes = TextAreaField(
         "Notes for staff", validators=[Optional(), Length(max=255)]
     )
-    authorisation_code = StringField("Authorisation code",  [is_authorised])
+    authorisation_code = PasswordField("Authorisation code",  [is_authorised])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

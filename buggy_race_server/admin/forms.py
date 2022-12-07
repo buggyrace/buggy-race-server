@@ -4,11 +4,10 @@ from flask_wtf import FlaskForm
 from gevent import config
 from wtforms import (
     BooleanField,
-    HiddenField,
     IntegerField,
     SelectField,
     SelectMultipleField,
-    StringField,
+    PasswordField,
     SubmitField,
     TextAreaField,
     widgets,
@@ -44,7 +43,7 @@ class BulkRegisterForm(FlaskForm):
     userdata = TextAreaField(
         f"Userdata (CSV including header)", validators=[DataRequired()]
     )
-    authorisation_code = StringField("Authorisation code",  [is_authorised])
+    authorisation_code = PasswordField("Authorisation code",  [is_authorised])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

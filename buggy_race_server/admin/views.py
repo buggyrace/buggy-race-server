@@ -151,7 +151,8 @@ def bulk_register(data_format=None):
     if form.validate_on_submit():
         lines = form.userdata.data.splitlines()
         if len(lines):
-          lines[0] = User.tidy_fieldnames(lines[0])
+          lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
+          print(f"FIXME **** <{lines[0]}>", flush=True)
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
         line_no = 0

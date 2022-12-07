@@ -150,6 +150,8 @@ def bulk_register(data_format=None):
     form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
         lines = form.userdata.data.splitlines()
+        if len(lines):
+          lines[0] = User.tidy_fieldnames(lines[0])
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
         line_no = 0
@@ -235,6 +237,7 @@ def bulk_register(data_format=None):
     return render_template(
         "admin/bulk_register.html",
         form=form,
+        example_csv_header_row = ['username', 'password'] + config._USERS_ADDITIONAL_FIELDNAMES,
         has_auth_code=current_app.config["HAS_AUTH_CODE"]
     )
 

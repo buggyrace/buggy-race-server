@@ -2,6 +2,7 @@
 """User models."""
 import datetime as datetime
 from random import randint
+import re
 
 from flask_login import UserMixin
 from sqlalchemy import orm
@@ -138,6 +139,12 @@ class User(UserMixin, SurrogatePK, Model):
             if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
                 del fields[fieldname]
         return fields
+
+    def tidy_fieldnames(fieldnames):
+        """ for a list of fieldnames, strips spaces and users underscores, etc.,
+            to be as forgiving as possible with that header row
+        """
+        return [re.sub(r'[ -]+', '_', f.strip().lower()) for f in fieldnames]
 
     def get_missing_fieldnames(fieldnames):
         required_fieldnames = ["username", "password"] + [

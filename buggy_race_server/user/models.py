@@ -22,6 +22,25 @@ from buggy_race_server.lib.http import Http
 
 API_KEY_LENGTH = 16
 
+EXAMPLE_USER_DATA = {
+    "ada": {
+        "username": "example1",
+        "password": "secR3t89o!W",
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "org_username": "al003",
+        "email": "ada@example.com"
+    },
+    "chaz":{
+        "username": "example2",
+        "password": "n-E7jWz*DIg",
+        "first_name": "Charles",
+        "last_name": "Babbage",
+        "org_username": "cb002",
+        "email": "chaz@example.com"
+    },
+}
+
 class Role(SurrogatePK, Model):
     """A role for a user."""
 
@@ -145,6 +164,9 @@ class User(UserMixin, SurrogatePK, Model):
             to be as forgiving as possible with that header row
         """
         return [re.sub(r'[ -]+', '_', f.strip().lower()) for f in fieldnames]
+
+    def get_example_data(example_user, fieldnames):
+        return [ EXAMPLE_USER_DATA[example_user][fieldname] for fieldname in fieldnames ]
 
     def get_missing_fieldnames(fieldnames):
         required_fieldnames = ["username", "password"] + [

@@ -235,11 +235,16 @@ def bulk_register(data_format=None):
           })
         else:
           flash_errors(form)
+    csv_fieldnames = ['username', 'password'] + config._USERS_ADDITIONAL_FIELDNAMES
     return render_template(
         "admin/bulk_register.html",
         form=form,
-        example_csv_header_row = ['username', 'password'] + config._USERS_ADDITIONAL_FIELDNAMES,
-        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+        has_auth_code=current_app.config["HAS_AUTH_CODE"],
+        example_csv_data = [
+          ",".join(csv_fieldnames),
+          ",".join(User.get_example_data("ada", csv_fieldnames)),
+          ",".join(User.get_example_data("chaz", csv_fieldnames)),
+        ]
     )
 
 # user_id may be username or id

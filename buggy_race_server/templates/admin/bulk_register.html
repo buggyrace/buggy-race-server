@@ -3,7 +3,7 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>Bulk Register</h1>
+    <h1>Register new students</h1>
   </div>
 
   <div id="registration-progress" style="display:none">
@@ -54,9 +54,11 @@
       {% endif %}
       <div class="form-group">
         <p>
-          Bulk upload by pasting a CSV in here, with a header row like this as
-          the first line:<br>
-          <code>{{ example_csv_header_row | join(",")}}</code>
+          Bulk upload by pasting a CSV in here, with a header row as
+          the first line, for example"<br>
+          {% for line in example_csv_data %}
+            <code>{{ line }}</code><br>
+          {% endfor %}
         </p>
           {{form.userdata.label}}
           {{form.userdata(placeholder="username,password,...", class_="form-control")}}

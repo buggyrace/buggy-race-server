@@ -64,7 +64,7 @@ def admin():
       abort(403)
     today = datetime.now().date()
     one_week_ago = today - timedelta(days=7)
-    users = User.query.all()
+    users = User.query.order_by(User.username).all()
     buggies = Buggy.query.all()
     students = [s for s in users if s.is_student]
     students_active = [s for s in students if s.is_active]

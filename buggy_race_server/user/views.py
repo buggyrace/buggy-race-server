@@ -13,7 +13,7 @@ from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
-from buggy_race_server.utils import flash_errors, warn_if_insecure, flash_suggest_if_not_yet_githubbed
+from buggy_race_server.utils import flash_errors, active_user_required, warn_if_insecure, flash_suggest_if_not_yet_githubbed
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
@@ -34,6 +34,7 @@ def flash_explanation_if_unauth(function):
 @blueprint.route("/")
 @flash_explanation_if_unauth
 @login_required
+@active_user_required
 @flash_suggest_if_not_yet_githubbed
 def submit_buggy_data():
   """Submit the JSON for the buggy."""
@@ -42,6 +43,7 @@ def submit_buggy_data():
 @blueprint.route("/settings")
 @flash_explanation_if_unauth
 @login_required
+@active_user_required
 def settings():
     form = ChangePasswordForm()
     return render_template(
@@ -52,6 +54,7 @@ def settings():
 
 @blueprint.route('/setup-course-repository', methods=['POST'])
 @login_required
+@active_user_required
 def setup_course_repository():
     """Create a new fork of the BUGGY_EDITOR_REPO if one doesn't already exist"""
     if current_user.has_course_repository():
@@ -109,6 +112,7 @@ def setup_course_repository():
 
 @blueprint.route("/password", methods=['GET','POST'])
 @login_required
+@active_user_required
 def change_password():
     """Change user's password (must be current user unless admin)."""
     warn_if_insecure()
@@ -146,6 +150,7 @@ def change_password():
 @blueprint.route("/secret", methods=['GET','POST'])
 @flash_explanation_if_unauth
 @login_required
+@active_user_required
 def set_api_secret():
     # note: the API secret's lifespan is hardcoded (1 hour): see pretty_lifespan below
     warn_if_insecure()
@@ -170,6 +175,7 @@ def set_api_secret():
 
 @blueprint.route("/vscode-workspace", methods=['GET'])
 @login_required
+@active_user_required
 def vscode_workspace():
   response = Response(render_template("users/vscode_workspace.json"))
   response.headers['content-disposition'] = f"attachment; filename=\"{current_app.config['PROJECT_SLUG']}.code-workspace\""

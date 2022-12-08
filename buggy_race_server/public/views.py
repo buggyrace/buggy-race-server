@@ -21,7 +21,7 @@ from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import flash_errors, warn_if_insecure
+from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -70,10 +70,12 @@ def register():
             username=form.username.data,
             org_username=form.org_username.data,
             email=form.email.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
             password=form.password.data,
             is_student=form.is_student.data,
             notes=form.notes.data,
-            active=True,
+            is_active=True,
         )
         flash("Thank you for registering. You can now log in.", "success")
         return redirect(url_for("public.home"))
@@ -149,6 +151,7 @@ def announce_races():
 @blueprint.route("/buggy/")
 @blueprint.route("/buggy/<username>")
 @login_required
+@active_user_required
 def show_buggy(username=None):
     """Admin inspection of buggy for given user."""
     if username is None:

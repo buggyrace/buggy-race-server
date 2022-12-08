@@ -6,7 +6,7 @@
       {% if is_own_buggy %}
           Your buggy
       {% else %}
-          {{ user.username | title }}’s buggy
+          {{ user.pretty_username }}’s buggy
       {% endif %}
     </h1>
   </div>
@@ -16,7 +16,7 @@
       {% if is_own_buggy %}
           This is the buggy you've offered up for the next race. 
       {% else %}
-          This is the buggy {{ user.username | title }} has offered up for the next race. 
+          This is the buggy {{ user.pretty_username }} has offered up for the next race. 
       {% endif %}      
       If it qualifies, it's in.
     </p>
@@ -26,7 +26,7 @@
       <thead>
         <tr>
           <th colspan="2" class="text-center py-3">
-            <span class="buggy-text-overlay">{{ user.username | title }}</span>
+            <span class="buggy-text-overlay">{{ user.pretty_username }}</span>
           </th>
         </tr>
       </thead>

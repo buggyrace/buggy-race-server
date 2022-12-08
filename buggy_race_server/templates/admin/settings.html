@@ -120,6 +120,58 @@
           <td><code><a href="{{ config['GITHUB_PAGES_URL'] }}">{{ config['GITHUB_PAGES_URL'] }}</a></code></td>
         </tr>
         <tr>
+          <td><code>IS_PRETTY_USERNAME_TITLECASE</code></td>
+          <td>
+            <code>{{ config['IS_PRETTY_USERNAME_TITLECASE'] }}</code>
+            <em>
+              (example: <code>ada</code> is 
+              {% if config['IS_PRETTY_USERNAME_TITLECASE'] %}Ada{% else %}ada{% endif %})
+            </em>
+          </td>
+        </tr>
+        <tr>
+          <th colspan="2">
+            Additional (required) user data fields
+            <span style="font-weight:normal">
+              (what you need typically depends on what you're using as "username")
+            </span>
+          </th>
+        </tr>
+        <tr>
+          <td>Summary</td>
+          <td>
+            {%if config['_USERS_ADDITIONAL_FIELDNAMES'] %}
+              <code>{{ config['_USERS_ADDITIONAL_FIELDNAMES'] | join(", ") }}</code>
+            {% else %}
+              <em>no additional fields enabled<em>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><code>USERS_HAVE_EMAIL</code></td>
+          <td>
+            <code><a href="{{ config['USERS_HAVE_EMAIL'] }}">{{ config['USERS_HAVE_EMAIL'] }}</a></code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>USERS_HAVE_ORG_USERNAME</code></td>
+          <td>
+            <code><a href="{{ config['USERS_HAVE_ORG_USERNAME'] }}">{{ config['USERS_HAVE_ORG_USERNAME'] }}</a></code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>USERS_HAVE_FIRST_NAME</code></td>
+          <td>
+            <code><a href="{{ config['USERS_HAVE_FIRST_NAME'] }}">{{ config['USERS_HAVE_FIRST_NAME'] }}</a></code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>USERS_HAVE_LAST_NAME</code></td>
+          <td>
+            <code><a href="{{ config['USERS_HAVE_LAST_NAME'] }}">{{ config['USERS_HAVE_LAST_NAME'] }}</a></code>
+          </td>
+        </tr>
+        <tr>
           <th colspan="2">
             Social/external sites
           </th>

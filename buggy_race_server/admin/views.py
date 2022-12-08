@@ -3,10 +3,12 @@
 import csv
 import io  # for CSV dump
 import random  # for API test
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import insert
 
 from flask import (
     Blueprint,
+    Response,
     abort,
     current_app,
     flash,
@@ -15,6 +17,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    jsonify,
 )
 from flask_login import current_user, login_required
 
@@ -24,8 +27,13 @@ from buggy_race_server.admin.forms import (
     ApiKeyForm,
     BulkRegisterForm,
 )
+from buggy_race_server.user.forms import UserForm
+
+from buggy_race_server.config import ConfigFromEnv as config
+
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.database import db
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, refresh_global_announcements
 
@@ -37,132 +45,249 @@ def _user_summary(username_list):
     else:
         return f"{len(username_list)} users"
 
+def _csv_tidy_string(row, fieldname, want_lower=False):
+  # incoming CSV fields might be None (i.e., not "")
+  # e.g. if the row wasn't long enough
+  s = row[fieldname] if fieldname in row else None
+  if s is not None:
+    s = str(s).strip()
+    if want_lower:
+      s = s.lower()
+  return s
+
 @blueprint.route("/")
+@login_required
 def admin():
     # for now the admin home page lists the students on the basis it's the
     # most useful day-to-day admin page... might change in future
-    return list_users(want_detail=False)
+    if not current_user.is_buggy_admin:
+      abort(403)
+    today = datetime.now().date()
+    one_week_ago = today - timedelta(days=7)
+    users = User.query.order_by(User.username).all()
+    buggies = Buggy.query.all()
+    students = [s for s in users if s.is_student]
+    students_active = [s for s in students if s.is_active]
+    students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
+    students_logged_in_today = [s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]
+    students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
+    students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
+    users_deactivated = [u for u in users if not u.is_active]
+    admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
+    return render_template(
+      "admin/dashboard.html",
+      students_active = students_active,
+      qty_users=len(users),
+      qty_students=len(students),
+      qty_students_active=len(students_active),
+      qty_buggies=len(buggies),
+      qty_students_logged_in_today=len(students_logged_in_today),
+      students_logged_in_today=students_logged_in_today,
+      qty_students_logged_in_this_week=len(students_logged_in_this_week),
+      students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
+      qty_students_never_logged_in=len(students_never_logged_in),
+      students_never_logged_in=students_never_logged_in,
+      qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
+      qty_uploads_week=len(students_uploaded_this_week),
+      users_deactivated=users_deactivated,
+      qty_users_deactivated=len(users_deactivated),
+      admin_users=admin_users,
+      qty_admin_users=len(admin_users),
+    )
 
 @blueprint.route("/users")
 @blueprint.route("/users/<data_format>")
 @login_required
-def list_users(data_format=None, want_detail=True):
+def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     if not current_user.is_buggy_admin:
       abort(403)
     else:
-      # want_detail shows all users (otherwise it's only students)
       users = User.query.all()
       users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
       students = [s for s in users if s.is_student]
-      if data_format == "csv":
+      if data_format == "csv": # note: CSV is only students
         si = io.StringIO()
         cw = csv.writer(si)
-        col_names = [
-          'username',
-          'logged_in',
-          'json_length',
-          'json_upload_at',
-          'github_username',
-          'github_repo',
-          'is_student',
-          'is_active'
-        ]
-        cw.writerow(col_names)
-        for s in students: # note: CSV is only students
-          cw.writerow([
-                  s.username,
-                  s.pretty_login_at,
-                  s.pretty_json_length,
-                  s.pretty_uploaded_at,
-                  s.github_username,
-                  s.course_repository if s.has_course_repository() else None,
-                  s.is_student,
-                  s.is_active
-                 ])
+        # To get the column names, use the current_user (admin) even though
+        # we're not going to save the data (there might not be any students)
+        cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
+        for s in students:
+          cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
         output = make_response(si.getvalue())
         yyyy_mm_dd_today = datetime.now().strftime("%Y-%m-%d")
-        output.headers["Content-Disposition"] = f"attachment; filename=users-{yyyy_mm_dd_today}.csv"
+        output.headers["Content-Disposition"] = f"attachment; filename=buggyrace-users-{yyyy_mm_dd_today}.csv"
         output.headers["Content-type"] = "text/csv"
         return output
       else:
+        # TODO want_detail shows all users (otherwise it's only students)
         return render_template("admin/users.html",
           want_detail = want_detail,
+          is_admin_can_edit = is_admin_can_edit,
           editor_repo_name = current_app.config["BUGGY_EDITOR_REPO_NAME"],
           users = users,
           admin_usernames = current_app.config['ADMIN_USERNAMES_LIST'],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
-          qty_students_active = len([s for s in students if s.is_active]),
+          qty_students_enabled = len([s for s in students if s.is_active]),
           qty_students_github = len([s for s in students if s.github_username]),
           qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
       )
 
 
 @blueprint.route("/bulk-register/", methods=["GET", "POST"])
+@blueprint.route("/bulk-register/<data_format>", methods=["POST"])
 @login_required
-def bulk_register():
-    """Register multiple user."""
+def bulk_register(data_format=None):
+    """Register multiple users."""
+    is_json = data_format == "json"
     if not current_user.is_buggy_admin:
       abort(403)
     if not current_app.config["HAS_AUTH_CODE"]:
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
+    err_msgs = []
     form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
         lines = form.userdata.data.splitlines()
+        if len(lines):
+          lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
+          print(f"FIXME **** <{lines[0]}>", flush=True)
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
         line_no = 0
         problem_lines = []
         clean_user_data = []
         if len(lines) < 2:
-          flash("Need CSV with a header row, then at least one line of data", "danger")
-        elif not ('username' in reader.fieldnames and 'org_username' in reader.fieldnames and 'password' in reader.fieldnames):
-          flash("CSV header row did not contain 'username', 'org_username' and 'password'", "danger")
+          err_msgs.append("Need CSV with a header row, then at least one line of data")
+        elif missing := User.get_missing_fieldnames(reader.fieldnames):
+          err_msgs.append(f"CSV header row is missing some required fields: {', '.join(missing)}")
         else:
+          usernames = []
           for row in reader:
             line_no += 1
-            # if len(row) != 3:
-            #   problem_lines.append(line_no)
-            #   continue
             username = row['username'].strip().lower() if 'username' in row else None
-            org_username = row['org_username'].strip().lower() if 'org_username' in row else None
-            email = row['email'].strip().lower() if 'email' in row else None
-            password = row['password'].strip() if 'password' in row else None
-            current_app.logger.info("{}, pw:{}".format(username, password))
-            if password and len(password) >= 4: # passwords longer than 4
+            if username is not None:
+              usernames.append(username)
+            new_user = User(
+              username=username,
+              org_username=row['org_username'].strip().lower() if 'org_username' in row else None,
+              email=_csv_tidy_string(row, 'email', want_lower=True),
+              password=_csv_tidy_string(row, 'password', want_lower=False),
+              first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
+              last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
+              created_at=datetime.now(),
+              is_active=True,
+              is_student=True,
+              latest_json="",
+              notes=_csv_tidy_string(row, 'notes', want_lower=False),
+            )
+            #current_app.logger.info("{}, pw:{}".format(username, password))
+            if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
               qty_users += 1
-              clean_user_data.append({'username': username, 'org_username': org_username, 'email': email, 'password': password})
+              clean_user_data.append(new_user.get_fields_as_dict_for_insert())
             else:
-              problem_lines.append("{}".format(line_no))
+              problem_lines.append(line_no)
           if len(problem_lines) > 0:
             pl = "s" if len(problem_lines)>1 else ""
-            flash("Bulk registration aborted with {} problem{}: see line{}: {}".format(
-              len(problem_lines), pl, pl, ", ".join(map(str,problem_lines))), "danger")
+            line_nos = ", ".join(map(str,problem_lines))
+            err_msgs.append(f"Bulk registration aborted with {len(problem_lines)} problem{pl}: see line{pl}: {line_nos}")
           else:
-            qty_fails = 0
-            for user_data in clean_user_data:
-              try:
-                User.create(
-                  username=user_data['username'],
-                  org_username=user_data['org_username'],
-                  email=user_data['email'],
-                  password=user_data['password'],
-                  active=True,
-                )
-              except Exception as e:
-                qty_fails += 1
-                flash("Error creating user {}: {}".format(user_data['username'], e.message), "danger")
-            flash("Bulk registered {} users".format(qty_users-qty_fails), "warning")
-        return redirect(url_for("public.home"))
+            try:
+              result = db.session.execute(
+                  insert(User.__table__),
+                  clean_user_data
+                  # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
+              )
+              db.session.commit()
+            except Exception as e:
+                # risky but frustratingly no easy way to get the specific database
+                # error as it's coming back from the connection: e.g.,
+                # (mysql.connector.errors.IntegrityError) 1062 (23000): Duplicate entry 'aaaa' for key 'username'
+                ex_str = str(e).split("\n")[0] # mySQL sends the SQL back too after a newline: don't want
+                # for JSON, users are being updated one user(name) at a time
+                bad_username = f"\"{usernames[0]}\": " if len(usernames) == 1 else ""
+                err_msgs.append(f"{bad_username}{ex_str}")
+            if not is_json:
+                flash(f"Bulk registered {qty_users} users", "warning")
+        if is_json:
+          if err_msgs:
+            payload = {
+              'status': "error",
+              'error': err_msgs[0],
+              'errors': err_msgs
+            }
+          else:
+            payload = {"status": "OK"}
+          return jsonify(payload)
+        else:
+            for err_msg in err_msgs:
+                flash(err_msg, "danger")
     else:
-        flash_errors(form)
+        if is_json:
+          errors = []
+          for err_key in form.errors:
+            errors.append(form.errors[err_key])
+          return jsonify({
+            "status": "error",
+            "error": errors[0],
+            "errors": errors
+          })
+        else:
+          flash_errors(form)
+    csv_fieldnames = ['username', 'password'] + config._USERS_ADDITIONAL_FIELDNAMES
     return render_template(
         "admin/bulk_register.html",
         form=form,
-        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+        has_auth_code=current_app.config["HAS_AUTH_CODE"],
+        example_csv_data = [
+          ",".join(csv_fieldnames),
+          ",".join(User.get_example_data("ada", csv_fieldnames)),
+          ",".join(User.get_example_data("chaz", csv_fieldnames)),
+        ]
     )
+
+# user_id may be username or id
+@blueprint.route("/user/<user_id>", methods=['GET','POST'])
+@login_required
+def edit_user(user_id):
+  if not current_user.is_buggy_admin:
+      abort(403)
+  if str(user_id).isdigit():
+    user = User.get_by_id(int(user_id))
+  else:
+    user = User.query.filter_by(username=user_id).first()
+  if user is None:
+    abort(404)
+  form = UserForm(request.form, obj=user)
+  if request.method == "POST":
+    if form.validate_on_submit():
+      user.notes = form.notes.data
+      user.is_student = form.is_student.data
+      user.is_active = form.is_active.data
+      if config.USERS_HAVE_FIRST_NAME:
+          user.first_name = form.first_name.data
+      if config.USERS_HAVE_LAST_NAME:
+          user.last_name = form.last_name.data
+      if config.USERS_HAVE_EMAIL:
+          user.email = form.email.data
+      if config.USERS_HAVE_ORG_USERNAME:
+          user.org_username = form.org_username.data
+      # if username wasn't unique, validation should have caught it
+      user.username = form.username.data
+      user.save()
+      flash(f"OK, updated user {user.username}", "success")
+      return redirect(url_for("admin.list_users"))
+    else:
+      flash(f"Did not update user {user.username}", "danger")
+      flash_errors(form)
+  return render_template(
+    "admin/user.html",
+    form=form,
+    user=user,
+    has_auth_code=current_app.config["HAS_AUTH_CODE"]
+  )
+#  return redirect(url_for("admin.admin"))
 
 @blueprint.route("/api-keys", methods=['GET','POST'])
 @login_required
@@ -241,6 +366,7 @@ def list_buggies(data_format=None):
       buggies = Buggy.query.all()
       for b in buggies:
         b.username = users_by_id[b.user_id].username
+        b.pretty_username = users_by_id[b.user_id].pretty_username
       if data_format == "csv":
         si = io.StringIO()
         cw = csv.writer(si)

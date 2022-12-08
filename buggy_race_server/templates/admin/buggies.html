@@ -45,7 +45,7 @@
         {% for b in buggies %}
         <tr>
           <td>  {{ b.id }} </td>
-          <td>  <a href="{{ url_for('public.show_buggy', username=b.username) }}">{{ b.username | title }}</a> </td>
+          <td>  <a href="{{ url_for('public.show_buggy', username=b.username) }}">{{ b.pretty_username }}</a> </td>
           <td>  {{ b.total_cost }} </td>
           <td>  {{ b.mass }} </td>
           <td>  {{ b.buggy_id }} </td>

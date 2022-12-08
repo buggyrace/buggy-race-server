@@ -2,6 +2,7 @@
 """User models."""
 import datetime as datetime
 from random import randint
+import re
 
 from flask_login import UserMixin
 from sqlalchemy import orm
@@ -20,6 +21,25 @@ from buggy_race_server.extensions import bcrypt
 from buggy_race_server.lib.http import Http
 
 API_KEY_LENGTH = 16
+
+EXAMPLE_USER_DATA = {
+    "ada": {
+        "username": "example1",
+        "password": "secR3t89o!W",
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "org_username": "al003",
+        "email": "ada@example.com"
+    },
+    "chaz":{
+        "username": "example2",
+        "password": "n-E7jWz*DIg",
+        "first_name": "Charles",
+        "last_name": "Babbage",
+        "org_username": "cb002",
+        "email": "chaz@example.com"
+    },
+}
 
 class Role(SurrogatePK, Model):
     """A role for a user."""
@@ -43,14 +63,14 @@ class User(UserMixin, SurrogatePK, Model):
 
     __tablename__ = "users"
     username = Column(db.String(80), unique=True, nullable=False)
-    org_username = Column(db.String(80), unique=True, nullable=False)
+    org_username = Column(db.String(80), unique=True, nullable=True)
     email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
     created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     first_name = Column(db.String(30), nullable=True)
     last_name = Column(db.String(30), nullable=True)
-    active = Column(db.Boolean(), default=False)
+    is_active = Column(db.Boolean(), default=True)
     is_admin = Column(db.Boolean(), default=False)
     buggies = db.relationship("Buggy", backref="users", lazy=True)
     latest_json = Column(db.Text(), default=False)
@@ -71,7 +91,10 @@ class User(UserMixin, SurrogatePK, Model):
             self.set_password(password)
         else:
             self.password = None
-
+        # disallow optional fields to be set unless they are explicitly enabled
+        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
+                setattr(self, fieldname, None)
         self.init_on_load()
 
     @orm.reconstructor
@@ -93,9 +116,72 @@ class User(UserMixin, SurrogatePK, Model):
         else:
           self.api_key = None
 
+    def get_fields_as_dict_for_insert(self):
+        """ Fields needed to create (insert) new user (absent fields are defaulted) """
+        return {
+            'username': self.username,
+            'org_username': self.org_username,
+            'email': self.email,
+            'password': self.password,
+            'created_at': self.created_at,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'is_active': self.is_active,
+            'is_admin': self.is_admin,
+            'latest_json': self.latest_json,
+            'is_student': self.is_student,
+            'notes': self.notes,
+        }
+
+    def get_fields_as_dict_for_csv(self):
+        """ Fields used for saving to CSV """
+        if self.github_username and self.has_course_repository:
+            repo = self.course_repository
+        else:
+            repo = None
+
+        fields = {
+            'username': self.username,
+            'org_username': self.org_username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'is_active': 1 if self.is_active else 0,
+            'last_login': self.pretty_login_at,
+            'last_upload_at': self.pretty_uploaded_at,
+            'json_length': self.pretty_json_length,
+            'github_username': self.github_username,
+            'github_repo': repo,
+            'notes': self.notes,
+        }
+        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
+                del fields[fieldname]
+        return fields
+
+    def tidy_fieldnames(fieldnames):
+        """ for a list of fieldnames, strips spaces and users underscores, etc.,
+            to be as forgiving as possible with that header row
+        """
+        return [re.sub(r'[ -]+', '_', f.strip().lower()) for f in fieldnames]
+
+    def get_example_data(example_user, fieldnames):
+        return [ EXAMPLE_USER_DATA[example_user][fieldname] for fieldname in fieldnames ]
+
+    def get_missing_fieldnames(fieldnames):
+        required_fieldnames = ["username", "password"] + [
+            field for field in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED
+            if config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[field]
+        ]
+        return [name for name in required_fieldnames if name not in fieldnames]
+
     @property
     def is_buggy_admin(self):
-      return self.username in config.ADMIN_USERNAMES_LIST
+      return self.is_active and self.username in config.ADMIN_USERNAMES_LIST
+
+    @property
+    def pretty_username(self):
+        return self.username.title() if config.IS_PRETTY_USERNAME_TITLECASE else self.username
 
     @property
     def full_name(self):

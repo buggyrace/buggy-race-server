@@ -9,7 +9,7 @@ from flask_login import current_user, login_required
 
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.utils import flash_errors
+from buggy_race_server.utils import flash_errors, active_user_required
 
 
 blueprint = Blueprint("buggy", __name__, url_prefix="/buggies", static_folder="../static")
@@ -118,12 +118,14 @@ def handle_uploaded_json(form, user, is_api=False):
 
 @blueprint.route("/")
 @login_required
+@active_user_required
 def buggies():
     """List all the buggies."""
     return render_template("buggies/buggy-list.html")
 
 @blueprint.route("/json/", methods=["POST"])
 @login_required
+@active_user_required
 def create_buggy_with_json():
     """Create or update user's buggy."""
     return handle_uploaded_json(BuggyJsonForm(request.form), current_user)

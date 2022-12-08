@@ -155,3 +155,47 @@ class ConfigFromEnv():
     # (only if there are no announcements already loaded)
     # Be careful with this: broken HTML here will cause problems!
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
+
+
+    # should usernames be capitalised when displayed?
+    # usernames are always considered lowercase, but (if they are
+    # student's names) you can choose to display them in titlecase
+    # (so Ada instead of ada)
+    IS_PRETTY_USERNAME_TITLECASE = env.bool("IS_PRETTY_USERNAME_TITLECASE", False)
+
+    # control which user fields are needed:
+    # users always have a username...
+    # ...but if you don't need the other fields, disable them
+    # If you're running a small class, username might already be first name, so you
+    # don't need to store other names.
+    # Note:
+    #   - the database still has all the columns, but their values won't
+    #     be enforced
+    #   - be aware of privacy issues (in general, and between other students)
+    #     when setting these. The server may also storing (but not publishing)
+    #     GitHub account information so even if you are disabling all of these
+    #     you are still resonsible for securely and responsibly handling
+    #     private data.
+    USERS_HAVE_EMAIL = env.bool("USERS_HAVE_EMAIL", default=False)
+    USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
+    USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
+    USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)
+
+    # note: explicit mapping between name of field/column and enable/disable
+    #   Developers: see users/models.py to see this in use: it's a bit messy
+    #   if these settings are changed _after_ any records have been created
+    #   (but that is why this is not implemented in the database schema, which
+    #   might be generated before these config settings have been fixed)
+    _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED = {
+        "email": USERS_HAVE_EMAIL,
+        "org_username": USERS_HAVE_ORG_USERNAME,
+        "first_name": USERS_HAVE_FIRST_NAME,
+        "last_name": USERS_HAVE_LAST_NAME
+    }
+
+    # list of additional fieldnames (will be empty if there are none)
+    #   this is a convenience for summarising user settings
+    _USERS_ADDITIONAL_FIELDNAMES = []
+    for name in _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
+        if _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[name]:
+            _USERS_ADDITIONAL_FIELDNAMES.append(name)

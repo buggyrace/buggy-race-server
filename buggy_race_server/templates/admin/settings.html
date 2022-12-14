@@ -3,11 +3,36 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>Site settings</h1>
+    <h1>Site/configuration settings</h1>
   </div>
-  <div class="row">
-    <h3>Config sanity-check for admins</h3>
-  </div>
+  {% for group in groups %}
+    <div style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+      <h3>{{ group | title }} settings</h3>
+      <form action="{{ url_for('admin.settings') }}" method="post">
+        {{ form.csrf_token }}
+        <input type="hidden" name="group" value="{{ group }}"/>
+        {% for name in groups[group] %}
+          <div class="row" style="background-color:#fff;margin:1em 0">
+            <div class="col-sm-3">
+              <code>{{ name }}</code>
+            </div>
+            <div class="col-sm-4">
+              <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
+              <!-- FIXME settings[name] won't work because settings isn't a dictionary  -->
+              <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" type="text"
+              {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
+            </div>
+            <div class="col-sm-5">
+              {{ descriptions[name] }}
+              <br>
+              default: <code>{{ default_settings[name] }}</code>
+            </div>
+          </div>
+        {% endfor %}
+        <input type="submit" class="button" />
+      </form>
+    </div>
+  {% endfor %}
   <div class="row">
     <p>
       These are settings that <em>should</em> be set in the config, i.e., 
@@ -83,7 +108,7 @@
           </td>
           <td>
             <code>
-              {% for u in config['ADMIN_USERNAMES_LIST'] %}
+              {% for u in config['_ADMIN_USERNAMES_LIST'] %}
                 {{ u }}<br>
               {% endfor %}
             </code>
@@ -92,7 +117,7 @@
         <tr>
           <td><code>REGISTRATION_AUTH_CODE</code></td>
           <td>
-            {% if config['HAS_AUTH_CODE']  %}
+            {% if config['_HAS_AUTH_CODE']  %}
               <code>[redacted]</code> <em>(but set OK)</em>
             {% else %}
               <em>none set</em>

@@ -4,11 +4,10 @@ import csv
 import io  # for CSV dump
 import random  # for API test
 from datetime import datetime, timedelta
-from sqlalchemy import insert
+from sqlalchemy import insert, update, bindparam
 
 from flask import (
     Blueprint,
-    Response,
     abort,
     current_app,
     flash,
@@ -26,16 +25,19 @@ from buggy_race_server.admin.forms import (
     AnnouncementForm,
     ApiKeyForm,
     BulkRegisterForm,
+    SettingForm
 )
 from buggy_race_server.user.forms import UserForm
 
 from buggy_race_server.config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigSettings as configs
 
-from buggy_race_server.admin.models import Announcement
+
+from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.database import db
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import flash_errors, refresh_global_announcements
+from buggy_race_server.utils import flash_errors, refresh_global_announcements, load_settings_from_db
 
 blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
 
@@ -124,9 +126,9 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
         return render_template("admin/users.html",
           want_detail = want_detail,
           is_admin_can_edit = is_admin_can_edit,
-          editor_repo_name = current_app.config["BUGGY_EDITOR_REPO_NAME"],
+          editor_repo_name = current_app.config[configs.BUGGY_EDITOR_REPO_NAME],
           users = users,
-          admin_usernames = current_app.config['ADMIN_USERNAMES_LIST'],
+          admin_usernames = current_app.config[configs._ADMIN_USERNAMES_LIST],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_enabled = len([s for s in students if s.is_active]),
@@ -143,7 +145,7 @@ def bulk_register(data_format=None):
     is_json = data_format == "json"
     if not current_user.is_buggy_admin:
       abort(403)
-    if not current_app.config["HAS_AUTH_CODE"]:
+    if not current_app.config[configs._HAS_AUTH_CODE]:
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
     err_msgs = []
@@ -235,11 +237,11 @@ def bulk_register(data_format=None):
           })
         else:
           flash_errors(form)
-    csv_fieldnames = ['username', 'password'] + config._USERS_ADDITIONAL_FIELDNAMES
+    csv_fieldnames = ['username', 'password'] + current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES]
     return render_template(
         "admin/bulk_register.html",
         form=form,
-        has_auth_code=current_app.config["HAS_AUTH_CODE"],
+        has_auth_code=current_app.config[configs._HAS_AUTH_CODE],
         example_csv_data = [
           ",".join(csv_fieldnames),
           ",".join(User.get_example_data("ada", csv_fieldnames)),
@@ -259,7 +261,7 @@ def edit_user(user_id):
     user = User.query.filter_by(username=user_id).first()
   if user is None:
     abort(404)
-  form = UserForm(request.form, obj=user)
+  form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
     if form.validate_on_submit():
       user.notes = form.notes.data
@@ -285,7 +287,7 @@ def edit_user(user_id):
     "admin/user.html",
     form=form,
     user=user,
-    has_auth_code=current_app.config["HAS_AUTH_CODE"]
+    has_auth_code=current_app.config[configs._HAS_AUTH_CODE]
   )
 #  return redirect(url_for("admin.admin"))
 
@@ -381,14 +383,78 @@ def list_buggies(data_format=None):
       else:
         return render_template("admin/buggies.html", buggies=buggies)
 
-@blueprint.route("/settings/")
-@login_required
+@blueprint.route("/settings/", methods=['GET','POST'])
+#### FIXME-DEBUG @login_required
 def settings():
     """Admin settings check page."""
-    if not current_user.is_buggy_admin:
-      abort(403)
-    else:
-      return render_template("admin/settings.html")
+    #### FIXME-DEBUG
+    #### if not current_user.is_buggy_admin:
+    ####   abort(403)
+    SETTING_PREFIX = "settings" # must match name of subform
+    form = SettingForm(request.form)
+    settings = Setting.query.all()
+    settings_as_dict = Setting.get_dict_from_query(settings)
+    if request.method == "POST":
+      qty_settings_changed = 0
+      # group_name = form['group'].data
+      if form.validate_on_submit():
+        config_data_insert = []
+        config_data_update = []
+        for setting_form in form.settings.data:
+          name = setting_form.get('name')
+          value = setting_form.get('value')
+          if name in settings_as_dict:
+            if settings_as_dict[name] != value:
+              flash(f"Changed {name} from \"{settings_as_dict[name]}\" to \"{value}\"", "info")
+              config_data_update.append({
+                "name": name,
+                "value": value
+              })
+              qty_settings_changed += 1
+          else: # config not in settings table: unexpected
+              flash(f"Setting {name} to \"{value}\"", "info")
+              config_data_insert.append({
+                "id": name,
+                "value": value
+              })
+              qty_settings_changed += 1
+        settings_table = Setting.__table__
+        if config_data_update:
+            try:
+              result = db.session.execute(
+                update(settings_table)
+                  .where(settings_table.c.id == bindparam("name"))
+                  .values(value=bindparam("value")),
+                  config_data_update
+              )
+              db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+        if config_data_insert:
+            try:
+              result = db.session.execute(
+                  insert(settings_table),
+                  config_data_insert
+              )
+              db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+        if qty_settings_changed:
+          # we've changed config, try to update config too
+          load_settings_from_db(current_app)
+          flash("When you've finished changing settings, you should restart the server", "info")
+          settings_as_dict = Setting.get_dict_from_query(settings)
+      else:
+        flash(form.errors, "danger")
+    return render_template(
+      "admin/settings.html",
+      form=form,
+      SETTING_PREFIX=SETTING_PREFIX,
+      groups=configs.GROUPS,
+      settings=settings_as_dict,
+      default_settings=configs.DEFAULTS,
+      descriptions=configs.DESCRIPTIONS
+    )
 
 @blueprint.route("/announcements/")
 @login_required

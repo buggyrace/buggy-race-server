@@ -1,12 +1,41 @@
 # -*- coding: utf-8 -*-
-"""Buggy model."""
+"""Admin models: settings and announcements."""
 
 from datetime import datetime
 
+from buggy_race_server.config import ConfigSettings
 from buggy_race_server.database import Column, Model, SurrogatePK, db
+
+class Setting(SurrogatePK, Model):
+    """A setting (for config)."""
+
+    __tablename__ = "settings"
+    id = Column(
+      db.String(64),
+      unique=True,
+      nullable=False,
+      primary_key=True,
+    )
+    value = Column(db.String(255), unique=False, nullable=False)
+
+    def get_dict_from_query(query_result):
+      settings_as_dict = {}
+      for setting in query_result:
+        settings_as_dict[setting.id] = setting.value
+      return settings_as_dict
+  
+    def __init__(self, **kwargs):
+        """Create instance."""
+        db.Model.__init__(self, **kwargs)
 
 
 class Announcement(SurrogatePK, Model):
+
+    # this is an example announcement to populate the database with a demo
+    # (only if there are no announcements already loaded)
+    # Be careful with this: broken HTML here will cause problems!
+    EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
+
     """An announcement to display on top of all pages."""
 
     __tablename__ = "announcements"

@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
 
 from flask_wtf import FlaskForm
-from gevent import config
 from wtforms import (
+    FieldList,
     BooleanField,
     IntegerField,
+    Form,
+    FormField,
+    HiddenField,
     SelectField,
     SelectMultipleField,
     PasswordField,
+    StringField,
     SubmitField,
     TextAreaField,
     widgets,
 )
 from wtforms.validators import DataRequired
 
-from buggy_race_server.config import ConfigFromEnv
+from buggy_race_server.admin.models import Setting
+from buggy_race_server.config import ConfigFromEnv, ConfigSettings
 from buggy_race_server.utils import is_authorised
 
 
@@ -82,3 +87,23 @@ class AnnouncementActionForm(FlaskForm):
 
     def validate(self):
         return super(AnnouncementActionForm, self).validate()
+
+class ConfigSettingForm(Form):
+    name = HiddenField("Config-Setting-Name")
+    value = StringField("Config-Setting-Value", validators=[])
+
+class SettingForm(FlaskForm):
+    group = HiddenField()
+    setting_list = HiddenField()
+    settings = FieldList(
+        FormField(ConfigSettingForm),
+        min_entries=1,
+        max_entries=len(ConfigSettings.DEFAULTS)
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(SettingForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        return super(SettingForm, self).validate()
+

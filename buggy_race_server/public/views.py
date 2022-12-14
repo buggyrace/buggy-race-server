@@ -15,6 +15,7 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
+from buggy_race_server.config import ConfigSettings as configs
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
@@ -65,13 +66,22 @@ def login():
 def register():
     """Register new user."""
     form = RegisterForm(request.form)
+    if not current_app.config[configs.USERS_HAVE_EMAIL]:
+        del form.email
+    if not current_app.config[configs.USERS_HAVE_FIRST_NAME]:
+        del form.first_name
+    if not current_app.config[configs.USERS_HAVE_LAST_NAME]:
+        del form.last_name
+    if not current_app.config[configs.USERS_HAVE_ORG_USERNAME]:
+        del form.org_username
+
     if form.validate_on_submit():
         User.create(
             username=form.username.data,
-            org_username=form.org_username.data,
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
+            org_username=form.org_username.data if form.org_username else None,
+            email=form.email.data if form.email else None,
+            first_name=form.first_name.data if form.first_name else None,
+            last_name=form.last_name.data if form.last_name else None,
             password=form.password.data,
             is_student=form.is_student.data,
             notes=form.notes.data,
@@ -84,7 +94,7 @@ def register():
     return render_template(
         "public/register.html",
         form=form,
-        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+        has_auth_code=current_app.config[configs._HAS_AUTH_CODE]
     )
 
 @blueprint.route("/specs/")

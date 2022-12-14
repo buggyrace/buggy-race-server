@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """User forms."""
+
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
@@ -8,7 +9,7 @@ from buggy_race_server.utils import is_authorised
 from buggy_race_server.user.models import User
 
 # get the config settings (without the app context):
-from buggy_race_server.config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigSettings as configs
 
 class UserForm(FlaskForm):
     """User form (for editing user details)."""
@@ -16,21 +17,24 @@ class UserForm(FlaskForm):
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
+    # fields that aren't being used (because config says so)
+    # are explicitly, dynamically removed from the form in the view:
+    # so validators are only applied if the field is indeed enabled
     org_username = StringField(
-        f"{config.INSTITUTION_SHORT_NAME} Username",
-        validators=[DataRequired(), Length(min=3, max=80)] if config.USERS_HAVE_ORG_USERNAME else []
+        f"Organisation Username",
+        validators=[DataRequired(), Length(min=3, max=80)]
     )
     email = StringField(
         "Email",
-        validators=[Email(), Length(min=6, max=80)] if config.USERS_HAVE_EMAIL else []
+        validators=[Email(), Length(min=6, max=80)]
     )
     first_name = StringField(
         "First name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_FIRST_NAME else []
+        validators=[DataRequired(), Length(min=1, max=80)]
     )
     last_name = StringField(
         "Last name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_LAST_NAME else []
+        validators=[DataRequired(), Length(min=1, max=80)]
     )
     is_student = BooleanField(
         "Is an enrolled student?"
@@ -43,7 +47,7 @@ class UserForm(FlaskForm):
     )
     authorisation_code = PasswordField("Authorisation code",  [is_authorised])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app=None, *args, **kwargs):
         """Create instance."""
         super(UserForm, self).__init__(*args, **kwargs)
         self.user = None

@@ -5,7 +5,9 @@ from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
 from buggy_race_server.config import ConfigFromEnv
-from buggy_race_server.admin.models import Announcement
+from buggy_race_server.admin.models import Announcement, Setting, ConfigSettings
+from buggy_race_server.extensions import db
+from sqlalchemy import insert
 
 def refresh_global_announcements(app):
   app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
@@ -46,3 +48,29 @@ def active_user_required(function):
             return redirect(url_for("public.home"))
         return function(*args, **kwargs)
     return wrapper
+
+def insert_default_settings_into_db(app):
+    db.session.execute(
+        insert(Setting.__table__),
+        [
+            {"id": name, "value": ConfigSettings.DEFAULTS[name]}
+            for name in ConfigSettings.DEFAULTS
+        ]
+    )
+    db.session.commit()
+    print(f"*** loaded {len(ConfigSettings.DEFAULTS)} config settings into database with default values", flush=True)
+
+def load_settings_from_db(app):
+    settings = Setting.query.all()
+    if len(settings) == 0:
+        insert_default_settings_into_db(app)
+        settings = Setting.query.all()
+
+    for setting in settings:
+        name = setting.id
+        if name in ConfigSettings.DEFAULTS:
+            ConfigSettings.set_config_value(app, setting.id, setting.value)
+        else:
+            pass # not in defaults (unexpected setting?) TODO
+    
+    ConfigSettings.imply_extra_settings(app)

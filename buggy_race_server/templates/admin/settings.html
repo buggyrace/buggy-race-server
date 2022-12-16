@@ -18,9 +18,15 @@
             </div>
             <div class="col-sm-4">
               <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-              <!-- FIXME settings[name] won't work because settings isn't a dictionary  -->
-              <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" type="text"
-              {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
+              {% if type_of_settings[name] == "bool" %}
+                <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                  <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
+                  <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
+                </select>
+              {% else %}
+                <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" type="text"
+                {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
+              {% endif %}
             </div>
             <div class="col-sm-5">
               {{ descriptions[name] }}

@@ -451,6 +451,7 @@ def settings():
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,
+      type_of_settings=ConfigSettings.TYPES,
       default_settings=ConfigSettings.DEFAULTS,
       descriptions=ConfigSettings.DESCRIPTIONS
     )

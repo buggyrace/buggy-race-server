@@ -122,7 +122,7 @@ class ConfigSettings:
         PROJECT_CODE: "Buggy",
         PROJECT_SLUG: "",
         SECRET_KEY: f"{randint(1000, 9999)}-secret-{randint(1000, 9999)}",
-        FORCE_REDIRECT_HTTP_TO_HTTPS: "",
+        FORCE_REDIRECT_HTTP_TO_HTTPS: 0,
         BUGGY_EDITOR_GITHUB_URL:  "https://github.com/buggyrace/buggy-race-editor",
         BUGGY_EDITOR_REPO_NAME: "buggy-race-editor",
         BUGGY_EDITOR_REPO_OWNER: "buggyrace",

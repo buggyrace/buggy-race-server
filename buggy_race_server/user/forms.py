@@ -47,7 +47,7 @@ class UserForm(FlaskForm):
     )
     authorisation_code = PasswordField("Authorisation code",  [is_authorised])
 
-    def __init__(self, app=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Create instance."""
         super(UserForm, self).__init__(*args, **kwargs)
         self.user = None

@@ -29,8 +29,7 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.user.forms import UserForm
 
-from buggy_race_server.config import ConfigFromEnv as config
-from buggy_race_server.config import ConfigSettings as configs
+from buggy_race_server.config import ConfigSettings
 
 
 from buggy_race_server.admin.models import Announcement, Setting
@@ -126,9 +125,9 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
         return render_template("admin/users.html",
           want_detail = want_detail,
           is_admin_can_edit = is_admin_can_edit,
-          editor_repo_name = current_app.config[configs.BUGGY_EDITOR_REPO_NAME],
+          editor_repo_name = current_app.config[ConfigSettings.BUGGY_EDITOR_REPO_NAME],
           users = users,
-          admin_usernames = current_app.config[configs._ADMIN_USERNAMES_LIST],
+          admin_usernames = current_app.config[ConfigSettings._ADMIN_USERNAMES_LIST],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_enabled = len([s for s in students if s.is_active]),
@@ -145,7 +144,7 @@ def bulk_register(data_format=None):
     is_json = data_format == "json"
     if not current_user.is_buggy_admin:
       abort(403)
-    if not current_app.config[configs._HAS_AUTH_CODE]:
+    if not current_app.config[ConfigSettings._HAS_AUTH_CODE]:
       flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
       abort(401)
     err_msgs = []
@@ -237,11 +236,11 @@ def bulk_register(data_format=None):
           })
         else:
           flash_errors(form)
-    csv_fieldnames = ['username', 'password'] + current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES]
+    csv_fieldnames = ['username', 'password'] + current_app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES]
     return render_template(
         "admin/bulk_register.html",
         form=form,
-        has_auth_code=current_app.config[configs._HAS_AUTH_CODE],
+        has_auth_code=current_app.config[ConfigSettings._HAS_AUTH_CODE],
         example_csv_data = [
           ",".join(csv_fieldnames),
           ",".join(User.get_example_data("ada", csv_fieldnames)),
@@ -267,13 +266,13 @@ def edit_user(user_id):
       user.notes = form.notes.data
       user.is_student = form.is_student.data
       user.is_active = form.is_active.data
-      if config.USERS_HAVE_FIRST_NAME:
+      if current_app.config[ConfigSettings.USERS_HAVE_FIRST_NAME]:
           user.first_name = form.first_name.data
-      if config.USERS_HAVE_LAST_NAME:
+      if current_app.config[ConfigSettings.USERS_HAVE_LAST_NAME]:
           user.last_name = form.last_name.data
-      if config.USERS_HAVE_EMAIL:
+      if current_app.config[ConfigSettings.USERS_HAVE_EMAIL]:
           user.email = form.email.data
-      if config.USERS_HAVE_ORG_USERNAME:
+      if current_app.config[ConfigSettings.USERS_HAVE_ORG_USERNAME]:
           user.org_username = form.org_username.data
       # if username wasn't unique, validation should have caught it
       user.username = form.username.data
@@ -287,7 +286,7 @@ def edit_user(user_id):
     "admin/user.html",
     form=form,
     user=user,
-    has_auth_code=current_app.config[configs._HAS_AUTH_CODE]
+    has_auth_code=current_app.config[ConfigSettings._HAS_AUTH_CODE]
   )
 #  return redirect(url_for("admin.admin"))
 
@@ -450,10 +449,10 @@ def settings():
       "admin/settings.html",
       form=form,
       SETTING_PREFIX=SETTING_PREFIX,
-      groups=configs.GROUPS,
+      groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,
-      default_settings=configs.DEFAULTS,
-      descriptions=configs.DESCRIPTIONS
+      default_settings=ConfigSettings.DEFAULTS,
+      descriptions=ConfigSettings.DESCRIPTIONS
     )
 
 @blueprint.route("/announcements/")

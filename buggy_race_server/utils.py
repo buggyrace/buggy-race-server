@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper utilities and decorators."""
-from flask import flash, request, redirect, Markup, url_for, config
+from flask import flash, request, redirect, Markup, url_for, current_app
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
@@ -31,7 +31,7 @@ def flash_suggest_if_not_yet_githubbed(function):
 
 # prevent unauthorised registration if there is an auth code in the environment
 def is_authorised(form, field):
-  auth_code = ConfigFromEnv.REGISTRATION_AUTH_CODE
+  auth_code = current_app.config[ConfigSettings.REGISTRATION_AUTH_CODE]
   if auth_code is not None and field.data.lower() != auth_code.lower():
     raise ValidationError("You must provide a valid authorisation code")
 

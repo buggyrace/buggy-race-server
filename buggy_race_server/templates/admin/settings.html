@@ -24,7 +24,12 @@
                   <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
                 </select>
               {% else %}
-                <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" type="text"
+                <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                {% if type_of_settings[name] == "int" %}
+                    type="number"
+                {% else %}
+                    type="text"
+                {% endif %}
                 {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
               {% endif %}
             </div>
@@ -35,7 +40,7 @@
             </div>
           </div>
         {% endfor %}
-        <input type="submit" class="button" />
+        <input type="submit" class="btn btn-primary" value="Submit {{ group }} settings"/>
       </form>
     </div>
   {% endfor %}

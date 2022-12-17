@@ -404,7 +404,9 @@ def settings():
           value = setting_form.get('value')
           if name in settings_as_dict:
             if settings_as_dict[name] != value:
-              flash(f"Changed {name} from \"{settings_as_dict[name]}\" to \"{value}\"", "info")
+              pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
+              pretty_new = ConfigSettings.prettify(name, value)
+              flash(f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\"", "info")
               config_data_update.append({
                 "name": name,
                 "value": value
@@ -452,7 +454,7 @@ def settings():
       groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,
       type_of_settings=ConfigSettings.TYPES,
-      default_settings=ConfigSettings.DEFAULTS,
+      pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
       descriptions=ConfigSettings.DESCRIPTIONS
     )
 

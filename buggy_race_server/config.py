@@ -279,6 +279,11 @@ class ConfigSettings:
 
     }
 
+    def prettify(name, value):
+      if ConfigSettings.TYPES.get(name) == "bool":
+        return "No" if (value == "0" or not bool(value)) else "Yes"
+      return value
+
     def set_config_value(app, name, value):
         str_value = str(value)
         type = ConfigSettings.TYPES[name]

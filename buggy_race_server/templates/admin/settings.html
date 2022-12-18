@@ -35,8 +35,9 @@
             </div>
             <div class="col-sm-5">
               {{ descriptions[name] }}
-              <br>
-              default: <code>{{ pretty_default_settings[name] }}</code>
+              <div class="setting-default">
+                <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+              </div>
             </div>
           </div>
         {% endfor %}

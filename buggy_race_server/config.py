@@ -127,10 +127,10 @@ class ConfigSettings:
         BUGGY_EDITOR_GITHUB_URL:  "https://github.com/buggyrace/buggy-race-editor",
         BUGGY_EDITOR_REPO_NAME: "buggy-race-editor",
         BUGGY_EDITOR_REPO_OWNER: "buggyrace",
-        BUGGY_EDITOR_ISSUES_FILE: "",
+        BUGGY_EDITOR_ISSUES_FILE: "buggyrace-issues.csv",
         GITHUB_PAGES_URL: "",
-        BUGGY_RACE_SERVER_URL: "",
-        SERVER_PROJECT_PAGE_PATH: "",
+        BUGGY_RACE_SERVER_URL: "http://localhost:8000",
+        SERVER_PROJECT_PAGE_PATH: "project",
         SOCIAL_LINKS: "",
         REGISTRATION_AUTH_CODE: "CHANGEME",
         ADMIN_USERNAMES: "",
@@ -180,7 +180,8 @@ class ConfigSettings:
 
     DESCRIPTIONS = {
         INSTITUTION_SHORT_NAME:
-          """Short name for your institution, college, or school.""",
+          """Short name or abbreviation for your institution, college,
+          or school.""",
         
         INSTITUTION_FULL_NAME:
           """Full name for your institution, college, or school""",
@@ -192,26 +193,29 @@ class ConfigSettings:
         PROJECT_CODE:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999);
-          otherwise, "buggy" works. An automatically slugified form of
+          otherwise, "Buggy" works. An automatically slugified form of
           this is used in filenames, etc., but if you want to specify your
-          own, set PROJECT_SLUG here too.""",
+          own, set `PROJECT_SLUG` here too.""",
 
         PROJECT_SLUG:
           """This is how the `PROJECT_CODE` appears in filenames: you only
-          need to set this is the automatic slug (lowercase, spaces-to-hyphens
+          need to set this if the automatic slug (lowercase, spaces-to-hyphens
           and so on) isn't acceptable to you.""",
 
         SECRET_KEY:
-          """A secret used by the webserver.""",
+          """A secret used by the webserver (for example, as part of its
+          defence against cross-site forgery attacks). This should be unique
+          for your server: the default value was randomised on installation,
+          but you can choose your own value if you prefer.""",
 
         FORCE_REDIRECT_HTTP_TO_HTTPS:
           """Should the webserver itself force HTTPS? This setting might not
-          helpful if your hosting environment manages this for you (that is,
-          it may already be handling this for you in which case it can be
-          counterproductive to tell the server to force it here). HTTPS is
-          mandatory for GitHub's OAuth authentication, or if you're holding any
-          personal information on students (e.g., if you're using that GitHub
-          mechanism, or storing email adresses).""",
+          be helpful if your hosting environment manages this for you (that is,
+          can be counterproductive to tell the server to force it here).
+          HTTPS is mandatory for GitHub's OAuth authentication, or if you're
+          holding any personal information on students. This setting does not
+          _implement_ HTTPS: it only forces redirection if the protocol the web
+          server sees in incoming requests is (non-secure) HTTP.""",
 
         BUGGY_EDITOR_GITHUB_URL:
           """URL to the 'buggy editor' code the students need to start
@@ -230,60 +234,90 @@ class ConfigSettings:
           version of the repo.""",
 
         BUGGY_EDITOR_ISSUES_FILE:
-          """Description""",
+          """Name of the CSV file the server creates that describes the project
+          tasks as GitHub issues. You probably don't need to change this.""",
 
         GITHUB_PAGES_URL:
-          """Description""",
+          """Full URL to the project info pages if they are not being hosted
+          on this server. Normally the project info pages *are* on the race
+          server, so this should be empty.""",
 
         BUGGY_RACE_SERVER_URL:
-          """Description""",
+          """Full URL of this server.""",
 
         SERVER_PROJECT_PAGE_PATH:
-          """Description""",
+          """Path to the project information pages: see `GITHUB_PAGES_URL`:
+          it's unlikely that you'll need to change this unless you've explictly
+          changed the way project info is hosted.
+          """,
 
         SOCIAL_LINKS:
           """Description""",
 
         REGISTRATION_AUTH_CODE:
-          """Description""",
+          """The authorisation code is needed to make any changes to user data,
+          including registering students. If `IS_PUBLIC_REGISTRATION_ALLOWED`
+          is 'Yes' then anyone can register a single user (not recommended).""",
 
         ADMIN_USERNAMES:
-          """Description""",
+          """Comma separated list of admin user names. You can nominate usernames
+          here before they have been registered.""",
 
         DEFAULT_RACE_LEAGUE:
-          """Description""",
+          """Races are grouped by league, so if you're using that mechanism you
+          can nominate the league that new races are in here. It's common to
+          run the race server without using leagues, so if you're not sure,
+          leave this blank.""",
 
         DEFAULT_RACE_COST_LIMIT:
-          """Description""",
+          """The default point cost threshhold for buggies: you can always
+          override this when you create each race.""",
 
         DEFAULT_RACE_IS_VISIBLE:
-          """Description""",
+          """Should a race be public as soon as you create it? If you choose
+          No, you'll have to remember to publish races in order for students
+          to see it.""",
 
         GITHUB_CLIENT_ID:
-          """Description""",
+          """The GitHub client ID for the GitHub app that the server uses to
+          fork the buggy editor repo into a student's own GitHub account.""",
 
         GITHUB_CLIENT_SECRET:
-          """Description""",
+          """A string that exactly matches the client secret stored on the
+          GitHub app that the server uses tofork the buggy editor repo into
+          a student's own GitHub account.""",
 
         IS_PRETTY_USERNAME_TITLECASE:
-          """Description""",
+          """Should usernames (which are always lower case) be displayed using
+          title case? For example, choose 'Yes' if the usernames you're using
+          are really students' names. Login is always case insensitive, so this
+          only affects how usernames are displayed, not what users need to
+          type.""",
 
         USERS_HAVE_EMAIL:
-          """Description""",
+          """Do users need email addresses? The server doesn't send emails so
+          you don't need this field unless it's a useful way of identifying
+          a student.""",
 
         USERS_HAVE_ORG_USERNAME:
-          """Description""",
+          """Do users have a username or account that's specific to your
+          institution? You might not need this, or you might already be using
+          it as the username — in which case choose 'No'.
+          """,
 
         USERS_HAVE_FIRST_NAME:
-          """Description""",
+          """Do users need to have a first name? You might be using each student's
+          first name as the username, in which case you don't need this.""",
 
         USERS_HAVE_LAST_NAME:
-          """Description""",
+          """Do users need to have a last name? If you can already identify your
+          students from the other fields, you might not need this.""",
 
         IS_PUBLIC_REGISTRATION_ALLOWED:
           """Can users register themselves? If not, only an admin user who
-          knows the `AUTH_CODE` can register new users. You almost certainly
-          do not want public registration."""
+          knows the `AUTH_CODE` can register new users. Normally, the
+          staff running the buggy racing project will register users so
+          public registration should not be enabled."""
 
     }
 

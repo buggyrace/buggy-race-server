@@ -8,7 +8,7 @@
   <div class="row">
     <form id="registerForm" class="form form-register" method="POST" action="" role="form">
       {{ form.csrf_token }}
-      {% if has_auth_code is sameas true %}
+      {% if is_registration_allowed is sameas false %}
         <div class="alert alert-danger">
           Registration is not public on this server:<br>
           you <strong>must</strong> provide a valid authorisation code to register users!

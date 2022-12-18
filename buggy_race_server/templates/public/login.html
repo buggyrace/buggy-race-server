@@ -23,9 +23,11 @@
     </div>
     <button class="btn btn-primary my-3" type="submit">Login</button>
   </form>
-  <p class="mt-5">
-    <a href="{{ url_for('public.register') }}">Register instead</a>.
-  </p>
+  {% if is_registration_allowed %}
+    <p class="mt-5">
+      <a href="{{ url_for('public.register') }}">Register instead</a>.
+    </p>
+  {% endif %}
 </div>
 {% endblock %}
 

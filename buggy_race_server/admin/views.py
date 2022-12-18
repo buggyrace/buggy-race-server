@@ -144,9 +144,6 @@ def bulk_register(data_format=None):
     is_json = data_format == "json"
     if not current_user.is_buggy_admin:
       abort(403)
-    if not current_app.config[ConfigSettings._HAS_AUTH_CODE]:
-      flash("Bulk registration is disabled: must set REGISTRATION_AUTH_CODE first", "danger")
-      abort(401)
     err_msgs = []
     form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
@@ -240,7 +237,6 @@ def bulk_register(data_format=None):
     return render_template(
         "admin/bulk_register.html",
         form=form,
-        has_auth_code=current_app.config[ConfigSettings._HAS_AUTH_CODE],
         example_csv_data = [
           ",".join(csv_fieldnames),
           ",".join(User.get_example_data("ada", csv_fieldnames)),
@@ -286,9 +282,7 @@ def edit_user(user_id):
     "admin/user.html",
     form=form,
     user=user,
-    has_auth_code=current_app.config[ConfigSettings._HAS_AUTH_CODE]
   )
-#  return redirect(url_for("admin.admin"))
 
 @blueprint.route("/api-keys", methods=['GET','POST'])
 @login_required

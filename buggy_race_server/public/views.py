@@ -60,12 +60,27 @@ def login():
             return redirect(redirect_url)
         else:
             flash_errors(form)
-    return render_template("public/login.html", form=form)
+    return render_template(
+        "public/login.html",
+        form=form,
+        is_registration_allowed=(
+            current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED]
+            or (not current_user.is_anonymous and current_user.is_buggy_admin)
+        )
+    )
 
 @blueprint.route("/register/", methods=["GET", "POST"])
 def register():
     """Register new user."""
     form = RegisterForm(request.form)
+    if current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED]:
+        del form.authorisation_code
+    elif not (not current_user.is_anonymous and current_user.is_buggy_admin):
+        flash(
+          "You must be logged in as an administrator to register new users "
+          "(you'll need to know the authorisation code too)", "warning"
+        )
+        abort(403)
     if not current_app.config[configs.USERS_HAVE_EMAIL]:
         del form.email
     if not current_app.config[configs.USERS_HAVE_FIRST_NAME]:
@@ -94,7 +109,7 @@ def register():
     return render_template(
         "public/register.html",
         form=form,
-        has_auth_code=current_app.config[configs._HAS_AUTH_CODE]
+        is_registration_allowed=bool(current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED])
     )
 
 @blueprint.route("/specs/")

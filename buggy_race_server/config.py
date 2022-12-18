@@ -39,7 +39,6 @@ class ConfigSettings:
     # but rather are implied once the config is set
     _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED="_USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED"
     _USERS_ADDITIONAL_FIELDNAMES="_USERS_ADDITIONAL_FIELDNAMES"
-    _HAS_AUTH_CODE="_HAS_AUTH_CODE"
     _ADMIN_USERNAMES_LIST="_ADMIN_USERNAMES_LIST"
 
     ADMIN_USERNAMES="ADMIN_USERNAMES"
@@ -59,6 +58,7 @@ class ConfigSettings:
     INSTITUTION_HOME_URL="INSTITUTION_HOME_URL"
     INSTITUTION_SHORT_NAME="INSTITUTION_SHORT_NAME"
     IS_PRETTY_USERNAME_TITLECASE="IS_PRETTY_USERNAME_TITLECASE"
+    IS_PUBLIC_REGISTRATION_ALLOWED="IS_PUBLIC_REGISTRATION_ALLOWED"
     PROJECT_CODE="PROJECT_CODE"
     PROJECT_SLUG="PROJECT_SLUG"
     REGISTRATION_AUTH_CODE="REGISTRATION_AUTH_CODE"
@@ -110,6 +110,7 @@ class ConfigSettings:
         REGISTRATION_AUTH_CODE,
         ADMIN_USERNAMES,
         SECRET_KEY,
+        IS_PUBLIC_REGISTRATION_ALLOWED,
       },
       "social": {
         SOCIAL_LINKS,
@@ -143,6 +144,7 @@ class ConfigSettings:
         USERS_HAVE_ORG_USERNAME: 0,
         USERS_HAVE_FIRST_NAME: 0,
         USERS_HAVE_LAST_NAME: 0,
+        IS_PUBLIC_REGISTRATION_ALLOWED: 0,
     }
 
     TYPES = {
@@ -173,6 +175,7 @@ class ConfigSettings:
         USERS_HAVE_ORG_USERNAME: TYPE_BOOLEAN,
         USERS_HAVE_FIRST_NAME: TYPE_BOOLEAN,
         USERS_HAVE_LAST_NAME: TYPE_BOOLEAN,
+        IS_PUBLIC_REGISTRATION_ALLOWED: TYPE_BOOLEAN,
     }
 
     DESCRIPTIONS = {
@@ -277,6 +280,11 @@ class ConfigSettings:
         USERS_HAVE_LAST_NAME:
           """Description""",
 
+        IS_PUBLIC_REGISTRATION_ALLOWED:
+          """Can users register themselves? If not, only an admin user who
+          knows the `AUTH_CODE` can register new users. You almost certainly
+          do not want public registration."""
+
     }
 
     def prettify(name, value):
@@ -299,7 +307,6 @@ class ConfigSettings:
         """ Generates extra/convenience config settings that are
         implied from config settings that are already set. """
 
-        app.config[ConfigSettings._HAS_AUTH_CODE] = app.config[ConfigSettings.REGISTRATION_AUTH_CODE] is not None
         app.config[ConfigSettings._ADMIN_USERNAMES_LIST] = [
             user.strip() for user in app.config[ConfigSettings.ADMIN_USERNAMES].split(",")
         ]

@@ -16,7 +16,7 @@ from wtforms import (
     TextAreaField,
     widgets,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 
 from buggy_race_server.admin.models import Setting
 from buggy_race_server.config import ConfigFromEnv, ConfigSettings
@@ -100,6 +100,8 @@ class SettingForm(FlaskForm):
         min_entries=1,
         max_entries=len(ConfigSettings.DEFAULTS)
     )
+    # when changing the auth form, need the current auth code too
+    authorisation_code = PasswordField("Authorisation code",  [Optional()])
 
     def __init__(self, *args, **kwargs):
         super(SettingForm, self).__init__(*args, **kwargs)

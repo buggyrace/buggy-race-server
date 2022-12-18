@@ -29,11 +29,15 @@ def flash_suggest_if_not_yet_githubbed(function):
     return function()
   return wrapper
 
-# prevent unauthorised registration if there is an auth code in the environment
+# prevent unauthorised registration
 def is_authorised(form, field):
   auth_code = current_app.config[ConfigSettings.REGISTRATION_AUTH_CODE]
-  if auth_code is not None and field.data.lower() != auth_code.lower():
+  if auth_code is None:
+    raise ValidationError("No authorisation code has been set: cannot authorise")    
+  if field.data.lower() != auth_code.lower():
     raise ValidationError("You must provide a valid authorisation code")
+  return True
+  
 
 # check current user is active: this catches (and logs out) a user who has been
 # made inactive _during_ their session: need this so admin can (if needed) bump

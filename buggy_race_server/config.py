@@ -34,6 +34,7 @@ class ConfigSettings:
     TYPE_BOOLEAN = "bool"
     TYPE_INT = "int"
     TYPE_URL = "url"
+    TYPE_PASSWORD = "pass"
 
     # config settings prefixed with _ are not set by user
     # but rather are implied once the config is set
@@ -75,6 +76,9 @@ class ConfigSettings:
     #     _USERS_ADDITIONAL_FIELDNAMES,
     #     _USERS_ADDITIONAL_FIELDNAMES_ENABLED
     #   ),
+      "auth":(
+        REGISTRATION_AUTH_CODE
+      ),
       "org": (
         INSTITUTION_FULL_NAME,
         INSTITUTION_SHORT_NAME,
@@ -107,7 +111,6 @@ class ConfigSettings:
         FORCE_REDIRECT_HTTP_TO_HTTPS,
         BUGGY_RACE_SERVER_URL,
         SERVER_PROJECT_PAGE_PATH,
-        REGISTRATION_AUTH_CODE,
         ADMIN_USERNAMES,
         SECRET_KEY,
         IS_PUBLIC_REGISTRATION_ALLOWED,
@@ -163,7 +166,7 @@ class ConfigSettings:
         BUGGY_RACE_SERVER_URL: TYPE_URL,
         SERVER_PROJECT_PAGE_PATH: TYPE_STRING,
         SOCIAL_LINKS: TYPE_STRING, # TODO
-        REGISTRATION_AUTH_CODE: TYPE_STRING,
+        REGISTRATION_AUTH_CODE: TYPE_PASSWORD,
         ADMIN_USERNAMES: TYPE_STRING,
         DEFAULT_RACE_LEAGUE: TYPE_STRING,
         DEFAULT_RACE_COST_LIMIT: TYPE_INT,
@@ -203,8 +206,7 @@ class ConfigSettings:
           and so on) isn't acceptable to you.""",
 
         SECRET_KEY:
-          """A secret used by the webserver (for example, as part of its
-          defence against cross-site forgery attacks). This should be unique
+          """A secret used by the webserver in cookies, etc. This should be unique
           for your server: the default value was randomised on installation,
           but you can choose your own value if you prefer.""",
 
@@ -334,7 +336,6 @@ class ConfigSettings:
         elif type == ConfigSettings.TYPE_INT:
             if str_value.isdecimal():
                 value = int(str_value)
-        print(f"FIXME setting {name}: <{value}>", flush=True)
         app.config[name] = value
 
     def imply_extra_settings(app):

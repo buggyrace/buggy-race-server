@@ -19,7 +19,7 @@ from flask import (
     jsonify,
 )
 from flask_login import current_user, login_required
-
+from wtforms.validators import ValidationError
 from buggy_race_server.admin.forms import (
     AnnouncementActionForm,
     AnnouncementForm,
@@ -28,15 +28,12 @@ from buggy_race_server.admin.forms import (
     SettingForm
 )
 from buggy_race_server.user.forms import UserForm
-
 from buggy_race_server.config import ConfigSettings
-
-
 from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.database import db
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import flash_errors, refresh_global_announcements, load_settings_from_db
+from buggy_race_server.utils import flash_errors, refresh_global_announcements, load_settings_from_db, is_authorised
 
 blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
 
@@ -150,7 +147,6 @@ def bulk_register(data_format=None):
         lines = form.userdata.data.splitlines()
         if len(lines):
           lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
-          print(f"FIXME **** <{lines[0]}>", flush=True)
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
         line_no = 0
@@ -395,50 +391,68 @@ def settings():
         config_data_update = []
         for setting_form in form.settings.data:
           name = setting_form.get('name')
-          value = setting_form.get('value')
+          value = setting_form.get('value').strip()
+          if name == ConfigSettings.REGISTRATION_AUTH_CODE:
+            try:
+              is_authorised(form, form.authorisation_code)
+              if len(value) < 4: # min sensible auth code length
+                raise ValidationError("Did not change auth code: the value you submitted was too short")
+            except ValidationError as e:
+              flash(str(e), "danger")
+              value = settings_as_dict[name] # don't change the auth code
           if name in settings_as_dict:
             if settings_as_dict[name] != value:
-              pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
-              pretty_new = ConfigSettings.prettify(name, value)
-              flash(f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\"", "info")
-              config_data_update.append({
-                "name": name,
-                "value": value
-              })
-              qty_settings_changed += 1
-          else: # config not in settings table: unexpected
-              flash(f"Setting {name} to \"{value}\"", "info")
+                if ConfigSettings.TYPES[name] == ConfigSettings.TYPE_PASSWORD:
+                  changed_msg = f"Changed {name} to a new value"
+                else:
+                  pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
+                  pretty_new = ConfigSettings.prettify(name, value)
+                  changed_msg = f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\""
+                flash(changed_msg, "info")
+                config_data_update.append({
+                  "name": name,
+                  "value": value
+                })
+                qty_settings_changed += 1
+          else: # config not in settings table: unexpected... but roll with it: INSERT
+              if ConfigSettings.TYPES[name] == ConfigSettings.TYPE_PASSWORD:
+                changed_msg = f"Setting {name}\""
+              else:
+                changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
+              flash(changed_msg, "info")
               config_data_insert.append({
                 "id": name,
                 "value": value
               })
               qty_settings_changed += 1
-        settings_table = Setting.__table__
-        if config_data_update:
-            try:
-              result = db.session.execute(
-                update(settings_table)
-                  .where(settings_table.c.id == bindparam("name"))
-                  .values(value=bindparam("value")),
-                  config_data_update
-              )
-              db.session.commit()
-            except Exception as e:
-                flash(str(e), "danger")
-        if config_data_insert:
-            try:
-              result = db.session.execute(
-                  insert(settings_table),
-                  config_data_insert
-              )
-              db.session.commit()
-            except Exception as e:
-                flash(str(e), "danger")
         if qty_settings_changed:
+          settings_table = Setting.__table__
+          if config_data_update:
+              try:
+                result = db.session.execute(
+                  update(settings_table)
+                    .where(settings_table.c.id == bindparam("name"))
+                    .values(value=bindparam("value")),
+                    config_data_update
+                )
+                db.session.commit()
+              except Exception as e:
+                  flash(str(e), "danger")
+          if config_data_insert:
+              try:
+                result = db.session.execute(
+                    insert(settings_table),
+                    config_data_insert
+                )
+                db.session.commit()
+              except Exception as e:
+                  flash(str(e), "danger")
           # we've changed config, try to update config too
           load_settings_from_db(current_app)
-          flash("When you've finished changing settings, you should restart the server", "info")
+          flash("When you've finished changing settings, it's a good idea to restart the server", "info")
           settings_as_dict = Setting.get_dict_from_query(settings)
+        else:
+          flash("No settings were changed", "info")
       else:
         flash(form.errors, "danger")
     return render_template(

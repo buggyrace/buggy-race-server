@@ -16,10 +16,10 @@ from wtforms import (
     TextAreaField,
     widgets,
 )
-from wtforms.validators import DataRequired, Optional
+from wtforms.validators import DataRequired, Optional, ValidationError
 
-from buggy_race_server.admin.models import Setting
-from buggy_race_server.config import ConfigFromEnv, ConfigSettings
+from buggy_race_server.admin.models import AnnouncementType
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.utils import is_authorised
 
 
@@ -65,7 +65,7 @@ class AnnouncementForm(FlaskForm):
     type = SelectField(
       'Type',
       validators=[DataRequired()],
-      choices=[(t,t) for t in ConfigFromEnv.ANNOUNCEMENT_TYPES]
+      choices=[(t,t) for t in AnnouncementType]
     )
     is_visible = BooleanField("Display now?")
     is_html = BooleanField("Allow HTML?")
@@ -89,8 +89,22 @@ class AnnouncementActionForm(FlaskForm):
         return super(AnnouncementActionForm, self).validate()
 
 class ConfigSettingForm(Form):
+
     name = HiddenField("Config-Setting-Name")
     value = StringField("Config-Setting-Value", validators=[])
+
+    def validate_value(self, value):
+        if (
+            self.name.data == ConfigSettingNames.REGISTRATION_AUTH_CODE.name
+            and self.value.data == ConfigSettings.DEFAULTS[ConfigSettingNames.REGISTRATION_AUTH_CODE.name]
+        ):
+            raise ValidationError(
+                "You must change the auth code to be something other than "
+                "its default ('factory') setting"
+            )
+
+    def validate(self):
+        return super(ConfigSettingForm, self).validate()
 
 class SettingForm(FlaskForm):
     group = HiddenField()

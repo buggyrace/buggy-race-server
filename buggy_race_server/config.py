@@ -16,31 +16,25 @@ but everything else from the settings in the database:
   but
   accessed as an object here in config
 
-  * why use database?
-   - Because files on heroku are transient, but DB persists
-   - maybe easier to ue same form mechanism through ORM?
-
 """
 
+from enum import Enum
 from environs import Env
-import re
 from random import randint
+import re
 
-class ConfigSettings:
+class ConfigSettingNames(str, Enum):
 
-    # these are the NAMES of the config settings (not their values!)
+    # TODO: might want to make these explicity somewhere:
+    # Some config settings (specifically, Flask-related ones) are missing here
+    # because they are only set by environment variables (e.g., the database URL).
 
-    TYPE_STRING = "str" # default TODO maybe ""?
-    TYPE_BOOLEAN = "bool"
-    TYPE_INT = "int"
-    TYPE_URL = "url"
-    TYPE_PASSWORD = "pass"
-
-    # config settings prefixed with _ are not set by user
-    # but rather are implied once the config is set
+    # prefix by _ are implied, so should not be set explicitly
     _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED="_USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED"
     _USERS_ADDITIONAL_FIELDNAMES="_USERS_ADDITIONAL_FIELDNAMES"
     _ADMIN_USERNAMES_LIST="_ADMIN_USERNAMES_LIST"
+    _CURRENT_ANNOUNCEMENTS="_CURRENT_ANNOUNCEMENTS"
+    _SETUP_STATUS="_SETUP_STATUS"
 
     ADMIN_USERNAMES="ADMIN_USERNAMES"
     BUGGY_EDITOR_GITHUB_URL="BUGGY_EDITOR_GITHUB_URL"
@@ -71,146 +65,181 @@ class ConfigSettings:
     USERS_HAVE_LAST_NAME="USERS_HAVE_LAST_NAME"
     USERS_HAVE_ORG_USERNAME="USERS_HAVE_ORG_USERNAME"
 
+class ConfigGroupNames(str, Enum):
+    """ Config settings are in groups to make the setting form more manageable """
+    AUTH = "auth"
+    ORG = "org"
+    GITHUB = "github"
+    USERS = "users"
+    RACES = "races"
+    SERVER = "server"
+    SOCIAL = "social"
+
+class ConfigTypes(str, Enum):
+    """ Explicit types of config settings (useful for validation, etc) """
+    STRING = "str" # default TODO maybe ""?
+    BOOLEAN = "bool"
+    INT = "int"
+    URL = "url"
+    PASSWORD = "pass"
+
+class ConfigSettings:
+
+    # config settings prefixed with _ are not set by user
+    # but rather are implied once the config is set
+
     GROUPS = {
-    #   "_auto": ( # these are not stored in the database
-    #     _USERS_ADDITIONAL_FIELDNAMES,
-    #     _USERS_ADDITIONAL_FIELDNAMES_ENABLED
-    #   ),
-      "auth":(
-        REGISTRATION_AUTH_CODE
+      ConfigGroupNames.AUTH.name:(
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name
       ),
-      "org": (
-        INSTITUTION_FULL_NAME,
-        INSTITUTION_SHORT_NAME,
-        INSTITUTION_HOME_URL,
-        PROJECT_CODE,
-        PROJECT_SLUG,
+      ConfigGroupNames.ORG.name: (
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name,
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name,
+        ConfigSettingNames.INSTITUTION_HOME_URL.name,
+        ConfigSettingNames.PROJECT_CODE.name,
+        ConfigSettingNames.PROJECT_SLUG.name,
       ),
-      "github": (
-        BUGGY_EDITOR_GITHUB_URL,
-        BUGGY_EDITOR_REPO_NAME,
-        BUGGY_EDITOR_REPO_OWNER,
-        BUGGY_EDITOR_ISSUES_FILE,
-        GITHUB_PAGES_URL,
-        GITHUB_CLIENT_ID,
-        GITHUB_CLIENT_SECRET,
+      ConfigGroupNames.GITHUB.name: (
+        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name,
+        ConfigSettingNames.GITHUB_PAGES_URL.name,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name,
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
       ),
-      "users": (
-        IS_PRETTY_USERNAME_TITLECASE,
-        USERS_HAVE_EMAIL,
-        USERS_HAVE_ORG_USERNAME,
-        USERS_HAVE_FIRST_NAME,
-        USERS_HAVE_LAST_NAME,
+      ConfigGroupNames.USERS.name: (
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name,
+        ConfigSettingNames.USERS_HAVE_EMAIL.name,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name,
+        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
+        ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
       ),
-      "races": {
-        DEFAULT_RACE_LEAGUE,
-        DEFAULT_RACE_COST_LIMIT,
-        DEFAULT_RACE_IS_VISIBLE,
+      ConfigGroupNames.RACES.name: {
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name,
       },
-      "server":{
-        FORCE_REDIRECT_HTTP_TO_HTTPS,
-        BUGGY_RACE_SERVER_URL,
-        SERVER_PROJECT_PAGE_PATH,
-        ADMIN_USERNAMES,
-        SECRET_KEY,
-        IS_PUBLIC_REGISTRATION_ALLOWED,
+      ConfigGroupNames.SERVER.name:{
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name,
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
+        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
+        ConfigSettingNames.ADMIN_USERNAMES.name,
+        ConfigSettingNames.SECRET_KEY.name,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name,
       },
-      "social": {
-        SOCIAL_LINKS,
+      ConfigGroupNames.SOCIAL.name: {
+        ConfigSettingNames.SOCIAL_LINKS.name,
       }
     }
     DEFAULTS = {
-        INSTITUTION_SHORT_NAME: "ASBP",
-        INSTITUTION_FULL_NAME: "Acme School of Buggy Programming",
-        INSTITUTION_HOME_URL: "https://acme.example.com/",
-        PROJECT_CODE: "Buggy",
-        PROJECT_SLUG: "",
-        SECRET_KEY: f"{randint(1000, 9999)}-secret-{randint(1000, 9999)}",
-        FORCE_REDIRECT_HTTP_TO_HTTPS: 0,
-        BUGGY_EDITOR_GITHUB_URL:  "https://github.com/buggyrace/buggy-race-editor",
-        BUGGY_EDITOR_REPO_NAME: "buggy-race-editor",
-        BUGGY_EDITOR_REPO_OWNER: "buggyrace",
-        BUGGY_EDITOR_ISSUES_FILE: "buggyrace-issues.csv",
-        GITHUB_PAGES_URL: "",
-        BUGGY_RACE_SERVER_URL: "http://localhost:8000",
-        SERVER_PROJECT_PAGE_PATH: "project",
-        SOCIAL_LINKS: "",
-        REGISTRATION_AUTH_CODE: "CHANGEME",
-        ADMIN_USERNAMES: "",
-        DEFAULT_RACE_LEAGUE: "",
-        DEFAULT_RACE_COST_LIMIT: 200,
-        DEFAULT_RACE_IS_VISIBLE: 0,
-        GITHUB_CLIENT_ID: "",
-        GITHUB_CLIENT_SECRET: "",
-        IS_PRETTY_USERNAME_TITLECASE: 0,
-        USERS_HAVE_EMAIL: 0,
-        USERS_HAVE_ORG_USERNAME: 0,
-        USERS_HAVE_FIRST_NAME: 0,
-        USERS_HAVE_LAST_NAME: 0,
-        IS_PUBLIC_REGISTRATION_ALLOWED: 0,
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
+        ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
+        ConfigSettingNames.PROJECT_CODE.name: "Buggy",
+        ConfigSettingNames.PROJECT_SLUG.name: "",
+        ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
+        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
+        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
+        ConfigSettingNames.GITHUB_PAGES_URL.name: "",
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
+        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
+        ConfigSettingNames.SOCIAL_LINKS.name: "",
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
+        ConfigSettingNames.ADMIN_USERNAMES.name: "",
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: 0,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
+        ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
+        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
+        ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
+        ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
     }
 
     TYPES = {
-        INSTITUTION_SHORT_NAME: TYPE_STRING,
-        INSTITUTION_FULL_NAME: TYPE_STRING,
-        INSTITUTION_HOME_URL: TYPE_URL,
-        PROJECT_CODE: TYPE_STRING,
-        PROJECT_SLUG: TYPE_STRING,
-        SECRET_KEY: TYPE_STRING,
-        FORCE_REDIRECT_HTTP_TO_HTTPS: TYPE_BOOLEAN,
-        BUGGY_EDITOR_GITHUB_URL:  TYPE_URL,
-        BUGGY_EDITOR_REPO_NAME: TYPE_STRING,
-        BUGGY_EDITOR_REPO_OWNER: TYPE_STRING,
-        BUGGY_EDITOR_ISSUES_FILE: TYPE_STRING,
-        GITHUB_PAGES_URL: TYPE_URL,
-        BUGGY_RACE_SERVER_URL: TYPE_URL,
-        SERVER_PROJECT_PAGE_PATH: TYPE_STRING,
-        SOCIAL_LINKS: TYPE_STRING, # TODO
-        REGISTRATION_AUTH_CODE: TYPE_PASSWORD,
-        ADMIN_USERNAMES: TYPE_STRING,
-        DEFAULT_RACE_LEAGUE: TYPE_STRING,
-        DEFAULT_RACE_COST_LIMIT: TYPE_INT,
-        DEFAULT_RACE_IS_VISIBLE: TYPE_BOOLEAN,
-        GITHUB_CLIENT_ID: TYPE_STRING,
-        GITHUB_CLIENT_SECRET: TYPE_STRING,
-        IS_PRETTY_USERNAME_TITLECASE: TYPE_BOOLEAN,
-        USERS_HAVE_EMAIL: TYPE_BOOLEAN,
-        USERS_HAVE_ORG_USERNAME: TYPE_BOOLEAN,
-        USERS_HAVE_FIRST_NAME: TYPE_BOOLEAN,
-        USERS_HAVE_LAST_NAME: TYPE_BOOLEAN,
-        IS_PUBLIC_REGISTRATION_ALLOWED: TYPE_BOOLEAN,
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
+        ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames.GITHUB_PAGES_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_LINKS.name: ConfigTypes.STRING, # TODO
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
+        ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
     }
 
+    # this is the order of the setting groups that is
+    # used during the (initial) setup: the _SETUP_STATUS
+    # config is effectively the index-1 into this array:
+    # when the setup is complete, _SETUP_STATUS is zero.
+    SETUP_GROUPS = [
+      ConfigGroupNames.AUTH,
+      ConfigGroupNames.ORG,
+      ConfigGroupNames.USERS,
+      ConfigGroupNames.SERVER,
+      ConfigGroupNames.RACES,
+      ConfigGroupNames.SOCIAL,
+      ConfigGroupNames.GITHUB
+    ]
+
     DESCRIPTIONS = {
-        INSTITUTION_SHORT_NAME:
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
           """Short name or abbreviation for your institution, college,
           or school.""",
         
-        INSTITUTION_FULL_NAME:
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name:
           """Full name for your institution, college, or school""",
 
-        INSTITUTION_HOME_URL:
+        ConfigSettingNames.INSTITUTION_HOME_URL.name:
           """Full URL for the home page of your institution: used as a link
           on the racing server's home page.""",
 
-        PROJECT_CODE:
+        ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999);
           otherwise, "Buggy" works. An automatically slugified form of
           this is used in filenames, etc., but if you want to specify your
           own, set `PROJECT_SLUG` here too.""",
 
-        PROJECT_SLUG:
+        ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears in filenames: you only
           need to set this if the automatic slug (lowercase, spaces-to-hyphens
           and so on) isn't acceptable to you.""",
 
-        SECRET_KEY:
+        ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique
           for your server: the default value was randomised on installation,
           but you can choose your own value if you prefer.""",
 
-        FORCE_REDIRECT_HTTP_TO_HTTPS:
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
           """Should the webserver itself force HTTPS? This setting might not
           be helpful if your hosting environment manages this for you (that is,
           can be counterproductive to tell the server to force it here).
@@ -219,103 +248,103 @@ class ConfigSettings:
           _implement_ HTTPS: it only forces redirection if the protocol the web
           server sees in incoming requests is (non-secure) HTTP.""",
 
-        BUGGY_EDITOR_GITHUB_URL:
+        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start
           the project. This is a public repo and unless you've forked
           it to make a custom one, you probably don't need to change
           this.""",
 
-        BUGGY_EDITOR_REPO_NAME:
+        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
           """This should match the name in the `BUGGY_EDITOR_GITHUB_URL`
           and is used in some of the GitHub API calls: if you haven't
           changed the repo URL then you won't need to change this.""",
 
-        BUGGY_EDITOR_REPO_OWNER:
+        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           You don't need to change this unless you've forked your own custom
           version of the repo.""",
 
-        BUGGY_EDITOR_ISSUES_FILE:
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name:
           """Name of the CSV file the server creates that describes the project
           tasks as GitHub issues. You probably don't need to change this.""",
 
-        GITHUB_PAGES_URL:
+        ConfigSettingNames.GITHUB_PAGES_URL.name:
           """Full URL to the project info pages if they are not being hosted
           on this server. Normally the project info pages *are* on the race
           server, so this should be empty.""",
 
-        BUGGY_RACE_SERVER_URL:
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
           """Full URL of this server.""",
 
-        SERVER_PROJECT_PAGE_PATH:
+        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name:
           """Path to the project information pages: see `GITHUB_PAGES_URL`:
           it's unlikely that you'll need to change this unless you've explictly
           changed the way project info is hosted.
           """,
 
-        SOCIAL_LINKS:
+        ConfigSettingNames.SOCIAL_LINKS.name:
           """Description""",
 
-        REGISTRATION_AUTH_CODE:
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
           """The authorisation code is needed to make any changes to user data,
           including registering students. If `IS_PUBLIC_REGISTRATION_ALLOWED`
           is 'Yes' then anyone can register a single user (not recommended).""",
 
-        ADMIN_USERNAMES:
+        ConfigSettingNames.ADMIN_USERNAMES.name:
           """Comma separated list of admin user names. You can nominate usernames
           here before they have been registered.""",
 
-        DEFAULT_RACE_LEAGUE:
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
           """Races are grouped by league, so if you're using that mechanism you
           can nominate the league that new races are in here. It's common to
           run the race server without using leagues, so if you're not sure,
           leave this blank.""",
 
-        DEFAULT_RACE_COST_LIMIT:
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshhold for buggies: you can always
           override this when you create each race.""",
 
-        DEFAULT_RACE_IS_VISIBLE:
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name:
           """Should a race be public as soon as you create it? If you choose
           No, you'll have to remember to publish races in order for students
           to see it.""",
 
-        GITHUB_CLIENT_ID:
+        ConfigSettingNames.GITHUB_CLIENT_ID.name:
           """The GitHub client ID for the GitHub app that the server uses to
           fork the buggy editor repo into a student's own GitHub account.""",
 
-        GITHUB_CLIENT_SECRET:
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name:
           """A string that exactly matches the client secret stored on the
           GitHub app that the server uses tofork the buggy editor repo into
           a student's own GitHub account.""",
 
-        IS_PRETTY_USERNAME_TITLECASE:
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
           title case? For example, choose 'Yes' if the usernames you're using
           are really students' names. Login is always case insensitive, so this
           only affects how usernames are displayed, not what users need to
           type.""",
 
-        USERS_HAVE_EMAIL:
+        ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
           you don't need this field unless it's a useful way of identifying
           a student.""",
 
-        USERS_HAVE_ORG_USERNAME:
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
           """Do users have a username or account that's specific to your
           institution? You might not need this, or you might already be using
           it as the username — in which case choose 'No'.
           """,
 
-        USERS_HAVE_FIRST_NAME:
+        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name:
           """Do users need to have a first name? You might be using each student's
           first name as the username, in which case you don't need this.""",
 
-        USERS_HAVE_LAST_NAME:
+        ConfigSettingNames.USERS_HAVE_LAST_NAME.name:
           """Do users need to have a last name? If you can already identify your
           students from the other fields, you might not need this.""",
 
-        IS_PUBLIC_REGISTRATION_ALLOWED:
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
           """Can users register themselves? If not, only an admin user who
           knows the `AUTH_CODE` can register new users. Normally, the
           staff running the buggy racing project will register users so
@@ -331,19 +360,19 @@ class ConfigSettings:
     def set_config_value(app, name, value):
         str_value = str(value)
         type = ConfigSettings.TYPES[name]
-        if type == ConfigSettings.TYPE_BOOLEAN:
+        if type == ConfigTypes.BOOLEAN:
             value = str_value == "1"
-        elif type == ConfigSettings.TYPE_INT:
+        elif type == ConfigTypes.INT:
             if str_value.isdecimal():
                 value = int(str_value)
         app.config[name] = value
 
-    def imply_extra_settings(app):
+    def infer_extra_settings(app):
         """ Generates extra/convenience config settings that are
         implied from config settings that are already set. """
 
-        app.config[ConfigSettings._ADMIN_USERNAMES_LIST] = [
-            user.strip() for user in app.config[ConfigSettings.ADMIN_USERNAMES].split(",")
+        app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = [
+            user.strip() for user in app.config[ConfigSettingNames.ADMIN_USERNAMES.name].split(",")
         ]
 
         # note: explicit mapping between name of field/column and enable/disable
@@ -351,20 +380,20 @@ class ConfigSettings:
         #   if these settings are changed _after_ any records have been created
         #   (but that is why this is not implemented in the database schema, which
         #   might be generated before these config settings have been fixed)
-        app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED] = {
-            "email": app.config[ConfigSettings.USERS_HAVE_EMAIL],
-            "org_username": app.config[ConfigSettings.USERS_HAVE_ORG_USERNAME],
-            "first_name": app.config[ConfigSettings.USERS_HAVE_FIRST_NAME],
-            "last_name": app.config[ConfigSettings.USERS_HAVE_LAST_NAME]
+        app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name] = {
+            "email": app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+            "org_username": app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
+            "first_name": app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+            "last_name": app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]
         }
 
         # list of additional fieldnames (will be empty if there are none)
         #   This is a convenience for summarising user settings
         additional_names = []
-        for name in app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED]:
-            if app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
+        for name in app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
+            if app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
                 additional_names.append(name)
-        app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES] = additional_names
+        app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name] = additional_names
 
 
 env = Env()
@@ -415,6 +444,14 @@ def _extract_social_links():
 
 class ConfigFromEnv():
 
+    # set up phase:
+    # 0 - none (full access to settings)
+    # 1 - force change of auth code if unchanged
+    # 2 - get admin username and password
+    # default here is None so existing setting (in db) or default is used
+    _SETUP_STATUS = env.str(str(ConfigSettingNames._SETUP_STATUS), default=None)
+
+    # some (not-buggy-race-specific) config _only_ comes from the ENV
     FLASK_APP = env.str("FLASK_APP", default="autoapp.py")
     FLASK_ENV = env.str("FLASK_ENV", default="production")
     FLASK_DEBUG = DEBUG = FLASK_ENV == "development"
@@ -433,37 +470,38 @@ class ConfigFromEnv():
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = env.str("DATABASE_URL")
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     
+    SECRET_KEY = ConfigSettings.DEFAULTS[ConfigSettingNames.SECRET_KEY.name]
+
     # note that the env settings are not explicitly passed into the config:
     # they exist as the NAME/URL/TEXT fields of the objects in
     # this SOCIAL_LINKS list:
-    SOCIAL_LINKS = _extract_social_links()
+    #- SOCIAL_LINKS = _extract_social_links()
 
     # registration only allowed with an auth code: (case insensitive)
     # if not set, registration is public, which probably isn't what you want
-    reg_auth_code = env.str("REGISTRATION_AUTH_CODE", default="localauth").strip()
-    REGISTRATION_AUTH_CODE = reg_auth_code if reg_auth_code else None
+    #- reg_auth_code = env.str("REGISTRATION_AUTH_CODE", default="localauth").strip()
+    #- REGISTRATION_AUTH_CODE = reg_auth_code if reg_auth_code else None
 
     # comma-separated list of users who have access to admin:
     # currently this is how we're acknowledging admin (not using the is_admin
     # setting in the user model: this was for pragmatic/monkey-patch reasons
     # and needs to be fixed!)
     # But for now, admin power is granted via env variable:
-    ADMIN_USERNAMES = env.str("ADMIN_USERNAMES", default="").strip()
+    #- ADMIN_USERNAMES = env.str("ADMIN_USERNAMES", default="").strip()
 
     # Supported announcement types:
     # roughly, xyz maps to "announcement-xyz" CSS class — but see layout.html)
     # If you add more here, make sure you've also added support for them first
-    ANNOUNCEMENT_TYPES = ['info', 'warning', 'special']
 
     # these are loaded from the database on the first request and then effectively
     # cached in the config to avoid repeated hits on the database
-    CURRENT_ANNOUNCEMENTS = None
+    #- CURRENT_ANNOUNCEMENTS = None
 
     # should usernames be capitalised when displayed?
     # usernames are always considered lowercase, but (if they are
     # student's names) you can choose to display them in titlecase
     # (so Ada instead of ada)
-    IS_PRETTY_USERNAME_TITLECASE = env.bool("IS_PRETTY_USERNAME_TITLECASE", False)
+    #- IS_PRETTY_USERNAME_TITLECASE = env.bool("IS_PRETTY_USERNAME_TITLECASE", False)
 
     # control which user fields are needed:
     # users always have a username...
@@ -478,7 +516,7 @@ class ConfigFromEnv():
     #     GitHub account information so even if you are disabling all of these
     #     you are still resonsible for securely and responsibly handling
     #     private data.
-    USERS_HAVE_EMAIL = env.bool("USERS_HAVE_EMAIL", default=False)
-    USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
-    USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
-    USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)
+    #- USERS_HAVE_EMAIL = env.bool("USERS_HAVE_EMAIL", default=False)
+    #- USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
+    #- USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
+    #- USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)

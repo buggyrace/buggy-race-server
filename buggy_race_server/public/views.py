@@ -15,7 +15,7 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
-from buggy_race_server.config import ConfigSettings as configs
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
@@ -64,7 +64,7 @@ def login():
         "public/login.html",
         form=form,
         is_registration_allowed=(
-            current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED]
+            current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
             or (not current_user.is_anonymous and current_user.is_buggy_admin)
         )
     )
@@ -73,7 +73,7 @@ def login():
 def register():
     """Register new user."""
     form = RegisterForm(request.form)
-    if current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED]:
+    if current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
         del form.authorisation_code
     elif not (not current_user.is_anonymous and current_user.is_buggy_admin):
         flash(
@@ -81,13 +81,13 @@ def register():
           "(you'll need to know the authorisation code too)", "warning"
         )
         abort(403)
-    if not current_app.config[configs.USERS_HAVE_EMAIL]:
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
         del form.email
-    if not current_app.config[configs.USERS_HAVE_FIRST_NAME]:
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
         del form.first_name
-    if not current_app.config[configs.USERS_HAVE_LAST_NAME]:
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
         del form.last_name
-    if not current_app.config[configs.USERS_HAVE_ORG_USERNAME]:
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name]:
         del form.org_username
 
     if form.validate_on_submit():
@@ -109,7 +109,7 @@ def register():
     return render_template(
         "public/register.html",
         form=form,
-        is_registration_allowed=bool(current_app.config[configs.IS_PUBLIC_REGISTRATION_ALLOWED])
+        is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name])
     )
 
 @blueprint.route("/specs/")

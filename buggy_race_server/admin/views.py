@@ -30,8 +30,9 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.config import ConfigSettings
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames, ConfigTypes
 from buggy_race_server.database import db
+from buggy_race_server.extensions import csrf
 from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
@@ -39,7 +40,97 @@ from buggy_race_server.utils import (
     is_authorised,
     load_settings_from_db,
     refresh_global_announcements,
+    set_and_save_config_setting,
 )
+
+SETTING_PREFIX = "settings" # must match name of subform
+
+# only call if form validated OK
+# returns number of settings changed
+# FIXME when this is working, settings/ should use it too
+def _update_settings_in_db(form):
+  settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+  config_data_insert = []
+  config_data_update = []
+  qty_settings_changed = 0
+  has_changed_secret_key = False
+  is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
+  is_update_ok = True # optimistic
+  for setting_form in form.settings.data:
+    name = setting_form.get('name')
+    value = setting_form.get('value').strip()
+    if name == ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
+      try:
+        is_authorised(form, form.authorisation_code)
+        if len(value) < 4: # min sensible auth code length
+          raise ValidationError("Did not change auth code: the value you submitted was too short")
+      except ValidationError as e:
+        flash(str(e), "danger")
+        is_update_ok = False
+        value = settings_as_dict[name] # don't change the auth code
+    is_changed_value = False
+    if name in settings_as_dict:
+      if settings_as_dict[name] != value:
+          if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
+            changed_msg = f"Changed {name} to a new value"
+          else:
+            pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
+            pretty_new = ConfigSettings.prettify(name, value)
+            changed_msg = f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\""
+          flash(changed_msg, "info")
+          config_data_update.append({
+            "name": name,
+            "value": value
+          })
+          is_changed_value = True
+          qty_settings_changed += 1
+    else: # config not in settings table: unexpected... but roll with it: INSERT
+        if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
+          changed_msg = f"Setting {name}\""
+        else:
+          changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
+        flash(changed_msg, "info")
+        config_data_insert.append({
+          "id": name,
+          "value": value
+        })
+        is_changed_value = True
+    if is_changed_value:
+        qty_settings_changed += 1
+        has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY
+  if qty_settings_changed:
+    settings_table = Setting.__table__
+    if config_data_update:
+        try:
+          result = db.session.execute(
+            update(settings_table)
+              .where(settings_table.c.id == bindparam("name"))
+              .values(value=bindparam("value")),
+              config_data_update
+          )
+          db.session.commit()
+        except Exception as e:
+            flash(str(e), "danger")
+            is_update_ok = False
+    if config_data_insert:
+        try:
+          result = db.session.execute(
+              insert(settings_table),
+              config_data_insert
+          )
+          db.session.commit()
+        except Exception as e:
+            flash(str(e), "danger")
+            is_update_ok = False
+    # we've changed config, try to update config too
+    load_settings_from_db(current_app)
+    if has_changed_secret_key:
+      csrf.init_app(current_app) # reset CSRF token before rendering template
+    if not is_in_setup_mode:
+      flash("When you've finished changing settings, it's a good idea to restart the server", "info")
+  else:
+      flash("No settings were changed", "info")
+  return is_update_ok
 
 blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
 
@@ -58,6 +149,50 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
     if want_lower:
       s = s.lower()
   return s
+
+@blueprint.route("/setup", methods=["GET", "POST"])
+def setup():
+    setup_status=current_app.config[ConfigSettingNames._SETUP_STATUS.name]
+    if not setup_status:
+      flash("Setup is complete on this server (settings can be edited from within admin instead)", "danger")
+      abort(404)
+    setup_status = int(setup_status)
+    if setup_status >= len(ConfigSettings.SETUP_GROUPS):
+      current_app.config[ConfigSettingNames._SETUP_STATUS.name] = setup_status = 0
+      flash("Setup complete: log in as admin (TODO) to register users or make changes", "success")
+      return redirect( url_for('public.login'))
+    form = SettingForm(request.form)
+    #settings_as_dict = {}
+    if request.method == "POST":
+      if form.validate_on_submit():
+          if _update_settings_in_db(form):
+            setup_status += 1
+            set_and_save_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name, setup_status)
+          else:
+            # something wasn't OK, so don't save and move on
+            # (the errors will have been explicitly flashed)
+            pass
+      else:
+        if form.settings.errors:
+          for setting_error in form.settings.errors:
+              for field in setting_error:
+                messages = setting_error[field]
+                for msg in messages:
+                  flash(msg, "danger")
+        else:
+          flash(form.errors)
+    group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
+    return render_template(
+      "admin/setup.html",
+      setup_status=setup_status,
+      form=form,
+      SETTING_PREFIX=SETTING_PREFIX,
+      groups={g:ConfigSettings.GROUPS[g] for g in ConfigSettings.GROUPS if g==group_name},
+      settings=Setting.get_dict_from_db(Setting.query.all()),
+      type_of_settings=ConfigSettings.TYPES,
+      pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
+      descriptions=ConfigSettings.DESCRIPTIONS
+    )
 
 @blueprint.route("/")
 @login_required
@@ -128,9 +263,9 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
         return render_template("admin/users.html",
           want_detail = want_detail,
           is_admin_can_edit = is_admin_can_edit,
-          editor_repo_name = current_app.config[ConfigSettings.BUGGY_EDITOR_REPO_NAME],
+          editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
           users = users,
-          admin_usernames = current_app.config[ConfigSettings._ADMIN_USERNAMES_LIST],
+          admin_usernames = current_app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name],
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_enabled = len([s for s in students if s.is_active]),
@@ -235,7 +370,7 @@ def bulk_register(data_format=None):
           })
         else:
           flash_errors(form)
-    csv_fieldnames = ['username', 'password'] + current_app.config[ConfigSettings._USERS_ADDITIONAL_FIELDNAMES]
+    csv_fieldnames = ['username', 'password'] + current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name]
     return render_template(
         "admin/bulk_register.html",
         form=form,
@@ -264,13 +399,13 @@ def edit_user(user_id):
       user.notes = form.notes.data
       user.is_student = form.is_student.data
       user.is_active = form.is_active.data
-      if current_app.config[ConfigSettings.USERS_HAVE_FIRST_NAME]:
+      if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
           user.first_name = form.first_name.data
-      if current_app.config[ConfigSettings.USERS_HAVE_LAST_NAME]:
+      if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
           user.last_name = form.last_name.data
-      if current_app.config[ConfigSettings.USERS_HAVE_EMAIL]:
+      if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
           user.email = form.email.data
-      if current_app.config[ConfigSettings.USERS_HAVE_ORG_USERNAME]:
+      if current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name]:
           user.org_username = form.org_username.data
       # if username wasn't unique, validation should have caught it
       user.username = form.username.data
@@ -382,13 +517,12 @@ def list_buggies(data_format=None):
 #### FIXME-DEBUG @login_required
 def settings():
     """Admin settings check page."""
-    #### FIXME-DEBUG
-    #### if not current_user.is_buggy_admin:
-    ####   abort(403)
+    if not current_user.is_buggy_admin:
+      abort(403)
     SETTING_PREFIX = "settings" # must match name of subform
     form = SettingForm(request.form)
     settings = Setting.query.all()
-    settings_as_dict = Setting.get_dict_from_query(settings)
+    settings_as_dict = Setting.get_dict_from_db(settings)
     if request.method == "POST":
       qty_settings_changed = 0
       # group_name = form['group'].data
@@ -398,7 +532,7 @@ def settings():
         for setting_form in form.settings.data:
           name = setting_form.get('name')
           value = setting_form.get('value').strip()
-          if name == ConfigSettings.REGISTRATION_AUTH_CODE:
+          if name == ConfigSettingNames.REGISTRATION_AUTH_CODE:
             try:
               is_authorised(form, form.authorisation_code)
               if len(value) < 4: # min sensible auth code length
@@ -408,7 +542,7 @@ def settings():
               value = settings_as_dict[name] # don't change the auth code
           if name in settings_as_dict:
             if settings_as_dict[name] != value:
-                if ConfigSettings.TYPES[name] == ConfigSettings.TYPE_PASSWORD:
+                if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
                   changed_msg = f"Changed {name} to a new value"
                 else:
                   pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
@@ -421,7 +555,7 @@ def settings():
                 })
                 qty_settings_changed += 1
           else: # config not in settings table: unexpected... but roll with it: INSERT
-              if ConfigSettings.TYPES[name] == ConfigSettings.TYPE_PASSWORD:
+              if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
                 changed_msg = f"Setting {name}\""
               else:
                 changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
@@ -455,8 +589,9 @@ def settings():
                   flash(str(e), "danger")
           # we've changed config, try to update config too
           load_settings_from_db(current_app)
-          flash("When you've finished changing settings, it's a good idea to restart the server", "info")
-          settings_as_dict = Setting.get_dict_from_query(settings)
+          if not current_app.config[ConfigSettingNames._SETUP_STATUS.name]:
+            flash("When you've finished changing settings, it's a good idea to restart the server", "info")
+          settings_as_dict = Setting.get_dict_from_db(settings)
         else:
           flash("No settings were changed", "info")
       else:
@@ -468,7 +603,10 @@ def settings():
       groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,
       type_of_settings=ConfigSettings.TYPES,
-      pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
+      pretty_default_settings={
+        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
+        for name in ConfigSettings.DEFAULTS
+      },
       descriptions=ConfigSettings.DESCRIPTIONS
     )
 

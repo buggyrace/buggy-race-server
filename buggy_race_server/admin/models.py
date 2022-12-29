@@ -2,6 +2,7 @@
 """Admin models: settings and announcements."""
 
 from datetime import datetime
+from enum import Enum
 
 from buggy_race_server.config import ConfigSettings
 from buggy_race_server.database import Column, Model, SurrogatePK, db
@@ -18,7 +19,7 @@ class Setting(SurrogatePK, Model):
     )
     value = Column(db.String(255), unique=False, nullable=False)
 
-    def get_dict_from_query(query_result):
+    def get_dict_from_db(query_result):
       settings_as_dict = {}
       for setting in query_result:
         settings_as_dict[setting.id] = setting.value
@@ -28,6 +29,10 @@ class Setting(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
 
+class AnnouncementType(Enum):
+    INFO = 'info'
+    WARNING = 'warning'
+    SPECIAL = 'special'
 
 class Announcement(SurrogatePK, Model):
 

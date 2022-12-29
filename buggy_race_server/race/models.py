@@ -4,7 +4,7 @@ import datetime as datetime
 import os
 
 # get the config settings (without the app context):
-from buggy_race_server.config import ConfigSettings as configs
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from flask import current_app
 from buggy_race_server.database import (
     Column,
@@ -29,8 +29,8 @@ class Race(SurrogatePK, Model):
     desc = Column(db.Text(), unique=False, nullable=False, default="")
     created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
-    cost_limit = db.Column(db.Integer(), default=configs.DEFAULTS[configs.DEFAULT_RACE_COST_LIMIT])
-    is_visible = db.Column(db.Boolean(), default=bool(configs.DEFAULTS[configs.DEFAULT_RACE_IS_VISIBLE]))
+    cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
+    is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name]))
     result_log_url = Column(db.String(120), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
 
@@ -38,7 +38,7 @@ class Race(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
         if self.league is None or self.league == "":
-            self.league = current_app.config[configs.DEFAULT_RACE_LEAGUE]
+            self.league = current_app.config[ConfigSettingNames.DEFAULT_RACE_LEAGUE.name]
 
     def log_path(self):
         return os.path.join(self.league, self.start_at.strftime('%Y-%m-%d-%H-%M'))

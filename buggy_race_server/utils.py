@@ -4,7 +4,7 @@ from flask import flash, request, redirect, Markup, url_for, current_app
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
-from buggy_race_server.config import ConfigFromEnv
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.admin.models import Announcement, Setting, ConfigSettings
 from buggy_race_server.extensions import db
 from sqlalchemy import insert
@@ -29,13 +29,13 @@ def flash_suggest_if_not_yet_githubbed(function):
     return function()
   return wrapper
 
-# prevent unauthorised registration
 def is_authorised(form, field):
-  auth_code = current_app.config[ConfigSettings.REGISTRATION_AUTH_CODE]
+  """ check the auth code — required for some admin activities (mainly user registration)"""
+  auth_code = current_app.config.get(ConfigSettingNames.REGISTRATION_AUTH_CODE)
   if auth_code is None:
-    raise ValidationError("No authorisation code has been set: cannot authorise")    
-  if field.data.lower() != auth_code.lower():
-    raise ValidationError("You must provide a valid authorisation code")
+    raise ValidationError("No authorisation code has been set: cannot authorise")
+  if field.data != auth_code:
+    raise ValidationError(f"You must provide a valid authorisation code")
   return True
   
 
@@ -57,24 +57,37 @@ def insert_default_settings_into_db(app):
     db.session.execute(
         insert(Setting.__table__),
         [
-            {"id": name, "value": ConfigSettings.DEFAULTS[name]}
-            for name in ConfigSettings.DEFAULTS
+          {"id": name, "value": ConfigSettings.DEFAULTS[name]}
+          for name in ConfigSettings.DEFAULTS
         ]
     )
     db.session.commit()
-    print(f"*** loaded {len(ConfigSettings.DEFAULTS)} config settings into database with default values", flush=True)
+    print(f"[ ] loaded {len(ConfigSettings.DEFAULTS)} config settings into database with default values", flush=True)
 
 def load_settings_from_db(app):
     settings = Setting.query.all()
     if len(settings) == 0:
         insert_default_settings_into_db(app)
         settings = Setting.query.all()
-
     for setting in settings:
         name = setting.id
-        if name in ConfigSettings.DEFAULTS:
-            ConfigSettings.set_config_value(app, setting.id, setting.value)
+        if name in ConfigSettings.DEFAULTS: # it's an expected config name
+            if app.config.get(name) is None: # it's not already been set (from ENV)
+                ConfigSettings.set_config_value(app, setting.id, setting.value)
         else:
-            pass # not in defaults (unexpected setting?) TODO
-    
-    ConfigSettings.imply_extra_settings(app)
+            print(f"[ ] found an unexpected config setting name \"{name}\" in the db, ignored")
+    ConfigSettings.infer_extra_settings(app)
+
+def set_and_save_config_setting(app, name, value):
+    # this changes the app's config setting and also saves that
+    # change in the database.
+    # This isn't used much because the admin settings page (the
+    # way settings are usually changed) uses bulk updates because
+    # the forms handle groups of settings.
+    app.config[name]=value
+    # could check that name is a valid config key?
+    setting = Setting.query.filter_by(id=name).first()
+    if setting is None: # not already in db? then make it
+        setting = Setting(id=name)
+    setting.value = value
+    setting.save()

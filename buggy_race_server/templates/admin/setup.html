@@ -5,52 +5,78 @@
   {% if setup_status == 1 %}
     <h1>Setup {{ setup_status }}</h1>
     <p>setup 1 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  {% elif setup_status == 2 %}
-    <h1>Setup {{ setup_status }}</h1>
-    <p>setup 2 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  {% elif setup_status == 3 %}
-    <h1>Setup {{ setup_status }}</h1>
-    <p>setup 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  {% elif setup_status == 4 %}
-    <h1>Setup {{ setup_status }}</h1>
-    <p>setup 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  {% endif %}
-  </div>
-  {% for group in groups %}
     <div style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
       <form action="{{ url_for('admin.setup') }}" method="post">
         {{ form.csrf_token }}
-        <input type="hidden" name="group" value="{{ group }}"/>
-        {% if group == "AUTH" %}
-           <h3>Set the authorisation code</h3>
-          <div class="row" style="background-color:#fff;margin:1em 0">
-            <div class="col-sm-3">
-              Current code
-            </div>
-            <div class="col-sm-4">
-              <input id="authorisation_code" name="authorisation_code" type="password" value=""/>
-            </div>
-            <div class="col-sm-5">
-              The authorisation code is needed when you register or edit
-              users. To change it here, you must provide the current auth
-              code as well as the new value.
-            </div>
+        <h3>Create admin user</h3>
+        <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="col-sm-3">
+            Current code
           </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
-            <div class="col-sm-3">
-              New auth code
-            </div>
-            <div class="col-sm-4">
-              <input name="{{ SETTING_PREFIX }}-0-name" type="hidden" value="REGISTRATION_AUTH_CODE" />
-              <input name="{{ SETTING_PREFIX }}-0-value" type="password" />
-            </div>
-            <div class="col-sm-5">
-              Be sure to remember the auth code you set! (It is possible to change it later, but you'll
-              need to know its current value in order to do so).
-            </div>
+          <div class="col-sm-4">
+            <input id="auth_code" name="auth_code" type="password" value=""/>
           </div>
-          <input type="submit" class="btn btn-primary" value="Submit new code"/>
-        {% else %}
+          <div class="col-sm-5">
+            The authorisation code is needed when you register or edit
+            users. To change it here, you must provide the current auth
+            code as well as the new value.
+          </div>
+        </div>
+        <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="col-sm-3">
+            New auth code
+          </div>
+          <div class="col-sm-4">
+            <input id="new_auth_code" name="new_auth_code" type="password" />
+          </div>
+          <div class="col-sm-5">
+            Be sure to remember the auth code you set! (It is possible to change it later, but you'll
+            need to know its current value in order to do so).
+          </div>
+        </div>
+        <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="col-sm-3">
+            Admin username
+          </div>
+          <div class="col-sm-4">
+            <input is="admin_username" name="admin_username" type="text" />
+          </div>
+          <div class="col-sm-5">
+            Username of the admin account TODO default <code>admin</code>
+          </div>
+        </div>
+        <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="col-sm-3">
+            Admin password
+          </div>
+          <div class="col-sm-4">
+            <input name="admin_password" id="admin_password" type="password" />
+          </div>
+          <div class="col-sm-5">
+            Password of the admin user (once you've finished setup, you
+            can change this later)
+          </div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Create admin account"/>
+      </form>
+    </div>
+  {% else %}
+    {% if setup_status == 2 %}
+      <h1>Setup {{ setup_status }}</h1>
+      <p>setup 2 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    {% elif setup_status == 3 %}
+      <h1>Setup {{ setup_status }}</h1>
+      <p>setup 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    {% elif setup_status == 4 %}
+      <h1>Setup {{ setup_status }}</h1>
+      <p>setup 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    {% endif %}
+    </div>
+    {% for group in groups %}
+      <div style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+        <form action="{{ url_for('admin.setup') }}" method="post">
+          {{ form.csrf_token }}
+          <input type="hidden" name="group" value="{{ group }}"/>
           <h3>{{ group | title }} settings</h3>
           {% for name in groups[group] %}
             <div class="row" style="background-color:#fff;margin:1em 0">
@@ -85,11 +111,10 @@
             </div>
           {% endfor %}
           <input type="submit" class="btn btn-primary" value="Submit {{ group }} settings"/>
-        {% endif %}
-      </form>
-    </div>
-  {% endfor %}
-
+        </form>
+      </div>
+    {% endfor %}
+  {% endif %}
 </div>
 {% endblock %}
 

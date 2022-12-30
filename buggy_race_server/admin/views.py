@@ -17,7 +17,7 @@ from flask import (
     request,
     url_for,
 )
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, login_user
 from sqlalchemy import bindparam, insert, update
 from wtforms.validators import ValidationError
 
@@ -27,6 +27,7 @@ from buggy_race_server.admin.forms import (
     ApiKeyForm,
     BulkRegisterForm,
     SettingForm,
+    SetupAuthForm,
 )
 from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.buggy.models import Buggy
@@ -41,7 +42,10 @@ from buggy_race_server.utils import (
     load_settings_from_db,
     refresh_global_announcements,
     set_and_save_config_setting,
+    prettify_form_field_name,
 )
+
+blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
 
 SETTING_PREFIX = "settings" # must match name of subform
 
@@ -59,18 +63,6 @@ def _update_settings_in_db(form):
   for setting_form in form.settings.data:
     name = setting_form.get('name')
     value = setting_form.get('value').strip()
-    if name == ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
-      try:
-        is_authorised(form, form.authorisation_code)
-        if len(value) < ConfigSettings.MIN_AUTH_CODE_LENGTH:
-          raise ValidationError(
-            "Did not change auth code: the value you submitted was too short "
-            f"(need at least {ConfigSettings.MIN_AUTH_CODE_LENGTH} characters)"
-          )
-      except ValidationError as e:
-        flash(str(e), "danger")
-        is_update_ok = False
-        value = settings_as_dict[name] # don't change the auth code
     is_changed_value = False
     if name in settings_as_dict:
       if settings_as_dict[name] != value:
@@ -135,8 +127,6 @@ def _update_settings_in_db(form):
       flash("No settings were changed", "info")
   return is_update_ok
 
-blueprint = Blueprint("admin", __name__, url_prefix="/admin", static_folder="../static")
-
 def _user_summary(username_list):
     if len(username_list) == 1:
         return f"user '{username_list[0]}'"
@@ -153,37 +143,82 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
       s = s.lower()
   return s
 
+
 @blueprint.route("/setup", methods=["GET", "POST"])
 def setup():
     setup_status=current_app.config[ConfigSettingNames._SETUP_STATUS.name]
     if not setup_status:
-      flash("Setup is complete on this server (settings can be edited from within admin instead)", "danger")
+      flash(
+        "Setup is complete on this server (settings can be edited "
+        "from within admin instead)", "danger"
+      )
       abort(404)
     setup_status = int(setup_status)
     if setup_status >= len(ConfigSettings.SETUP_GROUPS):
       current_app.config[ConfigSettingNames._SETUP_STATUS.name] = setup_status = 0
-      flash("Setup complete: log in as admin (TODO) to register users or make changes", "success")
-      return redirect( url_for('public.login'))
-    form = SettingForm(request.form)
-    #settings_as_dict = {}
+      flash("Setup complete: you can now register users or make changes to settings", "success")
+      return redirect( url_for('public.home'))
+    if setup_status == 1:
+      form = SetupAuthForm(request.form)
+    else:
+      # after initial setup (auth), user must be logged in
+      # TODO: so need to provide access to login in case the session gets broken
+      if current_user.is_anonymous or not current_user.is_buggy_admin:
+        flash("Setup is not complete: you must log in as an admin user to continue", "warning")
+        return redirect( url_for('public.login'))
+      form = SettingForm(request.form)
     if request.method == "POST":
-      if form.validate_on_submit():
-          if _update_settings_in_db(form):
+        if form.validate_on_submit():
+          if setup_status == 1: # this updating auth and creating a new admin user
+            set_and_save_config_setting(
+              current_app,
+              ConfigSettingNames.REGISTRATION_AUTH_CODE.name,
+              form.new_auth_code.data
+            )
+            new_admin_username = form.admin_username.data.strip().lower()
+            if admin_user := User.query.filter_by(username=new_admin_username).first():
+                admin_user.set_password(form.admin_password.data)
+                flash(f"updated existing admin user {new_admin_username}'s password", "warning")
+            else:
+              admin_user = User.create(
+                username=new_admin_username,
+                password=form.admin_password.data,
+              )
+              flash(f"Created new admin user \"{new_admin_username}\"", "info")
+            admin_user.is_active = True
+            admin_user.is_student = False
+            admin_user.save()
+            set_and_save_config_setting(
+              current_app,
+              ConfigSettingNames.ADMIN_USERNAMES.name,
+              new_admin_username
+            )
+            ConfigSettings.infer_extra_settings(current_app) # populate _ADMIN_USERNAMES_LIST
             setup_status += 1
             set_and_save_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name, setup_status)
-          else:
-            # something wasn't OK, so don't save and move on
-            # (the errors will have been explicitly flashed)
-            pass
-      else:
-        if form.settings.errors:
-          for setting_error in form.settings.errors:
-              for field in setting_error:
-                messages = setting_error[field]
-                for msg in messages:
-                  flash(msg, "danger")
+            login_user(admin_user)
+            admin_user.logged_in_at = datetime.now()
+            admin_user.save()
+            flash(f"OK, you're logged in with admin username {new_admin_username}.", "success")
+          else: # handle a regular settings update, which may also be part of setup
+            if _update_settings_in_db(form):
+              setup_status += 1
+              set_and_save_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name, setup_status)
+            else:
+              # something wasn't OK, so don't save and move on
+              # (the errors will have been explicitly flashed)
+              pass
         else:
-          flash(form.errors)
+          # settings is the name of the subform(s) within the settings group
+          if hasattr(form, SETTING_PREFIX) and form.settings.errors:
+            for setting_error in form.settings.errors:
+                for field in setting_error:
+                  messages = setting_error[field]
+                  for err_msg in messages:
+                    flash(err_msg, "danger")
+          for fieldName, errorMessages in form.errors.items():
+            for err_msg in errorMessages:
+              flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
     group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
     return render_template(
       "admin/setup.html",
@@ -522,7 +557,6 @@ def settings():
     """Admin settings check page."""
     if not current_user.is_buggy_admin:
       abort(403)
-    SETTING_PREFIX = "settings" # must match name of subform
     form = SettingForm(request.form)
     settings = Setting.query.all()
     settings_as_dict = Setting.get_dict_from_db(settings)

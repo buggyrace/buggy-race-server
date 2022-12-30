@@ -16,7 +16,7 @@ from wtforms import (
     TextAreaField,
     widgets,
 )
-from wtforms.validators import DataRequired, Optional, ValidationError
+from wtforms.validators import DataRequired, Optional, ValidationError, Length
 
 from buggy_race_server.admin.models import AnnouncementType
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -93,18 +93,9 @@ class ConfigSettingForm(Form):
     name = HiddenField("Config-Setting-Name")
     value = StringField("Config-Setting-Value", validators=[])
 
-    def validate_value(self, value):
-        if (
-            self.name.data == ConfigSettingNames.REGISTRATION_AUTH_CODE.name
-            and self.value.data == ConfigSettings.DEFAULTS[ConfigSettingNames.REGISTRATION_AUTH_CODE.name]
-        ):
-            raise ValidationError(
-                "You must change the auth code to be something other than "
-                "its default ('factory') setting"
-            )
-
     def validate(self):
         return super(ConfigSettingForm, self).validate()
+
 
 class SettingForm(FlaskForm):
     group = HiddenField()
@@ -114,12 +105,50 @@ class SettingForm(FlaskForm):
         min_entries=1,
         max_entries=len(ConfigSettings.DEFAULTS)
     )
-    # when changing the auth form, need the current auth code too
-    authorisation_code = PasswordField("Authorisation code",  [Optional()])
+
+    def validate(self):
+        return super(SettingForm, self).validate()
 
     def __init__(self, *args, **kwargs):
         super(SettingForm, self).__init__(*args, **kwargs)
 
+
+class SetupAuthForm(FlaskForm):
+    auth_code = PasswordField("Authorisation code", [DataRequired(), is_authorised])
+    new_auth_code = PasswordField(
+      "New auth code", 
+      [DataRequired(), Length(min=ConfigSettings.MIN_PASSWORD_LENGTH)]
+    )
+    new_auth_code_confirm = PasswordField("New auth confirm", [Optional()])
+    admin_username = StringField("Admin username", [DataRequired()])
+    admin_password = PasswordField(
+      "Admin user password",
+      [DataRequired(), Length(min=ConfigSettings.MIN_PASSWORD_LENGTH)]
+    )
+    admin_password_confirm = PasswordField("Admin password confirm", [Optional()])
+
+    def validate_new_auth_code_confirm(self, value):
+      if (
+        self.new_auth_code_confirm.data != ""
+        and self.new_auth_code_confirm.data != self.new_auth_code.data
+      ):
+        raise ValidationError("New auth code and its confirmation were not the same")
+      if self.new_auth_code.data == ConfigSettings.DEFAULTS[ConfigSettingNames.REGISTRATION_AUTH_CODE.name]:
+        raise ValidationError(
+          "You must change the auth code to be something other than "
+          "its default ('factory') setting"
+        )
+
+    def validate_admin_password_confirm(self, value):
+      if (
+        self.admin_password_confirm.data != ""
+        and self.admin_password_confirm.data != self.admin_password.data
+      ):
+        raise ValidationError("New admin password and its confirmation were not the same")
+
     def validate(self):
-        return super(SettingForm, self).validate()
+        return super(SetupAuthForm, self).validate()
+
+    def __init__(self, *args, **kwargs):
+        super(SetupAuthForm, self).__init__(*args, **kwargs)
 

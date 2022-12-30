@@ -7,6 +7,7 @@ from buggy_race_server.config import ConfigSettingNames
 
 app = create_app()
 
+LOGIN_PATH = "/login/"
 SETUP_PATH = "/admin/setup"
 
 # only force to HTTPS if we've explicitly set it
@@ -32,6 +33,6 @@ def check_setup_status():
     # TODO better to use Flask.static_folder_url (to get path if it's changed)
     #      ...but didn't get nice results: hardcoded for now
     if app.config.get(ConfigSettingNames._SETUP_STATUS) and not request.path.startswith(f"/static"):
-        if request.path != SETUP_PATH:
+        if not (request.path == SETUP_PATH or request.path == LOGIN_PATH):
             return redirect(f"{request.root_path}{SETUP_PATH}")
 

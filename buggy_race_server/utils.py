@@ -91,3 +91,7 @@ def set_and_save_config_setting(app, name, value):
         setting = Setting(id=name)
     setting.value = value
     setting.save()
+
+def prettify_form_field_name(name):
+  """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
+  return name.replace("_", " ").title()

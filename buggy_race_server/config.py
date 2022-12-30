@@ -164,6 +164,8 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
     }
 
+    MIN_AUTH_CODE_LENGTH = 4
+
     TYPES = {
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,

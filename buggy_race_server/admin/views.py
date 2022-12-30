@@ -62,8 +62,11 @@ def _update_settings_in_db(form):
     if name == ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
       try:
         is_authorised(form, form.authorisation_code)
-        if len(value) < 4: # min sensible auth code length
-          raise ValidationError("Did not change auth code: the value you submitted was too short")
+        if len(value) < ConfigSettings.MIN_AUTH_CODE_LENGTH:
+          raise ValidationError(
+            "Did not change auth code: the value you submitted was too short "
+            f"(need at least {ConfigSettings.MIN_AUTH_CODE_LENGTH} characters)"
+          )
       except ValidationError as e:
         flash(str(e), "danger")
         is_update_ok = False

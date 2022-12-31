@@ -26,7 +26,7 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for s in students_logged_in_today %}
-                  <li>{{ s.username }}</li>
+                  <li>{{ s.pretty_username }}</li>
                 {% endfor %}
               </ul>
             </td>
@@ -46,14 +46,14 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for s in students_logged_in_this_week %}
-                  <li>{{ s.username }}</li>
+                  <li>{{ s.pretty_username }}</li>
                 {% endfor %}
               </ul>
             </td>
           </tr>
         {% endif %}
         <tr>
-          <td>Never loggerd in</td>
+          <td>Never logged in</td>
           <td class="text-right">
             {% if qty_students_never_logged_in > 0 %}
               {{ (100 * qty_students_never_logged_in/qty_students_active) | int }}%
@@ -66,7 +66,7 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for u in students_never_logged_in %}
-                  <li>{{ u.username }}</li>
+                  <li>{{ u.pretty_username }}</li>
                 {% endfor %}
               </ul>
             </td>
@@ -83,7 +83,7 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for u in users_deactivated %}
-                  <li>{{ u.username }}</li>
+                  <li>{{ u.pretty_username }}</li>
                 {% endfor %}
               </ul>
             </td>
@@ -97,7 +97,7 @@
           <td colspan="3">
             <ul class="user-list">
               {% for u in admin_users %}
-                <li>{{ u.username }}</li>
+                <li>{{ u.pretty_username }}</li>
               {% endfor %}
             </ul>
           </td>

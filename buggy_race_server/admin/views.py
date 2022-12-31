@@ -175,7 +175,11 @@ def setup():
     abort(404)
   setup_status = int(setup_status)
   if setup_status >= len(ConfigSettings.SETUP_GROUPS):
-    current_app.config[ConfigSettingNames._SETUP_STATUS.name] = setup_status = 0
+    setup_status = 0
+    set_and_save_config_setting(
+      current_app, ConfigSettingNames._SETUP_STATUS.name,
+      setup_status
+    )
     flash("Setup complete: you can now register users or make changes to settings", "success")
     return redirect( url_for('public.home'))
   if setup_status == 1:
@@ -215,7 +219,10 @@ def setup():
           )
           ConfigSettings.infer_extra_settings(current_app) # populate _ADMIN_USERNAMES_LIST
           setup_status += 1
-          set_and_save_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name, setup_status)
+          set_and_save_config_setting(
+            current_app, ConfigSettingNames._SETUP_STATUS.name,
+            setup_status
+          )
           login_user(admin_user)
           admin_user.logged_in_at = datetime.now()
           admin_user.save()

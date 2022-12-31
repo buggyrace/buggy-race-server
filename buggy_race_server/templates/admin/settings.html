@@ -10,7 +10,7 @@
       <form action="{{ url_for('admin.settings') }}" method="post">
         {{ form.csrf_token }}
         <input type="hidden" name="group" value="{{ group }}"/>
-        {% if group == "auth" %}
+        {% if group == "AUTH" %}
            <h3>Change authorisation code</h3>
           <div class="row" style="background-color:#fff;margin:1em 0">
             <div class="col-sm-3">

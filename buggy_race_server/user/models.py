@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from sqlalchemy import orm
 
 # get the config settings (without the app context):
-from buggy_race_server.config import ConfigSettings as configs
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.database import (
     Column,
     Model,
@@ -85,7 +85,7 @@ class User(UserMixin, SurrogatePK, Model):
     api_key = Column(db.String(30), nullable=True)
     notes = Column(db.Text(), default=False)
 
-    def __init__(self, username, org_username, email, password=None, **kwargs):
+    def __init__(self, username, org_username=None, email=None, password=None, **kwargs):
         """Create instance."""
         db.Model.__init__(self, username=username, org_username=org_username, email=email, **kwargs)
         if password:
@@ -93,8 +93,8 @@ class User(UserMixin, SurrogatePK, Model):
         else:
             self.password = None
         # disallow optional fields to be set unless they are explicitly enabled
-        for fieldname in current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED]:
-            if not current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][fieldname]:
+        for fieldname in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
+            if not current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][fieldname]:
                 setattr(self, fieldname, None)
         self.init_on_load()
 
@@ -155,8 +155,8 @@ class User(UserMixin, SurrogatePK, Model):
             'github_repo': repo,
             'notes': self.notes,
         }
-        for fieldname in current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED]:
-            if not current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][fieldname]:
+        for fieldname in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
+            if not current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][fieldname]:
                 del fields[fieldname]
         return fields
 
@@ -171,18 +171,18 @@ class User(UserMixin, SurrogatePK, Model):
 
     def get_missing_fieldnames(fieldnames):
         required_fieldnames = ["username", "password"] + [
-            field for field in current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED]
-            if current_app.config[configs._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][field]
+            field for field in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]
+            if current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][field]
         ]
         return [name for name in required_fieldnames if name not in fieldnames]
 
     @property
     def is_buggy_admin(self):
-      return self.is_active and self.username in current_app.config[configs._ADMIN_USERNAMES_LIST]
+      return self.is_active and self.username in current_app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name]
 
     @property
     def pretty_username(self):
-        return self.username.title() if current_app.config[configs.IS_PRETTY_USERNAME_TITLECASE] else self.username
+        return self.username.title() if current_app.config[ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name] else self.username
 
     @property
     def full_name(self):
@@ -227,7 +227,7 @@ class User(UserMixin, SurrogatePK, Model):
         """Check if the course repo exists for this user"""
         if not self._has_course_repository:
             # This only matches on repo name, not if it is a fork of the og repo.
-            repo = self.github.get(f"/repos/{self.github_username}/{current_app.config[configs.BUGGY_EDITOR_REPO_NAME]}").json()
+            repo = self.github.get(f"/repos/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}").json()
             if not 'html_url' in repo:
                 return False
 
@@ -237,7 +237,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def course_repository(self):
-        return f"https://github.com/{self.github_username}/{current_app.config[configs.BUGGY_EDITOR_REPO_NAME]}"
+        return f"https://github.com/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}"
 
     @property
     def github(self):

@@ -479,46 +479,12 @@ class ConfigFromEnv():
     # this SOCIAL_LINKS list:
     #- SOCIAL_LINKS = _extract_social_links()
 
-    # registration only allowed with an auth code: (case insensitive)
-    # if not set, registration is public, which probably isn't what you want
-    #- reg_auth_code = env.str("REGISTRATION_AUTH_CODE", default="localauth").strip()
-    #- REGISTRATION_AUTH_CODE = reg_auth_code if reg_auth_code else None
-
-    # comma-separated list of users who have access to admin:
-    # currently this is how we're acknowledging admin (not using the is_admin
-    # setting in the user model: this was for pragmatic/monkey-patch reasons
-    # and needs to be fixed!)
-    # But for now, admin power is granted via env variable:
-    #- ADMIN_USERNAMES = env.str("ADMIN_USERNAMES", default="").strip()
-
-    # Supported announcement types:
-    # roughly, xyz maps to "announcement-xyz" CSS class — but see layout.html)
-    # If you add more here, make sure you've also added support for them first
-
-    # these are loaded from the database on the first request and then effectively
-    # cached in the config to avoid repeated hits on the database
-    #- CURRENT_ANNOUNCEMENTS = None
-
-    # should usernames be capitalised when displayed?
-    # usernames are always considered lowercase, but (if they are
-    # student's names) you can choose to display them in titlecase
-    # (so Ada instead of ada)
-    #- IS_PRETTY_USERNAME_TITLECASE = env.bool("IS_PRETTY_USERNAME_TITLECASE", False)
-
-    # control which user fields are needed:
-    # users always have a username...
-    # ...but if you don't need the other fields, disable them
-    # If you're running a small class, username might already be first name, so you
-    # don't need to store other names.
-    # Note:
-    #   - the database still has all the columns, but their values won't
-    #     be enforced
-    #   - be aware of privacy issues (in general, and between other students)
-    #     when setting these. The server may also storing (but not publishing)
-    #     GitHub account information so even if you are disabling all of these
-    #     you are still resonsible for securely and responsibly handling
-    #     private data.
-    #- USERS_HAVE_EMAIL = env.bool("USERS_HAVE_EMAIL", default=False)
-    #- USERS_HAVE_ORG_USERNAME = env.bool("USERS_HAVE_ORG_USERNAME", default=False)
-    #- USERS_HAVE_FIRST_NAME = env.bool("USERS_HAVE_FIRST_NAME", default=False)
-    #- USERS_HAVE_LAST_NAME = env.bool("USERS_HAVE_LAST_NAME", default=False)
+    def __init__(self):
+      # finally detect any env vars which are config settings: this allows
+      # *any* setting to be overridden by environment variables
+      # This allows sysadmin to punch past a bad setting that's got into
+      # the database but usually shouldn't be used.
+      for name in ConfigSettings.DEFAULTS:
+        print(f"[ ] FIXME *** {name}: {env.str(name, default=None)}", flush=True)
+        if env.str(name, default=None):
+          setattr(self, name, env.str(name))

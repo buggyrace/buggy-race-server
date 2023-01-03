@@ -37,7 +37,6 @@ def is_authorised(form, field):
   if field.data != auth_code:
     raise ValidationError(f"You must provide a valid authorisation code")
   return True
-  
 
 # check current user is active: this catches (and logs out) a user who has been
 # made inactive _during_ their session: need this so admin can (if needed) bump
@@ -53,30 +52,45 @@ def active_user_required(function):
         return function(*args, **kwargs)
     return wrapper
 
-def insert_default_settings_into_db(app):
-    db.session.execute(
-        insert(Setting.__table__),
-        [
-          {"id": name, "value": ConfigSettings.DEFAULTS[name]}
-          for name in ConfigSettings.DEFAULTS
-        ]
-    )
-    db.session.commit()
-    print(f"[ ] loaded {len(ConfigSettings.DEFAULTS)} config settings into database with default values", flush=True)
+def save_config_env_overrides_to_db(app):
+    """ Saves each config setting that's in the app config into the database.
+      This is specifically used when the app starts up, to save any settings
+      that are being set by environment variables in the database _before_
+      the app then loads the entire config — including defaults — back from
+      the database. This mechanism allows ENV overriding of bad/broken config.
+    """
+    if names := app.config.get(ConfigSettingNames._ENV_SETTING_OVERRIDES):
+      for name in names.split(","):
+        value = app.config.get(name) # expecting a value here
+        if value is not None:
+          set_and_save_config_setting(app, name, value)
+          print(f"* written {name} config setting (from ENV) into database", flush=True)
 
 def load_settings_from_db(app):
+    """ Read settings from db and set the app's config appropriately."""
     settings = Setting.query.all()
-    if len(settings) == 0:
-        insert_default_settings_into_db(app)
-        settings = Setting.query.all()
+    is_config_set = { name: False for name in ConfigSettings.DEFAULTS }
     for setting in settings:
         name = setting.id
         if name in ConfigSettings.DEFAULTS: # it's an expected config name
-            if app.config.get(name) is None: # it's not already been set (from ENV)
-                ConfigSettings.set_config_value(app, setting.id, setting.value)
+            ConfigSettings.set_config_value(app, setting.id, setting.value)
+            is_config_set[name] = True
         else:
             print(f"[ ] found an unexpected config setting name \"{name}\" in the db, ignored")
-    ConfigSettings.infer_extra_settings(app)
+    missing_settings = [
+        {
+          "id": name,
+          "value": ConfigSettings.stringify(
+              name,
+              ConfigSettings.DEFAULTS[name]
+          )
+        }
+        for name in is_config_set if not is_config_set[name]
+    ]
+    if missing_settings:
+      db.session.execute(insert(Setting.__table__), missing_settings)
+      db.session.commit()
+    print(f"* inserted {len(missing_settings)} config settings (with default values) into database", flush=True)
 
 def set_and_save_config_setting(app, name, value):
     # this changes the app's config setting and also saves that
@@ -88,10 +102,11 @@ def set_and_save_config_setting(app, name, value):
     # could check that name is a valid config key?
     setting = Setting.query.filter_by(id=name).first()
     if setting is None: # not already in db? then make it
-        setting = Setting(id=name)
-    setting.value = value
+        setting = Setting.create(id=name, value=value)
+    else:
+        setting.value = value
     setting.save()
-
+  
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
   return name.replace("_", " ").title()

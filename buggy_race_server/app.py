@@ -3,11 +3,18 @@
 import logging
 import sys
 
+#import traceback # for debug/dev work
+
 from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
-from buggy_race_server.utils import refresh_global_announcements, load_settings_from_db
-from buggy_race_server.admin.models import Announcement, Setting
+from buggy_race_server.utils import (
+    refresh_global_announcements,
+    save_config_env_overrides_to_db,
+    load_settings_from_db
+)
+from buggy_race_server.admin.models import Announcement
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -43,17 +50,19 @@ def create_app():
         err_msg = None
         
         try:
+            save_config_env_overrides_to_db(app)
             load_settings_from_db(app)
         except Exception as e:
-            err_msg = f"init error: {e}"
-            print(err_msg)
+            #traceback.print_exception(type(e), e, e.__traceback__)
+            print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
+
+        ConfigSettings.infer_extra_settings(app)
 
         try:
             qty_announcements = Announcement.query.count()
         except Exception as e:
-            err_msg = f"init error: {e}"
-            print(err_msg)
+            print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
 
         if qty_announcements == 0:

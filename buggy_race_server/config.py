@@ -35,6 +35,7 @@ class ConfigSettingNames(str, Enum):
     _ADMIN_USERNAMES_LIST="_ADMIN_USERNAMES_LIST"
     _CURRENT_ANNOUNCEMENTS="_CURRENT_ANNOUNCEMENTS"
     _SETUP_STATUS="_SETUP_STATUS"
+    _ENV_SETTING_OVERRIDES="_ENV_SETTING_OVERRIDES"
 
     ADMIN_USERNAMES="ADMIN_USERNAMES"
     BUGGY_EDITOR_GITHUB_URL="BUGGY_EDITOR_GITHUB_URL"
@@ -354,10 +355,19 @@ class ConfigSettings:
 
     }
 
+    @staticmethod
     def prettify(name, value):
-      if ConfigSettings.TYPES.get(name) == "bool":
+      if ConfigSettings.TYPES.get(name) == ConfigTypes.BOOLEAN:
         return "No" if (value == "0" or not bool(value)) else "Yes"
       return value
+
+    @staticmethod
+    def stringify(name, value):
+      """ Get string suitable for saving to database. """
+      if ConfigSettings.TYPES.get(name) == ConfigTypes.BOOLEAN:
+        return "1" if value else "0"
+      return str(value)
+
 
     def set_config_value(app, name, value):
         str_value = str(value)
@@ -372,18 +382,21 @@ class ConfigSettings:
     def infer_extra_settings(app):
         """ Generates extra/convenience config settings that are
         implied from config settings that are already set. """
-
-        app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = [
-            user.strip() for user in app.config[ConfigSettingNames.ADMIN_USERNAMES.name].split(",")
-        ]
+        if admin_users_str := app.config.get(ConfigSettingNames.ADMIN_USERNAMES.name):
+          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = [
+              user.strip() for user in admin_users_str.split(",")
+          ]
+        else:
+          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = []
 
         # note: explicit mapping between name of field/column and enable/disable
         #   Developers: see users/models.py to see this in use: it's a bit messy
         #   if these settings are changed _after_ any records have been created
         #   (but that is why this is not implemented in the database schema, which
         #   might be generated before these config settings have been fixed)
+        has_email = bool(app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name])
         app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name] = {
-            "email": app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+            "email": has_email,
             "org_username": app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
             "first_name": app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
             "last_name": app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]
@@ -396,7 +409,6 @@ class ConfigSettings:
             if app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
                 additional_names.append(name)
         app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name] = additional_names
-
 
 env = Env()
 env.read_env()
@@ -447,10 +459,9 @@ def _extract_social_links():
 class ConfigFromEnv():
 
     # set up phase:
-    # 0 - none (full access to settings)
-    # 1 - force change of auth code if unchanged
-    # 2 - get admin username and password
-    # default here is None so existing setting (in db) or default is used
+    # 0 - all done! (admin has full access to settings)
+    # 1 - force change of auth code, get admin username and password
+    # 2+ - subsquent settings (broken down into groups)
     _SETUP_STATUS = env.str(str(ConfigSettingNames._SETUP_STATUS), default=None)
 
     # some (not-buggy-race-specific) config _only_ comes from the ENV
@@ -474,17 +485,25 @@ class ConfigFromEnv():
     
     SECRET_KEY = ConfigSettings.DEFAULTS[ConfigSettingNames.SECRET_KEY.name]
 
-    # note that the env settings are not explicitly passed into the config:
-    # they exist as the NAME/URL/TEXT fields of the objects in
-    # this SOCIAL_LINKS list:
-    #- SOCIAL_LINKS = _extract_social_links()
+    # string containing comma separated config setting names that are
+    # stored in database but have been overridden by ENV settings
+    # (see constructor below)
+    _ENV_SETTING_OVERRIDES = ""
 
     def __init__(self):
-      # finally detect any env vars which are config settings: this allows
-      # *any* setting to be overridden by environment variables
+      # In addition to the Flask/server "system" environment variable,
+      # *any* config setting can be overridden here too.
       # This allows sysadmin to punch past a bad setting that's got into
-      # the database but usually shouldn't be used.
+      # the database (e.g., goofing up the admin user list could be a problem)
+      # although in normal use everything can/should be done through the
+      # database (i.e., through the web interface in admin/settings) 
+      # By putting the env names into _ENV_SETTING_OVERRIDES, the settings
+      # pages can usefully indicate when these have been overridden: this
+      # matters because any changes to the database settings table won't
+      # persist if it's being overridden by an ENV declaration at start-up.
+      env_setting_overrides = []
       for name in ConfigSettings.DEFAULTS:
-        print(f"[ ] FIXME *** {name}: {env.str(name, default=None)}", flush=True)
-        if env.str(name, default=None):
-          setattr(self, name, env.str(name))
+          if env.str(name, default=None):
+              setattr(self, name, env.str(name))
+              env_setting_overrides.append(name)
+      self._ENV_SETTING_OVERRIDES = ",".join(env_setting_overrides)

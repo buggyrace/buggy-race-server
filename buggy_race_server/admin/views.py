@@ -177,7 +177,8 @@ def setup():
   if setup_status >= len(ConfigSettings.SETUP_GROUPS):
     setup_status = 0
     set_and_save_config_setting(
-      current_app, ConfigSettingNames._SETUP_STATUS.name,
+      current_app,
+      ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
     flash("Setup complete: you can now register users or make changes to settings", "success")
@@ -220,7 +221,8 @@ def setup():
           ConfigSettings.infer_extra_settings(current_app) # populate _ADMIN_USERNAMES_LIST
           setup_status += 1
           set_and_save_config_setting(
-            current_app, ConfigSettingNames._SETUP_STATUS.name,
+            current_app,
+            ConfigSettingNames._SETUP_STATUS.name,
             setup_status
           )
           login_user(admin_user)
@@ -230,7 +232,11 @@ def setup():
         else: # handle a regular settings update, which may also be part of setup
           if _update_settings_in_db(form):
             setup_status += 1
-            set_and_save_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name, setup_status)
+            set_and_save_config_setting(
+              current_app,
+              ConfigSettingNames._SETUP_STATUS.name,
+              setup_status
+            )
           else:
             # something wasn't OK, so don't save and move on
             # (the errors will have been explicitly flashed)
@@ -247,7 +253,8 @@ def setup():
     settings=Setting.get_dict_from_db(Setting.query.all()),
     type_of_settings=ConfigSettings.TYPES,
     pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
-    descriptions=ConfigSettings.DESCRIPTIONS
+    descriptions=ConfigSettings.DESCRIPTIONS,
+    env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES].split(","),
   )
 
 @blueprint.route("/")
@@ -570,7 +577,7 @@ def list_buggies(data_format=None):
         return render_template("admin/buggies.html", buggies=buggies)
 
 @blueprint.route("/settings/", methods=['GET','POST'])
-#### FIXME-DEBUG @login_required
+@login_required
 def settings():
     """Admin settings check page."""
     if not current_user.is_buggy_admin:

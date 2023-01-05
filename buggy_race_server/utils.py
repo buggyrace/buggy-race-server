@@ -7,7 +7,7 @@ from flask_login import current_user, logout_user
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.admin.models import Announcement, Setting, ConfigSettings
 from buggy_race_server.extensions import db
-from sqlalchemy import insert
+from sqlalchemy import bindparam, insert, update
 
 def refresh_global_announcements(app):
   app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
@@ -67,30 +67,41 @@ def save_config_env_overrides_to_db(app):
           print(f"* written {name} config setting (from ENV) into database", flush=True)
 
 def load_settings_from_db(app):
-    """ Read settings from db and set the app's config appropriately."""
+    """ Read settings from db and set the app's config appropriately.
+        This is inefficient — we hit the database more than once — but it's only called
+        during app startup, setup, or when settings are being explicitly changed.
+
+        Note that, at startup, if there are ENV variables set for any config,
+        those are written to the database _before_ this, which is how they 
+        always override (and why we don't care if they are already set).
+    """
     settings = Setting.query.all()
-    is_config_set = { name: False for name in ConfigSettings.DEFAULTS }
-    for setting in settings:
-        name = setting.id
-        if name in ConfigSettings.DEFAULTS: # it's an expected config name
-            ConfigSettings.set_config_value(app, setting.id, setting.value)
-            is_config_set[name] = True
-        else:
-            print(f"[ ] found an unexpected config setting name \"{name}\" in the db, ignored")
-    missing_settings = [
-        {
-          "id": name,
-          "value": ConfigSettings.stringify(
-              name,
-              ConfigSettings.DEFAULTS[name]
+    names_found_in_db = [setting.id for setting in settings if ConfigSettings.is_valid_name(setting.id)]
+    missing_settings = []
+    for name in ConfigSettings.DEFAULTS.keys():
+       if name not in names_found_in_db:
+          # explicitly write the default value into the db for missing settings
+          # This is only expected when the app first starts up: after that, the
+          # config settings remain in the database
+          missing_settings.append(
+            {
+              "id": name,
+              "value": ConfigSettings.stringify(name, ConfigSettings.DEFAULTS[name])
+            }
           )
-        }
-        for name in is_config_set if not is_config_set[name]
-    ]
     if missing_settings:
-      db.session.execute(insert(Setting.__table__), missing_settings)
-      db.session.commit()
-    print(f"* inserted {len(missing_settings)} config settings (with default values) into database", flush=True)
+        db.session.execute(insert(Setting.__table__), missing_settings)
+        db.session.commit()
+        print(f"* inserted {len(missing_settings)} config settings (with default values) into database", flush=True)
+        # now reload settings: this time it won't have any missing
+        settings = Setting.query.all()
+
+    for setting in settings:
+        # set_config_value casts to correct type (e.g., bool/int/str)
+        ConfigSettings.set_config_value(app, setting.id, setting.value)
+
+    return Setting.get_dict_from_db(settings) # pass the settings back as a dict
+
 
 def set_and_save_config_setting(app, name, value):
     # this changes the app's config setting and also saves that
@@ -98,14 +109,23 @@ def set_and_save_config_setting(app, name, value):
     # This isn't used much because the admin settings page (the
     # way settings are usually changed) uses bulk updates because
     # the forms handle groups of settings.
-    app.config[name]=value
-    # could check that name is a valid config key?
-    setting = Setting.query.filter_by(id=name).first()
+
+    ConfigSettings.set_config_value(app, name, value)
+    setting = db.session.query(Setting).filter_by(id=name).first()
+    settings_table = Setting.__table__
     if setting is None: # not already in db? then make it
-        setting = Setting.create(id=name, value=value)
+        db.session.execute(
+          insert(settings_table),
+          [ {"id": name, "value": value} ]
+        )
     else:
-        setting.value = value
-    setting.save()
+        db.session.execute(
+          update(settings_table)
+            .where(settings_table.c.id == bindparam("name"))
+            .values(value=bindparam("value")),
+            [ {"name": name, "value": value} ]
+        )
+    db.session.commit()
   
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """

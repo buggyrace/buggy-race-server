@@ -163,8 +163,8 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
-    }
-
+    }    
+    
     MIN_PASSWORD_LENGTH = 4
 
     TYPES = {
@@ -356,6 +356,10 @@ class ConfigSettings:
     }
 
     @staticmethod
+    def is_valid_name(name):
+      return name in ConfigSettings.DEFAULTS
+
+    @staticmethod
     def prettify(name, value):
       if ConfigSettings.TYPES.get(name) == ConfigTypes.BOOLEAN:
         return "No" if (value == "0" or not bool(value)) else "Yes"
@@ -368,38 +372,50 @@ class ConfigSettings:
         return "1" if value else "0"
       return str(value)
 
-
+    @staticmethod
     def set_config_value(app, name, value):
+        """ Sets config value in the app (casting to correct type)
+            Note: this does NOT do anything with the database!
+        """
         str_value = str(value)
         type = ConfigSettings.TYPES[name]
         if type == ConfigTypes.BOOLEAN:
             value = str_value == "1"
         elif type == ConfigTypes.INT:
-            if str_value.isdecimal():
-                value = int(str_value)
+            value = int(str_value) if str_value.isdecimal() else 0
         app.config[name] = value
+        print(f"* updated config value: {name}={value}", flush=True)
 
-    def infer_extra_settings(app):
+    @staticmethod
+    def infer_extra_settings(app, settings_dict={}):
         """ Generates extra/convenience config settings that are
-        implied from config settings that are already set. """
-        if admin_users_str := app.config.get(ConfigSettingNames.ADMIN_USERNAMES.name):
+        implied from config settings that are already set. 
+        Using settings_dict (instead of app.config, which is mimics) because there
+        seems to be an issue with the app config being updated by the time this is
+        called, _maybe_ to do with app context (spent a long time getting odd results:
+        the app says the context is set, but it's not respected here)
+        """
+        if not settings_dict:
+          settings_dict = app.config # use config directly if no dict was passed
+        admin_users_str = settings_dict.get(ConfigSettingNames.ADMIN_USERNAMES.name)
+        if admin_users_str is None:
+          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = []
+        else:
           app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = [
               user.strip() for user in admin_users_str.split(",")
           ]
-        else:
-          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = []
 
         # note: explicit mapping between name of field/column and enable/disable
         #   Developers: see users/models.py to see this in use: it's a bit messy
         #   if these settings are changed _after_ any records have been created
         #   (but that is why this is not implemented in the database schema, which
         #   might be generated before these config settings have been fixed)
-        has_email = bool(app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name])
+
         app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name] = {
-            "email": has_email,
-            "org_username": app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
-            "first_name": app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
-            "last_name": app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]
+            "email": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_EMAIL.name) == '1'),
+            "org_username": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name) == '1'),
+            "first_name": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name) == '1'),
+            "last_name": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name) == '1'),
         }
 
         # list of additional fieldnames (will be empty if there are none)
@@ -409,9 +425,6 @@ class ConfigSettings:
             if app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
                 additional_names.append(name)
         app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name] = additional_names
-
-env = Env()
-env.read_env()
 
 def _force_slashes(s):
     s = s.strip()
@@ -435,26 +448,29 @@ def _slug(s):
 # first social link is SOCIAL_NAME, SOCIAL_URL, SOCIAL_TEXT
 # ...subsequent ones are SOCIAL_1_NAME, SOCIAL_1_URL, SOCIAL_1_TEXT
 # and then 2 and 3 and...
-def _extract_social_links():
-    social_links = []
-    if env.str("SOCIAL_URL", default="").strip():
-        social_links.append({
-          'NAME': env.str(f"SOCIAL_NAME", default=""),
-          'URL':  env.str(f"SOCIAL_URL", default="").strip(),
-          'TEXT': env.str(f"SOCIAL_TEXT", default="")
-        })
-    i = 1
-    while env.str(f"SOCIAL_{i}_URL", default="").strip() != "":
-        social_links.append({
-          'NAME': env.str(f"SOCIAL_{i}_NAME", default=""),
-          'URL':  env.str(f"SOCIAL_{i}_URL", default="").strip(),
-          'TEXT': env.str(f"SOCIAL_{i}_TEXT", default="")
-        })
-        i += 1
-    return social_links
+# def _extract_social_links():
+#     social_links = []
+#     if env.str("SOCIAL_URL", default="").strip():
+#         social_links.append({
+#           'NAME': env.str(f"SOCIAL_NAME", default=""),
+#           'URL':  env.str(f"SOCIAL_URL", default="").strip(),
+#           'TEXT': env.str(f"SOCIAL_TEXT", default="")
+#         })
+#     i = 1
+#     while env.str(f"SOCIAL_{i}_URL", default="").strip() != "":
+#         social_links.append({
+#           'NAME': env.str(f"SOCIAL_{i}_NAME", default=""),
+#           'URL':  env.str(f"SOCIAL_{i}_URL", default="").strip(),
+#           'TEXT': env.str(f"SOCIAL_{i}_TEXT", default="")
+#         })
+#         i += 1
+#     return social_links
 
 
 ##################################################################
+
+env = Env()
+env.read_env()
 
 class ConfigFromEnv():
 

@@ -47,17 +47,16 @@ def create_app():
     csrf.exempt(app.blueprints['api'])
 
     with app.app_context():
-        err_msg = None
-        
+
         try:
             save_config_env_overrides_to_db(app)
-            load_settings_from_db(app)
+            settings_dict = load_settings_from_db(app)
         except Exception as e:
             #traceback.print_exception(type(e), e, e.__traceback__)
             print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
 
-        ConfigSettings.infer_extra_settings(app)
+        ConfigSettings.infer_extra_settings(app, settings_dict)
 
         try:
             qty_announcements = Announcement.query.count()

@@ -174,7 +174,8 @@ def setup():
     )
     abort(404)
   setup_status = int(setup_status)
-  if setup_status >= len(ConfigSettings.SETUP_GROUPS):
+  qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
+  if setup_status >= qty_setup_steps:
     setup_status = 0
     set_and_save_config_setting(
       current_app,
@@ -247,9 +248,12 @@ def setup():
   return render_template(
     "admin/setup.html",
     setup_status=setup_status,
+    qty_setup_steps=qty_setup_steps,
     form=form,
     SETTING_PREFIX=SETTING_PREFIX,
-    groups={g:ConfigSettings.GROUPS[g] for g in ConfigSettings.GROUPS if g==group_name},
+    group_name=group_name,
+    group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
+    settings_group=ConfigSettings.GROUPS[group_name],
     settings=Setting.get_dict_from_db(Setting.query.all()),
     type_of_settings=ConfigSettings.TYPES,
     pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
@@ -583,12 +587,13 @@ def settings():
     if not current_user.is_buggy_admin:
       abort(403)
     form = SettingForm(request.form)
-    settings = Setting.query.all()
-    settings_as_dict = Setting.get_dict_from_db(settings)
+    settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
     if request.method == "POST":
       # group_name = form['group'].data
       if form.validate_on_submit():
-          _update_settings_in_db(form)
+        _update_settings_in_db(form)
+        # inefficient, but update to reflect changes
+        settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
       else:
         _flash_errors(form)
     return render_template(

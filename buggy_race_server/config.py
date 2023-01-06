@@ -295,7 +295,9 @@ class ConfigSettings:
 
         ConfigSettingNames.ADMIN_USERNAMES.name:
           """Comma separated list of admin user names. You can nominate usernames
-          here before they have been registered.""",
+          here before they have been registered. Usernames are lowercase.
+          If you remove (or change) a username in this list, you're effectively
+          revoking admin access, so be careful before changing anything.""",
 
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
           """Races are grouped by league, so if you're using that mechanism you
@@ -353,6 +355,52 @@ class ConfigSettings:
           staff running the buggy racing project will register users so
           public registration should not be enabled."""
 
+    }
+
+    SETUP_GROUP_DESCRIPTIONS = {
+      ConfigGroupNames.AUTH.name:
+        """
+        You must complete the setup. It takes around 5 minutes, and
+        you can leave most settings to be default (and you can change
+        most things later, if you need to).
+        """,
+      ConfigGroupNames.ORG.name:
+        """
+        Provide general details about your institution/organisation.
+        """,
+      ConfigGroupNames.USERS.name:
+        """
+        Every student will need a username. These settings define what
+        fields you want to store IN ADDITION to that username. You do
+        not need to have any additional fields (we recommend you only
+        add them if you really need to, for example, if the usernames
+        aren't already the students' first names, maybe add a first
+        name so you can recognise who they are). Only admin users see
+        these additional fields — they aren't made public.
+        """,
+      ConfigGroupNames.SERVER.name:
+        """
+        These settings control the behaviour of the server. The
+        BUGGY_RACE_SERVER_URL setting is important; the others can
+        usually be left to their default values.
+        """,
+      ConfigGroupNames.RACES.name:
+        """
+        Race settings can all be left to default (you can change them
+        later if you need to).
+        """,
+      ConfigGroupNames.SOCIAL.name:
+        """
+        These are used to add links to your institution's social or
+        educational accounts. If you run support sites like Moodle
+        or Discord or Teams for this project, add them here.
+        """,
+      ConfigGroupNames.GITHUB.name:
+        """
+        Setup the GitHub details here. If you're injecting issues
+        into student's own repos, you must provide valid GitHub
+        CLIENT details which may be specific to your installation.
+        """,
     }
 
     @staticmethod

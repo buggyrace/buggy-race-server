@@ -51,7 +51,7 @@
                   <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
                     <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
                     <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
-                  </select>              
+                  </select>
                 {% else %}
                   <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
                   {% if type_of_settings[name] == "int" %}

@@ -28,7 +28,7 @@ class UserForm(FlaskForm):
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active? (Users marked as inactive cannot login and are effectively suspended)")
     notes = TextAreaField("Notes for staff", validators=[Optional(), Length(max=255)])
-    authorisation_code = PasswordField("Authorisation code",  [is_authorised])
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
 
     @staticmethod
     def is_mandatory_by_config(name, value):

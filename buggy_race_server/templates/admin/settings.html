@@ -3,79 +3,105 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>Site/configuration settings</h1>
+    <h1 class="col">Configuration settings</h1>
+  </div>
+  <div class="row js-only" id="show-settings-btns">
+    <div class="col">
+      {% for group in groups %}
+        {% if group_name == group | lower %}
+          {% set btn_class = "btn-dark" %}
+        {% else %}
+          {% set btn_class = "btn-outline-secondary" %}
+        {% endif %}
+        <a href="{{ url_for('admin.settings', group_name=group | lower) }}"
+        class="btn {{ btn_class }}">{{ group | title }}</a>
+      {% endfor %}
+    </div>
   </div>
   {% for group in groups %}
-    <div style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
-      <form action="{{ url_for('admin.settings') }}" method="post">
-        {{ form.csrf_token }}
-        <input type="hidden" name="group" value="{{ group }}"/>
-        {% if group == "AUTH" %}
-           <h3>Change authorisation code</h3>
-          <div class="row" style="background-color:#fff;margin:1em 0">
-            <div class="col-sm-3">
-              Current code
-            </div>
-            <div class="col-sm-4">
-              <input id="authorisation_code" name="authorisation_code" type="password" value=""/>
-            </div>
-            <div class="col-sm-5">
-              The authorisation code is needed when you register or edit
-              users. To change it here, you must provide the current auth
-              code as well as the new value.
-            </div>
-          </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
-            <div class="col-sm-3">
-              New auth code
-            </div>
-            <div class="col-sm-4">
-              <input name="{{ SETTING_PREFIX }}-0-name" type="hidden" value="REGISTRATION_AUTH_CODE" />
-              <input name="{{ SETTING_PREFIX }}-0-value" type="password" />
-            </div>
-            <div class="col-sm-5">
-              The authorisation code is case insensitive.
-            </div>
-          </div>
-          <input type="submit" class="btn btn-primary" value="Submit new code"/>
-        {% else %}
-          <h3>{{ group | title }} settings</h3>
-          {% for name in groups[group] %}
-            <div class="row" style="background-color:#fff;margin:1em 0">
+    {% if group_name == None or group_name == group | lower %}
+      <div class="my-4 p-2" style="border:1px solid gray;background-color:#eee" id="form-{{ group | lower }}">
+        <form action="{{ url_for('admin.settings', group_name=group | lower) }}" method="post">
+          {{ form.csrf_token }}
+          <input type="hidden" name="group" value="{{ group }}"/>
+          {% if group == "AUTH" %}
+            <h3>Change authorisation code</h3>
+            <div class="row bg-warning py-2 m-1">
               <div class="col-sm-3">
-                <code>{{ name }}</code>
+                Auth code
               </div>
               <div class="col-sm-4">
-                <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-                {% if type_of_settings[name] == "bool" %}
-                  <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
-                    <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
-                    <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
-                  </select>
-                {% else %}
-                  <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
-                  {% if type_of_settings[name] == "int" %}
-                      type="number"
-                  {% elif type_of_settings[name] == "pass"%}
-                      type="password"
-                  {% else %}
-                      type="text"
-                  {% endif %}
-                  {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
-                {% endif %}
+                <input id="auth_code" name="auth_code" type="password" value=""/>
               </div>
               <div class="col-sm-5">
-                {{ descriptions[name] }}
-                <div class="setting-default">
-                  <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
-                </div>
+                You must provide the current authorisation code to make changes.
               </div>
             </div>
-          {% endfor %}
-          <input type="submit" class="btn btn-primary" value="Submit {{ group }} settings"/>
-        {% endif %}
-      </form>
-    </div>
+            <div class="row py-2 m-1 bg-white">
+              <div class="col-sm-3">
+                New auth code
+              </div>
+              <div class="col-sm-4">
+                <input name="{{ SETTING_PREFIX }}-0-name" type="hidden" value="REGISTRATION_AUTH_CODE" />
+                <input name="{{ SETTING_PREFIX }}-0-value" type="password" />
+              </div>
+              <div class="col-sm-5">
+                Do not forget the auth code you have set!
+              </div>
+            </div>
+            <input type="submit" class="btn btn-primary m-2" value="Submit new code"/>
+          {% else %}
+            <h3>{{ group | title }} settings</h3>
+
+            <div class="row bg-warning py-2 m-1">
+              <div class="col-sm-3">
+                Auth code
+              </div>
+              <div class="col-sm-4">
+                <input id="auth_code" name="auth_code" type="password" value=""/>
+              </div>
+              <div class="col-sm-5">
+                You must provide the current authorisation code to make changes.
+              </div>
+            </div>
+
+            {% for name in groups[group] %}
+              <div class="row py-2 m-1 bg-white">
+                <div class="col-sm-3">
+                  <code>{{ name }}</code>
+                </div>
+                <div class="col-sm-4">
+                  <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
+                  {% if type_of_settings[name] == "bool" %}
+                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                      <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
+                      <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
+                    </select>
+                  {% else %}
+                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                    {% if type_of_settings[name] == "int" %}
+                        type="number"
+                    {% elif type_of_settings[name] == "pass"%}
+                        type="password"
+                    {% else %}
+                        type="text"
+                    {% endif %}
+                    {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
+                  {% endif %}
+                </div>
+                <div class="col-sm-5">
+                  {{ descriptions[name] }}
+                  <div class="setting-default">
+                    <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+            <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | title }} settings"/>
+          {% endif %}
+        </form>
+      </div>
+    {% endif %}
   {% endfor %}
 </div>
 {% endblock %}

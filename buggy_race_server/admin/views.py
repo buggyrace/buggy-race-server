@@ -26,6 +26,7 @@ from buggy_race_server.admin.forms import (
     ApiKeyForm,
     BulkRegisterForm,
     SettingForm,
+    SetupSettingForm,
     SetupAuthForm,
 )
 from buggy_race_server.admin.models import Announcement, Setting
@@ -154,23 +155,25 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
 
 def _flash_errors(form):
   """ Flash errors in form, which may include settings subform """
-  if hasattr(form, SETTING_PREFIX) and form.settings.errors:
-    for setting_error in form.settings.errors:
-      for field in setting_error:
-        messages = setting_error[field]
-        for err_msg in messages:
-          flash(err_msg, "danger")
+  # if hasattr(form, SETTING_PREFIX) and form.settings.errors:
+  #   for setting_error in form.settings.errors:
+  #     for field in setting_error:
+  #       pass 
   for fieldName, errorMessages in form.errors.items():
     for err_msg in errorMessages:
-      flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
+      if isinstance(err_msg, dict):
+        for field in err_msg: # field is always "value"
+          flash(f"{err_msg[field][0]}", "danger")
+      else:
+        flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
 
 @blueprint.route("/setup", methods=["GET", "POST"])
 def setup():
   setup_status=current_app.config[ConfigSettingNames._SETUP_STATUS.name]
   if not setup_status:
     flash(
-      "Setup is complete on this server (settings can be edited "
-      "from within admin instead)", "danger"
+      "Setup is complete on this server (config settings "
+      "can be edited from within admin instead)", "danger"
     )
     abort(404)
   setup_status = int(setup_status)
@@ -182,7 +185,7 @@ def setup():
       ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
-    flash("Setup complete: you can now register users or make changes to settings", "success")
+    flash("Setup complete: you can now register users", "success")
     return redirect( url_for('public.home'))
   if setup_status == 1:
     form = SetupAuthForm(request.form)
@@ -192,7 +195,7 @@ def setup():
     if current_user.is_anonymous or not current_user.is_buggy_admin:
       flash("Setup is not complete: you must log in as an admin user to continue", "warning")
       return redirect( url_for('public.login'))
-    form = SettingForm(request.form)
+    form = SetupSettingForm(request.form)
   if request.method == "POST":
       if form.validate_on_submit():
         if setup_status == 1: # this updating auth and creating a new admin user
@@ -580,9 +583,10 @@ def list_buggies(data_format=None):
       else:
         return render_template("admin/buggies.html", buggies=buggies)
 
+@blueprint.route("/settings/<group_name>", methods=['GET','POST'])
 @blueprint.route("/settings/", methods=['GET','POST'])
 @login_required
-def settings():
+def settings(group_name=None):
     """Admin settings check page."""
     if not current_user.is_buggy_admin:
       abort(403)
@@ -599,6 +603,7 @@ def settings():
     return render_template(
       "admin/settings.html",
       form=form,
+      group_name=group_name,
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,

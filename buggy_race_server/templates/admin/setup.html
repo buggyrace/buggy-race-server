@@ -18,7 +18,7 @@
           <div class="row">
             <h3 class="col">Create admin user</h3>
           </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="row bg-warning py-2 m-1">
             <div class="col-sm-3">
               Current code
             </div>
@@ -26,12 +26,12 @@
               <input id="auth_code" name="auth_code" type="password" value=""/>
             </div>
             <div class="col-sm-5">
-              The authorisation code is needed when you register or edit
-              users. To change it here, you must provide the current auth
-              code as well as the new value.
+              You must provide the current authorisation code to commmence setup.
+              You'll also need the auth code whenever you register or edit
+              users, or change configuration settings.
             </div>
           </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
               New auth code
             </div>
@@ -39,15 +39,16 @@
               <input id="new_auth_code" name="new_auth_code" type="password" />
             </div>
             <div class="col-sm-5">
-              Be sure to remember the auth code you set! (It is possible to change
-              it later, but you'll need to know its current value in order to do so).
+              You <strong>must</strong> change the auth code.
+              Do not forget the new value! (It is possible to change
+              it later, but only if you remember what it is).
               This should <strong>not</strong> be the same as the admin account
               password you're also setting at this stage. Later you might add more
               admin accounts (e.g., for teaching assistants) but can choose not to
               share this auth code with them.
             </div>
           </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
               Admin username
             </div>
@@ -59,7 +60,7 @@
               name. If you're not sure, use <code>admin</code> (you can change it later).
             </div>
           </div>
-          <div class="row" style="background-color:#fff;margin:1em 0">
+          <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
               Admin password
             </div>
@@ -76,7 +77,7 @@
             <h3 class="col">{{ group_name | title }} settings</h3>
           </div>
           {% for name in settings_group %}
-            <div class="row" style="background-color:#fff;margin:1em 0">
+            <div class="row bg-white py-2 m-1">
               <div class="col-sm-3">
                 <code>{{ name }}</code>
               </div>
@@ -116,7 +117,7 @@
             </div>
           {% endfor %}
         {% endif %}
-        <input type="submit" class="btn btn-primary" value="Submit {{ group }} settings"/>
+        <input type="submit" class="btn btn-primary m-2" value="Submit {{ group_name | title }} settings"/>
       </form>
     </div>
   </div>

@@ -166,6 +166,8 @@ class ConfigSettings:
     }    
     
     MIN_PASSWORD_LENGTH = 4
+    MIN_USERNAME_LENGTH = 2
+    MAX_USERNAME_LENGTH = 32
 
     TYPES = {
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
@@ -473,7 +475,7 @@ class ConfigSettings:
             if app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
                 additional_names.append(name)
         app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name] = additional_names
-
+  
 def _force_slashes(s):
     s = s.strip()
     if not s.startswith("/"):

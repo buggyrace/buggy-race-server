@@ -74,7 +74,7 @@ def register():
     """Register new user."""
     form = RegisterForm(request.form)
     if current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
-        del form.authorisation_code
+        del form.auth_code
     elif not (not current_user.is_anonymous and current_user.is_buggy_admin):
         flash(
           "You must be logged in as an administrator to register new users "

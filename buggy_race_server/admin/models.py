@@ -4,8 +4,43 @@
 from datetime import datetime
 from enum import Enum
 
-from buggy_race_server.config import ConfigSettings
 from buggy_race_server.database import Column, Model, SurrogatePK, db
+
+class SocialSetting():
+  """A Social media link: note this is not a Flask/ORM model
+     SOCIAL_n_NAME, SOCIAL_n_URL, SOCIAL_n_TEXT
+  """
+
+  MAX_SOCIALS = 4
+  EMPTY_VALUE = "" # empty string, not None (so we can safely stringify them)
+
+  @staticmethod
+  def get_socials_from_config(conf, want_all=False):
+    """ Get list of social site links from config (ignoring any with no name, unless want_all)"""
+    socials = []
+    for i in range(SocialSetting.MAX_SOCIALS):
+      if want_all or conf.get(f"SOCIAL_{i}_NAME"):
+        socials.append(
+          SocialSetting(
+            i,
+            conf.get(f"SOCIAL_{i}_NAME") or SocialSetting.EMPTY_VALUE,
+            conf.get(f"SOCIAL_{i}_URL") or SocialSetting.EMPTY_VALUE,
+            conf.get(f"SOCIAL_{i}_TEXT") or SocialSetting.EMPTY_VALUE
+         )
+        )
+    for s in socials:
+      print(f"FIXME++! {s}", flush=True)
+    return socials
+
+  def __str__(self):
+    return f"<{self.index}: {self.name}, {self.url} [{self.text}]>"
+
+  def __init__(self, index, name, url, text):
+    self.index = index
+    self.name = name
+    self.url = url
+    self.text = text
+
 
 class Setting(SurrogatePK, Model):
     """A setting (for config)."""

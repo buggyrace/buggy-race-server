@@ -60,7 +60,18 @@ class ConfigSettingNames(str, Enum):
     REGISTRATION_AUTH_CODE="REGISTRATION_AUTH_CODE"
     SECRET_KEY="SECRET_KEY"
     SERVER_PROJECT_PAGE_PATH="SERVER_PROJECT_PAGE_PATH"
-    SOCIAL_LINKS="SOCIAL_LINKS"
+    SOCIAL_0_NAME="SOCIAL_0_NAME"
+    SOCIAL_0_TEXT="SOCIAL_0_TEXT"
+    SOCIAL_0_URL="SOCIAL_0_URL"
+    SOCIAL_1_NAME="SOCIAL_1_NAME"
+    SOCIAL_1_TEXT="SOCIAL_1_TEXT"
+    SOCIAL_1_URL="SOCIAL_1_URL"
+    SOCIAL_2_NAME="SOCIAL_2_NAME"
+    SOCIAL_2_TEXT="SOCIAL_2_TEXT"
+    SOCIAL_2_URL="SOCIAL_2_URL"
+    SOCIAL_3_NAME="SOCIAL_3_NAME"
+    SOCIAL_3_TEXT="SOCIAL_3_TEXT"
+    SOCIAL_3_URL="SOCIAL_3_URL"
     USERS_HAVE_EMAIL="USERS_HAVE_EMAIL"
     USERS_HAVE_FIRST_NAME="USERS_HAVE_FIRST_NAME"
     USERS_HAVE_LAST_NAME="USERS_HAVE_LAST_NAME"
@@ -130,7 +141,18 @@ class ConfigSettings:
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name,
       },
       ConfigGroupNames.SOCIAL.name: {
-        ConfigSettingNames.SOCIAL_LINKS.name,
+        ConfigSettingNames.SOCIAL_0_NAME.name,
+        ConfigSettingNames.SOCIAL_0_TEXT.name,
+        ConfigSettingNames.SOCIAL_0_URL.name,
+        ConfigSettingNames.SOCIAL_1_NAME.name,
+        ConfigSettingNames.SOCIAL_1_TEXT.name,
+        ConfigSettingNames.SOCIAL_1_URL.name,
+        ConfigSettingNames.SOCIAL_2_NAME.name,
+        ConfigSettingNames.SOCIAL_2_TEXT.name,
+        ConfigSettingNames.SOCIAL_2_URL.name,
+        ConfigSettingNames.SOCIAL_3_NAME.name,
+        ConfigSettingNames.SOCIAL_3_TEXT.name,
+        ConfigSettingNames.SOCIAL_3_URL.name,
       }
     }
     DEFAULTS = {
@@ -148,7 +170,18 @@ class ConfigSettings:
         ConfigSettingNames.GITHUB_PAGES_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
-        ConfigSettingNames.SOCIAL_LINKS.name: "",
+        ConfigSettingNames.SOCIAL_0_NAME.name: "",
+        ConfigSettingNames.SOCIAL_0_TEXT.name: "",
+        ConfigSettingNames.SOCIAL_0_URL.name: "",
+        ConfigSettingNames.SOCIAL_1_NAME.name: "",
+        ConfigSettingNames.SOCIAL_1_TEXT.name: "",
+        ConfigSettingNames.SOCIAL_1_URL.name: "",
+        ConfigSettingNames.SOCIAL_2_NAME.name: "",
+        ConfigSettingNames.SOCIAL_2_TEXT.name: "",
+        ConfigSettingNames.SOCIAL_2_URL.name: "",
+        ConfigSettingNames.SOCIAL_3_NAME.name: "",
+        ConfigSettingNames.SOCIAL_3_TEXT.name: "",
+        ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
@@ -184,7 +217,18 @@ class ConfigSettings:
         ConfigSettingNames.GITHUB_PAGES_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_LINKS.name: ConfigTypes.STRING, # TODO
+        ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_0_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SOCIAL_1_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_1_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_1_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SOCIAL_2_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_2_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_2_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
@@ -287,8 +331,30 @@ class ConfigSettings:
           changed the way project info is hosted.
           """,
 
-        ConfigSettingNames.SOCIAL_LINKS.name:
-          """Description""",
+        ConfigSettingNames.SOCIAL_0_NAME.name:
+          """Name (shown on button)""",
+        ConfigSettingNames.SOCIAL_0_TEXT.name:
+          """Short description""",
+        ConfigSettingNames.SOCIAL_0_URL.name:
+          """Full URL to external site/resource""",
+        ConfigSettingNames.SOCIAL_1_NAME.name:
+          """Name (shown on button)""",
+        ConfigSettingNames.SOCIAL_1_TEXT.name:
+          """Short description""",
+        ConfigSettingNames.SOCIAL_1_URL.name:
+          """Full URL to external site/resource""",
+        ConfigSettingNames.SOCIAL_2_NAME.name:
+          """Name (shown on button)""",
+        ConfigSettingNames.SOCIAL_2_TEXT.name:
+          """Short description""",
+        ConfigSettingNames.SOCIAL_2_URL.name:
+          """Full URL to external site/resource""",
+        ConfigSettingNames.SOCIAL_3_NAME.name:
+          """Name (shown on button)""",
+        ConfigSettingNames.SOCIAL_3_TEXT.name:
+          """Short description""",
+        ConfigSettingNames.SOCIAL_3_URL.name:
+          """Full URL to external site/resource""",
 
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
           """The authorisation code is needed to make any changes to user data,
@@ -408,7 +474,7 @@ class ConfigSettings:
     @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
-
+  
     @staticmethod
     def prettify(name, value):
       if ConfigSettings.TYPES.get(name) == ConfigTypes.BOOLEAN:
@@ -494,27 +560,6 @@ def _remove_slashes(s):
 
 def _slug(s):
     return re.sub(r'\W+', '-', s.lower().strip())
-
-# first social link is SOCIAL_NAME, SOCIAL_URL, SOCIAL_TEXT
-# ...subsequent ones are SOCIAL_1_NAME, SOCIAL_1_URL, SOCIAL_1_TEXT
-# and then 2 and 3 and...
-# def _extract_social_links():
-#     social_links = []
-#     if env.str("SOCIAL_URL", default="").strip():
-#         social_links.append({
-#           'NAME': env.str(f"SOCIAL_NAME", default=""),
-#           'URL':  env.str(f"SOCIAL_URL", default="").strip(),
-#           'TEXT': env.str(f"SOCIAL_TEXT", default="")
-#         })
-#     i = 1
-#     while env.str(f"SOCIAL_{i}_URL", default="").strip() != "":
-#         social_links.append({
-#           'NAME': env.str(f"SOCIAL_{i}_NAME", default=""),
-#           'URL':  env.str(f"SOCIAL_{i}_URL", default="").strip(),
-#           'TEXT': env.str(f"SOCIAL_{i}_TEXT", default="")
-#         })
-#         i += 1
-#     return social_links
 
 
 ##################################################################

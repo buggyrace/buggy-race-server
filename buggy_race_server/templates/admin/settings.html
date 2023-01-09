@@ -64,39 +64,42 @@
                 You must provide the current authorisation code to make changes.
               </div>
             </div>
-
-            {% for name in groups[group] %}
-              <div class="row py-2 m-1 bg-white">
-                <div class="col-sm-3">
-                  <code>{{ name }}</code>
-                </div>
-                <div class="col-sm-4">
-                  <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-                  {% if type_of_settings[name] == "bool" %}
-                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
-                      <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
-                      <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
-                    </select>
-                  {% else %}
-                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
-                    {% if type_of_settings[name] == "int" %}
-                        type="number"
-                    {% elif type_of_settings[name] == "pass"%}
-                        type="password"
+            {% if group == 'SOCIAL' %}
+              {%include "admin/_social_settings.html" %}
+            {% else %}
+              {% for name in groups[group] %}
+                <div class="row py-2 m-1 bg-white">
+                  <div class="col-sm-3">
+                    <code>{{ name }}</code>
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
+                    {% if type_of_settings[name] == "bool" %}
+                      <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                        <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
+                        <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
+                      </select>
                     {% else %}
-                        type="text"
+                      <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                      {% if type_of_settings[name] == "int" %}
+                          type="number"
+                      {% elif type_of_settings[name] == "pass"%}
+                          type="password"
+                      {% else %}
+                          type="text"
+                      {% endif %}
+                      {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
                     {% endif %}
-                    {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
-                  {% endif %}
-                </div>
-                <div class="col-sm-5">
-                  {{ descriptions[name] }}
-                  <div class="setting-default">
-                    <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                  </div>
+                  <div class="col-sm-5">
+                    {{ descriptions[name] }}
+                    <div class="setting-default">
+                      <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                    </div>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            {% endif %}
             <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | title }} settings"/>
           {% endif %}
         </form>

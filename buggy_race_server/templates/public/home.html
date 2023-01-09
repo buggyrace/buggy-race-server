@@ -62,14 +62,14 @@
         <p><a class="btn btn-outline-secondary" href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">See the code &rtri;</a></p>
       </div>
       <div class="col-lg-4">
-        {% if config['SOCIAL_LINKS'] %}
+        {% if social_site_links %}
           <h2><i class="icon-bubbles"></i> Other places</h2>
-          {% for site in config['SOCIAL_LINKS'] %}
+          {% for site in social_site_links %}
               <p>
-                {{ site['TEXT'] }}
+                {{ site.text }}
               </p>
               <p>
-                <a class="btn btn-outline-secondary" href="{{ site['URL'] }}">{{ site['NAME'] }} &rtri;</a>
+                <a class="btn btn-outline-secondary" href="{{ site.url }}">{{ site.name }} &rtri;</a>
                 <br>
                 <br>
               </p>

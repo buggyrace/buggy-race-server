@@ -76,46 +76,50 @@
           <div class="row">
             <h3 class="col">{{ group_name | title }} settings</h3>
           </div>
-          {% for name in settings_group %}
-            <div class="row bg-white py-2 m-1">
-              <div class="col-sm-3">
-                <code>{{ name }}</code>
-              </div>
-              <div class="col-sm-4">
-                <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-                {% if type_of_settings[name] == "bool" %}
-                  <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
-                    <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
-                    <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
-                  </select>              
-                {% else %}
-                  <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
-                  {% if type_of_settings[name] == "int" %}
-                      type="number"
-                  {% elif type_of_settings[name] == "pass"%}
-                      type="password"
+          {% if group_name == 'SOCIAL' %}
+            {%include "admin/_social_settings.html" %}
+          {% else %}
+            {% for name in settings_group %}
+              <div class="row bg-white py-2 m-1">
+                <div class="col-sm-3">
+                  <code>{{ name }}</code>
+                </div>
+                <div class="col-sm-4">
+                  <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
+                  {% if type_of_settings[name] == "bool" %}
+                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                      <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
+                      <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
+                    </select>              
                   {% else %}
-                      type="text"
+                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                    {% if type_of_settings[name] == "int" %}
+                        type="number"
+                    {% elif type_of_settings[name] == "pass"%}
+                        type="password"
+                    {% else %}
+                        type="text"
+                    {% endif %}
+                    {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
                   {% endif %}
-                  {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
-                {% endif %}
-              </div>
-              <div class="col-sm-5">
-                {% if name in env_setting_overrides %}
-                  <div class="alert-danger">
-                    THIS SETTING HAS BEEN DECLARED AS AN ENVIRONMENT VARAIBLE
-                    which has priority over the value found in the database.
-                    You can change it here, but the new setting will not survive
-                    a restart <em>unless</em> the ENV declaration is removed.
+                </div>
+                <div class="col-sm-5">
+                  {% if name in env_setting_overrides %}
+                    <div class="alert-danger">
+                      THIS SETTING HAS BEEN DECLARED AS AN ENVIRONMENT VARAIBLE
+                      which has priority over the value found in the database.
+                      You can change it here, but the new setting will not survive
+                      a restart <em>unless</em> the ENV declaration is removed.
+                    </div>
+                  {% endif %}
+                  {{ descriptions[name] }}
+                  <div class="setting-default">
+                    <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
                   </div>
-                {% endif %}
-                {{ descriptions[name] }}
-                <div class="setting-default">
-                  <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
                 </div>
               </div>
-            </div>
-          {% endfor %}
+            {% endfor %}
+          {% endif %}
         {% endif %}
         <input type="submit" class="btn btn-primary m-2" value="Submit {{ group_name | title }} settings"/>
       </form>

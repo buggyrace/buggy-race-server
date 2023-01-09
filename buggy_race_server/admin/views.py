@@ -3,6 +3,7 @@
 import csv
 import io  # for CSV dump
 import random  # for API test
+import re
 from datetime import datetime, timedelta
 
 from flask import (
@@ -29,7 +30,7 @@ from buggy_race_server.admin.forms import (
     SetupSettingForm,
     SetupAuthForm,
 )
-from buggy_race_server.admin.models import Announcement, Setting
+from buggy_race_server.admin.models import Announcement, Setting, SocialSetting
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
@@ -65,12 +66,13 @@ def _update_settings_in_db(form):
   is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
   is_update_ok = True # optimistic
   for setting_form in form.settings.data:
-    name = setting_form.get('name')
+    name = setting_form.get('name').upper() # force uppercase for config keys
     value = setting_form.get('value').strip()
     is_changed_value = False
+    print(f"FIXME-FIXME name={name}, value={value}", flush=True)
     if name in settings_as_dict:
       if settings_as_dict[name] != value:
-          if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
+          if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
             changed_msg = f"Changed {name} to a new value"
           else:
             pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
@@ -82,9 +84,9 @@ def _update_settings_in_db(form):
             "value": value
           })
           is_changed_value = True
-          qty_settings_changed += 1
-    else: # config not in settings table: unexpected... but roll with it: INSERT
-        if ConfigSettings.TYPES[name] == ConfigTypes.PASSWORD:
+    else:
+        # config not in settings table: unexpected but roll with it: INSERT
+        if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
           changed_msg = f"Setting {name}\""
         else:
           changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
@@ -248,6 +250,7 @@ def setup():
       else:
         _flash_errors(form)
   group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
+  settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
   return render_template(
     "admin/setup.html",
     setup_status=setup_status,
@@ -257,7 +260,8 @@ def setup():
     group_name=group_name,
     group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
     settings_group=ConfigSettings.GROUPS[group_name],
-    settings=Setting.get_dict_from_db(Setting.query.all()),
+    settings=settings_as_dict,
+    social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True),
     type_of_settings=ConfigSettings.TYPES,
     pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
     descriptions=ConfigSettings.DESCRIPTIONS,
@@ -592,12 +596,14 @@ def settings(group_name=None):
       abort(403)
     form = SettingForm(request.form)
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+    social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
       # group_name = form['group'].data
       if form.validate_on_submit():
         _update_settings_in_db(form)
         # inefficient, but update to reflect changes
         settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+        social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
       else:
         _flash_errors(form)
     return render_template(
@@ -607,12 +613,13 @@ def settings(group_name=None):
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
       settings=settings_as_dict,
+      social_settings=social_settings,
       type_of_settings=ConfigSettings.TYPES,
       pretty_default_settings={
         name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
         for name in ConfigSettings.DEFAULTS
       },
-      descriptions=ConfigSettings.DESCRIPTIONS
+      descriptions=ConfigSettings.DESCRIPTIONS,
     )
 
 @blueprint.route("/announcements/")

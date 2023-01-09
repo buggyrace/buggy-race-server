@@ -4,8 +4,8 @@ from flask import flash, request, redirect, Markup, url_for, current_app
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
-from buggy_race_server.config import ConfigSettingNames
-from buggy_race_server.admin.models import Announcement, Setting, ConfigSettings
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings
+from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.extensions import db
 from sqlalchemy import bindparam, insert, update
 

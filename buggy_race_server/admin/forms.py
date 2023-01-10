@@ -65,7 +65,7 @@ class AnnouncementForm(FlaskForm):
     type = SelectField(
       'Type',
       validators=[DataRequired()],
-      choices=[(t,t) for t in AnnouncementType]
+      choices=[(t.value,t.value) for t in AnnouncementType]
     )
     is_visible = BooleanField("Display now?")
     is_html = BooleanField("Allow HTML?")

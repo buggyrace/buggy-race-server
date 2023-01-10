@@ -39,35 +39,43 @@
     </ul>
   </div>
 
-  <div class="row my-3">
-    <form id="registerForm" class="form form-register" method="POST" action="" role="form">
-      {{ form.csrf_token }}
-      {#
-        note:
-          always require an auth code for bulk registration,
-          even if IS_PUBLIC_REGISTRATION_ALLOWED is true
-      #}
-      <div class="alert alert-warning">
-        You must provide a valid authorisation code to bulk-register users!
+  <form id="registerForm" class="form-register" method="POST" action="" role="form">
+    {{ form.csrf_token }}
+    <div class="form-group">
+      <p>
+        Bulk upload by pasting a CSV in here, with a header row as
+        the first line, for example:
+      </p>
+      <div class="border bg-light p-2 m-1">
+        {% for line in example_csv_data %}
+          <code>{{ line }}</code><br>
+        {% endfor %}
       </div>
-      <div class="form-group">
-          {{form.auth_code.label}}
-          {{form.auth_code(class_="form-control")}}
+        {{form.userdata.label}}
+        {{form.userdata(placeholder="username,password,...", class_="form-control")}}
+    </div>
+    {#
+      note:
+        always require an auth code for bulk registration,
+        even if IS_PUBLIC_REGISTRATION_ALLOWED is true
+    #}
+    <div class="row bg-warning py-2 m-1">
+      <div class="col-sm-3">
+        {{form.auth_code.label}}
       </div>
-      <div class="form-group">
-        <p>
-          Bulk upload by pasting a CSV in here, with a header row as
-          the first line, for example"<br>
-          {% for line in example_csv_data %}
-            <code>{{ line }}</code><br>
-          {% endfor %}
-        </p>
-          {{form.userdata.label}}
-          {{form.userdata(placeholder="username,password,...", class_="form-control")}}
+      <div class="col-sm-4">
+        {{form.auth_code(class_="form-control")}}
       </div>
-      <p><input class="btn btn-primary" type="submit" value="Register"></p>
-    </form>
-  </div>
+      <div class="col-sm-5">
+        You must provide a valid authorisation code to bulk-register users
+      </div>
+    </div>
+    <div class="row py-2 m-1">
+      <div class="col">
+        <input class="btn btn-primary" type="submit" value="Register">
+      </div>
+    </div>
+  </form>
 
   <div class="row">
     <p class="mt-5">

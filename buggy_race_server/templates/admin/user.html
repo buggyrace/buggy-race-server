@@ -2,62 +2,141 @@
 {% block content %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5">Edit user {{ user.username }}</h1>
+    <h1 class="p-0 my-2">Edit user {{ user.username }}</h1>
   </div>
+
   <div class="row">
-    <form id="userForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_user', user_id=user.id)}}" role="form">
-      {{ form.csrf_token }}
-      <div class="alert alert-danger">
-        You must provide a valid authorisation code to
-        edit user data!
-      </div>
-      <div class="form-group">
-          {{form.auth_code.label}}
-          {{form.auth_code(class_="form-control")}}
-      </div>
-      {{form.id()}}
-      <div class="form-group">
-          {{form.username.label}}
-          {{form.username(placeholder="Username", class_="form-control")}}
-      </div>
-      {% if config['USERS_HAVE_ORG_USERNAME'] %}
-        <div class="form-group">
-            {{form.org_username.label}}
-            {{form.org_username(placeholder="Org Username", class_="form-control")}}
+    <div class="col" style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+      <form id="userForm" class="form-announce" method="POST" action="{{url_for('admin.edit_user', user_id=user.id)}}" role="form">
+        {{ form.csrf_token }}
+        {{form.id()}}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.username.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.username(placeholder="Username", class_="form-control")}}
+          </div>
+          <div class="col-sm-5">
+            Usernames are always lower case (although they may be displayed
+            in title case: see the User settings in config).
+          </div>
         </div>
-      {% endif %}
-      {% if config['USERS_HAVE_FIRST_NAME'] %}
-        <div class="form-group">
-            {{form.first_name.label}}
-            {{form.first_name(placeholder="Ada", class_="form-control")}}
+
+        {% if config['USERS_HAVE_ORG_USERNAME'] %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.org_username.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.org_username(placeholder="Org Username", class_="form-control")}}
+            </div>
+            <div class="col-sm-5">
+              If users have a different username in your organisation or institution,
+              add it here. It's not used by the buggy race server.
+            </div>
+          </div>
+        {% endif %}
+
+        {% if config['USERS_HAVE_FIRST_NAME'] %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.first_name.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.first_name(placeholder="Ada", class_="form-control")}}
+            </div>
+            <div class="col-sm-5">
+              User's first name (if you're using first names as usernames,
+              you might not need this field).
+            </div>
+          </div>
+        {% endif %}
+
+        {% if config['USERS_HAVE_LAST_NAME'] %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.last_name.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.last_name(placeholder="Lovelace", class_="form-control")}}
+            </div>
+            <div class="col-sm-5">
+              User's last name.
+            </div>
+          </div>
+        {% endif %}
+
+        {% if config['USERS_HAVE_EMAIL'] %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.email.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.email(placeholder="name@example.com", class_="form-control")}}
+            </div>
+            <div class="col-sm-5">
+              User's email address.
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.is_student.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.is_student(class_="form-control", checked=user.is_student)}}
+          </div>
+          <div class="col-sm-5">
+            Admin users or teaching assistants aren't students (used in the dashboard).
+          </div>
         </div>
-      {% endif %}
-      {% if config['USERS_HAVE_LAST_NAME'] %}
-        <div class="form-group">
-            {{form.last_name.label}}
-            {{form.last_name(placeholder="Lovelace", class_="form-control")}}
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.is_active.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.is_active(class_="form-control", checked=user.is_active)}}
+          </div>
+          <div class="col-sm-5">
+            Users that are not active cannot log in, and are effectively suspended.
+          </div>
         </div>
-      {% endif %}
-      {% if config['USERS_HAVE_EMAIL'] %}
-        <div class="form-group">
-            {{form.email.label}}
-            {{form.email(placeholder="Email", class_="form-control")}}
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.notes.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.notes(class_="form-control")}}
+          </div>
+          <div class="col-sm-5">
+            Staff notes are displayed here on the server but are only shown to admin users.
+          </div>
         </div>
-      {% endif %}
-      <div class="form-group">
-          {{form.is_student.label}}
-          {{form.is_student(class_="form-control", checked=user.is_student)}}
+
+        <div class="row bg-warning py-2 m-1">
+          <div class="col-sm-3">
+            {{form.auth_code.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.auth_code(class_="form-control")}}
+          </div>
+          <div class="col-sm-5">
+            You must provide a valid authorisation code to
+            edit user data.
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col py-2">
+            <input class="btn btn-primary" type="submit" value="Submit changes">
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        {{form.is_active.label}}
-        {{form.is_active(class_="form-control", checked=user.is_active)}}
-    </div>
-    <div class="form-group">
-          {{form.notes.label}}
-          {{form.notes(class_="form-control")}}
-      </div>
-      <p><input class="btn btn-primary" type="submit" value="Submit changes"></p>
     </form>
+  </div>
   </div>
 </div>
 {% endblock %}

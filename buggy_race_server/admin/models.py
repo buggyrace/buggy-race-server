@@ -28,8 +28,6 @@ class SocialSetting():
             conf.get(f"SOCIAL_{i}_TEXT") or SocialSetting.EMPTY_VALUE
          )
         )
-    for s in socials:
-      print(f"FIXME++! {s}", flush=True)
     return socials
 
   def __str__(self):

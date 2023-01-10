@@ -69,7 +69,6 @@ def _update_settings_in_db(form):
     name = setting_form.get('name').upper() # force uppercase for config keys
     value = setting_form.get('value').strip()
     is_changed_value = False
-    print(f"FIXME-FIXME name={name}, value={value}", flush=True)
     if name in settings_as_dict:
       if settings_as_dict[name] != value:
           if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:

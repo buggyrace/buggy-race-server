@@ -53,17 +53,6 @@
           {% else %}
             <h3>{{ group | title }} settings</h3>
 
-            <div class="row bg-warning py-2 m-1">
-              <div class="col-sm-3">
-                Auth code
-              </div>
-              <div class="col-sm-4">
-                <input id="auth_code" name="auth_code" type="password" value=""/>
-              </div>
-              <div class="col-sm-5">
-                You must provide the current authorisation code to make changes.
-              </div>
-            </div>
             {% if group == 'SOCIAL' %}
               {%include "admin/_social_settings.html" %}
             {% else %}
@@ -100,6 +89,17 @@
                 </div>
               {% endfor %}
             {% endif %}
+            <div class="row bg-warning py-2 m-1">
+              <div class="col-sm-3">
+                Auth code
+              </div>
+              <div class="col-sm-4">
+                <input id="auth_code" name="auth_code" type="password" value=""/>
+              </div>
+              <div class="col-sm-5">
+                You must provide the current authorisation code to make changes.
+              </div>
+            </div>
             <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | title }} settings"/>
           {% endif %}
         </form>

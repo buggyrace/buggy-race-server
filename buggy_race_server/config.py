@@ -246,13 +246,14 @@ class ConfigSettings:
     # used during the (initial) setup: the _SETUP_STATUS
     # config is effectively the index-1 into this array:
     # when the setup is complete, _SETUP_STATUS is zero.
+    # (the settings page uses the same order, because it's sensible)
     SETUP_GROUPS = [
       ConfigGroupNames.AUTH,
-      ConfigGroupNames.ORG,
-      ConfigGroupNames.USERS,
       ConfigGroupNames.SERVER,
-      ConfigGroupNames.RACES,
+      ConfigGroupNames.ORG,
       ConfigGroupNames.SOCIAL,
+      ConfigGroupNames.USERS,
+      ConfigGroupNames.RACES,
       ConfigGroupNames.GITHUB
     ]
 

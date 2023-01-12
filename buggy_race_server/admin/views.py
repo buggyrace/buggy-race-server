@@ -612,6 +612,7 @@ def settings(group_name=None):
       group_name=group_name,
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
+      sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],
       settings=settings_as_dict,
       social_settings=social_settings,
       type_of_settings=ConfigSettings.TYPES,

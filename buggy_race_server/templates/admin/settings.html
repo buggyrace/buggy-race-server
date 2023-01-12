@@ -7,18 +7,18 @@
   </div>
   <div class="row js-only" id="show-settings-btns">
     <div class="col">
-      {% for group in groups %}
-        {% if group_name == group | lower %}
+      {% for name in sorted_groupnames %}
+        {% if group_name == name | lower %}
           {% set btn_class = "btn-dark" %}
         {% else %}
           {% set btn_class = "btn-outline-secondary" %}
         {% endif %}
-        <a href="{{ url_for('admin.settings', group_name=group | lower) }}"
-        class="btn {{ btn_class }}">{{ group | title }}</a>
+        <a href="{{ url_for('admin.settings', group_name=name | lower) }}"
+        class="btn {{ btn_class }}">{{ name | title }}</a>
       {% endfor %}
     </div>
   </div>
-  {% for group in groups %}
+  {% for group in sorted_groupnames %}
     {% if group_name == None or group_name == group | lower %}
       <div class="my-4 p-2" style="border:1px solid gray;background-color:#eee" id="form-{{ group | lower }}">
         <form action="{{ url_for('admin.settings', group_name=group | lower) }}" method="post">

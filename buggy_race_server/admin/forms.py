@@ -104,8 +104,8 @@ class ConfigSettingForm(Form):
         if self.value.data and not str(self.value.data).isdigit():
           raise ValidationError(f"{name} must be a number")
         return int(self.value.data)
-      if self.name.data == ConfigSettingNames.REGISTRATION_AUTH_CODE:
-        if len(self.name.data) < ConfigSettings.MIN_PASSWORD_LENGTH:
+      elif data_type == ConfigTypes.PASSWORD:
+        if len(self.value.data) < ConfigSettings.MIN_PASSWORD_LENGTH:
           raise ValidationError(f"{name} is too short: need at least {ConfigSettings.MIN_PASSWORD_LENGTH} characters")
       return self.value.data
 

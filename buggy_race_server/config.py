@@ -510,10 +510,6 @@ class ConfigSettings:
     
     @staticmethod
     def users_additional_fieldnames_is_enabled_dict(app):
-        print(f"FIXME: email: {app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)}", flush=True)
-        print(f"FIXME: org_username: {app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)}", flush=True)
-        print(f"FIXME: first_name: {app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)}", flush=True)
-        print(f"FIXME: last_name: {app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)}", flush=True)
         return {
             "email": bool(app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)),
             "org_username": bool(app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)),

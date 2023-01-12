@@ -30,9 +30,6 @@ class ConfigSettingNames(str, Enum):
     # because they are only set by environment variables (e.g., the database URL).
 
     # prefix by _ are implied, so should not be set explicitly
-    _USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED="_USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED"
-    _USERS_ADDITIONAL_FIELDNAMES="_USERS_ADDITIONAL_FIELDNAMES"
-    _ADMIN_USERNAMES_LIST="_ADMIN_USERNAMES_LIST"
     _CURRENT_ANNOUNCEMENTS="_CURRENT_ANNOUNCEMENTS"
     _SETUP_STATUS="_SETUP_STATUS"
     _ENV_SETTING_OVERRIDES="_ENV_SETTING_OVERRIDES"
@@ -503,45 +500,31 @@ class ConfigSettings:
         print(f"* updated config value: {name}={value}", flush=True)
 
     @staticmethod
-    def infer_extra_settings(app, settings_dict={}):
-        """ Generates extra/convenience config settings that are
-        implied from config settings that are already set. 
-        Using settings_dict (instead of app.config, which is mimics) because there
-        seems to be an issue with the app config being updated by the time this is
-        called, _maybe_ to do with app context (spent a long time getting odd results:
-        the app says the context is set, but it's not respected here)
-        """
-        if not settings_dict:
-          settings_dict = app.config # use config directly if no dict was passed
-        admin_users_str = settings_dict.get(ConfigSettingNames.ADMIN_USERNAMES.name)
+    def admin_usernames_list(app):
+        admin_users_str = app.config.get(ConfigSettingNames.ADMIN_USERNAMES.name)
         if admin_users_str is None:
-          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = []
+          return []
         else:
-          app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name] = [
-              user.strip() for user in admin_users_str.split(",")
-          ]
-
-        # note: explicit mapping between name of field/column and enable/disable
-        #   Developers: see users/models.py to see this in use: it's a bit messy
-        #   if these settings are changed _after_ any records have been created
-        #   (but that is why this is not implemented in the database schema, which
-        #   might be generated before these config settings have been fixed)
-
-        app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name] = {
-            "email": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_EMAIL.name) == '1'),
-            "org_username": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name) == '1'),
-            "first_name": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name) == '1'),
-            "last_name": bool(settings_dict.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name) == '1'),
+          return [user.strip() for user in admin_users_str.split(",")]
+    
+    @staticmethod
+    def users_additional_fieldnames_is_enabled_dict(app):
+        print(f"FIXME: email: {app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)}", flush=True)
+        print(f"FIXME: org_username: {app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)}", flush=True)
+        print(f"FIXME: first_name: {app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)}", flush=True)
+        print(f"FIXME: last_name: {app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)}", flush=True)
+        return {
+            "email": bool(app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)),
+            "org_username": bool(app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)),
+            "first_name": bool(app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)),
+            "last_name": bool(app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)),
         }
 
-        # list of additional fieldnames (will be empty if there are none)
-        #   This is a convenience for summarising user settings
-        additional_names = []
-        for name in app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
-            if app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]:
-                additional_names.append(name)
-        app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name] = additional_names
-  
+    @staticmethod
+    def users_additional_fieldnames(app):
+        is_enabled_dict = ConfigSettings.users_additional_fieldnames_is_enabled_dict(app)
+        return [ field for field in is_enabled_dict if is_enabled_dict[field] ]
+
 def _force_slashes(s):
     s = s.strip()
     if not s.startswith("/"):

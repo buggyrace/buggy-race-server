@@ -4,7 +4,7 @@
      Buggy Race Server 
   </a>
   {% if config['_SETUP_STATUS'] %}
-    <span style="color:#ffff00">&lt;setting up&gt;</span>
+    <a href="{{ url_for('admin.setup') }}" class="btn btn-small btn-warning">Setting up...</a>
   {% else %}
 
   <button class="navbar-toggler" type="button">

@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from sqlalchemy import orm
 
 # get the config settings (without the app context):
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.database import (
     Column,
     Model,
@@ -25,20 +25,20 @@ API_KEY_LENGTH = 16
 
 EXAMPLE_USER_DATA = {
     "ada": {
-        "username": "example1",
+        "username": "ada",
         "password": "secR3t89o!W",
         "first_name": "Ada",
         "last_name": "Lovelace",
         "org_username": "al003",
-        "email": "ada@example.com"
+        "email": "a.lovelace@example.com"
     },
     "chaz":{
-        "username": "example2",
+        "username": "chaz",
         "password": "n-E7jWz*DIg",
         "first_name": "Charles",
         "last_name": "Babbage",
         "org_username": "cb002",
-        "email": "chaz@example.com"
+        "email": "c.babbage@example.com"
     },
 }
 
@@ -93,9 +93,10 @@ class User(UserMixin, SurrogatePK, Model):
         else:
             self.password = None
         # disallow optional fields to be set unless they are explicitly enabled
-        for fieldname in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
-            if not current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][fieldname]:
-                setattr(self, fieldname, None)
+        mandatory_fields = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
+        for fieldname in mandatory_fields:
+            if not mandatory_fields[fieldname]:
+                setattr(self, fieldname, None) # force None
         self.init_on_load()
 
     @orm.reconstructor
@@ -155,8 +156,9 @@ class User(UserMixin, SurrogatePK, Model):
             'github_repo': repo,
             'notes': self.notes,
         }
-        for fieldname in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]:
-            if not current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][fieldname]:
+        mandatory_fieldnames = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
+        for fieldname in mandatory_fieldnames:
+            if not mandatory_fieldnames[fieldname]:
                 del fields[fieldname]
         return fields
 
@@ -170,15 +172,12 @@ class User(UserMixin, SurrogatePK, Model):
         return [ EXAMPLE_USER_DATA[example_user][fieldname] for fieldname in fieldnames ]
 
     def get_missing_fieldnames(fieldnames):
-        required_fieldnames = ["username", "password"] + [
-            field for field in current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name]
-            if current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED.name][field]
-        ]
-        return [name for name in required_fieldnames if name not in fieldnames]
+        additional_fields = ConfigSettings.users_additional_fieldnames(current_app)
+        return [name for name in additional_fields if name not in fieldnames]
 
     @property
     def is_buggy_admin(self):
-      return self.is_active and self.username in current_app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name]
+      return self.is_active and self.username in ConfigSettings.admin_usernames_list(current_app)
 
     @property
     def pretty_username(self):

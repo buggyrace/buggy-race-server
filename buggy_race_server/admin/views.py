@@ -223,7 +223,6 @@ def setup():
             ConfigSettingNames.ADMIN_USERNAMES.name,
             new_admin_username
           )
-          ConfigSettings.infer_extra_settings(current_app) # populate _ADMIN_USERNAMES_LIST
           setup_status += 1
           set_and_save_config_setting(
             current_app,
@@ -248,6 +247,7 @@ def setup():
             pass
       else:
         _flash_errors(form)
+
   group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
   settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
   return render_template(
@@ -338,7 +338,7 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
           is_admin_can_edit = is_admin_can_edit,
           editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
           users = users,
-          admin_usernames = current_app.config[ConfigSettingNames._ADMIN_USERNAMES_LIST.name],
+          admin_usernames = ConfigSettings.admin_usernames_list(current_app),
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_enabled = len([s for s in students if s.is_active]),
@@ -443,7 +443,7 @@ def bulk_register(data_format=None):
           })
         else:
           flash_errors(form)
-    csv_fieldnames = ['username', 'password'] + current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES.name]
+    csv_fieldnames = ['username', 'password'] + ConfigSettings.users_additional_fieldnames(current_app)
     return render_template(
         "admin/bulk_register.html",
         form=form,
@@ -451,7 +451,8 @@ def bulk_register(data_format=None):
           ",".join(csv_fieldnames),
           ",".join(User.get_example_data("ada", csv_fieldnames)),
           ",".join(User.get_example_data("chaz", csv_fieldnames)),
-        ]
+        ],
+        csv_fieldnames=f"{csv_fieldnames} {current_app.config}"
     )
 
 # user_id may be username or id

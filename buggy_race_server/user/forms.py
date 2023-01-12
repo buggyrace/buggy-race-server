@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, V
 
 from buggy_race_server.utils import is_authorised, prettify_form_field_name
 from buggy_race_server.user.models import User
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettings
 
 class UserForm(FlaskForm):
     """User form (for editing user details)."""
@@ -31,8 +31,9 @@ class UserForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
 
     @staticmethod
-    def is_mandatory_by_config(name, value):
-        is_mandatory = current_app.config[ConfigSettingNames._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED][name]
+    def is_mandatory_by_config(app, name, value):
+        mandatory_fields = ConfigSettings.users_additional_fieldnames_is_enabled_dict(app)
+        is_mandatory = mandatory_fields[name]
         if is_mandatory and (value is None or value == ""):
             raise ValidationError(f"missing {prettify_form_field_name(name)}, which is required by config settings")
         return is_mandatory
@@ -47,13 +48,13 @@ class UserForm(FlaskForm):
 
     def validate_org_username(self, field):
         value = field.data.strip()
-        if UserForm.is_mandatory_by_config(field.name, value):
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 
     def validate_email(self, field):
         value = field.data.strip()
-        if UserForm.is_mandatory_by_config(field.name, value):
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
             if not '@' in value:
                 raise ValidationError("Email must contain @-sign")
@@ -61,13 +62,13 @@ class UserForm(FlaskForm):
 
     def validate_first_name(self, field):
         value = field.data.strip()
-        if UserForm.is_mandatory_by_config(field.name, value):
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 
     def validate_last_name(self, field):
         value = field.data.strip()
-        if UserForm.is_mandatory_by_config(field.name, value):
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 

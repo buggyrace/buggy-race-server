@@ -56,8 +56,6 @@ def create_app():
             print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
 
-        ConfigSettings.infer_extra_settings(app, settings_dict)
-
         try:
             qty_announcements = Announcement.query.count()
         except Exception as e:

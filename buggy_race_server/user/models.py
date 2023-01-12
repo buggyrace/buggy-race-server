@@ -87,7 +87,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     def __init__(self, username, org_username=None, email=None, password=None, **kwargs):
         """Create instance."""
-        db.Model.__init__(self, username=username, org_username=org_username, email=email, **kwargs)
+        db.Model.__init__(self, username=username.lower(), org_username=org_username, email=email, **kwargs)
         if password:
             self.set_password(password)
         else:

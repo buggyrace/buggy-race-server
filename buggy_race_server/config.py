@@ -284,7 +284,8 @@ class ConfigSettings:
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique
           for your server: the default value was randomised on installation,
-          but you can choose your own value if you prefer.""",
+          so you usually don't need to change it. Note that changing it will
+          almost certainly break existing sessions.""",
 
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
           """Should the webserver itself force HTTPS? This setting might not

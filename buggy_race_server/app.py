@@ -3,11 +3,18 @@
 import logging
 import sys
 
+#import traceback # for debug/dev work
+
 from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
-from buggy_race_server.utils import refresh_global_announcements
+from buggy_race_server.utils import (
+    refresh_global_announcements,
+    save_config_env_overrides_to_db,
+    load_settings_from_db
+)
 from buggy_race_server.admin.models import Announcement
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -39,21 +46,27 @@ def create_app():
 
     csrf.exempt(app.blueprints['api'])
 
-    # prepare the announcements:
     with app.app_context():
-        err_msg = None
+
+        try:
+            save_config_env_overrides_to_db(app)
+            settings_dict = load_settings_from_db(app)
+        except Exception as e:
+            #traceback.print_exception(type(e), e, e.__traceback__)
+            print(f"init error: {e}")
+            return app # no more work: allows flask db init, etc
+
         try:
             qty_announcements = Announcement.query.count()
         except Exception as e:
-            err_msg = f"init error: {e}"
-            print(err_msg)
+            print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
 
-        if app.config['EXAMPLE_ANNOUNCEMENT'] and qty_announcements == 0:
+        if qty_announcements == 0:
             # note: this is *not* publishing an announcement, it's seeding an example
-            announcement = Announcement.create(
+            Announcement.create(
                 type="special",
-                text=app.config['EXAMPLE_ANNOUNCEMENT'],
+                text=Announcement.EXAMPLE_ANNOUNCEMENT,
                 is_html=True,
                 is_visible=False,
             )
@@ -61,7 +74,6 @@ def create_app():
         refresh_global_announcements(app)
 
     return app
-
 
 def register_extensions(app):
     """Register Flask extensions."""

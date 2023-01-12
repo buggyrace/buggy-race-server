@@ -1,0 +1,70 @@
+<p>
+  Links to up to four "Other places" (such as social media) are shown
+  on the server's home page. If you're using supporting sites such as
+  Moodle, Discord, Teams or Piazza, add them here.<br>
+  If you leave the <em>Name</em> blank, the link won't be displayed.
+</p>
+{% for social in social_settings %}
+  <div class="row p-0 m-2 bg-white" style="border:2px solid #ddd;">
+    <h4 class="col-sm-12 p-2" style="background-color:#ddd;">
+      Social site:
+      {% if social.name %}
+        {{ social.name }}
+      {% else %}
+        {{ social.index }}
+      {% endif %}
+    </h4>
+    <div class="col">
+      <div class="row py-2 m-1 bg-white">
+        <div class="col-sm-3">
+          Name
+        </div>
+        <div class="col-sm-4">
+          {% set social_field = social.index * 3 %}
+          {% set name = "SOCIAL_" ~ social.index ~ "_NAME" %}
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" />
+        </div>
+        <div class="col-sm-5">
+          {{ descriptions[name] }}
+          <br>
+          <em>Example:</em> <code>Discord</code>
+        </div>
+      </div>
+      <div class="row py-2 m-1 bg-white">
+        <div class="col-sm-3">
+          URL
+        </div>
+        <div class="col-sm-4">
+          {% set social_field = social_field + 1 %}
+          {% set name = "SOCIAL_" ~ social.index ~ "_URL" %}
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" />
+        </div>
+        <div class="col-sm-5">
+          {{ descriptions[name] }}
+          <br>
+          <em>Example:</em> <code>https://discord.example.com</code>
+        </div>
+      </div>
+      <div class="row py-2 m-1 bg-white">
+        <div class="col-sm-3">
+          Text/description
+        </div>
+        <div class="col-sm-4">
+          {% set social_field = social_field + 1 %}
+          {% set name = "SOCIAL_" ~ social.index ~ "_TEXT" %}
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}"/>
+        </div>
+        <div class="col-sm-5">
+          {{ descriptions[name] }}
+          <br>
+          <em>Example:</em>
+          <br>
+          <code>Discord server for discussing project/asking for help.</code>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}

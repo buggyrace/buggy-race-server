@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <div class="col">
+      <h1>Setup: step {{ setup_status }} of {{ qty_setup_steps }}</h1>
+      <p>
+        {{ group_description }}
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+      <form action="{{ url_for('admin.setup') }}" method="post">
+        {{ form.csrf_token }}
+        <input type="hidden" name="group" value="{{ group }}"/>
+        {% if setup_status == 1 %}
+          <div class="row">
+            <h3 class="col">Create admin user</h3>
+          </div>
+          <div class="row bg-warning py-2 m-1">
+            <div class="col-sm-3">
+              Current code
+            </div>
+            <div class="col-sm-4">
+              <input id="auth_code" name="auth_code" type="password" value=""/>
+            </div>
+            <div class="col-sm-5">
+              You must provide the current authorisation code to commmence setup.
+              You'll also need the auth code whenever you register or edit
+              users, or change configuration settings.
+            </div>
+          </div>
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              New auth code
+            </div>
+            <div class="col-sm-4">
+              <input id="new_auth_code" name="new_auth_code" type="password" />
+            </div>
+            <div class="col-sm-5">
+              You <strong>must</strong> change the auth code.
+              Do not forget the new value! (It is possible to change
+              it later, but only if you remember what it is).
+              This should <strong>not</strong> be the same as the admin account
+              password you're also setting at this stage. Later you might add more
+              admin accounts (e.g., for teaching assistants) but can choose not to
+              share this auth code with them.
+            </div>
+          </div>
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              Admin username
+            </div>
+            <div class="col-sm-4">
+              <input is="admin_username" name="admin_username" type="text" />
+            </div>
+            <div class="col-sm-5">
+              Provide a username for an administrator's account — maybe your first
+              name. If you're not sure, use <code>admin</code> (you can change it later).
+            </div>
+          </div>
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              Admin password
+            </div>
+            <div class="col-sm-4">
+              <input name="admin_password" id="admin_password" type="password" />
+            </div>
+            <div class="col-sm-5">
+              Password of the admin user (once you've finished setup, you
+              can change this later — but <em>do not forget it!</em>)
+            </div>
+          </div>
+        {% else %}
+          <div class="row">
+            <h3 class="col">{{ group_name | title }} settings</h3>
+          </div>
+          {% if group_name == 'SOCIAL' %}
+            {%include "admin/_social_settings.html" %}
+          {% else %}
+            {% for name in settings_group %}
+              <div class="row bg-white py-2 m-1">
+                <div class="col-sm-3">
+                  <code>{{ name }}</code>
+                </div>
+                <div class="col-sm-4">
+                  <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
+                  {% if type_of_settings[name] == "bool" %}
+                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                      <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
+                      <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
+                    </select>              
+                  {% else %}
+                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                    {% if type_of_settings[name] == "int" %}
+                        type="number"
+                    {% elif type_of_settings[name] == "pass"%}
+                        type="password"
+                    {% else %}
+                        type="text"
+                    {% endif %}
+                    {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
+                  {% endif %}
+                </div>
+                <div class="col-sm-5">
+                  {% if name in env_setting_overrides %}
+                    <div class="alert-danger">
+                      THIS SETTING HAS BEEN DECLARED AS AN ENVIRONMENT VARAIBLE
+                      which has priority over the value found in the database.
+                      You can change it here, but the new setting will not survive
+                      a restart <em>unless</em> the ENV declaration is removed.
+                    </div>
+                  {% endif %}
+                  {{ descriptions[name] }}
+                  <div class="setting-default">
+                    <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+        <input type="submit" class="btn btn-primary m-2" value="Submit {{ group_name | title }} settings"/>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

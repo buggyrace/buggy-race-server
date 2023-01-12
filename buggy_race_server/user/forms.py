@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """User forms."""
+
+from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, ValidationError
 
-from buggy_race_server.utils import is_authorised
+from buggy_race_server.utils import is_authorised, prettify_form_field_name
 from buggy_race_server.user.models import User
-
-# get the config settings (without the app context):
-from buggy_race_server.config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigSettings
 
 class UserForm(FlaskForm):
     """User form (for editing user details)."""
@@ -16,37 +16,61 @@ class UserForm(FlaskForm):
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=3, max=80)]
     )
-    org_username = StringField(
-        f"{config.INSTITUTION_SHORT_NAME} Username",
-        validators=[DataRequired(), Length(min=3, max=80)] if config.USERS_HAVE_ORG_USERNAME else []
-    )
-    email = StringField(
-        "Email",
-        validators=[Email(), Length(min=6, max=80)] if config.USERS_HAVE_EMAIL else []
-    )
-    first_name = StringField(
-        "First name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_FIRST_NAME else []
-    )
-    last_name = StringField(
-        "Last name",
-        validators=[DataRequired(), Length(min=1, max=80)] if config.USERS_HAVE_LAST_NAME else []
-    )
-    is_student = BooleanField(
-        "Is an enrolled student?"
-    )
-    is_active = BooleanField(
-        "Is active? (Users marked as inactive cannot login and are effectively suspended)"
-    )
-    notes = TextAreaField(
-        "Notes for staff", validators=[Optional(), Length(max=255)]
-    )
-    authorisation_code = PasswordField("Authorisation code",  [is_authorised])
 
-    def __init__(self, *args, **kwargs):
-        """Create instance."""
-        super(UserForm, self).__init__(*args, **kwargs)
-        self.user = None
+    # fields that aren't being used (because config says so)
+    # are explicitly, dynamically removed from the form in the view
+    # so they won't be submitted
+
+    org_username = StringField(f"Organisation Username")
+    email = StringField("Email")
+    first_name = StringField("First name")
+    last_name = StringField("Last name")
+    is_student = BooleanField("Is an enrolled student?")
+    is_active = BooleanField("Is active?")
+    notes = TextAreaField("Notes for staff", validators=[Optional(), Length(max=255)])
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+
+    @staticmethod
+    def is_mandatory_by_config(app, name, value):
+        mandatory_fields = ConfigSettings.users_additional_fieldnames_is_enabled_dict(app)
+        is_mandatory = mandatory_fields[name]
+        if is_mandatory and (value is None or value == ""):
+            raise ValidationError(f"missing {prettify_form_field_name(name)}, which is required by config settings")
+        return is_mandatory
+
+    @staticmethod
+    def check_length(name, value, min=0, max=80):
+        length = len(value)
+        if length < min:
+            raise ValidationError(f"{prettify_form_field_name(name)} is too short (at least {min} characters)")
+        if length > max:
+            raise ValidationError(f"{prettify_form_field_name(name)} is too long (at most {max} characters)")
+
+    def validate_org_username(self, field):
+        value = field.data.strip()
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
+            UserForm.check_length(field.name, value, min=3, max=32)
+        return value
+
+    def validate_email(self, field):
+        value = field.data.strip()
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
+            UserForm.check_length(field.name, value, min=3, max=32)
+            if not '@' in value:
+                raise ValidationError("Email must contain @-sign")
+        return value
+
+    def validate_first_name(self, field):
+        value = field.data.strip()
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
+            UserForm.check_length(field.name, value, min=3, max=32)
+        return value
+
+    def validate_last_name(self, field):
+        value = field.data.strip()
+        if UserForm.is_mandatory_by_config(current_app, field.name, value):
+            UserForm.check_length(field.name, value, min=3, max=32)
+        return value
 
     def validate(self):
         """Validate the form."""
@@ -58,6 +82,11 @@ class UserForm(FlaskForm):
             self.username.errors.append(f"Username \"{self.username}\" already registered")
             return False
         return True
+
+    def __init__(self, *args, **kwargs):
+        """Create instance."""
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.user = None
 
 # registration same as user form except needs password (and confirmation)
 # and the username can never already exist

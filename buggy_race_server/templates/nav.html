@@ -3,6 +3,10 @@
   <a class="navbar-brand" href="{{ url_for('public.home') }}">
      Buggy Race Server 
   </a>
+  {% if config['_SETUP_STATUS'] %}
+    <a href="{{ url_for('admin.setup') }}" class="btn btn-small btn-warning">Setting up...</a>
+  {% else %}
+
   <button class="navbar-toggler" type="button">
     <a href="#footer-nav"><span class="navbar-toggler-icon"></span></a>
   </button>
@@ -50,4 +54,5 @@
     </ul>
     {% endif %}
   </div><!-- /.navbar-collapse -->
+  {% endif %}
 </nav>

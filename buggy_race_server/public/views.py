@@ -15,12 +15,15 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
+from buggy_race_server.admin.models import SocialSetting
+
 from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -34,7 +37,10 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
-    return render_template("public/home.html")
+    return render_template(
+        "public/home.html",
+        social_site_links=SocialSetting.get_socials_from_config(current_app.config)
+    )
 
 @blueprint.route("/logout/")
 @login_required
@@ -59,19 +65,43 @@ def login():
             return redirect(redirect_url)
         else:
             flash_errors(form)
-    return render_template("public/login.html", form=form)
+    return render_template(
+        "public/login.html",
+        form=form,
+        is_registration_allowed=(
+            current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
+            or (not current_user.is_anonymous and current_user.is_buggy_admin)
+        )
+    )
 
 @blueprint.route("/register/", methods=["GET", "POST"])
 def register():
     """Register new user."""
     form = RegisterForm(request.form)
+    if current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
+        del form.auth_code
+    elif not (not current_user.is_anonymous and current_user.is_buggy_admin):
+        flash(
+          "You must be logged in as an administrator to register new users "
+          "(you'll need to know the authorisation code too)", "warning"
+        )
+        abort(403)
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
+        del form.email
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
+        del form.first_name
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
+        del form.last_name
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name]:
+        del form.org_username
+
     if form.validate_on_submit():
         User.create(
             username=form.username.data,
-            org_username=form.org_username.data,
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
+            org_username=form.org_username.data if form.org_username else None,
+            email=form.email.data if form.email else None,
+            first_name=form.first_name.data if form.first_name else None,
+            last_name=form.last_name.data if form.last_name else None,
             password=form.password.data,
             is_student=form.is_student.data,
             notes=form.notes.data,
@@ -84,7 +114,7 @@ def register():
     return render_template(
         "public/register.html",
         form=form,
-        has_auth_code=current_app.config["HAS_AUTH_CODE"]
+        is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name])
     )
 
 @blueprint.route("/specs/")

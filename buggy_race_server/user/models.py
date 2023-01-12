@@ -4,11 +4,12 @@ import datetime as datetime
 from random import randint
 import re
 
+from flask import current_app
 from flask_login import UserMixin
 from sqlalchemy import orm
 
 # get the config settings (without the app context):
-from buggy_race_server.config import ConfigFromEnv as config
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.database import (
     Column,
     Model,
@@ -24,20 +25,20 @@ API_KEY_LENGTH = 16
 
 EXAMPLE_USER_DATA = {
     "ada": {
-        "username": "example1",
+        "username": "ada",
         "password": "secR3t89o!W",
         "first_name": "Ada",
         "last_name": "Lovelace",
         "org_username": "al003",
-        "email": "ada@example.com"
+        "email": "a.lovelace@example.com"
     },
     "chaz":{
-        "username": "example2",
+        "username": "chaz",
         "password": "n-E7jWz*DIg",
         "first_name": "Charles",
         "last_name": "Babbage",
         "org_username": "cb002",
-        "email": "chaz@example.com"
+        "email": "c.babbage@example.com"
     },
 }
 
@@ -84,17 +85,18 @@ class User(UserMixin, SurrogatePK, Model):
     api_key = Column(db.String(30), nullable=True)
     notes = Column(db.Text(), default=False)
 
-    def __init__(self, username, org_username, email, password=None, **kwargs):
+    def __init__(self, username, org_username=None, email=None, password=None, **kwargs):
         """Create instance."""
-        db.Model.__init__(self, username=username, org_username=org_username, email=email, **kwargs)
+        db.Model.__init__(self, username=username.lower(), org_username=org_username, email=email, **kwargs)
         if password:
             self.set_password(password)
         else:
             self.password = None
         # disallow optional fields to be set unless they are explicitly enabled
-        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
-            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
-                setattr(self, fieldname, None)
+        mandatory_fields = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
+        for fieldname in mandatory_fields:
+            if not mandatory_fields[fieldname]:
+                setattr(self, fieldname, None) # force None
         self.init_on_load()
 
     @orm.reconstructor
@@ -154,8 +156,9 @@ class User(UserMixin, SurrogatePK, Model):
             'github_repo': repo,
             'notes': self.notes,
         }
-        for fieldname in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED:
-            if not config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[fieldname]:
+        mandatory_fieldnames = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
+        for fieldname in mandatory_fieldnames:
+            if not mandatory_fieldnames[fieldname]:
                 del fields[fieldname]
         return fields
 
@@ -169,19 +172,16 @@ class User(UserMixin, SurrogatePK, Model):
         return [ EXAMPLE_USER_DATA[example_user][fieldname] for fieldname in fieldnames ]
 
     def get_missing_fieldnames(fieldnames):
-        required_fieldnames = ["username", "password"] + [
-            field for field in config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED
-            if config._USERS_ADDITIONAL_FIELDNAMES_IS_ENABLED[field]
-        ]
-        return [name for name in required_fieldnames if name not in fieldnames]
+        additional_fields = ConfigSettings.users_additional_fieldnames(current_app)
+        return [name for name in additional_fields if name not in fieldnames]
 
     @property
     def is_buggy_admin(self):
-      return self.is_active and self.username in config.ADMIN_USERNAMES_LIST
+      return self.is_active and self.username in ConfigSettings.admin_usernames_list(current_app)
 
     @property
     def pretty_username(self):
-        return self.username.title() if config.IS_PRETTY_USERNAME_TITLECASE else self.username
+        return self.username.title() if current_app.config[ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name] else self.username
 
     @property
     def full_name(self):
@@ -226,7 +226,7 @@ class User(UserMixin, SurrogatePK, Model):
         """Check if the course repo exists for this user"""
         if not self._has_course_repository:
             # This only matches on repo name, not if it is a fork of the og repo.
-            repo = self.github.get(f"/repos/{self.github_username}/{config.BUGGY_EDITOR_REPO_NAME}").json()
+            repo = self.github.get(f"/repos/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}").json()
             if not 'html_url' in repo:
                 return False
 
@@ -236,7 +236,7 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def course_repository(self):
-        return f"https://github.com/{self.github_username}/{config.BUGGY_EDITOR_REPO_NAME}"
+        return f"https://github.com/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}"
 
     @property
     def github(self):

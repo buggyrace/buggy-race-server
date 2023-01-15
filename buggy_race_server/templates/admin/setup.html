@@ -86,7 +86,9 @@
                 </div>
                 <div class="col-sm-4">
                   <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-                  {% if type_of_settings[name] == "bool" %}
+                  {% if name == "PROJECT_REPORT_TYPE" %}
+                    {%include "admin/_report_type_input.html" %}
+                  {% elif type_of_settings[name] == "bool" %}
                     <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
                       <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
                       <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>

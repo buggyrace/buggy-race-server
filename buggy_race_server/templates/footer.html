@@ -18,7 +18,8 @@
         <li><a href="{{ url_for('public.showspecs') }}">Specs</a></li>
         <li><a href="{{ url_for('public.announce_races') }}">Races</a></li>
         <li><a href="{{ url_for('user.submit_buggy_data') }}">Upload</a></li>
-        <li><a href="{{ url_for('user.settings') }}">Settings</a>
+        <li><a href="{{ url_for('user.settings') }}">Settings</a></li>
+        <li><a href="{{ url_for('public.serve_project_page') }}">Project</a></li>
         <li><a href="{{ url_for('public.about') }}">About</a></li>
         {% if current_user and current_user.is_authenticated %}
             {% if current_user.is_buggy_admin %}
@@ -26,7 +27,7 @@
             {% endif %}
             <li><a href="{{ url_for('public.logout') }}">Logout <i class="icon-exit"></i></a></li>
         {% else %}
-        <li><a href="{{ url_for('public.login') }}">Log in</a></li>
+          <li><a href="{{ url_for('public.login') }}">Log in</a></li>
         {% endif %}
 
       </ul>

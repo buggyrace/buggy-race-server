@@ -1,0 +1,5 @@
+<select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+  <option value="" {% if settings[name] == "" %} selected="selected" {% endif %}>No report</option>
+  <option value="report" {% if settings[name] == "report" %} selected="selected" {% endif %}>Report</option>
+  <option value="poster" {% if settings[name] == "poster" %} selected="selected" {% endif %}>Poster</option>
+</select>

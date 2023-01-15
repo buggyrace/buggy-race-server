@@ -48,9 +48,20 @@
       <div class="col-lg-4">
         <h2><i class="icon-info"></i> Project details</h2>
         <p>
-          Everything you need to know about the <strong>tasks</strong> you need to work on.
+          Everything you need to know about the <strong>tasks</strong>
+          you need to work on, including some helpful tech notes.
         </p>
-        <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.show_project' ) }}">See tasks  &rtri;</a></p>
+        <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page' ) }}">Go to project &rtri;</a></p>
+        <!--
+        <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">See tasks &rtri;</a></p>
+        <p>
+          {{ config['PROJECT_CODE']}} tech notes contain specific
+          details to help you with the project
+        </p>
+        <p>
+          <a class="btn btn-outline-secondary" href="{{ url_for('public.serve_tech_notes') }}">Tech notes &rtri;</a>
+        </p>
+      -->
       </div>
       <div class="col-lg-4">
         <h2><i class="icon-github"></i> Source code</h2>
@@ -64,12 +75,12 @@
       <div class="col-lg-4">
         {% if social_site_links %}
           <h2><i class="icon-bubbles"></i> Other places</h2>
-          {% for site in social_site_links %}
+          {% for social_site in social_site_links %}
               <p>
-                {{ site.text }}
+                {{ social_site.text }}
               </p>
               <p>
-                <a class="btn btn-outline-secondary" href="{{ site.url }}">{{ site.name }} &rtri;</a>
+                <a class="btn btn-outline-secondary" href="{{ social_site.url }}">{{ social_site.name }} &rtri;</a>
                 <br>
                 <br>
               </p>

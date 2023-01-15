@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 from flask_wtf import FlaskForm
 from wtforms import (
     FieldList,
@@ -100,6 +102,14 @@ class ConfigSettingForm(Form):
         if self.value.data not in ["0", "1"]:
           raise ValidationError(f"{name} must be 1 or 0")
         return int(self.value.data) # use 1 or 0 (not bools) cos database is happier
+      elif data_type == ConfigTypes.DATETIME:
+        if self.value.data != "":
+          # accept format of "YYYY-MM-DD HH:MM" (space instead of T)
+          datestr = self.value.data.strip().replace(" ", "T")
+          try:
+            datetime.strptime(datestr, "%Y-%m-%dT%H:%M")
+          except ValueError:
+            raise ValidationError(f"{name} isn't in YYYY-MM-DD HH:MM format")
       elif data_type == ConfigTypes.INT:
         if self.value.data and not str(self.value.data).isdigit():
           raise ValidationError(f"{name} must be a number")

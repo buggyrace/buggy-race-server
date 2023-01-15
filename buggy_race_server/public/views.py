@@ -11,6 +11,8 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
+    send_from_directory,
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
@@ -148,21 +150,6 @@ def about():
     form = LoginForm(request.form)
     return render_template("public/about.html", form=form)
 
-@blueprint.route("/project/")
-@blueprint.route("/project/task/<task_id>")
-def show_project(task_id=None):
-  """Redirect projects and tasks to GitHub pages"""
-  url = current_app.config["GITHUB_PAGES_URL"]
-  if not url.endswith("/"):
-    url += "/"
-  if task_id:
-    task_id = task_id.lower()
-    if not task_id.startswith("task-"):
-      task_id = f"task-{task_id}"
-    return redirect(f"{url}project/tasks/#{task_id}", code=301 )
-  else:
-    return redirect( url + "project/", code=301 )
-
 @blueprint.route("/race/")
 def announce_races():
     """Race announcement page."""
@@ -206,3 +193,84 @@ def show_buggy(username=None):
         buggy=users_buggy,
         is_plain_flag=is_plain_flag
     )
+
+def _send_tech_notes_assets(type, path):
+    try:
+        if type not in ["theme", "assets"]:
+            raise FileNotFoundError()
+        return send_from_directory(
+            f"{current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH]}/{type}",
+            path
+        )
+    except FileNotFoundError:
+        return "File not found", 400
+        abort(404)
+
+@blueprint.route("/project/tasks/<task_id>")
+def show_single_task(task_id):
+    """Redirect individual tasks to single task page, with anchor tag"""
+    task_id = task_id.lower()
+    if not task_id.startswith("task-"):
+        task_id = f"task-{task_id}"
+    url = current_app.config.get("GITHUB_PAGES_URL") or ""
+    return redirect(f"{url}/project/tasks/#{task_id}", code=301 )
+
+@blueprint.route("/project", strict_slashes=False)
+@blueprint.route("/project/<page>", strict_slashes=False)
+def serve_project_page(page=None):
+    if page is None:
+        template = "public/project.html"
+    elif page == "tasks":
+        template = "public/project_tasks.html"
+    elif page in ["poster", "report"]:
+        if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE]:
+            abort(404) # nothing to show if there's no report
+        template = "public/project_report.html"
+    else:
+        abort(404)
+    report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE]
+    is_report = bool(report_type) # if it's not empty string (or maybe None?)
+    submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE]
+    return render_template(
+        template,
+        is_report=is_report,
+        report_type=report_type,
+        submit_deadline=submit_deadline,
+        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK],
+        is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED],
+
+    )
+
+@blueprint.route("/assets/<path:path>")
+def send_project_assets(path):
+    return _send_tech_notes_assets("assets", path)
+
+@blueprint.route("/theme/<path:path>")
+def send_project_theme(path):
+    return _send_tech_notes_assets("theme", path)
+
+@blueprint.route("/tech-notes", strict_slashes=False)
+def tech_notes_index():
+    url = current_app.config.get("GITHUB_PAGES_URL") or ""
+    return redirect(f"{url}/tech-notes/index", code=301 )
+    
+@blueprint.route("/tech-notes/<path:path>")
+def serve_tech_notes(path=None):
+    print(f"FIXME **** serve_tech_notes(path={path})", flush=True)
+    if path is None:
+        print("FIXME **** path was none, setting to index.html", flush=True)
+        path = "index.html"
+    elif path.endswith("/"):
+        print("FIXME **** path ended with slash, adding index.html", flush=True)
+        path +=" index.html"
+    elif not path.endswith(".html"):
+        print("FIXME **** path lacked .html suffix, adding it", flush=True)
+        path += ".html"
+    try:
+        return send_from_directory(
+            current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH],
+            path
+        )
+    except FileNotFoundError as e:
+        abort(404)
+

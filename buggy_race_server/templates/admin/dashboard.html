@@ -139,6 +139,34 @@
           <td class="text-right">{{ qty_uploads_week}}</td>
         </tr>
       </table>
+
+      <table class="table table-striped table-bordered table-hover">
+        <tr>
+          <td>Project deadline</td>
+          <!-- "dedaline-container" is magic: js enhanced -->
+          <td id="deadline-container">
+            {% if  config['PROJECT_SUBMISSION_DEADLINE'] %}
+              <span style="display:inline-block;margin-right:1em;">{{ config['PROJECT_SUBMISSION_DEADLINE'] | replace("T", " ") }}</span>
+              <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ config['PROJECT_SUBMISSION_DEADLINE'] }}"></span>
+            {% else %}
+              not set
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>With report?</td>
+          <td>
+            {% if config['PROJECT_REPORT_TYPE'] == "" %}
+              no
+            {% else %}
+              yes
+              {% if config['PROJECT_REPORT_TYPE'] != "report" %}
+                (as "{{ config['PROJECT_REPORT_TYPE'] }}")
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>

@@ -172,6 +172,63 @@ function bulk_registration_by_ajax(bulk_register_form){
   }
 }
 
+/* code for prettifying a countdown deadline (project submission) */
+const secs_in_hour = 60 * 60;
+const secs_in_day = secs_in_hour * 24;
+const secs_in_week = secs_in_day * 7;
+const deadline_css_classes = ["alert-info", "alert-success", "alert-warning", "alert-danger"];
+const deadline_container=document.getElementById("deadline-container");
+const deadline_display=document.getElementById("deadline-countdown");
+
+function plural_s(num, noun){
+  return num + " " + noun + (num == 1? "": "s") + " ";
+}
+
+function run_countdown(){
+  deadline = new Date(deadline_display.dataset.deadline);
+  let delta_s = Math.floor((deadline-Date.now())/1000);
+  let msg = "";
+  let css_class="alert-info";
+  if (delta_s <= 0) {
+    msg = "deadline has passed"
+  } else {
+    let weeks = Math.floor(delta_s / secs_in_week);
+    if (weeks > 0) {
+      msg = plural_s(weeks, "week");
+      css_class="alert-success";
+    } else {
+      css_class="alert-warning";
+    }
+    delta_s -= weeks * secs_in_week;
+    let days = Math.floor(delta_s / secs_in_day);
+    if (days > 0) {
+      msg += plural_s(days, "day");
+    }
+    delta_s -= days * secs_in_day;
+    if (weeks == 0) {
+      let hours = Math.floor(delta_s / secs_in_hour);
+      if (hours > 0) {
+        msg += plural_s(hours, "hour");
+      } else if (days == 0) {
+        msg = "less than an hour";
+      }
+      if (days == 0){
+        css_class="alert-danger";
+      }
+    }
+    msg += " to go"
+    window.setTimeout(run_countdown, 60000); // every minute
+  }
+  deadline_display.innerText=msg;
+  for (class_name of deadline_css_classes) {
+    if (class_name == css_class){
+      deadline_container.classList.add(class_name);
+    } else {
+      deadline_container.classList.remove(class_name);
+    }
+  }
+}
+
 $( document ).ready(function() {
   if (typeof USER_BUGGY_JSON !== "undefined") {
     //----------------------------------------------------------
@@ -267,4 +324,9 @@ $( document ).ready(function() {
     });
     is_init_done = true; // now show/hide uses slow fade, so user notices
   }
+
+  if (deadline_display){
+    run_countdown();
+  }
+
 });

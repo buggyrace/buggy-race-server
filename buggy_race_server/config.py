@@ -29,10 +29,28 @@ class ConfigSettingNames(str, Enum):
     # Some config settings (specifically, Flask-related ones) are missing here
     # because they are only set by environment variables (e.g., the database URL).
 
-    # prefix by _ are implied, so should not be set explicitly
+    # settings prefixed by _ are implied, so should not be set explicitly
+
+    # current announcements are cached to avoid database reads on every hit
     _CURRENT_ANNOUNCEMENTS="_CURRENT_ANNOUNCEMENTS"
+
+    # setup status is used to track progress (and ultimately completion)
+    # of the setup process when the app is first installed
     _SETUP_STATUS="_SETUP_STATUS"
+
+    # settings that are being overridden by ENV variables (by this
+    # class) are noted here so a warning can be displayed on the settings page
     _ENV_SETTING_OVERRIDES="_ENV_SETTING_OVERRIDES"
+
+    # tech notes are managed by Pelcian: we don't anticipate the tech notes
+    # dir being changed (it's in version control) so they aren't offered via
+    # admin/settings... but just in case, putting them in config to allow
+    # future tech notes to come from a different source: defaults values
+    # are set in ConfigFromEnv, below
+    TECH_NOTES_PATH="TECH_NOTES_PATH"
+    TECH_NOTES_OUTPUT_PATH="TECH_NOTES_OUTPUT_PATH"
+    TECH_NOTES_PAGES_PATH="TECH_NOTES_PAGES_PATH"
+
 
     ADMIN_USERNAMES="ADMIN_USERNAMES"
     BUGGY_EDITOR_GITHUB_URL="BUGGY_EDITOR_GITHUB_URL"
@@ -51,9 +69,13 @@ class ConfigSettingNames(str, Enum):
     INSTITUTION_HOME_URL="INSTITUTION_HOME_URL"
     INSTITUTION_SHORT_NAME="INSTITUTION_SHORT_NAME"
     IS_PRETTY_USERNAME_TITLECASE="IS_PRETTY_USERNAME_TITLECASE"
+    IS_PROJECT_ZIP_INFO_DISPLAYED="IS_PROJECT_ZIP_INFO_DISPLAYED"
     IS_PUBLIC_REGISTRATION_ALLOWED="IS_PUBLIC_REGISTRATION_ALLOWED"
+    PROJECT_REPORT_TYPE="PROJECT_REPORT_TYPE"
     PROJECT_CODE="PROJECT_CODE"
     PROJECT_SLUG="PROJECT_SLUG"
+    PROJECT_SUBMISSION_DEADLINE="PROJECT_SUBMISSION_DEADLINE"
+    PROJECT_SUBMISSION_LINK="PROJECT_SUBMISSION_LINK"
     REGISTRATION_AUTH_CODE="REGISTRATION_AUTH_CODE"
     SECRET_KEY="SECRET_KEY"
     SERVER_PROJECT_PAGE_PATH="SERVER_PROJECT_PAGE_PATH"
@@ -80,6 +102,7 @@ class ConfigGroupNames(str, Enum):
     ORG = "org"
     GITHUB = "github"
     USERS = "users"
+    PROJECT = "project"
     RACES = "races"
     SERVER = "server"
     SOCIAL = "social"
@@ -88,6 +111,7 @@ class ConfigTypes(str, Enum):
     """ Explicit types of config settings (useful for validation, etc) """
     STRING = "str" # default TODO maybe ""?
     BOOLEAN = "bool"
+    DATETIME = "datetime"
     INT = "int"
     URL = "url"
     PASSWORD = "pass"
@@ -105,8 +129,6 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name,
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
-        ConfigSettingNames.PROJECT_CODE.name,
-        ConfigSettingNames.PROJECT_SLUG.name,
       ),
       ConfigGroupNames.GITHUB.name: (
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
@@ -150,22 +172,44 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name,
         ConfigSettingNames.SOCIAL_3_TEXT.name,
         ConfigSettingNames.SOCIAL_3_URL.name,
+      },
+      ConfigGroupNames.PROJECT.name: {
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name,
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
+        ConfigSettingNames.PROJECT_CODE.name,
+        ConfigSettingNames.PROJECT_SLUG.name,
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
       }
     }
     DEFAULTS = {
-        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
-        ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
-        ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
-        ConfigSettingNames.PROJECT_CODE.name: "Buggy",
-        ConfigSettingNames.PROJECT_SLUG.name: "",
-        ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
-        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
+        ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
+        ConfigSettingNames.ADMIN_USERNAMES.name: "",
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
-        ConfigSettingNames.GITHUB_PAGES_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: 0,
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
+        ConfigSettingNames.GITHUB_PAGES_URL.name: "",
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
+        ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
+        ConfigSettingNames.PROJECT_CODE.name: "Buggy",
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
+        ConfigSettingNames.PROJECT_SLUG.name: "",
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
+        ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
         ConfigSettingNames.SOCIAL_0_NAME.name: "",
         ConfigSettingNames.SOCIAL_0_TEXT.name: "",
@@ -179,20 +223,10 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
-        ConfigSettingNames.ADMIN_USERNAMES.name: "",
-        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
-        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
-        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: 0,
-        ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
-        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
-        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
-        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
-        ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -200,19 +234,33 @@ class ConfigSettings:
     MAX_USERNAME_LENGTH = 32
 
     TYPES = {
-        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
-        ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
-        ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
-        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
+        ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
-        ConfigSettingNames.GITHUB_PAGES_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
+        ConfigSettingNames.GITHUB_PAGES_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
+        ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
+        ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
@@ -226,20 +274,10 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
-        ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
-        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
-        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
-        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
-        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
-        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
     }
 
     # this is the order of the setting groups that is
@@ -253,6 +291,7 @@ class ConfigSettings:
       ConfigGroupNames.ORG,
       ConfigGroupNames.SOCIAL,
       ConfigGroupNames.USERS,
+      ConfigGroupNames.PROJECT,
       ConfigGroupNames.RACES,
       ConfigGroupNames.GITHUB
     ]
@@ -420,8 +459,49 @@ class ConfigSettings:
           """Can users register themselves? If not, only an admin user who
           knows the `AUTH_CODE` can register new users. Normally, the
           staff running the buggy racing project will register users so
-          public registration should not be enabled."""
+          public registration should not be enabled.""",
 
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name:
+          """If you require students to include a report of how
+          they tackled the tasks, indicate that here ("report"
+          or "poster" are just different names for the same thing,
+          due to an historic anomaly). The report takes the form
+          of an additional webpage in the student's buggy editor
+          webserver.""",
+        
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name:
+          """If you require all students to submit their projects
+          on a specific deadline, set it here. This is displayed
+          prominently (if the project is enabled) on the project
+          page, but isn't currently used by the server for anything
+          else. Avoid the 00:00 as a time because it confuses
+          students (23:59 is clearer, and 16:00 healthier).
+          Leave blank if you don't want to display a deadline at all
+          (remember you can also use Announcements).
+          """,
+
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name:
+          """Provide a link to either the web page where you'll
+          be accepting submissions (presumably zip files) or
+          else a page containing clear instructions for the
+          students to follow. The buggy race server does
+          not handle submissions itself. By default, no submission
+          information is provided (because it's very dependent
+          on each institution), which means no link is displayed:
+          so you must supply one yourself.
+          """,
+
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name:
+          """Typically, students are expected to submit their
+          projects as a zip file containing the buggy editor web
+          app (including a report/poster, if you've enabled it).
+          The project page will display general information about
+          those files (e.g., they should have the student's name
+          just in case your submission process doesn't capture
+          that: you end up with a lot of zip files with the same
+          name otherwise). Use this setting to display or hide
+          this general information on the "project" page.
+          """
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
@@ -468,6 +548,14 @@ class ConfigSettings:
         into student's own repos, you must provide valid GitHub
         CLIENT details which may be specific to your installation.
         """,
+      ConfigGroupNames.PROJECT.name:
+        """
+        These settings control aspects of the what the students
+        need to do (for example: are they only coding, or do you
+        want them to add a report/poster page to their buggy editor
+        too?).
+        """
+
     }
 
     @staticmethod
@@ -581,6 +669,21 @@ class ConfigFromEnv():
     # stored in database but have been overridden by ENV settings
     # (see constructor below)
     _ENV_SETTING_OVERRIDES = ""
+
+    # hardcoded settings for Pelican (python tool for static site generation):
+    # These only need to be changed if you're not using tech notes from this
+    # repo, which currently isn't supported. Because these are reading raw
+    # files from the filesystem and serving them to the client, there's a
+    # security risk if they point anywhere outside the repo... which is
+    # why they aren't offered for changing via the admin/settings pages.
+    #------------------------------------------------------------------
+    # the "Pelican" directory (contains source and config for generating tech notes static content)
+    TECH_NOTES_PATH= env.str("TECH_NOTES_PATH", default="../tech_notes")
+    # the output directory of the tech notes, specifically the pages (because Pelican wants
+    # to generate other material — blog posts, summaries — which we're not using)
+    TECH_NOTES_OUTPUT_PATH= env.str("TECH_NOTES_OUTPUT_PATH", default="../tech_notes/output")
+    # the HTML pages themselves (pages subdir in the output path)
+    TECH_NOTES_PAGES_PATH= env.str("TECH_NOTES_PAGES_PATH", default=f"{TECH_NOTES_OUTPUT_PATH}/pages") 
 
     def __init__(self):
       # In addition to the Flask/server "system" environment variable,

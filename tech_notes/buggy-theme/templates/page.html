@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block html_lang %}{{ page.lang }}{% endblock %}
+
+<!--
+{% block title %}{{ SITENAME }} - {{ page.title|striptags }}{%endblock%}
+-->
+
+{% block content %}
+    {{ page.content }}
+    <hr>
+    <footer>
+      <a href="..">CS1999 Tech notes</a>
+      <a href="{{ BUGGY_RACE_SERVER_URL }}">Buggy race server</a>
+    </footer>
+
+{% endblock %}

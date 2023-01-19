@@ -19,18 +19,30 @@ LINKS = ()
 SOCIAL = ()
 DEFAULT_PAGINATION = False
 
+# toc ("Table of Contents") extension makes headings linkable
+# but... at the expense of the jinja2content — so this isn't
+# used and instead we hand-rolled a solution into the
+# jinja2content plugin
+#
+# MARKDOWN = {
+#     'extension_configs': {
+#         'markdown.extensions.toc': {'anchorlink': True},
+#     },
+# }
+
+# jinja2content plugin applies jinja substitutions to page (.md) bodies
+# as well as the (.html) templates, like Jekyll does: this is necessary
+# primarily to get the the gloabl substitutions to apply
+PLUGIN_PATHS = ['plugins']
+PLUGINS = ['buggyjinja2content']
+
 DIRECT_TEMPLATES = []
-#PAGE_URL = '{slug}'
-#PAGE_SAVE_AS = '{slug}.html'
+CACHE_CONTENT = False
 
 JINJA_GLOBALS={
-  "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
-  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
-  "XXX": "fixme-123"
+#  "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
+#  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
+  "PROJECT_CODE": "CS888",
+  "PROJECT_REPORT_TYPE": "poster"
 }
-PROJECT_CODE = "CS888"
-# BUGGY_RACE_SERVER_URL = "http://localhost:8000"
-# BUGGY_EDITOR_GITHUB_URL = "https://github.com/buggyrace/buggy-race-editor"
-# PROJECT_REPORT_TYPE = "poster"
 
-CACHE_CONTENT = False

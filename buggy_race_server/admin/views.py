@@ -750,15 +750,16 @@ def delete_announcement():
 def tech_notes_admin():
   if not current_user.is_buggy_admin:
     abort(403)
-  is_published = False
+  error_msg = None
   if request.method == "POST":
     try:
-      is_published = publish_tech_notes(current_app)
+      publish_tech_notes(current_app)
     except Exception as e:
-      flash(f"Problem publishing tech notes: {e}", "danger")
-    if is_published:
-      # TODO maybe update config: TECH_NOTES_PUBLICATION_DATE
-      flash("Re-generated tech notes OK", "success")      
+      error_msg = f"Problem publishing tech notes: {e}"
+    if error_msg:
+      flash(error_msg, "danger")
+    else:
+      flash("Re-generated tech notes OK", "success") 
   return render_template(
     "admin/tech_notes.html",
     form=FlaskForm(request.form), # nothing except CSRF token
@@ -766,5 +767,7 @@ def tech_notes_admin():
       ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
       ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
       ConfigSettingNames.PROJECT_CODE.name
-    ]
+    ],
+    notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
+
   )

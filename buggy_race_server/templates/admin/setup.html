@@ -92,15 +92,17 @@
                     <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
                       <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
                       <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
-                    </select>              
+                    </select>
                   {% else %}
                     <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
                     {% if type_of_settings[name] == "int" %}
-                        type="number"
+                      type="number"
+                    {% elif type_of_settings[name] == "datetime"%}
+                      type="datetime-local"
                     {% elif type_of_settings[name] == "pass"%}
-                        type="password"
+                      type="password"
                     {% else %}
-                        type="text"
+                      type="text"
                     {% endif %}
                     {%if settings[name] %} value="{{ settings[name] }}" {% endif %}/>
                   {% endif %}
@@ -116,7 +118,11 @@
                   {% endif %}
                   {{ descriptions[name] }}
                   <div class="setting-default">
-                    <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                    {% if name == "ADMIN_USERNAMES" %}
+                      <em>Currently:</em> <strong>must</strong> include <code>{{ current_user.username }}</code>
+                    {% else %}
+                      <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                    {% endif %}
                   </div>
                 </div>
               </div>

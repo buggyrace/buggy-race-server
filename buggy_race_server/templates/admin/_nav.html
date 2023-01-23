@@ -13,7 +13,7 @@
       &nbsp;
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.api_keys')}}">API keys &rtri;</a>
       &nbsp;
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
+      <a class="btn {% if config['TECH_NOTES_GENERATED_DATETIME'] %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
       &nbsp;
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.settings')}}">Config &rtri;</a>
     </p>

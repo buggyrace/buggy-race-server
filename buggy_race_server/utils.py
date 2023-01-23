@@ -10,6 +10,7 @@ from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.extensions import db
 from sqlalchemy import bindparam, insert, update
+from datetime import datetime
 
 import subprocess
 
@@ -205,4 +206,9 @@ def publish_tech_notes(app):
         content_path
       ],
       check=True # throw exception if this goes wrong
+    )
+    set_and_save_config_setting(
+      app,
+      name=ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name,
+      value=datetime.now().strftime("%Y-%m-%d %H:%M")
     )

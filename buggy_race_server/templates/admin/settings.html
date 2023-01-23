@@ -87,7 +87,11 @@
                   <div class="col-sm-5">
                     {{ descriptions[name] }}
                     <div class="setting-default">
-                      <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                      {% if name == "ADMIN_USERNAMES" %}
+                        <em>Currently:</em> <strong>must</strong> include <code>{{ current_user.username }}</code>
+                      {% else %}
+                        <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
+                      {% endif %}
                     </div>
                   </div>
                 </div>

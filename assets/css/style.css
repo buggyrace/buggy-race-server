@@ -362,7 +362,12 @@ table td.check input {
   margin-top: 1rem;
 }
 
-.btn-outline-secondary.btn-admin { background-color: #ffffdd;}
+.btn-admin.btn-outline-danger,
+.btn-outline-secondary.btn-admin {
+  background-color: #ffffdd;
+  margin-bottom: 0.5rem;
+}
+.btn-admin.btn-outline-danger:hover,
 .btn-outline-secondary.btn-admin:hover { color:black; }
 
 #registration-progress {

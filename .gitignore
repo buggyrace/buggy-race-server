@@ -3,10 +3,8 @@
 buggies.csv
 race.log
 
-docs/_site
-docs/.jekyll-cache/
-docs/.ruby-version
-docs/Gemfile.lock
+tech_notes/output/
+tech_notes/pelicanconflive.py
 
 **/__pycache__/
 *.py[cod]

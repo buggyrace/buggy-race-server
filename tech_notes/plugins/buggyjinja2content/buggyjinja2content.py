@@ -28,22 +28,26 @@ class JinjaContentMixin:
     # note: non-greedy headings here (.*?) are risky if the
     # heading isn't closed properly, *but* we're assuming they
     # will be well-formed because this is coming from markdown
-    # ...but to prevent runaways, capping this at 255 chars
+    # ...but to prevent runaways, capping this at 80 chars
     #
     # This adds the class "toclink" as it's mimicking the beahviour
     # of the "toc" markdown extension.
     
     HEADING_LINK_RE = re.compile(
-        r"<h(\d)>(.{1,255}?)</h\1>",
+        r"<h(\d)>(.{1,80}?)</h\1>",
         flags=re.IGNORECASE
     )
+    HTML_TAGS = re.compile(r"<[^>]+>|&\w+;")
     SLUG_BADCHARS = re.compile(r"[^a-z0-9-]+")
+    SLUG_COLLAPSE_HYPHENS = re.compile(r"--+")
     SLUG_TOP_TAIL = re.compile(r"^-|-$")
 
-    def _enhance_heading(match):
-        h_level = match.group(1)
-        text = match.group(2).strip()
-        slug = re.sub(JinjaContentMixin.SLUG_BADCHARS, '-', text.lower())
+    def _enhance_heading(matched):
+        h_level = matched.group(1)
+        text = matched.group(2).strip()
+        slug = re.sub(JinjaContentMixin.HTML_TAGS, "-", text.lower())
+        slug = re.sub(JinjaContentMixin.SLUG_BADCHARS, '-', slug)
+        slug = re.sub(JinjaContentMixin.SLUG_COLLAPSE_HYPHENS, '-', slug)
         slug = re.sub(JinjaContentMixin.SLUG_TOP_TAIL, "", slug)
         return (
             f"<h{h_level} id=\"{slug}\">"

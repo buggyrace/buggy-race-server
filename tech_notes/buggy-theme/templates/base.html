@@ -112,6 +112,23 @@
       </main>
 
     </section>
-  </div>
+    <hr>
+    <footer>
+      {% if SOCIAL_0_NAME %}
+        <a href="{{ SOCIAL_0_URL}}">{{ SOCIAL_0_NAME }}</a> |
+      {% endif %}
+      {% if SOCIAL_1_NAME %}
+        <a href="{{ SOCIAL_1_URL}}">{{ SOCIAL_1_NAME }}</a> |
+      {% endif %}
+      {% if SOCIAL_2_NAME %}
+        <a href="{{ SOCIAL_2_URL}}">{{ SOCIAL_2_NAME }}</a> |
+      {% endif %}
+      {% if SOCIAL_3_NAME %}
+        <a href="{{ SOCIAL_1_URL}}">{{ SOCIAL_3_NAME }}</a> |
+      {% endif %}
+      <a id="a-title" href="/tech-notes/">{{ PROJECT_CODE }} Tech notes</a> |
+      <a href="{{ BUGGY_RACE_SERVER_URL }}">Buggy race server</a> XXX
+    </footer>
+    </div>
 </body>
 </html>

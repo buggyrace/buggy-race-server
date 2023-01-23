@@ -199,7 +199,7 @@ def _send_tech_notes_assets(type, path):
         if type not in ["theme", "assets"]:
             raise FileNotFoundError()
         return send_from_directory(
-            f"{current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH]}/{type}",
+            f"{current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name]}/{type}",
             path
         )
     except FileNotFoundError:
@@ -223,21 +223,21 @@ def serve_project_page(page=None):
     elif page == "tasks":
         template = "public/project_tasks.html"
     elif page in ["poster", "report"]:
-        if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE]:
+        if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
         template = "public/project_report.html"
     else:
         abort(404)
-    report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE]
+    report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
-    submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE]
+    submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
         template,
         is_report=is_report,
         report_type=report_type,
         submit_deadline=submit_deadline,
-        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK],
-        is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED],
+        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
 
     )
 
@@ -264,7 +264,7 @@ def serve_tech_notes(path=None):
         path += ".html"
     try:
         return send_from_directory(
-            current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH],
+            current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH.name],
             path
         )
     except FileNotFoundError as e:

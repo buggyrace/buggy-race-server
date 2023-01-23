@@ -35,7 +35,7 @@ def flash_suggest_if_not_yet_githubbed(function):
 
 def is_authorised(form, field):
   """ check the auth code — required for some admin activities (mainly user registration)"""
-  auth_code = current_app.config.get(ConfigSettingNames.REGISTRATION_AUTH_CODE)
+  auth_code = current_app.config.get(ConfigSettingNames.REGISTRATION_AUTH_CODE.name)
   if auth_code is None:
     raise ValidationError("No authorisation code has been set: cannot authorise")
   if field.data != auth_code:
@@ -63,7 +63,7 @@ def save_config_env_overrides_to_db(app):
       the app then loads the entire config — including defaults — back from
       the database. This mechanism allows ENV overriding of bad/broken config.
     """
-    if names := app.config.get(ConfigSettingNames._ENV_SETTING_OVERRIDES):
+    if names := app.config.get(ConfigSettingNames._ENV_SETTING_OVERRIDES.name):
       for name in names.split(","):
         value = app.config.get(name) # expecting a value here
         if value is not None:
@@ -154,11 +154,11 @@ def publish_tech_notes(app):
     root_path = os.path.dirname(os.path.abspath(os.path.join(__file__, "..")))
     tech_notes_path = os.path.join(
         root_path, 
-        app.config[ConfigSettingNames.TECH_NOTES_CONFIG_PATH]
+        app.config[ConfigSettingNames.TECH_NOTES_CONFIG_PATH.name]
     )
     full_pathname = os.path.join(
       tech_notes_path,
-      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME]
+      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME.name]
     )
     conf_file_reader = open(full_pathname)
     lines = conf_file_reader.readlines()
@@ -180,21 +180,21 @@ def publish_tech_notes(app):
               value = new_value.replace("\"", "\\\"").replace("\n", " ")
             lines[i] = f"    \"{name}\": \"{value}\",\n"
           i += 1
-    live_filename = current_app.config[ConfigSettingNames.TECH_NOTES_CONFIG_LIVE_NAME]
+    live_filename = current_app.config[ConfigSettingNames.TECH_NOTES_CONFIG_LIVE_NAME.name]
     live_config_file = open(os.path.join(tech_notes_path, live_filename), "w")
     live_config_file.writelines(lines)
     live_config_file.close()
     publish_conf_file = os.path.join(
       tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME)
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME.name)
     )
     output_path = os.path.join(
       tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_PATH)
+      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name)
     )
     content_path = os.path.join(
       tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_PATH)
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_PATH.name)
     )
     os.chdir(tech_notes_path)
     subprocess.run(

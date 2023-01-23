@@ -18,12 +18,16 @@ but everything else from the settings in the database:
 
 """
 
-from enum import Enum
+from enum import Enum, auto
 from environs import Env
 from random import randint
 import re
 
-class ConfigSettingNames(str, Enum):
+class ConfigSettingNames(Enum):
+
+    def _generate_next_value_(name, start, count, last_values):
+        """ ConfigSettingNames values are the same (as strings) as their names."""
+        return name
 
     # TODO: might want to make these explicity somewhere:
     # Some config settings (specifically, Flask-related ones) are missing here
@@ -32,73 +36,73 @@ class ConfigSettingNames(str, Enum):
     # settings prefixed by _ are implied, so should not be set explicitly
 
     # current announcements are cached to avoid database reads on every hit
-    _CURRENT_ANNOUNCEMENTS="_CURRENT_ANNOUNCEMENTS"
+    _CURRENT_ANNOUNCEMENTS = auto()
 
     # setup status is used to track progress (and ultimately completion)
     # of the setup process when the app is first installed
-    _SETUP_STATUS="_SETUP_STATUS"
+    _SETUP_STATUS = auto()
 
     # settings that are being overridden by ENV variables (by this
     # class) are noted here so a warning can be displayed on the settings page
-    _ENV_SETTING_OVERRIDES="_ENV_SETTING_OVERRIDES"
+    _ENV_SETTING_OVERRIDES = auto()
 
     # tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) so they aren't offered via
     # admin/settings... but just in case, putting them in config to allow
     # future tech notes to come from a different source: defaults values
     # are set in ConfigFromEnv, below
-    TECH_NOTES_CONFIG_PATH="TECH_NOTES_CONFIG_PATH"
-    TECH_NOTES_CONFIG_FILE_NAME="TECH_NOTES_CONFIG_FILE_NAME"
-    TECH_NOTES_CONFIG_LIVE_NAME="TECH_NOTES_CONFIG_LIVE_NAME"
-    TECH_NOTES_CONFIG_PUBLISH_NAME="TECH_NOTES_CONFIG_PUBLISH_NAME"
-    TECH_NOTES_PATH="TECH_NOTES_PATH"
-    TECH_NOTES_OUTPUT_PATH="TECH_NOTES_OUTPUT_PATH"
-    TECH_NOTES_PAGES_PATH="TECH_NOTES_PAGES_PATH"
-    TECH_NOTES_CONTENT_PATH="TECH_NOTES_CONTENT_PATH"
+    TECH_NOTES_CONFIG_PATH = auto()
+    TECH_NOTES_CONFIG_FILE_NAME = auto()
+    TECH_NOTES_CONFIG_LIVE_NAME = auto()
+    TECH_NOTES_CONFIG_PUBLISH_NAME = auto()
+    TECH_NOTES_PATH = auto()
+    TECH_NOTES_OUTPUT_PATH = auto()
+    TECH_NOTES_PAGES_PATH = auto()
+    TECH_NOTES_CONTENT_PATH = auto()
 
-    ADMIN_USERNAMES="ADMIN_USERNAMES"
-    BUGGY_EDITOR_GITHUB_URL="BUGGY_EDITOR_GITHUB_URL"
-    BUGGY_EDITOR_ISSUES_FILE="BUGGY_EDITOR_ISSUES_FILE"
-    BUGGY_EDITOR_REPO_NAME="BUGGY_EDITOR_REPO_NAME"
-    BUGGY_EDITOR_REPO_OWNER="BUGGY_EDITOR_REPO_OWNER"
-    BUGGY_RACE_SERVER_URL="BUGGY_RACE_SERVER_URL"
-    DEFAULT_RACE_COST_LIMIT="DEFAULT_RACE_COST_LIMIT"
-    DEFAULT_RACE_IS_VISIBLE="DEFAULT_RACE_IS_VISIBLE"
-    DEFAULT_RACE_LEAGUE="DEFAULT_RACE_LEAGUE"
-    FORCE_REDIRECT_HTTP_TO_HTTPS="FORCE_REDIRECT_HTTP_TO_HTTPS"
-    GITHUB_CLIENT_ID="GITHUB_CLIENT_ID"
-    GITHUB_CLIENT_SECRET="GITHUB_CLIENT_SECRET"
-    GITHUB_PAGES_URL="GITHUB_PAGES_URL"
-    INSTITUTION_FULL_NAME="INSTITUTION_FULL_NAME"
-    INSTITUTION_HOME_URL="INSTITUTION_HOME_URL"
-    INSTITUTION_SHORT_NAME="INSTITUTION_SHORT_NAME"
-    IS_PRETTY_USERNAME_TITLECASE="IS_PRETTY_USERNAME_TITLECASE"
-    IS_PROJECT_ZIP_INFO_DISPLAYED="IS_PROJECT_ZIP_INFO_DISPLAYED"
-    IS_PUBLIC_REGISTRATION_ALLOWED="IS_PUBLIC_REGISTRATION_ALLOWED"
-    PROJECT_REPORT_TYPE="PROJECT_REPORT_TYPE"
-    PROJECT_CODE="PROJECT_CODE"
-    PROJECT_SLUG="PROJECT_SLUG"
-    PROJECT_SUBMISSION_DEADLINE="PROJECT_SUBMISSION_DEADLINE"
-    PROJECT_SUBMISSION_LINK="PROJECT_SUBMISSION_LINK"
-    REGISTRATION_AUTH_CODE="REGISTRATION_AUTH_CODE"
-    SECRET_KEY="SECRET_KEY"
-    SERVER_PROJECT_PAGE_PATH="SERVER_PROJECT_PAGE_PATH"
-    SOCIAL_0_NAME="SOCIAL_0_NAME"
-    SOCIAL_0_TEXT="SOCIAL_0_TEXT"
-    SOCIAL_0_URL="SOCIAL_0_URL"
-    SOCIAL_1_NAME="SOCIAL_1_NAME"
-    SOCIAL_1_TEXT="SOCIAL_1_TEXT"
-    SOCIAL_1_URL="SOCIAL_1_URL"
-    SOCIAL_2_NAME="SOCIAL_2_NAME"
-    SOCIAL_2_TEXT="SOCIAL_2_TEXT"
-    SOCIAL_2_URL="SOCIAL_2_URL"
-    SOCIAL_3_NAME="SOCIAL_3_NAME"
-    SOCIAL_3_TEXT="SOCIAL_3_TEXT"
-    SOCIAL_3_URL="SOCIAL_3_URL"
-    USERS_HAVE_EMAIL="USERS_HAVE_EMAIL"
-    USERS_HAVE_FIRST_NAME="USERS_HAVE_FIRST_NAME"
-    USERS_HAVE_LAST_NAME="USERS_HAVE_LAST_NAME"
-    USERS_HAVE_ORG_USERNAME="USERS_HAVE_ORG_USERNAME"
+    ADMIN_USERNAMES = auto()
+    BUGGY_EDITOR_GITHUB_URL = auto()
+    BUGGY_EDITOR_ISSUES_FILE = auto()
+    BUGGY_EDITOR_REPO_NAME = auto()
+    BUGGY_EDITOR_REPO_OWNER = auto()
+    BUGGY_RACE_SERVER_URL = auto()
+    DEFAULT_RACE_COST_LIMIT = auto()
+    DEFAULT_RACE_IS_VISIBLE = auto()
+    DEFAULT_RACE_LEAGUE = auto()
+    FORCE_REDIRECT_HTTP_TO_HTTPS = auto()
+    GITHUB_CLIENT_ID = auto()
+    GITHUB_CLIENT_SECRET = auto()
+    GITHUB_PAGES_URL = auto()
+    INSTITUTION_FULL_NAME = auto()
+    INSTITUTION_HOME_URL = auto()
+    INSTITUTION_SHORT_NAME = auto()
+    IS_PRETTY_USERNAME_TITLECASE = auto()
+    IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
+    IS_PUBLIC_REGISTRATION_ALLOWED = auto()
+    PROJECT_REPORT_TYPE = auto()
+    PROJECT_CODE = auto()
+    PROJECT_SLUG = auto()
+    PROJECT_SUBMISSION_DEADLINE = auto()
+    PROJECT_SUBMISSION_LINK = auto()
+    REGISTRATION_AUTH_CODE = auto()
+    SECRET_KEY = auto()
+    SERVER_PROJECT_PAGE_PATH = auto()
+    SOCIAL_0_NAME = auto()
+    SOCIAL_0_TEXT = auto()
+    SOCIAL_0_URL = auto()
+    SOCIAL_1_NAME = auto()
+    SOCIAL_1_TEXT = auto()
+    SOCIAL_1_URL = auto()
+    SOCIAL_2_NAME = auto()
+    SOCIAL_2_TEXT = auto()
+    SOCIAL_2_URL = auto()
+    SOCIAL_3_NAME = auto()
+    SOCIAL_3_TEXT = auto()
+    SOCIAL_3_URL = auto()
+    USERS_HAVE_EMAIL = auto()
+    USERS_HAVE_FIRST_NAME = auto()
+    USERS_HAVE_LAST_NAME = auto()
+    USERS_HAVE_ORG_USERNAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """

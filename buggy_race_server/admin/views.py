@@ -99,7 +99,7 @@ def _update_settings_in_db(form):
         is_changed_value = True
     if is_changed_value:
         qty_settings_changed += 1
-        has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY
+        has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY.name
   if qty_settings_changed:
     settings_table = Setting.__table__
     if config_data_update:
@@ -266,7 +266,7 @@ def setup():
     type_of_settings=ConfigSettings.TYPES,
     pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
     descriptions=ConfigSettings.DESCRIPTIONS,
-    env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES].split(","),
+    env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
   )
 
 @blueprint.route("/")

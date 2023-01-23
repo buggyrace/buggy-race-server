@@ -5,7 +5,6 @@ const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
 
 function bulk_registration_by_ajax(bulk_register_form){
-  console.log("FIXME bulk_register_form", bulk_register_form);
   const BULK_REGISTER_URL = "/admin/bulk-register/json";
   const USER_REGISTER_AUTH_ID = "auth_code";
   const USER_REGISTER_CSRF_ID = "csrf_token";

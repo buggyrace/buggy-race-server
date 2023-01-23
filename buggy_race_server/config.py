@@ -47,10 +47,14 @@ class ConfigSettingNames(str, Enum):
     # admin/settings... but just in case, putting them in config to allow
     # future tech notes to come from a different source: defaults values
     # are set in ConfigFromEnv, below
+    TECH_NOTES_CONFIG_PATH="TECH_NOTES_CONFIG_PATH"
+    TECH_NOTES_CONFIG_FILE_NAME="TECH_NOTES_CONFIG_FILE_NAME"
+    TECH_NOTES_CONFIG_LIVE_NAME="TECH_NOTES_CONFIG_LIVE_NAME"
+    TECH_NOTES_CONFIG_PUBLISH_NAME="TECH_NOTES_CONFIG_PUBLISH_NAME"
     TECH_NOTES_PATH="TECH_NOTES_PATH"
     TECH_NOTES_OUTPUT_PATH="TECH_NOTES_OUTPUT_PATH"
     TECH_NOTES_PAGES_PATH="TECH_NOTES_PAGES_PATH"
-
+    TECH_NOTES_CONTENT_PATH="TECH_NOTES_CONTENT_PATH"
 
     ADMIN_USERNAMES="ADMIN_USERNAMES"
     BUGGY_EDITOR_GITHUB_URL="BUGGY_EDITOR_GITHUB_URL"
@@ -684,6 +688,15 @@ class ConfigFromEnv():
     TECH_NOTES_OUTPUT_PATH= env.str("TECH_NOTES_OUTPUT_PATH", default="../tech_notes/output")
     # the HTML pages themselves (pages subdir in the output path)
     TECH_NOTES_PAGES_PATH= env.str("TECH_NOTES_PAGES_PATH", default=f"{TECH_NOTES_OUTPUT_PATH}/pages") 
+
+    # The TECH_NOTES_CONFIG_* settings are for the _file system_ (not URLs)
+    # Changing these is unexpected but they're presented here to facilitate
+    # moving tech notes outwith the version-controlled source.
+    TECH_NOTES_CONFIG_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="tech_notes")
+    TECH_NOTES_CONFIG_FILE_NAME=env.str("TECH_NOTES_CONFIG_FILE_NAME", default="pelicanconf.py")
+    TECH_NOTES_CONFIG_LIVE_NAME=env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
+    TECH_NOTES_CONFIG_PUBLISH_NAME=env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
+    TECH_NOTES_CONTENT_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="content")
 
     def __init__(self):
       # In addition to the Flask/server "system" environment variable,

@@ -250,21 +250,17 @@ def send_project_theme(path):
     return _send_tech_notes_assets("theme", path)
 
 @blueprint.route("/tech-notes", strict_slashes=False)
-def tech_notes_index():
+def tech_notes_redirect_to_index():
     url = current_app.config.get("GITHUB_PAGES_URL") or ""
     return redirect(f"{url}/tech-notes/index", code=301 )
-    
+
 @blueprint.route("/tech-notes/<path:path>")
 def serve_tech_notes(path=None):
-    print(f"FIXME **** serve_tech_notes(path={path})", flush=True)
-    if path is None:
-        print("FIXME **** path was none, setting to index.html", flush=True)
+    if not path:
         path = "index.html"
     elif path.endswith("/"):
-        print("FIXME **** path ended with slash, adding index.html", flush=True)
         path +=" index.html"
     elif not path.endswith(".html"):
-        print("FIXME **** path lacked .html suffix, adding it", flush=True)
         path += ".html"
     try:
         return send_from_directory(

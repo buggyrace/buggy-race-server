@@ -4,14 +4,13 @@
 import os
 import sys
 sys.path.append(os.curdir)
-from pelicanconf import *
+try:
+  from pelicanconflive import *
+except:
+  print("* failed to read from pelicanconflive.py (maybe not published yet?) ")
+  from pelicanconf import *
 
 # If your site is available via HTTPS, make sure SITEURL begins with https://
-SITEURL = ''
+
 RELATIVE_URLS = False
 DELETE_OUTPUT_DIRECTORY = True
-
-# Following items are often useful when publishing
-
-#DISQUS_SITENAME = ""
-#GOOGLE_ANALYTICS = ""

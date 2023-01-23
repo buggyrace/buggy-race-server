@@ -39,10 +39,25 @@ PLUGINS = ['buggyjinja2content']
 DIRECT_TEMPLATES = []
 CACHE_CONTENT = False
 
+# utils.publish_tech_notes examines this JINJA_GLOBALS and substitutes the
+# values with the live (i.e., current config) values: so leave these here
+# as a template (even though they mostly contain defaults/empty strings).
 JINJA_GLOBALS={
-#  "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
-#  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
-  "PROJECT_CODE": "CS888",
-  "PROJECT_REPORT_TYPE": "poster"
+  "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
+  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
+  "PROJECT_CODE": "",
+  "PROJECT_REPORT_TYPE": "report",
+  "SOCIAL_0_NAME": "",
+  "SOCIAL_0_TEXT": "",
+  "SOCIAL_0_URL": "",
+  "SOCIAL_1_NAME": "",
+  "SOCIAL_1_TEXT": "",
+  "SOCIAL_1_URL": "",
+  "SOCIAL_2_NAME": "",
+  "SOCIAL_2_TEXT": "",
+  "SOCIAL_2_URL": "",
+  "SOCIAL_3_NAME": "",
+  "SOCIAL_3_TEXT": "",
+  "SOCIAL_3_URL": "",
 }
 

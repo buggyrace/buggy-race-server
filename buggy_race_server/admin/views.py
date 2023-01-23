@@ -3,7 +3,6 @@
 import csv
 import io  # for CSV dump
 import random  # for API test
-import re
 from datetime import datetime, timedelta
 
 from flask import (
@@ -21,6 +20,8 @@ from flask import (
 from flask_login import current_user, login_required, login_user
 from sqlalchemy import bindparam, insert, update
 
+from flask_wtf import FlaskForm
+
 from buggy_race_server.admin.forms import (
     AnnouncementActionForm,
     AnnouncementForm,
@@ -37,6 +38,7 @@ from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf
 from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
+from buggy_race_server.utils import publish_tech_notes
 from buggy_race_server.utils import (
     flash_errors,
     load_settings_from_db,
@@ -743,3 +745,26 @@ def delete_announcement():
       flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for("admin.list_announcements"))
 
+@blueprint.route("/tech-notes", strict_slashes=False, methods=["GET", "POST"])
+@login_required
+def tech_notes_admin():
+  if not current_user.is_buggy_admin:
+    abort(403)
+  is_published = False
+  if request.method == "POST":
+    try:
+      is_published = publish_tech_notes(current_app)
+    except Exception as e:
+      flash(f"Problem publishing tech notes: {e}", "danger")
+    if is_published:
+      # TODO maybe update config: TECH_NOTES_PUBLICATION_DATE
+      flash("Re-generated tech notes OK", "success")      
+  return render_template(
+    "admin/tech_notes.html",
+    form=FlaskForm(request.form), # nothing except CSRF token
+    key_settings=[
+      ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+      ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
+      ConfigSettingNames.PROJECT_CODE.name
+    ]
+  )

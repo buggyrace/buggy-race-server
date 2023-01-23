@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper utilities and decorators."""
+import os # for path
+import re
 from flask import flash, request, redirect, Markup, url_for, current_app
 from wtforms import ValidationError
 from functools import wraps
@@ -8,6 +10,8 @@ from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 from buggy_race_server.admin.models import Announcement, Setting
 from buggy_race_server.extensions import db
 from sqlalchemy import bindparam, insert, update
+
+import subprocess
 
 def refresh_global_announcements(app):
   app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
@@ -130,3 +134,75 @@ def set_and_save_config_setting(app, name, value):
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
   return name.replace("_", " ").title()
+
+def publish_tech_notes(app):
+    """ Runs pelican to generate the tech notes.
+        Creates a pelican config file with "live" config settings (as
+        JINJA_GLOBALS) that are passed into the build.
+        Throws exceptions if anything goes wrong.
+        Note: this executes chdir to the tech_notes dir before executing
+        the pelican command (couldn't get it to work as an internal pelican
+        call).
+    """
+    JINJA_GLOBAL_MATCH_RE = re.compile(
+      # "SOME_SETTING": "some value"
+      r'\s*"([A-Z_][A-Z0-9_]+)"\s*\:\s*"([^"]*)"'
+    )
+    EMPTY_LINE_RE = re.compile(r'^\s*(#.*)?$')
+    # root path is parent of the buggy_race_server dir containing the .py
+    # TODO feels like this should be a more globally-available config
+    root_path = os.path.dirname(os.path.abspath(os.path.join(__file__, "..")))
+    tech_notes_path = os.path.join(
+        root_path, 
+        app.config[ConfigSettingNames.TECH_NOTES_CONFIG_PATH]
+    )
+    full_pathname = os.path.join(
+      tech_notes_path,
+      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME]
+    )
+    conf_file_reader = open(full_pathname)
+    lines = conf_file_reader.readlines()
+    conf_file_reader.close()
+    for i in range(len(lines)):
+      stripped_line=lines[i].strip()
+      if stripped_line.startswith("JINJA_GLOBALS"):
+        i += 1
+        while (
+          (i < len(lines))
+          and (
+            re.match(JINJA_GLOBAL_MATCH_RE, lines[i])
+            or re.match(EMPTY_LINE_RE, lines[i])
+          )
+        ):
+          if res := re.match(JINJA_GLOBAL_MATCH_RE, lines[i]):
+            (name, value) = res.groups()
+            if new_value := current_app.config.get(name):
+              value = new_value.replace("\"", "\\\"").replace("\n", " ")
+            lines[i] = f"    \"{name}\": \"{value}\",\n"
+          i += 1
+    live_filename = current_app.config[ConfigSettingNames.TECH_NOTES_CONFIG_LIVE_NAME]
+    live_config_file = open(os.path.join(tech_notes_path, live_filename), "w")
+    live_config_file.writelines(lines)
+    live_config_file.close()
+    publish_conf_file = os.path.join(
+      tech_notes_path,
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME)
+    )
+    output_path = os.path.join(
+      tech_notes_path,
+      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_PATH)
+    )
+    content_path = os.path.join(
+      tech_notes_path,
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_PATH)
+    )
+    os.chdir(tech_notes_path)
+    subprocess.run(
+      [
+        "pelican",
+        "-s", publish_conf_file,
+        "-o", output_path,
+        content_path
+      ],
+      check=True # throw exception if this goes wrong
+    )

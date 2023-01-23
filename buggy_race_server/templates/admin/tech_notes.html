@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5 col">
+      Tech notes admin
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        Publishing the tech notes updates them using the most
+        recent config settings (some examples are shown below).
+        Do this if you've made any changes to the config since
+        the server last restarted.
+      </p>
+      <p>
+        This really constructs a config file and then runs the
+        Pelican process, which generates the HTML files for the
+        tech notes pages.
+      </p>
+      <p>
+        Note that the HTML pages of the tech notes may be cached
+        by your (or your students') browsers.
+      </p>
+    </div>
+    <div class="col-md-6">
+      <p>
+        <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
+          class="btn btn-outline-secondary">View tech notes &rtri;</a>
+      </p>
+      <form method="POST" action="{{ url_for('admin.tech_notes_admin') }}" role="form">
+        {{ form.csrf_token }}
+        <p class="my-4">
+          <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
+        </p>
+      </form>
+    </div>
+  </div>
+  <div class="row my-3">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Setting</th>
+            <th>Current value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for setting_name in key_settings %}
+            <tr>
+              <td><code>{{ setting_name }}</code></td></td>
+              <td><code>{{ config[setting_name] }}</code></td></td>
+            </tr>
+          {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="row my-3">
+    <div class="col-sm-12">
+      <p>
+        If these are wrong, you can
+        <a href="{{ url_for('admin.settings') }}">change config settings</a>.  
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

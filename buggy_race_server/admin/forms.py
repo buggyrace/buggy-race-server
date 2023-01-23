@@ -200,3 +200,7 @@ class SetupAuthForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(SetupAuthForm, self).__init__(*args, **kwargs)
 
+class GeneralSubmitForm(FlaskForm):
+
+    def __init__(self, *args, **kwargs):
+        super(GeneralSubmitForm, self).__init__(*args, **kwargs)

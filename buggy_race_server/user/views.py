@@ -9,11 +9,12 @@ from flask import Blueprint, render_template, request, abort, flash, redirect, u
 from flask_login import login_required, current_user
 from functools import wraps
 
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
-from buggy_race_server.utils import flash_errors, active_user_required, warn_if_insecure, flash_suggest_if_not_yet_githubbed
+from buggy_race_server.utils import flash_errors, active_user_required, warn_if_insecure, flash_suggest_if_not_yet_githubbed, get_prefixed_filename
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
@@ -62,20 +63,22 @@ def setup_course_repository():
         return redirect(url_for('user.settings'))
 
     # Forking is async so we assume we're successful and hope for the best!
-    repo = current_user.github.post(f"/repos/{current_app.config['BUGGY_EDITOR_REPO_OWNER']}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}/forks")
+    repo = current_user.github.post(
+        f"/repos/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]}"
+        f"/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}/forks")
 
     # Forks don't get issues by default
     current_user.github.patch(
-        f"/repos/{current_user.github_username}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}",
-        {}, { 'has_issues': 'true'}
+        f"/repos/{current_user.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}",
+        {},
+        { 'has_issues': 'true'}
     )
-
 
     # this could probably be cached?
     # needs to run in current app context (same thread)
     issues_parser = IssueParser(
         os.path.join(
-          current_app.root_path, current_app.config['BUGGY_EDITOR_ISSUES_FILE']
+          current_app.root_path, current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name]
         )
     )
 
@@ -87,7 +90,7 @@ def setup_course_repository():
         # don't get delivered :(
         for i, issue in enumerate(issues_parser.parse_issues()):
             response = user.github.post(
-                f"/repos/{user.github_username}/{current_app.config['BUGGY_EDITOR_REPO_NAME']}/issues",
+                f"/repos/{user.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}/issues",
                 {},
                 {
                     'title': issue['title'],
@@ -177,7 +180,27 @@ def set_api_secret():
 @login_required
 @active_user_required
 def vscode_workspace():
-  response = Response(render_template("users/vscode_workspace.json"))
-  response.headers['content-disposition'] = f"attachment; filename=\"{current_app.config['PROJECT_SLUG']}.code-workspace\""
-  print(response.headers.__dict__)
-  return response
+    """ Returns workspace JSON file for VScode"""
+    remote_server_address = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name]
+    remote_server_name = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name]
+    if not (remote_server_address and remote_server_name):
+        return "Remote server has not been configured on the race server: cannot supply VS workspace file", 400
+    if not current_user.github_username:
+        return "No GitHub username (have you forked the repo yet?): cannot supply VS workspace file", 400
+    github_repo = current_user.course_repository
+    if not github_repo:
+        return "Missing GitHub repo (have you forked the repo yet?): cannot supply VS workspace file", 400
+    filename = get_prefixed_filename(current_app, "buggy-editor.code-workspace")
+    project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()
+    response = Response(
+        render_template(
+            "users/vscode_workspace.json",
+            project_name=project_name,
+            username=current_user.org_username or current_user.username,
+            remote_server_address=remote_server_address, # e.g., linux.cim.rhul.ac.uk
+            remote_server_name=remote_server_name,
+            github_repo=github_repo,
+        )
+    )
+    response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
+    return response

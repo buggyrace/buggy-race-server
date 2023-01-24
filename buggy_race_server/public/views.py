@@ -203,7 +203,7 @@ def _send_tech_notes_assets(type, path):
             path
         )
     except FileNotFoundError:
-        return "File not found", 400
+        return "File not found", 404
         abort(404)
 
 @blueprint.route("/project/tasks/<task_id>")

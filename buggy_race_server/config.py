@@ -104,6 +104,8 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
     USERS_HAVE_ORG_USERNAME = auto()
+    PROJECT_REMOTE_SERVER_ADDRESS = auto()
+    PROJECT_REMOTE_SERVER_NAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -189,6 +191,8 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SLUG.name,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
       }
     }
     DEFAULTS = {
@@ -212,7 +216,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
-        ConfigSettingNames.PROJECT_CODE.name: "Buggy",
+        ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
@@ -237,6 +241,8 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -289,6 +295,8 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
     }
 
     # this is the order of the setting groups that is
@@ -322,14 +330,20 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999);
-          otherwise, "Buggy" works. An automatically slugified form of
-          this is used in filenames, etc., but if you want to specify your
-          own, set `PROJECT_SLUG` here too.""",
+          otherwise, "Buggy" works. See also `PROJECT_SLUG` which is how
+          this code may appear in filenames of any downloaded files. The
+          full name of the project is \"the [`PROJECT_CODE`] Racing Buggy
+          project\", so if you don't have or need a course code,
+          it's fine to leave it blank.""",
 
         ConfigSettingNames.PROJECT_SLUG.name:
-          """This is how the `PROJECT_CODE` appears in filenames: you only
-          need to set this if the automatic slug (lowercase, spaces-to-hyphens
-          and so on) isn't acceptable to you.""",
+          """This is how the `PROJECT_CODE` appears — as a prefix — in any
+          filenames that are downloaded from the server. This is a kindness to
+          help disambiguate files in your Downloads folder. If you leave this blank,
+          it will default to using an automatic sluggified version of your project
+          code, if any. Note that there are some places where students can download
+          files (e.g., tabulated specification data) too, so it's not just admin
+          staff who will see it.""",
 
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique
@@ -512,7 +526,28 @@ class ConfigSettings:
           that: you end up with a lot of zip files with the same
           name otherwise). Use this setting to display or hide
           this general information on the "project" page.
-          """
+          """,
+
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name:
+          """If students are going to develop on a remote server,
+          what is its (human) name? This is used to help students
+          identify the server they are logging into (e.g, "the
+          CompSci department's Unix server").
+          Leave this blank if your students are all working on their
+          own machines (i.e., not a single teaching server with login
+          accounts, python, and personalised HTTP ports).
+          """,
+
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
+          """If students are going to develop on a remote server,
+          what is its address? This is used with their
+          organisational username (or just username, if they haven't
+          got one): for example enter `linux.example.ac.uk` so
+          student Ada can log via `ada@linux.example.ac.uk`.
+          If you're not using a remote project server, leave this
+          blank (see also `PROJECT_REMOTE_SERVER_NAME`).
+          """,
+
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
@@ -564,9 +599,13 @@ class ConfigSettings:
         These settings control aspects of the what the students
         need to do (for example: are they only coding, or do you
         want them to add a report/poster page to their buggy editor
-        too?).
+        too?). If you or your department is running a remote server
+        on which students will be doing their Python, enter its
+        details here (there's extra set-up required on that remote
+        server too — see the docs). It's fine to run the project
+        without a remote server: it just means students work on
+        individial machines.
         """
-
     }
 
     @staticmethod

@@ -4,11 +4,11 @@
 		"version": "2.0.0",
 		"tasks": [
 		  {
-        "label": "CS1999: Download from GitHub",
+        "label": "{{ project_name }}: download from GitHub",
         "type": "shell",
-        "command": "echo \"Please enter your RHUL College password: \" && ssh {{ current_user.org_username }}@linux.cim.rhul.ac.uk \"git clone {{ current_user.course_repository }} buggy-editor\""
+        "command": "echo \"Enter the password for your account ({{ username }}) on {{ remote_server_name }}: \" && ssh {{ username }}@{{ remote_server_address }} \"git clone {{ github_repo }} buggy-editor\""
       }
 		]
   },
-	"remoteAuthority": "ssh-remote+{{ current_user.rhul_username }}@linux.cim.rhul.ac.uk"
+	"remoteAuthority": "ssh-remote+{{ username }}@{{ remote_server_address }}"
 }

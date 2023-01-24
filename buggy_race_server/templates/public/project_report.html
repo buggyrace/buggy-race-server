@@ -10,14 +10,14 @@ pre {
 
 <div class="container pb-5">
   <div class="row">
-    <h1 id="project_details">
-      {{ config['PROJECT_CODE'] }} project: your {{ report_type }}
+    <h1 id="project-details">
+      {{ config['PROJECT_CODE'] }} Racing Buggy project: your {{ report_type }}
     </h1>
   </div>
   <div class="row">
     <div class="col">
 
-      <h2 id="about_the_8220poster8221">About the "{{ report_type }}"</h2>
+      <h2 id="about-the-{{ report_type | lower }}">About the "{{ report_type }}"</h2>
 
       <p>
         There are two parts of your project submission:
@@ -29,7 +29,8 @@ pre {
       </ul>
       
       <p>
-        Because you have developed a webserver, for {{ config['PROJECT_CODE'] }}
+        Because you have developed a webserver, for the
+        {{ config['PROJECT_CODE'] }} Racing Buggy project
         your {{ report_type }} is — of course — a page on your webserver at:
       </p>
       <ul>
@@ -38,7 +39,7 @@ pre {
         </li>
       </ul>
       
-      <h2 id="what_is_on_your_poster">
+      <h2 id="what-is-on-your-poster">
         What is {% if report_type == "poster" %} on {% else %} in {% endif %}
         your {{ report_type }}?
       </h2>
@@ -52,7 +53,7 @@ pre {
         <li>bottom: notes on each task you attempted</li>
       </ul>
       
-      <h2 id="what_is_on_the_top_of_your_poster">What is on the top of your poster?</h2>
+      <h2 id="what-is-on-the-top-of-your-poster">What is on the top of your poster?</h2>
       
       <p>
         You've made a working (up to a point) buggy editor! Tell someone who
@@ -87,7 +88,8 @@ pre {
       <p>
         Obviously some of those have the power of a team of pro graphic
         designers behind them so it's OK if yours isn't a complete festival
-        for the eyes... but you know enough about HTML now to know how
+        for the eyes... but once you've been working on your buggy editor
+        for a little while, you'll know enough about HTML to know how
         to organise headings and paragraphs or maybe bullet lists or...
         well, see how you get on with HTML and style.
       </p>
@@ -97,7 +99,7 @@ pre {
         editor has).
       </p>
       
-      <h2 id="what_is_on_the_bottom_of_your_poster">What is on the bottom of your poster?</h2>
+      <h2 id="what-is-on-the-bottom-of-your-poster">What is on the bottom of your poster?</h2>
       
       <p>
         Underneath that we want to see a list of the tasks your attempted with
@@ -107,7 +109,7 @@ pre {
         working.
       </p>
       
-      <h2 id="how_to_set_it_up">How to set it up</h2>
+      <h2 id="how-to-set-it-up">How to set it up</h2>
       
       <p>
         As you'll know by the time you set this up, there is more than one way
@@ -204,7 +206,7 @@ def poster():
   </div>
   <div class="row">
     <div class="col">
-      <h2 id="add_a_note_for_every_task_you_attempted">Add a note for every task you attempted</h2>
+      <h2 id="add-a-note-for-every-task-you-attempted">Add a note for every task you attempted</h2>
 
       <p>
         We'll be looking at the code to see <em>what</em> you did, but in the
@@ -227,7 +229,7 @@ def poster():
         you dived into it.
       </p>
 
-      <h3 id="keep_your_notes_short">Keep your notes short!</h3>
+      <h3 id="keep-your-notes-short">Keep your notes short!</h3>
 
       <p>
         Just a couple of sentences on what you did is fine (it <em>might</em>
@@ -235,7 +237,7 @@ def poster():
         straightforward).
       </p>
 
-      <h2 id="helpful_html_to_copy_and_paste">Helpful HTML to copy-and-paste</h2>
+      <h2 id="helpful-html-to-copy-and-paste">Helpful HTML to copy-and-paste</h2>
 
       <p>
         Here is HTML for you to copy-and-paste: for each task you attempted,

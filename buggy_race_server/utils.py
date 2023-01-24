@@ -136,6 +136,17 @@ def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
   return name.replace("_", " ").title()
 
+def get_prefixed_filename(app, filename):
+  """ For download files, returns the filename with a slug/project prefix, if configured. """
+  slug = app.config[ConfigSettingNames.PROJECT_SLUG.name]
+  if not slug:
+    slug = re.sub(r"\W+", "-", app.config[ConfigSettingNames.PROJECT_CODE.name].lower().strip())
+    slug = re.sub(r"(^-+|-{2,}|-$)", "", slug)
+  if slug:
+    return f"{slug}-{filename}"
+  else:
+    return filename
+
 def publish_tech_notes(app):
     """ Runs pelican to generate the tech notes.
         Creates a pelican config file with "live" config settings (as

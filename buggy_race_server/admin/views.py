@@ -759,14 +759,18 @@ def tech_notes_admin():
     if error_msg:
       flash(error_msg, "danger")
     else:
-      flash("Re-generated tech notes OK", "success") 
+      flash("Re-generated tech notes OK", "success")
   return render_template(
     "admin/tech_notes.html",
     form=FlaskForm(request.form), # nothing except CSRF token
     key_settings=[
       ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
       ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
-      ConfigSettingNames.PROJECT_CODE.name
+      ConfigSettingNames.PROJECT_CODE.name,
+      ConfigSettingNames.SOCIAL_0_NAME.name,
+      ConfigSettingNames.SOCIAL_1_NAME.name,
+      ConfigSettingNames.SOCIAL_2_NAME.name,
+      ConfigSettingNames.SOCIAL_3_NAME.name,
     ],
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
 

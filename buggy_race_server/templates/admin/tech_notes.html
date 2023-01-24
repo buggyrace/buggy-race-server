@@ -53,10 +53,13 @@
         </thead>
         <tbody>
           {% for setting_name in key_settings %}
-            <tr>
-              <td><code>{{ setting_name }}</code></td></td>
-              <td><code>{{ config[setting_name] }}</code></td></td>
-            </tr>
+            {# don't show empty social names #}
+            {% if not setting_name.startswith('SOCIAL') or config[setting_name] %}
+              <tr>
+                <td><code>{{ setting_name }}</code></td>
+                <td><code>{{ config[setting_name] }}</code></td>
+              </tr>
+            {% endif %}
           {% endfor %}
       </table>
     </div>

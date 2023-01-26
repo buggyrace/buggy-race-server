@@ -242,6 +242,7 @@ def serve_project_page(page=None):
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         is_report=is_report,
         report_type=report_type,
+        expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         submit_deadline=submit_deadline,
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],

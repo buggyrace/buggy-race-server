@@ -3,36 +3,35 @@
 
 <div class="container pb-5">
   <div class="row">
-    <h1 class="my-3">{{ project_code }} Racing Buggy project task list</h1>
-
-    <h2 id="phases_and_tasks">Phases and tasks</h2>
-    
+    <h1 class="col my-3">Project task list</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 id="phases_and_tasks">Phases and tasks</h2>
       <p>
         You should work on your project in phases, completing every task in
         each phase before moving on to the next. Apart from phase 0, you can
-        tackle the tasks in each phase in any order you like.
+        tackle the tasks within each phase in any order  you like.
       </p>
-
-      <ul>
-        <li>
-          <p>
-            You <strong>must</strong> implement each phase completely,
-            <strong>before</strong> moving on to the next.
-          </p>
-        </li>
-        <li>
-          <p>
-            You're free to implement each task <strong>as thoroughly</strong>
-            as you require.
-          </p>
-        </li>
-      </ul>
-    
-      <p>
-        If you're not an experienced programmer, we don't expect you to get
-        much further than phase 3 before you run out of time.
-      </p>
-  
+      {% if expected_phase_completion %}
+        <p>
+          If you're not an experienced programmer, we don't expect you to get
+          much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
+          before you run out of time.
+        </p>
+      {% endif %}
+    </div>
+    <div class="col-md-6">
+      <div class="alert-danger border border-danger p-4 my-3">
+          You <strong>must</strong> implement each phase completely,
+          <strong>before</strong> moving on to the next.
+      </div>
+      <div class="alert-success border border-success p-4 my-3">
+          You're free to implement each task <strong>as thoroughly</strong>
+          as you require.
+      </div>
+    </div>
+  </div>
   
   <!-- ======================================================================== -->
   <!-- ==                                                                    == -->

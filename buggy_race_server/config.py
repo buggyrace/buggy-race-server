@@ -107,6 +107,7 @@ class ConfigSettingNames(Enum):
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
     PROJECT_REMOTE_SERVER_NAME = auto()
     PROJECT_WORKFLOW_URL = auto()
+    PROJECT_PHASE_MIN_TARGET = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -195,6 +196,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
       }
     }
     DEFAULTS = {
@@ -246,6 +248,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -301,6 +304,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
     }
 
     # this is the order of the setting groups that is
@@ -560,6 +564,18 @@ class ConfigSettings:
           start with `http` (i.e., it's not a fully-qualified URL),
           it will default to `project/workflow` on this server. Leave
           this blank if you don't want to display a workflow page.
+          """,
+
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
+          """This is the minimum phase you'd expect an inexperienced
+          programmer to have completed before running out of time. The
+          default of 3 is based on our experience of running a 6-week
+          project (several times) with students with only one term's
+          prior experience of Python, and takes into account that task
+          3-MULTI is more involved than most students realise. This
+          expectation is displayed to students (for example on the
+          task list page). Set this to zero to remove the recommendation
+          entirely.
           """,
 
     }

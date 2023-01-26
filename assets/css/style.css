@@ -135,14 +135,18 @@ textarea {
 
 .buggy-project .task h3 a{
   float:right;
-  color:#999;
-  padding:0.1em 0.5em;
+  color:#fff;
+  padding:0.25em 0.5em;
   border-radius:0.2em;
+  border: 0.2em solid white;
   text-decoration: none;
-  background-color:inherit;
+  background-color:#000;
+  box-shadow: 0.2em 0.2em 0.4em #000;
+  margin: -1em 0em 0.5em 0.5em;
 }
 .buggy-project .task h3 a::before{
   content:"#";
+  margin-right:0.1em;
   opacity:0.5;
 }
 .buggy-project .task a:hover{

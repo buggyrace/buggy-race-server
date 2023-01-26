@@ -3,18 +3,22 @@
 
 <div class="container pb-5">
   <div class="row">
-    <h1 class="my-3">{{ config['PROJECT_CODE'] }} Racing Buggy project</h1>
+    <h1 class="my-3">{{ project_code }} Racing Buggy project</h1>
   </div>
   <div class="row">
     <div class="col">
-      <p>
-        <a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">See task list &rtri;</a>
-        &nbsp;
+      <p class="btn-collection">
+        <a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">Task list &rtri;</a>
         {% if is_report %}
           <a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
-          &nbsp;
-          {% endif %}
-        <a class="btn btn-outline-secondary" href="{{ url_for('public.serve_tech_notes', path='index') }}">Go to tech notes &rtri;</a>
+        {% endif %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes &rtri;</a>
+        {% if workflow_url %}
+          <a href="{{ workflow_url }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
+        {% endif %}
+        {% if submission_link %}
+            <a href="{{ submission_link }}" class="btn btn-outline-secondary">Submission &rtri;</a>
+        {% endif %}
       </p>
     </div>
   </div>
@@ -67,42 +71,29 @@
   </div>
   <div class="row">
     <div class="col-md-6 p-3 alert-info">
-        <h2>Tasks</h2>
-        <p>
-          The project requires you to work on a racing buggy editor: it's a
-          Python Flask webserver you've been given, and which you develop in
-          <strong>phases</strong> through a series of <strong>tasks</strong>.
-        </p>
-        <p>
-          <a class="btn btn-secondary" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">See task list &rtri;</a>
-        </p>
+      <h2>Tasks</h2>
+      <p>
+        The project requires you to work on a racing buggy editor: it's a
+        Python Flask webserver you've been given, and which you develop in
+        <strong>phases</strong> through a series of <strong>tasks</strong>.
+      </p>
+      <p>
+        <a class="btn btn-secondary" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">Task list &rtri;</a>
+      </p>
     </div>
     {% if is_report %}
       <div class="col-md-6 p-3 alert-info">
-          <h2>{{ report_type | title }}</h2>
-          <p>          
+        <h2>{{ report_type | title }}</h2>
+        <p>          
             Your buggy editor must include a webpage called <code>{{ report_type }}</code>
             that "sells" your editor and summarises your journey through those tasks.
           </p>
           <p>
             <a class="btn btn-secondary" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
           </p>
-        </div>
+      </div>
     {% endif %}
   </div>
-
-  <!---
-  <h2 id="development_workflow">Development workflow</h2>
-
-  <p>This is a practical project. Here is a breakdown of <em>how</em> you should be working
-  (with helpful links):</p>
-
-  <ul>
-  <li><a href="project/workflow">step-by-step workflow</a></li>
-  </ul>
-
-  <hr />
-  -->
   <div class="row">
     <div class="col-md-6 p-3">
       <h2>Tech notes</h2>
@@ -112,19 +103,32 @@
         tasks):
       </p>
       <p>
-        <a href="{{ url_for('public.serve_tech_notes', path='index') }}" class="btn btn-outline-secondary">Go to tech notes &rtri;</a>
+        <a href="{{ url_for('public.serve_tech_notes', path='index') }}" class="btn btn-outline-secondary">Tech notes &rtri;</a>
       </p>
     </div>
+    {% if workflow_url %}
+      <div class="col-md-6 p-3">
+        <h2>Workflow</h2>
+        <p>
+          This is a practical project.
+          Here's a breakdown of the workflow to help you approach
+          setting it up, working on it, and ultimately submitting it.
+        </p>
+        <p>
+          <a href="{{ workflow_url }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
+        </p>
+      </div>
+    {% endif %}
   </div>
 
-  {% if  config['PROJECT_SUBMISSION_DEADLINE'] %}
+  {% if submit_deadline %}
     <div class="row">
       <div class="col-md-6 p-3 alert">
         <h2>Submission deadline</h2>
         <!-- "deadline-container" is magic: js enhanced -->
         <div id="deadline-container" class="alert">
-            <span style="display:inline-block;margin-right:1em;">{{ config['PROJECT_SUBMISSION_DEADLINE'] | replace("T", " ") }}</span>
-            <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ config['PROJECT_SUBMISSION_DEADLINE'] }}"></span>
+            <span style="display:inline-block;margin-right:1em;">{{ submit_deadline | replace("T", " ") }}</span>
+            <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submit_deadline }}"></span>
         </div>
         <p>
           That's the submission we'll be assessing (and running) to see how you got on

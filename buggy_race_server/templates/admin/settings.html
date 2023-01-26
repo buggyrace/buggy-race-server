@@ -7,15 +7,17 @@
   </div>
   <div class="row js-only" id="show-settings-btns">
     <div class="col">
-      {% for name in sorted_groupnames %}
-        {% if group_name == name | lower %}
-          {% set btn_class = "btn-dark" %}
-        {% else %}
-          {% set btn_class = "btn-outline-secondary" %}
-        {% endif %}
-        <a href="{{ url_for('admin.settings', group_name=name | lower) }}"
-        class="btn {{ btn_class }}">{{ name | title }}</a>
-      {% endfor %}
+      <p class="btn-collection">
+        {% for name in sorted_groupnames %}
+          {% if group_name == name | lower %}
+            {% set btn_class = "btn-dark" %}
+          {% else %}
+            {% set btn_class = "btn-outline-secondary" %}
+          {% endif %}
+          <a href="{{ url_for('admin.settings', group_name=name | lower) }}"
+          class="btn {{ btn_class }}">{{ name | title }}</a>
+        {% endfor %}
+      </p>
     </div>
   </div>
   {% for group in sorted_groupnames %}

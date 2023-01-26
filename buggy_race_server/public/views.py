@@ -226,19 +226,26 @@ def serve_project_page(page=None):
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
         template = "public/project_report.html"
+    elif page == "workflow":
+        template = "public/project_workflow.html"
     else:
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
     submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
+    workflow_url = current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name]
+    if workflow_url and not workflow_url.startswith("http"):
+        workflow_url = "/project/workflow" # if it's not a URL, force it
     return render_template(
         template,
+        site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         is_report=is_report,
         report_type=report_type,
         submit_deadline=submit_deadline,
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
-
+        workflow_url=workflow_url,
     )
 
 @blueprint.route("/assets/<path:path>")

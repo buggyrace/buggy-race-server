@@ -219,15 +219,15 @@ def show_single_task(task_id):
 @blueprint.route("/project/<page>", strict_slashes=False)
 def serve_project_page(page=None):
     if page is None or page == "index":
-        template = "public/project.html"
+        template = "public/project/index.html"
     elif page == "tasks":
-        template = "public/project_tasks.html"
+        template = "public/project/tasks.html"
     elif page in ["poster", "report"]:
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
-        template = "public/project_report.html"
+        template = "public/project/report.html"
     elif page == "workflow":
-        template = "public/project_workflow.html"
+        template = "public/project/workflow.html"
     else:
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]

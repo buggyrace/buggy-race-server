@@ -218,7 +218,7 @@ def show_single_task(task_id):
 @blueprint.route("/project", strict_slashes=False)
 @blueprint.route("/project/<page>", strict_slashes=False)
 def serve_project_page(page=None):
-    if page is None:
+    if page is None or page == "index":
         template = "public/project.html"
     elif page == "tasks":
         template = "public/project_tasks.html"

@@ -1,0 +1,429 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  div.inner {
+      margin:0 auto;
+      max-width:40rem;
+    }
+  ul.timeline {
+    position: relative;
+    padding: 0 0 0 3rem;
+    max-width: 30rem;
+    margin:0 0 2rem 0;
+    list-style:none;
+  }
+
+  ul.timeline::before {
+    content: '';
+    width: 0.4rem;
+    background-color: #DE421A;
+    position: absolute;
+    top: -1rem;
+    bottom: -1rem;
+    left: 1.1rem;
+  }
+
+  ul.timeline > li {
+    padding: 20px 30px;
+    background-color: #FFD6D6;
+    position: relative;
+    border-radius: 6px;
+    margin-bottom: 2rem;
+  }
+  ul.timeline > li.optional {
+    background-color: #FFE79B; /*#ffffeb; */
+  }
+
+  h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #DE421A;
+  }
+  li.optional h3 {
+    color: #dd9933;
+  }
+  li.optional h3:before {
+    content:"Optional";
+    padding:0.2em 0.5em;
+    background: #dd9933;
+    color: white;
+    border-radius:0.5em;
+    margin-right:0.5em;
+  }
+  
+  p {
+    margin: 10px 0 0 0;
+    color: #222;
+  }
+
+  ul.timeline > li::before {
+    content: '';
+    border: 10px solid transparent;
+    border-right-color: #FFD6D6;
+    border-left: 0;
+    position: absolute;
+    top: 20%;
+    left: -10px;
+  }
+  ul.timeline >  li.optional::before {
+    border-right-color: #FFE79B;
+  }
+  
+  ul.timeline >  li::after {
+    content: '';
+    background: #FFD6D6;
+    border: 0.4rem solid #DE421A;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    position: absolute;
+    top: 20%;
+    left: -2.5rem;
+  }
+  ul.timeline > li.optional::after {
+    border-color: #dd9933;
+    background: #ffffeb;
+    
+  }
+  li li {
+    margin:0.5em 0;
+  }
+</style>
+
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">{{ config['PROJECT_CODE'] }} Project workflow</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        Here are the steps to get into your web dev flow.
+      </p>
+      <p>
+        This only looks like a lot because it's in detailed steps!
+        This is just an outline of the workflow — see other material
+        (e.g., videos) for help on how to do some of this.
+      </p>
+    </div>
+  </div>
+  <div class="row">
+      <h2 class="col my-5">This is the set-up (you only do it once):</h2>
+  </div>
+  <div class="inner">
+    <ul class="timeline init">
+      <li>
+        <h3>get login details</h3>
+        <p>
+          You'll need your username and password for this
+          <a href="{{ url_for('public.home') }}">race server</a>.
+        </p>
+      </li>
+      <li>
+        <h3>log into race server</h3>
+        <p>
+          <a href="{{ url_for('public.login') }}">Log in to the race server</a>
+          (make sure it's a secure connection: https).
+        </p>
+      </li>
+      <li>
+        <h3>change password</h3>
+        <p>
+          <a href="{{ url_for('user.change_password') }}">Change your password</a>
+          to something secret: essential if it was communicated to you in plaintext.
+      </p>
+      </li>
+      <li>
+        <h3>sign in to GitHub</h3>
+        <p>
+          You'll need to register a new account on  <a href="https://github.com">GitHub</a>
+          if you haven't already got one. Then, log into your GitHub account (it makes
+          the next step slightly easier if you're <em>already</em> logged in there).
+      </li>
+      </li>
+      <li>
+        <h3>connect to GitHub</h3>
+        <p>
+          On the race server, there's a button for this:
+          <a href="{{ url_for('user.settings') }}">Connect your race
+          server account</a> to your GitHub account.
+        </p>
+      </li>
+      <li>
+        <h3>fork the repo</h3>
+        <p>
+          Fork the Buggy Editor repo into your GitHub account (by pressing
+          the <a href="{{ url_for('user.settings') }}">button</a> 
+          on the race server — this is what you authorised the server
+          to do in the previous step).
+        </p>
+      </li>
+      <li>
+        <h3>see the issues arrive</h3>
+        <p>
+          Moments after forking, our server tries to inject 27 GitHub issues into
+          your repo (one for each task). You don't need these — they are just for
+          fun/learning.
+        </p>
+        <p>
+          10-May-2021: there is a bug — some of you are not getting all 27: we're
+          working on that!
+        </p>
+      </li>
+      <li>
+        <h3>clone your repo</h3>
+        <p>
+          There are a number of ways to do this but the one we suggest is using VSCode
+          (video: <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=62729d9b-9202-4686-90f6-ae8d002c0a88">0-GET VSCode<a/>)
+          as it avoids installing lots of dependencies on your machines (an area that
+          people often struggle with!).
+        </p>
+        <p>
+          If you're struggling to get VSCode to work and don't feel up to figuring out
+          how to use git then you can try one of:
+        </p>
+        <ul>
+          <li>
+            Use <a href="https://replit.com">repl.it</a>
+            (video: <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=79c7f430-ca06-45a9-ad36-ae8d002c0a57">0-GET with repl.it</a>)
+            and work entirely in-browser.
+          </li>
+          <li>
+            Download the zip file from GitHub (click the green <strong>code</strong>
+            button on your repo) and unzip it on your own machine. (This will require installing
+            python, pip and sqlite3 locally on your computer).
+          </li>
+        </ul>
+        <p>
+          If you're feeling up to the challenge of using git, we have some options for you!
+        </p>
+        <p>
+          The best way is probably to use GitHub GUI
+          (video: <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dc1be577-db16-4f23-b975-ad200135c7a0">0-GET with GitHub GUI</a>),
+          or install Git and try the command line 
+          (video: <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=66081520-cc38-4ef5-a40a-ad2001272186">0-GET with command-line git</a>)
+          in a terminal or (Windows) git bash.
+        </p>
+      </li>
+      <li>
+        <h3>find directory</h3>
+        <p>
+          Now you have a copy of the project you can edit and run!
+        </p>
+        <p>
+          You need to know <em>where</em> on your file system that is, because for
+          the rest of CS1999 you will be working in that directory.
+        </p>
+        <p>
+          New to file systems?
+          <a href="https://superbasics.beholder.uk/file-system/">Read
+          these superbasics</a> because you <em>must</em> be very comfortable with
+          them!
+        </p>
+        <p>
+          If you didn't clone the repo into a place you're happy with, you can
+          <em>move the whole repo</em> on your machine. It's best to do this before
+          you start working on it, though.
+        </p>
+      </li>
+      <li>
+        <h3>cd to directory</h3>
+        <p>
+          Make sure you are
+          <a href="https://superbasics.beholder.uk/files/current-directory/">"in"
+          the directory</a> that contains your Buggy Editor. Use <code>cd</code>
+          (change directory) to get there on the command line (if you're using an
+          IDE that takes care of this for you, it might not be important).
+        </p>
+      </li>
+      <li class="optional">
+        <h3>got Python?</h3>
+        <p>
+          Check you've got Python3 installed on your machine and you know how to
+          run it.
+        </p>
+      </li>
+      <li class="optional">
+        <h3>load the modules</h3>
+        <p>
+          Load the Python modules the Buggy Editor needs: this is what <a
+          href="https://pip.pypa.io/en/stable/installing/">pip</a> does. They
+          modules you need are listed in <code>requirements.txt</code> so do
+          <code>pip&nbsp;install&nbsp;-r&nbsp;requirements.txt</code>.
+        </p>
+        <p>
+          You can look inside <code>requirements.txt</code> of course (but don't
+          change it) — you won't be surprised to see Flask in there.
+        </p>
+        <p>
+          You only need to install the modules once. But it's safe to accidentally
+          pip install things twice: nothing bad happens, pip just tells you
+          "already satisfied".
+        </p>
+      </li>
+      <li class="optional">
+        <h3>create virtual env</h3>
+        <p>
+          If you want to use a virtual environment, create it now with something
+          like <br><code>python3&nbsp;-m&nbsp;venv&nbsp;venv</code> <br>That second
+          argument is the name of the directory you want to create:
+          <code>venv</code> is the convention.
+        </p>
+      </li>
+      <li class="optional">
+        <h3>activate venv</h3>
+        <p>
+          If you just created a virtual environment,
+          <a href="https://docs.python.org/3/library/venv.html">activate</a> it.
+          There is an activate script/command in the <code>venv</code> directory
+          you made: find it and run it (slightly different for Windows/Unix).
+        </p>
+      </li>
+      <li>
+        <h3>init the db</h3>
+        <p>
+          The Buggy Editor comes with a wee Python program for creating and/or
+          initialising the database.
+        </p>
+        <p>
+          Use Python3 to run <code>init_db.py</code> (you only need to initialise
+          the database once).
+        </p>
+        <p>
+          The database is an <a href="https://sqlite.org/index.html">SQLite
+          database</a> (SQLite databases are <em>awesome</em> and you're almost
+          certainly running several on your mobile phone already!).
+        </p>
+      </li>
+    </ul>
+    <p>
+      Right, you've set up your development environment. Well done! Let's get to
+      work.
+    </p>
+  </div>
+  <div class="row">
+      <h2 class="col my-5">This what you do each time you do development work:</h2>
+  </div>
+  <div class="inner">
+    <ul class="timeline">  
+      <li>
+        <h3>cd to directory</h3>
+        <p>
+          Make sure you are <a
+          href="https://superbasics.beholder.uk/files/current-directory/">"in"
+          the directory</a> that contains your Buggy Editor. Use <code>cd</code>
+          (change directory) to get there on the command line (if you're using an
+          IDE that takes care of this for you, it might not be important).
+        </p>
+      </li>
+      <li class="optional">
+        <h3>activate venv</h3>
+        <p>
+          If you are using a virtual environment, you <em>must</em> remember to
+          <a href="https://docs.python.org/3/library/venv.html">activate</a> it:
+          there is an activate script/command in the <code>venv</code> directory
+          you made: find it and run it.
+        </p>
+        <p>
+          Accidentally re-activating a venv you are already in is harmless.
+        </p>
+      </li>
+      <li class="optional">
+        <h3>set ENV vars</h3>
+        <p>
+          <a href="https://rhul-cs-projects.github.io/CS1999-buggy-race-server/setting-env">Set
+          environment variables</a> before you work (at task <a
+          href="https://rhul-cs-projects.github.io/CS1999-buggy-race-server/project/tasks/#task-3-env">3-ENV</a>
+          and thereafter this is less optional, because you should understand how
+          they work and why it's helpful).
+        </p>
+      </li>
+      <li>
+        <h3>run the webserver</h3>
+        <p>
+          Use Python3 to run the webserver: <code>app.py</code>
+        </p>
+      </li>
+      <li>
+        <h3>browse to localhost</h3>
+        <p>
+          Visit <a href="http://localhost:5000">http://localhost:5000</a> in your
+          browser: edit your buggy.
+        </p>
+        <p>
+          0.0.0.0:5000 or 127.0.0.0:5000 
+          <a href="https://rhul-cs-projects.github.io/CS1999-buggy-race-server/localhost">might work too</a> (it's handy to understand why).
+        </p>
+      </li>
+      <li>
+        <h3>run/test/edit/debug</h3>
+        <p>
+          Make changes using your editor/IDE of choice, save them, look in the
+          browser and the webserver's output (in the terminal or wherever you are
+          running it).
+        </p>
+        <p>
+          You're a web dev now.
+        </p>
+      </li>
+      <li class="optional">
+        <h3>commit changes</h3>
+        <p>
+          If you are <a href="https://www.atlassian.com/git">using Git</a>, you can
+          <em>add</em> and <em>commit</em> your changes, and <em>push</em> them up
+          to your repo — you can even close the <a
+          href="https://guides.github.com/features/issues/">Github issues</a> if
+          you want!
+        </p>
+      </li>
+      <li>
+        <h3>repeat for tasks and phases</h3>
+        <p>
+          Work through
+          <a href="{{ url_for('public.serve_project_page', page='tasks') }}">the&nbsp;tasks</a>
+          (in phase order).
+          {% if is_report %}
+            Keep notes of what you did because you'll need to summarise this in
+            <a href="{{ url_for('public.serve_project_page', page=report_type) }}">the&nbsp;{{ report_type }}</a>.
+          {% endif %}
+        </p>
+      </li>
+      <li class="optional">
+        <h3>deactivate venv</h3>
+        <p>
+          If you are using a virtual environment, <code>deactivate</code> it
+          (there's a deactivate command: you installed it when you activated the
+          venv) when you finish your session.
+        </p>
+      </li>
+    </ul>
+    <p>
+    That's the development cycle.
+    </p>
+  </div>
+  <div class="row">
+    <h2 class="col my-5">Finally, when it's time to submit:</h2>
+  </div>
+  <div class="inner">
+    <ul class="timeline">
+      {% if is_report %}
+        <li>
+          <h3>check the {{ report_type }}</h3>
+          <p>
+            See then <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type }} details</a>
+          </p>
+        </li>
+      {% endif %}
+      <li>
+        <h3>follow the project instructions</h3>
+        <p>
+          Go to the
+          <a href="{{ url_for( 'public.serve_project_page', page='index' ) }}">project page</a>
+        </p>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+

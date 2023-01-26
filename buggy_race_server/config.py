@@ -106,6 +106,7 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_ORG_USERNAME = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
     PROJECT_REMOTE_SERVER_NAME = auto()
+    PROJECT_WORKFLOW_URL = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -193,6 +194,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
       }
     }
     DEFAULTS = {
@@ -243,6 +245,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -297,6 +300,7 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
     }
 
     # this is the order of the setting groups that is
@@ -546,6 +550,16 @@ class ConfigSettings:
           student Ada can log via `ada@linux.example.ac.uk`.
           If you're not using a remote project server, leave this
           blank (see also `PROJECT_REMOTE_SERVER_NAME`).
+          """,
+
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
+          """It's helpful for students to have a summary of the
+          workflow process... but this often needs to be specific
+          to how you're running your project — so you can nominate
+          a URL to your own page. If the URL you specify here doesn't
+          start with `http` (i.e., it's not a fully-qualified URL),
+          it will default to `project/workflow` on this server. Leave
+          this blank if you don't want to display a workflow page.
           """,
 
     }

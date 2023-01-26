@@ -1,5 +1,6 @@
 # find all headings and wrap them with anchor tags
 
+from bs4 import BeautifulSoup
 import re
 import sys
 
@@ -35,11 +36,10 @@ if len(sys.argv) != 3:
 input_filename = sys.argv[1]
 output_filename = sys.argv[2]
 
-html = ""
+raw_html = ""
 with open(input_filename) as infile:
-    html = "".join(infile.readlines())
+    raw_html = "".join(infile.readlines())
 
-print(f"html={len(html)}")
 HEADING_RE = re.compile(r"<h(\d)(\s*[^>]*)>(.{1,80})</h\1>")
 CLASS_RE = re.compile(r"(class\s*=\s*([\"']))(.*?)(\2)")
 ID_RE = re.compile(r"(id\s*=\s*([\"'])(.*?)(\2))")
@@ -49,27 +49,37 @@ new_html = ""
 
 slug_lookup = {}
 
-while matched := re.search(HEADING_RE, html):
-    start = matched.start()
-    end = matched.end()
-    new_html += html[:start]
-    hx = matched.group(1)
-    attribs = matched.group(2)
-    text = matched.group(3)
-    slug = slugify(text)
-    if id_match := re.search(ID_RE, attribs):
-        id = id_match.group(3)
-        attribs = attribs.replace(id_match.group(1), "")
-        if id != slug: # report if we're not replacing like with like
-          print(f"[ ] heading (h{hx}) already had id=\"{id}\", replacing with {slug}")
-    attribs += f" id=\"{slug}\""
-    new_html += f"<a href=\"#{slug}\" class=\"toclink\"><h{hx}{attribs}>{text}</h{hx}></a>"
-    html = html[end:]
-new_html += html
+soup = BeautifulSoup(raw_html, 'html.parser')
+
+# if there's an anchor tag wrapped around a header,
+# this may be an anomoly: fix it by removing the <a> tags completely
+# (on the assumption we're about to rebuild them inside the header)
+for anchor in soup("a"):
+    for h_level in range(1, 7):
+        if heading := anchor.find(f"h{h_level}"):
+            print(f"Found an anchor around a h{h_level}, removing it")
+            anchor.replaceWith(heading)
+
+for h_level in range(1, 7):
+  for heading in soup.find_all(f"h{h_level}"):
+      if inner_link := heading.find("a"):
+        print(f"    found an anchor inside h{h_level}: {inner_link['href']} FIXME TODO")
+      heading_text = heading.text
+      slug = slugify(heading_text)
+      print(f"h{h_level}: {heading.text}")
+      id = heading.get("id")
+      if id and id != slug:
+           print(f"[ ] heading (h{h_level}) already had id=\"{id}\", replacing with {slug}")
+      heading["id"] = slug
+      new_anchor = soup.new_tag("a", href=f"#{slug}")
+      new_anchor["class"]=ANCHOR_CLASS
+      new_anchor.string = heading_text
+      heading.string = ""
+      heading.append(new_anchor)
 
 with open(output_filename, "w") as outfile:
-    outfile.write(new_html)
+     outfile.write(soup.prettify())
 
-print(f"[ ] wrote {len(new_html)} chars to {output_filename}")
-print(f"[ ] done: added {len(slug_lookup)} anchors/slugged ids")
+# print(f"[ ] wrote {len(new_html)} chars to {output_filename}")
+# print(f"[ ] done: added {len(slug_lookup)} anchors/slugged ids")
 

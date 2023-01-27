@@ -246,11 +246,14 @@ def poster():
         Be kind to your marker and put them in the right order too please ;-)
       </p>
 
-      <p>
-        <strong>REMEMBER</strong> nobody is expected to do them all! If you
-        did all of Phase 3 task you've done well — if you got onto Phase 4
-        or beyond you've done very well.
-      </p>
+      {% if expected_phase_completion %}
+        <p>
+          Remember:
+          if you're not an experienced programmer, we don't expect you to get
+          much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
+          before you run out of time.
+        </p>
+      {% endif %}
 
       <div class="example-report">
 <!-- POSTER-TASK-HTML-START -->

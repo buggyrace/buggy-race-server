@@ -228,7 +228,7 @@ function run_countdown(){
   }
 }
 
-$( document ).ready(function() {
+$(function() {
   if (typeof USER_BUGGY_JSON !== "undefined") {
     //----------------------------------------------------------
     // if this page has users' buggy json available,

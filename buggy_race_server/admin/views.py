@@ -288,6 +288,7 @@ def admin():
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
     admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
+    other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
     return render_template(
       "admin/dashboard.html",
       students_active = students_active,
@@ -307,6 +308,8 @@ def admin():
       qty_users_deactivated=len(users_deactivated),
       admin_users=admin_users,
       qty_admin_users=len(admin_users),
+      other_users=other_users,
+      qty_other_users=len(other_users),
     )
 
 @blueprint.route("/users")

@@ -102,6 +102,21 @@
             </ul>
           </td>
         </tr>
+        {% if qty_other_users %}
+          <tr>
+            <td colspan="2">Other users (e.g. guests)</td>
+            <td class="text-right">{{ qty_other_users }}</td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <ul class="user-list">
+                {% for u in other_users %}
+                  <li>{{ u.pretty_username }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+        {% endif %}
         <tr>
           <td colspan="2">Total users</td>
           <td class="text-right">{{ qty_users }}</td>

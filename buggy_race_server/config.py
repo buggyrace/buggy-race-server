@@ -51,14 +51,14 @@ class ConfigSettingNames(Enum):
     # admin/settings... but just in case, putting them in config to allow
     # future tech notes to come from a different source: defaults values
     # are set in ConfigFromEnv, below
-    TECH_NOTES_CONFIG_PATH = auto()
     TECH_NOTES_CONFIG_FILE_NAME = auto()
     TECH_NOTES_CONFIG_LIVE_NAME = auto()
+    TECH_NOTES_CONFIG_PATH = auto()
     TECH_NOTES_CONFIG_PUBLISH_NAME = auto()
-    TECH_NOTES_PATH = auto()
+    TECH_NOTES_CONTENT_PATH = auto()
     TECH_NOTES_OUTPUT_PATH = auto()
     TECH_NOTES_PAGES_PATH = auto()
-    TECH_NOTES_CONTENT_PATH = auto()
+    TECH_NOTES_PATH = auto()
 
     ADMIN_USERNAMES = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
@@ -79,11 +79,15 @@ class ConfigSettingNames(Enum):
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
-    PROJECT_REPORT_TYPE = auto()
     PROJECT_CODE = auto()
+    PROJECT_PHASE_MIN_TARGET = auto()
+    PROJECT_REMOTE_SERVER_ADDRESS = auto()
+    PROJECT_REMOTE_SERVER_NAME = auto()
+    PROJECT_REPORT_TYPE = auto()
     PROJECT_SLUG = auto()
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
+    PROJECT_WORKFLOW_URL = auto()
     REGISTRATION_AUTH_CODE = auto()
     SECRET_KEY = auto()
     SERVER_PROJECT_PAGE_PATH = auto()
@@ -104,30 +108,26 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
     USERS_HAVE_ORG_USERNAME = auto()
-    PROJECT_REMOTE_SERVER_ADDRESS = auto()
-    PROJECT_REMOTE_SERVER_NAME = auto()
-    PROJECT_WORKFLOW_URL = auto()
-    PROJECT_PHASE_MIN_TARGET = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
     AUTH = "auth"
-    ORG = "org"
     GITHUB = "github"
-    USERS = "users"
+    ORG = "org"
     PROJECT = "project"
     RACES = "races"
     SERVER = "server"
     SOCIAL = "social"
+    USERS = "users"
 
 class ConfigTypes(str, Enum):
     """ Explicit types of config settings (useful for validation, etc) """
-    STRING = "str" # default TODO maybe ""?
     BOOLEAN = "bool"
     DATETIME = "datetime"
     INT = "int"
-    URL = "url"
     PASSWORD = "pass"
+    STRING = "str" # default TODO maybe ""?
+    URL = "url"
 
 class ConfigSettings:
 
@@ -221,10 +221,14 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
+        ConfigSettingNames.PROJECT_SLUG.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
-        ConfigSettingNames.PROJECT_SLUG.name: "",
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
@@ -245,10 +249,6 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
-        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -277,10 +277,14 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
-        ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
@@ -296,15 +300,11 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
     }
 
     # this is the order of the setting groups that is
@@ -324,55 +324,21 @@ class ConfigSettings:
     ]
 
     DESCRIPTIONS = {
-        ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
-          """Short name or abbreviation for your institution, college,
-          or school.""",
-        
-        ConfigSettingNames.INSTITUTION_FULL_NAME.name:
-          """Full name for your institution, college, or school""",
-
-        ConfigSettingNames.INSTITUTION_HOME_URL.name:
-          """Full URL for the home page of your institution: used as a link
-          on the racing server's home page.""",
-
-        ConfigSettingNames.PROJECT_CODE.name:
-          """If this project is known by a course or module code, use it
-          (for example, when we ran it at Royal Holloway, it was CS1999);
-          otherwise, "Buggy" works. See also `PROJECT_SLUG` which is how
-          this code may appear in filenames of any downloaded files. The
-          full name of the project is \"the [`PROJECT_CODE`] Racing Buggy
-          project\", so if you don't have or need a course code,
-          it's fine to leave it blank.""",
-
-        ConfigSettingNames.PROJECT_SLUG.name:
-          """This is how the `PROJECT_CODE` appears — as a prefix — in any
-          filenames that are downloaded from the server. This is a kindness to
-          help disambiguate files in your Downloads folder. If you leave this blank,
-          it will default to using an automatic sluggified version of your project
-          code, if any. Note that there are some places where students can download
-          files (e.g., tabulated specification data) too, so it's not just admin
-          staff who will see it.""",
-
-        ConfigSettingNames.SECRET_KEY.name:
-          """A secret used by the webserver in cookies, etc. This should be unique
-          for your server: the default value was randomised on installation,
-          so you usually don't need to change it. Note that changing it will
-          almost certainly break existing sessions.""",
-
-        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
-          """Should the webserver itself force HTTPS? This setting might not
-          be helpful if your hosting environment manages this for you (that is,
-          can be counterproductive to tell the server to force it here).
-          HTTPS is mandatory for GitHub's OAuth authentication, or if you're
-          holding any personal information on students. This setting does not
-          _implement_ HTTPS: it only forces redirection if the protocol the web
-          server sees in incoming requests is (non-secure) HTTP.""",
+        ConfigSettingNames.ADMIN_USERNAMES.name:
+          """Comma separated list of admin user names. You can nominate usernames
+          here before they have been registered. Usernames are lowercase.
+          If you remove (or change) a username in this list, you're effectively
+          revoking admin access, so be careful before changing anything.""",
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start
           the project. This is a public repo and unless you've forked
           it to make a custom one, you probably don't need to change
           this.""",
+
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name:
+          """Name of the CSV file the server creates that describes the project
+          tasks as GitHub issues. You probably don't need to change this.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
           """This should match the name in the `BUGGY_EDITOR_GITHUB_URL`
@@ -384,23 +350,182 @@ class ConfigSettings:
           You don't need to change this unless you've forked your own custom
           version of the repo.""",
 
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name:
-          """Name of the CSV file the server creates that describes the project
-          tasks as GitHub issues. You probably don't need to change this.""",
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
+          """Full URL of this server.""",
+
+        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
+          """The default point cost threshhold for buggies: you can always
+          override this when you create each race.""",
+
+        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name:
+          """Should a race be public as soon as you create it? If you choose
+          No, you'll have to remember to publish races in order for students
+          to see it.""",
+
+        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
+          """Races are grouped by league, so if you're using that mechanism you
+          can nominate the league that new races are in here. It's common to
+          run the race server without using leagues, so if you're not sure,
+          leave this blank.""",
+
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
+          """Should the webserver itself force HTTPS? This setting might not
+          be helpful if your hosting environment manages this for you (that is,
+          can be counterproductive to tell the server to force it here).
+          HTTPS is mandatory for GitHub's OAuth authentication, or if you're
+          holding any personal information on students. This setting does not
+          _implement_ HTTPS: it only forces redirection if the protocol the web
+          server sees in incoming requests is (non-secure) HTTP.""",
+
+        ConfigSettingNames.GITHUB_CLIENT_ID.name:
+          """The GitHub client ID for the GitHub app that the server uses to
+          fork the buggy editor repo into a student's own GitHub account.""",
+
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name:
+          """A string that exactly matches the client secret stored on the
+          GitHub app that the server uses tofork the buggy editor repo into
+          a student's own GitHub account.""",
 
         ConfigSettingNames.GITHUB_PAGES_URL.name:
           """Full URL to the project info pages if they are not being hosted
           on this server. Normally the project info pages *are* on the race
           server, so this should be empty.""",
 
-        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
-          """Full URL of this server.""",
+        ConfigSettingNames.INSTITUTION_FULL_NAME.name:
+          """Full name for your institution, college, or school""",
+
+        ConfigSettingNames.INSTITUTION_HOME_URL.name:
+          """Full URL for the home page of your institution: used as a link
+          on the racing server's home page.""",
+
+        ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
+          """Short name or abbreviation for your institution, college,
+          or school.""",
+
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
+          """Should usernames (which are always lower case) be displayed using
+          title case? For example, choose 'Yes' if the usernames you're using
+          are really students' names. Login is always case insensitive, so this
+          only affects how usernames are displayed, not what users need to
+          type.""",
+
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name:
+          """Typically, students are expected to submit their
+          projects as a zip file containing the buggy editor web
+          app (including a report/poster, if you've enabled it).
+          The project page will display general information about
+          those files (e.g., they should have the student's name
+          just in case your submission process doesn't capture
+          that: you end up with a lot of zip files with the same
+          name otherwise). Use this setting to display or hide
+          this general information on the "project" page.
+          """,
+
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
+          """Can users register themselves? If not, only an admin user who
+          knows the `AUTH_CODE` can register new users. Normally, the
+          staff running the buggy racing project will register users so
+          public registration should not be enabled.""",
+
+        ConfigSettingNames.PROJECT_CODE.name:
+          """If this project is known by a course or module code, use it
+          (for example, when we ran it at Royal Holloway, it was CS1999);
+          otherwise, "Buggy" works. See also `PROJECT_SLUG` which is how
+          this code may appear in filenames of any downloaded files. The
+          full name of the project is \"the [`PROJECT_CODE`] Racing Buggy
+          project\", so if you don't have or need a course code,
+          it's fine to leave it blank.""",
+
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
+          """This is the minimum phase you'd expect an inexperienced
+          programmer to have completed before running out of time. The
+          default of 3 is based on our experience of running a 6-week
+          project (several times) with students with only one term's
+          prior experience of Python, and takes into account that task
+          3-MULTI is more involved than most students realise. This
+          expectation is displayed to students (for example on the
+          task list page). Set this to zero to remove the recommendation
+          entirely.""",
+
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
+          """If students are going to develop on a remote server,
+          what is its address? This is used with their
+          organisational username (or just username, if they haven't
+          got one): for example enter `linux.example.ac.uk` so
+          student Ada can log via `ada@linux.example.ac.uk`.
+          If you're not using a remote project server, leave this
+          blank (see also `PROJECT_REMOTE_SERVER_NAME`).""",
+
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name:
+          """If students are going to develop on a remote server,
+          what is its (human) name? This is used to help students
+          identify the server they are logging into (e.g, "the
+          CompSci department's Unix server").
+          Leave this blank if your students are all working on their
+          own machines (i.e., not a single teaching server with login
+          accounts, python, and personalised HTTP ports).""",
+
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name:
+          """If you require students to include a report of how
+          they tackled the tasks, indicate that here ("report"
+          or "poster" are just different names for the same thing,
+          due to an historic anomaly). The report takes the form
+          of an additional webpage in the student's buggy editor
+          webserver.""",
+
+        ConfigSettingNames.PROJECT_SLUG.name:
+          """This is how the `PROJECT_CODE` appears — as a prefix — in any
+          filenames that are downloaded from the server. This is a kindness to
+          help disambiguate files in your Downloads folder. If you leave this blank,
+          it will default to using an automatic sluggified version of your project
+          code, if any. Note that there are some places where students can download
+          files (e.g., tabulated specification data) too, so it's not just admin
+          staff who will see it.""",
+
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name:
+          """If you require all students to submit their projects
+          on a specific deadline, set it here. This is displayed
+          prominently (if the project is enabled) on the project
+          page, but isn't currently used by the server for anything
+          else. Avoid the 00:00 as a time because it confuses
+          students (23:59 is clearer, and 16:00 healthier).
+          Leave blank if you don't want to display a deadline at all
+          (remember you can also use Announcements).""",
+
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name:
+          """Provide a link to either the web page where you'll
+          be accepting submissions (presumably zip files) or
+          else a page containing clear instructions for the
+          students to follow. The buggy race server does
+          not handle submissions itself. By default, no submission
+          information is provided (because it's very dependent
+          on each institution), which means no link is displayed:
+          so you must supply one yourself.""",
+
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
+          """It's helpful for students to have a summary of the
+          workflow process... but this often needs to be specific
+          to how you're running your project — so you can nominate
+          a URL to your own page. If the URL you specify here doesn't
+          start with `http` (i.e., it's not a fully-qualified URL),
+          it will default to `project/workflow` on this server. Leave
+          this blank if you don't want to display a workflow page.""",
+
+        ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
+          """The authorisation code is needed to make any changes to user data,
+          including registering students. If `IS_PUBLIC_REGISTRATION_ALLOWED`
+          is 'Yes' then anyone can register a single user (not recommended).""",
+
+        ConfigSettingNames.SECRET_KEY.name:
+          """A secret used by the webserver in cookies, etc. This should be unique
+          for your server: the default value was randomised on installation,
+          so you usually don't need to change it. Note that changing it will
+          almost certainly break existing sessions.""",
 
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name:
           """Path to the project information pages: see `GITHUB_PAGES_URL`:
           it's unlikely that you'll need to change this unless you've explictly
-          changed the way project info is hosted.
-          """,
+          changed the way project info is hosted.""",
 
         ConfigSettingNames.SOCIAL_0_NAME.name:
           """Name (shown on button)""",
@@ -427,58 +552,10 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
 
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
-          """The authorisation code is needed to make any changes to user data,
-          including registering students. If `IS_PUBLIC_REGISTRATION_ALLOWED`
-          is 'Yes' then anyone can register a single user (not recommended).""",
-
-        ConfigSettingNames.ADMIN_USERNAMES.name:
-          """Comma separated list of admin user names. You can nominate usernames
-          here before they have been registered. Usernames are lowercase.
-          If you remove (or change) a username in this list, you're effectively
-          revoking admin access, so be careful before changing anything.""",
-
-        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
-          """Races are grouped by league, so if you're using that mechanism you
-          can nominate the league that new races are in here. It's common to
-          run the race server without using leagues, so if you're not sure,
-          leave this blank.""",
-
-        ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
-          """The default point cost threshhold for buggies: you can always
-          override this when you create each race.""",
-
-        ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name:
-          """Should a race be public as soon as you create it? If you choose
-          No, you'll have to remember to publish races in order for students
-          to see it.""",
-
-        ConfigSettingNames.GITHUB_CLIENT_ID.name:
-          """The GitHub client ID for the GitHub app that the server uses to
-          fork the buggy editor repo into a student's own GitHub account.""",
-
-        ConfigSettingNames.GITHUB_CLIENT_SECRET.name:
-          """A string that exactly matches the client secret stored on the
-          GitHub app that the server uses tofork the buggy editor repo into
-          a student's own GitHub account.""",
-
-        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
-          """Should usernames (which are always lower case) be displayed using
-          title case? For example, choose 'Yes' if the usernames you're using
-          are really students' names. Login is always case insensitive, so this
-          only affects how usernames are displayed, not what users need to
-          type.""",
-
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
           you don't need this field unless it's a useful way of identifying
           a student.""",
-
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
-          """Do users have a username or account that's specific to your
-          institution? You might not need this, or you might already be using
-          it as the username — in which case choose 'No'.
-          """,
 
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name:
           """Do users need to have a first name? You might be using each student's
@@ -488,145 +565,26 @@ class ConfigSettings:
           """Do users need to have a last name? If you can already identify your
           students from the other fields, you might not need this.""",
 
-        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
-          """Can users register themselves? If not, only an admin user who
-          knows the `AUTH_CODE` can register new users. Normally, the
-          staff running the buggy racing project will register users so
-          public registration should not be enabled.""",
-
-        ConfigSettingNames.PROJECT_REPORT_TYPE.name:
-          """If you require students to include a report of how
-          they tackled the tasks, indicate that here ("report"
-          or "poster" are just different names for the same thing,
-          due to an historic anomaly). The report takes the form
-          of an additional webpage in the student's buggy editor
-          webserver.""",
-        
-        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name:
-          """If you require all students to submit their projects
-          on a specific deadline, set it here. This is displayed
-          prominently (if the project is enabled) on the project
-          page, but isn't currently used by the server for anything
-          else. Avoid the 00:00 as a time because it confuses
-          students (23:59 is clearer, and 16:00 healthier).
-          Leave blank if you don't want to display a deadline at all
-          (remember you can also use Announcements).
-          """,
-
-        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name:
-          """Provide a link to either the web page where you'll
-          be accepting submissions (presumably zip files) or
-          else a page containing clear instructions for the
-          students to follow. The buggy race server does
-          not handle submissions itself. By default, no submission
-          information is provided (because it's very dependent
-          on each institution), which means no link is displayed:
-          so you must supply one yourself.
-          """,
-
-        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name:
-          """Typically, students are expected to submit their
-          projects as a zip file containing the buggy editor web
-          app (including a report/poster, if you've enabled it).
-          The project page will display general information about
-          those files (e.g., they should have the student's name
-          just in case your submission process doesn't capture
-          that: you end up with a lot of zip files with the same
-          name otherwise). Use this setting to display or hide
-          this general information on the "project" page.
-          """,
-
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name:
-          """If students are going to develop on a remote server,
-          what is its (human) name? This is used to help students
-          identify the server they are logging into (e.g, "the
-          CompSci department's Unix server").
-          Leave this blank if your students are all working on their
-          own machines (i.e., not a single teaching server with login
-          accounts, python, and personalised HTTP ports).
-          """,
-
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
-          """If students are going to develop on a remote server,
-          what is its address? This is used with their
-          organisational username (or just username, if they haven't
-          got one): for example enter `linux.example.ac.uk` so
-          student Ada can log via `ada@linux.example.ac.uk`.
-          If you're not using a remote project server, leave this
-          blank (see also `PROJECT_REMOTE_SERVER_NAME`).
-          """,
-
-        ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
-          """It's helpful for students to have a summary of the
-          workflow process... but this often needs to be specific
-          to how you're running your project — so you can nominate
-          a URL to your own page. If the URL you specify here doesn't
-          start with `http` (i.e., it's not a fully-qualified URL),
-          it will default to `project/workflow` on this server. Leave
-          this blank if you don't want to display a workflow page.
-          """,
-
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
-          """This is the minimum phase you'd expect an inexperienced
-          programmer to have completed before running out of time. The
-          default of 3 is based on our experience of running a 6-week
-          project (several times) with students with only one term's
-          prior experience of Python, and takes into account that task
-          3-MULTI is more involved than most students realise. This
-          expectation is displayed to students (for example on the
-          task list page). Set this to zero to remove the recommendation
-          entirely.
-          """,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
+          """Do users have a username or account that's specific to your
+          institution? You might not need this, or you might already be using
+          it as the username — in which case choose 'No'.""",
 
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
       ConfigGroupNames.AUTH.name:
-        """
-        You must complete the setup. It takes around 5 minutes, and
+        """You must complete the setup. It takes around 5 minutes, and
         you can leave most settings to be default (and you can change
-        most things later, if you need to).
-        """,
-      ConfigGroupNames.ORG.name:
-        """
-        Provide general details about your institution/organisation.
-        """,
-      ConfigGroupNames.USERS.name:
-        """
-        Every student will need a username. These settings define what
-        fields you want to store IN ADDITION to that username. You do
-        not need to have any additional fields (we recommend you only
-        add them if you really need to, for example, if the usernames
-        aren't already the students' first names, maybe add a first
-        name so you can recognise who they are). Only admin users see
-        these additional fields — they aren't made public.
-        """,
-      ConfigGroupNames.SERVER.name:
-        """
-        These settings control the behaviour of the server. The
-        BUGGY_RACE_SERVER_URL setting is important; the others can
-        usually be left to their default values.
-        """,
-      ConfigGroupNames.RACES.name:
-        """
-        Race settings can all be left to default (you can change them
-        later if you need to).
-        """,
-      ConfigGroupNames.SOCIAL.name:
-        """
-        These are used to add links to your institution's social or
-        educational accounts. If you run support sites like Moodle
-        or Discord or Teams for this project, add them here.
-        """,
+        most things later, if you need to).""",
       ConfigGroupNames.GITHUB.name:
-        """
-        Setup the GitHub details here. If you're injecting issues
+        """Setup the GitHub details here. If you're injecting issues
         into student's own repos, you must provide valid GitHub
-        CLIENT details which may be specific to your installation.
-        """,
+        CLIENT details which may be specific to your installation.""",
+      ConfigGroupNames.ORG.name:
+        """Provide general details about your institution/organisation.""",
       ConfigGroupNames.PROJECT.name:
-        """
-        These settings control aspects of the what the students
+        """These settings control aspects of the what the students
         need to do (for example: are they only coding, or do you
         want them to add a report/poster page to their buggy editor
         too?). If you or your department is running a remote server
@@ -634,8 +592,26 @@ class ConfigSettings:
         details here (there's extra set-up required on that remote
         server too — see the docs). It's fine to run the project
         without a remote server: it just means students work on
-        individial machines.
-        """
+        individial machines.""",
+      ConfigGroupNames.RACES.name:
+        """Race settings can all be left to default (you can change them
+        later if you need to).""",
+      ConfigGroupNames.SERVER.name:
+        """These settings control the behaviour of the server. The
+        BUGGY_RACE_SERVER_URL setting is important; the others can
+        usually be left to their default values.""",
+      ConfigGroupNames.SOCIAL.name:
+        """These are used to add links to your institution's social or
+        educational accounts. If you run support sites like Moodle
+        or Discord or Teams for this project, add them here.""",
+      ConfigGroupNames.USERS.name:
+        """Every student will need a username. These settings define what
+        fields you want to store IN ADDITION to that username. You do
+        not need to have any additional fields (we recommend you only
+        add them if you really need to, for example, if the usernames
+        aren't already the students' first names, maybe add a first
+        name so you can recognise who they are). Only admin users see
+        these additional fields — they aren't made public.""",
     }
 
     @staticmethod
@@ -680,10 +656,18 @@ class ConfigSettings:
     @staticmethod
     def users_additional_fieldnames_is_enabled_dict(app):
         return {
-            "email": bool(app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)),
-            "org_username": bool(app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)),
-            "first_name": bool(app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)),
-            "last_name": bool(app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)),
+            "email": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)
+            ),
+            "org_username": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)
+            ),
+            "first_name": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)
+            ),
+            "last_name": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)
+            ),
         }
 
     @staticmethod
@@ -768,9 +752,9 @@ class ConfigFromEnv():
     # The TECH_NOTES_CONFIG_* settings are for the _file system_ (not URLs)
     # Changing these is unexpected but they're presented here to facilitate
     # moving tech notes outwith the version-controlled source.
-    TECH_NOTES_CONFIG_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="tech_notes")
     TECH_NOTES_CONFIG_FILE_NAME=env.str("TECH_NOTES_CONFIG_FILE_NAME", default="pelicanconf.py")
     TECH_NOTES_CONFIG_LIVE_NAME=env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
+    TECH_NOTES_CONFIG_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="tech_notes")
     TECH_NOTES_CONFIG_PUBLISH_NAME=env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
     TECH_NOTES_CONTENT_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="content")
 

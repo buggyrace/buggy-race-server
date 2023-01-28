@@ -133,8 +133,14 @@ textarea {
   background:#eee6d6;
 }
 
+.buggy-project .task h3 {
+  display: flex;
+  align-items: flex-start;
+}
+
 .buggy-project .task h3 a{
-  float:right;
+  display: block;
+  white-space:nowrap;
   color:#fff;
   padding:0.25em 0.5em;
   border-radius:0.2em;
@@ -142,7 +148,7 @@ textarea {
   text-decoration: none;
   background-color:#000;
   box-shadow: 0.2em 0.2em 0.4em #000;
-  margin: -1em 0em 0.5em 0.5em;
+  margin: -1em 1em 0.2em 0em;
 }
 .buggy-project .task h3 a::before{
   content:"#";
@@ -152,6 +158,19 @@ textarea {
 .buggy-project .task a:hover{
   background-color:#666;
   color:white;
+}
+/* special case: for very narrow screens:
+   task description drops below the (never
+   text-wrapped) task anchor
+ */
+@media (max-width: 30em) {
+  .buggy-project .task h3 {
+    flex-direction: column;
+    padding-left:1em;
+  }
+  .buggy-project .task h3 a{
+    margin-left:-0.5em;
+  }
 }
 
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}

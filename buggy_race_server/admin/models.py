@@ -91,3 +91,25 @@ class Announcement(SurrogatePK, Model):
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<Announcement({self.id!r} text:{self.text[0:16]}...)>"
+
+
+class Task(SurrogatePK, Model):
+    """Task for students to complete."""
+
+    def __str__(self):
+        return f"{self.phase}-{self.name}"
+
+    __tablename__ = "tasks"
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    modified_at = Column(db.DateTime, nullable=True)
+    phase = Column(db.Integer, nullable=False)
+    name = Column(db.String(16), unique=False, nullable=False)
+    problem_text = Column(db.Text(), unique=False, nullable=False, default="")
+    solution_text = Column(db.Text(), unique=False, nullable=False, default="")
+    hints_text = Column(db.Text(), unique=False, nullable=False, default="")
+    is_enabled = db.Column(db.Boolean(), nullable=False, default=True)
+
+    def __init__(self, **kwargs):
+        """Create instance."""
+        db.Model.__init__(self, **kwargs)

@@ -7,7 +7,7 @@ from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings
-from buggy_race_server.admin.models import Announcement, Setting
+from buggy_race_server.admin.models import Announcement, Setting, Task
 from buggy_race_server.extensions import db
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime
@@ -223,3 +223,31 @@ def publish_tech_notes(app):
       name=ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name,
       value=datetime.now().strftime("%Y-%m-%d %H:%M")
     )
+
+def load_tasks_into_db(app, task_source_filename, want_overwrite=False):
+    """Reads tasks from markdown file, and inserts into database.
+    Database task table must be empty.
+    App needed to here to update config record of tasks published (?)"""
+    if Task.query.count():
+        if want_overwrite:
+            num_rows_deleted = db.session.query(Task).delete()
+            db.session.commit()
+        else:
+            raise ValidationError("can't generate tasks must delete all tasks first")
+    task_file_reader = open(task_source_filename)
+    lines = task_file_reader.readlines()
+    task_file_reader.close()
+    new_tasks = []
+    for i in range(4):
+      new_tasks.append(
+        {
+          "name": f"TEST{i}",
+          "phase": 0,
+          "problem_text": "Problem: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "solution_text": "Solution: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "hints_text": "Hints: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        }
+      )
+    db.session.execute(insert(Task.__table__), new_tasks)
+    db.session.commit()
+    return len(new_tasks)

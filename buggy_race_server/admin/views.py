@@ -38,7 +38,7 @@ from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf
 from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import publish_tech_notes
+from buggy_race_server.utils import publish_tech_notes, load_tasks_into_db
 from buggy_race_server.utils import (
     flash_errors,
     load_settings_from_db,
@@ -778,3 +778,17 @@ def tech_notes_admin():
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
 
   )
+
+@blueprint.route("/tasks", strict_slashes=False, methods=["GET"])
+@login_required
+def tasks_admin():
+    try:
+        load_tasks_into_db(
+          current_app,
+          "project/tasks.md", # TODO explicit path,
+          want_overwrite=True, # TODO require confirmation in form
+        )
+        flash("FIXME did task test OK", "success")
+    except Exception as e:
+        flash(f"FIXME task error: {e}", "danger")
+    return redirect( url_for('admin.admin'))

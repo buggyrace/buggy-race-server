@@ -5,6 +5,14 @@
   <div class="row">
     <h1 class="col">Configuration settings</h1>
   </div>
+  <div class="row">
+    <div class="col">
+      <p class="btn-collection">
+        <a class="btn {% if config['TECH_NOTES_GENERATED_DATETIME'] %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.tasks_admin')}}">Tasks &rtri;</a>
+      </p>
+    </div>
+  </div>
   <div class="row js-only" id="show-settings-btns">
     <div class="col">
       <p class="btn-collection">

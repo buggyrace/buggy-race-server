@@ -7,8 +7,11 @@
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('race.list_races')}}">Races &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_announcements')}}">Announce &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.api_keys')}}">API keys &rtri;</a>
-      <a class="btn {% if config['TECH_NOTES_GENERATED_DATETIME'] %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.settings')}}">Config &rtri;</a>
+      {% if not config['TECH_NOTES_GENERATED_DATETIME'] %}
+        <a class="btn btn-outline-danger btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
+      {% endif %}
+      {# TODO: add conditional Task button too #}
     </p>
   </div>
 </div>

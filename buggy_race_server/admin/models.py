@@ -105,6 +105,7 @@ class Task(SurrogatePK, Model):
     modified_at = Column(db.DateTime, nullable=True)
     phase = Column(db.Integer, nullable=False)
     name = Column(db.String(16), unique=False, nullable=False)
+    title = Column(db.String(80), unique=False, nullable=False)
     problem_text = Column(db.Text(), unique=False, nullable=False, default="")
     solution_text = Column(db.Text(), unique=False, nullable=False, default="")
     hints_text = Column(db.Text(), unique=False, nullable=False, default="")

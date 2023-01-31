@@ -14,7 +14,13 @@ from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
-from buggy_race_server.utils import flash_errors, active_user_required, warn_if_insecure, flash_suggest_if_not_yet_githubbed, get_prefixed_filename
+from buggy_race_server.utils import (
+    active_user_required,
+    flash_errors,
+    flash_suggest_if_not_yet_githubbed,
+    get_download_filename,
+    warn_if_insecure,
+)
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
@@ -190,7 +196,7 @@ def vscode_workspace():
     github_repo = current_user.course_repository
     if not github_repo:
         return "Missing GitHub repo (have you forked the repo yet?): cannot supply VS workspace file", 400
-    filename = get_prefixed_filename(current_app, "buggy-editor.code-workspace")
+    filename = get_download_filename("buggy-editor.code-workspace")
     project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()
     response = Response(
         render_template(

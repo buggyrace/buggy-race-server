@@ -103,6 +103,8 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
+    TASKS_LOADED_DATETIME = auto()
+    TASK_URLS_USE_ANCHORS = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
@@ -197,6 +199,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
+        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
       }
     }
     DEFAULTS = {
@@ -244,6 +247,8 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
+        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
@@ -300,6 +305,8 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
@@ -359,7 +366,7 @@ class ConfigSettings:
 
         ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name:
           """Should a race be public as soon as you create it? If you choose
-          No, you'll have to remember to publish races in order for students
+          `No`, you'll have to remember to publish races in order for students
           to see it.""",
 
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
@@ -392,7 +399,7 @@ class ConfigSettings:
           server, so this should be empty.""",
 
         ConfigSettingNames.INSTITUTION_FULL_NAME.name:
-          """Full name for your institution, college, or school""",
+          """Full name for your institution, college, or school.""",
 
         ConfigSettingNames.INSTITUTION_HOME_URL.name:
           """Full URL for the home page of your institution: used as a link
@@ -404,7 +411,7 @@ class ConfigSettings:
 
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
-          title case? For example, choose 'Yes' if the usernames you're using
+          title case? For example, choose `Yes` if the usernames you're using
           are really students' names. Login is always case insensitive, so this
           only affects how usernames are displayed, not what users need to
           type.""",
@@ -425,42 +432,41 @@ class ConfigSettings:
           """Can users register themselves? If not, only an admin user who
           knows the `AUTH_CODE` can register new users. Normally, the
           staff running the buggy racing project will register users so
-          public registration should not be enabled.""",
+          we strongly recommend public registration is not enabled.""",
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
-          (for example, when we ran it at Royal Holloway, it was CS1999);
-          otherwise, "Buggy" works. See also `PROJECT_SLUG` which is how
-          this code may appear in filenames of any downloaded files. The
-          full name of the project is \"the [`PROJECT_CODE`] Racing Buggy
-          project\", so if you don't have or need a course code,
-          it's fine to leave it blank.""",
+          (for example, when we ran it at Royal Holloway, it was CS1999).
+          See also `PROJECT_SLUG` which is how this code may appear in
+          filenames of any downloaded files. The full name of the project
+          is \"the `PROJECT_CODE` Racing Buggy project\", so if you don't
+          have or need a course code, it's fine to leave it blank.""",
 
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
           """This is the minimum phase you'd expect an inexperienced
-          programmer to have completed before running out of time. The
-          default of 3 is based on our experience of running a 6-week
-          project (several times) with students with only one term's
-          prior experience of Python, and takes into account that task
-          3-MULTI is more involved than most students realise. This
-          expectation is displayed to students (for example on the
-          task list page). Set this to zero to remove the recommendation
-          entirely.""",
+          programmer who's fully engaged in the project to have completed
+          before running out of time. The default of 3 is based on our
+          experience of running a 6-week project (several times) with
+          students with only one term's prior experience of Python, and
+          takes into account that task 3-MULTI is (deliberately) more
+          involved than most students realise. This expectation is displayed
+          to students (for example on the task list page). If you don't
+          want this, set it to zero to remove the recommendation entirely.""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
           """If students are going to develop on a remote server,
           what is its address? This is used with their
           organisational username (or just username, if they haven't
           got one): for example enter `linux.example.ac.uk` so
-          student Ada can log via `ada@linux.example.ac.uk`.
+          student Ada can log in via `ada@linux.example.ac.uk`.
           If you're not using a remote project server, leave this
           blank (see also `PROJECT_REMOTE_SERVER_NAME`).""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name:
           """If students are going to develop on a remote server,
-          what is its (human) name? This is used to help students
-          identify the server they are logging into (e.g, "the
-          CompSci department's Unix server").
+          what is its (human-facing) name? This is used to help
+          students identify the server they are logging into (e.g,
+          "the CompSci department's Unix server").
           Leave this blank if your students are all working on their
           own machines (i.e., not a single teaching server with login
           accounts, python, and personalised HTTP ports).""",
@@ -471,7 +477,9 @@ class ConfigSettings:
           or "poster" are just different names for the same thing,
           due to an historic anomaly). The report takes the form
           of an additional webpage in the student's buggy editor
-          webserver.""",
+          webserver. If you choose `No report`, all mentions will
+          be removed: see also the `IS_SAVING_STUDENT_TASK_NOTES`
+          setting. """,
 
         ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears — as a prefix — in any
@@ -487,8 +495,8 @@ class ConfigSettings:
           on a specific deadline, set it here. This is displayed
           prominently (if the project is enabled) on the project
           page, but isn't currently used by the server for anything
-          else. Avoid the 00:00 as a time because it confuses
-          students (23:59 is clearer, and 16:00 healthier).
+          else. Avoid using 00:00 as a time because it confuses
+          students — 23:59 is clearer (and 16:00 is healthier).
           Leave blank if you don't want to display a deadline at all
           (remember you can also use Announcements).""",
 
@@ -512,15 +520,16 @@ class ConfigSettings:
           this blank if you don't want to display a workflow page.""",
 
         ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
-          """The authorisation code is needed to make any changes to user data,
-          including registering students. If `IS_PUBLIC_REGISTRATION_ALLOWED`
-          is 'Yes' then anyone can register a single user (not recommended).""",
+          """The authorisation code is needed to make any changes to config
+          or other-user data, including registering students.
+          See also `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
 
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique
-          for your server: the default value was randomised on installation,
+          for your server: the default value shown here was randomised on installation,
           so you usually don't need to change it. Note that changing it will
-          almost certainly break existing sessions.""",
+          almost certainly break existing sessions. For cleanest results, reboot
+          the server as soon as you've changed it).""",
 
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name:
           """Path to the project information pages: see `GITHUB_PAGES_URL`:
@@ -552,6 +561,14 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
 
+        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name:
+          """By default, task URLs go direct to the server
+          (e.g., `/project/tasks/3-multi`) and then redirect
+          to an anchor within the page showing all tasks
+          (e.g., `/project/tasks#task-3-multi`). This works fine
+          on this server, and makes "nicer" URLs, but if you
+          don't like this behaviour, switch it off.""",
+
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
           you don't need this field unless it's a useful way of identifying
@@ -568,7 +585,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
           """Do users have a username or account that's specific to your
           institution? You might not need this, or you might already be using
-          it as the username — in which case choose 'No'.""",
+          it as the username — in which case choose `No`.""",
 
     }
 

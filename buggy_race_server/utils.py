@@ -2,6 +2,7 @@
 """Helper utilities and decorators."""
 import os # for path
 import re
+import csv
 from flask import flash, request, redirect, Markup, url_for, current_app
 from wtforms import ValidationError
 from functools import wraps
@@ -136,16 +137,50 @@ def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
   return name.replace("_", " ").title()
 
-def get_prefixed_filename(app, filename):
+def get_download_filename(filename, want_datestamp=False):
   """ For download files, returns the filename with a slug/project prefix, if configured. """
-  slug = app.config[ConfigSettingNames.PROJECT_SLUG.name]
+  if want_datestamp:
+    datestamp = datetime.now().strftime('%Y-%m-%d')
+    parts = filename.rsplit(".", 1) # (filename, extension)
+    if len(parts) == 2:
+      filename = f"{parts[0]}-{datestamp}.{parts[1]}"
+    else: # there was no extension (unexpected)
+      filename = f"{filename}-{datestamp}"
+  slug = current_app.config[ConfigSettingNames.PROJECT_SLUG.name]
   if not slug:
-    slug = re.sub(r"\W+", "-", app.config[ConfigSettingNames.PROJECT_CODE.name].lower().strip())
+    code = current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+    slug = re.sub(r"\W+", "-", code.lower().strip())
     slug = re.sub(r"(^-+|-{2,}|-$)", "", slug)
   if slug:
     return f"{slug}-{filename}"
   else:
     return filename
+
+def get_tasks_as_issues_csv(tasks):
+
+    class CsvString(object):
+      def __init__(self):
+        self.rows = []
+      def write(self, row):
+          self.rows.append(row)
+      def __str__(self):
+        return "\n".join(self.rows)
+
+    issues_str = CsvString()
+    sep = "\n\n"
+    issue_writer = csv.writer(issues_str)
+    for task in tasks:
+      issue_writer.writerow(
+        [
+          f"{task.fullname} {task.title}",
+          sep.join([
+            task.problem_text,
+            task.solution_text,
+            f"[{task.fullname}]({task.get_url(current_app.config)})"
+          ]).replace("\n", "\\n")
+        ]
+      )
+    return str(issues_str)
 
 def publish_tech_notes(app):
     """ Runs pelican to generate the tech notes.
@@ -224,30 +259,122 @@ def publish_tech_notes(app):
       value=datetime.now().strftime("%Y-%m-%d %H:%M")
     )
 
-def load_tasks_into_db(app, task_source_filename, want_overwrite=False):
+def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     """Reads tasks from markdown file, and inserts into database.
     Database task table must be empty.
     App needed to here to update config record of tasks published (?)"""
+    new_tasks = parse_task_markdown(task_source_filename)
     if Task.query.count():
         if want_overwrite:
-            num_rows_deleted = db.session.query(Task).delete()
+            db.session.query(Task).delete()
             db.session.commit()
         else:
-            raise ValidationError("can't generate tasks must delete all tasks first")
-    task_file_reader = open(task_source_filename)
-    lines = task_file_reader.readlines()
-    task_file_reader.close()
-    new_tasks = []
-    for i in range(4):
-      new_tasks.append(
-        {
-          "name": f"TEST{i}",
-          "phase": 0,
-          "problem_text": "Problem: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "solution_text": "Solution: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          "hints_text": "Hints: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        }
-      )
+            raise ValidationError(
+              "Database is not empty: missing \"want_overwrite\" argument "
+              f"prevented loading any of the {len(new_tasks)} new ones")
     db.session.execute(insert(Task.__table__), new_tasks)
     db.session.commit()
     return len(new_tasks)
+
+def parse_task_markdown(task_source_filename):
+    print("FIXME parse_task_markdown", flush=True)
+
+    SECTION_NAMES = [
+      name for name in Task.__table__.columns._data.keys()
+      if name.endswith("_text")
+    ]
+    H1_PHASE_NAME_RE = re.compile(r"^#\s+(.*)")
+    PHASE_NAME_RE = re.compile(r"(\d)-(\w+)")
+    H2_TITLE_RE = re.compile(r"^##\s+(.*)")
+    H3_TEXT_SECTION_RE = r"^###\s+(\w+)"
+    _LINE_NO = "_line_no"
+
+    print(f"FIXME OK open(task_source_filename) {task_source_filename}", flush=True)
+    task_file_reader = open(task_source_filename)
+    markdown_lines = task_file_reader.readlines()
+    task_file_reader.close()
+    line_no = 0
+
+    print("FIXME OK 1235", flush=True)
+
+    def make_section_name(string):
+        section_name = f"{string.lower()}_text"
+        if section_name not in SECTION_NAMES:
+            raise ValueError(
+              f"bad section name \"{string}\" found in task source file at line {line_no}"
+            )
+        print(f"-----> {line_no}:   {section_name}")
+        return section_name
+
+    def get_next_line():
+      nonlocal line_no
+      if line_no >= len(markdown_lines):
+        return None
+      else:
+        line = markdown_lines[line_no]
+        line_no += 1
+        return line
+
+    def validated_task(task):
+        phase =  task.get('phase')
+        name = task.get('name')
+        if not (phase and name):
+            loc = f"at line {task[_LINE_NO]}" if task.get(_LINE_NO) else f"before line {line_no}"
+            raise ValueError(f"Task is missing phase and/or name {loc}")
+        for section_name in SECTION_NAMES:
+            if task.get(section_name) is None:
+              raise ValueError(f"Task {phase}-{name} has no \"{section_name}\"")
+            else:
+              task[section_name] = task[section_name].strip()
+        if _LINE_NO in task:
+          del task[_LINE_NO]
+        return task
+
+    sort_position = 1000
+    tasks = []
+    task = {}
+    print("FIXME 1234", flush=True)
+    line = get_next_line()
+    while line:
+        h1 = re.findall(H1_PHASE_NAME_RE, line)
+        h2 = re.findall(H2_TITLE_RE, line)
+        h3 = re.findall(H3_TEXT_SECTION_RE, line)
+        if len(h1)==1:
+            if matched := re.match(PHASE_NAME_RE, h1[0]):
+                (task['phase'], task['name']) = matched.groups()
+            task[_LINE_NO] = line_no
+            task["sort_position"] = sort_position
+            sort_position += 100
+            print(f"-----> {line_no}: {task['phase']}-{task['name']} sort:{sort_position}", flush=True)
+        elif len(h2)==1:
+            task['title'] = h2[0].strip()
+            print(f"-----> {line_no}:     {task['title']}", flush=True)
+        elif len(h3)==1:
+            section_name = make_section_name(h3[0])
+            section_lines = []
+            end_of_task = False
+            line = get_next_line()
+            while line and not end_of_task:
+                h3 = re.findall(H3_TEXT_SECTION_RE, line)
+                if not line.startswith("#"):
+                    section_lines.append(line)
+                    line = get_next_line()
+                else: # end of a section
+                    task[section_name] = "".join(section_lines)
+                    if len(h3)==1: # new section
+                        section_name = make_section_name(h3[0])
+                        section_lines = []
+                        line = get_next_line()
+                    else:
+                        end_of_task = True
+            if not end_of_task: # was end of file: keep last section
+                task[section_name] = "".join(section_lines)
+            tasks.append(validated_task(task))
+            task = {}
+            continue # already read
+        line = get_next_line()
+    print("FIXME done", flush=True)
+    if not tasks:
+        raise ValueError("No tasks found")
+    return tasks
+

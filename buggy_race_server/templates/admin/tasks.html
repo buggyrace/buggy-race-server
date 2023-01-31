@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5 col">
+      Tasks admin
+    </h1>
+  </div>
+  <div class="row my-3">
+    <div class="col">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th colspan="2">Task</th>
+            <th>Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+            <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %}>
+              <td>
+                <a href="" class="btn btn-outline-secondary btn-admin">edit</a>
+              </td>
+              <td>
+                {% if task.is_enabled %}
+                  <a href="{{ url_for('public.serve_project_page', page='tasks') }}#{{ task.anchor }}"
+                  class="btn btn-outline-secondary">{{ task.fullname }}&nbsp;&rtri;</a>
+                {% else %}
+                <span class="btn btn-outline-secondary disabled">{{ task.fullname }}&nbsp;&times;</span>
+              {% endif %}
+              </td>
+              <td>
+                 {{ task.title }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h2>Generating tasks</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        Generating the tasks <strong>deletes all existing tasks</strong>
+        from the database (including any edits you may have made), and
+        replaces them with the new ones.
+        Only do this if you are sure you want to: really, it only makes
+        sense to do this <strong>before the project has started</strong>.
+        After that, if you need to change tasks, you should edit them
+        (above, on this page) rather than generating them.
+      </p>
+      <p>
+        When you first set the server up, it should generate the  
+        default tasks for you, so you only need to do this if you
+        want to override that behaviour, or reset any (all) edits.
+      </p>
+      <p>
+        If you want to load your own customised tasks, download
+        the default tasks and edit them (look inside that file
+        to see the markdown syntax: <code>#</code> (<code>h1</code>)
+        for phase-name, <code>##</code> for title, and so on). Then
+        upload your edited file to load the tasks. If you've edited
+        any of the current tasks, the markdown file will not be
+        the same as the default file.
+      </p>
+      </p>
+      <p class="btn-collection my-4">
+        <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
+        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>current</strong> tasks as Markdown&nbsp;&dtri;</a>
+        <a href="{{ url_for('admin.download_tasks', type='default', format='md') }}"
+        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>default</strong> tasks as Markdown&nbsp;&dtri;</a>
+      </p>
+      <p>
+        <em>Current</em> tasks include any edits you have made to the tasks
+        since installation. <em>Default</em> tasks are the "factory reset"
+        version.
+      </p>
+    </div>
+    <div class="col-md-6">
+      <div class="alert-danger p-4">
+        {% if tasks %}
+          <div class="border border-danger p-3">
+            This will delete all existing tasks!
+          </div>
+        {% endif %}
+        <p class="my-3">
+          Tasks loaded into&nbsp;database: {{ tasks_loaded_at or "never/unknown" }}
+        </p>
+        <form method="POST" action="{{ url_for('admin.tasks_admin') }}" role="form">
+          {{ form.csrf_token }}
+          <p class="my-3">
+            <input type="submit" value="Load new tasks into database" class="btn btn-danger"/>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row my-4">
+    <div class="col">
+      <h2>Task summary CSV (for issues) </h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        The CSV file contains a comma-separated <strong>summary</strong>
+        of the tasks which we use for injecting issues into students' GitHub
+        repos — but it might be useful for other things too, so you can
+        download it here.
+      </p> 
+      <p class="btn-collection my-4">
+        <a href="{{ url_for('admin.download_tasks', type='current', format='csv') }}"
+        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>current</strong> tasks as CSV&nbsp;&dtri;</a>
+      </p>
+      <p>
+        Check that the config settings it uses (shown below) are correct,
+        because they are used to generate the links within the CSV. Be
+        aware that these links might break if you change tasks after you've downloaded
+        it. You should do all your task-editing <em>before</em> downloading or
+        sharing any links to them.
+      </p>
+    </div>
+  </div>
+  <div class="row my-4">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Setting</th>
+            <th>Current value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for setting_name in key_settings %}
+            <tr>
+              <td><code>{{ setting_name }}</code></td>
+              <td><code>{{ config[setting_name] }}</code></td>
+            </tr>
+          {% endfor %}
+          {% if example_task %}
+            <tr>
+              <td>Example link<br>(check it works!)</td>
+              <td>
+                <code><a href="{{ example_task_url }}">{{ example_task_url }}</a></code>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

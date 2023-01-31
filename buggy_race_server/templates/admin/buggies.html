@@ -3,13 +3,18 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>Buggies</h1>
+    <h1 class="col">Buggies</h1>
   </div>
   <div class="row">
-    <p>
-      <a class="btn btn-outline-secondary btn-admin"
-       href="{{ url_for('admin.list_buggies', data_format='csv') }}">download buggies CSV &dtri;</a>
-    </p>
+    <div class="col">
+      <p>
+        Choose +date if you want the download filename to include today's date.
+      </p>
+      <p class="btn-collection">
+        <a class="btn btn-outline-secondary btn-admin"
+         href="{{ url_for('admin.list_buggies', data_format='csv') }}">Download buggies CSV&nbsp;&dtri;</a>
+      </p>  
+    </div>
   </div>
   <div class="row">
     <p>

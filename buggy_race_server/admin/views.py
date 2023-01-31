@@ -16,6 +16,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    Response
 )
 from flask_login import current_user, login_required, login_user
 from sqlalchemy import bindparam, insert, update
@@ -31,18 +32,21 @@ from buggy_race_server.admin.forms import (
     SetupSettingForm,
     SetupAuthForm,
 )
-from buggy_race_server.admin.models import Announcement, Setting, SocialSetting
+from buggy_race_server.admin.models import Announcement, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf
 from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import publish_tech_notes, load_tasks_into_db
 from buggy_race_server.utils import (
     flash_errors,
+    get_download_filename,
+    get_tasks_as_issues_csv,
     load_settings_from_db,
+    load_tasks_into_db,
     prettify_form_field_name,
+    publish_tech_notes,
     refresh_global_announcements,
     set_and_save_config_setting,
 )
@@ -188,13 +192,12 @@ def setup():
       ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
-    flash("Setup complete: you can now register users", "success")
+    flash("Setup complete: you can now generate tech notes, edit tasks, and register users", "success")
     return redirect( url_for('public.home'))
   if setup_status == 1:
     form = SetupAuthForm(request.form)
   else:
     # after initial setup (auth), user must be logged in
-    # TODO: so need to provide access to login in case the session gets broken
     if current_user.is_anonymous or not current_user.is_buggy_admin:
       flash("Setup is not complete: you must log in as an admin user to continue", "warning")
       return redirect( url_for('public.login'))
@@ -210,7 +213,7 @@ def setup():
           new_admin_username = form.admin_username.data.strip().lower()
           if admin_user := User.query.filter_by(username=new_admin_username).first():
               admin_user.set_password(form.admin_password.data)
-              flash(f"updated existing admin user {new_admin_username}'s password", "warning")
+              flash(f"Updated existing admin user {new_admin_username}'s password", "warning")
           else:
             admin_user = User.create(
               username=new_admin_username,
@@ -234,7 +237,7 @@ def setup():
           login_user(admin_user)
           admin_user.logged_in_at = datetime.now()
           admin_user.save()
-          flash(f"OK, you're logged in with admin username {new_admin_username}.", "success")
+          flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
         else: # handle a regular settings update, which may also be part of setup
           if _update_settings_in_db(form):
             setup_status += 1
@@ -272,8 +275,6 @@ def setup():
 @blueprint.route("/")
 @login_required
 def admin():
-    # for now the admin home page lists the students on the basis it's the
-    # most useful day-to-day admin page... might change in future
     if not current_user.is_buggy_admin:
       abort(403)
     today = datetime.now().date()
@@ -331,9 +332,9 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
         cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
         for s in students:
           cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
+        filename = get_download_filename("users.csv", want_datestamp=True)
         output = make_response(si.getvalue())
-        yyyy_mm_dd_today = datetime.now().strftime("%Y-%m-%d")
-        output.headers["Content-Disposition"] = f"attachment; filename=buggyrace-users-{yyyy_mm_dd_today}.csv"
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
         output.headers["Content-type"] = "text/csv"
         return output
       else:
@@ -585,8 +586,9 @@ def list_buggies(data_format=None):
         col_names.insert(1, 'username')
         cw.writerow(col_names)
         [cw.writerow([getattr(b, col) for col in col_names]) for b in buggies]
+        filename = get_download_filename("buggies.csv", want_datestamp=True)
         output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=buggies.csv"
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
         output.headers["Content-type"] = "text/csv"
         return output
       else:
@@ -779,16 +781,84 @@ def tech_notes_admin():
 
   )
 
-@blueprint.route("/tasks", strict_slashes=False, methods=["GET"])
+@blueprint.route("/tasks", strict_slashes=False, methods=["GET", "POST"])
 @login_required
 def tasks_admin():
-    try:
-        load_tasks_into_db(
-          current_app,
-          "project/tasks.md", # TODO explicit path,
-          want_overwrite=True, # TODO require confirmation in form
-        )
-        flash("FIXME did task test OK", "success")
-    except Exception as e:
-        flash(f"FIXME task error: {e}", "danger")
-    return redirect( url_for('admin.admin'))
+    if not current_user.is_buggy_admin:
+      abort(403)
+    want_overwrite = True
+    if request.method == "POST":
+        if not want_overwrite:
+            flash(f"Did not not load tasks because you did not explicity confirm it", "danger")
+        else:
+          try:
+              qty_tasks_added = load_tasks_into_db(
+                  "project/tasks.md", # TODO explicit path,
+                  app=current_app,
+                  want_overwrite=want_overwrite,
+              )
+              flash(f"Put {qty_tasks_added} tasks into the database", "success")
+          except Exception as e:
+              flash(f"Error parsing/adding tasks: {e}", "danger")
+    tasks = Task.query.all()
+    qty_tasks = len(tasks)
+    if qty_tasks:
+        example_task = tasks[int(qty_tasks/2)]
+        example_task_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] + \
+                   "/" + current_app.config[ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name] + \
+                   f"/tasks/{example_task.fullname.lower()}"
+    else:
+      example_task = None
+      example_task_url = None
+    return render_template(
+      "admin/tasks.html",
+      form=FlaskForm(request.form),
+      tasks=tasks,
+      qty_tasks=qty_tasks,
+      tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
+      key_settings=[
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
+        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
+        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
+      ],
+      example_task=example_task,
+      example_task_url=example_task_url,
+    )
+
+@blueprint.route("/tasks/download/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])
+@login_required
+def download_tasks(type=None, format=None):
+    if not current_user.is_buggy_admin:
+        abort(403)
+    CURRENT = "current"
+    DEFAULT = "default"
+    FORMAT_MARKDOWN = "md"
+    FORMAT_CSV = "csv"
+    DOWNLOAD_TYPES = [DEFAULT, CURRENT]
+    DOWNLOAD_FORMATS = [FORMAT_MARKDOWN, FORMAT_CSV]
+    if type not in DOWNLOAD_TYPES:
+        flash(f"Unknown task type \"{type}\": should be one of {' or '.join(DOWNLOAD_TYPES)}", "danger")
+        abort(404)
+    if format not in DOWNLOAD_FORMATS:
+        flash(f"Unknown task format \"{format}\": should be one of {' or '.join(DOWNLOAD_FORMATS)}", "danger")
+        abort(404)
+    if type == DEFAULT:
+        if format == FORMAT_CSV:
+            flash(f"Cannot download default issues in CSV format", "danger")
+            abort(404)
+        infile = open("project/tasks.md")
+        payload = "".join(infile.readlines())
+        infile.close()
+        filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=False)
+    elif type == CURRENT:
+        tasks = Task.query.order_by(Task.sort_position.asc())
+        if format == FORMAT_CSV:
+            payload = get_tasks_as_issues_csv(tasks)
+        else:
+            payload = "".join([task.markdown for task in tasks if task.is_enabled])
+        filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=True)
+    return Response(
+        payload,
+        mimetype="text/plain",
+        headers={"Content-disposition": f"attachment; filename=\"{filename}\""}
+    )

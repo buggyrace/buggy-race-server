@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
+from buggy_race_server.config import ConfigSettingNames
 
 class SocialSetting():
   """A Social media link: note this is not a Flask/ORM model
@@ -96,6 +97,42 @@ class Announcement(SurrogatePK, Model):
 class Task(SurrogatePK, Model):
     """Task for students to complete."""
 
+    @property
+    def markdown(self):
+        return f"""# {self.phase}-{self.name.upper()}
+
+## {self.title}
+
+### Problem
+
+{self.problem_text}
+
+### Solution
+
+{self.solution_text}
+
+### Hints
+
+{self.hints_text}
+"""
+
+    @property
+    def anchor(self):
+        return f"task-{self.fullname.lower()}"
+
+    @property
+    def fullname(self):
+        return f"{self.phase}-{self.name}"
+
+    def get_url(self, config):
+        tasks_url = config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
+            + "/" + config[ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name] \
+            + "/tasks"
+        if config[ConfigSettingNames.TASK_URLS_USE_ANCHORS.name]:
+            return f"{tasks_url}#{self.anchor}"
+        else:
+            return f"{tasks_url}/{self.fullname.lower()}"
+
     def __str__(self):
         return f"{self.phase}-{self.name}"
 
@@ -110,6 +147,7 @@ class Task(SurrogatePK, Model):
     solution_text = Column(db.Text(), unique=False, nullable=False, default="")
     hints_text = Column(db.Text(), unique=False, nullable=False, default="")
     is_enabled = db.Column(db.Boolean(), nullable=False, default=True)
+    sort_position = db.Column(db.Integer, nullable=False, default=0)
 
     def __init__(self, **kwargs):
         """Create instance."""

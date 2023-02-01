@@ -1,40 +1,44 @@
-
 {% extends "layout.html" %}
-
 {% block content %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5">About Buggy Racing</h1>
+    <h1 class="col my-3">About Buggy Racing</h1>
   </div>
   <div class="row">
-    <p class="lead">
+    <div class="lead col my-3">
       This is the race-server for the 
       {{config['INSTITUTION_SHORT_NAME']}}
       <strong>{{config['PROJECT_CODE']}} Racing Buggy </strong> project
-    </p>
+    </div>
   </div>
   <div class="row">
-    <p>
-      The project requires you to develop a separate web app — a
-      <a href="{{ url_for( 'public.serve_project_page' ) }}">Racing Buggy Editor</a>
-      — using Python and Flask that lets you edit your own buggy. When you've
-      got that working, you can <a href="{{ url_for('user.submit_buggy_data')}}">enter
-      your buggy</a> into the races that happen on this server.
-    </p>
-    <p>
-      The server only accepts <em>valid</em> buggies in JSON format, so really
-      the project is testing your understanding of how things like data-based
-      web apps work. The  <a href="{{ url_for('public.announce_races')}}">race
-      results</a> are just for fun... but because you can't enter the race with
-      bad data, they're your incentive to get your editor working.
-    </p>
+    <div class="col-md-6">
+      <p>
+        The project requires you to develop a separate web app — a
+        <a href="{{ url_for( 'public.serve_project_page' ) }}">Racing Buggy Editor</a>
+        — using Python and Flask that lets you edit your own buggy. When you've
+        got that working, you can <a href="{{ url_for('user.submit_buggy_data')}}">enter
+        your buggy</a> into the races that happen on this server.
+      </p>
+    </div>
+    <div class="col-md-6">
+      <p>
+        The server only accepts <em>valid</em> buggies in JSON format, so really
+        the project is testing your understanding of how things like data-based
+        web apps work. The  <a href="{{ url_for('public.announce_races')}}">race
+        results</a> are just for fun... but because you can't enter the race with
+        bad data, they're your incentive to get your editor working.
+      </p>
+    </div>
   </div>
-  <div class="alert alert-warning w-100 text-center my-5">
-    <p>
-      To enter a buggy for the next race, log into this server and
-      enter the JSON specification of the buggy that you created 
-      with your buggy editor.
-    </p>
+  <div class="row">
+    <div class="col alert alert-warning w-100 text-center my-5">
+      <p>
+        To enter a buggy for the next race, log into this server and
+        enter the JSON specification of the buggy that you created 
+        with your buggy&nbsp;editor.
+      </p>
+    </div>
   </div>
 </div>
 {% endblock %}

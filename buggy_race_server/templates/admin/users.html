@@ -3,7 +3,7 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>
+    <h1 class="col">
       {%if want_detail %}
          All Users
       {% else %}
@@ -13,36 +13,39 @@
   </div>
   {%if want_detail %}
     <div class="row">
-      <p>
-        All {{ users|length }} users in the system.
-        {{ qty_students}} are students (&Sopf;).
-        {{ admin_usernames|count }} have admin powers (&star;).
-      </p>
+      <div class="col">
+        <p>
+          All {{ users|length }} users in the system.
+          {{ qty_students}} are students (&Sopf;).
+          {{ admin_usernames|count }} have admin powers (&star;).
+        </p>
+      </div>
     </div>
     <div class="row my-3" id="user-column-toggles">
-      <p class="my-2">Show/hide:&nbsp;</p>
-      <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">all&nbsp;columns</button>
-      {% if config['USERS_HAVE_FIRST_NAME'] %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">first&nbsp;name</button>
-      {% endif %}
-      {% if config['USERS_HAVE_LAST_NAME'] %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">last&nbsp;name</button>
-      {% endif %}
-      {% if config['USERS_HAVE_EMAIL'] %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-email">email</button>
-      {% endif %}
-      {% if config['USERS_HAVE_ORG_USERNAME'] %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">account</button>
-      {% endif %}
-      <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">created</button>
-      <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">active?</button>
-      <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">logged&nbsp;in?</button>
-      <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
-      <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">uploaded</button>
+      <div class="col">
+        <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">all&nbsp;columns</button>
+        {% if config['USERS_HAVE_FIRST_NAME'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">first&nbsp;name</button>
+        {% endif %}
+        {% if config['USERS_HAVE_LAST_NAME'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">last&nbsp;name</button>
+        {% endif %}
+        {% if config['USERS_HAVE_EMAIL'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-email">email</button>
+        {% endif %}
+        {% if config['USERS_HAVE_ORG_USERNAME'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">account</button>
+        {% endif %}
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">created</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">active?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">logged&nbsp;in?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">uploaded</button>
+      </div>
     </div>
   {% endif %}
   <div class="row">
-    <table class="table table-striped table-bordered table-hover">
+    <table class="col table table-striped table-bordered table-hover">
       <thead>
         <tr>
           {% if is_admin_can_edit %}
@@ -169,30 +172,16 @@
       </tbody>
     </table>
   </div>
-</div>
-<div class="container pb-5">
-  <div class="d-flex align-items-start w-100">
-    <div class="col">
-      <div class="row">
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
-      </div>
+  <div class="row">
+    <div class="col btn-collection my-4">
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change passwords &rtri;</a>
+      {%if want_detail %}
+        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
+      {% endif %}
     </div>
-    <div class="col">
-      <div class="row">
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change passwords &rtri;</a>
-      </div>
-    </div>
-    {%if want_detail %}
-      <div class="col">
-        <div class="row">
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
-        </div>
-      </div>
-    {% endif %}
   </div>
 </div>
-
-
 <div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

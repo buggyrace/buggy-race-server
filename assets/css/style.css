@@ -385,6 +385,7 @@ table td.check input {
   margin-top: 1rem;
 }
 
+input#auth_code,
 .btn-admin.btn-outline-danger,
 .btn-outline-secondary.btn-admin {
   background-color: #ffffdd;

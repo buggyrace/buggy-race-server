@@ -133,6 +133,13 @@ class ChangePasswordForm(FlaskForm):
         "Verify new password",
         [DataRequired(), EqualTo("password", message="Passwords must match")],
     )
+    # auth_code here is — uniquely — optional, because it only applies
+    # if the user is not the current_user (then: must be admin too)
+    auth_code = PasswordField(
+        "You must provide the authorisation code if you're changing another user's password " + \
+        "(if you're changing your own, you can leave it blank)",
+        validators=[Optional(), Length(min=4, max=40)]
+    )
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

@@ -8,6 +8,7 @@ import threading
 from flask import Blueprint, render_template, request, abort, flash, redirect, url_for, current_app, Markup, Response
 from flask_login import login_required, current_user
 from functools import wraps
+from wtforms import ValidationError
 
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.forms import BuggyJsonForm
@@ -19,6 +20,7 @@ from buggy_race_server.utils import (
     flash_errors,
     flash_suggest_if_not_yet_githubbed,
     get_download_filename,
+    is_authorised,
     warn_if_insecure,
 )
 
@@ -128,16 +130,19 @@ def change_password():
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
         if form.validate_on_submit():
-            is_allowed = True
             username = form.username.data
-            user = current_user
-            if current_user.username != username:
-                if username is None or username == "":
-                    username = current_user.username
-                elif not current_user.is_buggy_admin:
-                    flash("Cannot change another user's password", "danger")
-                    is_allowed = False
-                else: # user was checked by validation
+            username = username.lower().strip() if username else current_user.username
+            if is_allowed := current_user.username == username:
+                user = current_user
+            elif not current_user.is_buggy_admin:
+                flash("You cannot change another user's password", "danger")
+            else: # is_allowed is False
+                try:
+                    is_allowed = is_authorised(form, form.auth_code)
+                except ValidationError as e:
+                    flash(f"Did not change {username}'s password: {e}", "danger")
+                if is_allowed:
+                     # validation confirmed username is for a real user
                     user = User.query.filter_by(username=form.username.data).first()
             if is_allowed:
                 user.set_password(form.password.data)

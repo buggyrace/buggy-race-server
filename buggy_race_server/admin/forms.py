@@ -200,6 +200,16 @@ class SetupAuthForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(SetupAuthForm, self).__init__(*args, **kwargs)
 
+class SubmitWithAuthForm(FlaskForm):
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+
+    def __init__(self, *args, **kwargs):
+        super(SubmitWithAuthForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        return super(SubmitWithAuthForm, self).validate()
+
+
 class GeneralSubmitForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):

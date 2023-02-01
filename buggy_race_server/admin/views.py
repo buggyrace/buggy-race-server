@@ -31,6 +31,7 @@ from buggy_race_server.admin.forms import (
     SettingForm,
     SetupSettingForm,
     SetupAuthForm,
+    SubmitWithAuthForm,
 )
 from buggy_race_server.admin.models import Announcement, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
@@ -756,15 +757,19 @@ def tech_notes_admin():
   if not current_user.is_buggy_admin:
     abort(403)
   error_msg = None
+  form = SubmitWithAuthForm(request.form)
   if request.method == "POST":
-    try:
-      publish_tech_notes(current_app)
-    except Exception as e:
-      error_msg = f"Problem publishing tech notes: {e}"
-    if error_msg:
-      flash(error_msg, "danger")
+    if form.validate_on_submit():
+      try:
+        publish_tech_notes(current_app)
+      except Exception as e:
+        error_msg = f"Problem publishing tech notes: {e}"
+      if error_msg:
+        flash(error_msg, "danger")
+      else:
+        flash("Re-generated tech notes OK", "success")
     else:
-      flash("Re-generated tech notes OK", "success")
+      flash_errors(form)
   return render_template(
     "admin/tech_notes.html",
     form=FlaskForm(request.form), # nothing except CSRF token

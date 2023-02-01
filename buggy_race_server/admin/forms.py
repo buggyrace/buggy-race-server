@@ -50,7 +50,7 @@ class BulkRegisterForm(FlaskForm):
     userdata = TextAreaField(
         f"Userdata (CSV including header)", validators=[DataRequired()]
     )
-    auth_code = PasswordField("Authorisation code",  [is_authorised])
+    auth_code = PasswordField("You must provide a valid authorisation code to bulk-register users",  [is_authorised])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

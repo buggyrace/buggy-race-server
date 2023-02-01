@@ -3,6 +3,8 @@
 // if both these elements are present on the page, do bulk-registration:
 const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
+const USER_REGISTER_CSV_EXAMPLE = "example-csv";
+const USER_REGISTER_CSV_EXAMPLE_TRIGGER = "example-csv-trigger";
 
 function bulk_registration_by_ajax(bulk_register_form){
   const BULK_REGISTER_URL = "/admin/bulk-register/json";
@@ -260,11 +262,29 @@ $(function() {
   if (bulk_register_form && document.getElementById(USER_REGISTER_CSV_ID)){
     bulk_register_form.addEventListener('submit', function(e){
       e.preventDefault();
+      bulk_register_form.classList.remove("d-none");
+      console.log(bulk_register_form.classList);
       $(bulk_register_form).slideUp(
         "slow",
         function(){bulk_registration_by_ajax(bulk_register_form)}
       );
     });
+  }
+  // hide the example CSV unless user clicks button to show (toggle) it
+  let bulk_reg_example_trigger = document.getElementById(USER_REGISTER_CSV_EXAMPLE_TRIGGER);
+  if (bulk_reg_example_trigger){
+    let example_csv = document.getElementById(USER_REGISTER_CSV_EXAMPLE);
+    if (example_csv){
+      example_csv.classList.add("d-none");
+      trigger_btn = document.createElement("button");
+      trigger_btn.classList.add("btn", "btn-sm", "btn-outline-secondary");
+      trigger_btn.innerText = "Show example";
+      trigger_btn.addEventListener("click", function(e){
+        e.preventDefault(); // we're inside a form
+        example_csv.classList.toggle('d-none');
+      });
+      bulk_reg_example_trigger.replaceWith(trigger_btn);
+    }
   }
 
   const CSS_BTN_COLUMN_SHOWN = "btn-dark";

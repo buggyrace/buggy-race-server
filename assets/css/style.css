@@ -399,6 +399,9 @@ p.btn-collection {
 .btn-collection .btn {
   margin: 0.25rem 0.25rem 0.25rem 0rem;
 }
+#registerForm textarea#userdata {
+  min-height: 8em;
+}
 #registration-progress {
   display:none;
 }

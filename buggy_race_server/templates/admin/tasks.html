@@ -64,17 +64,18 @@
         If you want to load your own customised tasks, download
         the default tasks and edit them (look inside that file
         to see the markdown syntax: <code>#</code> (<code>h1</code>)
-        for phase-name, <code>##</code> for title, and so on). Then
-        upload your edited file to load the tasks. If you've edited
-        any of the current tasks, the markdown file will not be
-        the same as the default file.
-      </p>
+        for phase-name, <code>##</code>  (<code>h2</code>) for title,
+        and so on). Then upload your edited file to load the tasks.
+        If you've edited any of the current tasks, the markdown file
+        will not be the same as the default file.
       </p>
       <p class="btn-collection my-4">
         <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
-        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>current</strong> tasks as Markdown&nbsp;&dtri;</a>
+        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>current</strong>
+        tasks as Markdown&nbsp;&dtri;</a>
         <a href="{{ url_for('admin.download_tasks', type='default', format='md') }}"
-        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>default</strong> tasks as Markdown&nbsp;&dtri;</a>
+        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>default</strong>
+        tasks as Markdown&nbsp;&dtri;</a>
       </p>
       <p>
         <em>Current</em> tasks include any edits you have made to the tasks
@@ -83,20 +84,51 @@
       </p>
     </div>
     <div class="col-md-6">
-      <div class="alert-danger p-4">
-        {% if tasks %}
-          <div class="border border-danger p-3">
-            This will delete all existing tasks!
-          </div>
-        {% endif %}
-        <p class="my-3">
-          Tasks loaded into&nbsp;database: {{ tasks_loaded_at or "never/unknown" }}
-        </p>
+      <div class="alert-danger container border border-danger">
         <form method="POST" action="{{ url_for('admin.tasks_admin') }}" role="form">
           {{ form.csrf_token }}
-          <p class="my-3">
-            <input type="submit" value="Load new tasks into database" class="btn btn-danger"/>
-          </p>
+          {% if tasks %}
+            <div class="row p-3">
+              <div class="col border border-danger p-3">
+                This will delete all existing tasks!
+              </div>
+            </div>
+          {% endif %}
+          <div class="row">
+            <div class="col p-3">
+              {% if tasks_loaded_at %}
+                Tasks loaded into&nbsp;database: {{ tasks_loaded_at }}
+              {% else %}
+                Missing timestamp
+                (maybe no tasks have been loaded&nbsp;yet)
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              {{ form.is_confirmed.label }}
+            </div>
+            <div class="col-sm-8">
+              <select id="is_confirmed" name="is_confirmed">
+                <option selected value="">No</option>
+                <option value="">I think so</option>
+                <option value="y">Totally</option>
+              </select>
+            </div>
+          </div>
+          <div class="row bg-warning p-3">
+            <div class="col-sm-4">
+              {{ form.auth_code.label }}
+            </div>
+            <div class="col-sm-8">
+              {{ form.auth_code(class_="form-control mr-sm-1 my-auto") }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col p-3">
+              <input type="submit" value="Load new tasks into database" class="btn btn-danger"/>
+            </div>
+          </div>
         </form>
       </div>
     </div>

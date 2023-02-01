@@ -6,8 +6,8 @@ import random  # for API test
 from datetime import datetime, timedelta
 
 from flask import (
-    Blueprint,
     abort,
+    Blueprint,
     current_app,
     flash,
     jsonify,
@@ -15,8 +15,8 @@ from flask import (
     redirect,
     render_template,
     request,
+    Response,
     url_for,
-    Response
 )
 from flask_login import current_user, login_required, login_user
 from sqlalchemy import bindparam, insert, update
@@ -28,9 +28,10 @@ from buggy_race_server.admin.forms import (
     AnnouncementForm,
     ApiKeyForm,
     BulkRegisterForm,
+    GenerateTasksForm,
     SettingForm,
-    SetupSettingForm,
     SetupAuthForm,
+    SetupSettingForm,
     SubmitWithAuthForm,
 )
 from buggy_race_server.admin.models import Announcement, Setting, SocialSetting, Task
@@ -790,21 +791,24 @@ def tech_notes_admin():
 @login_required
 def tasks_admin():
     if not current_user.is_buggy_admin:
-      abort(403)
-    want_overwrite = True
+        abort(403)
+    form = GenerateTasksForm(request.form)
     if request.method == "POST":
-        if not want_overwrite:
-            flash(f"Did not not load tasks because you did not explicity confirm it", "danger")
+        if form.validate_on_submit():
+            if want_overwrite := form.is_confirmed.data:
+                try:
+                    qty_tasks_added = load_tasks_into_db(
+                        "project/tasks.md", # TODO explicit path,
+                        app=current_app,
+                        want_overwrite=want_overwrite,
+                    )
+                    flash(f"Put {qty_tasks_added} tasks into the database", "success")
+                except Exception as e:
+                    flash(f"Error parsing/adding tasks: {e}", "danger")
+            else:
+                flash(f"Did not not load tasks because you did not explicity confirm it", "danger")
         else:
-          try:
-              qty_tasks_added = load_tasks_into_db(
-                  "project/tasks.md", # TODO explicit path,
-                  app=current_app,
-                  want_overwrite=want_overwrite,
-              )
-              flash(f"Put {qty_tasks_added} tasks into the database", "success")
-          except Exception as e:
-              flash(f"Error parsing/adding tasks: {e}", "danger")
+            flash_errors(form)
     tasks = Task.query.all()
     qty_tasks = len(tasks)
     if qty_tasks:
@@ -813,21 +817,21 @@ def tasks_admin():
                    "/" + current_app.config[ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name] + \
                    f"/tasks/{example_task.fullname.lower()}"
     else:
-      example_task = None
-      example_task_url = None
+        example_task = None
+        example_task_url = None
     return render_template(
-      "admin/tasks.html",
-      form=FlaskForm(request.form),
-      tasks=tasks,
-      qty_tasks=qty_tasks,
-      tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
-      key_settings=[
-        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
-        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
-        ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
-      ],
-      example_task=example_task,
-      example_task_url=example_task_url,
+        "admin/tasks.html",
+        form=form,
+        tasks=tasks,
+        qty_tasks=qty_tasks,
+        tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
+        key_settings=[
+          ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
+          ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
+          ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
+        ],
+        example_task=example_task,
+        example_task_url=example_task_url,
     )
 
 @blueprint.route("/tasks/download/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])

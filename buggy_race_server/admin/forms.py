@@ -209,6 +209,16 @@ class SubmitWithAuthForm(FlaskForm):
     def validate(self):
         return super(SubmitWithAuthForm, self).validate()
 
+class GenerateTasksForm(FlaskForm):
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+    is_confirmed = BooleanField("You cannot undo this. Are you sure?")
+
+    def __init__(self, *args, **kwargs):
+        super(GenerateTasksForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        return super(GenerateTasksForm, self).validate()
+
 
 class GeneralSubmitForm(FlaskForm):
 

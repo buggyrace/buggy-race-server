@@ -730,6 +730,8 @@ class ConfigFromEnv():
     FLASK_ENV = env.str("FLASK_ENV", default="production")
     FLASK_DEBUG = DEBUG = FLASK_ENV == "development"
 
+    UPLOAD_FOLDER = "buggy_race_server/uploads"
+
     LOG_LEVEL = env.str("LOG_LEVEL", default="debug")
     BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
     DEBUG_TB_ENABLED = DEBUG

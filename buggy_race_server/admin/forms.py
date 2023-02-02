@@ -4,15 +4,16 @@ from datetime import datetime
 
 from flask_wtf import FlaskForm
 from wtforms import (
-    FieldList,
     BooleanField,
-    IntegerField,
+    FieldList,
+    FileField,
     Form,
     FormField,
     HiddenField,
+    IntegerField,
+    PasswordField,
     SelectField,
     SelectMultipleField,
-    PasswordField,
     StringField,
     SubmitField,
     TextAreaField,
@@ -212,6 +213,10 @@ class SubmitWithAuthForm(FlaskForm):
 class GenerateTasksForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
     is_confirmed = BooleanField("You cannot undo this. Are you sure?")
+    markdown_file =FileField(
+      "Upload a markdown file describing the tasks (or leave blank to load the default tasks)",
+      [Optional()]
+    )
 
     def __init__(self, *args, **kwargs):
         super(GenerateTasksForm, self).__init__(*args, **kwargs)

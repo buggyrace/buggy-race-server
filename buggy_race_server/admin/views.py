@@ -4,6 +4,7 @@ import csv
 import io  # for CSV dump
 import random  # for API test
 from datetime import datetime, timedelta
+import os
 
 from flask import (
     abort,
@@ -22,6 +23,7 @@ from flask_login import current_user, login_required, login_user
 from sqlalchemy import bindparam, insert, update
 
 from flask_wtf import FlaskForm
+from werkzeug.utils import secure_filename
 
 from buggy_race_server.admin.forms import (
     AnnouncementActionForm,
@@ -796,15 +798,35 @@ def tasks_admin():
     if request.method == "POST":
         if form.validate_on_submit():
             if want_overwrite := form.is_confirmed.data:
+                # TODO ensure path no affected by cwd elsewhere
+                md_filename_with_path = "project/tasks.md"
+                delete_path = None
+                pretty_source = "default tasks"
+                if "markdown_file" in request.files:
+                    md_file = request.files['markdown_file']
+                    if md_file.filename:
+                        md_filename_with_path = os.path.join(
+                            current_app.config['UPLOAD_FOLDER'],
+                            secure_filename(md_file.filename)
+                        )
+                        md_file.save(md_filename_with_path)
+                        delete_path = md_filename_with_path
+                        pretty_source = "uploaded tasks"
                 try:
                     qty_tasks_added = load_tasks_into_db(
-                        "project/tasks.md", # TODO explicit path,
+                        md_filename_with_path,
                         app=current_app,
                         want_overwrite=want_overwrite,
                     )
-                    flash(f"Put {qty_tasks_added} tasks into the database", "success")
+                    flash(f"OK, put {qty_tasks_added} {pretty_source} into the database", "success")
                 except Exception as e:
                     flash(f"Error parsing/adding tasks: {e}", "danger")
+                if delete_path:
+                    try:
+                        os.unlink(delete_path)
+                    except os.error as e:
+                        # could sanitise this, but the diagnostic might be useful
+                        flash(f"Problem deleting uploaded file: {e}", "warning")
             else:
                 flash(f"Did not not load tasks because you did not explicity confirm it", "danger")
         else:

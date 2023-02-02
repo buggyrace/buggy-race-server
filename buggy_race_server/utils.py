@@ -274,6 +274,12 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
               f"prevented loading any of the {len(new_tasks)} new ones")
     db.session.execute(insert(Task.__table__), new_tasks)
     db.session.commit()
+    if app is not None:
+        set_and_save_config_setting(
+            app,
+            ConfigSettingNames.TASKS_LOADED_DATETIME.name,
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
     return len(new_tasks)
 
 def parse_task_markdown(task_source_filename):

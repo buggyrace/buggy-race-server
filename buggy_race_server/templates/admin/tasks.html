@@ -41,13 +41,13 @@
   </div>
   <div class="row">
     <div class="col">
-      <h2>Generating tasks</h2>
+      <h2>Loading tasks</h2>
     </div>
   </div>
   <div class="row">
     <div class="col-md-6">
       <p>
-        Generating the tasks <strong>deletes all existing tasks</strong>
+        Loading the tasks <strong>deletes all existing tasks</strong>
         from the database (including any edits you may have made), and
         replaces them with the new ones.
         Only do this if you are sure you want to: really, it only makes
@@ -85,17 +85,11 @@
     </div>
     <div class="col-md-6">
       <div class="alert-danger container border border-danger">
-        <form method="POST" action="{{ url_for('admin.tasks_admin') }}" role="form">
+        <form method="POST" action="{{ url_for('admin.tasks_admin') }}"
+          enctype="multipart/form-data" role="form">
           {{ form.csrf_token }}
-          {% if tasks %}
-            <div class="row p-3">
-              <div class="col border border-danger p-3">
-                This will delete all existing tasks!
-              </div>
-            </div>
-          {% endif %}
-          <div class="row">
-            <div class="col p-3">
+          <div class="row py-3">
+            <div class="col">
               {% if tasks_loaded_at %}
                 Tasks loaded into&nbsp;database: {{ tasks_loaded_at }}
               {% else %}
@@ -104,7 +98,16 @@
               {% endif %}
             </div>
           </div>
-          <div class="row">
+          {% if tasks %}
+            <div class="row px-3">
+              <div class="col border border-danger text-center p-3">
+                <strong>
+                  This will delete all existing tasks!
+                </strong>
+              </div>
+            </div>
+          {% endif %}
+          <div class="row mt-3">
             <div class="col-sm-4">
               {{ form.is_confirmed.label }}
             </div>
@@ -112,8 +115,16 @@
               <select id="is_confirmed" name="is_confirmed" class="form-control">
                 <option selected value="">No</option>
                 <option value="">I think so</option>
-                <option value="y">Totally</option>
+                <option value="y">Yes</option>
               </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              {{ form.markdown_file.label }}
+            </div>
+            <div class="col-sm-8">
+              {{ form.markdown_file() }}
             </div>
           </div>
           <div class="row bg-warning p-3">

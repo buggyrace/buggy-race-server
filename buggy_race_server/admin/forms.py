@@ -224,6 +224,35 @@ class GenerateTasksForm(FlaskForm):
     def validate(self):
         return super(GenerateTasksForm, self).validate()
 
+class TaskForm(FlaskForm):
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+    phase = IntegerField("Phase number", [DataRequired()], )
+    name = StringField("One-word name", [DataRequired()])
+    title = StringField("Short summary title", [DataRequired()])
+    is_enabled = BooleanField(
+      "Include in project? Choose 'no' to delete this task from the task list.",
+      [Optional()] # only to allow false through?
+    )
+    problem_text = TextAreaField(
+      "Description of the problem task is addressing",
+      [DataRequired()]
+    )
+    solution_text = TextAreaField(
+      "Description of the solution, or suggested approaches to it",
+      [DataRequired()]
+    )
+    hints_text = TextAreaField(
+      "Helful hints to help students understand the problem and perhaps concepts around it",
+      [DataRequired()]
+    )
+    sort_position = IntegerField("Sort position (used to control the display order of all tasks)",
+      [DataRequired()]
+    )
+    def __init__(self, *args, **kwargs):
+        super(TaskForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(TaskForm, self).validate()
 
 class GeneralSubmitForm(FlaskForm):
 

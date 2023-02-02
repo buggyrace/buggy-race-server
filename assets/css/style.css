@@ -453,3 +453,7 @@ a.toclink:hover{
 select.form-control{
   width: max-content; /* not on IE, but not critical */
 }
+
+span.btn.disabled{
+  border-style: dashed;
+}

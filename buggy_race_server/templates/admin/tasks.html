@@ -3,11 +3,25 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5 col">
+    <h1 class="col my-3">
       Tasks admin
     </h1>
   </div>
-  <div class="row my-3">
+  {% if qty_disabled_tasks %}
+    <div class="row">
+      {% if is_showing_all_tasks %}
+        <div class="col mb-3 alert-danger p-3">
+          <span class="mr-3">Showing all tasks, including deleted ones ({{ qty_disabled_tasks }}).</span>
+          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin">Exclude deleted tasks&nbsp;&rtri;</a>
+        </div>
+      {% else %}
+        <div class="col mb-3 p-3">
+          <a href="{{ url_for('admin.tasks_admin_all') }}" class="btn btn-outline-secondary btn-admin">Include deleted tasks&nbsp;&rtri;</a>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="row">
     <div class="col">
       <table class="table table-bordered table-hover">
         <thead>
@@ -18,20 +32,20 @@
         </thead>
         <tbody>
           {% for task in tasks %}
-            <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %}>
+            <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %} %}>
               <td>
-                <a href="" class="btn btn-outline-secondary btn-admin">edit</a>
+                <a href="{{ url_for('admin.edit_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-admin">edit</a>
               </td>
               <td>
                 {% if task.is_enabled %}
                   <a href="{{ url_for('public.serve_project_page', page='tasks') }}#{{ task.anchor }}"
                   class="btn btn-outline-secondary">{{ task.fullname }}&nbsp;&rtri;</a>
                 {% else %}
-                <span class="btn btn-outline-secondary disabled">{{ task.fullname }}&nbsp;&times;</span>
+                  <span class="btn btn-outline-secondary disabled ">{{ task.fullname }}&nbsp;&times;</span>
               {% endif %}
               </td>
               <td>
-                 {{ task.title }}
+                {% if not task.is_enabled %}<s>{% endif %}{{ task.title }}{% if not task.is_enabled %}</s>{% endif %}
               </td>
             </tr>
           {% endfor %}

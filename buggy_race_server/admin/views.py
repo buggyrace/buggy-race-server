@@ -35,6 +35,7 @@ from buggy_race_server.admin.forms import (
     SetupAuthForm,
     SetupSettingForm,
     SubmitWithAuthForm,
+    TaskForm,
 )
 from buggy_race_server.admin.models import Announcement, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
@@ -789,12 +790,17 @@ def tech_notes_admin():
 
   )
 
+@blueprint.route("/tasks/all", strict_slashes=True, methods=["GET"])
+def tasks_admin_all():
+    return tasks_admin()
+
 @blueprint.route("/tasks", strict_slashes=False, methods=["GET", "POST"])
 @login_required
 def tasks_admin():
     if not current_user.is_buggy_admin:
         abort(403)
     form = GenerateTasksForm(request.form)
+    want_all = request.path.endswith("all")
     if request.method == "POST":
         if form.validate_on_submit():
             if want_overwrite := form.is_confirmed.data:
@@ -832,6 +838,9 @@ def tasks_admin():
         else:
             flash_errors(form)
     tasks = Task.query.all()
+    qty_disabled_tasks = len([task for task in tasks if not task.is_enabled])
+    if not want_all:
+        tasks = [task for task in tasks if task.is_enabled]
     qty_tasks = len(tasks)
     if qty_tasks:
         example_task = tasks[int(qty_tasks/2)]
@@ -844,8 +853,10 @@ def tasks_admin():
     return render_template(
         "admin/tasks.html",
         form=form,
+        is_showing_all_tasks = want_all,
         tasks=tasks,
         qty_tasks=qty_tasks,
+        qty_disabled_tasks=qty_disabled_tasks,
         tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -893,3 +904,52 @@ def download_tasks(type=None, format=None):
         mimetype="text/plain",
         headers={"Content-disposition": f"attachment; filename=\"{filename}\""}
     )
+
+@blueprint.route("/task/<task_id>", strict_slashes=False, methods=["GET", "POST"])
+@login_required
+def edit_task(task_id=None):
+    if not current_user.is_buggy_admin:
+        abort(403)
+    task = None
+    if str(task_id).isdigit():
+        task = Task.get_by_id(int(task_id))
+    else:
+        (phase, name) = Task.split_fullname(task_id)
+        if phase is not None:
+            task = Task.query.filter_by(phase=phase, name=name).first()
+    if task is None:
+        abort(404)
+      # Note: not allowing addition of new tasks here.
+      # This is a policy decision not a technical one.
+      # You can add entirely new tasks by uploading the
+      # markdown file, but after that: only tweaks and/or
+      # en/disabling them (effectively deleting them).
+    form = TaskForm(request.form, obj=task)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            task.phase = form.phase.data
+            task.name = form.name.data
+            task.title = form.title.data
+            task.problem_text = form.problem_text.data
+            task.solution_text = form.solution_text.data
+            task.hints_text = form.hints_text.data
+            task.sort_position = form.sort_position.data
+            changed_is_enabled = task.is_enabled != form.is_enabled.data
+            task.is_enabled = form.is_enabled.data
+            task.save()
+            flash(f"OK, updated task { task.fullname }", "success")
+            if changed_is_enabled:
+                if task.is_enabled:
+                  msg = f"When you undelete a task like this, it doesn't appear in the project until you regenerate the task list"
+                else:
+                  msg = f"When you delete a task like this, it won't disappear from the project until you regenerate the task list"
+                flash(msg, "info")
+            return redirect(url_for('admin.tasks_admin'))
+        else:
+            flash_errors(form)
+    return render_template(
+      "admin/edit_task.html",
+      form=form,
+      task=task
+    )
+

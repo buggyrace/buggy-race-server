@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from enum import Enum
+import re
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.config import ConfigSettingNames
@@ -97,6 +98,16 @@ class Announcement(SurrogatePK, Model):
 class Task(SurrogatePK, Model):
     """Task for students to complete."""
 
+    FULLNAME_RE = re.compile(r"^(\d+)-([a-zA-Z][a-zA-Z0-9_]*)$")
+
+    @staticmethod
+    def split_fullname(fullname):
+      (phase, name) = (None, None)
+      if matched := re.match(Task.FULLNAME_RE, fullname):
+          phase = int(matched.group(1))
+          name = matched.group(2)
+      return (phase, name)
+    
     @property
     def markdown(self):
         return f"""# {self.phase}-{self.name.upper()}

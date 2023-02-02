@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Edit task {{ task.fullname }}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <p>
+        TODO about editing tasks
+      </p>
+    </div>
+  </div>
+  {% if not task.is_enabled %}
+  <div class="row">
+    <div class="col-lg-6 alert alert-danger">
+      This task is currently <strong>not enabled</strong>,
+      so does not appear in the project.
+    </div>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="border border-secondary container">
+        <form id="TaskForm" method="POST" action="{{ url_for('admin.edit_task', task_id=task.id) }}" role="form">
+          {{ form.csrf_token }}
+          <div class="row">
+            <div class="col-sm-4 p-3">
+                {{ form.phase.label}}
+                {{ form.phase(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-8 p-3">
+                {{ form.name.label}}
+                {{ form.name(placeholder="TASK", class_="form-control mr-sm-1") }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-1 bg-white">
+              <div class="form-group">
+                {{ form.title.label}}
+                {{ form.title(class="form-control mr-sm-1")}}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2">
+              <div class="form-group">
+                {{ form.problem_text.label}}
+                {{ form.problem_text(class="form-control mr-sm-1")}}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2">
+              <div class="form-group">
+                {{ form.solution_text.label}}
+                {{ form.solution_text(class="form-control mr-sm-1")}}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2">
+              <div class="form-group">
+                {{ form.hints_text.label}}
+                {{ form.hints_text(class="form-control mr-sm-1")}}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2">
+              <div class="form-group">
+                {{ form.sort_position.label}}
+                {{ form.sort_position(class="form-control mr-sm-1")}}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2">
+              <div class="form-group">
+                {{ form.is_enabled.label}}
+                <select name="is_enabled" id="is_enabled" class="form-control mr-sm-1">
+                  <option value="y" {% if task.is_enabled %} selected {% endif %}>Yes</option>
+                  <option value="" {% if not task.is_enabled %} selected {% endif %}>No</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row bg-warning p-3">
+              {{ form.auth_code.label }}
+              {{ form.auth_code(class_="form-control mr-sm-1") }}
+          </div>
+          <button class="btn btn-primary my-3" type="submit">Submit changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3">
+      <a href="{{ url_for('admin.tasks_admin') }}"} class="btn btn-outline-secondary btn-admin">Admin tasks &rtri;</a>
+    </div>
+  </div>
+</div>
+
+  {% endblock %}
+

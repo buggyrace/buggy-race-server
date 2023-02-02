@@ -19,7 +19,14 @@ from wtforms import (
     TextAreaField,
     widgets,
 )
-from wtforms.validators import DataRequired, Optional, ValidationError, Length
+from wtforms.validators import (
+    DataRequired,
+    InputRequired,
+    Length, 
+    NumberRange,
+    Optional,
+    ValidationError, 
+)
 
 from buggy_race_server.admin.models import AnnouncementType
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames, ConfigTypes
@@ -226,7 +233,10 @@ class GenerateTasksForm(FlaskForm):
 
 class TaskForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
-    phase = IntegerField("Phase number", [DataRequired()], )
+    phase = IntegerField(
+      "Phase number",
+      [InputRequired(), NumberRange(min=0, max=9)]  # 9 a bit arbitrary TODO
+    )
     name = StringField("One-word name", [DataRequired()])
     title = StringField("Short summary title", [DataRequired()])
     is_enabled = BooleanField(

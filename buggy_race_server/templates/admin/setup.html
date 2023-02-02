@@ -89,12 +89,12 @@
                   {% if name == "PROJECT_REPORT_TYPE" %}
                     {%include "admin/_report_type_input.html" %}
                   {% elif type_of_settings[name] == "bool" %}
-                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value">
+                    <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control">
                       <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
                       <option value="1" {% if settings[name] == "1" %} selected="selected" {% endif %}>Yes</option>
                     </select>
                   {% else %}
-                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" 
+                    <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control mr-sm-1" 
                     {% if type_of_settings[name] == "int" %}
                       type="number"
                     {% elif type_of_settings[name] == "datetime"%}

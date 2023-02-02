@@ -23,7 +23,7 @@
           {% set social_field = social.index * 3 %}
           {% set name = "SOCIAL_" ~ social.index ~ "_NAME" %}
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {{ descriptions[name] }}
@@ -39,7 +39,7 @@
           {% set social_field = social_field + 1 %}
           {% set name = "SOCIAL_" ~ social.index ~ "_URL" %}
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {{ descriptions[name] }}
@@ -55,7 +55,7 @@
           {% set social_field = social_field + 1 %}
           {% set name = "SOCIAL_" ~ social.index ~ "_TEXT" %}
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}"/>
+          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {{ descriptions[name] }}

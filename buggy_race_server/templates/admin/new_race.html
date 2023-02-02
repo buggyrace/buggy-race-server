@@ -3,21 +3,23 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1>
+    <h1 class="col">
       Add new race
     </h1>
   </div>
   <div class="row">
-    <p>
-      If there is a race that hasn't run yet, and it's <em>not</em> hidden,
-      it <strong>will automatically be announced</strong> on the
-      <a href="{{ url_for('public.announce_races') }}">race page</a>.
-    </p>
-    <p>
-      There is currently no mechanism for handling races that have run: they
-      just don't get announced (!).
-    </p>
-  </div>  
+    <div class="col-lg-6">
+      <p>
+        If there is a race that hasn't run yet, and it's <em>not</em> hidden,
+        it <strong>will automatically be announced</strong> on the
+        <a href="{{ url_for('public.announce_races') }}">race page</a>.
+      </p>
+      <p>
+        There is currently no mechanism for handling races that have run: they
+        just don't get announced (!).
+      </p>
+    </div>
+  </div>
   <div class="row">
     <form id="RaceForm" class="form form-race" method="POST" action="" role="form">
       {{ form.csrf_token }}

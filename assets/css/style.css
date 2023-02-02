@@ -450,3 +450,6 @@ a.toclink:hover::after{
 a.toclink:hover{
   text-decoration: none;
 }
+select.form-control{
+  width: max-content; /* not on IE, but not critical */
+}

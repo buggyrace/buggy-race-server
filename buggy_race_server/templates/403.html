@@ -1,18 +1,14 @@
-
 {% extends "layout.html" %}
-
-{% block page_title %}Unauthorized{% endblock %}
-
+{% block page_title %}Forbidden{% endblock %}
 {% block content %}
-<div class="jumbotron">
-    <div class="text-center">
-        <h1>403</h1>
-        <p>
-          Nope: you need to special permission to be here.
-          <br>
-          Contact the the race marshals and ask them to give you a pitstop pass.
-        </p>
-    </div>
+<div class="jumbotron text-center">
+  <h1 class="display-4">403</h1>
+  <p>
+    Nope: you need to special permission to be here.
+  </p>
+  <p>
+    If you think you should be allowed here, contact the
+    race marshals and ask them to give you a pitstop pass.
+  </p>
 </div>
 {% endblock %}
-

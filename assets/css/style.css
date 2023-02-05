@@ -453,7 +453,14 @@ a.toclink:hover{
 select.form-control{
   width: max-content; /* not on IE, but not critical */
 }
-
 span.btn.disabled{
   border-style: dashed;
+}
+#flash-container .alert {
+  margin:0.25rem 0 0.25rem 0;
+}
+.jumbotron { /* override Bootstrap default, for art */
+  width:100%;
+  background-color:#ffffff;
+  margin: 0 0 0 0;
 }

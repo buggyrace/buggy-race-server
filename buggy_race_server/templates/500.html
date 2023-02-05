@@ -1,5 +1,22 @@
 
 {% extends "layout.html" %}
+{% block page_title %}Server error{% endblock %}
+{% block content %}
+<div class="jumbotron text-center">
+  <h1 class="display-4">500</h1>
+  <p>
+    Sorry, something went wrong on our system. Don't panic, we
+    have logged it and will be fixing it!
+  </p>
+  <p>
+    Please try again later.
+  </p>
+</div>
+{% endblock %}
+
+
+
+{% extends "layout.html" %}
 
 {% block page_title %}Server error{% endblock %}
 
@@ -7,7 +24,6 @@
 <div class="jumbotron">
     <div class="text-center">
         <h1>500</h1>
-        <p>Sorry, something went wrong on our system. Don't panic, we are fixing it! Please try again later.</p>
     </div>
 </div>
 {% endblock %}

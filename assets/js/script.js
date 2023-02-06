@@ -231,6 +231,34 @@ function run_countdown(){
 }
 
 $(function() {
+  TASK_PATH = "/project/tasks";
+  const TASK_RE = new RegExp('#task-(\\d)-(\\w+)', 'i');
+  if (window.location.pathname.slice(0, TASK_PATH.length)==TASK_PATH){
+    match = window.location.hash.match(TASK_RE);
+    let flash_msgs = document.getElementById("flash-msgs");
+    if (flash_msgs && match) {
+      let phase = match[1];
+      let name = match[2].toUpperCase();
+      let full_name = phase + "-" + name;
+      if (! document.getElementById("task-" + full_name.toLowerCase())){
+          message = "There's no task called " + full_name +"!";
+          task_404_outer = document.createElement("div");
+          task_404_outer.classList.add("col-sm-12", "alert", "alert-danger");
+          task_404_inner = document.createElement("div");
+          task_404_inner.classList.add("container");
+          task_404_close = document.createElement("a");
+          task_404_close.setAttribute("href", "#");
+          task_404_close.setAttribute("title", "Close");
+          task_404_close.dataset.dismiss="alert";
+          task_404_close.innerHTML = "&times;";
+          task_404_close.classList.add("close");
+          task_404_inner.innerText = message;
+          task_404_inner.appendChild(task_404_close);
+          task_404_outer.appendChild(task_404_inner);
+          flash_msgs.appendChild(task_404_outer);
+      }
+    }
+  }
   if (typeof USER_BUGGY_JSON !== "undefined") {
     //----------------------------------------------------------
     // if this page has users' buggy json available,

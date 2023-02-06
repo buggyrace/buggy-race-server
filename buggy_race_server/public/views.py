@@ -62,7 +62,11 @@ def login():
             login_user(form.user)
             form.user.logged_in_at = datetime.now()
             form.user.save()
-            flash("OK, you're logged in.", "success")
+            if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
+                pretty_name = current_user.first_name
+            else:
+                pretty_name = current_user.pretty_username
+            flash(f"Hello {pretty_name}! You're logged in to the race server", "success")
             redirect_url = request.args.get("next") or url_for("user.submit_buggy_data")
             return redirect(redirect_url)
         else:

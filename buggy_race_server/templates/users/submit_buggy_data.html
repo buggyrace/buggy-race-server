@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
+{% if current_user.is_buggy_admin %}
+  {%include "admin/_nav.html" %}
+{% endif %}
 <div class="container pb-5">
   <div class="row">
     <h1 class="mt-5">Buggy data for {{ current_user.pretty_username }}</h1>

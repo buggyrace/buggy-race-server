@@ -837,7 +837,7 @@ def tasks_admin():
                 flash(f"Did not not load tasks because you did not explicity confirm it", "danger")
         else:
             flash_errors(form)
-    tasks = Task.query.all()
+    tasks = Task.query.order_by(Task.sort_position.asc()).all()
     qty_disabled_tasks = len([task for task in tasks if not task.is_enabled])
     if not want_all:
         tasks = [task for task in tasks if task.is_enabled]
@@ -893,7 +893,7 @@ def download_tasks(type=None, format=None):
         infile.close()
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=False)
     elif type == CURRENT:
-        tasks = Task.query.order_by(Task.sort_position.asc())
+        tasks = Task.query.order_by(Task.sort_position.asc()).all()
         if format == FORMAT_CSV:
             payload = get_tasks_as_issues_csv(tasks)
         else:

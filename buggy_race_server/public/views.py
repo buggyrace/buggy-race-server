@@ -2,6 +2,7 @@
 """Public section, including homepage and signup."""
 from datetime import datetime
 from collections import defaultdict
+from os import path
 
 from flask import (
     Blueprint,
@@ -226,19 +227,12 @@ def serve_project_page(page=None):
     if page is None or page == "index":
         template = "public/project/index.html"
     elif page == "tasks":
-        tasks = Task.query.order_by(Task.sort_position.asc()).all()
-        tasks_by_phase = defaultdict(list)
-        for task in tasks:
-            tasks_by_phase[task.phase].append(task)
-
-        # TDOD cache this in admin, and serve the
-        # static page ---------------------------
-        return render_template(
-            "public/project/tasks.html",
-            poster_word = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-            project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-            expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-            tasks_by_phase = tasks_by_phase
+        generated_task_file = path.join(current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name], "tasks_generated.html")
+        if not path.exists(generated_task_file):
+            flash("Task list is missing: perhaps an administrator needs to update it", "danger")
+        return send_from_directory(
+            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name],
+            "tasks_generated.html"
         )
     elif page in ["poster", "report"]:
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:

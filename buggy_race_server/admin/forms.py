@@ -240,7 +240,7 @@ class TaskForm(FlaskForm):
     name = StringField("One-word name", [DataRequired()])
     title = StringField("Short summary title", [DataRequired()])
     is_enabled = BooleanField(
-      "Include in project? Choose 'no' to delete this task from the task list.",
+      "Include in project? Choose 'no' to hide this task from the students.",
       [Optional()] # only to allow false through?
     )
     problem_text = TextAreaField(
@@ -255,7 +255,7 @@ class TaskForm(FlaskForm):
       "Helful hints to help students understand the problem and perhaps concepts around it",
       [DataRequired()]
     )
-    sort_position = IntegerField("Sort position (used to control the display order of all tasks)",
+    sort_position = IntegerField("Sort position used to determine display order within each phase)",
       [DataRequired()]
     )
     def __init__(self, *args, **kwargs):

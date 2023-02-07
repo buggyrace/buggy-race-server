@@ -2,9 +2,10 @@
 """Admin views/controllers."""
 import csv
 import io  # for CSV dump
-import random  # for API test
+import random  # for API tests
 from datetime import datetime, timedelta
 import os
+from collections import defaultdict
 
 from flask import (
     abort,
@@ -30,6 +31,7 @@ from buggy_race_server.admin.forms import (
     AnnouncementForm,
     ApiKeyForm,
     BulkRegisterForm,
+    GeneralSubmitForm,
     GenerateTasksForm,
     SettingForm,
     SetupAuthForm,
@@ -787,8 +789,40 @@ def tech_notes_admin():
       ConfigSettingNames.SOCIAL_3_NAME.name,
     ],
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
-
   )
+
+@blueprint.route("/tasks/update", strict_slashes=True, methods=["POST"])
+def tasks_update():
+    form = GeneralSubmitForm(request.form) # no auth required
+    if form.validate_on_submit():
+        # render the form and save it as task_list.html
+        tasks = Task.query.order_by(Task.sort_position.asc()).all()
+        tasks_by_phase = defaultdict(list)
+        for task in tasks:
+            tasks_by_phase[task.phase].append(task)
+        html = render_template(
+            "public/project/tasks.html",
+            poster_word = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+            project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+            expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
+            tasks_by_phase = tasks_by_phase
+        )
+        try:
+            template_file = open("tech_notes/output/tasks_generated.html", "w")
+            template_file.write(html)
+            template_file.close()
+            is_ok = True
+        except Exception as e:
+            flash(f"Oops, that didn't work: {e}", "danger")
+            is_ok = False
+        if is_ok:
+          flash("OK, task list page has been updated with latest data", "success")
+          set_and_save_config_setting(
+              current_app,
+              name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
+              value=datetime.now().strftime("%Y-%m-%d %H:%M")
+          )
+    return redirect(url_for('admin.tasks_admin'))
 
 @blueprint.route("/tasks/all", strict_slashes=True, methods=["GET"])
 def tasks_admin_all():
@@ -800,6 +834,7 @@ def tasks_admin():
     if not current_user.is_buggy_admin:
         abort(403)
     form = GenerateTasksForm(request.form)
+    is_fresh_update = False
     want_all = request.path.endswith("all")
     if request.method == "POST":
         if form.validate_on_submit():
@@ -825,6 +860,7 @@ def tasks_admin():
                         want_overwrite=want_overwrite,
                     )
                     flash(f"OK, put {qty_tasks_added} {pretty_source} into the database", "success")
+                    is_fresh_update = True
                 except Exception as e:
                     flash(f"Error parsing/adding tasks: {e}", "danger")
                 if delete_path:
@@ -853,7 +889,8 @@ def tasks_admin():
     return render_template(
         "admin/tasks.html",
         form=form,
-        is_showing_all_tasks = want_all,
+        is_showing_all_tasks=want_all,
+        is_fresh_update=is_fresh_update,
         tasks=tasks,
         qty_tasks=qty_tasks,
         qty_disabled_tasks=qty_disabled_tasks,
@@ -865,6 +902,7 @@ def tasks_admin():
         ],
         example_task=example_task,
         example_task_url=example_task_url,
+        task_list_updated_timestamp=current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/tasks/download/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])

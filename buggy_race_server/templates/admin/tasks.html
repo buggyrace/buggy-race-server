@@ -7,16 +7,44 @@
       Tasks admin
     </h1>
   </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="container border border-secondary">
+        <form method="POST" action="{{ url_for('admin.tasks_update') }}" role="form">
+          {{ form.csrf_token }}
+          <div class="row">
+            <div class="col p-3">
+              The main <a href="{{ url_for('public.serve_project_page', page='tasks')}}">task list page</a>
+              that the students see does not update automatically.
+              So if you change any tasks <em>or config settings that it contains</em>, you should update it.
+            </div>
+          </div>
+          <div class="row">
+            <div class="col p-3">
+              <input type="submit" value="Update task page" class="btn {% if is_fresh_update %}btn-danger{% else %}btn-primary{% endif %}"/>
+            </div>
+            {% if task_list_updated_timestamp %}
+              <div class="col p-3">
+                Last updated:<br>{{ task_list_updated_timestamp }}
+              </div>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   {% if qty_disabled_tasks %}
     <div class="row">
       {% if is_showing_all_tasks %}
         <div class="col mb-3 alert-danger p-3">
-          <span class="mr-3">Showing all tasks, including deleted ones ({{ qty_disabled_tasks }}).</span>
-          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin">Exclude deleted tasks&nbsp;&rtri;</a>
+          <span class="mr-3">Showing all tasks, including hidden ones ({{ qty_disabled_tasks }}).</span>
+          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin">Exclude hidden tasks&nbsp;&rtri;</a>
         </div>
       {% else %}
         <div class="col mb-3 p-3">
-          <a href="{{ url_for('admin.tasks_admin_all') }}" class="btn btn-outline-secondary btn-admin">Include deleted tasks&nbsp;&rtri;</a>
+          <a href="{{ url_for('admin.tasks_admin_all') }}" class="btn btn-outline-secondary btn-admin">Include hidden tasks&nbsp;&rtri;</a>
         </div>
       {% endif %}
     </div>
@@ -53,7 +81,7 @@
       </table>
     </div>
   </div>
-  <div class="row">
+  <div class="row mt-5">
     <div class="col">
       <h2>Loading tasks</h2>
     </div>
@@ -96,14 +124,7 @@
         since installation. <em>Default</em> tasks are the "factory reset"
         version.
       </p>
-      <p>
-        <strong>Substitutions:</strong>
-        If you upload a markdown file to load tasks onto this server, any string
-        in the texts of the form <code>%CONFIGNAME%</code> (all-caps between
-        <code>%</code>, no spaces) will be replaced with the value of the
-        <a href="{{ url_for('admin.settings')}}">config setting</a> of that
-        (exact: type it carefully!) name.
-      </p>
+      {%include "admin/_task_text_note.html" %}
     </div>
     <div class="col-md-6">
       <div class="alert-danger container border border-danger">

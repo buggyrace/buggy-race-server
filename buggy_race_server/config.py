@@ -103,6 +103,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
+    TASK_LIST_GENERATED_DATETIME = auto()
     TASKS_LOADED_DATETIME = auto()
     TASK_URLS_USE_ANCHORS = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
@@ -247,6 +248,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
@@ -305,6 +307,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,

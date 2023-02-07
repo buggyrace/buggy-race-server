@@ -13,7 +13,7 @@ Get the source code, ideally by using the VSCode workspace file we have prepared
 
 A requirement for the below steps is to install the main IDE (**I**ntegrated **D**evelopment **E**nvironment) we will use for this module: [VSCode](https://code.visualstudio.com/). This is a modern, powerful and thorough IDE that will be a valuable asset in your toolbox! This is what needs to happen: 
 
-* Go to the [buggy race server]({{ site.server_url }}) and login.
+* Go to the [buggy race server](%BUGGY_RACE_SERVER_URL%) and login.
 * Link your account to your Github personal account.
 * `Fork` the template for the buggy race editor from [our Github repository]({{ site.editor_url }}) to yours.
 * Download your *VSCode workspace configuration file* by clicking in the corresponding button. Store it somewhere safe.

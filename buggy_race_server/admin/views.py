@@ -897,7 +897,7 @@ def download_tasks(type=None, format=None):
         if format == FORMAT_CSV:
             payload = get_tasks_as_issues_csv(tasks)
         else:
-            payload = "".join([task.markdown for task in tasks if task.is_enabled])
+            payload = "".join([task.raw_markdown for task in tasks if task.is_enabled])
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=True)
     return Response(
         payload,
@@ -952,4 +952,3 @@ def edit_task(task_id=None):
       form=form,
       task=task
     )
-

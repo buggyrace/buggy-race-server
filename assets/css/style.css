@@ -51,6 +51,7 @@ textarea {
 
 .buggy-project .task-breakdown  {
   margin-top: 3em;
+  border-top:1px solid #cccccc;
 }
 
 .buggy-project .phase-list {

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Public section, including homepage and signup."""
 from datetime import datetime
+from collections import defaultdict
 
 from flask import (
     Blueprint,
@@ -24,7 +25,7 @@ from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import SocialSetting
+from buggy_race_server.admin.models import SocialSetting, Task
 
 from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required
 
@@ -225,7 +226,20 @@ def serve_project_page(page=None):
     if page is None or page == "index":
         template = "public/project/index.html"
     elif page == "tasks":
-        template = "public/project/tasks.html"
+        tasks = Task.query.order_by(Task.sort_position.asc()).all()
+        tasks_by_phase = defaultdict(list)
+        for task in tasks:
+            tasks_by_phase[task.phase].append(task)
+
+        # TDOD cache this in admin, and serve the
+        # static page ---------------------------
+        return render_template(
+            "public/project/tasks.html",
+            poster_word = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+            project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+            expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
+            tasks_by_phase = tasks_by_phase
+        )
     elif page in ["poster", "report"]:
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report

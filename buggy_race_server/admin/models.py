@@ -4,6 +4,7 @@
 from datetime import datetime
 from enum import Enum
 import re
+import markdown
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.config import ConfigSettingNames
@@ -100,6 +101,16 @@ class Task(SurrogatePK, Model):
 
     FULLNAME_RE = re.compile(r"^(\d+)-([a-zA-Z][a-zA-Z0-9_]*)$")
 
+    # replaces %KEY% with config setting
+    CONFIG_EMBED_RE = re.compile(r"%s*([_A-Z][A-Z0-9_]+)\s*%")
+
+    @staticmethod
+    def _sub_config_in_text(config, text):
+        def _config_sub(match):
+            value = config.get(match.group(1))
+            return value if value is not None else ""
+        return re.sub(Task.CONFIG_EMBED_RE, _config_sub, text)
+
     @staticmethod
     def split_fullname(fullname):
       (phase, name) = (None, None)
@@ -109,7 +120,7 @@ class Task(SurrogatePK, Model):
       return (phase, name)
     
     @property
-    def markdown(self):
+    def raw_markdown(self):
         return f"""# {self.phase}-{self.name.upper()}
 
 ## {self.title}
@@ -134,6 +145,21 @@ class Task(SurrogatePK, Model):
     @property
     def fullname(self):
         return f"{self.phase}-{self.name}"
+
+    def problem_html(self, config):
+        return markdown.markdown(
+            Task._sub_config_in_text(config, self.problem_text)
+        )
+
+    def solution_html(self, config):
+        return markdown.markdown(
+            Task._sub_config_in_text(config, self.solution_text)
+        )
+
+    def hints_html(self, config):
+        return markdown.markdown(
+            Task._sub_config_in_text(config, self.hints_text)
+        )
 
     def get_url(self, config):
         tasks_url = config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \

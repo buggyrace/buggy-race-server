@@ -96,6 +96,14 @@
         since installation. <em>Default</em> tasks are the "factory reset"
         version.
       </p>
+      <p>
+        <strong>Substitutions:</strong>
+        If you upload a markdown file to load tasks onto this server, any string
+        in the texts of the form <code>%CONFIGNAME%</code> (all-caps between
+        <code>%</code>, no spaces) will be replaced with the value of the
+        <a href="{{ url_for('admin.settings')}}">config setting</a> of that
+        (exact: type it carefully!) name.
+      </p>
     </div>
     <div class="col-md-6">
       <div class="alert-danger container border border-danger">

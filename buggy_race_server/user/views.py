@@ -59,6 +59,7 @@ def settings():
     return render_template(
         "users/settings.html",
         form=form,
+        is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config['BUGGY_RACE_SERVER_URL']
     )
 

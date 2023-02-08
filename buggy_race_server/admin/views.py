@@ -462,7 +462,7 @@ def bulk_register(data_format=None):
           flash_errors(form)
     csv_fieldnames = ['username', 'password'] + ConfigSettings.users_additional_fieldnames(current_app)
     return render_template(
-        "admin/bulk_register.html",
+        "admin/users_register.html",
         form=form,
         example_csv_data = [
           ",".join(csv_fieldnames),
@@ -702,7 +702,7 @@ def edit_announcement(id=None):
           flash("Did not create an announcement!", "danger")
           flash_errors(form)
     return render_template(
-      "admin/edit_announcement.html", 
+      "admin/announcement_edit.html", 
       form=form, 
       id=id,
       is_html=is_html,
@@ -993,7 +993,7 @@ def edit_task(task_id=None):
         else:
             flash_errors(form)
     return render_template(
-      "admin/edit_task.html",
+      "admin/task_edit.html",
       form=form,
       task=task
     )

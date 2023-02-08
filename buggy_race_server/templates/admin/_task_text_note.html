@@ -1,0 +1,8 @@
+<p>
+  <strong>Substitutions:</strong>
+  Inside the tasks' markdown texts, words like this: <code>%CONFIG_NAME%</code>
+  (all-caps between <code>%</code>, no spaces) will be replaced with the value of the
+  <a href="{{ url_for('admin.settings')}}">config setting</a> with that
+  (exact: type it carefully!) name. For example, <code>%BUGGY_RACE_SERVER_URL%</code>
+  will become <code>{{ config['BUGGY_RACE_SERVER_URL'] }}</code>.
+</p>

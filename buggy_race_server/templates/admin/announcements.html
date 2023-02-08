@@ -22,7 +22,8 @@
           {% for announcement in announcements %}
             <tr>
               <td>
-                <a href="{{ url_for('admin.edit_announcement', id=announcement.id)}}" class="btn btn-outline-secondary btn-admin">edit&nbsp;&rtri;</a>
+                <a href="{{ url_for('admin.edit_announcement', id=announcement.id)}}"
+                class="btn btn-outline-secondary btn-admin">Edit&nbsp;&rtri;</a>
               </td>
               <td>{{announcement.type}}</td>
               <td>

@@ -88,8 +88,8 @@ class AnnouncementForm(FlaskForm):
 
 class AnnouncementActionForm(FlaskForm):
     id = IntegerField(validators=[DataRequired()])
-    submit_publish = SubmitField(label='publish')
-    submit_hide = SubmitField(label='hide')
+    submit_publish = SubmitField(label='Publish')
+    submit_hide = SubmitField(label='Hide')
     submit_delete = SubmitField(label='Delete announcement')
 
     def __init__(self, *args, **kwargs):

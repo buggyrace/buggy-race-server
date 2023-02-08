@@ -298,6 +298,7 @@ def admin():
     users_deactivated = [u for u in users if not u.is_active]
     admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
     other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
+    qty_tasks = Task.query.filter_by(is_enabled=True).count()
     return render_template(
       "admin/dashboard.html",
       students_active = students_active,
@@ -319,6 +320,8 @@ def admin():
       qty_admin_users=len(admin_users),
       other_users=other_users,
       qty_other_users=len(other_users),
+      qty_tasks=qty_tasks,
+      submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
     )
 
 @blueprint.route("/users")

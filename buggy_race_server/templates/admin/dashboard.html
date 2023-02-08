@@ -159,10 +159,10 @@
         <tr>
           <td>Project deadline</td>
           <!-- "dedaline-container" is magic: js enhanced -->
-          <td id="deadline-container">
-            {% if  config['PROJECT_SUBMISSION_DEADLINE'] %}
-              <span style="display:inline-block;margin-right:1em;">{{ config['PROJECT_SUBMISSION_DEADLINE'] | replace("T", " ") }}</span>
-              <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ config['PROJECT_SUBMISSION_DEADLINE'] }}"></span>
+          <td id="deadline-container" colspan="3">
+            {% if submission_deadline %}
+              <span style="display:inline-block;margin-right:1em;">{{ submission_deadline | replace("T", " ") }}</span>
+              <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submission_deadline }}"></span>
             {% else %}
               not set
             {% endif %}
@@ -180,6 +180,8 @@
               {% endif %}
             {% endif %}
           </td>
+          <td>Tasks</td>
+          <td class="text-right">{{ qty_tasks }}</td>
         </tr>
       </table>
     </div>

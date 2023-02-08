@@ -465,3 +465,6 @@ span.btn.disabled{
   background-color:#ffffff;
   margin: 0 0 0 0;
 }
+.hidden{
+  display: none; /* bootstrap's d-none too heavy-handed: has !important */
+}

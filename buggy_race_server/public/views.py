@@ -26,9 +26,9 @@ from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import SocialSetting, Task
+from buggy_race_server.admin.models import SocialSetting
 
-from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required
+from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required, join_to_project_root
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -204,13 +204,16 @@ def _send_tech_notes_assets(type, path):
     try:
         if type not in ["theme", "assets"]:
             raise FileNotFoundError()
-        return send_from_directory(
-            f"{current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name]}/{type}",
-            path
+        return send_file(
+            join_to_project_root(
+                current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+                current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+                type,
+                path
+            )
         )
     except FileNotFoundError:
         return "File not found", 404
-        abort(404)
 
 @blueprint.route("/project/tasks/<task_id>")
 def show_single_task(task_id):
@@ -227,13 +230,16 @@ def serve_project_page(page=None):
     if page is None or page == "index":
         template = "public/project/index.html"
     elif page == "tasks":
-        generated_task_file = path.join(current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name], "tasks_generated.html")
-        if not path.exists(generated_task_file):
-            flash("Task list is missing: perhaps an administrator needs to update it", "danger")
-        return send_from_directory(
-            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name],
-            "tasks_generated.html"
+        filename = current_app.config[ConfigSettingNames.TASK_LIST_TEMPLATE.name]
+        generated_task_file = join_to_project_root(
+            current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+            filename
         )
+        if not path.exists(generated_task_file):
+            flash(f"Task list ({filename}) is missing: an administrator needs to update it", "danger")
+            abort(404)
+        return send_file(generated_task_file)
     elif page in ["poster", "report"]:
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
@@ -282,10 +288,13 @@ def serve_tech_notes(path=None):
         path +=" index.html"
     elif not path.endswith(".html"):
         path += ".html"
+    # TODO sanitise the path
     try:
-        return send_from_directory(
-            current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH.name],
-            path
+        return send_file(
+            join_to_project_root(
+                current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH.name],
+                path
+            )
         )
     except FileNotFoundError as e:
         abort(404)

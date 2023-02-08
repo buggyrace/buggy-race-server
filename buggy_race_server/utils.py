@@ -27,6 +27,12 @@ def flash_errors(form, category="warning"):
 def warn_if_insecure():
   pass # TODO delegating this to (Cloudflare) host/DNS config, not application level
 
+def join_to_project_root(*args, app=current_app):
+    """Returns filename made absolute with current_app's root_path
+       with optional path too. App available in case this is ever
+       needed from (e.g.) utils running outwith a web request."""
+    return os.path.join(*[os.path.dirname(current_app.root_path), *args])
+  
 def flash_suggest_if_not_yet_githubbed(function):
   @wraps(function)
   def wrapper():
@@ -182,7 +188,7 @@ def get_tasks_as_issues_csv(tasks):
       )
     return str(issues_str)
 
-def publish_tech_notes(app):
+def publish_tech_notes(app=current_app):
     """ Runs pelican to generate the tech notes.
         Creates a pelican config file with "live" config settings (as
         JINJA_GLOBALS) that are passed into the build.
@@ -196,16 +202,10 @@ def publish_tech_notes(app):
       r'\s*"([A-Z_][A-Z0-9_]+)"\s*\:\s*"([^"]*)"'
     )
     EMPTY_LINE_RE = re.compile(r'^\s*(#.*)?$')
-    # root path is parent of the buggy_race_server dir containing the .py
-    # TODO feels like this should be a more globally-available config
-    root_path = os.path.dirname(os.path.abspath(os.path.join(__file__, "..")))
-    tech_notes_path = os.path.join(
-        root_path, 
-        app.config[ConfigSettingNames.TECH_NOTES_CONFIG_PATH.name]
-    )
-    full_pathname = os.path.join(
-      tech_notes_path,
-      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME.name]
+    full_pathname = join_to_project_root(
+      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME.name],
+      app=app
     )
     conf_file_reader = open(full_pathname)
     lines = conf_file_reader.readlines()
@@ -228,22 +228,37 @@ def publish_tech_notes(app):
             lines[i] = f"    \"{name}\": \"{value}\",\n"
           i += 1
     live_filename = current_app.config[ConfigSettingNames.TECH_NOTES_CONFIG_LIVE_NAME.name]
-    live_config_file = open(os.path.join(tech_notes_path, live_filename), "w")
+    live_pathname = join_to_project_root(
+      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      live_filename,
+      app=app
+    )
+    live_config_file = open(live_pathname, "w")
     live_config_file.writelines(lines)
     live_config_file.close()
-    publish_conf_file = os.path.join(
-      tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME.name)
+    publish_conf_file = join_to_project_root(
+      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME.name),
+      app=app
     )
-    output_path = os.path.join(
-      tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_PATH.name)
+    output_path = join_to_project_root(
+      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name),
+      app=app
     )
-    content_path = os.path.join(
-      tech_notes_path,
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_PATH.name)
+    content_path = join_to_project_root(
+      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_DIR.name),
+      app=app
     )
-    os.chdir(tech_notes_path)
+
+    # cd to the pelican dir so that the imports work
+    os.chdir(
+      join_to_project_root(
+        app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+        app=app
+      )
+    )
     subprocess.run(
       [
         "pelican",

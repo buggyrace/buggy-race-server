@@ -17,6 +17,7 @@ from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
 from buggy_race_server.utils import (
     active_user_required,
+    join_to_project_root,
     flash_errors,
     flash_suggest_if_not_yet_githubbed,
     get_download_filename,
@@ -85,8 +86,9 @@ def setup_course_repository():
     # this could probably be cached?
     # needs to run in current app context (same thread)
     issues_parser = IssueParser(
-        os.path.join(
-          current_app.root_path, current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name]
+        join_to_project_root(
+          "project",
+          current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name]
         )
     )
 

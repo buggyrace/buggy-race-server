@@ -22,6 +22,7 @@ from enum import Enum, auto
 from environs import Env
 from random import randint
 import re
+from os import path
 
 class ConfigSettingNames(Enum):
 
@@ -55,8 +56,8 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_CONFIG_LIVE_NAME = auto()
     TECH_NOTES_CONFIG_PATH = auto()
     TECH_NOTES_CONFIG_PUBLISH_NAME = auto()
-    TECH_NOTES_CONTENT_PATH = auto()
-    TECH_NOTES_OUTPUT_PATH = auto()
+    TECH_NOTES_CONTENT_DIR = auto()
+    TECH_NOTES_OUTPUT_DIR = auto()
     TECH_NOTES_PAGES_PATH = auto()
     TECH_NOTES_PATH = auto()
 
@@ -104,6 +105,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
     TASK_LIST_GENERATED_DATETIME = auto()
+    TASK_LIST_TEMPLATE = auto()
     TASKS_LOADED_DATETIME = auto()
     TASK_URLS_USE_ANCHORS = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
@@ -249,6 +251,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
+        ConfigSettingNames.TASK_LIST_TEMPLATE.name: "task_list.html",
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
@@ -308,6 +311,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.TASK_LIST_TEMPLATE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
@@ -756,29 +760,43 @@ class ConfigFromEnv():
     # (see constructor below)
     _ENV_SETTING_OVERRIDES = ""
 
-    # hardcoded settings for Pelican (python tool for static site generation):
+    # Hardcoded settings for Pelican (python tool for static site generation):
+    #-------------------------------------------------------------------------
     # These only need to be changed if you're not using tech notes from this
     # repo, which currently isn't supported. Because these are reading raw
     # files from the filesystem and serving them to the client, there's a
     # security risk if they point anywhere outside the repo... which is
     # why they aren't offered for changing via the admin/settings pages.
-    #------------------------------------------------------------------
-    # the "Pelican" directory (contains source and config for generating tech notes static content)
-    TECH_NOTES_PATH= env.str("TECH_NOTES_PATH", default="../tech_notes")
-    # the output directory of the tech notes, specifically the pages (because Pelican wants
-    # to generate other material — blog posts, summaries — which we're not using)
-    TECH_NOTES_OUTPUT_PATH= env.str("TECH_NOTES_OUTPUT_PATH", default="../tech_notes/output")
-    # the HTML pages themselves (pages subdir in the output path)
-    TECH_NOTES_PAGES_PATH= env.str("TECH_NOTES_PAGES_PATH", default=f"{TECH_NOTES_OUTPUT_PATH}/pages") 
+    # Note that they're here so _if you really need to_ you can experiment
+    # with changing them via (e.g.) .env settings (not recommended).
+    #-------------------------------------------------------------------------
+    # the "Pelican" directory
+    # (contains source and config for generating tech notes static content)
+    TECH_NOTES_PATH = env.str("TECH_NOTES_PATH", default="tech_notes")
+
+    # the source directory where pelican looks for the content to generate
+    TECH_NOTES_CONTENT_DIR = env.str("TECH_NOTES_CONTENT_DIR", default="content")
+
+    # the output directory of the tech notes, specifically the pages (because
+    # Pelican wants to generate other material — blog posts, summaries — which
+    # we're not using)
+    TECH_NOTES_OUTPUT_DIR = env.str("TECH_NOTES_OUTPUT_DIR", default="output")
+
+    # the HTML pages themselves (pages subdir in the output path), which is
+    # where the tech notes end up (because in pelican-speak they are "pages"
+    # (not "posts", etc). This is used by the webserver to locate the
+    # tech notes it's serving as web pages.
+    TECH_NOTES_PAGES_PATH = env.str(
+        "TECH_NOTES_PAGES_PATH",
+        default=path.join(TECH_NOTES_PATH, TECH_NOTES_OUTPUT_DIR, "pages")
+    )
 
     # The TECH_NOTES_CONFIG_* settings are for the _file system_ (not URLs)
     # Changing these is unexpected but they're presented here to facilitate
     # moving tech notes outwith the version-controlled source.
-    TECH_NOTES_CONFIG_FILE_NAME=env.str("TECH_NOTES_CONFIG_FILE_NAME", default="pelicanconf.py")
-    TECH_NOTES_CONFIG_LIVE_NAME=env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
-    TECH_NOTES_CONFIG_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="tech_notes")
-    TECH_NOTES_CONFIG_PUBLISH_NAME=env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
-    TECH_NOTES_CONTENT_PATH=env.str("TECH_NOTES_CONFIG_PATH", default="content")
+    TECH_NOTES_CONFIG_FILE_NAME = env.str("TECH_NOTES_CONFIG_FILE_NAME", default="pelicanconf.py")
+    TECH_NOTES_CONFIG_LIVE_NAME = env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
+    TECH_NOTES_CONFIG_PUBLISH_NAME = env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
 
     def __init__(self):
       # In addition to the Flask/server "system" environment variable,

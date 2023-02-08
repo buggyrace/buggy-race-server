@@ -48,6 +48,7 @@ from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
+    join_to_project_root,
     get_download_filename,
     get_tasks_as_issues_csv,
     load_settings_from_db,
@@ -770,7 +771,6 @@ def tech_notes_admin():
         publish_tech_notes(current_app)
       except Exception as e:
         error_msg = f"Problem publishing tech notes: {e}"
-      if error_msg:
         flash(error_msg, "danger")
       else:
         flash("Re-generated tech notes OK", "success")
@@ -807,21 +807,25 @@ def tasks_update():
             expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
             tasks_by_phase = tasks_by_phase
         )
+        task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_TEMPLATE.name]
+        generated_task_file = join_to_project_root(
+            current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+            task_list_filename
+        )
         try:
-            template_file = open("tech_notes/output/tasks_generated.html", "w")
+            template_file = open(generated_task_file, "w")
             template_file.write(html)
             template_file.close()
-            is_ok = True
-        except Exception as e:
-            flash(f"Oops, that didn't work: {e}", "danger")
-            is_ok = False
-        if is_ok:
-          flash("OK, task list page has been updated with latest data", "success")
-          set_and_save_config_setting(
-              current_app,
-              name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
-              value=datetime.now().strftime("%Y-%m-%d %H:%M")
-          )
+        except IOError as e:
+            flash(f"Failed to create {task_list_filename}:", "danger")
+        else:
+            flash("OK, task list page has been updated with latest data", "success")
+            set_and_save_config_setting(
+                current_app,
+                name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
+                value=datetime.now().strftime("%Y-%m-%d %H:%M")
+            )
     return redirect(url_for('admin.tasks_admin'))
 
 @blueprint.route("/tasks/all", strict_slashes=True, methods=["GET"])

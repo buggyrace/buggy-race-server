@@ -298,8 +298,6 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     return len(new_tasks)
 
 def parse_task_markdown(task_source_filename):
-    print("FIXME parse_task_markdown", flush=True)
-
     SECTION_NAMES = [
       name for name in Task.__table__.columns._data.keys()
       if name.endswith("_text")
@@ -310,13 +308,10 @@ def parse_task_markdown(task_source_filename):
     H3_TEXT_SECTION_RE = r"^###\s+(\w+)"
     _LINE_NO = "_line_no"
 
-    print(f"FIXME OK open(task_source_filename) {task_source_filename}", flush=True)
     task_file_reader = open(task_source_filename)
     markdown_lines = task_file_reader.readlines()
     task_file_reader.close()
     line_no = 0
-
-    print("FIXME OK 1235", flush=True)
 
     def make_section_name(string):
         section_name = f"{string.lower()}_text"
@@ -324,7 +319,6 @@ def parse_task_markdown(task_source_filename):
             raise ValueError(
               f"bad section name \"{string}\" found in task source file at line {line_no}"
             )
-        print(f"-----> {line_no}:   {section_name}")
         return section_name
 
     def get_next_line():
@@ -354,7 +348,6 @@ def parse_task_markdown(task_source_filename):
     sort_position = 1000
     tasks = []
     task = {}
-    print("FIXME 1234", flush=True)
     line = get_next_line()
     while line:
         h1 = re.findall(H1_PHASE_NAME_RE, line)
@@ -366,10 +359,8 @@ def parse_task_markdown(task_source_filename):
             task[_LINE_NO] = line_no
             task["sort_position"] = sort_position
             sort_position += 100
-            print(f"-----> {line_no}: {task['phase']}-{task['name']} sort:{sort_position}", flush=True)
         elif len(h2)==1:
             task['title'] = h2[0].strip()
-            print(f"-----> {line_no}:     {task['title']}", flush=True)
         elif len(h3)==1:
             section_name = make_section_name(h3[0])
             section_lines = []
@@ -394,7 +385,6 @@ def parse_task_markdown(task_source_filename):
             task = {}
             continue # already read
         line = get_next_line()
-    print("FIXME done", flush=True)
     if not tasks:
         raise ValueError("No tasks found")
     return tasks

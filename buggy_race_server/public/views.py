@@ -10,11 +10,11 @@ from flask import (
     current_app,
     flash,
     jsonify,
+    make_response,
     redirect,
     render_template,
     request,
     send_file,
-    send_from_directory,
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
@@ -28,7 +28,13 @@ from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
 from buggy_race_server.admin.models import SocialSetting, Task
 
-from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required, join_to_project_root
+from buggy_race_server.utils import (
+    active_user_required,
+    flash_errors,
+    get_download_filename,
+    join_to_project_root,
+    warn_if_insecure,
+)
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -128,7 +134,7 @@ def register():
 @blueprint.route("/specs/")
 def showspecs():
     """Buggy specifications page."""
-    return render_template("public/buggyspecs.html", 
+    return render_template("public/specs.html",
       defaults=Buggy.DEFAULTS,
       data=Buggy.game_data
     )
@@ -138,16 +144,22 @@ def showspecs():
 def showspecs_data(data_filename=""):
     """Buggy specifications: data page."""
     want_mass = request.args.get('extra')=="mass" 
-    if data_filename == "types.json":
-      return jsonify(Buggy.game_data)
-    elif data_filename == "defaults.json":
-      return jsonify(Buggy.DEFAULTS)
-    elif data_filename != "":
-        abort(404)
-    return render_template("public/specs_data.html", 
-      defaults=Buggy.DEFAULTS,
-      data=Buggy.game_data,
-      is_showing_mass=want_mass
+    if data_filename:
+        if data_filename in ["types.json", "defaults.json"]:
+            if data_filename == "defaults.json":
+                download = make_response(jsonify(Buggy.DEFAULTS))
+            else:
+                download = make_response(jsonify(Buggy.game_data))
+            download.headers["Content-Disposition"] = f"attachment; filename={get_download_filename(data_filename)}"
+            download.headers["Content-type"] = "application/json"
+            return download
+        else:
+            abort(404)
+    return render_template(
+        "public/specs_data.html", 
+        defaults=Buggy.DEFAULTS,
+        data=Buggy.game_data,
+        is_showing_mass=want_mass
     )
 
 @blueprint.route("/about/")

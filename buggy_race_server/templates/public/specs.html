@@ -4,38 +4,44 @@
 {% block content %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5">Buggy Specifications/Race Rules</h1>
+    <h1 class="col my-3">Buggy Specifications/Race Rules</h1>
   </div>
   <div class="row">
-    <p class="lead">
-      These are the buggy specifications. Any you don't provide will use the
-      default setting.
-      <br>
-      Also available as <a href="{{ url_for('public.showspecs_data') }}">tabulated data</a>.
-    </p>
-    <div class="alert alert-danger w-100 text-center" role="alert">
-      If there are <strong> rule violations</strong> in your buggy's
-      specification, it will be excluded from the race.
-      <br>
-      <em>(hint: fix that in your buggy editor)</em>
+    <div class="col-lg-8">
+      <p>
+        These are the buggy specifications. Any you don't provide will use the
+        default setting.
+        <br>
+        The underlyin data is also available in
+        <a href="{{ url_for('public.showspecs_data') }}">tabulated form</a>.
+      </p>
     </div>
-    <div class="alert alert-danger w-100 text-center" role="alert">
-      If the total <strong>cost</strong> of your buggy is greater
-      that the race limit, it will be excluded from that race.
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-danger text-center" role="alert">
+        If there are <strong> rule violations</strong> in your buggy's
+        specification, it will be excluded from the race.
+        <br>
+        <em>(hint: fix that in your buggy editor)</em>
+      </div>
+      <div class="alert alert-danger text-center" role="alert">
+        If the total <strong>cost</strong> of your buggy is greater
+        that the race limit, it will be excluded from that race.
+      </div>
+      <div class="alert alert-warning text-center" role="alert">
+        Prices and masses may change with 24 hours' notice.
+      </div>
+      <div class="alert alert-info text-center" role="alert">
+        <strong>JSON name</strong> is the name you <strong>must</strong> use
+        for this item when you upload your buggy's data.
+        <br>
+        <strong>Default value</strong> is what the buggy gets for this item if
+        you don't provide a value.
+        <br>
+        <strong>Value</strong> indicates what values are acceptable.
+      </div>
     </div>
-    <div class="alert alert-warning w-100 text-center" role="alert">
-      Prices and masses may change with 24 hours' notice.
-    </div>
-    <div class="alert alert-info w-100 text-center" role="alert">
-      <strong>JSON name</strong> is the name you <strong>must</strong> use
-      for this item when you upload your buggy's data.
-      <br>
-      <strong>Default value</strong> is what the buggy gets for this item if
-      you don't provide a value.
-      <br>
-      <strong>Value</strong> indicates what values are acceptable.
-    </div>
-    
   </div>
   <div class="row">
     <table class="table table-striped table-bordered table-hover table-responsive">
@@ -595,21 +601,25 @@
     </table>
   </div>
   <div class="row">
-    <h2 id="types-of-motive-power" class="mt-5">Types of motive power</h2>
+    <h2 id="types-of-motive-power" class="col my-3">Types of motive power</h2>
   </div>
   <div class="row">
-    <p class="lead">
-      These are the different fuel types you can use in each of your engines
-      (<code>power_type</code> and (optionally) <code>aux_power_type</code>).
-    </p>
-    <p>
-      Consumable fuel is depleted while the race progresses, until it's gone
-      (but, with the exception of electric, your buggy gets lighter).
-    </p>
-    <p>
-      * You can only have <strong>one</strong> unit of non-consumable power
-        (e.g., a single reactor) per motive force.
-    </p>
+    <div class="col-lg-8">
+      <p>
+        These are the different fuel types you can use in each of your engines
+        (<code>power_type</code> and (optionally) <code>aux_power_type</code>).
+      </p>
+      <p>
+       Consumable fuel is depleted while the race progresses, until it's gone
+       (but, with the exception of electric, your buggy gets lighter).
+      </p>
+      <p>
+       * You can only have <strong>one</strong> unit of non-consumable power
+         (e.g., a single reactor) per motive force.
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <table class="table table-striped table-bordered table-hover" style="width:auto">
       <thead class="thead-light">
         <tr>
@@ -929,17 +939,21 @@
     </table>
   </div>
   <div class="row">
-    <h2 id="types-of-tyre" class="mt-5">Types of tyre</h2>
+    <h2 id="types-of-tyre" class="col my-3">Types of tyre</h2>
   </div>
   <div class="row">
-    <p>
-      You must have at least as many tyres as you have wheels. Any surplus are
-      spare tyres, and those are deployed immediately to replace punctured
-      tyres. Your buggy's speed is multiplied by the percentage of
-      non-punctured tyres you currently have on your wheels: so if half your
-      wheels are punctured, you'll be going at 50%. If all your wheels are
-      punctured, that's 0% and you are no longer racing, you're parking.
-    </p>
+    <div class="col-lg-8">
+      <p>
+        You must have at least as many tyres as you have wheels. Any surplus are
+        spare tyres, and those are deployed immediately to replace punctured
+        tyres. Your buggy's speed is multiplied by the percentage of
+        non-punctured tyres you currently have on your wheels: so if half your
+        wheels are punctured, you'll be going at 50%. If all your wheels are
+        punctured, that's 0% and you are no longer racing, you're parking.
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <table class="table table-striped table-bordered table-hover" style="width:auto">
       <thead class="thead-light">
         <tr>
@@ -961,33 +975,35 @@
       </tbody>
     </table>
   </div>
-
   <div class="row">
-    <h2 id="types-of-armour" class="mt-5">Types of armour</h2>
+    <h2 id="types-of-armour" class="col my-3">Types of armour</h2>
   </div>
   <div class="row">
-    <p>
-      The armour cladding on your buggy is taken into consideration when you
-      suffer an attack from another buggy, or perhaps if there is an
-      environmental incident on the track (feral hamsters, often with
-      justifiable grievances arising from their treatment whilst part of the
-      racing community, have been known to lob rocks at passing buggies).
-      Armour adds significantly to the mass of the vehicle. Armour is not a
-      requirement for entry in any race.
-    </p>
-    <p class="alert alert-warning">
-      Specifically, the <em>number of wheels</em> is used as an indication of
-      the size of your buggy, so the cost and mass of whichever armour you
-      choose is increased by this percentage: 
-      <strong>+10% for every wheel your buggy has over four</strong>.
-    </p>
-    <p>
-      So, for a four-wheeled buggy, use the figures shown in the table. For a
-      six-wheeled buggy (that's 2 wheels more than four, so +2×10%=+20%),
-      use these figures multiplied by 120%. For a ten-wheeled juggernaught,
-      multiply these figures by (+6×10%=+60%) 160%.
-    </p>
-
+    <div class="col-lg-8">
+      <p>
+        The armour cladding on your buggy is taken into consideration when you
+        suffer an attack from another buggy, or perhaps if there is an
+        environmental incident on the track (feral hamsters, often with
+        justifiable grievances arising from their treatment whilst part of the
+        racing community, have been known to lob rocks at passing buggies).
+        Armour adds significantly to the mass of the vehicle. Armour is not a
+        requirement for entry in any race.
+      </p>
+      <p class="alert alert-warning">
+        Specifically, the <em>number of wheels</em> is used as an indication of
+        the size of your buggy, so the cost and mass of whichever armour you
+        choose is increased by this percentage: 
+        <strong>+10% for every wheel your buggy has over four</strong>.
+      </p>
+      <p>
+        So, for a four-wheeled buggy, use the figures shown in the table. For a
+        six-wheeled buggy (that's 2 wheels more than four, so +2×10%=+20%),
+        use these figures multiplied by 120%. For a ten-wheeled juggernaught,
+        multiply these figures by (+6×10%=+60%) 160%.
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <table class="table table-striped table-bordered table-hover" style="width:auto">
       <thead class="thead-light">
         <tr>
@@ -1017,24 +1033,28 @@
   </div>
 
   <div class="row">
-    <h2 id="types-of-offensive-capability" class="mt-5">Types of offensive capability</h2>
+    <h2 id="types-of-offensive-capability" class="col my-3">Types of offensive capability</h2>
   </div>
   <div class="row">
-    <p>
-      Each attack can be deployed once and only once. (Yes even spikes).
-      Those attacks happen when there is another buggy in proximity, so
-      it's possible that if the race is spread out you won't get to deploy
-      all your attacks (but then... it's a race not a fight anyway). It's
-      also why attacks are probably more likely to occur near the start of
-      the race. When an opportunity to attack presents itself, the likelihood
-      of being able to execute the attack is influenced by your buggy's
-      race computer algorithm.
-    </p>
-    <p>
-      <em>Every</em> form of attack except spikes carries a karmic risk of
-      going wrong and applying to your own buggy instead of your intended
-      target.
-    </p>
+    <div class="col-lg-8">
+      <p>
+        Each attack can be deployed once and only once. (Yes even spikes).
+        Those attacks happen when there is another buggy in proximity, so
+        it's possible that if the race is spread out you won't get to deploy
+        all your attacks (but then... it's a race not a fight anyway). It's
+        also why attacks are probably more likely to occur near the start of
+        the race. When an opportunity to attack presents itself, the likelihood
+        of being able to execute the attack is influenced by your buggy's
+        race computer algorithm.
+      </p>
+      <p>
+        <em>Every</em> form of attack except spikes carries a karmic risk of
+        going wrong and applying to your own buggy instead of your intended
+        target.
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <table class="table table-striped table-bordered table-hover" style="width:auto">
       <thead class="thead-light">
         <tr>
@@ -1058,19 +1078,23 @@
   </div>
 
   <div class="row">
-    <h2 id="types-of-race-computer-algorithm" class="mt-5">Types of race computer algorithm</h2>
+    <h2 id="types-of-race-computer-algorithm" class="col my-3">Types of race computer algorithm</h2>
   </div>
   <div class="row">
-    <p>
-      Your race computer primarily affects how your manage your offensive
-      capabilities and your reaction to others who attack you.
-    </p>
-    <p>
-      If you have equipped your buggy with no offensive capabilities, choose
-      either <code>defensive</code> or <code>steady</code>. The former actively
-      seeks to avoid proximity with potentially offensive buggies, so you're
-      less likely to be attacked but perhaps your race line is compromised.
-    </p>
+    <div class="col">
+      <p>
+        Your race computer primarily affects how your manage your offensive
+        capabilities and your reaction to others who attack you.
+      </p>
+      <p>
+        If you have equipped your buggy with no offensive capabilities, choose
+        either <code>defensive</code> or <code>steady</code>. The former actively
+        seeks to avoid proximity with potentially offensive buggies, so you're
+        less likely to be attacked but perhaps your race line is compromised.
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <table class="table table-striped table-bordered table-hover" style="width:auto">
       <thead class="thead-light">
         <tr>
@@ -1088,9 +1112,6 @@
       </tbody>
     </table>
   </div>
-
-
-
   <div class="row mt-5" id="hamster">
     <img src="/static/build/img/rene-hamster-1.png" alt="buggy-racing hamster" class="float-right"/>
   </div>

@@ -798,6 +798,11 @@ class ConfigFromEnv():
     TECH_NOTES_CONFIG_LIVE_NAME = env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
     TECH_NOTES_CONFIG_PUBLISH_NAME = env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
 
+    # handily makes all downloaded JSON pretty:
+    # less confusing for students (e.g., downloading spec files)
+    JSONIFY_PRETTYPRINT_REGULAR = True
+
+
     def __init__(self):
       # In addition to the Flask/server "system" environment variable,
       # *any* config setting can be overridden here too.

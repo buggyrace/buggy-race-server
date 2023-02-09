@@ -5,34 +5,38 @@
 {% endif %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="mt-5">Buggy data for {{ current_user.pretty_username }}</h1>
+    <h1 class="col my-3">
+      Buggy data for {{ current_user.pretty_username }}
+    </h1>
   </div>
   <div class="row">
-    <p>
-      Copy the JSON data from your buggy editor and paste it here.
-      <br>
-      Be sure to paste <em>all</em> of it.
+    <div class="col-lg-8">
+      <p>
+        Copy the JSON data from your buggy editor and paste it here.
+        <br>
+        Be sure to paste <em>all</em> of it.
+      </p>
+      <form id="BugyJsonForm" class="form" method="POST" action="{{ url_for('buggy.create_buggy_with_json') }}" role="form">
+        {{ form.csrf_token }}
+        <div>
+          <label for="buggy_json">
+            Race buggy JSON:
+          </label>
+          <textarea name="buggy_json" cols="60" rows="16"></textarea>
+        </div>
+        <button type="submit" class="mt-3 btn btn-primary" aria-label="Left Align">
+          <span class="icon-wrench"> Submit buggy JSON</span>
+        </button>
+      </form>
+    </div>
   </div>
-  <form id="BugyJsonForm" class="form" method="POST"
-     action="{{ url_for('buggy.create_buggy_with_json') }}" role="form">
-    {{ form.csrf_token }}
-    <div class="row">
-      <label for="BugyJsonForm">
-        Race buggy JSON:
-      </label>
-    </div>
-    <div class="row">
-      <textarea name="buggy_json" cols="60" rows="20"></textarea>
-    </div>
-    <button type="submit" class="mt-3 btn btn-primary" aria-label="Left Align">
-      <span class="icon-wrench" aria-hidden="true"> submit </span>
-    </button>
-  </form>
   <div class="row mt-5">
-    <p>Want to see how your buggy is currently configured?</p>
-  </div>
-  <div class="row">
-    <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.show_buggy' ) }}">View buggy &rtri;</a></p>
+    <div class="col">
+      <p>Want to see how your buggy is currently configured?</p>
+      <p>
+        <a class="btn btn-outline-secondary" href="{{ url_for( 'public.show_buggy' ) }}">View buggy &rtri;</a>
+      </p>
+    </div>
   </div>
 </div>
 {% endblock %}

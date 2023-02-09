@@ -457,6 +457,7 @@ select.form-control{
 span.btn.disabled{
   border-style: dashed;
 }
+#flash-msgs .alert,
 #flash-container .alert {
   margin:0.25rem 0 0.25rem 0;
 }

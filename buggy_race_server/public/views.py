@@ -65,7 +65,7 @@ def login():
             form.user.logged_in_at = datetime.now()
             form.user.save()
             if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
-                pretty_name = current_user.first_name
+                pretty_name = current_user.first_name or current_user.pretty_username
             else:
                 pretty_name = current_user.pretty_username
             flash(f"Hello {pretty_name}! You're logged in to the race server", "success")

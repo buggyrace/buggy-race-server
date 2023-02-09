@@ -96,7 +96,7 @@
                     {% endif %}
                   </div>
                   <div class="col-sm-5">
-                    {{ descriptions[name] }}
+                    {{ html_descriptions[name] | safe }}
                     <div class="setting-default">
                       {% if name == "ADMIN_USERNAMES" %}
                         <em>Currently:</em> <strong>must</strong> include <code>{{ current_user.username }}</code>

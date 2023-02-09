@@ -26,7 +26,7 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
-          {{ descriptions[name] }}
+          {{ html_descriptions[name] | safe }}
           <br>
           <em>Example:</em> <code>Discord</code>
         </div>
@@ -42,7 +42,7 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
-          {{ descriptions[name] }}
+          {{ html_descriptions[name] | safe }}
           <br>
           <em>Example:</em> <code>https://discord.example.com</code>
         </div>
@@ -58,7 +58,7 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
-          {{ descriptions[name] }}
+          {{ html_descriptions[name] | safe }}
           <br>
           <em>Example:</em>
           <br>

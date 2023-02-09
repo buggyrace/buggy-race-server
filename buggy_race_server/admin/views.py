@@ -6,6 +6,7 @@ import random  # for API tests
 from datetime import datetime, timedelta
 import os
 from collections import defaultdict
+import markdown
 
 from flask import (
     abort,
@@ -263,6 +264,10 @@ def setup():
 
   group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
   settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+  html_descriptions = { 
+    setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
+    for setting in ConfigSettings.DESCRIPTIONS
+  }
   return render_template(
     "admin/setup.html",
     setup_status=setup_status,
@@ -276,7 +281,7 @@ def setup():
     social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True),
     type_of_settings=ConfigSettings.TYPES,
     pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
-    descriptions=ConfigSettings.DESCRIPTIONS,
+    html_descriptions=html_descriptions,
     env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
   )
 
@@ -624,6 +629,10 @@ def settings(group_name=None):
         social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
       else:
         _flash_errors(form)
+    html_descriptions = { 
+        setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
+        for setting in ConfigSettings.DESCRIPTIONS
+    }
     return render_template(
       "admin/settings.html",
       form=form,
@@ -638,7 +647,7 @@ def settings(group_name=None):
         name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
         for name in ConfigSettings.DEFAULTS
       },
-      descriptions=ConfigSettings.DESCRIPTIONS,
+      html_descriptions=html_descriptions,
     )
 
 @blueprint.route("/announcements/")

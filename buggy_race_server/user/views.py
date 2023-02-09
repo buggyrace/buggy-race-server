@@ -173,6 +173,7 @@ def set_api_secret():
     warn_if_insecure()
     form = ApiSecretForm()
     is_confirmation = False
+    delta_mins = int((datetime.now()-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
     if request.method == "POST":
         if form.validate_on_submit():
             if current_user.api_secret == form.api_secret.data:
@@ -183,12 +184,17 @@ def set_api_secret():
                 current_user.save()
                 flash("OK, you set your API secret: it's good for one hour from now.", "success")
                 is_confirmation = True
+                delta_mins = 1
         else:
             flash(f"Warning! Your API secret was not set.", "danger")
             flash_errors(form)
-    delta_mins = int((datetime.now()-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
-    return render_template("users/api_secret.html", form=form, delta_mins=delta_mins,
-        is_confirmation=is_confirmation, pretty_lifespan="one hour")
+    return render_template(
+        "users/settings_api.html",
+        form=form,
+        delta_mins=delta_mins,
+        is_confirmation=is_confirmation,
+        pretty_lifespan="one hour",
+    )
 
 @blueprint.route("/vscode-workspace", methods=['GET'])
 @login_required

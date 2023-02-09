@@ -1,33 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<style>
-pre {
-  border:1px solid #333;
-  padding: 1rem;
-}
-</style>
 
 <div class="container pb-5">
   <div class="row">
-    <h1 id="project-details">
+    <h1 class="col my-3" id="project-details">
       {{ config['PROJECT_CODE'] }} Racing Buggy project: your {{ report_type }}
     </h1>
   </div>
   <div class="row">
-    <div class="col">
-
+    <div class="col-lg-8">
       <h2 id="about-the-{{ report_type | lower }}">About the "{{ report_type }}"</h2>
-
       <p>
         There are two parts of your project submission:
       </p>
-      
       <ul>
         <li>your Racing Buggy Editor web application</li>
         <li>a "{{ report_type }}" summarising your work</li>
       </ul>
-      
       <p>
         Because you have developed a webserver, for the
         {{ config['PROJECT_CODE'] }} Racing Buggy project
@@ -38,23 +28,20 @@ pre {
           <a href="ttp://localhost:5000/poster">http://localhost:5000/{{ report_type }}</a>
         </li>
       </ul>
-      
-      <h2 id="what-is-on-your-poster">
+
+      <h2 id="what-is-in-your-{{ report_type }}">
         What is {% if report_type == "poster" %} on {% else %} in {% endif %}
         your {{ report_type }}?
       </h2>
-      
       <p>
         There are two parts: the top and the bottom (of the single web page):
       </p>
-      
       <ul>
-        <li>top: "sell" the features of your editor</li>
-        <li>bottom: notes on each task you attempted</li>
+        <li><strong>top</strong>: "sell" the features of your editor</li>
+        <li><strong>bottom</strong>: notes on each task you attempted</li>
       </ul>
-      
-      <h2 id="what-is-on-the-top-of-your-poster">What is on the top of your poster?</h2>
-      
+
+      <h2 id="what-is-on-the-top-of-your-{{ report_type }}">What is on the top of your {{ report_type }}?</h2>
       <p>
         You've made a working (up to a point) buggy editor! Tell someone who
         lands on this page what's great about it! What does it offer? What can
@@ -65,7 +52,6 @@ pre {
         Here are examples of webpages that do this for <em>their</em> editors:
         this is only for inspiration, you can make it your own!
       </p>
-      
       <ul>
         <li>
           <a href="https://code.visualstudio.com/">VSCode</a>:
@@ -84,7 +70,6 @@ pre {
           the Atom text editor
         </li>
       </ul>
-      
       <p>
         Obviously some of those have the power of a team of pro graphic
         designers behind them so it's OK if yours isn't a complete festival
@@ -93,14 +78,12 @@ pre {
         to organise headings and paragraphs or maybe bullet lists or...
         well, see how you get on with HTML and style.
       </p>
-      
       <p>
-        (but don't forget this is about conveying the <em>features</em> your
+        (But don't forget this is about conveying the <em>features</em> your
         editor has).
       </p>
-      
-      <h2 id="what-is-on-the-bottom-of-your-poster">What is on the bottom of your poster?</h2>
-      
+
+      <h2 id="what-is-on-the-bottom-of-your-{{ report_type }}">What is on the bottom of your {{ report_type }}?</h2>
       <p>
         Underneath that we want to see a list of the tasks your attempted with
         a couple of sentences on each: what you did and anything you did and
@@ -110,32 +93,35 @@ pre {
       </p>
       
       <h2 id="how-to-set-it-up">How to set it up</h2>
-      
       <p>
         As you'll know by the time you set this up, there is more than one way
         to do this, but you are <em>strongly recommended</em> to add your
         poster like this:
       </p>
-      
       <p>
         In <code>app.py</code> add another route (drop it in with your other
         routes, which means somewhere <em>before</em> <code>app.run()</code>
         is called):
       </p>
-      
-<pre>
-@app.route('/poster')
-def poster():
-  return render_template('poster.html')
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <pre class="border border-secondary p-3">
+@app.route('/{{ report_type }}')
+def {{ report_type }}():
+  return render_template('{{ report_type }}.html')
 </pre>
-    
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-8">
       <p>
         Incidentally this makes sense to you because you know how Flask
         webservers work now. How cool is that? Well done!
       </p>
-      
       <p>
-        And in <code>templates/poster.html</code> add this: (maybe
+        And in <code>templates/{{ report_type }}.html</code> add this: (maybe
         copy-and-paste it?) (we've written the first one — <code>0-GET</code>
         for you as an example — of course you can edit it!)
       </p>
@@ -145,33 +131,31 @@ def poster():
   <div class="row">
     <div class="col">
 
-      <pre>
+      <pre class="border border-secondary p-3">
 &lbrace;% extends "base.html" %&rbrace;
 &lbrace;% block content %&rbrace;
 
 &lt;style&gt;
-.cs1999-tasks &lbrace;
+.{{ report_type }}-tasks &lbrace;
   border-top: 1px solid black;
   margin-top: 4em;
 &rbrace;
-.cs1999-tasks .task &lbrace;
+.{{ report_type }}-tasks .task &lbrace;
   margin: 1em;
   padding: 1em;
   border: 1px solid black;
 &rbrace;
-.cs1999-tasks .task h2 &lbrace;
+.{{ report_type }}-tasks .task h2 &lbrace;
   border-bottom: 3px solid gray;
 &rbrace;
 &lt;/style&gt;
 
-&lt;!-- see tech note about the poster:  
-    https://rhul-cs-projects.github.io/CS1999-buggy-race-server/                --&gt;
-&lt;!--                                                                              --&gt;
-&lt;!-- anything you want here: make it beautiful! make it appealing! make it clear! --&gt;
+&lt;!-- Anything you want here: make it beautiful! make it appealing! make it clear! --&gt;
 &lt;!-- you can drop images into static/assets if you want... and access them        --&gt;
 &lt;!-- here with &lt;img src="/static/image-filename.png" alt="diagram" /&gt;             --&gt;
 &lt;!--                                                                              --&gt;
-&lt;!-- Of course you can edit static/app.css too if you want. It's your webserver,  --&gt;
+&lt;!-- Of course you can edit static/app.css too if you want...                     --&gt;
+&lt;!-- It's your webserver, after all.                                              --&gt;
 &lt;!--                                                                              --&gt;
 &lt;!-- Maybe... delete all these comments too :-)                                   --&gt;
 
@@ -179,7 +163,7 @@ def poster():
 &lt;!-- below this point keep this section tag and paste in a &lt;div&gt; for every        --&gt;
 &lt;!-- task you attempted.                                                          --&gt;
 
-&lt;section class="cs1999-tasks"&gt;
+&lt;section class="{{ report_type }}-tasks"&gt;
 
 &lt;div class="task"&gt;
   &lt;h2&gt;0-GET&lt;/h2&gt;
@@ -196,7 +180,6 @@ def poster():
   &lt;/p&gt;
 &lt;/div&gt;
 
-
 &lt;!-- this closes the section: keep it in! --&gt;
 &lt;/section&gt;
 
@@ -205,9 +188,8 @@ def poster():
     </div>
   </div>
   <div class="row">
-    <div class="col">
+    <div class="col-lg-8">
       <h2 id="add-a-note-for-every-task-you-attempted">Add a note for every task you attempted</h2>
-
       <p>
         We'll be looking at the code to see <em>what</em> you did, but in the
         notes just drop a short paragraph saying <em>what you did</em>. And
@@ -230,7 +212,6 @@ def poster():
       </p>
 
       <h3 id="keep-your-notes-short">Keep your notes short!</h3>
-
       <p>
         Just a couple of sentences on what you did is fine (it <em>might</em>
         just be stating the task's solution if you think it was
@@ -238,7 +219,6 @@ def poster():
       </p>
 
       <h2 id="helpful-html-to-copy-and-paste">Helpful HTML to copy-and-paste</h2>
-
       <p>
         Here is HTML for you to copy-and-paste: for each task you attempted,
         take this and add it to your poster (in the <code>cs1999-tasks</code>
@@ -254,334 +234,23 @@ def poster():
           before you run out of time.
         </p>
       {% endif %}
+    </div>
+  </div>
 
-      <div class="example-report">
-<!-- POSTER-TASK-HTML-START -->
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;0-GET Get the source code&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
+  <div class="row">
+    <div class="col example-report">
+      {% for task in tasks %}
+        <pre class="border border-secondary p-3">&lt;div class="task"&gt;
+  &lt;h2&gt;{{ task.fullname }} {{ task.title }}&lt;/h2&gt;
+  &lt;p&gt;
+    &lt;!-- sentence on _how_ you fixed it --&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+      {% endfor %}
 
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;0-RUN Get app running and view it in a browser&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;0-CHANGE Make a change to a template and see it appear&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;1-TEMPLATE Add a new template to the app&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;1-ADD Add more data to the form&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;1-VALID Add basic data validation&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;1-STYLE Style your editor just how you like it&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;2-EDIT Edit the record by loading its current values into the form&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;2-FORM Make the form better&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;2-COST Calculate and save the game cost of the buggy&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;2-RULES Add validation according to the game rules&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-ENV Switch between dev and production environments&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-AUTOFILL Add auto-fill to the edit forms&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-MULTI Allow different buggies to be created&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-DEL Allow buggies to be deleted&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-FLAG Display the pennant graphically&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;3-TESTS Write some tests&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;4-USERS Add users (and sessions) so you know who is editing a buggy&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;4-REGISTER Make a new user&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;4-OWNER A buggy belongs to a user&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;4-PASS Add password protection to the users&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;5-VIZ Visual representation of the buggy&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;5-RESET Password reset&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;5-RACELOG Store a history of race results for the buggies in your app&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;5-ADMIN Add admin capabilities to superusers&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;5-API Use the server API for submitting the buggy data&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-
-<pre>
-&lt;div class="task"&gt;
-&lt;h2&gt;6-FREE Add custom features to the editor&lt;/h2&gt;
-&lt;p&gt;
-  &lt;!-- sentence on _how_ you fixed it --&gt;
-&lt;/p&gt;
-&lt;p&gt;
-  &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-&lt;/p&gt;
-&lt;/div&gt;
-</pre>
-<!-- POSTER-TASK-HTML-END -->
-      </div>
     </div>
   </div>
 </div>

@@ -26,7 +26,7 @@ from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.user.forms import RegisterForm
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import SocialSetting
+from buggy_race_server.admin.models import SocialSetting, Task
 
 from buggy_race_server.utils import flash_errors, warn_if_insecure, active_user_required, join_to_project_root
 
@@ -227,9 +227,8 @@ def show_single_task(task_id):
 @blueprint.route("/project", strict_slashes=False)
 @blueprint.route("/project/<page>", strict_slashes=False)
 def serve_project_page(page=None):
-    if page is None or page == "index":
-        template = "public/project/index.html"
-    elif page == "tasks":
+    tasks = []
+    if page == "tasks":
         filename = current_app.config[ConfigSettingNames.TASK_LIST_TEMPLATE.name]
         generated_task_file = join_to_project_root(
             current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
@@ -240,9 +239,16 @@ def serve_project_page(page=None):
             flash(f"Task list ({filename}) is missing: an administrator needs to update it", "danger")
             abort(404)
         return send_file(generated_task_file)
+    elif page is None or page == "index":
+        template = "public/project/index.html"
     elif page in ["poster", "report"]:
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
+        tasks = Task.query.filter_by(is_enabled=True).order_by(
+                    Task.phase.asc(),
+                    Task.sort_position.asc()
+                ).all()
+
         template = "public/project/report.html"
     elif page == "workflow":
         template = "public/project/workflow.html"
@@ -265,6 +271,7 @@ def serve_project_page(page=None):
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
         workflow_url=workflow_url,
+        tasks=tasks,
     )
 
 @blueprint.route("/assets/<path:path>")

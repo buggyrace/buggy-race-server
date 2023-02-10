@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block page_title %}Unauthorized{% endblock %}
+{% block content %}
+<div class="jumbotron text-center">
+  <h1 class="display-4">400</h1>
+  <p>
+    Bad Request
+  </p>
+  <p>
+    This problem is nearly always because your request didn't have the correct
+    CSRF token.
+    <br>
+    The racing server puts a token into every form, and when you
+    click a button it checks that the token matches what it expected.
+    <br>
+    These tokens timeout, and that's probably what happened here.
+  </p>
+  <p>
+    <strong>Go back and refresh the page you came from</strong>
+    <br>
+    and then try to click on the button again.
+    <br>
+    That will probably solve the problem.
+  </p>
+  <h4 class="mt-5">What are CSRF tokens? Why does this happen?</h4>
+  <p>
+    These <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">Cross-site
+    Request Forgery</a> tokens prevent someone hijacking your login by
+    <em>pretending</em> to be a request you sent. 
+  </p>
+</div>
+{% endblock %}

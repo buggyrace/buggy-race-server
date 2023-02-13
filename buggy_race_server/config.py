@@ -80,6 +80,7 @@ class ConfigSettingNames(Enum):
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
+    IS_STORING_STUDENT_TASK_NOTES = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -203,6 +204,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
       }
     }
     DEFAULTS = {
@@ -226,6 +228,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -286,6 +289,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -441,6 +445,16 @@ class ConfigSettings:
           staff running the buggy racing project will register users so
           we strongly recommend public registration is not enabled.""",
 
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name:
+          """Do you want students to be able to record notes on this server
+          reporting they approached/did each task? If you're running
+          the project with a report (see `PROJECT_REPORT_TYPE`), then this
+          allows students to save notes here as they go along, which in
+          turn gives you some visibility of their progress (which is why we
+          implemented it). If you choose `No`, this feature will be hidden.
+          Note that you _can_ choose `Yes`, letting students store task notes,
+          even if the project doesn't require a report.""",
+
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999).
@@ -485,7 +499,7 @@ class ConfigSettings:
           due to an historic anomaly). The report takes the form
           of an additional webpage in the student's buggy editor
           webserver. If you choose `No report`, all mentions will
-          be removed: see also the `IS_SAVING_STUDENT_TASK_NOTES`
+          be removed: see also the `IS_STORING_STUDENT_TASK_NOTES`
           setting. """,
 
         ConfigSettingNames.PROJECT_SLUG.name:

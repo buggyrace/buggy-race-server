@@ -241,16 +241,26 @@ def show_single_task(task_id):
 def serve_project_page(page=None):
     tasks = []
     if page == "tasks":
-        filename = current_app.config[ConfigSettingNames.TASK_LIST_TEMPLATE.name]
+        task_html_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
         generated_task_file = join_to_project_root(
             current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
             current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
-            filename
+            task_html_filename
         )
         if not path.exists(generated_task_file):
-            flash(f"Task list ({filename}) is missing: an administrator needs to update it", "danger")
+            flash(f"Task list ({task_html_filename}) is missing: an administrator needs to update it", "danger")
             abort(404)
-        return send_file(generated_task_file)
+        try:
+            html_file = open(generated_task_file, "r")
+            task_html = "".join(html_file.readlines())
+            html_file.close()
+        except IOError as e:
+            flash(f"Error reading task list from {task_html_filename}: {e}", "danger")
+            abort(500)
+        return render_template(
+            "public/project/tasks.html",
+            task_html=task_html
+        )
     elif page is None or page == "index":
         template = "public/project/index.html"
     elif page in ["poster", "report"]:

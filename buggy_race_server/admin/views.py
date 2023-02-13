@@ -648,6 +648,7 @@ def settings(group_name=None):
         for name in ConfigSettings.DEFAULTS
       },
       html_descriptions=html_descriptions,
+      tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/announcements/")
@@ -807,7 +808,7 @@ def tech_notes_admin():
 def tasks_update():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
-        # render the form and save it as task_list.html
+        # render the template and save it as _task_list.html
         tasks = Task.query.order_by(
           Task.phase.asc(),
           Task.sort_position.asc()
@@ -815,31 +816,36 @@ def tasks_update():
         tasks_by_phase = defaultdict(list)
         for task in tasks:
             tasks_by_phase[task.phase].append(task)
+        created_at = datetime.now()
         html = render_template(
-            "public/project/tasks.html",
+            "public/project/_tasks.html",
             poster_word = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
             project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
             expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-            tasks_by_phase = tasks_by_phase
+            tasks_by_phase = tasks_by_phase,
+            qty_tasks=len(tasks),
+            created_at=created_at,# for debug: includes seconds, but config doesn't
         )
-        task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_TEMPLATE.name]
+        task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
         generated_task_file = join_to_project_root(
             current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
             current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
             task_list_filename
         )
         try:
-            template_file = open(generated_task_file, "w")
-            template_file.write(html)
-            template_file.close()
+            task_list_html_file = open(generated_task_file, "w")
+            task_list_html_file.write(html)
+            task_list_html_file.close()
         except IOError as e:
             flash(f"Failed to create {task_list_filename}:", "danger")
         else:
             flash("OK, task list page has been updated with latest data", "success")
+            if len(tasks) == 0:
+                flash("But: there are no tasks in the project yet: you need to some into the database", "danger")
             set_and_save_config_setting(
                 current_app,
                 name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
-                value=datetime.now().strftime("%Y-%m-%d %H:%M")
+                value=created_at.strftime("%Y-%m-%d %H:%M"),
             )
     return redirect(url_for('admin.tasks_admin'))
 

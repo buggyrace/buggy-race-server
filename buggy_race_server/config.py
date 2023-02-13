@@ -105,7 +105,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
     TASK_LIST_GENERATED_DATETIME = auto()
-    TASK_LIST_TEMPLATE = auto()
+    TASK_LIST_HTML_FILENAME = auto()
     TASKS_LOADED_DATETIME = auto()
     TASK_URLS_USE_ANCHORS = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
@@ -251,7 +251,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
-        ConfigSettingNames.TASK_LIST_TEMPLATE.name: "task_list.html",
+        ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
@@ -311,7 +311,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
-        ConfigSettingNames.TASK_LIST_TEMPLATE.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
@@ -661,13 +661,17 @@ class ConfigSettings:
             Note: this does NOT do anything with the database!
         """
         str_value = str(value)
-        type = ConfigSettings.TYPES[name]
+        try:
+          type = ConfigSettings.TYPES[name]
+        except KeyError as e:
+          print(f"* ignoring unknown config setting: {name}, not set", flush=True)
+          return
         if type == ConfigTypes.BOOLEAN:
             value = str_value == "1"
         elif type == ConfigTypes.INT:
             value = int(str_value) if str_value.isdecimal() else 0
         app.config[name] = value
-        print(f"* updated config value: {name}={value}", flush=True)
+        # print(f"* updated config value: {name}={value}", flush=True)
 
     @staticmethod
     def admin_usernames_list(app):

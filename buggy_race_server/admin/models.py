@@ -189,3 +189,19 @@ class Task(SurrogatePK, Model):
     def __init__(self, **kwargs):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
+
+
+class Note(SurrogatePK, Model):
+    """Note by student recording how they approached/did a task"""
+
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    modified_at = Column(db.DateTime, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
+    text = Column(db.Text(), unique=False, nullable=False, default="")
+
+    __tablename__ = "notes"
+    def __init__(self, **kwargs):
+       """Create instance."""
+       db.Model.__init__(self, **kwargs)

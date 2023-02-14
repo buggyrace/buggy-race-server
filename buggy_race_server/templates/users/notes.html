@@ -11,6 +11,17 @@
       {{ report_type }} notes
     </h1>
   </div>
+  <div class="row">
+    <div class="col btn-collection">
+      {% for phase in tasks_by_phase %}
+        {% for task in tasks_by_phase[phase] %}
+          {% if notes_by_task_id[task.id] %}
+            <a class="btn btn-secondary btn-goto-note" data-phase="{{ task.phase }}" href="#{{ task.anchor }}">{{ task.fullname }}</a>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
   {% for phase in tasks_by_phase %}
     <div class="row mt-4 mb-2">
       <div class="col">
@@ -20,7 +31,8 @@
               Phase {{ phase }}
             </h3>
             <div class="col-sm-6 p-3 text-right">
-              <span class="task-count" data-phase="{{ phase }}">{{ tasks_by_phase[phase] | length }}
+              <span id="toggle-btn-{{ phase }}" class="task-count"
+                data-phase="{{ phase }}">{{ tasks_by_phase[phase] | length }}
                 {% if (tasks_by_phase[phase] | length) == 1 %}
                   task
                 {% else %}

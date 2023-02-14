@@ -263,7 +263,7 @@ def note(task_fullname):
                 note.modified_at = datetime.now()
             note.save()
             flash(f"OK, saved {user.pretty_username}'s note for task {task.fullname}", "success")
-            return redirect(url_for("user.list_notes") + "#" + task.anchor)
+            return redirect(url_for("user.list_notes"))
         else:
             flash_errors(form)
     is_own_note = current_user.id == note.user_id

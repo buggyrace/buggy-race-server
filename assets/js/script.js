@@ -141,7 +141,6 @@ function bulk_registration_by_ajax(bulk_register_form){
   let csv_raw_rows = bulk_register_form[USER_REGISTER_CSV_ID].value.split("\n");
   let csv_rows_as_dicts = [];
   let header_row = [];
-  console.log("number of rows: " + csv_raw_rows.length);
   let err_msg = null;
   for (let i=0; i<csv_raw_rows.length; i++) {
     let row = csv_raw_rows[i].split(/\s*,\s*/);
@@ -291,7 +290,6 @@ $(function() {
     bulk_register_form.addEventListener('submit', function(e){
       e.preventDefault();
       bulk_register_form.classList.remove("d-none");
-      console.log(bulk_register_form.classList);
       $(bulk_register_form).slideUp(
         "slow",
         function(){bulk_registration_by_ajax(bulk_register_form)}
@@ -361,7 +359,6 @@ $(function() {
         )
       });
       let want_to_hide = localStorage.getItem(this.dataset.column)=="true";
-      console.log(this.dataset.column + " = " + want_to_hide, want_to_hide);
       if ($(this)[0].dataset.column != ALL_COLUMNS) {
         show_or_hide_col_by_button(
           $(this)[0],
@@ -377,7 +374,7 @@ $(function() {
 
     function toggle_task_display(){
       let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
-      let is_hidden = this.dataset.is_hidden == "0";
+      let is_hidden = this.dataset.is_hidden == "1";
       if (is_hidden){
         $tasks_box.slideDown("slow");
         this.innerText = "Hide " + this.dataset.text
@@ -385,7 +382,7 @@ $(function() {
         $tasks_box.slideUp("slow")
         this.innerText = "Show " + this.dataset.text
       }
-      this.dataset.is_hidden = is_hidden? "1" : "0"; // toggle
+      this.dataset.is_hidden = is_hidden? "0" : "1"; // toggle
     }
 
     $task_counts.each(function(){
@@ -393,11 +390,25 @@ $(function() {
       let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
       let is_hidden = $tasks_box.find(".task-note").length == 0;
       this.dataset.text = this.innerText;
-      this.dataset.is_hidden = is_hidden? "1" : "0";
+      this.dataset.is_hidden = is_hidden? "0" : "1";
       this.classList.add("btn", "btn-outline-secondary");
       this.addEventListener("click", toggle_task_display);
       this.dispatchEvent(new Event("click"));
-    })
+    });
+
+    let $goto_btns = $(".btn-goto-note");
+    if ($goto_btns){
+      // need to unhide phase if trying to jump to anchor within it
+      function reveal_goto_target(){
+        let toggle_btn = document.getElementById("toggle-btn-" + this.dataset.phase);
+        if (toggle_btn && toggle_btn.dataset.is_hidden == "1"){
+          toggle_btn.dispatchEvent(new Event("click"));
+        }  
+      }
+      $(".btn-goto-note").each(function(){
+        this.addEventListener("click", reveal_goto_target)
+      });
+    }
   }
 
   if (deadline_display){

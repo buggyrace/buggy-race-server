@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Admin models: settings and announcements."""
 
+from collections import defaultdict
 from datetime import datetime
 from enum import Enum
 import re
@@ -119,6 +120,20 @@ class Task(SurrogatePK, Model):
           name = matched.group(2)
       return (phase, name)
     
+    @staticmethod
+    def get_dict_tasks_by_phase(want_hidden=True):
+        """Returns dict keyed on phase number containing lists of
+           tasks (in task sort order)"""
+        tasks = Task.query.order_by(
+          Task.phase.asc(),
+          Task.sort_position.asc()
+        ).all()
+        tasks_by_phase = defaultdict(list)
+        for task in tasks:
+            if task.is_enabled or want_hidden:
+                tasks_by_phase[task.phase].append(task)
+        return tasks_by_phase
+
     @property
     def raw_markdown(self):
         return f"""# {self.phase}-{self.name.upper()}
@@ -193,6 +208,14 @@ class Task(SurrogatePK, Model):
 
 class Note(SurrogatePK, Model):
     """Note by student recording how they approached/did a task"""
+
+    @staticmethod
+    def get_dict_notes_by_task_id(user_id):
+        """Returns dict of notes keyed on task id"""
+        return {
+           note.task_id: note
+           for note in Note.query.filter_by(user_id=user_id).all()
+        }
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)

@@ -469,3 +469,9 @@ span.btn.disabled{
 .hidden{
   display: none; /* bootstrap's d-none too heavy-handed: has !important */
 }
+
+.task-note {
+  border:1px solid #ccc;
+  background-color: #fffff8;
+  box-shadow: 0.3rem 0.3rem 0.3rem 0.1rem rgba(0,0,0,0.33);
+}

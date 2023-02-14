@@ -372,6 +372,34 @@ $(function() {
     is_init_done = true; // now show/hide uses slow fade, so user notices
   }
 
+  let $task_counts = $(".task-count");
+  if ($task_counts){
+
+    function toggle_task_display(){
+      let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
+      let is_hidden = this.dataset.is_hidden == "0";
+      if (is_hidden){
+        $tasks_box.slideDown("slow");
+        this.innerText = "Hide " + this.dataset.text
+      } else {
+        $tasks_box.slideUp("slow")
+        this.innerText = "Show " + this.dataset.text
+      }
+      this.dataset.is_hidden = is_hidden? "1" : "0"; // toggle
+    }
+
+    $task_counts.each(function(){
+      // collapse any box which doesn't have notes
+      let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
+      let is_hidden = $tasks_box.find(".task-note").length == 0;
+      this.dataset.text = this.innerText;
+      this.dataset.is_hidden = is_hidden? "1" : "0";
+      this.classList.add("btn", "btn-outline-secondary");
+      this.addEventListener("click", toggle_task_display);
+      this.dispatchEvent(new Event("click"));
+    })
+  }
+
   if (deadline_display){
     run_countdown();
   }

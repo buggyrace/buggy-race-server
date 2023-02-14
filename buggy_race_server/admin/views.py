@@ -809,13 +809,8 @@ def tasks_update():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
         # render the template and save it as _task_list.html
-        tasks = Task.query.order_by(
-          Task.phase.asc(),
-          Task.sort_position.asc()
-        ).all()
-        tasks_by_phase = defaultdict(list)
-        for task in tasks:
-            tasks_by_phase[task.phase].append(task)
+        tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
+        qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
         created_at = datetime.now()
         html = render_template(
             "public/project/_tasks.html",
@@ -823,7 +818,7 @@ def tasks_update():
             project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
             expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
             tasks_by_phase = tasks_by_phase,
-            qty_tasks=len(tasks),
+            qty_tasks=qty_tasks,
             created_at=created_at,# for debug: includes seconds, but config doesn't
         )
         task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
@@ -839,9 +834,11 @@ def tasks_update():
         except IOError as e:
             flash(f"Failed to create {task_list_filename}:", "danger")
         else:
-            flash("OK, task list page has been updated with latest data", "success")
-            if len(tasks) == 0:
-                flash("But: there are no tasks in the project yet: you need to some into the database", "danger")
+            if qty_tasks == 0:
+                flash("Task list page has been updated but there are no tasks in the project yet!", "danger")
+                flash("You should load some tasks into the database before the project can start", "warning")
+            else:
+                flash(f"OK, task list page has been updated with latest data ({qty_tasks} tasks)", "success")
             set_and_save_config_setting(
                 current_app,
                 name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,

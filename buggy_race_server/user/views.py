@@ -10,10 +10,12 @@ from flask_login import login_required, current_user
 from functools import wraps
 from wtforms import ValidationError
 
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.admin.forms import NoteForm
+from buggy_race_server.admin.models import Note, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.user.models import User
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
+from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
 from buggy_race_server.utils import (
     active_user_required,
@@ -224,3 +226,70 @@ def vscode_workspace():
     )
     response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
     return response
+
+@blueprint.route("/note/<task_fullname>", methods=['GET', 'POST'])
+@login_required
+@active_user_required
+def note(task_fullname):
+    """Show note for current user"""
+    (phase, name) = Task.split_fullname(task_fullname)
+    if phase is None:
+        abort(404)
+    task = Task.query.filter_by(phase=phase, name=name).first()
+    if task is None:
+        abort(404)
+    if not task.is_enabled:
+        flash("Warning: this task is currently not part of the project (it's been hidden)", "danger")
+    form = NoteForm(request.form)
+    user = current_user # TODO allow admins to edit notes?
+    note = Note.query.filter_by(user_id=user.id, task_id=task.id).first()
+    is_new_note = note is None
+    if is_new_note:
+        note = Note(
+            user_id=current_user.id,
+            task_id=task.id,
+            text="",
+            created_at=datetime.now())
+    if request.method == "POST":
+        if form.task_id.data != str(task.id):
+            flash("Mismatched task in request", "danger")
+            abort(400)
+        if form.user_id.data != str(current_user.id):
+            flash("Mismatched user in request", "danger")
+            abort(400)
+        if form.validate_on_submit():
+            note.text = form.text.data
+            if not is_new_note:
+                note.modified_at = datetime.now()
+            note.save()
+            flash(f"OK, saved {user.pretty_username}'s note for task {task.fullname}", "success")
+            return redirect(url_for("user.list_notes") + "#" + task.anchor)
+        else:
+            flash_errors(form)
+    is_own_note = current_user.id == note.user_id
+    return render_template(
+        "users/note.html",
+        user=user,
+        is_own_note=is_own_note,
+        is_new_note=is_new_note,
+        note=note,
+        task=task,
+        report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        form=form,
+        pretty_timestamp=(note.modified_at or note.created_at).strftime("%Y-%m-%d %H:%M"),
+    )
+
+@blueprint.route("/notes", methods=['GET'])
+@login_required
+@active_user_required
+def list_notes():
+    """Show all notes for current user"""
+    user = current_user
+    tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
+    notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
+    return render_template(
+        'users/notes.html',
+        user=user,
+        tasks_by_phase=tasks_by_phase,
+        notes_by_task_id=notes_by_task_id,
+    )

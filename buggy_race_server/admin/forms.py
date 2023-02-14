@@ -264,6 +264,20 @@ class TaskForm(FlaskForm):
     def validate(self):
         return super(TaskForm, self).validate()
 
+class NoteForm(FlaskForm):
+    user_id = HiddenField()
+    task_id = HiddenField()
+    text = TextAreaField(
+        "A sentence or two about how you approached or solved this task.",
+        [DataRequired()]
+    )
+    def __init__(self, *args, **kwargs):
+        super(NoteForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(NoteForm, self).validate()
+
+
 class GeneralSubmitForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):

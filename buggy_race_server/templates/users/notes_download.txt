@@ -1,0 +1,17 @@
+{{ project_code }} Buggy Editor Project notes by {{ username }}
+Downloaded from the race server: {{ downloaded_at }}
+{% if report_type %}
+For more about your {{ report_type}}, see
+{{ buggy_race_server_url }}{{ url_for('public.serve_project_page', page=report_type )}}
+{% endif %}
+----------------------------------------
+
+{% for task_id in notes_by_task_id %}
+{{ tasks_by_id[task_id].fullname }}: {{ tasks_by_id[task_id].title }}
+-------------------------------------------------------------------------------
+
+{{ notes_by_task_id[task_id].text }}
+
+
+
+{% endfor %}

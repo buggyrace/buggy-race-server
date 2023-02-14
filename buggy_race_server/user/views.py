@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 """User views."""
-import os
-import csv
 import time
 from datetime import datetime
 import threading
-from flask import Blueprint, render_template, request, abort, flash, redirect, url_for, current_app, Markup, Response
+from flask import (
+    abort,
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    make_response,
+    Markup,
+    redirect,
+    render_template,
+    request,
+    Response,
+    url_for,
+)
 from flask_login import login_required, current_user
 from functools import wraps
 from wtforms import ValidationError
@@ -279,7 +290,7 @@ def note(task_fullname):
         pretty_timestamp=(note.modified_at or note.created_at).strftime("%Y-%m-%d %H:%M"),
     )
 
-@blueprint.route("/notes", methods=['GET'])
+@blueprint.route("/notes", strict_slashes=False, methods=['GET'])
 @login_required
 @active_user_required
 def list_notes():
@@ -293,3 +304,33 @@ def list_notes():
         tasks_by_phase=tasks_by_phase,
         notes_by_task_id=notes_by_task_id,
     )
+
+@blueprint.route("/notes/download/<format>", methods=['GET'])
+@login_required
+@active_user_required
+def download_notes(format):
+    """Get notes for current user in HTML or text format (html or txt)"""
+    if format not in ["html", "txt"]:
+        flash("Notes can be downloaded as HTML or plain text (html or txt) only", "error")
+        abort(400)
+    user = current_user
+    tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}
+    notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
+    filename = get_download_filename(f"notes-{user.username}.{format}", want_datestamp=True)        
+    response = make_response(
+        render_template(
+            f"users/notes_download.{format}",
+            username=user.username,
+            notes_by_task_id=notes_by_task_id,
+            tasks_by_id=tasks_by_id,
+            project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+            report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+            downloaded_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        )
+    )
+    response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
+    return response
+
+
+

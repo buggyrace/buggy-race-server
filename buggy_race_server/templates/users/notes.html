@@ -22,6 +22,12 @@
       {% endfor %}
     </div>
   </div>
+  <div class="row">
+    <div class="col btn-collection my-3">
+      <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download notes as&nbsp;HTML&nbsp;&dtri;</a>
+      <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download notes as plain&nbsp;text&nbsp;&dtri;</a>
+    </div>
+  </div>
   {% for phase in tasks_by_phase %}
     <div class="row mt-4 mb-2">
       <div class="col">

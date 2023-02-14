@@ -3,6 +3,7 @@
 import time
 from datetime import datetime
 import threading
+import markdown
 from flask import (
     abort,
     Blueprint,
@@ -301,8 +302,10 @@ def list_notes():
     return render_template(
         'users/notes.html',
         user=user,
+        is_own_note=user.id == current_user.id,
         tasks_by_phase=tasks_by_phase,
         notes_by_task_id=notes_by_task_id,
+        report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
 
 @blueprint.route("/notes/download/<format>", methods=['GET'])
@@ -310,12 +313,16 @@ def list_notes():
 @active_user_required
 def download_notes(format):
     """Get notes for current user in HTML or text format (html or txt)"""
-    if format not in ["html", "txt"]:
+    if format not in ["html", "md2html", "txt"]:
         flash("Notes can be downloaded as HTML or plain text (html or txt) only", "error")
         abort(400)
     user = current_user
     tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}
     notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
+    if format == "md2html":
+        for task_id in notes_by_task_id:
+            notes_by_task_id[task_id].text = markdown.markdown(notes_by_task_id[task_id].text)
+        format = "html"
     filename = get_download_filename(f"notes-{user.username}.{format}", want_datestamp=True)        
     response = make_response(
         render_template(

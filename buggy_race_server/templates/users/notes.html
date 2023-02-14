@@ -8,11 +8,11 @@
       {% else %}
           {{ user.pretty_username }}’s
       {% endif %}
-      {{ report_type }} notes
+      {{ report_type }} task notes
     </h1>
   </div>
   <div class="row">
-    <div class="col btn-collection">
+    <div class="col-lg-8 btn-collection">
       {% for phase in tasks_by_phase %}
         {% for task in tasks_by_phase[phase] %}
           {% if notes_by_task_id[task.id] %}
@@ -23,9 +23,18 @@
     </div>
   </div>
   <div class="row">
-    <div class="col btn-collection my-3">
-      <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download notes as&nbsp;HTML&nbsp;&dtri;</a>
-      <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download notes as plain&nbsp;text&nbsp;&dtri;</a>
+    <div class="col my-3">
+      {% if report_type %}
+        <p>
+          You can download all your notes as a single text or HTML file, to copy-and-paste
+          into your {{ report_type }}.
+        </p>
+      {% endif %}
+      <p class="btn-collection">
+        <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML&nbsp;&dtri;</a>
+        <a href="{{ url_for('user.download_notes', format='md2html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML (using&nbsp;markdown)&dtri;</a>
+        <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download as plain&nbsp;text&nbsp;&dtri;</a>
+      </p>
     </div>
   </div>
   {% for phase in tasks_by_phase %}

@@ -820,6 +820,7 @@ def tasks_update():
             tasks_by_phase = tasks_by_phase,
             qty_tasks=qty_tasks,
             created_at=created_at,# for debug: includes seconds, but config doesn't
+            is_storing_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
         )
         task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
         generated_task_file = join_to_project_root(

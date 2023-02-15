@@ -244,6 +244,9 @@ def vscode_workspace():
 @active_user_required
 def note(task_fullname):
     """Show note for current user"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
+        flash("Notes are not enabled on this project", "warning")
+        abort(404)
     (phase, name) = Task.split_fullname(task_fullname)
     if phase is None:
         abort(404)
@@ -296,6 +299,9 @@ def note(task_fullname):
 @active_user_required
 def list_notes():
     """Show all notes for current user"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
+        flash("Notes are not enabled on this project", "warning")
+        abort(404)
     user = current_user
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
@@ -313,9 +319,12 @@ def list_notes():
 @active_user_required
 def download_notes(format):
     """Get notes for current user in HTML or text format (html or txt)"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
+        flash("Notes are not enabled on this project", "warning")
+        abort(404)
     if format not in ["html", "md2html", "txt"]:
         flash("Notes can be downloaded as HTML or plain text (html or txt) only", "error")
-        abort(400)
+        abort(404)
     user = current_user
     tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}
     notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)

@@ -83,12 +83,18 @@
           <section class="phase-{{ phase }}">
             {% for task in tasks_by_phase[phase] %}  
               <div class="task" id="{{ task.anchor }}">
-                <h3>
-                  <a href="#{{ task.anchor }}">{{ task.fullname }}</a> {{ task.title }}
-                </h3>
-                {% if is_storing_notes %}
-                  <a class="btn btn-outline-secondary btn-task-note" href="{{ url_for('user.note', task_fullname=task.fullname) }}">Note&nbsp;&rtri;</a>
-                {% endif %}
+                <div class="container">
+                  <div class="row task-heading">
+                    <h3 class="m-0 col">
+                      <a href="#{{ task.anchor }}">{{ task.fullname }}</a> {{ task.title }}
+                    </h3>
+                    {% if is_storing_notes %}
+                    <div class="col-md-3 text-right p-2">
+                      <a class="btn btn-outline-secondary btn-task-note" href="{{ url_for('user.note', task_fullname=task.fullname) }}">Add&nbsp;note&nbsp;&rtri;</a>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
                 <div class="item problem">
   {{ task.problem_html(config) | safe }}
                 </div>

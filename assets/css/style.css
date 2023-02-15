@@ -54,6 +54,13 @@ textarea {
   border-top:1px solid #cccccc;
 }
 
+.buggy-project .task-breakdown .task-heading {
+  margin-bottom:1rem;
+}
+.buggy-project .task-breakdown .btn-task-note{
+  background-color:white;
+}
+
 .buggy-project .phase-list {
   margin:1em auto;
   border:1px solid gray;
@@ -92,7 +99,6 @@ textarea {
 .buggy-project .task h3 {
   padding:0.5em;
   margin:0 0 0.5em 0;
-  background-color:#ffffbb;
 }
 .buggy-project .task .item {
   padding:0 0 0.5em 0;
@@ -175,17 +181,17 @@ textarea {
 }
 
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
-.buggy-project .phase-0 .task h3 { background-color: #ffffbb; }
+.buggy-project .phase-0 .task .task-heading { background-color: #ffffbb; }
 .buggy-project .phase-1 .task:before{ background: repeating-linear-gradient(-45deg, #ffe600, #ffe600 1em, black 1em, black 2em);}
-.buggy-project .phase-1 .task h3 { background-color: #ffeebb; }
+.buggy-project .phase-1 .task .task-heading { background-color: #ffeebb; }
 .buggy-project .phase-2 .task:before{ background: repeating-linear-gradient(-45deg, #ffc100, #ffc100 1em, black 1em, black 2em);}
-.buggy-project .phase-2 .task h3 { background-color: #ffe3bb; }
+.buggy-project .phase-2 .task .task-heading { background-color: #ffe3bb; }
 .buggy-project .phase-3 .task:before{ background: repeating-linear-gradient(-45deg, #ff9c00, #ff9c00 1em, black 1em, black 2em);}
-.buggy-project .phase-3 .task h3 { background-color: #ffd2bb; }
+.buggy-project .phase-3 .task .task-heading { background-color: #ffd2bb; }
 .buggy-project .phase-4 .task:before{ background: repeating-linear-gradient(-45deg, #ff7600, #ff7600 1em, black 1em, black 2em);}
-.buggy-project .phase-4 .task h3 { background-color: #ffc6bb; }
+.buggy-project .phase-4 .task .task-heading { background-color: #ffc6bb; }
 .buggy-project .phase-5 .task:before{ background: repeating-linear-gradient(-45deg, #ff0000, #ff0000 1em, black 1em, black 2em);}
-.buggy-project .phase-5 .task h3 { background-color: #ffbbbb; }
+.buggy-project .phase-5 .task .task-heading { background-color: #ffbbbb; }
 
 .buggy-text-overlay {
   background-color: rgba(0,0,0,0.333);

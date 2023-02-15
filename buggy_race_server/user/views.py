@@ -22,7 +22,7 @@ from flask_login import login_required, current_user
 from functools import wraps
 from wtforms import ValidationError
 
-from buggy_race_server.admin.forms import NoteForm
+from buggy_race_server.admin.forms import NoteForm, NoteDeleteForm
 from buggy_race_server.admin.models import Note, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.config import ConfigSettingNames
@@ -239,6 +239,33 @@ def vscode_workspace():
     response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
     return response
 
+@blueprint.route("/note/delete", methods=['POST'])
+@login_required
+@active_user_required
+def delete_note():
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
+        flash("Notes are not enabled on this project", "warning")
+        abort(404)
+    form = NoteDeleteForm(request.form)
+    if form.validate_on_submit():
+        if not form.is_confirmed.data:
+            flash("Did not delete note (you didn't confirm it)", "warning")
+        else:
+            user = current_user # TODO: admin deletes others' notes
+            note = Note.get_by_id(form.note_id.data)
+            if not note:
+                abort(404)
+            task = Task.get_by_id(note.task_id)
+            if not task or note.user_id != user.id:
+                flash("Did not delete note: data mismatch", "warning")
+            else:
+                note.delete()
+                flash(f"OK, deleted {user.pretty_username}'s note for task {task.fullname}", "success")
+    else:
+        flash_errors(form)
+    return redirect(url_for('user.list_notes'))
+
+
 @blueprint.route("/note/<task_fullname>", methods=['GET', 'POST'])
 @login_required
 @active_user_required
@@ -256,6 +283,7 @@ def note(task_fullname):
     if not task.is_enabled:
         flash("Warning: this task is currently not part of the project (it's been hidden)", "danger")
     form = NoteForm(request.form)
+    delete_form = NoteDeleteForm()
     user = current_user # TODO allow admins to edit notes?
     note = Note.query.filter_by(user_id=user.id, task_id=task.id).first()
     is_new_note = note is None
@@ -291,6 +319,7 @@ def note(task_fullname):
         task=task,
         report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
         form=form,
+        delete_form=delete_form,
         pretty_timestamp=(note.modified_at or note.created_at).strftime("%Y-%m-%d %H:%M"),
     )
 

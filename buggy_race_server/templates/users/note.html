@@ -62,6 +62,39 @@
       </div>
     </div>
   </div>
+
+  {% if not is_new_note %}
+    <div class="row">
+      <div class="col-lg-8 my-5">
+        <p>
+          You can delete your note — be careful, you can't undo this.
+          Maybe download a copy of all your notes as a single HTML or
+          plain text file as a backup first?
+        </p>
+        <div class="border border-secondary container">
+          <form id="NoteDeleteForm" method="POST" action="{{ url_for('user.delete_note')}}" role="form">
+            {{ delete_form.csrf_token }}
+            {{ delete_form.note_id(value=note.id) }}
+            <div class="row">
+              <div class="col-md-3 p-3">
+                {{ delete_form.is_confirmed.label }}
+              </div>
+              <div class="col-md-3 p-3">
+                <select id="is_confirmed" name="is_confirmed" class="form-control">
+                  <option selected value="">No</option>
+                  <option value="">I think so</option>
+                  <option value="y">Yes</option>
+                </select>  
+              </div>
+              <div class="col-md-6 p-3">
+                <input type="submit" class="btn btn-danger" value="Delete note"/>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

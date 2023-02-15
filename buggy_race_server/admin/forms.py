@@ -278,6 +278,17 @@ class NoteForm(FlaskForm):
         return super(NoteForm, self).validate()
 
 
+class NoteDeleteForm(FlaskForm):
+    note_id = HiddenField()
+    is_confirmed = BooleanField("Are you sure?")
+  
+    def __init__(self, *args, **kwargs):
+        super(NoteDeleteForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(NoteDeleteForm, self).validate()
+
+
 class GeneralSubmitForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):

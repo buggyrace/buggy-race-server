@@ -166,7 +166,9 @@ def showspecs_data(data_filename=""):
 def about():
     """About page."""
     form = LoginForm(request.form)
-    return render_template("public/about.html", form=form)
+    response = make_response(render_template("public/about.html", form=form))
+    response.headers.set("Cache-Control", "no-cache")
+    return response
 
 @blueprint.route("/race/")
 def announce_races():

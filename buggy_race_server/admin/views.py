@@ -8,6 +8,8 @@ import os
 from collections import defaultdict
 import markdown
 
+from sqlalchemy.inspection import inspect
+
 from flask import (
     abort,
     Blueprint,
@@ -40,7 +42,7 @@ from buggy_race_server.admin.forms import (
     SubmitWithAuthForm,
     TaskForm,
 )
-from buggy_race_server.admin.models import Announcement, Setting, SocialSetting, Task
+from buggy_race_server.admin.models import Announcement, Note, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
@@ -288,6 +290,7 @@ def setup():
 @blueprint.route("/")
 @login_required
 def admin():
+    TASK_NOTE_LENGTH_THRESHHOLD = 2 # texts shorter than this are not counted
     if not current_user.is_buggy_admin:
       abort(403)
     today = datetime.now().date()
@@ -303,7 +306,18 @@ def admin():
     users_deactivated = [u for u in users if not u.is_active]
     admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
     other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
-    qty_tasks = Task.query.filter_by(is_enabled=True).count()
+    tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
+    qty_tasks = len(tasks)
+    tasks_by_id = {task.id: task.fullname for task in tasks}
+    qty_notes_by_task = defaultdict(int)
+    qty_notes = 0
+    if is_storing_notes := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
+      # TODO counting all notes, not only those of enrolled active students
+      notes = Note.query.all()
+      qty_notes = len(notes)
+      for note in notes:
+         if len(note.text) > TASK_NOTE_LENGTH_THRESHHOLD:
+            qty_notes_by_task[tasks_by_id[note.task_id]] += 1
     return render_template(
       "admin/dashboard.html",
       students_active = students_active,
@@ -325,8 +339,12 @@ def admin():
       qty_admin_users=len(admin_users),
       other_users=other_users,
       qty_other_users=len(other_users),
+      tasks=tasks,
       qty_tasks=qty_tasks,
       submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+      is_storing_notes=is_storing_notes,
+      qty_notes_by_task=qty_notes_by_task,
+      qty_notes=qty_notes,
     )
 
 @blueprint.route("/users")

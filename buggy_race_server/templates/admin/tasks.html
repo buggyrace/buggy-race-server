@@ -82,7 +82,7 @@
                 <td>
                   {% if task.is_enabled %}
                     <a href="{{ url_for('public.serve_project_page', page='tasks') }}#{{ task.anchor }}"
-                    class="btn btn-outline-secondary">{{ task.fullname }}&nbsp;&rtri;</a>
+                    class="btn btn-outline-secondary btn-white">{{ task.fullname }}&nbsp;&rtri;</a>
                   {% else %}
                     <span class="btn btn-outline-secondary disabled ">{{ task.fullname }}&nbsp;&times;</span>
                 {% endif %}

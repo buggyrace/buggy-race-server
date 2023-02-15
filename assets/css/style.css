@@ -9,19 +9,20 @@ html {
 }
 
 body {
+  background-color: #ffffcc;
+  background-image:url('/static/build/img/metal-floor-plate.jpg');
 }
 
 section {
   overflow: auto;
 }
 
-textarea {
-  resize: vertical;
+main {
+  background-color:white;
 }
 
-.container-narrow{
-  margin: 0 auto;
-  max-width: 700px;
+textarea {
+  resize: vertical;
 }
 
 /* home */
@@ -32,11 +33,6 @@ textarea {
 
 /* Forms */
 
-.navbar-form input[type="text"],
-.navbar-form input[type="password"] {
-  width: 180px;
-}
-
 .form-register .form-control {
   position: relative;
   font-size: 16px;
@@ -45,6 +41,15 @@ textarea {
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
+}
+
+/* btn-white for secondary outline buttons */
+.btn-white {
+  background-color:white;
+}
+.btn-white:hover {
+  color: white;
+  background-color:#6c757d;
 }
 
 /* the buggy project page */
@@ -255,14 +260,6 @@ footer .footer-nav {
   float: right;
   margin-right: 25px;
   list-style: none;
-}
-
-body {
-  background-color: #ffffcc;
-  background-image:url('/static/build/img/metal-floor-plate.jpg');
-}
-main {
-  background-color:white;
 }
 
 /* icons */

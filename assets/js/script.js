@@ -391,7 +391,7 @@ $(function() {
       let is_hidden = $tasks_box.find(".task-note").length == 0;
       this.dataset.text = this.innerText;
       this.dataset.is_hidden = is_hidden? "0" : "1";
-      this.classList.add("btn", "btn-outline-secondary");
+      this.classList.add("btn", "btn-outline-secondary", "btn-white");
       this.addEventListener("click", toggle_task_display);
       this.dispatchEvent(new Event("click"));
     });

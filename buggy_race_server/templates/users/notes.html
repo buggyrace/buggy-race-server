@@ -11,32 +11,40 @@
       {{ report_type }} task notes
     </h1>
   </div>
-  <div class="row">
-    <div class="col-lg-8 btn-collection">
-      {% for phase in tasks_by_phase %}
-        {% for task in tasks_by_phase[phase] %}
-          {% if notes_by_task_id[task.id] %}
-            <a class="btn btn-secondary btn-goto-note" data-phase="{{ task.phase }}" href="#{{ task.anchor }}">{{ task.fullname }}</a>
-          {% endif %}
+  {% if qty_notes == 0 %}
+    <div class="row">
+      <div class="col-lg-8 btn-collection">
+        You have not created any task notes.
+      </div>
+    </div>
+{% else %}
+    <div class="row">
+      <div class="col-lg-8 btn-collection">
+        {% for phase in tasks_by_phase %}
+          {% for task in tasks_by_phase[phase] %}
+            {% if notes_by_task_id[task.id] %}
+              <a class="btn btn-secondary btn-goto-note" data-phase="{{ task.phase }}" href="#{{ task.anchor }}">{{ task.fullname }}</a>
+            {% endif %}
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col my-3">
-      {% if report_type %}
-        <p>
-          You can download all your notes as a single text or HTML file, to copy-and-paste
-          into your {{ report_type }}.
+    <div class="row">
+      <div class="col my-3">
+        {% if report_type %}
+          <p>
+            You can download all your notes as a single text or HTML file, to copy-and-paste
+            into your {{ report_type }}.
+          </p>
+        {% endif %}
+        <p class="btn-collection">
+          <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML&nbsp;&dtri;</a>
+          <a href="{{ url_for('user.download_notes', format='md2html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML (using&nbsp;markdown)&dtri;</a>
+          <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download as plain&nbsp;text&nbsp;&dtri;</a>
         </p>
-      {% endif %}
-      <p class="btn-collection">
-        <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML&nbsp;&dtri;</a>
-        <a href="{{ url_for('user.download_notes', format='md2html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML (using&nbsp;markdown)&dtri;</a>
-        <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download as plain&nbsp;text&nbsp;&dtri;</a>
-      </p>
+      </div>
     </div>
-  </div>
+  {% endif %}
   {% for phase in tasks_by_phase %}
     <div class="row mt-4 mb-2">
       <div class="col">
@@ -85,6 +93,14 @@
       {% endfor %}
     {% endif %}
   {% endfor %}
+  <div class="row mt-5">
+    <div class="col btn-collection">
+      <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary">Task list &rtri;</a>
+      {% if report_type %}
+        <a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
 

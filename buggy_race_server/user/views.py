@@ -338,6 +338,7 @@ def list_notes():
         'users/notes.html',
         user=user,
         is_own_note=user.id == current_user.id,
+        qty_notes=len(notes_by_task_id),
         tasks_by_phase=tasks_by_phase,
         notes_by_task_id=notes_by_task_id,
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],

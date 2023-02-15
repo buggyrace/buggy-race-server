@@ -186,6 +186,7 @@ textarea {
 }
 
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
+.buggy-project .phase-6 .task .task-heading,
 .buggy-project .phase-0 .task .task-heading { background-color: #ffffbb; }
 .buggy-project .phase-1 .task:before{ background: repeating-linear-gradient(-45deg, #ffe600, #ffe600 1em, black 1em, black 2em);}
 .buggy-project .phase-1 .task .task-heading { background-color: #ffeebb; }

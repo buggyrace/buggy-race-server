@@ -6,9 +6,6 @@ race.log
 tech_notes/output/
 tech_notes/pelicanconflive.py
 
-# cached HTML body of the task list:
-buggy_race_server/templates/public/project/_tasks.html
-
 **/__pycache__/
 *.py[cod]
 buggy_race_server/static

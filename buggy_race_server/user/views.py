@@ -175,7 +175,8 @@ def change_password():
             flash_errors(form)
     usernames = []
     if current_user.is_buggy_admin:
-        form.username.choices =  [""]+sorted([user.username for user in User.query.all()])
+        form.username.choices = sorted([user.username for user in User.query.all()])
+        form.username.data = form.username.data or current_user.username
     return render_template("users/password.html", form=form)
   
 @blueprint.route("/secret", methods=['GET','POST'])

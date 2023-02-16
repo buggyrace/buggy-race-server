@@ -409,6 +409,26 @@ $(function() {
         this.addEventListener("click", reveal_goto_target)
       });
     }
+
+    let authcode_box = document.getElementById('change-password-authcode');
+    // be kind: hide authcode when an admin changes their _own_ password
+    if (authcode_box){
+      const current_username = authcode_box.dataset.username;
+      const username_input = document.getElementById('username');
+      if (current_username && username_input) {
+        if (username_input.value == current_username) {
+          authcode_box.classList.add("hidden");
+        }
+        function show_auth_code(){
+          if (username_input.value == current_username) {
+            $(authcode_box).slideUp();
+          } else {
+            $(authcode_box).slideDown();
+          }
+        }
+        username_input.addEventListener("change", show_auth_code);
+      }
+    }
   }
 
   if (deadline_display){

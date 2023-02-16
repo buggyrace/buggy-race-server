@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container w-100">
   <div class="row">
-    <p class="btn-collection">
+    <div class="btn-collection col p-1">
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.admin')}}">Dashboard &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_buggies')}}">Buggies &rtri;</a>
@@ -12,6 +12,6 @@
         <a class="btn btn-outline-danger btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
       {% endif %}
       {# TODO: add conditional Task button too #}
-    </p>
+    </div>
   </div>
 </div>

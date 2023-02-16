@@ -77,7 +77,7 @@
             {% for task in tasks %}
               <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %} %}>
                 <td>
-                  <a href="{{ url_for('admin.edit_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-admin">edit</a>
+                  <a href="{{ url_for('admin.edit_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-admin">Edit</a>
                 </td>
                 <td>
                   {% if task.is_enabled %}

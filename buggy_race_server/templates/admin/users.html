@@ -23,24 +23,24 @@
     </div>
     <div class="row my-3" id="user-column-toggles">
       <div class="col">
-        <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">all&nbsp;columns</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">All&nbsp;columns</button>
         {% if config['USERS_HAVE_FIRST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">first&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">First&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_LAST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">last&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">Last&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_EMAIL'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-email">email</button>
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-email">Email</button>
         {% endif %}
         {% if config['USERS_HAVE_ORG_USERNAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">account</button>
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">Account</button>
         {% endif %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">created</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">active?</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">logged&nbsp;in?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Logged&nbsp;in?</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">uploaded</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">Uploaded</button>
       </div>
     </div>
   {% endif %}
@@ -110,7 +110,7 @@
             <tr>
               {% if is_admin_can_edit %}
                 <td>
-                  <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">edit</a>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
                 </td>
               {% endif %}
               <td style="width:1em">

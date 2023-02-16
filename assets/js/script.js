@@ -316,6 +316,7 @@ $(function() {
   const CSS_BTN_COLUMN_SHOWN = "btn-dark";
   const CSS_BTN_COLUMN_HIDDEN = "btn-outline-secondary";
   const ALL_COLUMNS = "all-columns";
+  let btn_all_columns;
 
   let $user_column_toggle_div = $("#user-column-toggles");
   if ($user_column_toggle_div){
@@ -348,6 +349,10 @@ $(function() {
             show_or_hide_col_by_button($(this)[0], want_to_hide)
           }
         });
+      } else if (want_to_hide && btn_all_columns){
+        // "All columns" not marked as "shown" if any cols are hidden
+        btn_all_columns.classList.remove(CSS_BTN_COLUMN_SHOWN);
+        btn_all_columns.classList.add(CSS_BTN_COLUMN_HIDDEN);
       }
     }
 
@@ -359,7 +364,9 @@ $(function() {
         )
       });
       let want_to_hide = localStorage.getItem(this.dataset.column)=="true";
-      if ($(this)[0].dataset.column != ALL_COLUMNS) {
+      if ($(this)[0].dataset.column == ALL_COLUMNS) {
+        btn_all_columns = this;
+      } else {
         show_or_hide_col_by_button(
           $(this)[0],
           want_to_hide

@@ -3,9 +3,7 @@ Title: index
 
 # CS1999 Tech notes
 
-Notes to explain how to do (and understand) project tasks. Remember there
-are videos too — see [all the resource links](cs1999-resource-links).
-
+Notes to explain how to do (and understand) project tasks.
 
 ## Especially for phase 0
 

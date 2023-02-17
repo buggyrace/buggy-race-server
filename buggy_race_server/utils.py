@@ -251,6 +251,8 @@ def publish_tech_notes(app=current_app):
       app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_DIR.name),
       app=app
     )
+    keepfile = os.path.join(output_path, ".keep")
+    has_keepfile = os.path.exists(keepfile)
 
     # cd to the pelican dir so that the imports work
     os.chdir(
@@ -273,6 +275,10 @@ def publish_tech_notes(app=current_app):
       name=ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name,
       value=datetime.now().strftime("%Y-%m-%d %H:%M")
     )
+    # there's a keepfile (for git) in the technotes output dir
+    # Pelican has probably deleted it, so replace it
+    if has_keepfile: open(keepfile, 'a').close()
+
 
 def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     """Reads tasks from markdown file, and inserts into database.

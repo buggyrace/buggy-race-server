@@ -1037,3 +1037,32 @@ def edit_task(task_id=None):
       form=form,
       task=task
     )
+
+@blueprint.route("/notes", strict_slashes=False, methods=["GET"])
+@login_required
+def notes():
+    if not current_user.is_buggy_admin:
+        abort(403)
+    # TODO: this should be using joins and stuff but let's make python
+    #       do the work for now and optimise/make it robust when we know
+    #       from playing with the page what we really need here...
+    #       Possibly all in JSON too for interactive graphing on the page
+
+    students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
+    usernames_by_id = {student.id: student.username for student in students}
+    tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
+    notes_by_username = {student.username: {} for student in students}
+    for note in Note.query.all():
+        if note.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
+            notes_by_username[usernames_by_id[note.user_id]][note.task_id] = note
+    buggies_by_username = {student.username: {} for student in students}
+    for buggy in Buggy.query.all():
+        if buggy.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
+           buggies_by_username[usernames_by_id[buggy.user_id]] = buggy
+    return render_template(
+       "admin/notes.html",
+       students=students,
+       tasks=tasks,
+       notes_by_username=notes_by_username,
+       buggies_by_username=buggies_by_username
+    )

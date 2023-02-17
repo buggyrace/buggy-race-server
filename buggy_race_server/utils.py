@@ -58,7 +58,7 @@ def active_user_required(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         if current_user and not current_user.is_active:
-            flash(f"User \"{current_user.username}\" is inactive", "danger")
+            flash(f"User \"{current_user.pretty_username}\" is inactive", "danger")
             logout_user()
             return redirect(url_for("public.home"))
         return function(*args, **kwargs)

@@ -524,10 +524,10 @@ def edit_user(user_id):
       # if username wasn't unique, validation should have caught it
       user.username = form.username.data
       user.save()
-      flash(f"OK, updated user {user.username}", "success")
+      flash(f"OK, updated user {user.pretty_username}", "success")
       return redirect(url_for("admin.list_users"))
     else:
-      flash(f"Did not update user {user.username}", "danger")
+      flash(f"Did not update user {user.pretty_username}", "danger")
       flash_errors(form)
   return render_template(
     "admin/user.html",

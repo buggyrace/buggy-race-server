@@ -79,7 +79,7 @@ class UserForm(FlaskForm):
             return False
         user = User.query.filter_by(username=self.username.data).first()
         if user and int(user.id) != int(self.id.data):
-            self.username.errors.append(f"Username \"{self.username}\" already registered")
+            self.username.errors.append(f"Username \"{self.pretty_username}\" already registered")
             return False
         return True
 

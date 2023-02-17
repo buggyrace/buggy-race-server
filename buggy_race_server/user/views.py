@@ -157,7 +157,7 @@ def change_password():
                 try:
                     is_allowed = is_authorised(form, form.auth_code)
                 except ValidationError as e:
-                    flash(f"Did not change {username}'s password: {e}", "danger")
+                    flash(f"Did not change {username.pretty_username}'s password: {e}", "danger")
                 if is_allowed:
                      # validation confirmed username is for a real user
                     user = User.query.filter_by(username=form.username.data).first()
@@ -167,7 +167,7 @@ def change_password():
                 if username == current_user.username:
                   success_msg = "OK, you changed your password. Don't forget it!"
                 else:
-                  success_msg = f"OK, password was changed for user {username}"
+                  success_msg = f"OK, password was changed for user {username.pretty_username}"
                 flash(success_msg, "success")
                 return redirect(url_for("public.home"))
         else:

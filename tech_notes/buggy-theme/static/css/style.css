@@ -422,3 +422,7 @@ a.toclink:hover::before{
     opacity: 0.5;
     visibility: visible;
 }
+p code{
+    background-color:#444444;
+    padding:0.1rem 0.2rem;
+}

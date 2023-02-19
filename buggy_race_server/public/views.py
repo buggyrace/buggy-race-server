@@ -235,8 +235,8 @@ def show_single_task(task_id):
     task_id = task_id.lower()
     if not task_id.startswith("task-"):
         task_id = f"task-{task_id}"
-    url = current_app.config.get("GITHUB_PAGES_URL") or ""
-    return redirect(f"{url}/project/tasks/#{task_id}", code=301 )
+    url = url_for("public.serve_project_page", page="tasks")
+    return redirect(f"{url}#{task_id}", code=301 )
 
 @blueprint.route("/project", strict_slashes=False)
 @blueprint.route("/project/<page>", strict_slashes=False)
@@ -308,11 +308,15 @@ def send_project_theme(path):
 
 @blueprint.route("/tech-notes", strict_slashes=False)
 def tech_notes_redirect_to_index():
-    url = current_app.config.get("GITHUB_PAGES_URL") or ""
-    return redirect(f"{url}/tech-notes/index", code=301 )
+    external_url = current_app.config.get("TECH_NOTES_EXTERNAL_URL")
+    if external_url:
+        return redirect(f"{external_url}/index")
+    else:
+        return redirect(url_for("public.serve_tech_notes", path="index"))
 
 @blueprint.route("/tech-notes/<path:path>")
 def serve_tech_notes(path=None):
+    external_url = current_app.config.get("TECH_NOTES_EXTERNAL_URL")
     if not path:
         path = "index.html"
     elif path.endswith("/"):
@@ -320,6 +324,8 @@ def serve_tech_notes(path=None):
     elif not path.endswith(".html"):
         path += ".html"
     # TODO sanitise the path
+    if external_url:
+        return redirect(f"{external_url}/{path}")
     try:
         return send_file(
             join_to_project_root(

@@ -7,6 +7,21 @@
       Tech notes admin
     </h1>
   </div>
+  {% if tech_notes_external_url %}
+    <div class="row">
+      <div class="col alert alert-danger text-center">
+        <p>
+          The config setting <code>TECH_NOTES_EXTERNAL_URL</code>
+          is currently set to
+          <a href="{{ tech_notes_external_url }}">{{ tech_notes_external_url }}</a>
+        </p>
+        <p>
+        This means tech notes published on <em>this</em> server
+        <strong>will not be seen</strong>.
+        </p>
+      </div>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col-md-6">
       <p>

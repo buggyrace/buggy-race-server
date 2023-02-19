@@ -73,7 +73,7 @@ class ConfigSettingNames(Enum):
     FORCE_REDIRECT_HTTP_TO_HTTPS = auto()
     GITHUB_CLIENT_ID = auto()
     GITHUB_CLIENT_SECRET = auto()
-    GITHUB_PAGES_URL = auto()
+    TECH_NOTES_EXTERNAL_URL = auto()
     INSTITUTION_FULL_NAME = auto()
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
@@ -154,7 +154,6 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name,
-        ConfigSettingNames.GITHUB_PAGES_URL.name,
         ConfigSettingNames.GITHUB_CLIENT_ID.name,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
       ),
@@ -205,6 +204,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
       }
     }
     DEFAULTS = {
@@ -221,7 +221,7 @@ class ConfigSettings:
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
-        ConfigSettingNames.GITHUB_PAGES_URL.name: "",
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
@@ -282,7 +282,7 @@ class ConfigSettings:
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
-        ConfigSettingNames.GITHUB_PAGES_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
@@ -404,10 +404,12 @@ class ConfigSettings:
           GitHub app that the server uses tofork the buggy editor repo into
           a student's own GitHub account.""",
 
-        ConfigSettingNames.GITHUB_PAGES_URL.name:
-          """Full URL to the project info pages if they are not being hosted
-          on this server. Normally the project info pages *are* on the race
-          server, so this should be empty.""",
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
+          """Full URL to the tech notes pages if they are *not* being hosted
+          on this server. If you've customised them and have published them
+          somewhere else (for example, hosted on GitHub pages), then put the
+          URL here. By default, tech notes are hosted on the race
+          server, so you can leave this blank.""",
 
         ConfigSettingNames.INSTITUTION_FULL_NAME.name:
           """Full name for your institution, college, or school.""",
@@ -553,9 +555,8 @@ class ConfigSettings:
           the server as soon as you've changed it).""",
 
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name:
-          """Path to the project information pages: see `GITHUB_PAGES_URL`:
-          it's unlikely that you'll need to change this unless you've explictly
-          changed the way project info is hosted.""",
+          """Path to the project pages: it's unlikely that you'll need to change
+          this unless you've explictly changed the way project info is hosted.""",
 
         ConfigSettingNames.SOCIAL_0_NAME.name:
           """Name (shown on button)""",

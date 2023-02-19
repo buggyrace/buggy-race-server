@@ -819,6 +819,7 @@ def tech_notes_admin():
       ConfigSettingNames.SOCIAL_2_NAME.name,
       ConfigSettingNames.SOCIAL_3_NAME.name,
     ],
+    tech_notes_external_url=current_app.config['TECH_NOTES_EXTERNAL_URL'],
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
   )
 
@@ -924,9 +925,7 @@ def tasks_admin():
     qty_tasks = len(tasks)
     if qty_tasks:
         example_task = tasks[int(qty_tasks/2)]
-        example_task_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] + \
-                   "/" + current_app.config[ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name] + \
-                   f"/tasks/{example_task.fullname.lower()}"
+        example_task_url = example_task.get_url(current_app.config)
     else:
         example_task = None
         example_task_url = None
@@ -941,8 +940,8 @@ def tasks_admin():
         tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
-          ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
           ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
+          ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
         ],
         example_task=example_task,
         example_task_url=example_task_url,

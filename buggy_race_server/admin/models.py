@@ -178,8 +178,7 @@ class Task(SurrogatePK, Model):
 
     def get_url(self, config):
         tasks_url = config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
-            + "/" + config[ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name] \
-            + "/tasks"
+            + "/project/tasks"
         if config[ConfigSettingNames.TASK_URLS_USE_ANCHORS.name]:
             return f"{tasks_url}#{self.anchor}"
         else:

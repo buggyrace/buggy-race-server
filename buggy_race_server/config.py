@@ -62,6 +62,7 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_PATH = auto()
 
     ADMIN_USERNAMES = auto()
+    AUTO_GENERATE_STATIC_CONTENT = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_ISSUES_FILE = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
@@ -176,6 +177,7 @@ class ConfigSettings:
         ConfigSettingNames.ADMIN_USERNAMES.name,
         ConfigSettingNames.SECRET_KEY.name,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name,
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name,
       },
       ConfigGroupNames.SOCIAL.name: {
         ConfigSettingNames.SOCIAL_0_NAME.name,
@@ -210,6 +212,7 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 1,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
@@ -271,6 +274,7 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT: ConfigTypes.BOOLEAN,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
@@ -347,6 +351,13 @@ class ConfigSettings:
           here before they have been registered. Usernames are lowercase.
           If you remove (or change) a username in this list, you're effectively
           revoking admin access, so be careful before changing anything.""",
+
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name:
+          """The task list and tech notes do not get updated when you change
+          config (or edit tasks): you can generate or publish both manually,
+          but if `AUTO_GENERATE_STATIC_CONTENT` is set, the race server will
+          automatically update them whenever it reboots. Only switch this off
+          if you are experiencing problems with the build.""",
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start

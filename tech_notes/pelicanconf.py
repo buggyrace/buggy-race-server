@@ -1,7 +1,7 @@
 AUTHOR = 'buggyrace'
 SITENAME = 'buggyrace'
 SITEURL = ''
-STATIC_PATHS=("assets/css", "assets/img")
+STATIC_PATHS=("assets/js", "assets/img")
 PATH = 'content'
 THEME = 'buggy-theme'
 RELATIVE_URLS = False

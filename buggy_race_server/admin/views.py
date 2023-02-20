@@ -669,7 +669,7 @@ def settings(group_name=None):
       tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
     )
 
-@blueprint.route("/announcements/")
+@blueprint.route("/announcements/", strict_slashes=False)
 @login_required
 def list_announcements():
     # only using the form for the CSRF token at this point
@@ -686,19 +686,19 @@ def list_announcements():
       form=form
     )
 
-@blueprint.route("/announcement/<int:id>", methods=["GET", "POST"])
-@blueprint.route("/announcement/", methods=["GET", "POST"])
+@blueprint.route("/announcements/<int:announcement_id>", methods=["GET", "POST"])
+@blueprint.route("/announcements/new", methods=["GET", "POST"])
 @login_required
-def edit_announcement(id=None):
+def edit_announcement(announcement_id=None):
     if not current_user.is_buggy_admin:
       abort(403)
     announcement = None
     is_visible = False
     is_html =  False
-    if id:
-      announcement = Announcement.query.filter_by(id=id).first()
+    if announcement_id:
+      announcement = Announcement.query.filter_by(id=announcement_id).first()
       if announcement is None:
-        flash(f"No such announcement (id={id})", "danger")
+        flash(f"No such announcement", "danger")
         return redirect(url_for("admin.list_announcements"))
     form = AnnouncementForm(request.form, obj=announcement)
     delete_form = AnnouncementActionForm()
@@ -732,16 +732,16 @@ def edit_announcement(id=None):
     return render_template(
       "admin/announcement_edit.html", 
       form=form, 
-      id=id,
+      id=announcement_id,
       is_html=is_html,
       is_visible=is_visible,
       announcement=announcement,
       delete_form=delete_form
     )
 
-@blueprint.route("/announcements/publish", methods=["POST"])
+@blueprint.route("/announcements/<int:announcement_id>/publish", methods=["POST"])
 @login_required
-def publish_announcement():
+def publish_announcement(announcement_id):
     if not current_user.is_buggy_admin:
       abort(403)
     form = AnnouncementActionForm(request.form)
@@ -753,7 +753,7 @@ def publish_announcement():
     if want_to_publish is None:
       flash("Error: couldn't decide to publish or not", "danger")
     else:
-      announcement = Announcement.query.filter_by(id=form.id.data).first()
+      announcement = Announcement.query.filter_by(id=announcement_id).first()
       if announcement is None:
         flash("Error: coudldn't find announcement", "danger")
       else:
@@ -771,14 +771,14 @@ def publish_announcement():
       form=form
     )
 
-@blueprint.route("/annoucement/delete", methods=["POST"])
+@blueprint.route("/announcements/<int:announcement_id>/delete", methods=["POST"])
 @login_required
-def delete_announcement():
+def delete_announcement(announcement_id=None):
     if not current_user.is_buggy_admin:
       abort(403)
     form = AnnouncementActionForm(request.form)
     if form.submit_delete.data:
-      announcement = Announcement.query.filter_by(id=form.id.data).first()
+      announcement = Announcement.query.filter_by(id=announcement_id).first()
       if announcement is None:
         flash("Error: coudldn't find announcement to delete", "danger")
       else:

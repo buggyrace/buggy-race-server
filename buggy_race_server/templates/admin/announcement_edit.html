@@ -18,7 +18,6 @@
       <div class="border border-secondary container">
         <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=id)}}" role="form">
           {{ form.csrf_token }}
-          <input type="hidden" name="id" value="{{ id }}"/>
           <div class="row">
             <div class="col my-2">
               <div class="form-group">
@@ -60,10 +59,9 @@
     <div class="row my-3">
       <div class="col-lg-6">
         <div class="border border-secondary container p-3">
-          <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement')}}" role="form">
+          <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
             {{ delete_form.csrf_token }}
             {{ delete_form.submit_delete(class="btn btn-danger")}}
-                <input type="hidden" name="id" value="{{ announcement.id }}" />
           </form>
         </div>
       </div>

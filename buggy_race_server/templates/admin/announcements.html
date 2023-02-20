@@ -21,7 +21,7 @@
           {% for announcement in announcements %}
             <tr>
               <td>
-                <a href="{{ url_for('admin.edit_announcement', id=announcement.id)}}"
+                <a href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id)}}"
                 class="btn btn-outline-secondary btn-admin">Edit&nbsp;&rtri;</a>
               </td>
               <td>{{announcement.type}}</td>
@@ -33,9 +33,8 @@
                 {% endif %}
               </td>
               <td>
-                <form action="{{ url_for('admin.publish_announcement')}}" method="POST">
+                <form action="{{ url_for('admin.publish_announcement', announcement_id=announcement.id) }}" method="POST">
                   {{ form.csrf_token }}
-                  <input type="hidden" name="id" value="{{announcement.id}}"/>
                   {% if announcement.is_visible %}
                     {{ form.submit_hide(class="btn btn-primary")}}
                   {% else %}

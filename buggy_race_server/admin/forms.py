@@ -87,7 +87,6 @@ class AnnouncementForm(FlaskForm):
         return super(AnnouncementForm, self).validate()
 
 class AnnouncementActionForm(FlaskForm):
-    id = IntegerField(validators=[DataRequired()])
     submit_publish = SubmitField(label='Publish')
     submit_hide = SubmitField(label='Hide')
     submit_delete = SubmitField(label='Delete announcement')

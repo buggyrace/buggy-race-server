@@ -387,8 +387,8 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
       )
 
 
-@blueprint.route("/bulk-register/", methods=["GET", "POST"])
-@blueprint.route("/bulk-register/<data_format>", methods=["POST"])
+@blueprint.route("/users/register/", methods=["GET", "POST"])
+@blueprint.route("/users/register/<data_format>", methods=["POST"])
 @login_required
 def bulk_register(data_format=None):
     """Register multiple users."""

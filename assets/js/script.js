@@ -7,7 +7,7 @@ const USER_REGISTER_CSV_EXAMPLE = "example-csv";
 const USER_REGISTER_CSV_EXAMPLE_TRIGGER = "example-csv-trigger";
 
 function bulk_registration_by_ajax(bulk_register_form){
-  const BULK_REGISTER_URL = "/admin/bulk-register/json";
+  const BULK_REGISTER_URL = "/admin/users/register/json";
   const USER_REGISTER_AUTH_ID = "auth_code";
   const USER_REGISTER_CSRF_ID = "csrf_token";
   const USER_REGISTER_PROGRESS_ID = "registration-progress";

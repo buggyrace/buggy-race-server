@@ -52,6 +52,7 @@ from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
     join_to_project_root,
+    generate_task_list,
     get_download_filename,
     get_tasks_as_issues_csv,
     load_settings_from_db,
@@ -828,42 +829,17 @@ def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
         # render the template and save it as _task_list.html
-        tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
-        qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
-        created_at = datetime.now()
-        html = render_template(
-            "public/project/_tasks.html",
-            poster_word = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-            project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-            expected_phase_completion = current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-            tasks_by_phase = tasks_by_phase,
-            qty_tasks=qty_tasks,
-            created_at=created_at,# for debug: includes seconds, but config doesn't
-            is_storing_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
-        )
-        task_list_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
-        generated_task_file = join_to_project_root(
-            current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
-            task_list_filename
-        )
         try:
-            task_list_html_file = open(generated_task_file, "w")
-            task_list_html_file.write(html)
-            task_list_html_file.close()
+            generate_task_list(current_app)
         except IOError as e:
-            flash(f"Failed to create {task_list_filename}:", "danger")
+            flash(f"Failed to create task list: problem with file: {e}", "danger")
         else:
+            qty_tasks = Task.query.filter_by(is_enabled=True).count()
             if qty_tasks == 0:
-                flash("Task list page has been generated but there are no tasks in the project yet!", "danger")
+                flash("Task list page has been generated but there are no unhidden tasks in the project yet!", "danger")
                 flash("You should load some tasks into the database before the project can start", "warning")
             else:
                 flash(f"OK, task list page has been generated with latest data ({qty_tasks} tasks)", "success")
-            set_and_save_config_setting(
-                current_app,
-                name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
-                value=created_at.strftime("%Y-%m-%d %H:%M"),
-            )
     return redirect(url_for('admin.tasks_admin'))
 
 @blueprint.route("/tasks/all", strict_slashes=True, methods=["GET"])

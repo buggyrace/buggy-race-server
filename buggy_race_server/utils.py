@@ -3,7 +3,7 @@
 import os # for path
 import re
 import csv
-from flask import flash, request, redirect, Markup, url_for, current_app
+from flask import flash, request, redirect, Markup, url_for, current_app, render_template
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
@@ -395,3 +395,33 @@ def parse_task_markdown(task_source_filename):
         raise ValueError("No tasks found")
     return tasks
 
+def generate_task_list(app=current_app):
+    # render the tasklist template and save it as _task_list.html
+    tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
+    qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
+    created_at = datetime.now()
+    html = render_template(
+        "public/project/_tasks.html",
+        poster_word = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        project_code = app.config[ConfigSettingNames.PROJECT_CODE.name],
+        expected_phase_completion = app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
+        tasks_by_phase = tasks_by_phase,
+        qty_tasks=qty_tasks,
+        created_at=created_at,# for debug: includes seconds, but config doesn't
+        is_storing_notes=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
+    )
+    task_list_filename = app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
+    generated_task_file = join_to_project_root(
+        app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+        app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+        task_list_filename
+    )
+    task_list_html_file = open(generated_task_file, "w")
+    task_list_html_file.write(html)
+    task_list_html_file.close()
+    set_and_save_config_setting(
+        app,
+        name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
+        value=created_at.strftime("%Y-%m-%d %H:%M"),
+    )
+  

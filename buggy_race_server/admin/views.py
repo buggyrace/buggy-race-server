@@ -530,7 +530,7 @@ def edit_user(user_id):
       flash(f"Did not update user {user.pretty_username}", "danger")
       flash_errors(form)
   return render_template(
-    "admin/user.html",
+    "admin/user_edit.html",
     form=form,
     user=user,
   )

@@ -823,8 +823,8 @@ def tech_notes_admin():
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
   )
 
-@blueprint.route("/tasks/update", strict_slashes=True, methods=["POST"])
-def tasks_update():
+@blueprint.route("/tasks/generate", strict_slashes=True, methods=["POST"])
+def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
         # render the template and save it as _task_list.html
@@ -855,10 +855,10 @@ def tasks_update():
             flash(f"Failed to create {task_list_filename}:", "danger")
         else:
             if qty_tasks == 0:
-                flash("Task list page has been updated but there are no tasks in the project yet!", "danger")
+                flash("Task list page has been generated but there are no tasks in the project yet!", "danger")
                 flash("You should load some tasks into the database before the project can start", "warning")
             else:
-                flash(f"OK, task list page has been updated with latest data ({qty_tasks} tasks)", "success")
+                flash(f"OK, task list page has been generated with latest data ({qty_tasks} tasks)", "success")
             set_and_save_config_setting(
                 current_app,
                 name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
@@ -989,7 +989,7 @@ def download_tasks(type=None, format=None):
         headers={"Content-disposition": f"attachment; filename=\"{filename}\""}
     )
 
-@blueprint.route("/task/<task_id>", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/tasks/<task_id>/edit", strict_slashes=False, methods=["GET", "POST"])
 @login_required
 def edit_task(task_id=None):
     if not current_user.is_buggy_admin:

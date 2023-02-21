@@ -9,8 +9,8 @@ from flask import Flask, render_template
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.utils import (
-    generate_task_list,
     refresh_global_announcements,
+    publish_task_list,
     publish_tech_notes,
     save_config_env_overrides_to_db,
     load_settings_from_db
@@ -80,9 +80,9 @@ def create_app():
         # ...but that's OK because the task list is probably empty too
         server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
         with app.test_request_context(server_url):
-            print(f"* generating task list (for {server_url})", flush=True)
-            generate_task_list(app)
-            print(f"* generated task list", flush=True)
+            print(f"* publishing task list (for {server_url})", flush=True)
+            publish_task_list(app)
+            print(f"* published task list", flush=True)
         
             print(f"* publishing tech notes (for {server_url})", flush=True)
             publish_tech_notes(app)

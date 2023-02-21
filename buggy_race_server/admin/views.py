@@ -52,7 +52,7 @@ from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
     join_to_project_root,
-    generate_task_list,
+    publish_task_list,
     get_download_filename,
     get_tasks_as_issues_csv,
     load_settings_from_db,
@@ -830,7 +830,7 @@ def tasks_generate():
     if form.validate_on_submit():
         # render the template and save it as _task_list.html
         try:
-            generate_task_list(current_app)
+            publish_task_list(current_app)
         except IOError as e:
             flash(f"Failed to create task list: problem with file: {e}", "danger")
         else:

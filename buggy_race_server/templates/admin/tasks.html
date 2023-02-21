@@ -17,16 +17,16 @@
             <div class="col p-3">
               The main <a href="{{ url_for('public.serve_project_page', page='tasks')}}">task list page</a>
               that the students see does not update automatically unless you restart the server.
-              So if you change any tasks <em>or config settings that it contains</em>, you should regenerate it.
+              So if you change any tasks <em>or config settings that it contains</em>, you should republish it.
             </div>
           </div>
           <div class="row">
             <div class="col p-3">
-              <input type="submit" value="Generate task page" class="btn {% if is_fresh_update %}btn-danger{% else %}btn-primary{% endif %}"/>
+              <input type="submit" value="Publish task list" class="btn {% if is_fresh_update %}btn-danger{% else %}btn-primary{% endif %}"/>
             </div>
             {% if task_list_updated_timestamp %}
               <div class="col p-3">
-                Last generated:<br>{{ task_list_updated_timestamp }}
+                Last published:<br>{{ task_list_updated_timestamp }}
               </div>
             {% endif %}
           </div>

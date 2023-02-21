@@ -395,7 +395,7 @@ def parse_task_markdown(task_source_filename):
         raise ValueError("No tasks found")
     return tasks
 
-def generate_task_list(app=current_app):
+def publish_task_list(app=current_app):
     # render the tasklist template and save it as _task_list.html
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)

@@ -207,7 +207,7 @@ def show_buggy(username=None):
         flash("No buggy exists for this user", "danger")
     else:
         is_plain_flag = users_buggy.flag_pattern == 'plain'
-    return render_template("users/show_buggy.html",
+    return render_template("user/show_buggy.html",
         is_own_buggy=user==current_user,
         user=user,
         buggy=users_buggy,

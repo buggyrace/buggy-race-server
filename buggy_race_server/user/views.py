@@ -39,7 +39,7 @@ from buggy_race_server.utils import (
     warn_if_insecure,
 )
 
-blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
+blueprint = Blueprint("user", __name__, url_prefix="/user", static_folder="../static")
 
 DELAY_BEFORE_INJECTING_ISSUES = 30 # give repo generous time to get issue auth before starting
 
@@ -47,7 +47,7 @@ def flash_explanation_if_unauth(function):
   @wraps(function)
   def wrapper():
     if not current_user.is_authenticated:
-      if request.path == '/users/settings':
+      if request.path == '/user/settings':
         msg = "You must log in before you can access your settings"
       else:
         msg = "You must log in before you can upload data for your buggy"
@@ -55,14 +55,14 @@ def flash_explanation_if_unauth(function):
     return function()
   return wrapper
 
-@blueprint.route("/")
+@blueprint.route("/upload")
 @flash_explanation_if_unauth
 @login_required
 @active_user_required
 @flash_suggest_if_not_yet_githubbed
 def submit_buggy_data():
   """Submit the JSON for the buggy."""
-  return render_template("users/submit_buggy_data.html", form = BuggyJsonForm(request.form))
+  return render_template("user/submit_buggy_data.html", form = BuggyJsonForm(request.form))
 
 @blueprint.route("/settings")
 @flash_explanation_if_unauth
@@ -71,7 +71,7 @@ def submit_buggy_data():
 def settings():
     form = ChangePasswordForm()
     return render_template(
-        "users/settings.html",
+        "user/settings.html",
         form=form,
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config['BUGGY_RACE_SERVER_URL']
@@ -177,7 +177,7 @@ def change_password():
     if current_user.is_buggy_admin:
         form.username.choices = sorted([user.username for user in User.query.all()])
         form.username.data = form.username.data or current_user.username
-    return render_template("users/password.html", form=form)
+    return render_template("user/password.html", form=form)
   
 @blueprint.route("/secret", methods=['GET','POST'])
 @flash_explanation_if_unauth
@@ -204,7 +204,7 @@ def set_api_secret():
             flash(f"Warning! Your API secret was not set.", "danger")
             flash_errors(form)
     return render_template(
-        "users/settings_api.html",
+        "user/settings_api.html",
         form=form,
         delta_mins=delta_mins,
         is_confirmation=is_confirmation,
@@ -229,7 +229,7 @@ def vscode_workspace():
     project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()
     response = Response(
         render_template(
-            "users/vscode_workspace.json",
+            "user/vscode_workspace.json",
             project_name=project_name,
             username=current_user.org_username or current_user.username,
             remote_server_address=remote_server_address, # e.g., linux.cim.rhul.ac.uk
@@ -312,7 +312,7 @@ def note(task_fullname):
             flash_errors(form)
     is_own_note = current_user.id == note.user_id
     return render_template(
-        "users/note.html",
+        "user/note.html",
         user=user,
         is_own_note=is_own_note,
         is_new_note=is_new_note,
@@ -336,7 +336,7 @@ def list_notes():
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
     return render_template(
-        'users/notes.html',
+        'user/notes.html',
         user=user,
         is_own_note=user.id == current_user.id,
         qty_notes=len(notes_by_task_id),
@@ -366,7 +366,7 @@ def download_notes(format):
     filename = get_download_filename(f"notes-{user.username}.{format}", want_datestamp=True)        
     response = make_response(
         render_template(
-            f"users/notes_download.{format}",
+            f"user/notes_download.{format}",
             username=user.username,
             notes_by_task_id=notes_by_task_id,
             tasks_by_id=tasks_by_id,

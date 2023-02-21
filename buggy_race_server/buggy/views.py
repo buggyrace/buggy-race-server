@@ -113,7 +113,7 @@ def handle_uploaded_json(form, user, is_api=False):
   if is_api:
       return {"error": "buggy data is missing"}
   else:
-    return render_template("users/submit_buggy_data.html", form=form)
+    return render_template("user/submit_buggy_data.html", form=form)
 
 
 @blueprint.route("/")

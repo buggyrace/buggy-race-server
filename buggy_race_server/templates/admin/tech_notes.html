@@ -49,7 +49,7 @@
         Last generated: {{ notes_generated_timestamp or "never/unknown" }}
       </p>
       <div class="border border-secondary container">
-        <form method="POST" action="{{ url_for('admin.tech_notes_admin') }}" role="form">
+        <form method="POST" action="{{ url_for('admin.tech_notes_publish') }}" role="form">
           {{ form.csrf_token }}
           <div class="row bg-warning py-3">
             <div class="col-sm-4">

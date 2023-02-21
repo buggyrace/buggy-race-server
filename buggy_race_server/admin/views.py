@@ -790,7 +790,11 @@ def delete_announcement(announcement_id=None):
       flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for("admin.list_announcements"))
 
-@blueprint.route("/tech-notes", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/tech-notes/publish", strict_slashes=False, methods=["POST"])
+def tech_notes_publish():
+   return tech_notes_admin()
+
+@blueprint.route("/tech-notes", strict_slashes=False, methods=["GET"])
 @login_required
 def tech_notes_admin():
   if not current_user.is_buggy_admin:

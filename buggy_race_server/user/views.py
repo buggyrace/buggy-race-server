@@ -74,7 +74,8 @@ def settings():
         "user/settings.html",
         form=form,
         is_secure=True, # TODO investigate when this can be false
-        server_url=current_app.config['BUGGY_RACE_SERVER_URL']
+        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        is_using_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'])

@@ -274,7 +274,7 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
-        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,

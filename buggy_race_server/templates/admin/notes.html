@@ -33,7 +33,7 @@
             <td>{{ student.pretty_username }}</td>
             <td class="status">
               {% if buggies_by_username[student.username] %}
-                <a href="{{ url_for('public.show_buggy', username=student.username) }}" class="bg-success"></a>
+                <a href="{{ url_for('buggy.show_buggy', username=student.username) }}" class="bg-success"></a>
               {% endif %}
             </td>
             {% for task in tasks %}

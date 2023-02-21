@@ -4,15 +4,16 @@ import json
 import string
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
 from flask_login import current_user, login_required
 
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, active_user_required
 
 
-blueprint = Blueprint("buggy", __name__, url_prefix="/buggies", static_folder="../static")
+blueprint = Blueprint("buggy", __name__, url_prefix="/buggy", static_folder="../static")
 
 # if is_api responds differently
 def handle_uploaded_json(form, user, is_api=False):
@@ -107,7 +108,7 @@ def handle_uploaded_json(form, user, is_api=False):
     if is_api:
       return {"ok": "buggy updated OK"}
     else:
-      return redirect(url_for("public.show_buggy"))
+      return redirect(url_for("buggy.show_buggy", username=user.username))
   else:
       flash_errors(form)
   if is_api:
@@ -122,3 +123,36 @@ def create_buggy_with_json():
     """Create or update user's buggy."""
     return handle_uploaded_json(BuggyJsonForm(request.form), current_user)
 
+@blueprint.route("/")
+@login_required
+@active_user_required
+def show_own_buggy():
+  return show_buggy(username=current_user.username)
+
+@blueprint.route("/<username>")
+@login_required
+@active_user_required
+def show_buggy(username=None):
+    """Admin inspection of buggy for given user."""
+    if username is None or username == current_user.username:
+        user = current_user
+        username = user.username
+    else:
+        if not current_user.is_buggy_admin:
+          abort(403)
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            flash(f"Cannot show buggy: no such user \"{username}\"", "danger")
+            return redirect(url_for("public.home"))
+    users_buggy = Buggy.query.filter_by(user_id=user.id).first()
+    is_plain_flag = True
+    if users_buggy is None:
+        flash("No buggy exists for this user", "danger")
+    else:
+        is_plain_flag = users_buggy.flag_pattern == 'plain'
+    return render_template("buggy/buggy.html",
+        is_own_buggy=user==current_user,
+        user=user,
+        buggy=users_buggy,
+        is_plain_flag=is_plain_flag
+    )

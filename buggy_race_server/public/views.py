@@ -185,35 +185,6 @@ def announce_races():
       next_race=next_race,
       races=races)
 
-@blueprint.route("/buggy/")
-@blueprint.route("/buggy/<username>")
-@login_required
-@active_user_required
-def show_buggy(username=None):
-    """Admin inspection of buggy for given user."""
-    if username is None:
-        user = current_user
-        username = user.username
-    else:
-        if not current_user.is_buggy_admin:
-          abort(403)
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            flash(f"Cannot show buggy: no such user \"{username}\"", "danger")
-            return redirect(url_for("public.home"))
-    users_buggy = Buggy.query.filter_by(user_id=user.id).first()
-    is_plain_flag = True
-    if users_buggy is None:
-        flash("No buggy exists for this user", "danger")
-    else:
-        is_plain_flag = users_buggy.flag_pattern == 'plain'
-    return render_template("user/show_buggy.html",
-        is_own_buggy=user==current_user,
-        user=user,
-        buggy=users_buggy,
-        is_plain_flag=is_plain_flag
-    )
-
 def _send_tech_notes_assets(type, path):
     try:
         if type not in ["theme", "assets"]:

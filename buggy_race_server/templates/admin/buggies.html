@@ -22,7 +22,7 @@
     <table class="table table-striped table-bordered table-hover" style="background-color:white">
       <thead>
         <tr>
-          <th>id</th>
+          <th></th>
           <th>username</th>
           <th>cost</th>
           <th>mass</th>
@@ -46,8 +46,8 @@
       <tbody>
         {% for b in buggies %}
         <tr>
-          <td>  {{ b.id }} </td>
-          <td>  <a href="{{ url_for('public.show_buggy', username=b.username) }}">{{ b.pretty_username }}</a> </td>
+          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('buggy.show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
+          <td>  {{ b.pretty_username }} </td>
           <td>  {{ b.total_cost }} </td>
           <td>  {{ b.mass }} </td>
           <td>  {{ b.buggy_id }} </td>

@@ -824,7 +824,7 @@ def tech_notes_admin():
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
   )
 
-@blueprint.route("/tasks/generate", strict_slashes=True, methods=["POST"])
+@blueprint.route("/tasks/publish", strict_slashes=True, methods=["POST"])
 def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():

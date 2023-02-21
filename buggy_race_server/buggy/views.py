@@ -115,14 +115,6 @@ def handle_uploaded_json(form, user, is_api=False):
   else:
     return render_template("user/submit_buggy_data.html", form=form)
 
-
-@blueprint.route("/")
-@login_required
-@active_user_required
-def buggies():
-    """List all the buggies."""
-    return render_template("buggies/buggy-list.html")
-
 @blueprint.route("/json/", methods=["POST"])
 @login_required
 @active_user_required

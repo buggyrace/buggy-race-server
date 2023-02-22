@@ -3,7 +3,8 @@
 buggies.csv
 race.log
 
-tech_notes/output/
+published/tech_notes/
+published/_task_list.html
 tech_notes/pelicanconflive.py
 
 **/__pycache__/

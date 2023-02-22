@@ -346,7 +346,7 @@ def list_notes():
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
 
-@blueprint.route("/notes/download/<format>", methods=['GET'])
+@blueprint.route("/download/notes/<format>", methods=['GET'])
 @login_required
 @active_user_required
 def download_notes(format):

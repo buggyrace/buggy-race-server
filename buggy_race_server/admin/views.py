@@ -601,7 +601,7 @@ def admin_show_buggy(username):
    return show_buggy(username=username)
 
 
-@blueprint.route("download/buggies/csv")
+@blueprint.route("/download/buggies/csv")
 @login_required
 def download_buggies():
     """Download buggies as CSV (only format supported at the moment)"""
@@ -928,7 +928,7 @@ def tasks_admin():
         task_list_updated_timestamp=current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
     )
 
-@blueprint.route("/tasks/download/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/download/tasks/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])
 @login_required
 def download_tasks(type=None, format=None):
     if not current_user.is_buggy_admin:

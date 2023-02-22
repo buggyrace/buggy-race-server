@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="mt-5">
+      {% if is_own_buggy %}
+          Your buggy
+      {% else %}
+          {{ user.pretty_username }}’s buggy
+      {% endif %}
+    </h1>
+  </div>
+{% if buggy %}
+  <div class="row">
+    <p>
+      {% if is_own_buggy %}
+          This is the buggy you've offered up for the next race. 
+      {% else %}
+          This is the buggy {{ user.pretty_username }} has offered up for the next race. 
+      {% endif %}      
+      If it qualifies, it's in.
+    </p>
+  </div>
+  <div class="row">
+    <table class="table table-striped table-bordered table-hover buggy-table" style="max-width:40em">
+      <thead>
+        <tr>
+          <th colspan="2" class="text-center py-3">
+            <span class="buggy-text-overlay">{{ user.pretty_username }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td class="text-center">{{ buggy.buggy_id }}</td>
+        </tr>
+        <tr>
+          <td>Flag color</td>
+          <td class="text-center" style="background-color:{{ buggy.flag_color }};">
+            <span class="buggy-text-overlay">{{ buggy.flag_color }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td>Flag's other color</td>
+          <td class="text-center" style="background-color:{{ buggy.flag_color_secondary }};{% if is_plain_flag %}opacity:0.1;{% endif %}">
+            <span class="buggy-text-overlay">{{ buggy.flag_color_secondary }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td>Flag's pattern</td>
+          <td class="text-center">{{ buggy.flag_pattern }}</td>
+        </tr>
+        <tr>
+          <td>Number of wheels</td>
+          <td class="text-center">{{ buggy.qty_wheels }}</td>
+        </tr>
+        <tr>
+          <td>Primary power source</td>
+          <td class="text-center">{{ buggy.power_type }}</td>
+        </tr>
+        <tr>
+          <td>Primary power units</td>
+          <td class="text-center">{{ buggy.power_units }}</td>
+        </tr>
+        <tr>
+          <td>Auxilliary power source</td>
+          <td class="text-center">{{ buggy.aux_power_type or "—"}}</td>
+        </tr>
+        <tr>
+          <td>Auxilliary power units</td>
+          <td class="text-center">{{ buggy.aux_power_units }}</td>
+        </tr>
+        <tr>
+          <td>Hamster booster</td>
+          <td class="text-center">{{ buggy.hamster_booster }}</td>
+        </tr>
+        <tr>
+          <td>Tyres</td>
+          <td class="text-center">
+            {{ buggy.tyres }} × {{ buggy.qty_tyres }}
+          </td>
+        </tr>
+        <tr>
+          <td>Armour</td>
+          <td class="text-center">{{ buggy.armour }}</td>
+        </tr>
+        <tr>
+          <td>Offensive capability</td>
+          <td class="text-center">{{ buggy.attack }}</td>
+        </tr>
+        <tr>
+          <td>Number of attacks</td>
+          <td class="text-center">{{ buggy.qty_attacks }}</td>
+        </tr>
+        <tr>
+          <td>Fireproof?</td>
+          <td class="text-center">{{ buggy.fireproof  | tojson}}</td>
+        </tr>
+        <tr>
+          <td>Insulated?</td>
+          <td class="text-center">{{ buggy.insulated | tojson }}</td>
+        </tr>
+        <tr>
+          <td>Antibiotic?</td>
+          <td class="text-center">{{ buggy.antibiotic | tojson }}</td>
+        </tr>
+        <tr>
+          <td>Banging sound system?</td>
+          <td class="text-center">{{ buggy.banging | tojson }}</td>
+        </tr>
+        <tr>
+          <td>Race computer algorithm</td>
+          <td class="text-center">{{ buggy.algo }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% if is_own_buggy %}
+    <div class="row mt-5">
+      <p>Want to change it?</p>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="row">
+    <div class="alert alert-warning my-3" role="alert">
+      <p><strong>No buggy yet</strong></p>
+      <p>
+        You need to submit the specification of your race-ready buggy by
+        uploading valid data in JSON format.
+      </p>
+      <p>
+        Use your buggy editor to prepare the data for you. It's OK if
+        it doesn't have much data in it (because everything has a default
+        value).
+      </p>
+    </div>
+  </div>
+{% endif %}
+{% if is_own_buggy %}
+  <div class="row">
+    <p><a class="btn btn-outline-secondary" href="{{ url_for( 'user.submit_buggy_data' ) }}">Submit buggy JSON &rtri;</a></p>
+  </div>
+{% endif %}
+</div>
+{% endblock %}
+

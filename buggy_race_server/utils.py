@@ -242,7 +242,7 @@ def publish_tech_notes(app=current_app):
       app=app
     )
     output_path = join_to_project_root(
-      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config[ConfigSettingNames.PUBLISHED_PATH.name],
       app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name),
       app=app
     )
@@ -261,6 +261,7 @@ def publish_tech_notes(app=current_app):
         app=app
       )
     )
+
     subprocess.run(
       [
         "pelican",
@@ -412,8 +413,7 @@ def publish_task_list(app=current_app):
     )
     task_list_filename = app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
     generated_task_file = join_to_project_root(
-        app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-        app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+        app.config[ConfigSettingNames.PUBLISHED_PATH.name],
         task_list_filename
     )
     task_list_html_file = open(generated_task_file, "w")

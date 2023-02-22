@@ -191,7 +191,7 @@ def _send_tech_notes_assets(type, path):
             raise FileNotFoundError()
         return send_file(
             join_to_project_root(
-                current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+                current_app.config[ConfigSettingNames.PUBLISHED_PATH.name],
                 current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
                 type,
                 path
@@ -216,8 +216,7 @@ def serve_project_page(page=None):
     if page == "tasks":
         task_html_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
         generated_task_file = join_to_project_root(
-            current_app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-            current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+            current_app.config[ConfigSettingNames.PUBLISHED_PATH.name],
             task_html_filename
         )
         if not path.exists(generated_task_file):

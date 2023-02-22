@@ -47,6 +47,9 @@ class ConfigSettingNames(Enum):
     # class) are noted here so a warning can be displayed on the settings page
     _ENV_SETTING_OVERRIDES = auto()
 
+    # path where published HTML (task list and tech notes) is written
+    PUBLISHED_PATH = auto()
+
     # tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) so they aren't offered via
     # admin/settings... but just in case, putting them in config to allow
@@ -60,7 +63,7 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_OUTPUT_DIR = auto()
     TECH_NOTES_PAGES_PATH = auto()
     TECH_NOTES_PATH = auto()
-
+  
     ADMIN_USERNAMES = auto()
     AUTO_GENERATE_STATIC_CONTENT = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
@@ -790,6 +793,10 @@ class ConfigFromEnv():
     # (see constructor below)
     _ENV_SETTING_OVERRIDES = ""
 
+    # path into which published content is written:
+    # task list page, and tech notes (output from Pelican)
+    PUBLISHED_PATH = env.str("PUBLISHED_PATH", default="published")
+
     # Hardcoded settings for Pelican (python tool for static site generation):
     #-------------------------------------------------------------------------
     # These only need to be changed if you're not using tech notes from this
@@ -809,8 +816,8 @@ class ConfigFromEnv():
 
     # the output directory of the tech notes, specifically the pages (because
     # Pelican wants to generate other material — blog posts, summaries — which
-    # we're not using)
-    TECH_NOTES_OUTPUT_DIR = env.str("TECH_NOTES_OUTPUT_DIR", default="output")
+    # we're not using) which is found in the PUBLISHED_PATH
+    TECH_NOTES_OUTPUT_DIR = env.str("TECH_NOTES_OUTPUT_DIR", default="tech_notes")
 
     # the HTML pages themselves (pages subdir in the output path), which is
     # where the tech notes end up (because in pelican-speak they are "pages"
@@ -818,7 +825,7 @@ class ConfigFromEnv():
     # tech notes it's serving as web pages.
     TECH_NOTES_PAGES_PATH = env.str(
         "TECH_NOTES_PAGES_PATH",
-        default=path.join(TECH_NOTES_PATH, TECH_NOTES_OUTPUT_DIR, "pages")
+        default=path.join(PUBLISHED_PATH, TECH_NOTES_OUTPUT_DIR, "pages")
     )
 
     # The TECH_NOTES_CONFIG_* settings are for the _file system_ (not URLs)

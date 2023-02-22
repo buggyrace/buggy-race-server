@@ -9,7 +9,7 @@
     <div class="col">
       <p class="btn-collection">
         <a class="btn btn-outline-secondary btn-admin"
-         href="{{ url_for('admin.list_buggies', data_format='csv') }}">Download buggies CSV&nbsp;&dtri;</a>
+         href="{{ url_for('admin.download_buggies') }}">Download buggies CSV&nbsp;&dtri;</a>
       </p>  
     </div>
   </div>
@@ -46,7 +46,7 @@
       <tbody>
         {% for b in buggies %}
         <tr>
-          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('buggy.show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
+          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.admin_show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
           <td>  {{ b.pretty_username }} </td>
           <td>  {{ b.total_cost }} </td>
           <td>  {{ b.mass }} </td>

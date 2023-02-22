@@ -108,7 +108,10 @@ def handle_uploaded_json(form, user, is_api=False):
     if is_api:
       return {"ok": "buggy updated OK"}
     else:
-      return redirect(url_for("buggy.show_buggy", username=user.username))
+      if user == current_user:
+        return redirect(url_for("user.show_own_buggy"))
+      else:
+        return redirect(url_for("admin.show_buggy", username=user.username))
   else:
       flash_errors(form)
   if is_api:
@@ -129,7 +132,7 @@ def create_buggy_with_json():
 def show_own_buggy():
   return show_buggy(username=current_user.username)
 
-@blueprint.route("/<username>")
+@blueprint.route("/")
 @login_required
 @active_user_required
 def show_buggy(username=None):
@@ -143,16 +146,16 @@ def show_buggy(username=None):
         user = User.query.filter_by(username=username).first()
         if not user:
             flash(f"Cannot show buggy: no such user \"{username}\"", "danger")
-            return redirect(url_for("public.home"))
-    users_buggy = Buggy.query.filter_by(user_id=user.id).first()
+            abort(404)
+    buggy = Buggy.query.filter_by(user_id=user.id).first()
     is_plain_flag = True
-    if users_buggy is None:
+    if buggy is None:
         flash("No buggy exists for this user", "danger")
     else:
-        is_plain_flag = users_buggy.flag_pattern == 'plain'
+        is_plain_flag = buggy.flag_pattern == 'plain'
     return render_template("buggy/buggy.html",
         is_own_buggy=user==current_user,
         user=user,
-        buggy=users_buggy,
+        buggy=buggy,
         is_plain_flag=is_plain_flag
     )

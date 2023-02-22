@@ -5,7 +5,7 @@ import datetime as datetime
 from sqlalchemy import event
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
-
+from buggy_race_server.user.models import User
 
 class Buggy(SurrogatePK, Model):
     """A buggy ready to race."""
@@ -278,6 +278,21 @@ class Buggy(SurrogatePK, Model):
         return violations
       else:
         return None
+
+    @staticmethod
+    def get_all_buggies_with_usernames():
+        # TODO shockingly building my own join because somehow the SQLAlchemy
+        # TODO relationship isn't putting User into the buggy. Don't look
+        # TODO Used db.session with .joins and everything. Sigh.
+        users_by_id = dict()
+        users = User.query.all()
+        for user in users:
+            users_by_id[user.id] = user
+        buggies = Buggy.query.all()
+        for b in buggies:
+          b.username = users_by_id[b.user_id].username
+          b.pretty_username = users_by_id[b.user_id].pretty_username
+        return buggies
 
 @event.listens_for(Buggy, 'before_update')
 def receive_before_update(mapper, connection, target):

@@ -44,6 +44,7 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import Announcement, Note, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.buggy.views import show_buggy
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf
@@ -594,40 +595,39 @@ def api_test():
       abort(403)
     return render_template("admin/api_test.html", random_qty_wheels=random.randint(1,100))
 
+@blueprint.route("/buggies/<username>")
+def admin_show_buggy(username):
+   """ Using the show_buggy code from Buggy, as that's common for non-admin too"""
+   return show_buggy(username=username)
 
-@blueprint.route("/buggies/")
-@blueprint.route("/buggies/<data_format>")
+
+@blueprint.route("download/buggies/csv")
+@login_required
+def download_buggies():
+    """Download buggies as CSV (only format supported at the moment)"""
+    buggies = Buggy.get_all_buggies_with_usernames()
+    si = io.StringIO()
+    cw = csv.writer(si)
+    col_names = [col.name for col in Buggy.__mapper__.columns]
+    col_names.insert(1, 'username')
+    cw.writerow(col_names)
+    [cw.writerow([getattr(b, col) for col in col_names]) for b in buggies]
+    filename = get_download_filename("buggies.csv", want_datestamp=True)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+@blueprint.route("/buggies")
 @login_required
 def list_buggies(data_format=None):
     """Admin buggly list."""
     if not current_user.is_buggy_admin:
       abort(403)
-    else:
-      # TODO shockingly building my own join because somehow the SQLAlchemy
-      # TODO relationship isn't putting User into the buggy. Don't look
-      # TODO Used db.session with .joins and everything. Sigh.
-      users_by_id = dict()
-      users = User.query.all()
-      for user in users:
-        users_by_id[user.id] = user
-      buggies = Buggy.query.all()
-      for b in buggies:
-        b.username = users_by_id[b.user_id].username
-        b.pretty_username = users_by_id[b.user_id].pretty_username
-      if data_format == "csv":
-        si = io.StringIO()
-        cw = csv.writer(si)
-        col_names = [col.name for col in Buggy.__mapper__.columns]
-        col_names.insert(1, 'username')
-        cw.writerow(col_names)
-        [cw.writerow([getattr(b, col) for col in col_names]) for b in buggies]
-        filename = get_download_filename("buggies.csv", want_datestamp=True)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        output.headers["Content-type"] = "text/csv"
-        return output
-      else:
-        return render_template("admin/buggies.html", buggies=buggies)
+    return render_template(
+        "admin/buggies.html",
+        buggies=Buggy.get_all_buggies_with_usernames()
+    )
 
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])
 @blueprint.route("/settings/", methods=['GET','POST'])

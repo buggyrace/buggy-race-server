@@ -30,7 +30,7 @@
   </div>
   {% for group in sorted_groupnames %}
     {% if group_name == None or group_name == group | lower %}
-      <div class="my-4 p-2" style="border:1px solid gray;background-color:#eee" id="form-{{ group | lower }}">
+      <div class="my-4 p-2 grey-wrapper" id="form-{{ group | lower }}">
         <form action="{{ url_for('admin.settings', group_name=group | lower) }}" method="post">
           {{ form.csrf_token }}
           <input type="hidden" name="group" value="{{ group }}"/>

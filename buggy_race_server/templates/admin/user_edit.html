@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
+{%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="p-0 my-2">Edit user {{ user.username }}</h1>
+    <h1 class="p-0 my-2">Edit user {{ user.pretty_username }}</h1>
   </div>
 
   <div class="row">
-    <div class="col" style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+    <div class="col grey-wrapper p-2">
       <form id="userForm" class="form-announce" method="POST" action="{{url_for('admin.edit_user', user_id=user.id)}}" role="form">
         {{ form.csrf_token }}
         {{form.id()}}
@@ -93,11 +94,11 @@
           </div>
         </div>
 
-        <div class="row bg-white py-2 m-1">
+        <div class="row py-2 m-1 {% if not user.is_active %}alert-danger{% else %}bg-white{% endif %}">
           <div class="col-sm-3">
             {{form.is_active.label}}
           </div>
-          <div class="col-sm-4">
+          <div class="col-sm-4 ">
             {{form.is_active(class_="form-control", checked=user.is_active)}}
           </div>
           <div class="col-sm-5">
@@ -137,6 +138,11 @@
       </div>
     </form>
   </div>
+  <div class="row">
+    <div class="col btn-collection my-3">
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }} &rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">User {{ user.pretty_username }}</h1>
+  </div>
+  {% if not user.is_active %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-danger p-3">
+          This user is inactive, and cannot log in or participate in&nbsp;the&nbsp;project!
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <div class="row">
+    <div class="col-md-6">
+      <table class="table table-striped table-bordered table-hover">
+        <tbody>
+          <tr>
+            <td>Admin?</td>
+            <td {% if user.is_admin %}class="alert-success"{% endif %}>
+              {% if user.is_buggy_admin %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Student?</td>
+            <td {% if user.is_student %}class="alert-success"{% else %}class="alert-danger"{% endif %}>
+              {% if user.is_student %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Active?</td>
+            <td {% if user.is_active %}class="alert-success"{% else %}class="alert-danger"{% endif %}>
+              {% if user.is_active %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          {% if config['USERS_HAVE_FIRST_NAME'] %}
+            <tr>
+              <td>
+                {% if config['USERS_HAVE_LAST_NAME'] %}
+                  First name
+                {%else%}
+                  Name
+                {% endif %}
+              </td>
+              <td>
+                {% if user.first_name is not none %}
+                  {{ user.first_name }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if config['USERS_HAVE_LAST_NAME'] %}
+            <tr>
+              <td>
+                Last name
+              </td>
+              <td>
+                {% if user.last_name is not none %}
+                  {{ user.last_name }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if config['USERS_HAVE_EMAIL'] %}
+            <tr>
+              <td>
+                Email
+              </td>
+              <td>
+                {% if user.last_name is not none %}
+                  {{ user.last_name }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if config['USERS_HAVE_ORG_USERNAME'] %}
+            <tr>
+              <td>
+                Org username
+              </td>
+              <td>
+                {% if user.org_username is not none %}
+                  {{ user.org_username }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td>
+              GitHub user
+            </td>
+            <td>
+              {% if user.github_username is not none %}
+                <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
+              {% endif %}
+            </td>  
+          </tr>
+          <tr>
+            <td>
+              Last logged in
+            </td>
+            <td>
+              {% if user.logged_in_at is not none %}
+                {{ user.logged_in_at }}
+              {% endif %}
+            </td>  
+          </tr>
+          <tr>
+            <td>
+              JSON uploaded
+            </td>
+            <td>
+              {% if user.uploaded_at is not none %}
+                {{ user.uploaded_at }}
+              {% endif %}
+            </td>  
+          </tr>
+          <tr>
+            <td>
+              API secret
+            </td>
+            <td>
+              {% if user.api_secret %}
+                <code>{{ user.api_secret }}</code>
+                <br>
+                {{ user.api_secret_at }}
+              {% endif %}
+            </td>  
+          </tr>
+          <tr>
+            <td>
+              API key
+            </td>
+            <td>
+              {% if user.api_secret %}
+                <code>{{ user.api_key }}</code>
+              {% endif %}
+            </td>  
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <div class="border mb-3">
+        <div class="alert-secondary p-3 ">
+            <strong class="mr-3">Staff notes:</strong> 
+            <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
+        </div>
+        <p class="pt-3 px-3">
+          {% if user.notes %}
+            {{ user.notes }}
+          {% else %}
+            <em>no notes</em>
+          {% endif %}
+        </p>
+      </div>
+      <div class="border">
+        <div class="alert-secondary p-3 ">
+          <strong class="mr-3">Buggy JSON:</strong>
+          <a href="{{ url_for('buggy.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
+        </div>
+<pre class="pt-3 px-3">{{ user.latest_json }}</pre>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 btn-collection">
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

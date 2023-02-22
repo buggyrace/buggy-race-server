@@ -109,15 +109,16 @@
           {% if want_detail or u.is_student %}
             <tr>
               {% if is_admin_can_edit %}
-                <td>
+                <td class="btn-collection bool-{{ u.is_active | lower }}">
                   <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.show_user', user_id=u.id) }}">View</a>
                 </td>
               {% endif %}
               <td style="width:1em">
                 {% if u.username in admin_usernames %} &star; {% endif %}
                 {% if u.is_student %} &Sopf; {% endif %}
               </td>
-              <td class="u-username">  
+              <td class="u-username">
                 {{ u.pretty_username }} 
                 {% if u.notes %}
                  <a href="#" class="show-notes"

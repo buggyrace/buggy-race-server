@@ -499,3 +499,9 @@ span.btn.disabled{
   width:100%;
   border-radius:0.2em;
 }
+.grey-wrapper{
+  border:1px solid gray;
+  padding:0.5em;
+  margin-bottom:1em;
+  background-color:#eee;
+}

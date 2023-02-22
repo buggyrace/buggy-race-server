@@ -497,8 +497,24 @@ def bulk_register(data_format=None):
         csv_fieldnames=f"{csv_fieldnames} {current_app.config}"
     )
 
+@blueprint.route("/user/<user_id>", methods=['GET'])
+@login_required
+def show_user(user_id):
+  if not current_user.is_buggy_admin:
+      abort(403)
+  if str(user_id).isdigit():
+    user = User.get_by_id(int(user_id))
+  else:
+    user = User.query.filter_by(username=user_id).first()
+  if user is None:
+    abort(404)
+  return  render_template(
+     "admin/user.html",
+     user=user,
+  )
+
 # user_id may be username or id
-@blueprint.route("/user/<user_id>", methods=['GET','POST'])
+@blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])
 @login_required
 def edit_user(user_id):
   if not current_user.is_buggy_admin:

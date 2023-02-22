@@ -10,7 +10,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col" style="border:1px solid gray;padding:0.5em 1em;margin-bottom:1em;background-color:#eee">
+    <div class="col mb-2 p-2 grey-wrapper">
       <form action="{{ url_for('admin.setup') }}" method="post">
         {{ form.csrf_token }}
         <input type="hidden" name="group" value="{{ group }}"/>

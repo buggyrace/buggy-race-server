@@ -6,93 +6,12 @@
       {% if is_own_note %}
           Your
       {% else %}
-          {{ user.pretty_username }}’s
+          {{ user.pretty_username }}'s
       {% endif %}
       {{ report_type }} task notes
     </h1>
   </div>
-  {% if qty_notes == 0 %}
-    <div class="row">
-      <div class="col-lg-8 btn-collection">
-        You have not created any task notes.
-      </div>
-    </div>
-{% else %}
-    <div class="row">
-      <div class="col-lg-8 btn-collection">
-        {% for phase in tasks_by_phase %}
-          {% for task in tasks_by_phase[phase] %}
-            {% if notes_by_task_id[task.id] %}
-              <a class="btn btn-secondary btn-goto-note" data-phase="{{ task.phase }}" href="#{{ task.anchor }}">{{ task.fullname }}</a>
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col my-3">
-        {% if report_type %}
-          <p>
-            You can download all your notes as a single text or HTML file, to copy-and-paste
-            into your {{ report_type }}.
-          </p>
-        {% endif %}
-        <p class="btn-collection">
-          <a href="{{ url_for('user.download_notes', format='html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML&nbsp;&dtri;</a>
-          <a href="{{ url_for('user.download_notes', format='md2html') }}" class="btn btn-outline-secondary">Download as&nbsp;HTML (using&nbsp;markdown)&dtri;</a>
-          <a href="{{ url_for('user.download_notes', format='txt') }}" class="btn btn-outline-secondary">Download as plain&nbsp;text&nbsp;&dtri;</a>
-        </p>
-      </div>
-    </div>
-  {% endif %}
-  {% for phase in tasks_by_phase %}
-    <div class="row mt-4 mb-2">
-      <div class="col">
-        <div class="container alert-secondary">
-          <div class="row">
-            <h3 class="col-sm-6 p-3">
-              Phase {{ phase }}
-            </h3>
-            <div class="col-sm-6 p-3 text-right">
-              <span id="toggle-btn-{{ phase }}" class="task-count"
-                data-phase="{{ phase }}">{{ tasks_by_phase[phase] | length }}
-                {% if (tasks_by_phase[phase] | length) == 1 %}
-                  task
-                {% else %}
-                  tasks
-                {% endif %}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% if tasks_by_phase[phase] %}
-      {% for task in tasks_by_phase[phase] %}
-        <div class="row phase-tasks-{{phase}}" id="{{ task.anchor }}">
-          <div class="col my-1">
-            <div class="border border-secondary p-3 ml-4">
-              <p>Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong></p>
-              {% if notes_by_task_id[task.id] %}
-                <pre class="p-3 mb-4 mt-3 mr-3 task-note ">{{ notes_by_task_id[task.id].text }}</pre>
-              {% endif %}
-              <p class="btn-collection">
-                <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary">{{ task.fullname }} &rtri;</a>
-                <a href="{{ url_for('user.note', task_fullname=task.fullname) }}" class="btn btn-outline-secondary">
-                  {% if notes_by_task_id[task.id] %}
-                    Edit note
-                  {% else %}
-                    Create note
-                  {% endif %}
-                   &rtri;
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endfor %}
+  {% include "admin/_task_notes_for_user.html" %}
   <div class="row mt-5">
     <div class="col btn-collection">
       <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary">Task list &rtri;</a>

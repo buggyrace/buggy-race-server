@@ -167,6 +167,12 @@
     </div>
   </div>
   <div class="row">
+    <div class="col my-3">
+      <h3>{{ user.pretty_username }}'s task notes</h3>
+    </div>
+  </div>
+  {% include "admin/_task_notes_for_user.html" %}
+  <div class="row">
     <div class="col my-3 btn-collection">
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>

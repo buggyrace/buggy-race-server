@@ -509,8 +509,11 @@ def show_user(user_id):
   if user is None:
     abort(404)
   return  render_template(
-     "admin/user.html",
-     user=user,
+      "admin/user.html",
+      user=user,
+      is_own_note=user.id == current_user.id,
+      tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
+      notes_by_task_id=Note.get_dict_notes_by_task_id(user.id),
   )
 
 # user_id may be username or id

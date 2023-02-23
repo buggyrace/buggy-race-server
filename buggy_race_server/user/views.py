@@ -346,10 +346,10 @@ def list_notes():
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
 
-@blueprint.route("/download/notes/<format>", methods=['GET'])
+@blueprint.route("/download/notes/<username>/<format>", methods=['GET'])
 @login_required
 @active_user_required
-def download_notes(format):
+def download_notes(username, format):
     """Get notes for current user in HTML or text format (html or txt)"""
     if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
         flash("Notes are not enabled on this project", "warning")
@@ -357,7 +357,13 @@ def download_notes(format):
     if format not in ["html", "md2html", "txt"]:
         flash("Notes can be downloaded as HTML or plain text (html or txt) only", "error")
         abort(404)
-    user = current_user
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        flash(f"Can't find user {username}", "danger")
+        abort(404)
+    if username != user.username and not current_user.is_buggy_admin:
+        flash("Cannot download another user's notes", "danger")
+        abort(403)
     tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}
     notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
     if format == "md2html":

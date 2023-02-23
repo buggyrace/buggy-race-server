@@ -8,7 +8,7 @@
   {% else %}
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <a href="#footer-nav"><span class="navbar-toggler-icon"></span></a>
+    <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
@@ -33,19 +33,19 @@
     </ul>
     {% if current_user and current_user.is_authenticated %}
     <ul class="navbar-nav">
+      {% if current_user.is_buggy_admin %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('admin.admin') }}">
+            <i class="icon-cog"></i>&nbsp;Admin
+          </a>
+        </li>
+      {% endif %}
       <li class="nav-item active">
         <a class="nav-link" href="{{ url_for('user.submit_buggy_data') }}">Logged in as {{ current_user.pretty_username }}</a>
       </li>
-        {% if current_user.is_buggy_admin %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin.admin') }}">
-              <i class="icon-cog"></i>
-            </a>
-          </li>
-        {% endif %}
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('public.logout') }}">
-          <i class="icon-exit"></i>
+          <i class="icon-exit"></i>&nbsp;Log&nbsp;out
         </a>
       </li>
     </ul>

@@ -505,3 +505,10 @@ span.btn.disabled{
   margin-bottom:1em;
   background-color:#eee;
 }
+.nav-item + .nav-item{
+  border-left: 1px solid #555555;
+}
+.collapse.show .nav-item {
+  border-top: 1px solid #555555;
+  border-left: none;
+}

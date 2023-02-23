@@ -119,24 +119,21 @@ def handle_uploaded_json(form, user, is_api=False):
   else:
     return render_template("user/submit_buggy_data.html", form=form)
 
-@blueprint.route("/json/", methods=["POST"])
+@blueprint.route("/json", methods=["POST"], strict_slashes=False)
 @login_required
 @active_user_required
 def create_buggy_with_json():
     """Create or update user's buggy."""
     return handle_uploaded_json(BuggyJsonForm(request.form), current_user)
 
-@blueprint.route("/")
+@blueprint.route("/", strict_slashes=False)
 @login_required
 @active_user_required
 def show_own_buggy():
   return show_buggy(username=current_user.username)
 
-@blueprint.route("/")
-@login_required
-@active_user_required
 def show_buggy(username=None):
-    """Admin inspection of buggy for given user."""
+    """Inspection of buggy for given user: used by admin and user"""
     if username is None or username == current_user.username:
         user = current_user
         username = user.username

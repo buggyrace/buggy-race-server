@@ -52,7 +52,7 @@ def home():
         social_site_links=SocialSetting.get_socials_from_config(current_app.config)
     )
 
-@blueprint.route("/logout/")
+@blueprint.route("/logout", strict_slashes=False)
 @login_required
 def logout():
     """Logout."""
@@ -60,7 +60,7 @@ def logout():
     flash("You are logged out.", "info")
     return redirect(url_for("public.home"))
 
-@blueprint.route("/login/", methods=["GET", "POST"])
+@blueprint.route("/login", methods=["GET", "POST"], strict_slashes=False)
 def login():
     """Log in to the server."""
     warn_if_insecure()
@@ -88,9 +88,15 @@ def login():
         )
     )
 
-@blueprint.route("/register/", methods=["GET", "POST"])
+@blueprint.route("/register", methods=["GET", "POST"], strict_slashes=False)
 def register():
-    """Register new user."""
+    """Register new user.
+       This is the "convenience" of allowing a single-user registration, which
+       is probably most useful for adding new admins... because the "bulk
+       registration" of users (i.e., students) from a CSV is probably better.
+       IS_PUBLIC_REGISTRATION_ALLOWED should always be 0 (i.e., switched OFF)
+       unless you're running in an enclosed environment.
+    """
     form = RegisterForm(request.form)
     if current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
         del form.auth_code
@@ -131,7 +137,7 @@ def register():
         is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name])
     )
 
-@blueprint.route("/specs/")
+@blueprint.route("/specs", strict_slashes=False)
 def showspecs():
     """Buggy specifications page."""
     return render_template("public/specs.html",
@@ -140,7 +146,7 @@ def showspecs():
     )
 
 @blueprint.route("/specs/data/<data_filename>")
-@blueprint.route("/specs/data")
+@blueprint.route("/specs/data", strict_slashes=False)
 def showspecs_data(data_filename=""):
     """Buggy specifications: data page."""
     want_mass = request.args.get('extra')=="mass" 
@@ -162,7 +168,7 @@ def showspecs_data(data_filename=""):
         is_showing_mass=want_mass
     )
 
-@blueprint.route("/about/")
+@blueprint.route("/about", strict_slashes=False)
 def about():
     """About page."""
     form = LoginForm(request.form)
@@ -170,7 +176,7 @@ def about():
     response.headers.set("Cache-Control", "no-cache")
     return response
 
-@blueprint.route("/race/")
+@blueprint.route("/race", strict_slashes=False)
 def announce_races():
     """Race announcement page."""
     next_race=Race.query.filter(
@@ -200,7 +206,7 @@ def _send_tech_notes_assets(type, path):
     except FileNotFoundError:
         return "File not found", 404
 
-@blueprint.route("/project/tasks/<task_id>")
+@blueprint.route("/project/tasks/<task_id>", strict_slashes=False)
 def show_single_task(task_id):
     """Redirect individual tasks to single task page, with anchor tag"""
     task_id = task_id.lower()
@@ -284,7 +290,7 @@ def tech_notes_redirect_to_index():
     else:
         return redirect(url_for("public.serve_tech_notes", path="index"))
 
-@blueprint.route("/tech-notes/<path:path>")
+@blueprint.route("/tech-notes/<path:path>", strict_slashes=False)
 def serve_tech_notes(path=None):
     external_url = current_app.config.get("TECH_NOTES_EXTERNAL_URL")
     if not path:

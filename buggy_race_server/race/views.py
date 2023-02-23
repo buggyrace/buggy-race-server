@@ -13,7 +13,7 @@ from buggy_race_server.utils import flash_errors
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
-@blueprint.route("/")
+@blueprint.route("/", strict_slashes=False)
 @login_required
 def list_races():
     """Admin list of all races."""
@@ -24,10 +24,10 @@ def list_races():
       form = RaceForm(request.form)
       return render_template("admin/races.html", races=races, form=form)
 
-@blueprint.route("/new", methods=["GET", "POST"])
+@blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
 @login_required
 def new_race():
-    """Admin list of all races."""
+    """Create a new race."""
     if not current_user.is_buggy_admin:
       abort(403)
     else:

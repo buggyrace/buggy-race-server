@@ -14,7 +14,7 @@ blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../stat
 
 API_SECRET_LIFESPAN_MINS = 60
 
-@blueprint.route("/upload/", methods=["POST"])
+@blueprint.route("/upload", methods=["POST"], strict_slashes=False)
 def create_buggy_with_json_via_api():
   """ API call  """
   # basic API call to /api/upload with three params:

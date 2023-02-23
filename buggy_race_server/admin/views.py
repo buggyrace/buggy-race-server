@@ -187,7 +187,7 @@ def _flash_errors(form):
       else:
         flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
 
-@blueprint.route("/setup", methods=["GET", "POST"])
+@blueprint.route("/setup", methods=["GET", "POST"], strict_slashes=False)
 def setup():
   setup_status=current_app.config[ConfigSettingNames._SETUP_STATUS.name]
   if not setup_status:
@@ -289,7 +289,7 @@ def setup():
     env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
   )
 
-@blueprint.route("/")
+@blueprint.route("/", strict_slashes=False)
 @login_required
 def admin():
     TASK_NOTE_LENGTH_THRESHHOLD = 2 # texts shorter than this are not counted
@@ -349,7 +349,7 @@ def admin():
       qty_notes=qty_notes,
     )
 
-@blueprint.route("/users")
+@blueprint.route("/users", strict_slashes=False)
 @blueprint.route("/users/<data_format>")
 @login_required
 def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
@@ -389,7 +389,7 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
       )
 
 
-@blueprint.route("/users/register/", methods=["GET", "POST"])
+@blueprint.route("/users/register", methods=["GET", "POST"], strict_slashes=False)
 @blueprint.route("/users/register/<data_format>", methods=["POST"])
 @login_required
 def bulk_register(data_format=None):
@@ -553,7 +553,7 @@ def edit_user(user_id):
     user=user,
   )
 
-@blueprint.route("/api-keys", methods=['GET','POST'])
+@blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)
 @login_required
 def api_keys():
     if not current_user.is_buggy_admin:
@@ -604,7 +604,7 @@ def api_keys():
     form.usernames.choices = [u.username for u in users]
     return render_template("admin/api_key.html", form=form, users=users)
 
-@blueprint.route("/api-test", methods=["GET"])
+@blueprint.route("/api-test", methods=["GET"], strict_slashes=False)
 @login_required
 def api_test():
     if not current_user.is_buggy_admin:
@@ -634,7 +634,7 @@ def download_buggies():
     output.headers["Content-type"] = "text/csv"
     return output
 
-@blueprint.route("/buggies")
+@blueprint.route("/buggies", strict_slashes=False)
 @login_required
 def list_buggies(data_format=None):
     """Admin buggly list."""
@@ -646,7 +646,7 @@ def list_buggies(data_format=None):
     )
 
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])
-@blueprint.route("/settings/", methods=['GET','POST'])
+@blueprint.route("/settings", methods=['GET','POST'], strict_slashes=False)
 @login_required
 def settings(group_name=None):
     """Admin settings check page."""
@@ -686,7 +686,7 @@ def settings(group_name=None):
       tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
     )
 
-@blueprint.route("/announcements/", strict_slashes=False)
+@blueprint.route("/announcements", strict_slashes=False)
 @login_required
 def list_announcements():
     # only using the form for the CSRF token at this point
@@ -806,11 +806,11 @@ def delete_announcement(announcement_id=None):
       flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for("admin.list_announcements"))
 
-@blueprint.route("/tech-notes/publish", strict_slashes=False, methods=["POST"])
+@blueprint.route("/tech-notes/publish", methods=["POST"])
 def tech_notes_publish():
    return tech_notes_admin()
 
-@blueprint.route("/tech-notes", strict_slashes=False, methods=["GET"])
+@blueprint.route("/tech-notes", methods=["GET"], strict_slashes=False)
 @login_required
 def tech_notes_admin():
   if not current_user.is_buggy_admin:
@@ -844,7 +844,7 @@ def tech_notes_admin():
     notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
   )
 
-@blueprint.route("/tasks/publish", strict_slashes=True, methods=["POST"])
+@blueprint.route("/tasks/publish", methods=["POST"])
 def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
@@ -862,11 +862,11 @@ def tasks_generate():
                 flash(f"OK, task list page has been generated with latest data ({qty_tasks} tasks)", "success")
     return redirect(url_for('admin.tasks_admin'))
 
-@blueprint.route("/tasks/all", strict_slashes=True, methods=["GET"])
+@blueprint.route("/tasks/all", methods=["GET"], strict_slashes=False)
 def tasks_admin_all():
     return tasks_admin()
 
-@blueprint.route("/tasks", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/tasks", methods=["GET", "POST"], strict_slashes=False)
 @login_required
 def tasks_admin():
     if not current_user.is_buggy_admin:
@@ -944,7 +944,7 @@ def tasks_admin():
         task_list_updated_timestamp=current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
     )
 
-@blueprint.route("/download/tasks/<type>/<format>", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/download/tasks/<type>/<format>", methods=["GET", "POST"])
 @login_required
 def download_tasks(type=None, format=None):
     if not current_user.is_buggy_admin:
@@ -985,7 +985,7 @@ def download_tasks(type=None, format=None):
         headers={"Content-disposition": f"attachment; filename=\"{filename}\""}
     )
 
-@blueprint.route("/tasks/<task_id>/edit", strict_slashes=False, methods=["GET", "POST"])
+@blueprint.route("/tasks/<task_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_task(task_id=None):
     if not current_user.is_buggy_admin:
@@ -1033,7 +1033,7 @@ def edit_task(task_id=None):
       task=task
     )
 
-@blueprint.route("/notes", strict_slashes=False, methods=["GET"])
+@blueprint.route("/notes", methods=["GET"], strict_slashes=False)
 @login_required
 def notes():
     if not current_user.is_buggy_admin:

@@ -21,7 +21,7 @@ for match in re.findall(ROUTE_RE, str(grep_output.stdout)):
         prefix = ""
     else:
         prefix = "/" + (prefixes.get(module) or module)
-    routes.append(f"{prefix}/{path}")
+    routes.append(f"{prefix}/{path}".strip("/") or "/")
 
 routes.sort()
 print("\n".join(routes))

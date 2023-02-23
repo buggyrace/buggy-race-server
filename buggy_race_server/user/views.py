@@ -55,7 +55,7 @@ def flash_explanation_if_unauth(function):
     return function()
   return wrapper
 
-@blueprint.route("/upload")
+@blueprint.route("/upload", strict_slashes=False)
 @flash_explanation_if_unauth
 @login_required
 @active_user_required
@@ -64,7 +64,7 @@ def submit_buggy_data():
   """Submit the JSON for the buggy."""
   return render_template("user/submit_buggy_data.html", form = BuggyJsonForm(request.form))
 
-@blueprint.route("/settings")
+@blueprint.route("/settings", strict_slashes=False)
 @flash_explanation_if_unauth
 @login_required
 @active_user_required
@@ -78,7 +78,7 @@ def settings():
         is_using_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
     )
 
-@blueprint.route('/setup-course-repository', methods=['POST'])
+@blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)
 @login_required
 @active_user_required
 def setup_course_repository():
@@ -139,7 +139,7 @@ def setup_course_repository():
 
     return redirect(url_for('user.settings'))
 
-@blueprint.route("/password", methods=['GET','POST'])
+@blueprint.route("/password", methods=['GET','POST'], strict_slashes=False)
 @login_required
 @active_user_required
 def change_password():
@@ -180,7 +180,7 @@ def change_password():
         form.username.data = form.username.data or current_user.username
     return render_template("user/password.html", form=form)
   
-@blueprint.route("/secret", methods=['GET','POST'])
+@blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)
 @flash_explanation_if_unauth
 @login_required
 @active_user_required
@@ -212,7 +212,7 @@ def set_api_secret():
         pretty_lifespan="one hour",
     )
 
-@blueprint.route("/vscode-workspace", methods=['GET'])
+@blueprint.route("/vscode-workspace", methods=['GET'], strict_slashes=False)
 @login_required
 @active_user_required
 def vscode_workspace():
@@ -325,7 +325,7 @@ def note(task_fullname):
         pretty_timestamp=(note.modified_at or note.created_at).strftime("%Y-%m-%d %H:%M"),
     )
 
-@blueprint.route("/notes", strict_slashes=False, methods=['GET'])
+@blueprint.route("/notes", methods=['GET'], strict_slashes=False)
 @login_required
 @active_user_required
 def list_notes():

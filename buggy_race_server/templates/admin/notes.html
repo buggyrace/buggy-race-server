@@ -12,6 +12,9 @@
         <br>
         This page not fully implemented yet! (Will be displaying/linking note and user details)
       </div>
+      <p class="btn-collection">
+        <button id="show-buttons-btn" class="hidden btn btn-outline-secondary">Show users as buttons</button>
+      </p>
     </div>
   </div>
   <div class="row">
@@ -30,7 +33,10 @@
       <tbody>
         {% for student in students %}
           <tr>
-            <td>{{ student.pretty_username }}</td>
+            <td class="username-display">
+              <div>{{ student.pretty_username }}</div>
+              <a class="hidden btn btn-outline-secondary m-0" href="{{ url_for('admin.show_user', user_id=student.id) }}">{{ student.pretty_username }} &rtri;</button>
+            </td>
             <td class="status">
               {% if buggies_by_username[student.username] %}
                 <a href="{{ url_for('admin.show_buggy', username=student.username) }}" class="bg-success"></a>
@@ -55,4 +61,17 @@
     </table>
   </div>
 </div>
+<script>
+  const btn=document.getElementById("show-buttons-btn");
+  btn.addEventListener("click", function(){
+    let tds = document.getElementsByClassName("username-display");
+    for (let td of tds){
+      td.classList.add("p-1", "pr-0");
+      td.getElementsByTagName("DIV")[0].classList.add("hidden");
+      td.getElementsByTagName("A")[0].classList.remove("hidden");
+    }
+  })
+  btn.classList.remove("hidden");
+
+</script>
 {% endblock %}

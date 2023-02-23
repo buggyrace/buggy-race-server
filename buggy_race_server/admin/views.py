@@ -44,7 +44,7 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import Announcement, Note, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.buggy.views import show_buggy
+from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf
@@ -612,9 +612,9 @@ def api_test():
     return render_template("admin/api_test.html", random_qty_wheels=random.randint(1,100))
 
 @blueprint.route("/buggies/<username>")
-def admin_show_buggy(username):
+def show_buggy(username):
    """ Using the show_buggy code from Buggy, as that's common for non-admin too"""
-   return show_buggy(username=username)
+   return show_buggy_by_user(username=username)
 
 
 @blueprint.route("/download/buggies/csv")

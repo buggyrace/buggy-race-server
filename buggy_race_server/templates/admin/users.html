@@ -162,7 +162,7 @@
                 {% else %}
                   none
                 {% endif %}
-                <a href="{{ url_for('buggy.show_buggy', username=u.username) }}">&rarr;</a>
+                <a href="{{ url_for('admin.show_buggy', username=u.username) }}">&rarr;</a>
               </td>
               <td  class="u-uploaded">
                 {{ u.pretty_uploaded_at }}

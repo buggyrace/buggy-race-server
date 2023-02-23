@@ -160,7 +160,7 @@
       <div class="border">
         <div class="alert-secondary p-3 ">
           <strong class="mr-3">Buggy JSON:</strong>
-          <a href="{{ url_for('buggy.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
+          <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
         </div>
 <pre class="pt-3 px-3">{{ user.latest_json }}</pre>
       </div>

@@ -46,7 +46,7 @@
       <tbody>
         {% for b in buggies %}
         <tr>
-          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.admin_show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
+          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
           <td>  {{ b.pretty_username }} </td>
           <td>  {{ b.total_cost }} </td>
           <td>  {{ b.mass }} </td>

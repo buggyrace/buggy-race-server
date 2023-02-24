@@ -1,0 +1,15 @@
+{% if config['CURRENT_ANNOUNCEMENTS'] %}
+  {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}
+    {% if announcement.type == local_announcement_type %}
+      <div class="row">
+        <div class="col alert">
+          {% if announcement.is_html %}
+            {{ announcement.text|safe }}
+          {% else %}
+            {{ announcement.text }}
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}

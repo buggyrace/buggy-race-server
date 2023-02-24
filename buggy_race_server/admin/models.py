@@ -67,9 +67,12 @@ class Setting(SurrogatePK, Model):
         db.Model.__init__(self, **kwargs)
 
 class AnnouncementType(Enum):
+    DANGER = 'danger'
     INFO = 'info'
-    WARNING = 'warning'
+    LOGIN = 'login'
     SPECIAL = 'special'
+    TAGLINE = 'tagline'
+    WARNING = 'warning'
 
 class Announcement(SurrogatePK, Model):
 

@@ -19,6 +19,7 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
+from buggy_race_server.admin.models import AnnouncementType
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
@@ -49,7 +50,8 @@ def home():
     warn_if_insecure()
     return render_template(
         "public/home.html",
-        social_site_links=SocialSetting.get_socials_from_config(current_app.config)
+        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
+        local_announcement_type=AnnouncementType.TAGLINE.value,
     )
 
 @blueprint.route("/logout", strict_slashes=False)
@@ -85,7 +87,8 @@ def login():
         is_registration_allowed=(
             current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
             or (not current_user.is_anonymous and current_user.is_buggy_admin)
-        )
+        ),
+        local_announcement_type=AnnouncementType.LOGIN.value,
     )
 
 @blueprint.route("/register", methods=["GET", "POST"], strict_slashes=False)

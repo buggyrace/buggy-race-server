@@ -5,10 +5,8 @@
 <div class="jumbotron">
     <div class="container">
     <img class="buggy-img" src="{{ static_url_for('static', filename='build/img/rene-buggy-2.png') }}" alt="beat-up racing buggy">
-
       <h1 class="display-3">{{config['INSTITUTION_SHORT_NAME']}} Buggy Race Server</h1>
-    
-      <p>Buggy races happen here (almost) every night.</p>
+      {% include "_local_announcement.html" %}
     </div>
 </div><!-- /.jumbotron -->
 

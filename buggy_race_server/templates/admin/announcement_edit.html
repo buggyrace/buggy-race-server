@@ -47,11 +47,31 @@
         </form>
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-6 my-3">
-      You may need to hide/publish announcements to see changes take
-      effect after you have submitted them.
+    <div class="col-lg-6">
+      <div class="alert alert-danger mb-3">
+        Be <strong>very careful</strong> if you enable HTML in an announcement:
+        <em>you can break the layout of the pages</em>. Check and double check
+        that you have closed all the tags you've opened!
+      </div>
+      <p>
+        You may need to hide/publish announcements to see changes take
+        effect after you have submitted them.  
+      </p>
+      <p>
+        Announcements of type
+        <code class="alert-info p-1">info</code>,
+        <code class="alert-warning p-1">warning</code>, 
+        <code class="alert-danger p-1">danger</code>, 
+        or
+        <code class="bg-yellow p-1">special</code> appear on all pages (except tech notes).
+      </p>
+      <p>
+        The <code>login</code> and <code>tagline</code> announcements are
+        not styled, and <strong>only</strong> appear on the
+        <a href="{{ url_for('public.login') }}">login</a> and
+        <a href="{{ url_for('public.home') }}">home</a> pages respectively.
+      </p>
+
     </div>
   </div>
 

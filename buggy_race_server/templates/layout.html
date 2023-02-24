@@ -25,17 +25,19 @@
     <header>{% block header %}{% endblock %}</header>
     <main role="main">
       {% if config['CURRENT_ANNOUNCEMENTS'] %}
-        {% for banner in config['CURRENT_ANNOUNCEMENTS'] %}
-          <div class="row announcement-wrapper announcement-{{ banner.type }}">
-            <div class="col announcement-inner-box">
-              <div class="alert text-center">
-                {% if banner.is_html %}
-                  {{ banner.text|safe }}
-                {% else %}
-                  {{ banner.text }}
-                {% endif %}
+        {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}
+          {% if not announcement.type in ["login", "tagline"] %}
+            <div class="row announcement-wrapper announcement-{{ announcement.type }}">
+              <div class="col announcement-inner-box">
+                <div class="alert text-center">
+                  {% if announcement.is_html %}
+                    {{ announcement.text|safe }}
+                  {% else %}
+                    {{ announcement.text }}
+                  {% endif %}
+                </div>
               </div>
-            </div>
+            {% endif %}
           </div>
         {% endfor %}
       {% endif %}

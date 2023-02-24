@@ -17,7 +17,7 @@
   <div class="alert alert-warning">
     <div class="row">
       <div class="col-lg-4">
-        <h2><i class="icon-book"></i> Rules &amp; specs</h2>
+        <h2><span class="icon-book"></span> Rules &amp; specs</h2>
         <p>
           <strong>Race rules</strong> and 
           <strong>buggy definitions</strong>,
@@ -27,14 +27,14 @@
         <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.showspecs' ) }}">See the specs &rtri;</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><i class="icon-wrench"></i> Upload data</h2>
+        <h2><span class="icon-wrench"></span> Upload data</h2>
         <p>
           Enter the <strong>specification of your buggy</strong> for the next race.
         </p>
         <p><a class="btn btn-outline-secondary" href="{{ url_for( 'user.submit_buggy_data' ) }}">Submit buggy JSON &rtri;</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><i class="icon-trophy"></i> Race results</h2>
+        <h2><span class="icon-trophy"></span> Race results</h2>
         <p>
           Report from the most recent <strong>race</strong>.
         </p>
@@ -46,7 +46,7 @@
   <div class="alert">
     <div class="row mt-5">
       <div class="col-lg-4">
-        <h2><i class="icon-info"></i> Project details</h2>
+        <h2><span class="icon-info"></span> Project details</h2>
         <p>
           Everything you need to know about the 
           <strong>tasks</strong>
@@ -56,7 +56,7 @@
         <p><a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page' ) }}">Go to project &rtri;</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><i class="icon-github"></i> Source code</h2>
+        <h2><span class="icon-github"></span> Source code</h2>
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver (we'll automatically fork this into
@@ -66,7 +66,7 @@
       </div>
       <div class="col-lg-4">
         {% if social_site_links %}
-          <h2><i class="icon-bubbles"></i> Other places</h2>
+          <h2><span class="icon-bubbles"></span> Other places</h2>
           {% for social_site in social_site_links %}
               <p>
                 {{ social_site.text }}

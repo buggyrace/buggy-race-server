@@ -309,6 +309,9 @@ footer .footer-nav {
 .icon-info:before {
   content: "\ea0c";
 }
+.icon-enter:before {
+  content: "\ea13";
+}
 .icon-exit:before {
   content: "\ea14";
 }

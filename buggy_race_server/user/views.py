@@ -168,7 +168,7 @@ def change_password():
                 if username == current_user.username:
                   success_msg = "OK, you changed your password. Don't forget it!"
                 else:
-                  success_msg = f"OK, password was changed for user {username.pretty_username}"
+                  success_msg = f"OK, password was changed for user {username}"
                 flash(success_msg, "success")
                 return redirect(url_for("public.home"))
         else:

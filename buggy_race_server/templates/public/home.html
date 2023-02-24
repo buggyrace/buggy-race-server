@@ -4,7 +4,7 @@
 <!-- Main jumbotron for a primary marketing message or call to action -->
 <div class="jumbotron">
     <div class="container">
-    <img class="buggy-img" src="/static/build/img/rene-buggy-2.png" alt="beat-up racing buggy">
+    <img class="buggy-img" src="{{ static_url_for('static', filename='build/img/rene-buggy-2.png') }}" alt="beat-up racing buggy">
 
       <h1 class="display-3">{{config['INSTITUTION_SHORT_NAME']}} Buggy Race Server</h1>
     

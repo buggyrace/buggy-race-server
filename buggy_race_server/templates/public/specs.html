@@ -823,7 +823,7 @@
             motive wheel. Slow to accelerate, limited top power, but cheaper
             and cuter than most alternatives.
             <br>
-            <a href="#hamster"><img src="/static/build/img/rene-hamster-1.png" alt="buggy-racing hamster" style="max-width:3em"/></a>
+            <a href="#hamster"><img src="{{ static_url_for('static', filename='build/img/rene-hamster-1.png') }}" alt="buggy-racing hamster" style="max-width:3em"/></a>
             
             <br>
             <em>Note: Expired hamsters do not die; they jump off (safely).</em>
@@ -1113,7 +1113,7 @@
     </table>
   </div>
   <div class="row mt-5" id="hamster">
-    <img src="/static/build/img/rene-hamster-1.png" alt="buggy-racing hamster" class="float-right"/>
+    <img src="{{static_url_for('static', filename='build/img/rene-hamster-1.png') }}" alt="buggy-racing hamster" class="float-right"/>
   </div>
 </div>
 {% endblock %}

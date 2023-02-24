@@ -174,8 +174,9 @@
   {% include "admin/_task_notes_for_user.html" %}
   <div class="row">
     <div class="col my-3 btn-collection">
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}&nbsp;&rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password&nbsp;&rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users&nbsp;&rtri;</a>
     </div>
   </div>
 </div>

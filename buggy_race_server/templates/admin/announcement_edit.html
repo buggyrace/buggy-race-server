@@ -16,7 +16,7 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="border border-secondary container">
-        <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', id=id)}}" role="form">
+        <form id="AnnounceForm" class="form form-announce" method="POST" action="{{url_for('admin.edit_announcement', announcement_id=id)}}" role="form">
           {{ form.csrf_token }}
           <div class="row">
             <div class="col my-2">

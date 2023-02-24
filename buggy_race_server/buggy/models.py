@@ -280,12 +280,15 @@ class Buggy(SurrogatePK, Model):
         return None
 
     @staticmethod
-    def get_all_buggies_with_usernames():
+    def get_all_buggies_with_usernames(want_inactive_users=False, want_students_only=True):
         # TODO shockingly building my own join because somehow the SQLAlchemy
         # TODO relationship isn't putting User into the buggy. Don't look
         # TODO Used db.session with .joins and everything. Sigh.
         users_by_id = dict()
-        users = User.query.all()
+        criteria = {}
+        if want_inactive_users or not want_students_only:
+           print("* not implemented — buggies only for active students")
+        users = User.query.filter_by(is_active=True, is_student=True).all()
         for user in users:
             users_by_id[user.id] = user
         buggies = Buggy.query.all()

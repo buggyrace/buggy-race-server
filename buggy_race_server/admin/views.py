@@ -21,6 +21,7 @@ from flask import (
     render_template,
     request,
     Response,
+    session,
     url_for,
 )
 from flask_login import current_user, login_required, login_user
@@ -52,7 +53,6 @@ from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
-    join_to_project_root,
     publish_task_list,
     get_download_filename,
     get_tasks_as_issues_csv,
@@ -62,6 +62,7 @@ from buggy_race_server.utils import (
     publish_tech_notes,
     refresh_global_announcements,
     set_and_save_config_setting,
+    load_config_setting,
 )
 
 blueprint = Blueprint(
@@ -189,7 +190,9 @@ def _flash_errors(form):
 
 @blueprint.route("/setup", methods=["GET", "POST"], strict_slashes=False)
 def setup():
-  setup_status=current_app.config[ConfigSettingNames._SETUP_STATUS.name]
+  session_status_name = ConfigSettingNames._SETUP_STATUS.name
+  # always get setup status from database during setup:
+  setup_status = load_config_setting(current_app, session_status_name)
   if not setup_status:
     flash(
       "Setup is complete on this server (config settings "
@@ -197,6 +200,13 @@ def setup():
     )
     abort(404)
   setup_status = int(setup_status)
+  setup_status_from_session = session.get(session_status_name)
+  if setup_status == 1 and setup_status_from_session and setup_status_from_session > 1:
+      flash("Unexpected session bump: clearing your session status", "warning")
+      del session[session_status_name]
+  if setup_status > 1 and not setup_status_from_session:
+      flash("Cannot continue setup in this session (maybe someone else is already setting up?)", "warning")
+      abort(403)
   qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
   if setup_status >= qty_setup_steps:
     setup_status = 0
@@ -205,10 +215,13 @@ def setup():
       ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
+    del session[session_status_name] # clear the session: we're done
     flash("Setup complete: you can now generate tech notes, edit tasks, and register users", "success")
     return redirect( url_for('public.home'))
   if setup_status == 1:
     form = SetupAuthForm(request.form)
+    # here we grant this session (effectively, this user) setup status
+    session[session_status_name] = setup_status
   else:
     # after initial setup (auth), user must be logged in
     if current_user.is_anonymous or not current_user.is_buggy_admin:
@@ -259,6 +272,8 @@ def setup():
               ConfigSettingNames._SETUP_STATUS.name,
               setup_status
             )
+            # here we grant this session setup status
+            session[session_status_name] = setup_status
           else:
             # something wasn't OK, so don't save and move on
             # (the errors will have been explicitly flashed)

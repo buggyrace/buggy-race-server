@@ -8,17 +8,21 @@
   <div class="row">
     <div class="col">
       <div class="alert alert-warning">
-        TODO! Work in progress!
-        <br>
-        This page not fully implemented yet! (Will be displaying/linking note and user details)
+        Currently only notes belonging to <em>active students</em> are shown on this page.
       </div>
-      <p class="btn-collection">
-        <button id="show-buttons-btn" class="hidden btn btn-outline-secondary">Show users as buttons</button>
-      </p>
+      {% if students %}
+        <p class="btn-collection">
+          <button id="show-buttons-btn" class="hidden btn btn-outline-secondary">Show users as buttons</button>
+        </p>
+      {% else %}
+        <div class="alert alert-danger">
+          No active students found.
+        </div>
+      {% endif %}
     </div>
   </div>
   <div class="row">
-    <table id="all-student-notes" class="col table bg-white table-striped table-bordered table-hover table-responsive-md">
+    <table id="all-student-notes" class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
       <thead>
         <tr>
           <th>

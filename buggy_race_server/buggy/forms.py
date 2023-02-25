@@ -9,7 +9,7 @@ class BuggyJsonForm(FlaskForm):
     """Buggy (JSON) form."""
 
     buggy_json = TextAreaField(
-        "buggy_json", validators=[DataRequired(), Length(min=1, max=2048)]
+        "JSON data", validators=[DataRequired(), Length(min=1, max=2048)]
     )
 
     def __init__(self, *args, **kwargs):

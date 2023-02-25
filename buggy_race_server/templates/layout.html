@@ -27,31 +27,31 @@
       {% if config['CURRENT_ANNOUNCEMENTS'] %}
         {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}
           {% if not announcement.type in ["login", "tagline"] %}
-            <div class="row announcement-wrapper announcement-{{ announcement.type }}">
-              <div class="col announcement-inner-box">
-                <div class="alert text-center">
+            <div class="row my-2 mx-0 announcement-wrapper announcement-{{ announcement.type }} w-100">
+              <div class="announcement-inner-box text-center alert">
                   {% if announcement.is_html %}
                     {{ announcement.text|safe }}
                   {% else %}
                     {{ announcement.text }}
                   {% endif %}
-                </div>
               </div>
-            {% endif %}
-          </div>
+            </div>
+          {% endif %}
         {% endfor %}
       {% endif %}
-      <div id="flash-msgs" class="row">
+      <div id="flash-msgs">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            {% for category, message in messages %}
-              <div class="col-sm-12 alert alert-{{ category }}">
-                <div class="container">
-                  <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
-                  {{ message }}
+            <div class="my-3">
+              {% for category, message in messages %}
+                <div class="row alert alert-{{ category }} my-2">
+                  <div class="container">
+                    <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
+                    {{ message }}
+                  </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
           {% endif %}
         {% endwith %}
       </div>

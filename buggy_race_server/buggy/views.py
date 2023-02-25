@@ -109,7 +109,7 @@ def handle_uploaded_json(form, user, is_api=False):
       return {"ok": "buggy updated OK"}
     else:
       if user == current_user:
-        return redirect(url_for("user.show_own_buggy"))
+        return redirect(url_for("buggy.show_own_buggy"))
       else:
         return redirect(url_for("admin.show_buggy", username=user.username))
   else:

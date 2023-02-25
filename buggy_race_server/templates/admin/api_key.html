@@ -21,7 +21,7 @@
   <form class="form p-3" id="ApiKeyForm" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
     {{ form.csrf_token }}
     <div class="row">
-      <table class="table table-striped table-bordered table-hover">
+      <table class="table table-striped table-bordered table-hover bg-white">
         <thead>
           <tr>
             <th>Username</th>
@@ -50,7 +50,7 @@
       </table>
     </div>
     <div class="row">
-      <p class="text-right">
+      <p class="btn-collection">
         <button class="btn btn-outline-secondary" id="check-all-btn">Check all &utri;</button>
         &nbsp;
         <button class="btn btn-outline-secondary" id="toggle-all-btn">Toggle all &utri;</button>

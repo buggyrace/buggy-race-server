@@ -23,6 +23,7 @@ from environs import Env
 from random import randint
 import re
 from os import path
+from buggy_race_server.extensions import bcrypt
 
 class ConfigSettingNames(Enum):
 
@@ -94,7 +95,7 @@ class ConfigSettingNames(Enum):
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
     PROJECT_WORKFLOW_URL = auto()
-    REGISTRATION_AUTH_CODE = auto()
+    AUTHORISATION_CODE = auto()
     SECRET_KEY = auto()
     SERVER_PROJECT_PAGE_PATH = auto()
     SOCIAL_0_NAME = auto()
@@ -146,7 +147,7 @@ class ConfigSettings:
 
     GROUPS = {
       ConfigGroupNames.AUTH.name:(
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name
+        ConfigSettingNames.AUTHORISATION_CODE.name
       ),
       ConfigGroupNames.ORG.name: (
         ConfigSettingNames.INSTITUTION_FULL_NAME.name,
@@ -215,7 +216,7 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
-        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 1,
+        ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 0,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
@@ -244,7 +245,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: "CHANGEME",
+        ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
         ConfigSettingNames.SOCIAL_0_NAME.name: "",
@@ -306,7 +307,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name: ConfigTypes.PASSWORD,
+        ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
         ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
@@ -556,7 +557,7 @@ class ConfigSettings:
           it will default to `project/workflow` on this server. Leave
           this blank if you don't want to display a workflow page.""",
 
-        ConfigSettingNames.REGISTRATION_AUTH_CODE.name:
+        ConfigSettingNames.AUTHORISATION_CODE.name:
           """The authorisation code is needed to make any changes to config
           or other-user data, including registering students.
           See also `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
@@ -699,6 +700,9 @@ class ConfigSettings:
             value = str_value == "1"
         elif type == ConfigTypes.INT:
             value = int(str_value) if str_value.isdecimal() else 0
+        # note: hash passwords _before_ sending them to set_config_value
+        # elif type == ConfigTypes.PASSWORD:
+        #     value = bcrypt.generate_password_hash(str_value)
         app.config[name] = value
         # print(f"* updated config value: {name}={value}", flush=True)
 

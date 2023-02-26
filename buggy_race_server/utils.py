@@ -9,10 +9,9 @@ from functools import wraps
 from flask_login import current_user, logout_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 from buggy_race_server.admin.models import Announcement, Setting, Task
-from buggy_race_server.extensions import db
+from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime
-
 import subprocess
 
 def refresh_global_announcements(app):
@@ -43,10 +42,10 @@ def flash_suggest_if_not_yet_githubbed(function):
 
 def is_authorised(form, field):
   """ check the auth code — required for some admin activities (mainly user registration)"""
-  auth_code = current_app.config.get(ConfigSettingNames.REGISTRATION_AUTH_CODE.name)
+  auth_code = current_app.config.get(ConfigSettingNames.AUTHORISATION_CODE.name)
   if auth_code is None:
     raise ValidationError("No authorisation code has been set: cannot authorise")
-  if field.data != auth_code:
+  if not bcrypt.check_password_hash(auth_code, field.data):
     raise ValidationError(f"You must provide a valid authorisation code")
   return True
 

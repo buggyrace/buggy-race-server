@@ -105,7 +105,7 @@ you edited in the `.env` file at the start). Make sure the username you
 register is listed as an admin. For example, with these settings...
 
 ```yaml
-REGISTRATION_AUTH_CODE=please
+AUTHORISATION_CODE=please
 ADMIN_USERNAMES=jane
 ```
 

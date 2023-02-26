@@ -11,7 +11,7 @@
 4. `flask db migrate`
 5. `cp env.example .env`
   * add your name or a preferred username to `ADMIN_USERNAME`
-  * set or use the default value for `REGISTRATION_AUTH_CODE`, you will need it for registering accounts.
+  * set or use the default value for `AUTHORISATION_CODE`, you will need it for registering accounts.
 6. `npm install`
 7. Run the flask app
   6.1. `npm start`

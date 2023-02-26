@@ -48,7 +48,7 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
-from buggy_race_server.extensions import csrf
+from buggy_race_server.extensions import csrf, bcrypt
 from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
@@ -89,6 +89,8 @@ def _update_settings_in_db(form):
   for setting_form in form.settings.data:
     name = setting_form.get('name').upper() # force uppercase for config keys
     value = setting_form.get('value').strip()
+    if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
+        value = bcrypt.generate_password_hash(value)
     is_changed_value = False
     if name in settings_as_dict:
       if settings_as_dict[name] != value:
@@ -226,7 +228,8 @@ def setup():
   else:
     # after initial setup (auth), user must be logged in
     if current_user.is_anonymous or not current_user.is_buggy_admin:
-      flash("Setup is not complete: you must log in as an admin user to continue", "warning")
+      admins = current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name]
+      flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
       return redirect( url_for('public.login'))
     form = SetupSettingForm(request.form)
   if request.method == "POST":
@@ -234,8 +237,8 @@ def setup():
         if setup_status == 1: # this updating auth and creating a new admin user
           set_and_save_config_setting(
             current_app,
-            ConfigSettingNames.REGISTRATION_AUTH_CODE.name,
-            form.new_auth_code.data
+            ConfigSettingNames.AUTHORISATION_CODE.name,
+            bcrypt.generate_password_hash(form.new_auth_code.data)
           )
           new_admin_username = form.admin_username.data.strip().lower()
           if admin_user := User.query.filter_by(username=new_admin_username).first():

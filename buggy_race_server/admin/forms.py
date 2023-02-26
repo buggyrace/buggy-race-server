@@ -179,7 +179,7 @@ class SetupAuthForm(FlaskForm):
     admin_password_confirm = PasswordField("Admin password confirm", [Optional()])
 
     def validate_new_auth_code(self, value):
-      if self.new_auth_code.data == ConfigSettings.DEFAULTS[ConfigSettingNames.REGISTRATION_AUTH_CODE.name]:
+      if self.new_auth_code.data == ConfigSettings.DEFAULTS[ConfigSettingNames.AUTHORISATION_CODE.name]:
         raise ValidationError(
           "You must change the auth code to be something other than "
           "its default ('factory') setting"

@@ -88,7 +88,7 @@ it in development, it's happy with SQLite).
 
 At the start of term, you need to load it with student (and staff) login
 accounts. You can register yourself by providing the authorisation code (which
-you can set as `REGISTRATION_AUTH_CODE`). Likewise, grant yourself admin
+you can set as `AUTHORISATION_CODE`). Likewise, grant yourself admin
 access by including your user name in `ADMIN_USERNAMES` (see `env.example`).
 
 When registering, emails are _optional_ — you just need a username and password
@@ -174,7 +174,7 @@ Informal steps for setting up the project:
    * check the server is running (e.g., deployed on Heroku)
    * set up the database or make sure it's empty if carrying over from previous year
    * make sure all the config is set, including external URLs: see `env.example`
-    — that includes the `REGISTRATION_AUTH_CODE` code you'll need to set up
+    — that includes the `AUTHORISATION_CODE` code you'll need to set up
     administrators
 
 1. Go onto the server and register your own user —

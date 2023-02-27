@@ -708,6 +708,7 @@ def settings(group_name=None):
       },
       html_descriptions=html_descriptions,
       tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
+      env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
     )
 
 @blueprint.route("/announcements", strict_slashes=False)

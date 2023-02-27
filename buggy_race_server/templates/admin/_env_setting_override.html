@@ -1,0 +1,8 @@
+{% if name in env_setting_overrides %}
+<div class="alert-danger">
+  <strong>This setting has been declared as an environment variable</strong>
+  which has priority over the value found in the database.
+  You can change it here, but the new setting will not survive
+  a restart <em>unless</em> the ENV declaration is removed.
+</div>
+{% endif %}

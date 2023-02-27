@@ -1,9 +1,13 @@
-<p>
-  Links to up to four "Other places" (such as social media) are shown
-  on the server's home page. If you're using supporting sites such as
-  Moodle, Discord, Teams or Piazza, add them here.<br>
-  If you leave the <em>Name</em> blank, the link won't be displayed.
-</p>
+<div class="row">
+  <div class="col-lg-8">
+    <p class="m-3">
+      Links to up to four "Other places" (such as social media) are shown
+      on the server's home page. If you're using supporting sites such as
+      Moodle, Discord, Teams or Piazza, add them here.<br>
+      If you leave the <em>Name</em> blank, the link won't be displayed.
+    </p>
+  </div>
+</div>
 {% for social in social_settings %}
   <div class="row p-0 m-2 bg-white" style="border:2px solid #ddd;">
     <h4 class="col-sm-12 p-2" style="background-color:#ddd;">
@@ -26,9 +30,11 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
+          {% include "admin/_env_setting_override.html" %}
           {{ html_descriptions[name] | safe }}
-          <br>
-          <em>Example:</em> <code>Discord</code>
+          <p>
+            <em>Example:</em> <code>Discord</code>
+          </p>
         </div>
       </div>
       <div class="row py-2 m-1 bg-white">
@@ -42,9 +48,11 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
+          {% include "admin/_env_setting_override.html" %}
           {{ html_descriptions[name] | safe }}
-          <br>
-          <em>Example:</em> <code>https://discord.example.com</code>
+          <p>
+            <em>Example:</em> <code>https://discord.example.com</code>
+          </p>
         </div>
       </div>
       <div class="row py-2 m-1 bg-white">
@@ -58,11 +66,12 @@
           <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
+          {% include "admin/_env_setting_override.html" %}
           {{ html_descriptions[name] | safe }}
-          <br>
-          <em>Example:</em>
-          <br>
-          <code>Discord server for discussing project/asking for help.</code>
+          <p>
+            <em>Example:</em><br>
+            <code>Discord server for discussing project/asking for help.</code>
+          <p>
         </div>
       </div>
     </div>

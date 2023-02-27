@@ -165,10 +165,10 @@ class SettingForm(FlaskForm):
 class SetupAuthForm(FlaskForm):
     auth_code = PasswordField("Authorisation code", [DataRequired(), is_authorised])
     new_auth_code = PasswordField(
-      "New auth code", 
+      "New authorisation code", 
       [DataRequired(), Length(min=ConfigSettings.MIN_PASSWORD_LENGTH)]
     )
-    new_auth_code_confirm = PasswordField("New auth confirm", [Optional()])
+    new_auth_code_confirm = PasswordField("New authorisation code confirm", [Optional()])
     admin_username = StringField(
       "Admin username",
       [DataRequired(), Length(min=ConfigSettings.MIN_USERNAME_LENGTH, max=ConfigSettings.MAX_USERNAME_LENGTH)])

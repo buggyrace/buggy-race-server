@@ -35,7 +35,11 @@
           {{ form.csrf_token }}
           <input type="hidden" name="group" value="{{ group }}"/>
           {% if group == "AUTH" %}
-            <h3>Change authorisation code</h3>
+            <div class="row">
+              <div class="col">
+                <h3 class="p-2">Change authorisation code</h3>
+              </div>
+            </div>
             <div class="row py-2 m-1 bg-white">
               <div class="col-sm-3">
                 New authorisation code
@@ -45,7 +49,11 @@
                 <input name="{{ SETTING_PREFIX }}-0-value" type="password"  class="form-control mr-sm-1"/>
               </div>
               <div class="col-sm-5">
-                Do not forget the new value of the authorisation code!
+                {% set name = "AUTHORISATION_CODE" %}
+                {% include "admin/_env_setting_override.html" %}
+                <p>
+                  Do not forget the new value of the authorisation code!
+                </p>
               </div>
             </div>
             <div class="row bg-warning py-2 m-1">
@@ -62,6 +70,18 @@
             <input type="submit" class="btn btn-primary m-2" value="Submit new code"/>
           {% else %}
             {% include "admin/_settings_group.html" %}
+            <div class="row bg-warning py-2 m-1">
+              <div class="col-sm-3">
+                {{ form.auth_code.label }}
+              </div>
+              <div class="col-sm-4">
+                {{ form.auth_code(class="mr-sm-1")}}
+              </div>
+              <div class="col-sm-5">
+                You must provide the current authorisation code to make changes.
+              </div>
+            </div>
+            <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | lower }} settings"/>
           {% endif %}
         </form>
       </div>

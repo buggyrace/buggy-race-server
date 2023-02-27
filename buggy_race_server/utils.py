@@ -141,7 +141,6 @@ def set_and_save_config_setting(app, name, value):
 def load_config_setting(app, name):
     """ loads config setting from database, and returns value """
     if setting := db.session.query(Setting).filter_by(id=name).first():
-       print(f"FIXME setting config[{name}] to <{setting.value}> - - - - - - - - - - - - - - - - - ")
        ConfigSettings.set_config_value(app, name, setting.value)
        return setting.value
 

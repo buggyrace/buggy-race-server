@@ -878,7 +878,10 @@ class ConfigFromEnv():
       # persist if it's being overridden by an ENV declaration at start-up.
       env_setting_overrides = []
       for name in ConfigSettings.DEFAULTS:
-          if env.str(name, default=None):
-              setattr(self, name, env.str(name))
+          setting_value = env.str(name, default=None) 
+          if setting_value is not None:
+              if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
+                 setting_value = bcrypt.generate_password_hash(setting_value).decode('utf8')
+              setattr(self, name, setting_value)
               env_setting_overrides.append(name)
       self._ENV_SETTING_OVERRIDES = ",".join(env_setting_overrides)

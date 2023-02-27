@@ -291,19 +291,25 @@ def setup():
     setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
     for setting in ConfigSettings.DESCRIPTIONS
   }
+  social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
   return render_template(
     "admin/setup.html",
+    setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
+    #group=ConfigSettings.GROUPS[group_name],
     setup_status=setup_status,
     qty_setup_steps=qty_setup_steps,
     form=form,
-    SETTING_PREFIX=SETTING_PREFIX,
     group_name=group_name,
-    group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
-    settings_group=ConfigSettings.GROUPS[group_name],
+    SETTING_PREFIX=SETTING_PREFIX,
+    groups=ConfigSettings.GROUPS,
+    sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],
     settings=settings_as_dict,
-    social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True),
+    social_settings=social_settings,
     type_of_settings=ConfigSettings.TYPES,
-    pretty_default_settings={name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name]) for name in ConfigSettings.DEFAULTS},
+    pretty_default_settings={
+      name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
+      for name in ConfigSettings.DEFAULTS
+    },
     html_descriptions=html_descriptions,
     env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
   )
@@ -707,8 +713,8 @@ def settings(group_name=None):
         for name in ConfigSettings.DEFAULTS
       },
       html_descriptions=html_descriptions,
-      tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
       env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
+      tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/announcements", strict_slashes=False)

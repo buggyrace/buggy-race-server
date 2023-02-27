@@ -1,14 +1,17 @@
-<h3>{{ group | title }} settings</h3>
-
+<div class="row">
+  <div class="col">
+    <h3 class="p-2">{{ group | title }} settings</h3>
+  </div>
+</div>
 {% if group == 'SOCIAL' %}
   {%include "admin/_social_settings.html" %}
 {% else %}
   {% for name in groups[group] %}
     <div class="row py-2 m-1 bg-white">
-      <div class="col-sm-3">
+      <div class="col-lg-3 col-md-12">
         <label for="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name"><code>{{ name }}</code></label>
       </div>
-      <div class="col-sm-4">
+      <div class="col-lg-4 col-sm-6 mb-2">
         <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
         {%if name == "PROJECT_REPORT_TYPE" %}
           {%include "admin/_report_type_input.html" %}
@@ -32,7 +35,7 @@
           />
         {% endif %}
       </div>
-      <div class="col-sm-5">
+      <div class="col-lg-5 col-sm-6">
         {% include "admin/_env_setting_override.html" %}
         {{ html_descriptions[name] | safe }}
         <div class="setting-default">
@@ -46,15 +49,3 @@
     </div>
   {% endfor %}
 {% endif %}
-<div class="row bg-warning py-2 m-1">
-  <div class="col-sm-3">
-    Authorisation code
-  </div>
-  <div class="col-sm-4">
-    <input id="auth_code" name="auth_code" type="password" value="" class="form-control mr-sm-1"/>
-  </div>
-  <div class="col-sm-5">
-    You must provide the current authorisation code to make changes.
-  </div>
-</div>
-<input type="submit" class="btn btn-primary m-2" value="Submit {{ group | title }} settings"/>

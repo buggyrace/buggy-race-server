@@ -204,12 +204,18 @@ def set_api_secret():
         else:
             flash(f"Warning! Your API secret was not set.", "danger")
             flash_errors(form)
+    if task_names := current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name].split(","):
+        api_task_names = [task_name.strip() for task_name in task_names]
+    else:
+        api_task_names = []
+    
     return render_template(
         "user/settings_api.html",
         form=form,
         delta_mins=delta_mins,
         is_confirmation=is_confirmation,
         pretty_lifespan="one hour",
+        api_task_names=api_task_names,
     )
 
 @blueprint.route("/vscode-workspace", methods=['GET'], strict_slashes=False)

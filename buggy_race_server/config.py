@@ -112,8 +112,9 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_URL = auto()
     TASK_LIST_GENERATED_DATETIME = auto()
     TASK_LIST_HTML_FILENAME = auto()
-    TASKS_LOADED_DATETIME = auto()
+    TASK_NAME_FOR_API = auto()
     TASK_URLS_USE_ANCHORS = auto()
+    TASKS_LOADED_DATETIME = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
@@ -208,6 +209,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
+        ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
@@ -263,6 +265,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
+        ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
@@ -325,6 +328,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
@@ -597,6 +601,15 @@ class ConfigSettings:
           """Short description""",
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
+
+        ConfigSettingNames.TASK_NAME_FOR_API.name:
+          """The name of the task (or tasks) that require use of the
+          upload API. If set, this is shown as a helpful link in the
+          explanotary text on the student's API settings page.
+          If you set this to be empty, no link is show. You can provide
+          mulitple task names by separating them with commas. If you
+          haven't customised the task list, you don't need to change
+          this.""",
 
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name:
           """By default, task URLs go direct to the server

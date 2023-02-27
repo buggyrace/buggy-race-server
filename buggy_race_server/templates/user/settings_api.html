@@ -8,9 +8,21 @@
   </div>
   <div class="row">
     <div class="col-lg-6 mb-4">
-      You only need this information if you are going to use the race server
-      API to upload your buggy JSON (for task 
-      <a href="{{ url_for('public.show_single_task', task_id='5-API') }}">5-API</a>).
+      <p>
+        These are the credentials for accessing the race server API. This lets you upload your buggy JSON directly
+        (instead of pasting it into the <a href="{{ url_for('user.submit_buggy_data') }}">upload form</a>).
+        {% if api_task_names %}
+          {% if api_task_names | length == 1 %}
+          You only need these if you're working on task
+            <a href="{{ url_for('public.show_single_task', task_id=api_task_names[0]) }}">{{ api_task_names[0] }}</a>.
+          {% else %}
+            You only need these if you're working on one of these tasks:
+            {% for task_name in api_task_names %}
+              <a href="{{ url_for('public.show_single_task', task_id=task_name) }}">{{ task_name }}</a>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+      </p>
     </div>
   </div>
 

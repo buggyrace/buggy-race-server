@@ -48,6 +48,9 @@ class ConfigSettingNames(Enum):
     # class) are noted here so a warning can be displayed on the settings page
     _ENV_SETTING_OVERRIDES = auto()
 
+    # unexpected settings that are found in the database
+    _UNEXPECTED_CONFIG_SETTINGS = auto()
+
     # path where published HTML (task list and tech notes) is written
     PUBLISHED_PATH = auto()
 
@@ -97,7 +100,6 @@ class ConfigSettingNames(Enum):
     PROJECT_WORKFLOW_URL = auto()
     AUTHORISATION_CODE = auto()
     SECRET_KEY = auto()
-    SERVER_PROJECT_PAGE_PATH = auto()
     SOCIAL_0_NAME = auto()
     SOCIAL_0_TEXT = auto()
     SOCIAL_0_URL = auto()
@@ -170,21 +172,20 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
       ),
-      ConfigGroupNames.RACES.name: {
+      ConfigGroupNames.RACES.name: (
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name,
-      },
-      ConfigGroupNames.SERVER.name:{
-        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name,
+      ),
+      ConfigGroupNames.SERVER.name: (
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
-        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name,
         ConfigSettingNames.ADMIN_USERNAMES.name,
-        ConfigSettingNames.SECRET_KEY.name,
-        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name,
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name,
-      },
-      ConfigGroupNames.SOCIAL.name: {
+        ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name,
+        ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name,
+        ConfigSettingNames.SECRET_KEY.name,
+      ),
+      ConfigGroupNames.SOCIAL.name: (
         ConfigSettingNames.SOCIAL_0_NAME.name,
         ConfigSettingNames.SOCIAL_0_TEXT.name,
         ConfigSettingNames.SOCIAL_0_URL.name,
@@ -197,8 +198,8 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name,
         ConfigSettingNames.SOCIAL_3_TEXT.name,
         ConfigSettingNames.SOCIAL_3_URL.name,
-      },
-      ConfigGroupNames.PROJECT.name: {
+      ),
+      ConfigGroupNames.PROJECT.name: (
         ConfigSettingNames.PROJECT_REPORT_TYPE.name,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
         ConfigSettingNames.PROJECT_CODE.name,
@@ -213,7 +214,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
-      }
+      )
     }
     DEFAULTS = {
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
@@ -249,7 +250,6 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
-        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: "project",
         ConfigSettingNames.SOCIAL_0_NAME.name: "",
         ConfigSettingNames.SOCIAL_0_TEXT.name: "",
         ConfigSettingNames.SOCIAL_0_URL.name: "",
@@ -312,7 +312,6 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
-        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_URL.name: ConfigTypes.URL,
@@ -408,7 +407,7 @@ class ConfigSettings:
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
           """Should the webserver itself force HTTPS? This setting might not
           be helpful if your hosting environment manages this for you (that is,
-          can be counterproductive to tell the server to force it here).
+          it can be counterproductive to tell the server to force it here).
           HTTPS is mandatory for GitHub's OAuth authentication, or if you're
           holding any personal information on students. This setting does not
           _implement_ HTTPS: it only forces redirection if the protocol the web
@@ -462,8 +461,8 @@ class ConfigSettings:
 
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
           """Can users register themselves? If not, only an admin user who
-          knows the `AUTH_CODE` can register new users. Normally, the
-          staff running the buggy racing project will register users so
+          knows the `AUTHORISATION_CODE` can register new users. Normally,
+          the staff running the buggy racing project will register users so
           we strongly recommend public registration is not enabled.""",
 
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name:
@@ -573,10 +572,6 @@ class ConfigSettings:
           almost certainly break existing sessions. For cleanest results, reboot
           the server as soon as you've changed it).""",
 
-        ConfigSettingNames.SERVER_PROJECT_PAGE_PATH.name:
-          """Path to the project pages: it's unlikely that you'll need to change
-          this unless you've explictly changed the way project info is hosted.""",
-
         ConfigSettingNames.SOCIAL_0_NAME.name:
           """Name (shown on button)""",
         ConfigSettingNames.SOCIAL_0_TEXT.name:
@@ -681,6 +676,8 @@ class ConfigSettings:
         these additional fields — they aren't made public.""",
     }
 
+    NO_KEY = "_NOTHING_" # special case of unexpected config with no key
+
     @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
@@ -707,6 +704,12 @@ class ConfigSettings:
         try:
           type = ConfigSettings.TYPES[name]
         except KeyError as e:
+          if name == "": name = ConfigSettings.NO_KEY
+          unexpecteds = app.config.get(ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name)
+          if unexpecteds is None:
+             app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name] = [name]
+          elif name not in unexpecteds:
+             app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name].append(name)
           print(f"* ignoring unknown config setting: {name}, not set", flush=True)
           return
         if type == ConfigTypes.BOOLEAN:
@@ -809,6 +812,11 @@ class ConfigFromEnv():
     # stored in database but have been overridden by ENV settings
     # (see constructor below)
     _ENV_SETTING_OVERRIDES = ""
+
+    # string containing comma separated config setting names that the app
+    # attempts to make, but are not recognised — this is useful for debug
+    # and can result from deprecated settings persisting in the database
+    _UNEXPECTED_CONFIG_SETTINGS = []
 
     # path into which published content is written:
     # task list page, and tech notes (output from Pelican)

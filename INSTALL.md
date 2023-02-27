@@ -99,62 +99,42 @@ flask run
 That will run the buggy-racing server website locally on port 5000: hit it
 in a browser on [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
 
-Note you won't be able to log in until you've made an admin user: go to
-register and supply the authorisation code (it's one of the config settings
-you edited in the `.env` file at the start). Make sure the username you
-register is listed as an admin. For example, with these settings...
+When the server first runs, it's in setup mode: click on the *setting up* 
+button. You will be invited to change the authorisation code (which by default
+is `CHANGEME`), an admin username, and an admin password.
 
-```yaml
-AUTHORISATION_CODE=please
-ADMIN_USERNAMES=jane
-```
-
-...you'd need to supply `please` as the auth code, and `jane` as the username
-to create an admin user called `jane`. If you change the auth code to be empty
-then registration is disabled. You won't care about that on this, your local,
-installation — but it's how registration is constrained on the production site.
-Normally registration only happens once, at the start of term, and then can be
-so disabled.
+Once you've submitted that, you'll be logged in as that admin user, and
+you'll be guided through the setup. You must complete this process before
+the server is ready — it takes a few minutes. Most of the settings have
+sensible defaults, so typically the only things you'll need to change are
+those specific to your institution (e.g., the name of the school or
+department, the code for this project if it's part of a syllabus, and
+how you want to run the project — for example, whether your require
+students to take notes and submit a report as part of their project).
 
 ---
 
-## Viewing the static (GitHub pages) site
+## Static website: the tech notes
 
-The `docs/` directory is the root of the GitHub pages site that contains crucial
-information for the students.
+There is a effectively a sub-site of pages called "tech notes" with explanatory
+text specific to some aspects of the project, and a couple of early tasks. These
+are statically generated HTML pages. By default they are served as part of
+the buggy race server. We don't provide a mechanism for editing these through
+the race server's web interface. If you're comfortable with forking the 
+project and editing these files, you can customise them in place. However,
+it's also possible to host these files entirely separately. If you do this,
+put the URL of your alternate site in the config setting `TECH_NOTES_EXTERNAL_URL`.
 
-You can run that locally too so you can edit and test it before publishing it
-(by pushing it, in the default branch, up to GitHub — assuming you've enabled
-the repo to publish GitHub pages from `docs/`).
+The tech notes are generated using [Pelican](https://getpelican.com), which
+is a Python-based static site generator. The tech notes are in the `tech-notes/`
+directory in the root of the repo — see `tech-notes/content` for the source files
+and assets.
 
-The publication of those pages requires Jekyll (that's the tool GitHub pages
-uses). To set that up, you'll need Ruby installed and bundler. Ideally, use
-`rbenv` or `rvm` to manage a local environment for your Ruby gems.
-
-The Jekyll site is effectively contained within the `docs/` directory:
-
-```bash
-cd docs/
-bundle install
-```
-
-The reads the dependencies from the `Gemfile` and installs what it needs.
-Then you can generate the site with
-
-```bash
-bundle exec jekyll serve
-```
-
-...and hit [http://127.0.0.1:4000](http://127.0.0.1:4000) for the static site
-that is automatically published whenever you push changes to `docs/` up to
-GitHub.
-
-Note that `utils/generate_tasks.py` changes the contents of the rather important
-task list in this static site, so you might need to look into that too.
-
-
-
-
+If you are hosting the tech notes yourself, you can stick with Pelican or
+switch to another mechanism — for example, Jekyll works nicely with GitHub
+pages. We used Pelican because it's in Python. See
+`tech_notes/TECH_NOTES_README.md` for more information if you're thinking
+of customising/generating them yourself.
 
 ---
 
@@ -313,11 +293,5 @@ Deployment by using [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cl
 * Please check `env.example` to see which environmental variables are used in
   the project and also need to be set. The exception is `DATABASE_URL`, which
   Heroku sets automatically.
-
-* Deploy on Heroku by pushing to the `heroku` branch
-
-    ```bash
-    git push heroku main
-    ```
 
 

@@ -366,6 +366,8 @@ def admin():
       is_storing_notes=is_storing_notes,
       qty_notes_by_task=qty_notes_by_task,
       qty_notes=qty_notes,
+      unexpected_config_settings=current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name],
+      purge_form = GeneralSubmitForm(),
     )
 
 @blueprint.route("/users", strict_slashes=False)
@@ -1085,3 +1087,31 @@ def notes():
        notes_by_username=notes_by_username,
        buggies_by_username=buggies_by_username
     )
+
+@blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
+@login_required
+def purge_unexpected_config_setting(setting_name):
+    """ Purge a config setting that has been reported as unexpected:
+    In practice this is a housekeeping activity for development: unexpected
+    settings are typically legacy config settings that remain in the database
+    after being removed from the code.
+    There's one gotcha: the empty string is problematic and isn't handled
+    """
+    if not current_user.is_buggy_admin:
+        abort(403)
+    unexpected_settings =  current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name]
+    if setting_name not in unexpected_settings:
+       flash(f"Cannot purge config setting \"{setting_name}\": it's not reported as unexpected", "warning")
+       return redirect(url_for("admin.admin"))
+    actual_name = "" if setting_name == ConfigSettings.NO_KEY else setting_name
+    dead_setting = Setting.query.filter_by(id=actual_name).first()
+    if dead_setting is None:
+       flash(f"Cannot purge config setting \"{actual_name}\": can't find it", "danger")
+       return redirect(url_for("admin.admin"))
+    dead_setting.delete()
+    current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name] = [
+       name for name in unexpected_settings if name != setting_name
+    ]
+    flash(f"OK, purged config setting \"{setting_name}\"", "success")
+    return redirect(url_for("admin.admin"))
+

@@ -203,6 +203,29 @@
       {% endif %}
     </div>
   </div>
+  {% if unexpected_config_settings %}
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="alert alert-warning">
+          <p>
+            Unexpected config settings found in database:
+            {% for name in unexpected_config_settings %}
+            <code>{{ name }}</code>
+            {% endfor %}
+          </p>
+          {% for name in unexpected_config_settings %}
+            <p class="btn-collection">
+              <form action="{{ url_for('admin.purge_unexpected_config_setting', setting_name=name) }}" method="POST">
+                {{ purge_form.csrf_token }}
+                <button type="submit" class="btn btn-primary">Purge {{name}}</button>
+              </form>
+            </p>
+          {% endfor %}
+          <p>These settings are deprecated: it's safe to purge them.</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

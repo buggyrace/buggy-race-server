@@ -146,7 +146,7 @@ def load_config_setting(app, name):
        return setting.value
 
 def prettify_form_field_name(name):
-  """ for flash error messages (e.g., 'auth_code' become 'Auth Code') """
+  """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """
   return name.replace("_", " ").title()
 
 def get_download_filename(filename, want_datestamp=False):

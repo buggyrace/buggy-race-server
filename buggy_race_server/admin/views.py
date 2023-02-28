@@ -238,7 +238,7 @@ def setup():
           set_and_save_config_setting(
             current_app,
             ConfigSettingNames.AUTHORISATION_CODE.name,
-            bcrypt.generate_password_hash(form.new_auth_code.data)
+            bcrypt.generate_password_hash(form.new_auth_code.data).decode('utf8')
           )
           new_admin_username = form.admin_username.data.strip().lower()
           if admin_user := User.query.filter_by(username=new_admin_username).first():

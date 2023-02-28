@@ -728,10 +728,14 @@ def list_announcements():
       Announcement.query.all(),
       key=lambda announcement: (announcement.type, announcement.text)
     )
+    has_example_already = bool(
+       [ann for ann in announcements if ann.text == Announcement.EXAMPLE_ANNOUNCEMENT]
+    )
     return render_template(
       "admin/announcements.html",
       announcements=announcements,
-      form=form
+      form=form,
+      example_form=None if has_example_already else GeneralSubmitForm(),
     )
 
 @blueprint.route("/announcements/<int:announcement_id>", methods=["GET", "POST"])
@@ -835,6 +839,24 @@ def delete_announcement(announcement_id=None):
         refresh_global_announcements(current_app)
     else:
       flash("Error: incorrect button wiring, nothing deleted", "danger")
+    return redirect(url_for("admin.list_announcements"))
+
+@blueprint.route("/announcements/new/example", methods=["POST"])
+@login_required
+def add_example_announcement():
+    if not current_user.is_buggy_admin:
+      abort(403)
+    form = GeneralSubmitForm(request.form)
+    if form.validate_on_submit():
+      Announcement.create(
+        type="special",
+        text=Announcement.EXAMPLE_ANNOUNCEMENT,
+        is_html=True,
+        is_visible=False,
+      )
+      flash("OK, inserted an example announcement", "success")
+    else:
+      flash("Problem with example announcement submit", "warning")
     return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/tech-notes/publish", methods=["POST"])

@@ -7,8 +7,9 @@
       Announcements
     </h1>
   </div>
-    <div class="row">
-      <table class="table table-striped table-bordered table-hover table-responsive-md bg-white">
+  <div class="row">
+    {% if announcements %}
+      <table class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
         <thead>
           <tr>
             <th></th>
@@ -46,11 +47,28 @@
           {% endfor %}
         </tbody>
       </table>
-    </div>
-  
+    {% else %}
+      <div class="col">
+        <div class="alert alert-warning">
+          No announcements in the database. Make a new one, or add an example and edit it.
+        </div>
+      </div>
+    {% endif %}
+  </div>
   <div class="row">
-    <a href="{{ url_for('admin.edit_announcement') }}" class="btn btn-outline-secondary btn-admin">New announcement &rtri;</a>
+    <div class="col">
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.edit_announcement') }}" class="btn btn-outline-secondary btn-admin">New announcement &rtri;</a>
+      </p>
+      {% if example_form %}
+        <form action="{{ url_for('admin.add_example_announcement') }}" method="POST">
+          {{ example_form.csrf_token }}
+          <p class="btn-collection">
+            <input type="submit" class="btn btn-primary" value="Add example announcement"/>
+          </p>
+        </form>
+      {% endif %}
+    </div>
   </div>
 </div>
-
 {% endblock %}

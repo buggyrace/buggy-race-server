@@ -90,6 +90,13 @@ def create_app():
             if not request.is_secure:
                 return redirect(request.url.replace('http://', 'https://', 1), code=301)
 
+    app.config['DEBUG_TEST_VALUE'] = 0
+    @app.before_request
+    def debug_investigate_auth_hash_problem():
+        if auth_code := app.config.get(ConfigSettingNames.AUTHORISATION_CODE.name):
+            # FIXME debugging using the 'xxxx' value as an explicit test
+            app.config['DEBUG_TEST_VALUE'] = f"<{auth_code}> {bool(bcrypt.check_password_hash(auth_code, 'xxxx'))}"
+
     return app
 
 def register_extensions(app):

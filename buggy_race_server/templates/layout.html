@@ -23,6 +23,9 @@
         {% include "nav.html" %} 
       {% endwith %}
     <header>{% block header %}{% endblock %}</header>
+    <p class="w-100 p-2" style="background-color:black;">
+      <code style="color:yellow">DEBUG ***[{{ config['DEBUG_TEST_VALUE'] }}]***</code>
+    </p>
     <main role="main">
       {% if config['CURRENT_ANNOUNCEMENTS'] %}
         {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}

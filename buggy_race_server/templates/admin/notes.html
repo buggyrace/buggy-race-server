@@ -49,7 +49,7 @@
             {% for task in tasks %}
               <td class="status">
                 {% if notes_by_username[student.username][task.id] %}
-                  <a href="#"
+                  <a href="{{ url_for('admin.show_user', user_id=student.id) }}#{{ task.anchor }}"
                     {% if notes_by_username[student.username][task.id].text | length < 16 %}
                       class="bg-warning"
                     {% else %}

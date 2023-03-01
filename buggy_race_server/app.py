@@ -29,7 +29,8 @@ from buggy_race_server.extensions import (
 )
 
 def create_app():
-    """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
+    """Create application factory, as explained here:
+    http://flask.pocoo.org/docs/patterns/appfactories/
     See config.py which loads config from env vars:
     specify all non-defaulted settings with environment variables
     (either using .env or explicit exports/settings (e.g., via Heroku's dialogue))
@@ -48,30 +49,37 @@ def create_app():
 
     csrf.exempt(app.blueprints['api'])
 
-    # FIXME: If this is not wrapped in a try, the flask db migration attempts to instantiate the app
-    #        even though the database has not been initialised yet. We allow these things to fail as
-    #        the first entrypoint is the db migration.
-    # This needs to be made more robust.
+    # Flask's db migration needs to instantiate the app even though the
+    # database has not been initialised yet. We allow these things to
+    # fail as the first entrypoint is the db migration.
+    # TODO: would be better to _know_ it was OK to fail rather than assume
+    #       it's OK because it only needs the app for the migration.
+
     try:
         with app.app_context():
             save_config_env_overrides_to_db(app)
             load_settings_from_db(app)
             refresh_global_announcements(app)
-
-        if app.config[ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name]:
-            # the very first time this runs, server URL might not be set...
-            # ...but that's OK because the task list is probably empty too
-            server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
-            with app.test_request_context(server_url):
-                print(f"* publishing task list (for {server_url})", flush=True)
-                publish_task_list(app)
-                print(f"* published task list", flush=True)
-
-                print(f"* publishing tech notes (for {server_url})", flush=True)
-                publish_tech_notes(app)
-                print(f"* published tech notes", flush=True)
     except Exception as e:
-        print(f"------ EXCEPTION CAUGHT ON CREATING APP: ------\n{e}")
+        # not being more specific about errors because the different databases
+        # throw different exceptions, alas
+        print(f"*** init error: {e}")
+        print("*** buggy racing sever init finishing early (OK to perform database ops now)")
+        return app # which is enough to allow migrations
+
+    if app.config.get(ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name):
+        # the very first time this runs, server URL might not be set...
+        # ...but that's OK because the task list is probably empty too
+        server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+
+        with app.test_request_context(server_url):
+            print(f"* publishing task list (for {server_url})", flush=True)
+            publish_task_list(app)
+            print(f"* published task list", flush=True)
+
+            print(f"* publishing tech notes (for {server_url})", flush=True)
+            publish_tech_notes(app)
+            print(f"* published tech notes", flush=True)
 
     @app.before_request
     def force_setup_on_new_installs():
@@ -95,6 +103,7 @@ def create_app():
                 return redirect(request.url.replace('http://', 'https://', 1), code=301)
 
     return app
+
 
 def register_extensions(app):
     """Register Flask extensions."""

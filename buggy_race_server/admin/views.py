@@ -90,7 +90,7 @@ def _update_settings_in_db(form):
     name = setting_form.get('name').upper() # force uppercase for config keys
     value = setting_form.get('value').strip()
     if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
-        value = bcrypt.generate_password_hash(value)
+        value = bcrypt.generate_password_hash(value).decode('utf8')
     is_changed_value = False
     if name in settings_as_dict:
       if settings_as_dict[name] != value:

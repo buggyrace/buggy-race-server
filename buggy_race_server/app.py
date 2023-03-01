@@ -50,14 +50,8 @@ def create_app():
 
     with app.app_context():
 
-        try:
-            save_config_env_overrides_to_db(app)
-            settings_dict = load_settings_from_db(app)
-        except Exception as e:
-            #traceback.print_exception(type(e), e, e.__traceback__)
-            print(f"init error: {e}")
-            return app # no more work: allows flask db init, etc
-
+        save_config_env_overrides_to_db(app)
+        load_settings_from_db(app)
         refresh_global_announcements(app)
 
     if app.config[ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name]:

@@ -9,7 +9,7 @@
     <div class="col">
       <p class="btn-collection">
         <a class="btn {% if tech_notes_timestamp %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.tasks_admin')}}">Tasks &rtri;</a>
+        <a class="btn {% if is_tasks_ok %}btn-outline-secondary{% else %}btn-outline-danger{% endif %} btn-admin" href="{{ url_for('admin.tasks_admin')}}">Tasks &rtri;</a>
       </p>
     </div>
   </div>

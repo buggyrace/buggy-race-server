@@ -698,6 +698,7 @@ def settings(group_name=None):
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
+    task_count = Task.query.filter_by(is_enabled=True).count()
     return render_template(
       "admin/settings.html",
       form=form,
@@ -715,6 +716,7 @@ def settings(group_name=None):
       html_descriptions=html_descriptions,
       env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
       tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
+      is_tasks_ok=task_count and current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/announcements", strict_slashes=False)

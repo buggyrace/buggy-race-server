@@ -48,24 +48,30 @@ def create_app():
 
     csrf.exempt(app.blueprints['api'])
 
-    with app.app_context():
+    # FIXME: If this is not wrapped in a try, the flask db migration attempts to instantiate the app
+    #        even though the database has not been initialised yet. We allow these things to fail as
+    #        the first entrypoint is the db migration.
+    # This needs to be made more robust.
+    try:
+        with app.app_context():
+            save_config_env_overrides_to_db(app)
+            load_settings_from_db(app)
+            refresh_global_announcements(app)
 
-        save_config_env_overrides_to_db(app)
-        load_settings_from_db(app)
-        refresh_global_announcements(app)
+        if app.config[ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name]:
+            # the very first time this runs, server URL might not be set...
+            # ...but that's OK because the task list is probably empty too
+            server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+            with app.test_request_context(server_url):
+                print(f"* publishing task list (for {server_url})", flush=True)
+                publish_task_list(app)
+                print(f"* published task list", flush=True)
 
-    if app.config[ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name]:
-        # the very first time this runs, server URL might not be set...
-        # ...but that's OK because the task list is probably empty too
-        server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
-        with app.test_request_context(server_url):
-            print(f"* publishing task list (for {server_url})", flush=True)
-            publish_task_list(app)
-            print(f"* published task list", flush=True)
-        
-            print(f"* publishing tech notes (for {server_url})", flush=True)
-            publish_tech_notes(app)
-            print(f"* published tech notes", flush=True)
+                print(f"* publishing tech notes (for {server_url})", flush=True)
+                publish_tech_notes(app)
+                print(f"* published tech notes", flush=True)
+    except Exception as e:
+        print(f"------ EXCEPTION CAUGHT ON CREATING APP: ------\n{e}")
 
     @app.before_request
     def force_setup_on_new_installs():

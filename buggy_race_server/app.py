@@ -78,11 +78,15 @@ def create_app():
         """ Prevent access to any pages other than setup or login.
             Access to login is also allowed, since an interrupted setup can
             continue by logging in with an admin account."""
-        if app.config.get(ConfigSettingNames._SETUP_STATUS.name) \
-           and not request.path.startswith(app.static_url_path):
-              setup_url = url_for("admin.setup")
-              if not (request.path == setup_url or request.path == url_for("public.login")):
-                  return redirect(f"{request.root_path}{setup_url}")
+        setup_status = app.config.get(ConfigSettingNames._SETUP_STATUS.name)
+        if not (setup_status is None or request.path.startswith(app.static_url_path)):
+            try:
+                if int(setup_status) > 0:
+                    setup_url = url_for("admin.setup")
+                    if not (request.path == setup_url or request.path == url_for("public.login")):
+                        return redirect(f"{request.root_path}{setup_url}")
+            except ValueError:
+                pass # ignore unexpected bad setup value, and allow access
 
     if app.config.get(ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name):
         @app.before_request

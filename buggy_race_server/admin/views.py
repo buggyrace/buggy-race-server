@@ -24,7 +24,7 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user, login_required, login_user
+from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import bindparam, insert, update
 
 from flask_wtf import FlaskForm
@@ -193,21 +193,25 @@ def _flash_errors(form):
 
 @blueprint.route("/setup", methods=["GET", "POST"], strict_slashes=False)
 def setup():
-  session_status_name = ConfigSettingNames._SETUP_STATUS.name
   # always get setup status from database during setup:
-  setup_status = load_config_setting(current_app, session_status_name)
+  setup_status = load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name)
   if not setup_status:
     flash(
       "Setup is complete on this server (config settings "
       "can be edited from within admin instead)", "danger"
     )
+    if ConfigSettingNames._SETUP_STATUS.name in session:
+       del session[ConfigSettingNames._SETUP_STATUS.name]
     abort(404)
-  setup_status = int(setup_status)
-  setup_status_from_session = session.get(session_status_name)
-  if setup_status == 1 and setup_status_from_session and setup_status_from_session > 1:
+  try:
+    setup_status_from_session = int(session.get(ConfigSettingNames._SETUP_STATUS.name) or 0)
+  except ValueError():
+    setup_status_from_session = 0
+  if setup_status_from_session:
+    if setup_status < setup_status_from_session:
       flash("Unexpected session bump: clearing your session status", "warning")
-      del session[session_status_name]
-  if setup_status > 1 and not setup_status_from_session:
+      del session[ConfigSettingNames._SETUP_STATUS.name]
+  if setup_status > setup_status_from_session + 1:
       flash("Cannot continue setup in this session (maybe someone else is already setting up?)", "warning")
       abort(403)
   qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
@@ -218,18 +222,19 @@ def setup():
       ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
-    del session[session_status_name] # clear the session: we're done
-    flash("Setup complete: you can now generate tech notes, edit tasks, and register users", "success")
+    del session[ConfigSettingNames._SETUP_STATUS.name] # clear the session: we're done
+    flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
     return redirect( url_for('public.home'))
   if setup_status == 1:
     form = SetupAuthForm(request.form)
     # here we grant this session (effectively, this user) setup status
-    session[session_status_name] = setup_status
+    session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
   else:
     # after initial setup (auth), user must be logged in
     if current_user.is_anonymous or not current_user.is_buggy_admin:
       admins = current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name]
       flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
+      logout_user()
       return redirect( url_for('public.login'))
     form = SetupSettingForm(request.form)
   if request.method == "POST":
@@ -277,7 +282,7 @@ def setup():
               setup_status
             )
             # here we grant this session setup status
-            session[session_status_name] = setup_status
+            session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
           else:
             # something wasn't OK, so don't save and move on
             # (the errors will have been explicitly flashed)

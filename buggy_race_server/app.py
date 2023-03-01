@@ -5,7 +5,7 @@ import sys
 
 #import traceback # for debug/dev work
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.utils import (
@@ -58,21 +58,6 @@ def create_app():
             print(f"init error: {e}")
             return app # no more work: allows flask db init, etc
 
-        try:
-            qty_announcements = Announcement.query.count()
-        except Exception as e:
-            print(f"init error: {e}")
-            return app # no more work: allows flask db init, etc
-
-        if qty_announcements == 0:
-            # note: this is *not* publishing an announcement, it's seeding an example
-            Announcement.create(
-                type="special",
-                text=Announcement.EXAMPLE_ANNOUNCEMENT,
-                is_html=True,
-                is_visible=False,
-            )
-        # and now load any published (is_visible=True) announcements into the config
         refresh_global_announcements(app)
 
     if app.config[ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name]:
@@ -87,6 +72,23 @@ def create_app():
             print(f"* publishing tech notes (for {server_url})", flush=True)
             publish_tech_notes(app)
             print(f"* published tech notes", flush=True)
+
+    @app.before_request
+    def force_setup_on_new_installs():
+        """ Prevent access to any pages other than setup or login.
+            Access to login is also allowed, since an interrupted setup can
+            continue by logging in with an admin account."""
+        if app.config.get(ConfigSettingNames._SETUP_STATUS.name) \
+           and not request.path.startswith(app.static_url_path):
+              setup_url = url_for("admin.setup")
+              if not (request.path == setup_url or request.path == url_for("public.login")):
+                  return redirect(f"{request.root_path}{setup_url}")
+
+    if app.config.get(ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name):
+        @app.before_request
+        def force_redirect_http_to_https():
+            if not request.is_secure:
+                return redirect(request.url.replace('http://', 'https://', 1), code=301)
 
     return app
 

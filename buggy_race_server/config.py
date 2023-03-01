@@ -357,14 +357,18 @@ class ConfigSettings:
           """Comma separated list of admin user names. You can nominate usernames
           here before they have been registered. Usernames are lowercase.
           If you remove (or change) a username in this list, you're effectively
-          revoking admin access, so be careful before changing anything.""",
+          revoking admin access, so **be careful** before changing anything.""",
 
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name:
           """The task list and tech notes do not get updated when you change
-          config (or edit tasks): you can generate or publish both manually,
-          but if `AUTO_GENERATE_STATIC_CONTENT` is set, the race server will
-          automatically update them whenever it reboots. Only switch this off
-          if you are experiencing problems with the build.""",
+          config (or edit tasks): it's better to adopt the discipline of
+          manually publishing both whenever you change config (which usally
+          only happens  before project has started). If
+          `AUTO_GENERATE_STATIC_CONTENT` is set, the race server will
+          automatically republish the task list and the tech notes whenever
+          it reboots. This might have an impact on the server's performance,
+          and it's currently somewhat experimental. Only switch this on if
+          you are experiencing problems with the build.""",
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start
@@ -387,7 +391,7 @@ class ConfigSettings:
           version of the repo.""",
 
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
-          """Full URL of this server.""",
+          """Full ("base") URL of this server.""",
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshhold for buggies: you can always
@@ -395,7 +399,7 @@ class ConfigSettings:
 
         ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name:
           """Should a race be public as soon as you create it? If you choose
-          `No`, you'll have to remember to publish races in order for students
+          `No`, you'll have to remember to publish a race in order for students
           to see it.""",
 
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:
@@ -405,13 +409,17 @@ class ConfigSettings:
           leave this blank.""",
 
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name:
-          """Should the webserver itself force HTTPS? This setting might not
-          be helpful if your hosting environment manages this for you (that is,
-          it can be counterproductive to tell the server to force it here).
-          HTTPS is mandatory for GitHub's OAuth authentication, or if you're
-          holding any personal information on students. This setting does not
-          _implement_ HTTPS: it only forces redirection if the protocol the web
-          server sees in incoming requests is (non-secure) HTTP.""",
+          """Should the webserver itself force HTTPS? **Be careful**: this
+          setting will not be helpful if your hosting environment manages
+          this for you (that is, only set this to `Yes` if you are certain
+          HTTPS requests arrive directly to the app: if you have a process
+          that's handling requests and connecting with this app locally over
+          HTTP, forcing redirects with this setting may prevent _any_ requests
+          getting through). HTTPS is mandatory for GitHub's OAuth
+          authentication, or if you're holding any personal information on
+          students... but _this setting does not implement HTTPS_ — it only
+          forces redirection if the protocol the app sees in incoming requests
+          is (non-secure) HTTP.""",
 
         ConfigSettingNames.GITHUB_CLIENT_ID.name:
           """The GitHub client ID for the GitHub app that the server uses to

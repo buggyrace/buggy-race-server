@@ -15,6 +15,7 @@ from flask import (
     render_template,
     request,
     send_file,
+    session,
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
@@ -35,6 +36,7 @@ from buggy_race_server.utils import (
     get_download_filename,
     join_to_project_root,
     warn_if_insecure,
+    load_config_setting,
 )
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -77,7 +79,14 @@ def login():
             else:
                 pretty_name = current_user.pretty_username
             flash(f"Hello {pretty_name}! You're logged in to the race server", "success")
-            redirect_url = request.args.get("next") or url_for("user.submit_buggy_data")
+            if setup_status := load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name):
+                redirect_url = url_for("admin.setup")
+                if current_user.is_buggy_admin:
+                    session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
+                else:
+                    flash("Not an admin user: can't do much until setup is complete", "warning")
+            else:
+                redirect_url = request.args.get("next") or url_for("user.submit_buggy_data")
             return redirect(redirect_url)
         else:
             flash_errors(form)

@@ -8,7 +8,7 @@
   {% include "_local_announcement.html" %}
   <div class="row">
     <div class="col-lg-6">
-      <div class="border border-secondary container p-3">
+      <div class="border container p-3">
         <form id="loginForm" method="POST" action="{{ url_for('public.login' )}}" role="login">
           {{ form.csrf_token }}
           <div class="row">

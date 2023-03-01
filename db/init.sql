@@ -1,0 +1,3 @@
+CREATE USER buggy WITH PASSWORD 'changeme';
+GRANT ALL PRIVILEGES ON DATABASE buggy_race TO buggy;
+ALTER DATABASE buggy_race OWNER TO buggy;

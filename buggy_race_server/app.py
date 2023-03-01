@@ -95,7 +95,10 @@ def create_app():
     def debug_investigate_auth_hash_problem():
         if auth_code := app.config.get(ConfigSettingNames.AUTHORISATION_CODE.name):
             # FIXME debugging using the 'xxxx' value as an explicit test
-            app.config['DEBUG_TEST_VALUE'] = f"<{auth_code}> {bool(bcrypt.check_password_hash(auth_code, 'xxxx'))}"
+            try:
+                app.config['DEBUG_TEST_VALUE'] = f"<{auth_code}> {bool(bcrypt.check_password_hash(auth_code, 'xxxx'))}"
+            except ValueError as e:
+                app.config['DEBUG_TEST_VALUE'] = f"<{auth_code}> {e}"
 
     return app
 

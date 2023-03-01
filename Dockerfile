@@ -1,5 +1,5 @@
 # ==================================== BASE ====================================
-ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.7}
+ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.8}
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster AS base
 
 RUN apt-get update
@@ -13,34 +13,37 @@ RUN apt-get install -y \
     nodejs \
     && apt-get -y autoclean
 
+COPY db/init.sql /docker-entrypoint-initdb.d/
+
 WORKDIR /app
 COPY requirements requirements
 
 COPY . .
 
-RUN useradd -m sid
-RUN chown -R sid:sid /app
-USER sid
-ENV PATH="/home/sid/.local/bin:${PATH}"
+# TODO: Fix permissions on webpack
+#RUN useradd -m buggy
+#RUN chown -R buggy:buggy /app
+#RUN chmod -R 777 /app
+#USER buggy
+
+
+ENV FLASK_APP="buggy_race_server/app.py"
+# TODO: Replace root with buggy user when above is fixed
+ENV PATH="/root/.local/bin:${PATH}"
 RUN npm install
 
-# ================================= DEVELOPMENT ================================
+
+# ================================= DEVELOPMENT =================================
+# NOTE: We don't need this as of right now but it could be useful in the future.
 FROM base AS development
 RUN pip install --user -r requirements/dev.txt
-EXPOSE 2992
 EXPOSE 5000
 CMD [ "npm", "start" ]
+
 
 # ================================= PRODUCTION =================================
 FROM base AS production
 RUN pip install --user -r requirements/prod.txt
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY supervisord_programs /etc/supervisor/conf.d
 EXPOSE 5000
-ENTRYPOINT ["/bin/bash", "shell_scripts/supervisord_entrypoint.sh"]
-CMD ["-c", "/etc/supervisor/supervisord.conf"]
+CMD [ "npm", "start" ]
 
-# =================================== MANAGE ===================================
-FROM base AS manage
-RUN pip install --user -r requirements/dev.txt
-ENTRYPOINT [ "flask" ]

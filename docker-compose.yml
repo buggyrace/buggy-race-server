@@ -1,7 +1,7 @@
 version: '3.6'
 
 x-build-args: &build_args
-  INSTALL_PYTHON_VERSION: 3.7
+  INSTALL_PYTHON_VERSION: 3.8
   INSTALL_NODE_VERSION: 12
 
 x-default-volumes: &default_volumes
@@ -11,6 +11,23 @@ x-default-volumes: &default_volumes
     - ./dev.db:/tmp/dev.db
 
 services:
+  db:
+    image: postgres:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=superuser
+      # TODO: Auto-generate this
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=buggy_race
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d/
+
+
   flask-dev:
     build:
       context: .
@@ -20,8 +37,18 @@ services:
     image: "buggy_race_server-development"
     ports:
       - "5000:5000"
-      - "2992:2992"
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: development
+      LOG_LEVEL: debug
+      GUNICORN_WORKERS: 1
     <<: *default_volumes
+    depends_on:
+      - db
+    links:
+      - db
+  
 
   flask-prod:
     build:
@@ -32,26 +59,22 @@ services:
     image: "buggy_race_server-production"
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       FLASK_ENV: production
       FLASK_DEBUG: 0
       LOG_LEVEL: info
-      GUNICORN_WORKERS: 4
+      GUNICORN_WORKERS: 1
     <<: *default_volumes
-
-  manage:
-    build:
-      context: .
-      target: manage
-    environment:
-      FLASK_ENV: production
-      FLASK_DEBUG: 0
-    image: "buggy_race_server-manage"
-    stdin_open: true
-    tty: true
-    <<: *default_volumes
+    depends_on:
+      - db
+    links:
+      - db
 
 volumes:
   node-modules:
   static-build:
   dev-db:
+  db_data:
+    driver: local

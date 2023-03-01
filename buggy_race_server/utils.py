@@ -142,7 +142,7 @@ def load_config_setting(app, name):
     """ loads config setting from database, and returns value """
     if setting := db.session.query(Setting).filter_by(id=name).first():
        ConfigSettings.set_config_value(app, name, setting.value)
-       return setting.value
+       return app.config.get(name) # will have done type conversion too
 
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """

@@ -8,12 +8,14 @@
     "build:default": "NODE_ENV=production webpack --progress --colors -p && npm run flask-static-digest",
     "start": "run-script-os",
     "start:win32": "concurrently -n \"WEBPACK,FLASK\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run webpack-watch:win32\" \"npm run flask-server\"",
-    "start:default": "concurrently -n \"WEBPACK,FLASK\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run webpack-watch\" \"npm run flask-server\"",
+    "start:default": "concurrently -n \"DB,WEBPACK,FLASK\" -c \"bgGreen.bold,bgBlue.bold,bgMagenta.bold\" \"npm run db-init\" \"npm run webpack-watch\" \"npm run flask-server\"",
     "webpack-watch": "run-script-os",
     "webpack-watch:win32": "SET NODE_ENV=debug && webpack --mode development --watch",
     "webpack-watch:default": "NODE_ENV=debug webpack --mode development --watch",
-    "flask-server": "flask run --host=0.0.0.0",
+    "flask-server": "sleep 15 && flask run --host=0.0.0.0",
     "flask-static-digest": "flask digest compile",
+    "db-init": "run-script-os",
+    "db-init:default": "flask db upgrade",
     "lint": "eslint \"assets/js/*.js\""
   },
   "repository": {

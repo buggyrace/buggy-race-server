@@ -89,6 +89,7 @@ class ConfigSettingNames(Enum):
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
     IS_STORING_STUDENT_TASK_NOTES = auto()
+    IS_USING_REMOTE_VS_WORKSPACE = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -206,6 +207,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SLUG.name,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
+        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
@@ -239,6 +241,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
+        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -301,6 +304,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -482,6 +486,16 @@ class ConfigSettings:
           implemented it). If you choose `No`, this feature will be hidden.
           Note that you _can_ choose `Yes`, letting students store task notes,
           even if the project doesn't require a report.""",
+
+        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
+          """If your students will be using a remote server (see:
+          `PROJECT_REMOTE_SERVER_NAME`) and are running VS Code over
+          a remote session, the race server can produce a VS Code
+          workspace file to facilitate cloning the repo onto that
+          server and subequently acccess it through VS Code. This
+          is quite a specific setup: if you're not sure, you almost
+          certainly do not want this.
+          """,
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it

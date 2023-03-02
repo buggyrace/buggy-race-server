@@ -47,12 +47,14 @@
                 <p class="btn-collection">
                   <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary">Your GitHub repo&nbsp;&rtri;</a>
                 </p>
-                <p>
-                  Download your VScode workspace to load <!-- TODO ...and some instruction! -->
-                </p>
-                <p class="btn-collection">
-                  <a href="{{ url_for() }}" class="btn btn-outline-primary">Download VSCode Workspace&nbsp;&dtri;</a>
-                </p>
+                {% if is_using_vs_workspace %}
+                  <p>
+                    Download your VScode workspace to load <!-- TODO ...and some instruction! -->
+                  </p>
+                  <p class="btn-collection">
+                    <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary">Download VS&nbsp;Code workspace&nbsp;&dtri;</a>
+                  </p>
+                {% endif %}
               </div>
             </div>
           {% else %}

@@ -76,6 +76,7 @@ def settings():
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         is_using_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
+        is_using_vs_workspace=current_app.condfig[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)
@@ -221,8 +222,11 @@ def set_api_secret():
 @blueprint.route("/vscode-workspace", methods=['GET'], strict_slashes=False)
 @login_required
 @active_user_required
-def vscode_workspace():
+def download_vscode_workspace():
     """ Returns workspace JSON file for VScode"""
+    if not current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name]:
+        flash("VS Code workspace files are not available for this project (IS_USING_REMOTE_VS_WORKSPACE not set)", "warning")
+        abort(404)
     remote_server_address = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name]
     remote_server_name = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name]
     if not (remote_server_address and remote_server_name):

@@ -1,3 +1,4 @@
+{# local announcements are only shown on specific pages: e.g., home or login #}
 {% if config['CURRENT_ANNOUNCEMENTS'] %}
   {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}
     {% if announcement.type == local_announcement_type %}

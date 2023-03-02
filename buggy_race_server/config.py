@@ -69,6 +69,7 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_PATH = auto()
   
     ADMIN_USERNAMES = auto()
+    AUTHORISATION_CODE = auto()
     AUTO_GENERATE_STATIC_CONTENT = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_ISSUES_FILE = auto()
@@ -81,7 +82,6 @@ class ConfigSettingNames(Enum):
     FORCE_REDIRECT_HTTP_TO_HTTPS = auto()
     GITHUB_CLIENT_ID = auto()
     GITHUB_CLIENT_SECRET = auto()
-    TECH_NOTES_EXTERNAL_URL = auto()
     INSTITUTION_FULL_NAME = auto()
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
@@ -99,7 +99,6 @@ class ConfigSettingNames(Enum):
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
     PROJECT_WORKFLOW_URL = auto()
-    AUTHORISATION_CODE = auto()
     SECRET_KEY = auto()
     SOCIAL_0_NAME = auto()
     SOCIAL_0_TEXT = auto()
@@ -118,6 +117,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_API = auto()
     TASK_URLS_USE_ANCHORS = auto()
     TASKS_LOADED_DATETIME = auto()
+    TECH_NOTES_EXTERNAL_URL = auto()
     TECH_NOTES_GENERATED_DATETIME = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
@@ -221,6 +221,7 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
+        ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 0,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
@@ -233,7 +234,6 @@ class ConfigSettings:
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
-        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
@@ -251,7 +251,6 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
-        ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
         ConfigSettingNames.SOCIAL_0_NAME.name: "",
         ConfigSettingNames.SOCIAL_0_TEXT.name: "",
@@ -267,9 +266,10 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: "_task_list.html",
-        ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
+        ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
@@ -284,6 +284,7 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
+        ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
@@ -296,7 +297,6 @@ class ConfigSettings:
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
-        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
@@ -314,7 +314,6 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
-        ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
@@ -330,9 +329,10 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
@@ -362,6 +362,11 @@ class ConfigSettings:
           here before they have been registered. Usernames are lowercase.
           If you remove (or change) a username in this list, you're effectively
           revoking admin access, so **be careful** before changing anything.""",
+
+        ConfigSettingNames.AUTHORISATION_CODE.name:
+          """The authorisation code is needed to make any changes to config
+          or other-user data, including registering students.
+          See also `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
 
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name:
           """The task list and tech notes do not get updated when you change
@@ -433,13 +438,6 @@ class ConfigSettings:
           """A string that exactly matches the client secret stored on the
           GitHub app that the server uses tofork the buggy editor repo into
           a student's own GitHub account.""",
-
-        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
-          """Full URL to the tech notes pages if they are *not* being hosted
-          on this server. If you've customised them and have published them
-          somewhere else (for example, hosted on GitHub pages), then put the
-          URL here. By default, tech notes are hosted on the race
-          server, so you can leave this blank.""",
 
         ConfigSettingNames.INSTITUTION_FULL_NAME.name:
           """Full name for your institution, college, or school.""",
@@ -582,11 +580,6 @@ class ConfigSettings:
           it will default to `project/workflow` on this server. Leave
           this blank if you don't want to display a workflow page.""",
 
-        ConfigSettingNames.AUTHORISATION_CODE.name:
-          """The authorisation code is needed to make any changes to config
-          or other-user data, including registering students.
-          See also `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
-
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique
           for your server: the default value shown here was randomised on installation,
@@ -636,6 +629,14 @@ class ConfigSettings:
           on this server, and makes "nicer" URLs, but if you
           don't like this behaviour, switch it off.""",
 
+        ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
+          """Full URL to the tech notes pages if they are *not* being hosted
+          on this server. If you've customised them and have published them
+          somewhere else (for example, hosted on GitHub pages), then put the
+          URL here. By default, tech notes are hosted on the race
+          server, so you can leave this blank.""",
+
+
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
           you don't need this field unless it's a useful way of identifying
@@ -651,8 +652,9 @@ class ConfigSettings:
 
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
           """Do users have a username or account that's specific to your
-          institution? You might not need this, or you might already be using
-          it as the username — in which case choose `No`.""",
+          organsiation or institution? You might not need this, or you
+          might already be using it as the username — in which case
+          choose `No`.""",
 
     }
 

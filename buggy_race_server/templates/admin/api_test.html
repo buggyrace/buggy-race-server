@@ -21,8 +21,8 @@
   </div>
   <form method="POST" action="/api/upload" role="form">
     <div class="row my-3">
-      <div class="col">
-        <table class="table table-striped table-bordered table-hover bg-white">
+      <div class="col-md-8 col-lg-6">
+        <table class="table table-bordered bg-white">
           <thead>
             <tr>
               <th>request</th>
@@ -35,7 +35,7 @@
                 <code>user:</code>
               </td>
               <td>
-                <input type="text" id="user" name="user" value="{{ current_user.username }}"/>
+                <input type="text" id="user" name="user" value="{{ current_user.username }}" class="form-control mr-sm-1"/>
               </td>
             </tr>
             <tr>
@@ -43,7 +43,7 @@
                 <code>key:</code>
               </td>
               <td>
-                <input type="text" name="key" value="{{ current_user.api_key }}"/>
+                <input type="text" name="key" value="{{ current_user.api_key }}" class="form-control mr-sm-1"/>
               </td>
             </tr>
             <tr>
@@ -51,8 +51,8 @@
                 <code>secret:</code>
               </td>
               <td>
-                <input type="text" name="secret" value="{{ current_user.api_secret or '' }}"/>
-                <a id="btn-to-own-secret" href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-white ml-3">Set API secret &rtri;</a>
+                <input type="text" name="secret" value="{{ current_user.api_secret or '' }}"  class="form-control mr-sm-1"/>
+                <a id="btn-to-own-secret" href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-white my-2">Set API secret &rtri;</a>
               </td>
             </tr>
             <tr>
@@ -60,7 +60,7 @@
                 <code>buggy_json:</code>
               </td>
               <td>
-                <textarea name="buggy_json" rows="4">
+                <textarea name="buggy_json" rows="4" class="form-control mr-sm-1">
   {
     "qty_wheels": {{ random_qty_wheels }}
   }

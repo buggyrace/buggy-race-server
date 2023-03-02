@@ -226,21 +226,24 @@ def vscode_workspace():
     remote_server_address = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name]
     remote_server_name = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name]
     if not (remote_server_address and remote_server_name):
-        return "Remote server has not been configured on the race server: cannot supply VS workspace file", 400
+        flash("Remote server has not been configured on the race server: cannot create VScode workspace file", "danger")
+        return redirect(url_for("user.settings"))
     if not current_user.github_username:
-        return "No GitHub username (have you forked the repo yet?): cannot supply VS workspace file", 400
+        flash("No GitHub username (have you forked the repo yet?): cannot create VScode workspace file", "danger")
+        return redirect(url_for("user.settings"))
     github_repo = current_user.course_repository
     if not github_repo:
-        return "Missing GitHub repo (have you forked the repo yet?): cannot supply VS workspace file", 400
+        flash("Missing GitHub repo (have you forked the repo yet?): cannot create VScode workspace file", "danger")
+        return redirect(url_for("user.settings"))
     filename = get_download_filename("buggy-editor.code-workspace")
     project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()
     response = Response(
         render_template(
             "user/vscode_workspace.json",
             project_name=project_name,
-            username=current_user.org_username or current_user.username,
+            remote_username=current_user.org_username or current_user.username,
             remote_server_address=remote_server_address, # e.g., linux.cim.rhul.ac.uk
-            remote_server_name=remote_server_name,
+            remote_server_name=remote_server_name, # e.g., "the CS department's teaching server"
             github_repo=github_repo,
         )
     )

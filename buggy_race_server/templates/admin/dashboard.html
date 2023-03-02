@@ -26,7 +26,9 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for s in students_logged_in_today %}
-                  <li>{{ s.pretty_username }}</li>
+                  <li>
+                    <a class="user-link" href="{{ url_for('admin.show_user', user_id=s.username) }}">{{ s.pretty_username }}</a>
+                  </li>
                 {% endfor %}
               </ul>
             </td>
@@ -46,7 +48,9 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for s in students_logged_in_this_week %}
-                  <li>{{ s.pretty_username }}</li>
+                  <li>
+                    <a class="user-link" href="{{ url_for('admin.show_user', user_id=s.username) }}">{{ s.pretty_username }}</a>
+                  </li>
                 {% endfor %}
               </ul>
             </td>
@@ -65,8 +69,10 @@
           <tr>
             <td colspan="3">
               <ul class="user-list">
-                {% for u in students_never_logged_in %}
-                  <li>{{ u.pretty_username }}</li>
+                {% for s in students_never_logged_in %}
+                  <li>
+                    <a class="user-link" href="{{ url_for('admin.show_user', user_id=s.username) }}">{{ s.pretty_username }}</a>
+                  </li>
                 {% endfor %}
               </ul>
             </td>
@@ -83,7 +89,9 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for u in users_deactivated %}
-                  <li>{{ u.pretty_username }}</li>
+                  <li>
+                    <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.username) }}">{{ u.pretty_username }}</a>
+                  </li>
                 {% endfor %}
               </ul>
             </td>
@@ -97,7 +105,9 @@
           <td colspan="3">
             <ul class="user-list">
               {% for u in admin_users %}
-                <li>{{ u.pretty_username }}</li>
+                <li>
+                  <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.username) }}">{{ u.pretty_username }}</a>
+                </li>
               {% endfor %}
             </ul>
           </td>
@@ -111,7 +121,9 @@
             <td colspan="3">
               <ul class="user-list">
                 {% for u in other_users %}
-                  <li>{{ u.pretty_username }}</li>
+                  <li>
+                    <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.username) }}">{{ u.pretty_username }}</a>
+                  </li>
                 {% endfor %}
               </ul>
             </td>

@@ -423,9 +423,14 @@ p.btn-collection {
 }
 #registration-progress ul li, ul.user-list li {
   display:inline-block;
-  margin:0.1em 0.33em;
+  margin:0.1em 0.25em;
+}
+#registration-progress ul li, a.user-link {
   padding:0.33em;
   border-radius:0.33em;
+}
+#registration-progress ul li, a.user-link {
+  color: black;
 }
 #registration-progress ul li span {
   background-color: rgba(255,255,255,0.5);
@@ -439,8 +444,14 @@ p.btn-collection {
   margin:4px 4px 0 0;
 }
 
-ul.user-list li{
-  background-color: #dddddd;
+a.user-link{
+  background-color: #e8e8e8;
+  min-width:2em;
+}
+a.user-link:hover {
+  background-color: #666666;
+  color:white;
+  text-decoration: none;
 }
 
 a.toclink{

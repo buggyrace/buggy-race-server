@@ -85,21 +85,23 @@ def load_settings_from_db(app):
         Note that, at startup, if there are ENV variables set for any config,
         those are written to the database _before_ this, which is how they 
         always override (and why we don't care if they are already set).
+
+        Also, this includes non-persistent config settings
     """
     settings = Setting.query.all()
     names_found_in_db = [setting.id for setting in settings if ConfigSettings.is_valid_name(setting.id)]
     missing_settings = []
     for name in ConfigSettings.DEFAULTS.keys():
-       if name not in names_found_in_db:
-          # explicitly write the default value into the db for missing settings
-          # This is only expected when the app first starts up: after that, the
-          # config settings remain in the database
-          missing_settings.append(
-            {
-              "id": name,
-              "value": ConfigSettings.stringify(name, ConfigSettings.DEFAULTS[name])
-            }
-          )
+        if name not in names_found_in_db:
+            # explicitly write the default value into the db for missing settings
+            # This is only expected when the app first starts up: after that, the
+            # config settings remain in the database
+            missing_settings.append(
+                {
+                  "id": name,
+                  "value": ConfigSettings.stringify(name, ConfigSettings.DEFAULTS[name])
+                }
+            )
     if missing_settings:
         db.session.execute(insert(Setting.__table__), missing_settings)
         db.session.commit()
@@ -122,6 +124,7 @@ def set_and_save_config_setting(app, name, value):
     # the forms handle groups of settings.
 
     ConfigSettings.set_config_value(app, name, value)
+
     setting = db.session.query(Setting).filter_by(id=name).first()
     settings_table = Setting.__table__
     if setting is None: # not already in db? then make it
@@ -143,6 +146,8 @@ def load_config_setting(app, name):
     if setting := db.session.query(Setting).filter_by(id=name).first():
        ConfigSettings.set_config_value(app, name, setting.value)
        return app.config.get(name) # will have done type conversion too
+    else:
+       raise ValueError(f"bad config: {name}")
 
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """
@@ -208,8 +213,8 @@ def publish_tech_notes(app=current_app):
     )
     EMPTY_LINE_RE = re.compile(r'^\s*(#.*)?$')
     full_pathname = join_to_project_root(
-      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-      app.config[ConfigSettingNames.TECH_NOTES_CONFIG_FILE_NAME.name],
+      app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
+      app.config[ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name],
       app=app
     )
     conf_file_reader = open(full_pathname)
@@ -232,9 +237,9 @@ def publish_tech_notes(app=current_app):
               value = new_value.replace("\"", "\\\"").replace("\n", " ")
             lines[i] = f"    \"{name}\": \"{value}\",\n"
           i += 1
-    live_filename = current_app.config[ConfigSettingNames.TECH_NOTES_CONFIG_LIVE_NAME.name]
+    live_filename = current_app.config[ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name]
     live_pathname = join_to_project_root(
-      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+      app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
       live_filename,
       app=app
     )
@@ -242,18 +247,18 @@ def publish_tech_notes(app=current_app):
     live_config_file.writelines(lines)
     live_config_file.close()
     publish_conf_file = join_to_project_root(
-      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONFIG_PUBLISH_NAME.name),
+      app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
+      app.config.get(ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name),
       app=app
     )
     output_path = join_to_project_root(
-      app.config[ConfigSettingNames.PUBLISHED_PATH.name],
-      app.config.get(ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name),
+      app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+      app.config.get(ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name),
       app=app
     )
     content_path = join_to_project_root(
-      app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
-      app.config.get(ConfigSettingNames.TECH_NOTES_CONTENT_DIR.name),
+      app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
+      app.config.get(ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name),
       app=app
     )
     keepfile = os.path.join(output_path, ".keep")
@@ -262,7 +267,7 @@ def publish_tech_notes(app=current_app):
     # cd to the pelican dir so that the imports work
     os.chdir(
       join_to_project_root(
-        app.config[ConfigSettingNames.TECH_NOTES_PATH.name],
+        app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
         app=app
       )
     )
@@ -278,7 +283,7 @@ def publish_tech_notes(app=current_app):
     )
     set_and_save_config_setting(
       app,
-      name=ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name,
+      name=ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
       value=datetime.now().strftime("%Y-%m-%d %H:%M")
     )
     # there's a keepfile (for git) in the technotes output dir
@@ -304,7 +309,7 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     if app is not None:
         set_and_save_config_setting(
             app,
-            ConfigSettingNames.TASKS_LOADED_DATETIME.name,
+            ConfigSettingNames._TASKS_LOADED_DATETIME.name,
             datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
     return len(new_tasks)
@@ -416,9 +421,9 @@ def publish_task_list(app=current_app):
         created_at=created_at,# for debug: includes seconds, but config doesn't
         is_storing_notes=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
     )
-    task_list_filename = app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
+    task_list_filename = app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
     generated_task_file = join_to_project_root(
-        app.config[ConfigSettingNames.PUBLISHED_PATH.name],
+        app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         task_list_filename
     )
     task_list_html_file = open(generated_task_file, "w")
@@ -426,7 +431,7 @@ def publish_task_list(app=current_app):
     task_list_html_file.close()
     set_and_save_config_setting(
         app,
-        name=ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name,
+        name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         value=created_at.strftime("%Y-%m-%d %H:%M"),
     )
   

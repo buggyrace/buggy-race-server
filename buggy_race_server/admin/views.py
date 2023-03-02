@@ -377,7 +377,7 @@ def admin():
       is_storing_notes=is_storing_notes,
       qty_notes_by_task=qty_notes_by_task,
       qty_notes=qty_notes,
-      unexpected_config_settings=current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name],
+      unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
       purge_form = GeneralSubmitForm(),
     )
 
@@ -720,8 +720,8 @@ def settings(group_name=None):
       },
       html_descriptions=html_descriptions,
       env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
-      tech_notes_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
-      is_tasks_ok=task_count and current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
+      tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+      is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/announcements", strict_slashes=False)
@@ -901,7 +901,7 @@ def tech_notes_admin():
       ConfigSettingNames.SOCIAL_3_NAME.name,
     ],
     tech_notes_external_url=current_app.config['TECH_NOTES_EXTERNAL_URL'],
-    notes_generated_timestamp=current_app.config[ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name],
+    notes_generated_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
   )
 
 @blueprint.route("/tasks/publish", methods=["POST"])
@@ -993,7 +993,7 @@ def tasks_admin():
         tasks=tasks,
         qty_tasks=qty_tasks,
         qty_disabled_tasks=qty_disabled_tasks,
-        tasks_loaded_at=current_app.config[ConfigSettingNames.TASKS_LOADED_DATETIME.name],
+        tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
           ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
@@ -1001,7 +1001,7 @@ def tasks_admin():
         ],
         example_task=example_task,
         example_task_url=example_task_url,
-        task_list_updated_timestamp=current_app.config[ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name],
+        task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
     )
 
 @blueprint.route("/download/tasks/<type>/<format>", methods=["GET", "POST"])
@@ -1131,11 +1131,10 @@ def purge_unexpected_config_setting(setting_name):
     In practice this is a housekeeping activity for development: unexpected
     settings are typically legacy config settings that remain in the database
     after being removed from the code.
-    There's one gotcha: the empty string is problematic and isn't handled
     """
     if not current_user.is_buggy_admin:
         abort(403)
-    unexpected_settings =  current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name]
+    unexpected_settings =  current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY]
     if setting_name not in unexpected_settings:
        flash(f"Cannot purge config setting \"{setting_name}\": it's not reported as unexpected", "warning")
        return redirect(url_for("admin.admin"))
@@ -1145,7 +1144,7 @@ def purge_unexpected_config_setting(setting_name):
        flash(f"Cannot purge config setting \"{actual_name}\": can't find it", "danger")
        return redirect(url_for("admin.admin"))
     dead_setting.delete()
-    current_app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name] = [
+    current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY] = [
        name for name in unexpected_settings if name != setting_name
     ]
     flash(f"OK, purged config setting \"{setting_name}\"", "success")

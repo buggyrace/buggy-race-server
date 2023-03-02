@@ -31,48 +31,61 @@ class ConfigSettingNames(Enum):
         """ ConfigSettingNames values are the same (as strings) as their names."""
         return name
 
-    # TODO: might want to make these explicity somewhere:
-    # Some config settings (specifically, Flask-related ones) are missing here
-    # because they are only set by environment variables (e.g., the database URL).
+    #   These are the buggy-racing-specific config settings (that persist
+    #   in the datbase(.)
+    #   Some config settings (specifically, Flask-related ones) are missing
+    #   here because they are only set by environment variables
+    #   (e.g., the database URL or FLASK_APP) - see ConfigFromEnv, below,
+    #   to see some of those settings. Those do not persist in the database.
 
-    # settings prefixed by _ are implied, so should not be set explicitly
 
-    # current announcements are cached to avoid database reads on every hit
+    # Settings prefixed by _ are implied/managed entirely in code, so should
+    # not be set by user (so: are not edited (or seen) in admin/settings
+
+    # Name of the CSV file into which tasks-as-issues (for GitHub) are put
+    _BUGGY_EDITOR_ISSUES_FILE = auto()
+
+    # Current announcements are cached to avoid database reads on every hit
     _CURRENT_ANNOUNCEMENTS = auto()
 
-    # setup status is used to track progress (and ultimately completion)
+    # Settings that are being overridden by ENV variables (by this class)
+    # are noted here so a warning can be displayed on the settings page
+    _ENV_SETTING_OVERRIDES = auto()
+
+    # Path where published HTML (task list and tech notes) is written
+    _PUBLISHED_PATH = auto()
+
+    # Setup status is used to track progress (and ultimately completion)
     # of the setup process when the app is first installed
     _SETUP_STATUS = auto()
 
-    # settings that are being overridden by ENV variables (by this
-    # class) are noted here so a warning can be displayed on the settings page
-    _ENV_SETTING_OVERRIDES = auto()
+    # Timestamps that user never sets explicitly, but are stored as config
+    _TASK_LIST_GENERATED_DATETIME = auto()
+    _TASKS_LOADED_DATETIME = auto()
+    _TECH_NOTES_GENERATED_DATETIME = auto()
 
-    # unexpected settings that are found in the database
-    _UNEXPECTED_CONFIG_SETTINGS = auto()
+    # Filename of the generated task list (effectively static content)
+    _TASK_LIST_HTML_FILENAME = auto()
 
-    # path where published HTML (task list and tech notes) is written
-    PUBLISHED_PATH = auto()
+    # Tech notes are managed by Pelcian: we don't anticipate the tech notes
+    # dir being changed (it's in version control) but  putting them in config
+    # to allow future tech notes to come from a different source
+    _TECH_NOTES_CONFIG_FILE_NAME = auto()
+    _TECH_NOTES_CONFIG_LIVE_NAME = auto()
+    _TECH_NOTES_CONFIG_PATH = auto()
+    _TECH_NOTES_CONFIG_PUBLISH_NAME = auto()
+    _TECH_NOTES_CONTENT_DIR = auto()
+    _TECH_NOTES_OUTPUT_DIR = auto()
+    _TECH_NOTES_PAGES_DIR = auto()
+    _TECH_NOTES_PATH = auto()
 
-    # tech notes are managed by Pelcian: we don't anticipate the tech notes
-    # dir being changed (it's in version control) so they aren't offered via
-    # admin/settings... but just in case, putting them in config to allow
-    # future tech notes to come from a different source: defaults values
-    # are set in ConfigFromEnv, below
-    TECH_NOTES_CONFIG_FILE_NAME = auto()
-    TECH_NOTES_CONFIG_LIVE_NAME = auto()
-    TECH_NOTES_CONFIG_PATH = auto()
-    TECH_NOTES_CONFIG_PUBLISH_NAME = auto()
-    TECH_NOTES_CONTENT_DIR = auto()
-    TECH_NOTES_OUTPUT_DIR = auto()
-    TECH_NOTES_PAGES_PATH = auto()
-    TECH_NOTES_PATH = auto()
-  
+    # User-editable config settings: presented in the settings/config.
+    # Each one should also exist in a settings group, and have a description
+    # and a type.
     ADMIN_USERNAMES = auto()
     AUTHORISATION_CODE = auto()
     AUTO_GENERATE_STATIC_CONTENT = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
-    BUGGY_EDITOR_ISSUES_FILE = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
     BUGGY_RACE_SERVER_URL = auto()
@@ -112,13 +125,9 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
-    TASK_LIST_GENERATED_DATETIME = auto()
-    TASK_LIST_HTML_FILENAME = auto()
     TASK_NAME_FOR_API = auto()
     TASK_URLS_USE_ANCHORS = auto()
-    TASKS_LOADED_DATETIME = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
-    TECH_NOTES_GENERATED_DATETIME = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
@@ -146,8 +155,11 @@ class ConfigTypes(str, Enum):
 
 class ConfigSettings:
 
-    # config settings prefixed with _ are not set by user
-    # but rather are implied once the config is set
+    # Config settings prefixed with _ are not set by user, so do not appear
+    # in GROUPS, which are used to present related settings together in the
+    # admin/settings pages (otherwise it's overwhelming to manage).
+    # If a setting isn't in a group here, the admin cannot change it through
+    # the (web) admin/settings interface.
 
     GROUPS = {
       ConfigGroupNames.AUTH.name:(
@@ -162,7 +174,6 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name,
         ConfigSettingNames.GITHUB_CLIENT_ID.name,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
       ),
@@ -218,13 +229,31 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
       )
     }
+
+
+    # **Every** config setting in ConfigSettingNames **must** have an entry
+    # in the DEFAULTS (it's used during setup to populate the database)
+
     DEFAULTS = {
-        ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
+        ConfigSettingNames._ENV_SETTING_OVERRIDES.name: "",
+        ConfigSettingNames._PUBLISHED_PATH.name: "published",
+        ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
+        ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
+        ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name: "content",
+        ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: "tech_notes",
+        ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: "pages",
+        ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
+        ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: "pelicanconflive.py",
+        ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name: "publishconf.py",
+        ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
+        ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
+        ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
+        ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name: "",
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 0,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
@@ -264,13 +293,9 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
-        ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: "",
-        ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
-        ConfigSettingNames.TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
-        ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: "",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
@@ -281,13 +306,30 @@ class ConfigSettings:
     MIN_USERNAME_LENGTH = 2
     MAX_USERNAME_LENGTH = 32
 
+    # TYPES are used to force casting when input either through the
+    # admin/settings interface or simply when read as strings from ENV or the
+    # database. By default they are strings, but it's best to be explicit.
+
     TYPES = {
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames._ENV_SETTING_OVERRIDES.name: ConfigTypes.STRING,
+        ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
+        ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.ADMIN_USERNAMES.name: ConfigTypes.STRING,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
@@ -327,23 +369,18 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
-        ConfigSettingNames.TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.TECH_NOTES_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
     }
 
-    # this is the order of the setting groups that is
-    # used during the (initial) setup: the _SETUP_STATUS
-    # config is effectively the index-1 into this array:
-    # when the setup is complete, _SETUP_STATUS is zero.
+    # This is the order of the setting groups that is used during the
+    # (initial) setup: the _SETUP_STATUS config is effectively the index-1
+    # into this array: when the setup is complete, _SETUP_STATUS is zero.
     # (the settings page uses the same order, because it's sensible)
     SETUP_GROUPS = [
       ConfigGroupNames.AUTH,
@@ -384,10 +421,6 @@ class ConfigSettings:
           the project. This is a public repo and unless you've forked
           it to make a custom one, you probably don't need to change
           this.""",
-
-        ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name:
-          """Name of the CSV file the server creates that describes the project
-          tasks as GitHub issues. You probably don't need to change this.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
           """This should match the name in the `BUGGY_EDITOR_GITHUB_URL`
@@ -636,7 +669,6 @@ class ConfigSettings:
           URL here. By default, tech notes are hosted on the race
           server, so you can leave this blank.""",
 
-
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
           you don't need this field unless it's a useful way of identifying
@@ -663,12 +695,15 @@ class ConfigSettings:
         """You must complete the setup. It takes around 5 minutes, and
         you can leave most settings to be default (and you can change
         most things later, if you need to).""",
+
       ConfigGroupNames.GITHUB.name:
         """Setup the GitHub details here. If you're injecting issues
         into student's own repos, you must provide valid GitHub
         CLIENT details which may be specific to your installation.""",
+
       ConfigGroupNames.ORG.name:
         """Provide general details about your institution/organisation.""",
+
       ConfigGroupNames.PROJECT.name:
         """These settings control aspects of the what the students
         need to do (for example: are they only coding, or do you
@@ -679,17 +714,21 @@ class ConfigSettings:
         server too — see the docs). It's fine to run the project
         without a remote server: it just means students work on
         individial machines.""",
+
       ConfigGroupNames.RACES.name:
         """Race settings can all be left to default (you can change them
         later if you need to).""",
+
       ConfigGroupNames.SERVER.name:
         """These settings control the behaviour of the server. The
         BUGGY_RACE_SERVER_URL setting is important; the others can
         usually be left to their default values.""",
+
       ConfigGroupNames.SOCIAL.name:
         """These are used to add links to your institution's social or
         educational accounts. If you run support sites like Moodle
         or Discord or Teams for this project, add them here.""",
+
       ConfigGroupNames.USERS.name:
         """Every student will need a username. These settings define what
         fields you want to store IN ADDITION to that username. You do
@@ -701,6 +740,8 @@ class ConfigSettings:
     }
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key
+
+    UNEXPECTED_SETTINGS_KEY = "_UNEXPECTED_CONFIG_SETTINGS"
 
     @staticmethod
     def is_valid_name(name):
@@ -725,26 +766,21 @@ class ConfigSettings:
             Note: this does NOT do anything with the database!
         """
         str_value = str(value)
-        try:
-          type = ConfigSettings.TYPES[name]
-        except KeyError as e:
-          if name == "": name = ConfigSettings.NO_KEY
-          unexpecteds = app.config.get(ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name)
-          if unexpecteds is None:
-             app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name] = [name]
-          elif name not in unexpecteds:
-             app.config[ConfigSettingNames._UNEXPECTED_CONFIG_SETTINGS.name].append(name)
-          print(f"* ignoring unknown config setting: {name}, not set", flush=True)
-          return
+        if not ConfigSettings.is_valid_name(name):
+            if name == "": name = ConfigSettings.NO_KEY
+            unexpecteds = app.config.get(ConfigSettings.UNEXPECTED_SETTINGS_KEY)
+            if unexpecteds is None:
+               app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY] = [name]
+            elif name not in unexpecteds:
+               app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY].append(name)
+            print(f"* ignoring unknown config setting: {name}, not set", flush=True)
+            return
+        type = ConfigSettings.TYPES.get(name) or ConfigTypes.STRING
         if type == ConfigTypes.BOOLEAN:
             value = str_value == "1"
         elif type == ConfigTypes.INT:
             value = int(str_value) if str_value.isdecimal() else 0
-        # note: hash passwords _before_ sending them to set_config_value
-        # elif type == ConfigTypes.PASSWORD:
-        #     value = bcrypt.generate_password_hash(str_value)
         app.config[name] = value
-        # print(f"* updated config value: {name}={value}", flush=True)
 
     @staticmethod
     def admin_usernames_list(app):
@@ -775,25 +811,6 @@ class ConfigSettings:
     def users_additional_fieldnames(app):
         is_enabled_dict = ConfigSettings.users_additional_fieldnames_is_enabled_dict(app)
         return [ field for field in is_enabled_dict if is_enabled_dict[field] ]
-
-def _force_slashes(s):
-    s = s.strip()
-    if not s.startswith("/"):
-        s = "/" + s
-    if not s.endswith("/"):
-        s = s + "/"
-    return s
-
-def _remove_slashes(s):
-    s = s.strip()
-    if s.startswith("/"):
-       s = s[1:]
-    if s.endswith("/"):
-       s = s[:-1]
-    return s
-
-def _slug(s):
-    return re.sub(r'\W+', '-', s.lower().strip())
 
 
 ##################################################################
@@ -830,63 +847,11 @@ class ConfigFromEnv():
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = env.str("DATABASE_URL")
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     
-    SECRET_KEY = ConfigSettings.DEFAULTS[ConfigSettingNames.SECRET_KEY.name]
-
-    # string containing comma separated config setting names that are
-    # stored in database but have been overridden by ENV settings
-    # (see constructor below)
-    _ENV_SETTING_OVERRIDES = ""
-
-    # string containing comma separated config setting names that the app
-    # attempts to make, but are not recognised — this is useful for debug
-    # and can result from deprecated settings persisting in the database
-    _UNEXPECTED_CONFIG_SETTINGS = []
-
-    # path into which published content is written:
-    # task list page, and tech notes (output from Pelican)
-    PUBLISHED_PATH = env.str("PUBLISHED_PATH", default="published")
-
-    # Hardcoded settings for Pelican (python tool for static site generation):
-    #-------------------------------------------------------------------------
-    # These only need to be changed if you're not using tech notes from this
-    # repo, which currently isn't supported. Because these are reading raw
-    # files from the filesystem and serving them to the client, there's a
-    # security risk if they point anywhere outside the repo... which is
-    # why they aren't offered for changing via the admin/settings pages.
-    # Note that they're here so _if you really need to_ you can experiment
-    # with changing them via (e.g.) .env settings (not recommended).
-    #-------------------------------------------------------------------------
-    # the "Pelican" directory
-    # (contains source and config for generating tech notes static content)
-    TECH_NOTES_PATH = env.str("TECH_NOTES_PATH", default="tech_notes")
-
-    # the source directory where pelican looks for the content to generate
-    TECH_NOTES_CONTENT_DIR = env.str("TECH_NOTES_CONTENT_DIR", default="content")
-
-    # the output directory of the tech notes, specifically the pages (because
-    # Pelican wants to generate other material — blog posts, summaries — which
-    # we're not using) which is found in the PUBLISHED_PATH
-    TECH_NOTES_OUTPUT_DIR = env.str("TECH_NOTES_OUTPUT_DIR", default="tech_notes")
-
-    # the HTML pages themselves (pages subdir in the output path), which is
-    # where the tech notes end up (because in pelican-speak they are "pages"
-    # (not "posts", etc). This is used by the webserver to locate the
-    # tech notes it's serving as web pages.
-    TECH_NOTES_PAGES_PATH = env.str(
-        "TECH_NOTES_PAGES_PATH",
-        default=path.join(PUBLISHED_PATH, TECH_NOTES_OUTPUT_DIR, "pages")
-    )
-
-    # The TECH_NOTES_CONFIG_* settings are for the _file system_ (not URLs)
-    # Changing these is unexpected but they're presented here to facilitate
-    # moving tech notes outwith the version-controlled source.
-    TECH_NOTES_CONFIG_FILE_NAME = env.str("TECH_NOTES_CONFIG_FILE_NAME", default="pelicanconf.py")
-    TECH_NOTES_CONFIG_LIVE_NAME = env.str("TECH_NOTES_CONFIG_LIVE_NAME", default="pelicanconflive.py")
-    TECH_NOTES_CONFIG_PUBLISH_NAME = env.str("TECH_NOTES_CONFIG_PUBLISH_NAME", default="publishconf.py")
-
     # handily makes all downloaded JSON pretty:
     # less confusing for students (e.g., downloading spec files)
     JSONIFY_PRETTYPRINT_REGULAR = True
+
+    _UNEXPECTED_CONFIG_SETTINGS = []
 
 
     def __init__(self):

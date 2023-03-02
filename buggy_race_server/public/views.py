@@ -209,8 +209,8 @@ def _send_tech_notes_assets(type, path):
             raise FileNotFoundError()
         return send_file(
             join_to_project_root(
-                current_app.config[ConfigSettingNames.PUBLISHED_PATH.name],
-                current_app.config[ConfigSettingNames.TECH_NOTES_OUTPUT_DIR.name],
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                current_app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
                 type,
                 path
             )
@@ -232,9 +232,9 @@ def show_single_task(task_id):
 def serve_project_page(page=None):
     tasks = []
     if page == "tasks":
-        task_html_filename = current_app.config[ConfigSettingNames.TASK_LIST_HTML_FILENAME.name]
+        task_html_filename = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
         generated_task_file = join_to_project_root(
-            current_app.config[ConfigSettingNames.PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
             task_html_filename
         )
         if not path.exists(generated_task_file):
@@ -304,7 +304,7 @@ def tech_notes_redirect_to_index():
 
 @blueprint.route("/tech-notes/<path:path>", strict_slashes=False)
 def serve_tech_notes(path=None):
-    external_url = current_app.config.get("TECH_NOTES_EXTERNAL_URL")
+    external_url = current_app.config.get(ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name)
     if not path:
         path = "index.html"
     elif path.endswith("/"):
@@ -317,7 +317,9 @@ def serve_tech_notes(path=None):
     try:
         return send_file(
             join_to_project_root(
-                current_app.config[ConfigSettingNames.TECH_NOTES_PAGES_PATH.name],
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                current_app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
+                current_app.config[ConfigSettingNames._TECH_NOTES_PAGES_DIR.name],
                 path
             )
         )

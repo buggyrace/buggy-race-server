@@ -105,7 +105,7 @@ def setup_course_repository():
     issues_parser = IssueParser(
         join_to_project_root(
           "project",
-          current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_FILE.name]
+          current_app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
         )
     )
 

@@ -8,7 +8,7 @@ import re
 import markdown
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 
 class SocialSetting():
   """A Social media link: note this is not a Flask/ORM model
@@ -57,6 +57,7 @@ class Setting(SurrogatePK, Model):
     value = Column(db.String(255), unique=False, nullable=False)
 
     def get_dict_from_db(query_result):
+      """ Returns current config values from database """
       settings_as_dict = {}
       for setting in query_result:
         settings_as_dict[setting.id] = setting.value

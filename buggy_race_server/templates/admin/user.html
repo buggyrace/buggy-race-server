@@ -3,7 +3,9 @@
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="col my-3">User {{ user.pretty_username }}</h1>
+    <h1 class="col my-3">
+      User {{ user.pretty_username }}
+    </h1>
   </div>
   {% if not user.is_active %}
     <div class="row">

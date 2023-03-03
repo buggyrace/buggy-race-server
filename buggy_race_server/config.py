@@ -853,6 +853,9 @@ class ConfigFromEnv():
 
     _UNEXPECTED_CONFIG_SETTINGS = []
 
+    # must set SECRET_KEY for sessions to work, and must
+    # be in place here in case subsequent (db) load doesn't load it
+    SECRET_KEY = ConfigSettings.DEFAULTS[ConfigSettingNames.SECRET_KEY.name]
 
     def __init__(self):
       # In addition to the Flask/server "system" environment variable,

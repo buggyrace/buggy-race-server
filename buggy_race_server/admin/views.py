@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import os
 from collections import defaultdict
 import markdown
+import re
 
 from sqlalchemy.inspection import inspect
 
@@ -1152,3 +1153,22 @@ def purge_unexpected_config_setting(setting_name):
     flash(f"OK, purged config setting \"{setting_name}\"", "success")
     return redirect(url_for("admin.admin"))
 
+@blueprint.route("/system", strict_slashes=False, methods=["GET"])
+@login_required
+def show_system_info():
+    if not current_user.is_buggy_admin:
+        abort(403)
+    # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
+    database_url = current_app.config.get("DATABASE_URL")
+    redacted_database_url = "(unavailable)"
+    if current_app.config.get("DATABASE_URL"):
+      DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
+      if match := re.match(DATABASE_RE, database_url):
+        print(match, flush=True)
+        redacted_database_url = f"{match[1]}******{match[2]}"
+    return render_template(
+       "admin/system.html",
+       redacted_database_url=redacted_database_url,
+       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
+
+    )   

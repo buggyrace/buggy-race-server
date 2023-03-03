@@ -287,13 +287,18 @@ def delete_note():
 def note(task_fullname):
     """Show note for current user"""
     if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-        flash("Notes are not enabled on this project", "warning")
+        flash(f"Notes are not enabled on this project ({ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name} is not set)", "warning")
         abort(404)
     (phase, name) = Task.split_fullname(task_fullname)
     if phase is None:
+        flash("No such task", "warning")
         abort(404)
     task = Task.query.filter_by(phase=phase, name=name).first()
     if task is None:
+        if Task.query.count():
+            flash("No such task", "warning")
+        else:
+            flash("No tasks in project yet", "warning")
         abort(404)
     if not task.is_enabled:
         flash("Warning: this task is currently not part of the project (it's been hidden)", "danger")

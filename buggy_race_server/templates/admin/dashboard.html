@@ -5,6 +5,33 @@
   <div class="row">
     <h1 class="col">Admin dashboard</h1>
   </div>
+  {% if not tasks %}
+    <div class="alert alert-danger">
+      <strong>There are no tasks in the project</strong>
+      <br>
+      Go to <a href="{{ url_for('admin.tasks_admin')}}">config for tasks</a>
+      and either accept the default tasks or upload your own customised markdown file.
+    </div>
+  {% endif %}
+  {% if not students %}
+    <div class="alert alert-warning">
+      <strong>There are no active enrolled students</strong>
+      <br>
+      You can <a href="{{ url_for('admin.bulk_register', data_format=None )}}">register users</a>
+      from a CSV file — see the example format on that page.
+    </div>
+  {% endif %}
+  {% if not external_tech_notes_url %}
+    {% if not tech_notes_generated_at %}
+      <div class="alert alert-warning">
+        <strong>Tech notes have not been published yet</strong>
+        <br>
+        When you have finished changing any config settings they might use, go to
+        <a href="{{ url_for('admin.tech_notes_admin')}}">config for tech notes</a>
+        and press the <strong>Publish</strong> button.
+      </div>
+    {% endif %}
+  {% endif %}
   <div class="row">
     <div class="col-sm-6">
       <table class="table table-striped table-bordered table-hover">

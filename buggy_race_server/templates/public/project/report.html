@@ -211,18 +211,29 @@ def {{ report_type }}():
         you dived into it.
       </p>
 
-      <h3 id="keep-your-notes-short">Keep your notes short!</h3>
-      <p>
-        Just a couple of sentences on what you did is fine (it <em>might</em>
-        just be stating the task's solution if you think it was
-        straightforward).
-      </p>
+      {% if is_storing_notes %}
+        <h2>Storing notes on this race server</h2>
 
+        <p>
+          You can make notes as you go along, and download them as text or
+          already in HTML format (see below) to put into your report.
+        </p>
+        <p>
+          Remember that this is not your report! It's simply a convenient place
+          to collect your notes as you go along. You still have to manage putting
+          it into the <code>/{{ report_type }}</code> page of your buggy editor.
+          However, there are buttons for <strong>downloading your notes</strong>
+          which will already put them in a helpful HTML format, if you want.
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('user.list_notes') }}" class="btn btn-outline-seconday">Your notes &rtri;</a>
+        </p>
+      {% endif %}
+      
       <h2 id="helpful-html-to-copy-and-paste">Helpful HTML to copy-and-paste</h2>
       <p>
-        Here is HTML for you to copy-and-paste: for each task you attempted,
-        take this and add it to your poster (in the <code>cs1999-tasks</code>
-        <code>section</code>).
+        For each task you attempted, take this and add it to your poster (in the
+        <code>tasks</code> <code>section</code>).
         Be kind to your marker and put them in the right order too please ;-)
       </p>
 

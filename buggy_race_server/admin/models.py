@@ -104,6 +104,7 @@ class Announcement(SurrogatePK, Model):
 class Task(SurrogatePK, Model):
     """Task for students to complete."""
 
+    ANCHOR_PREFIX = "task-"
     FULLNAME_RE = re.compile(r"^(\d+)-([a-zA-Z][a-zA-Z0-9_]*)$")
 
     # replaces %KEY% with config setting
@@ -119,9 +120,11 @@ class Task(SurrogatePK, Model):
     @staticmethod
     def split_fullname(fullname):
       (phase, name) = (None, None)
+      if fullname.startwith(Task.ANCHOR_PREFIX): # be forgiving...
+          fullname = fullname[len(Task.ANCHOR_PREFIX):] # ...strip anchor
       if matched := re.match(Task.FULLNAME_RE, fullname):
           phase = int(matched.group(1))
-          name = matched.group(2)
+          name = matched.group(2).upper()
       return (phase, name)
     
     @staticmethod
@@ -156,10 +159,10 @@ class Task(SurrogatePK, Model):
 
 {self.hints_text}
 """
-
+    
     @property
     def anchor(self):
-        return f"task-{self.fullname.lower()}"
+        return f"{Task.ANCHOR_PREFIX}{self.fullname.lower()}"
 
     @property
     def fullname(self):

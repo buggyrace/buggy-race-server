@@ -1,12 +1,16 @@
-
 {% if qty_notes == 0 %}
   <div class="row">
-    <div class="col-lg-8 btn-collection">
-      {% if is_own_note %}
-        You have not created any task notes.
-      {% else %}
-        User {{ user.pretty_username }} has not created any task notes.
-      {% endif %}
+    <div class="col-lg-8">
+      <div class="alert alert-warning">
+        {% if is_own_note %}
+          You have not created any task notes yet.
+          <br>
+          There's an <strong>Add&nbsp;note</strong> button on each task
+          description in the <a href="{{ url_for('public.serve_project_page', page='tasks') }}">task&nbsp;list</a>.
+        {% else %}
+          User {{ user.pretty_username }} has not created any task notes yet.
+        {% endif %}
+      </div>
     </div>
   </div>
 {% else %}

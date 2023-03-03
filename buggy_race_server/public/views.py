@@ -222,8 +222,8 @@ def _send_tech_notes_assets(type, path):
 def show_single_task(task_id):
     """Redirect individual tasks to single task page, with anchor tag"""
     task_id = task_id.lower()
-    if not task_id.startswith("task-"):
-        task_id = f"task-{task_id}"
+    if not task_id.startswith(Task.ANCHOR_PREFIX):
+        task_id = f"{Task.ANCHOR_PREFIX}{task_id}"
     url = url_for("public.serve_project_page", page="tasks")
     return redirect(f"{url}#{task_id}", code=301 )
 
@@ -268,6 +268,7 @@ def serve_project_page(page=None):
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
+    is_storing_notes = current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]
     submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     workflow_url = current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name]
     if workflow_url and not workflow_url.startswith("http"):
@@ -277,6 +278,7 @@ def serve_project_page(page=None):
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         is_report=is_report,
+        is_storing_notes=is_storing_notes,
         report_type=report_type,
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         submit_deadline=submit_deadline,

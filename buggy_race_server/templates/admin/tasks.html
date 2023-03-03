@@ -8,6 +8,22 @@
     </h1>
   </div>
 
+  {% if qty_tasks == 0 %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-warning my-3">
+          <strong>There are no tasks in the project</strong>
+          <br>
+          You need to <strong>Load new tasks into database</strong> (red button, below):
+          <ul>
+            <li>If you don't upload a file, the server will use the default project tasks (which is OK!)</li>
+            <li>Otherwise, if you want to use your own tasks, download the markdown describing them, edit it, and upload that</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   <div class="row">
     <div class="col-md-6 mb-3">
       <div class="container border">
@@ -16,8 +32,18 @@
           <div class="row">
             <div class="col p-3">
               The main <a href="{{ url_for('public.serve_project_page', page='tasks')}}">task list page</a>
-              that the students see does not update automatically unless you restart the server.
-              So if you change any tasks <em>or config settings that it contains</em>, you should republish it.
+              that the students see does not update automatically.
+              {% if config[auto_republish_config_name] %}
+                The config setting <code>{{ auto_republish_config_name }}</code>
+                is set, so if you change any tasks <em>or config settings that
+                it contains</em>, you should republish it here or restart the
+                server.
+              {% else %}
+                The config setting <code>{{ auto_republish_config_name }}</code>
+                is not set (which is normal), so if you change any tasks <em>or
+                config settings that it contains</em>, you should republish it
+                here.
+              {% endif %}
             </div>
           </div>
           <div class="row">
@@ -50,20 +76,7 @@
     </div>
   {% endif %}
 
-  {% if qty_tasks == 0 %}
-    <div class="row">
-      <div class="col">
-        <div class="alert alert-warning my-3">
-          <strong>No tasks in project!</strong><br>
-          You need to <strong>Load new tasks into database</strong> (red button, below):
-          <ul>
-            <li>if you don't upload a file, the server will use the default project tasks (which is OK!)</li>
-            <li>otherwise, if you want to use your own tasks, download the markdown describing them, edit it, and upload that</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  {% else %}
+  {% if qty_tasks > 0 %}
     <div class="row">
       <div class="col">
         <table class="table table-bordered table-hover">

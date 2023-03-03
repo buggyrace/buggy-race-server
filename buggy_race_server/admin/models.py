@@ -120,7 +120,7 @@ class Task(SurrogatePK, Model):
     @staticmethod
     def split_fullname(fullname):
       (phase, name) = (None, None)
-      if fullname.startwith(Task.ANCHOR_PREFIX): # be forgiving...
+      if fullname.startswith(Task.ANCHOR_PREFIX): # be forgiving...
           fullname = fullname[len(Task.ANCHOR_PREFIX):] # ...strip anchor
       if matched := re.match(Task.FULLNAME_RE, fullname):
           phase = int(matched.group(1))

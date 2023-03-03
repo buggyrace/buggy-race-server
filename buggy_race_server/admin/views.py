@@ -1164,7 +1164,6 @@ def show_system_info():
     if current_app.config.get("DATABASE_URL"):
       DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
       if match := re.match(DATABASE_RE, database_url):
-        print(match, flush=True)
         redacted_database_url = f"{match[1]}******{match[2]}"
     return render_template(
        "admin/system.html",

@@ -533,3 +533,7 @@ span.btn.disabled{
   background-color: #ffff00;
   color: black;
 }
+
+table.table-bordered.table-responsive {
+  border:none
+}

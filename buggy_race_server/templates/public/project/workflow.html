@@ -381,7 +381,7 @@
      <a class="toclink" href="#set-env-vars">set ENV vars</a>
     </h3>
     <p>
-     <a href="https://rhul-cs-projects.github.io/CS1999-buggy-race-server/setting-env">Set environment variables</a>
+     <a href="{{ url_for('public.serve_tech_notes', path='setting-env') }}">Set environment variables</a>
      before you work (at task
      <a href="{{ url_for('public.serve_project_page', page='tasks' )}}#task-3-env">3-ENV</a>
      and thereafter this is less optional, because you should understand how
@@ -407,7 +407,7 @@
     </p>
     <p>
      0.0.0.0:5000 or 127.0.0.0:5000
-     <a href="https://rhul-cs-projects.github.io/CS1999-buggy-race-server/localhost">might work too</a>
+     <a href="{{ url_for('public.serve_tech_notes', path='localhost') }}">might work too</a>
      (it's handy to understand why).
     </p>
    </li>

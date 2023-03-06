@@ -724,6 +724,7 @@ def settings(group_name=None):
       env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
       tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+      is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     )
 
 @blueprint.route("/announcements", strict_slashes=False)
@@ -902,7 +903,8 @@ def tech_notes_admin():
       ConfigSettingNames.SOCIAL_2_NAME.name,
       ConfigSettingNames.SOCIAL_3_NAME.name,
     ],
-    tech_notes_external_url=current_app.config['TECH_NOTES_EXTERNAL_URL'],
+    is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+    tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
     notes_generated_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
   )
 

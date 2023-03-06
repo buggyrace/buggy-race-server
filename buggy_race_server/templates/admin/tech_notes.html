@@ -9,93 +9,112 @@
   </div>
   {% if tech_notes_external_url %}
     <div class="row">
-      <div class="col alert alert-danger text-center">
-        <p>
-          The config setting <code>TECH_NOTES_EXTERNAL_URL</code>
-          is currently set to
-          <a href="{{ tech_notes_external_url }}">{{ tech_notes_external_url }}</a>
-        </p>
-        <p>
-        This means tech notes published on <em>this</em> server
-        <strong>will not be seen</strong>.
-        </p>
+      <div class="col">
+        <div class="alert alert-danger">
+          <p>
+            The config setting <code>TECH_NOTES_EXTERNAL_URL</code>
+            is currently set to
+            <a href="{{ tech_notes_external_url }}">{{ tech_notes_external_url }}</a>
+          </p>
+          <p>
+          Tech notes published on <em>this</em> server
+          <strong>will not be seen</strong>.
+          </p>
+        </div>
       </div>
     </div>
   {% endif %}
-  <div class="row">
-    <div class="col-md-6">
-      <p>
-        Generating the tech notes updates them using the most
-        recent config settings (some examples are shown below).
-        Do this if you've made any changes to the config since
-        the server last restarted.
-      </p>
-      <p>
-        This really constructs a config file and then runs the
-        Pelican process, which generates the HTML files for the
-        tech notes pages.
-      </p>
-      <p>
-        Note that the HTML pages of the tech notes may be cached
-        by your (or your students') browsers.
-      </p>
-    </div>
-    <div class="col-md-6">
-      <p>
-        <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
-          class="btn btn-outline-secondary">View tech notes &rtri;</a>
-      </p>
-      <p>
-        Last generated: {{ notes_generated_timestamp or "never/unknown" }}
-      </p>
-      <div class="border container">
-        <form method="POST" action="{{ url_for('admin.tech_notes_publish') }}" role="form">
-          {{ form.csrf_token }}
-          <div class="row bg-warning py-3">
-            <div class="col-sm-4">
-              Authorisation code
+  {% if is_publishing_enabled %}
+    <div class="row">
+      <div class="col-md-6">
+        <p>
+          Generating the tech notes updates them using the most
+          recent config settings (some examples are shown below).
+          Do this if you've made any changes to the config since
+          the server last restarted.
+        </p>
+        <p>
+          This really constructs a config file and then runs the
+          Pelican process, which generates the HTML files for the
+          tech notes pages.
+        </p>
+        <p>
+          Note that the HTML pages of the tech notes may be cached
+          by your (or your students') browsers.
+        </p>
+      </div>
+      <div class="col-md-6">
+        <p>
+          <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
+            class="btn btn-outline-secondary">View tech notes &rtri;</a>
+        </p>
+        <p>
+          Last generated: {{ notes_generated_timestamp or "never/unknown" }}
+        </p>
+        <div class="border container">
+          <form method="POST" action="{{ url_for('admin.tech_notes_publish') }}" role="form">
+            {{ form.csrf_token }}
+            <div class="row bg-warning py-3">
+              <div class="col-sm-4">
+                Authorisation code
+              </div>
+              <div class="col-sm-8">
+                  <input id="auth_code" name="auth_code" type="password" value="" class="form-control mr-sm-1"/>
+              </div>
             </div>
-            <div class="col-sm-8">
-                <input id="auth_code" name="auth_code" type="password" value="" class="form-control mr-sm-1"/>
-            </div>
-          </div>
-          <p class="my-4">
-            <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
-          </p>
-        </form>
+            <p class="my-4">
+              <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="row my-3">
-    <div class="col">
-      <table class="table table-striped table-bordered table-hover bg-white">
-        <thead>
-          <tr>
-            <th>Setting</th>
-            <th>Current value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for setting_name in key_settings %}
-            {# don't show empty social names #}
-            {% if not setting_name.startswith('SOCIAL') or config[setting_name] %}
-              <tr>
-                <td><code>{{ setting_name }}</code></td>
-                <td><code>{{ config[setting_name] }}</code></td>
-              </tr>
-            {% endif %}
-          {% endfor %}
-      </table>
+    <div class="row my-3">
+      <div class="col">
+        <table class="table table-striped table-bordered table-hover bg-white">
+          <thead>
+            <tr>
+              <th>Setting</th>
+              <th>Current value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for setting_name in key_settings %}
+              {# don't show empty social names #}
+              {% if not setting_name.startswith('SOCIAL') or config[setting_name] %}
+                <tr>
+                  <td><code>{{ setting_name }}</code></td>
+                  <td><code>{{ config[setting_name] }}</code></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+        </table>
+      </div>
     </div>
-  </div>
-  <div class="row my-3">
-    <div class="col-sm-12">
-      <p>
-        If these are wrong, you can
-        <a href="{{ url_for('admin.settings') }}">change config settings</a>.  
-      </p>
+    <div class="row my-3">
+      <div class="col-sm-12">
+        <p>
+          If these are wrong, you can
+          <a href="{{ url_for('admin.settings') }}">change config settings</a>.  
+        </p>
+      </div>
     </div>
-  </div>
+  {% else %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-danger">
+          <p>
+            The config setting <code>IS_TECH_NOTES_PUBLISHING_ENABLED</code>
+            is not set, so you can't publish tech notes here.  
+          </p>
+          <p>
+            To enable publishing,
+            <a href="{{ url_for('admin.settings', group_name='tech_notes') }}">change the config</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

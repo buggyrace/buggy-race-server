@@ -103,6 +103,7 @@ class ConfigSettingNames(Enum):
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
     IS_STORING_STUDENT_TASK_NOTES = auto()
+    IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
@@ -143,6 +144,7 @@ class ConfigGroupNames(str, Enum):
     RACES = "races"
     SERVER = "server"
     SOCIAL = "social"
+    TECH_NOTES = "tech_notes"
     USERS = "users"
 
 class ConfigTypes(str, Enum):
@@ -227,8 +229,11 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
+      ),
+      ConfigGroupNames.TECH_NOTES.name: (
+        ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
-        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,       
       )
     }
 
@@ -273,6 +278,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
+        ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
@@ -350,6 +356,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
@@ -393,6 +400,7 @@ class ConfigSettings:
       ConfigGroupNames.SOCIAL,
       ConfigGroupNames.USERS,
       ConfigGroupNames.PROJECT,
+      ConfigGroupNames.TECH_NOTES,
       ConfigGroupNames.RACES,
       ConfigGroupNames.GITHUB
     ]
@@ -529,6 +537,16 @@ class ConfigSettings:
           implemented it). If you choose `No`, this feature will be hidden.
           Note that you _can_ choose `Yes`, letting students store task notes,
           even if the project doesn't require a report.""",
+
+        ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name:
+          """The admin interface normally lets you publish the tech
+          notes, but if you're hosting them externally this might be
+          confusing (because it certainly won't be changing your external
+          site). However, there are circumstances where you want to be able
+          to publish them here too, depending on how you're managing their
+          creation. This setting doesn't affect the display of tech notes
+          (see `TECH_NOTES_EXTERNAL_URL`), only whether the interface
+          for publishing them is shown.""",
 
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
           """If your students will be using a remote server (see:
@@ -740,6 +758,15 @@ class ConfigSettings:
         """These are used to add links to your institution's social or
         educational accounts. If you run support sites like Moodle
         or Discord or Teams for this project, add them here.""",
+
+      ConfigGroupNames.TECH_NOTES.name:
+        """The tech notes are static webpages with supporting or
+        explanatory material specific to the project, and even some
+        tasks. You cannot customise them on this server (i.e.,
+        through this web interface) but you can host them externally
+        (e.g., on your own course website or GitHub pages), in which
+        case set the external URL here. For details on how to extract
+        the tech notes for self-publication, see separate docs.""",
 
       ConfigGroupNames.USERS.name:
         """Every student will need a username. These settings define what

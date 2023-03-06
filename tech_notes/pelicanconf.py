@@ -45,6 +45,8 @@ CACHE_CONTENT = False
 JINJA_GLOBALS={
   "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
   "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
+  "BUGGY_EDITOR_REPO_NAME": "buggy-race-editor",
+  "BUGGY_EDITOR_REPO_OWNER": "buggyrace",
   "PROJECT_CODE": "",
   "PROJECT_REPORT_TYPE": "report",
   "SOCIAL_0_NAME": "",
@@ -60,4 +62,3 @@ JINJA_GLOBALS={
   "SOCIAL_3_TEXT": "",
   "SOCIAL_3_URL": "",
 }
-

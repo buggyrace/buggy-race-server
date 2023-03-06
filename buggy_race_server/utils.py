@@ -7,7 +7,7 @@ from flask import flash, request, redirect, Markup, url_for, current_app, render
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.admin.models import Announcement, Setting, Task
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
@@ -220,6 +220,8 @@ def publish_tech_notes(app=current_app):
     conf_file_reader = open(full_pathname)
     lines = conf_file_reader.readlines()
     conf_file_reader.close()
+    globals_start_on_line = 0
+    globals_end_on_line = 0
     for i in range(len(lines)):
       stripped_line=lines[i].strip()
       if stripped_line.startswith("JINJA_GLOBALS"):
@@ -231,12 +233,22 @@ def publish_tech_notes(app=current_app):
             or re.match(EMPTY_LINE_RE, lines[i])
           )
         ):
+          if not globals_start_on_line:
+            globals_start_on_line = i
           if res := re.match(JINJA_GLOBAL_MATCH_RE, lines[i]):
-            (name, value) = res.groups()
-            if new_value := current_app.config.get(name):
-              value = new_value.replace("\"", "\\\"").replace("\n", " ")
-            lines[i] = f"    \"{name}\": \"{value}\",\n"
+            (name, _unused_value) = res.groups()
+            dec = ConfigSettings.get_dict_declaration(name, app.config.get(name))
+            lines[i] = f"    {dec}\n"
           i += 1
+        globals_end_on_line = i
+    if current_app.config[ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name]:
+      jinja_globals_lines = [] # ignore settings read: use all of them
+      for name in ConfigSettings.DEFAULTS:
+        dec = ConfigSettings.get_dict_declaration(name, app.config.get(name))
+        jinja_globals_lines.append(f"    {dec}\n")
+      lines = lines[:globals_start_on_line] + \
+              jinja_globals_lines + \
+              lines[globals_end_on_line:]
     live_filename = current_app.config[ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name]
     live_pathname = join_to_project_root(
       app.config[ConfigSettingNames._TECH_NOTES_PATH.name],

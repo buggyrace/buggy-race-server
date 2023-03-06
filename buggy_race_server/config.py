@@ -98,6 +98,7 @@ class ConfigSettingNames(Enum):
     INSTITUTION_FULL_NAME = auto()
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
+    IS_ALL_CONFIG_IN_TECH_NOTES = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
@@ -227,6 +228,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,
       )
     }
 
@@ -266,6 +268,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
@@ -342,6 +345,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -482,6 +486,14 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
           """Short name or abbreviation for your institution, college,
           or school.""",
+
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name:
+          """Choose `Yes` if all the config settings' values should be
+          available when publishing tech notes. This setting is only
+          relevant if you're customising the tech notes and/or publishing
+          them externally. If `No`, only (sensible) selected config
+          settings will be available as subtitutions in the tech notes'
+          markdown. See the Pelican config file(s) for details.""",
 
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
@@ -756,9 +768,27 @@ class ConfigSettings:
     @staticmethod
     def stringify(name, value):
       """ Get string suitable for saving to database. """
+      if value is None:
+        return ""
       if ConfigSettings.TYPES.get(name) == ConfigTypes.BOOLEAN:
         return "1" if value else "0"
       return str(value)
+
+    @staticmethod
+    def get_dict_declaration(name, value):
+      """ Used in Pelican conf files, within dictionary """
+      type = ConfigSettings.TYPES.get(name)
+      str_value = str(value)
+      if type == ConfigTypes.PASSWORD:
+        str_value = None
+      elif type is None or type in (
+         ConfigTypes.DATETIME,
+         ConfigTypes.STRING,
+         ConfigTypes.URL,
+        ):
+        str_value = str_value.replace("\"", "\\\"").replace("\n", " ")
+        str_value = f"\"{str_value}\""
+      return f"\"{name}\": {str_value},"
 
     @staticmethod
     def set_config_value(app, name, value):

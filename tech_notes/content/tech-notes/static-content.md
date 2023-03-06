@@ -58,28 +58,41 @@ back).
 
 ## Can you have a website that is _totally_ static?
 
-Yes you can, and you're looking at one now!
+Yes you can, and your looking at one now! (Well, probably — it depends a little
+on how the race server was set up this time).
 
 The tech notes pages you're looking at are just static HTML: there's nothing in
 them that changes from request to request. If they _do_ change it will be because
 we've changed the content in some way. When that happens, the site is
-re-deployed.
+re-deployed. Specifically, they are  generated using
+[Pelican](https://getpelican.com), which is written in Python.
+
+In practice, this means most of the {{ PROJECT_CODE }} Tech Notes you're
+reading are written as markdown and Jina templates (the same template
+mechanism Flask uses). Pelican converts them into the HTML pages that end up
+in your browser.
 
 Static sites are popular because they are simple to run, can be optimised for
 speed and [caching](cache-busting-css), and expose the server to fewer security
 risks than dynamic sites do.
 
-In fact, these pages are published as a
-[GitHub Pages](https://pages.github.com) site. Although the content is static,
-the deployment is handled by [Jekyll](https://jekyllrb.com). Jekyll is a
-popular static site generator (there are others). Generating a static site can
-become a very sophisticated process — possibly exploiting resources and time
-that you wouldn't have if you were trying to serve it in real time — but the
-point is everything happens _before_ any HTTP requests are being handled. By
-the time it's up on the webserver, all the work is done.
+A basic static site can also be relatively straightforward to build. However,
+generating a static site _can_ become a very sophisticated process — possibly
+exploiting resources and time that you wouldn't have if you were trying to
+serve it in real time — but the point is everything happens _before_ any HTTP
+requests are being handled. By the time it's up on the webserver, all the work
+is done.
 
-In practice, this means most of the CS1999 Tech Notes you're reading are
-written in GitHub-flavoured [markdown](https://github.github.com/gfm/) and
+## GitHub pages
+
+We chose to build the tech notes pages with Pelican because it's a Python tool,
+and the race server is already running Python. But previously we published them
+as [GitHub Pages](https://pages.github.com). In that case, the deployment is
+handled by [Jekyll](https://jekyllrb.com). Jekyll is a popular static site
+generator (there are others) written in the programming language Ruby. 
+GitHub Pages is a very convenient way to publish static sites — especially
+documentation for open source projects. The content is written in
+GitHub-flavoured [markdown](https://github.github.com/gfm/) and (of course)
 stored in version control (Git). When the pages are updated, that change is
 committed, and the repo pushed up to GitHub. This triggers Jekyll to rebuild
 the website, turning the markdown into HTML and deploying it on the server.

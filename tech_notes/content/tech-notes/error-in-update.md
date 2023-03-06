@@ -64,8 +64,8 @@ INSERT INTO buggies (qty_wheels, flag_color) VALUES (?, ?)
 ### Syntax error in SQL (trailing comma?)
 
 Syntax errors in your SQL mean your attempt to save to the database will fail,
-of course. **We don't expect you to learn SQL for CS1999** so we _always_ give
-you the right SQL if you ask!
+of course. **The focus on this project is the Python, not the SQL** so if
+you need help with the SQL, ask us!
 
 The most common error is this trailing comma immediately before the `, WHERE`
 (that comma should not be there).

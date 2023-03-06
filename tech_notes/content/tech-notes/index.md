@@ -1,7 +1,7 @@
 Title: index
 
 
-# CS1999 Tech notes
+# {{ PROJECT_CODE }} Tech notes
 
 Notes to explain how to do (and understand) project tasks.
 

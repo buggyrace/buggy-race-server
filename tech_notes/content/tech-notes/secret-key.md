@@ -26,16 +26,16 @@ different, isn't it?).
 
 However, even though HTTP might not support it, it clearly is possible to
 implement statefulness on top of the protocol, because you know login _does_
-work. This tech note explains how.
+work on websites. This tech note explains how.
 
 ## Flask supports sessions
 
 Flask supports sessions, and you might find them useful in your project.
 However, in order to use them, you **must** give your webserver a `SECRET_KEY`.
 
-So: if you need to use sessions (and you might not... depends what tasks you
+So: if you need to use sessions (and you might not... it depends what tasks you
 implement) you need to set a secret key. Because your project is only in
-development, and it's just a Foundation exercise, you don't _need_ to be strict
+development, and is really just an exercise, you don't _need_ to be strict
 about how secret the secret part of it is (because you're only running on
 `localhost`, not the web).
 
@@ -63,10 +63,11 @@ it's going to support sessions.
 
 Now, you know that websites — the [buggy race server]({{ BUGGY_RACE_SERVER_URL }})
 for example — _do_ let you login. Requests you send after your correct username
-and password combo are demonstrably handled differently from those before.
-Basically there is a _session_ at work. It's how you are able to login. It's
-also how I'm able to log in at the same time as you but the webserver sends us
-different things. I can't see your buggy; you can't see mine.
+and password combo are demonstrably handled differently from those you sent
+before. Basically there is a _session_ at work. It's how you are able to login.
+It's also how someone else is able to log in at the same time as you but the
+webserver sends the two of you different things. The other user can't see your
+buggy; you can't see theirs.
 
 How does that work?  
 
@@ -77,8 +78,9 @@ common is by using [cookies](https://en.wikipedia.org/wiki/HTTP_cookie).
  ![cookies](assets/img/cookie.png)
   ![cookies](assets/img/cookie.png)
 
-For CS1999 you don't need to worry about cookies because if you need sessions,
-Flask handles them for you (it does all the work with cookies).
+For this project you might not need to worry about cookies because if you need
+sessions, Flask handles them for you (that is, although it implements sessions
+using cookies so you typically don't need to manipulate them yourself).
 
 But the concept is fairly simple:
 
@@ -123,17 +125,18 @@ be logged in.
 
 This mechanism is very handy but it has a weakness: if I know what's written
 on _your_ cookie I can simply write that on mine, and — because the protocol
-is stateless — if I send that cookie to the webserver, it will give me a response
-that really it should only be showing you.
+is stateless — if I send that cookie to the webserver, it will give me a
+response that really it should only be showing you.
 
 This is clearly a security problem. In practice, it's a lot more complex than
-this, but for CS1999 all you need to know is that, because of this, sessions
-have a **secret key**.
+this, but to understand the mechanism all you need to know is that, because of
+this, sessions have a **secret key**.
 
 The secret key is part of the cryptographic mechanism that means it's possible
 for the server to write messages on cookies in such a way it can detect if they
 have been tampered with. (If you're interested in how this _really_ works:
-study Information Security as the specialism in your CompSci degree!)
+this is the maths and systems at the heart of the Information Security
+specialism within Computer Science).
 
 
 ## Don't put secrets where other people can read them
@@ -150,9 +153,9 @@ may be that you know the program is _only_ available in that secure environment,
 so that's OK. But that's quite a risky assumption, so be aware that _in general_
 putting passwords or secrets in your source code is discouraged.
 
-For CS1999 it's OK for your project's secret key to be in the code, partly
-because it's a development exercise, but mainly because you're the only person
-running it, on your own machine.
+For this project it's OK for your project's secret key to be in the code,
+partly because it's a development exercise, but mainly because you're the only
+person running it, on your own machine.
 
 
 ---

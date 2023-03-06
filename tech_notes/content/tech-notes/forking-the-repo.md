@@ -84,10 +84,10 @@ is the one _in your GitHub account_ — not (our) original one that you forked i
 from) and press the green **Code** button. Copy the URL and paste it onto the
 command line after `git clone` like this:
 
-    git clone git@github.com:your_github_username/CS1999-buggy-race-editor.git
+    git clone git@github.com:your_github_username/{{ BUGGY_EDITOR_REPO_NAME}}.git
 
 When you press ENTER, you'll see the files being copied down (it won't take
-long). A directory named `CS1999-buggy-race-editor` will appear. That's your
+long). A directory named `{{ BUGGY_EDITOR_REPO_NAME}}` will appear. That's your
 local repo.
 
 There's a little more setup to do before you can push any changes you make

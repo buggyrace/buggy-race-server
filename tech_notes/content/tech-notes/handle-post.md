@@ -87,7 +87,7 @@ Where's `msg` being used? It's being passed into the template `updated.html`.
 
 So the next thing is to quickly look in that and see what the template does
 with it. Can you see how `msg` is used in 
-[that template](https://github.com/RHUL-CS-Projects/CS1999-buggy-race-editor/blob/main/templates/updated.html)?
+[that template]({{ BUGGY_EDITOR_GITHUB_URL }}/blob/main/templates/updated.html)?
 
 Why is `render_template()` being called at all? The answer is that although
 the browser sent data to the server to be added to the database, that is still

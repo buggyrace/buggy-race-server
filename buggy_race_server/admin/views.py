@@ -550,6 +550,8 @@ def show_user(user_id):
       is_own_note=user.id == current_user.id,
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       notes_by_task_id=Note.get_dict_notes_by_task_id(user.id),
+      ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+      ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
   )
 
 # user_id may be username or id

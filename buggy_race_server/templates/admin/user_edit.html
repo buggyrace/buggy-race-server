@@ -27,10 +27,9 @@
         {% if config['USERS_HAVE_EXT_USERNAME'] %}
           <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
-              {{form.ext_username.label}}
+              <label for="ext_username">{{ ext_username_name }}</label>
             </div>
             <div class="col-sm-4">
-              <label for="ext_username">{{ ext_username_name }}</label>
               {{form.ext_username(placeholder=ext_username_example, class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">

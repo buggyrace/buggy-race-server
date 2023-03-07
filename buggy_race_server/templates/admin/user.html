@@ -43,7 +43,7 @@
               <td>
                 {% if config['USERS_HAVE_LAST_NAME'] %}
                   First name
-                {%else%}
+                {% else %}
                   Name
                 {% endif %}
               </td>
@@ -91,17 +91,17 @@
             </tr>
           {% endif %}
           {% if config['IS_STUDENT_USING_GITHUB_REPO'] %}
-          <tr>
-            <td>
-              GitHub user
-            </td>
-            <td>
-              {% if user.github_username is not none %}
-                <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
-              {% endif %}
-            </td>  
-          </tr>
-          (% endif %)
+            <tr>
+              <td>
+                GitHub user
+              </td>
+              <td>
+                {% if user.github_username is not none %}
+                  <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
+                {% endif %}
+              </td>  
+            </tr>
+          {% endif %}
           <tr>
             <td>
               Last logged in
@@ -157,7 +157,7 @@
           {% if user.notes %}
             {{ user.notes }}
           {% else %}
-            <em>no notes</em>
+            <em>No notes</em>
           {% endif %}
         </p>
       </div>

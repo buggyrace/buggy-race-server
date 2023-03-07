@@ -21,7 +21,7 @@ class UserForm(FlaskForm):
     # are explicitly, dynamically removed from the form in the view
     # so they won't be submitted
 
-    ext_username = StringField(f"Exterbal Username")
+    ext_username = StringField(f"External Username")
     email = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")

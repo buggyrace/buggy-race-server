@@ -25,10 +25,10 @@ After VSCodes finishes connecting you to our *teaching server*, it will be time 
 
 * go to the *terminal* tab in VSCode, located in the top panel. Then, click on *run task* and a list of tasks will appear. Choose the one starting with `git clone https://github.com/` and wait.
 * The previous step *cloned* your **remote Github repository** to a **local version** which, in this case, lives in the teaching server!
-* If you click on *Open file* and you look in your *home directory*, you should find a folder called **CS1999-buggy-race-editor**.
+* If you click on *Open file* and you look in your *home directory*, you should find a folder with a name `%BUGGY_EDITOR_REPO_NAME%`.
 * Open that folder and compare its contents against those in the remote repo you previously forked, they are the same!
 * You might get asked for your college password a couple of times in the above step, this is normal.
-* If the *CS1999-buggy-race-editor* **is not** in your home directory, then probably something went wrong. Try to reproduce the above steps once more.
+* If the `%BUGGY_EDITOR_REPO_NAME%` folder **is not** in your home directory, then probably something went wrong. Try to reproduce the above steps once more.
 
 
 <!-- commented out in iteration 2021-2022 as students will be getting the repos automatically via VSCode's tasks -->

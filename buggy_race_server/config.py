@@ -105,6 +105,9 @@ class ConfigSettingNames(Enum):
     IS_STORING_STUDENT_TASK_NOTES = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
+    IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_USING_GITHUB_API_TO_FORK = auto()
+    IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -177,6 +180,9 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name,
         ConfigSettingNames.GITHUB_CLIENT_ID.name,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
       ),
@@ -278,7 +284,10 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
@@ -357,6 +366,9 @@ class ConfigSettings:
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
@@ -547,6 +559,27 @@ class ConfigSettings:
           creation. This setting doesn't affect the display of tech notes
           (see `TECH_NOTES_EXTERNAL_URL`), only whether the interface
           for publishing them is shown.""",
+
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name:
+          """Should students fork the buggy editor repo into their
+          own GitHub repo? Choose `No` if your students are not
+          using GitHub. If you choose `Yes`, make sure you've set
+          `IS_USING_GITHUB_API_TO_FORK` if you want this to be automated
+          via the race server.""",
+
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
+          """If students must work with the buggy editor in their own GitHub
+          repo, the race server can help by automatically forking it for them,
+          using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
+          `GITHUB_CLIENT_SECRET` for this to work (and `IS_STUDENT_USING_GITHUB_REPO`.
+          must be `Yes`).""",
+
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
+          """If you have set the race server to use GitHub's API to fork the buggy
+          editor repo into each student's account, it will also also inject the tasks
+          as GitHub issues into their repo unless you prevent it here.
+          This setting is ignored if `IS_USING_GITHUB_API_TO_FORK` is set to `No`.
+          """,
 
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
           """If your students will be using a remote server (see:

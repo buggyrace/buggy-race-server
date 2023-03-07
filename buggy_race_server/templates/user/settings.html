@@ -6,118 +6,8 @@
       Settings for {{ current_user.pretty_username }}
     </h1>
   </div>
-
   <div class="row">
     <div class="col-lg-6 mb-4">
-      <div class="row">
-        <h2 class="col">Your GitHub account</h2>
-      </div>
-      {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
-      {% if not is_secure %}
-        <div class="row">
-          <div class="col alert alert-danger">
-            <p>
-              <span class="buggy-warn">WARNING</span>
-              You are not using the secure race server!
-            </p>
-            <p>
-              Setting up your GitHub account won't work unless you're logged into
-              the secure server.
-            </p>
-            <p>
-              <a href="{{ server_url }}" class="btn btn-warning">Switch to {{ server_url }}&nbsp;&rtri;</a>
-            </p>
-          </div>
-        </div>
-      {% else %}
-        {% if current_user.is_github_connected() %}
-          <div class="row">
-            <div class="col alert alert-warning">
-              This buggy racing account is connected to your
-              <strong>{{ current_user.github_username }}</strong> GitHub account.
-            </div>
-          </div>
-          {% if current_user.has_course_repository() %}
-            <div class="row">
-              <div class="col">
-                <p>
-                  You have forked the Racing Buggy Editor repo into your 
-                  GitHub account ({{ current_user.github_username }}).
-                </p>
-                <p class="btn-collection">
-                  <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary">Your GitHub repo&nbsp;&rtri;</a>
-                </p>
-                {% if is_using_vs_workspace %}
-                  <p>
-                    Download your VScode workspace to load <!-- TODO ...and some instruction! -->
-                  </p>
-                  <p class="btn-collection">
-                    <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary">Download VS&nbsp;Code workspace&nbsp;&dtri;</a>
-                  </p>
-                {% endif %}
-              </div>
-            </div>
-          {% else %}
-            <div class="row">
-              <div class="col alert alert-primary">
-                <p>
-                  You can now <em>fork</em> the Racing Buggy Editor repo.
-                  This will copy all the files you need into your own
-                  GitHub account
-                  (<code>{{ current_user.github_username }}</code>).
-                  It will also add the project tasks as <em>issues</em>
-                  to that repo.
-                </p>
-                <div class="my-3">
-                  <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <button type="submit" class="btn btn-primary">Fork Racing Buggy Editor repo&nbsp;&rtri;</button>
-                  </form>
-                </div>
-                <p>
-                  Forking may take a few moments, so be patient when you click the button.
-                </p>
-              </div>
-            </div>
-          {% endif %}
-        {% else %}
-          <div class="row">
-            <div class="col">
-              <p>
-                If you connect your GitHub account to this buggy racing
-                server, we'll fork the Racing Buggy Editor repo into your
-                own account and then add the project tasks (as GitHub
-                "issues").
-              </p>
-              <p class="alert alert-danger">
-                To do this, this buggy racing server needs access to the 
-                <strong>repositories</strong> and <strong>personal user
-                data</strong> of your GitHub account. When you click on the
-                button below, GitHub will ask you to confirm that you know
-                this server needs such access.
-              </p>
-              <p>
-                If you don't have a GitHub account yet, you can create one
-                as part of the process when you click this button (although
-                it's simpler if you are already logged into GitHub before
-                you start).
-              </p>
-              <p class="my-3">
-                <a href="{{ url_for('oauth.github') }}" class="btn btn-primary">Connect your GitHub account &rtri;</a>
-              </p>
-              <p>
-                Afterwards, expect to receive an email from GitHub alerting
-                you that “a third-party OAuth application
-                ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
-                with repo and user scopes was recently authorized to access
-                your account.”
-              </p>
-            </div>
-          </div>
-        {% endif %}
-      {% endif %}
-    </div>
-    <div class="col-lg-6">
       <div class="row">
         <h2 class="col">Your racing server account</h2>
       </div>
@@ -133,7 +23,173 @@
           {% endif %}
         </div>
       </div>
+      <div class="row">
+        <div class="col my-3">
+          <table class="col table table-striped table-bordered table-hover bg-white">
+            <tbody>
+              {% if user.is_buggy_admin %}
+                <tr>
+                  <td>Admin?</td>
+                  <td>Yes<span class="icon-cog ml-2"></span></td>
+                </tr>
+              {% endif %}
+              {% if not user.is_active %}
+                {# probably shouldn't/can't be logged in #}
+                <tr>
+                  <td>Active?</td>
+                  <td class="alert-danger">No</td>
+                </tr>
+              {% endif %}
+              <tr>
+                <td>Student?</td>
+                <td class="{% if user.is_student %}alert-success{% endif %}">Yes</td>
+              </tr>
+              {% if has_first_name or has_last_name %}
+              <tr>
+                <td>
+                  {% if not has_first_name %}
+                    Last name
+                  {% else %}
+                    Name
+                  {% endif %}
+                </td>
+                <td>
+                  {{ user.full_name }}
+                </td>
+              </tr>
+              {% endif %}
+              {% if config['USERS_HAVE_EMAIL'] %}
+                <tr>
+                  <td>Email</td>
+                  <td>
+                    {{ user.email }}
+                  </td>
+                </tr>
+              {% endif %}
+              {% if config['USERS_HAVE_ORG_USERNAME'] %}
+                <tr>
+                  <td>Org username</td>
+                  <td>
+                    {{ user.org_username }}
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+    {% if is_using_github %}
+      <div class="col-lg-6 mb-4">
+        <div class="row">
+          <h2 class="col">Your GitHub account</h2>
+        </div>
+        {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
+        {% if not is_secure %}
+          <div class="row">
+            <div class="col alert alert-danger">
+              <p>
+                <span class="buggy-warn">WARNING</span>
+                You are not using the secure race server!
+              </p>
+              <p>
+                Setting up your GitHub account won't work unless you're logged into
+                the secure server.
+              </p>
+              <p>
+                <a href="{{ server_url }}" class="btn btn-warning">Switch to {{ server_url }}&nbsp;&rtri;</a>
+              </p>
+            </div>
+          </div>
+        {% else %}
+          {% if current_user.is_github_connected() %}
+            <div class="row">
+              <div class="col alert alert-warning">
+                This buggy racing account is connected to your
+                <strong>{{ current_user.github_username }}</strong> GitHub account.
+              </div>
+            </div>
+            {% if current_user.has_course_repository() %}
+              <div class="row">
+                <div class="col">
+                  <p>
+                    You have forked the Racing Buggy Editor repo into your 
+                    GitHub account ({{ current_user.github_username }}).
+                  </p>
+                  <p class="btn-collection">
+                    <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary">Your GitHub repo&nbsp;&rtri;</a>
+                  </p>
+                  {% if is_using_vs_workspace %}
+                    <p>
+                      Download your VScode workspace to load <!-- TODO ...and some instruction! -->
+                    </p>
+                    <p class="btn-collection">
+                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary">Download VS&nbsp;Code workspace&nbsp;&dtri;</a>
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+            {% else %}
+              <div class="row">
+                <div class="col alert alert-primary">
+                  <p>
+                    You can now <em>fork</em> the Racing Buggy Editor repo.
+                    This will copy all the files you need into your own
+                    GitHub account
+                    (<code>{{ current_user.github_username }}</code>).
+                    It will also add the project tasks as <em>issues</em>
+                    to that repo.
+                  </p>
+                  <div class="my-3">
+                    <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button type="submit" class="btn btn-primary">Fork Racing Buggy Editor repo&nbsp;&rtri;</button>
+                    </form>
+                  </div>
+                  <p>
+                    Forking may take a few moments, so be patient when you click the button.
+                  </p>
+                </div>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="row">
+              <div class="col">
+                <p>
+                  If you connect your GitHub account to this buggy racing
+                  server, we'll fork the Racing Buggy Editor repo into your
+                  own account and then add the project tasks (as GitHub
+                  "issues").
+                </p>
+                <p class="alert alert-danger">
+                  To do this, this buggy racing server needs access to the 
+                  <strong>repositories</strong> and <strong>personal user
+                  data</strong> of your GitHub account. When you click on the
+                  button below, GitHub will ask you to confirm that you know
+                  this server needs such access.
+                </p>
+                <p>
+                  If you don't have a GitHub account yet, you can create one
+                  as part of the process when you click this button (although
+                  it's simpler if you are already logged into GitHub before
+                  you start).
+                </p>
+                <p class="my-3">
+                  <a href="{{ url_for('oauth.github') }}" class="btn btn-primary">Connect your GitHub account &rtri;</a>
+                </p>
+                <p>
+                  Afterwards, expect to receive an email from GitHub alerting
+                  you that “a third-party OAuth application
+                  ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
+                  with repo and user scopes was recently authorized to access
+                  your account.”
+                </p>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

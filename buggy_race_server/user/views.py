@@ -72,9 +72,15 @@ def settings():
     form = ChangePasswordForm()
     return render_template(
         "user/settings.html",
+        user=current_user,
+        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
+        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        has_org_username=current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
         form=form,
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
     )

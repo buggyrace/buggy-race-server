@@ -186,7 +186,7 @@ class User(UserMixin, SurrogatePK, Model):
     @property
     def full_name(self):
         """Full user name."""
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
     @property
     def pretty_login_at(self):

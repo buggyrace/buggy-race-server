@@ -420,8 +420,8 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
           qty_students_enabled = len([s for s in students if s.is_active]),
           qty_students_github = len([s for s in students if s.github_username]),
           qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
-          org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
-          org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
+          ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+          ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
       )
 
 
@@ -457,7 +457,7 @@ def bulk_register(data_format=None):
               usernames.append(username)
             new_user = User(
               username=username,
-              org_username=row['org_username'].strip().lower() if 'org_username' in row else None,
+              ext_username=row['ext_username'].strip().lower() if 'ext_username' in row else None,
               email=_csv_tidy_string(row, 'email', want_lower=True),
               password=_csv_tidy_string(row, 'password', want_lower=False),
               first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
@@ -483,7 +483,7 @@ def bulk_register(data_format=None):
               result = db.session.execute(
                   insert(User.__table__),
                   clean_user_data
-                  # %(username)s, %(org_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
+                  # %(username)s, %(ext_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
               )
               db.session.commit()
             except Exception as e:
@@ -576,8 +576,8 @@ def edit_user(user_id):
           user.last_name = form.last_name.data
       if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
           user.email = form.email.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name]:
-          user.org_username = form.org_username.data
+      if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
+          user.ext_username = form.ext_username.data
       # if username wasn't unique, validation should have caught it
       user.username = form.username.data
       user.save()
@@ -590,8 +590,8 @@ def edit_user(user_id):
     "admin/user_edit.html",
     form=form,
     user=user,
-    org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
-    org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
+    ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+    ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
   )
 
 @blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)

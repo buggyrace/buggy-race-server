@@ -124,13 +124,13 @@ def register():
         del form.first_name
     if not current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
         del form.last_name
-    if not current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name]:
-        del form.org_username
+    if not current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
+        del form.ext_username
 
     if form.validate_on_submit():
         User.create(
             username=form.username.data,
-            org_username=form.org_username.data if form.org_username else None,
+            ext_username=form.ext_username.data if form.ext_username else None,
             email=form.email.data if form.email else None,
             first_name=form.first_name.data if form.first_name else None,
             last_name=form.last_name.data if form.last_name else None,
@@ -147,8 +147,8 @@ def register():
         "public/register.html",
         form=form,
         is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]),
-        org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
-        org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
     )
 
 @blueprint.route("/specs", strict_slashes=False)

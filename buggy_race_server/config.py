@@ -108,8 +108,8 @@ class ConfigSettingNames(Enum):
     IS_STUDENT_USING_GITHUB_REPO = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
-    ORG_USERNAME_EXAMPLE = auto()
-    ORG_USERNAME_NAME = auto()
+    EXT_USERNAME_EXAMPLE = auto()
+    EXT_USERNAME_NAME = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -138,7 +138,7 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
-    USERS_HAVE_ORG_USERNAME = auto()
+    USERS_HAVE_EXT_USERNAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -193,9 +193,9 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EMAIL.name,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name,
-        ConfigSettingNames.ORG_USERNAME_NAME.name,
-        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
+        ConfigSettingNames.EXT_USERNAME_NAME.name,
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
@@ -293,8 +293,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
-        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name: "abcd123",
-        ConfigSettingNames.ORG_USERNAME_NAME.name: "Ext. username",
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
+        ConfigSettingNames.EXT_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -323,7 +323,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: 0,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -376,8 +376,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
-        ConfigSettingNames.ORG_USERNAME_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -406,7 +406,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
     }
 
     # This is the order of the setting groups that is used during the
@@ -599,26 +599,30 @@ class ConfigSettings:
           certainly do not want this.
           """,
 
-        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name:
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
           """If users have an external username, provide an example
-          format (e.g., `abcd123` or `ada@example.org)`, used as an
-          input placeholder. Note that we do *not* use this to validate
-          or check the format of inputs — it's just used as a suggestion
-          when inputting.""",
+          format (e.g., `abcd123` or `ada@example.org`). Note that this
+          only serves as a placeholder suggestion when inputting — it's
+          not used to validate or force the format of inputs. This setting
+          is ignored if `USERS_HAVE_EXT_USERENAME` is `No`.""",
 
-        ConfigSettingNames.ORG_USERNAME_NAME.name:
+        ConfigSettingNames.EXT_USERNAME_NAME.name:
           """If users have an external username, what is it called? For
-          example: "College username". This is used to clearly differentiate
-          it from the username students use on the race server. Keep it
-          short, because it's used on buttons in the admin.""",
+          example: "College username". This is to clearly differentiate
+          the race server username (which students use to log into this race
+          server) from this external one (which they pressumably use to access
+          other course systems). Keep it short, because it's used on buttons
+          in the admin. This setting is ignored if `USERS_HAVE_EXT_USERENAME`
+          is `No`.""",
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999).
           See also `PROJECT_SLUG` which is how this code may appear in
-          filenames of any downloaded files. The full name of the project
-          is \"the `PROJECT_CODE` Racing Buggy project\", so if you don't
-          have or need a course code, it's fine to leave it blank.""",
+          filenames of any downloaded files, if you need it to be different.
+          The full name of the project is \"the `PROJECT_CODE` Racing Buggy
+          project\", so if you don't have or need a course code, it's fine
+          to leave it blank.""",
 
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
           """This is the minimum phase you'd expect an inexperienced
@@ -634,7 +638,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
           """If students are going to develop on a remote server,
           what is its address? This is used with their
-          organisational username (or just username, if they haven't
+          external username (or just username, if they haven't
           got one): for example enter `linux.example.ac.uk` so
           student Ada can log in via `ada@linux.example.ac.uk`.
           If you're not using a remote project server, leave this
@@ -766,11 +770,16 @@ class ConfigSettings:
           """Do users need to have a last name? If you can already identify your
           students from the other fields, you might not need this.""",
 
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name:
-          """Do users have a username or account that's specific to your
-          organsiation or institution? You might not need this, or you
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name:
+          """Do users have an external username or account that's specific to
+          your organsiation or institution? You might not need this, or you
           might already be using it as the username — in which case
-          choose `No`.""",
+          choose `No`. Note: the race server does **not** use this for
+          authentication (i.e., there is no OAuth implementation). However,
+          if your users need to log into a remote server for development
+          _and_ you are using VS Code workspace files, you will need this to
+          be `Yes` — unless you're simply using those external usernames as
+          the students' race server usernames when you register them.""",
 
     }
 
@@ -907,8 +916,8 @@ class ConfigSettings:
             "email": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)
             ),
-            "org_username": bool(
-              app.config.get(ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name)
+            "ext_username": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name)
             ),
             "first_name": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_FIRST_NAME.name)

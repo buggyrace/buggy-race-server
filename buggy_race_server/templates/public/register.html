@@ -22,10 +22,10 @@
           {{form.username.label}}
           {{form.username(placeholder="Username", class_="form-control")}}
       </div>
-      {% if config['USERS_HAVE_ORG_USERNAME'] %}
+      {% if config['USERS_HAVE_EXT_USERNAME'] %}
         <div class="form-group">
-          <label for="org_username">{{ org_username_name }}</label>
-          {{form.org_username(placeholder=org_username_example, class_="form-control")}}
+          <label for="ext_username">{{ ext_username_name }}</label>
+          {{form.ext_username(placeholder=ext_username_example, class_="form-control")}}
         </div>
       {% endif %}
       {% if config['USERS_HAVE_FIRST_NAME'] %}

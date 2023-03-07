@@ -78,14 +78,14 @@
               </td>
             </tr>
           {% endif %}
-          {% if config['USERS_HAVE_ORG_USERNAME'] %}
+          {% if config['USERS_HAVE_EXT_USERNAME'] %}
             <tr>
               <td>
-                {{ org_username_name | title }}
+                {{ ext_username_name | title }}
               </td>
               <td>
-                {% if user.org_username is not none %}
-                  {{ user.org_username }}
+                {% if user.ext_username is not none %}
+                  {{ user.ext_username }}
                 {% endif %}
               </td>
             </tr>

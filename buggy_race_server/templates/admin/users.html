@@ -33,8 +33,8 @@
         {% if config['USERS_HAVE_EMAIL'] %}
           <button class="btn btn-outline-secondary btn-sm" data-column="u-email">Email</button>
         {% endif %}
-        {% if config['USERS_HAVE_ORG_USERNAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ org_username_name }}</button>
+        {% if config['USERS_HAVE_EXT_USERNAME'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ ext_username_name }}</button>
         {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
@@ -63,8 +63,8 @@
             {% if config['USERS_HAVE_EMAIL'] %}
               <th class="u-email">Email</th>
             {% endif %}
-            {% if config['USERS_HAVE_ORG_USERNAME'] %}
-              <th  class="u-org-username">{{ org_username_name | title }}</th>
+            {% if config['USERS_HAVE_EXT_USERNAME'] %}
+              <th  class="u-org-username">{{ ext_username_name | title }}</th>
             {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>
@@ -92,7 +92,7 @@
               {% if config['USERS_HAVE_EMAIL'] %}
                 <td class="u-email"></td>
               {% endif %}
-              {% if config['USERS_HAVE_ORG_USERNAME'] %}
+              {% if config['USERS_HAVE_EXT_USERNAME'] %}
                 <td class="u-org-username"></td>
               {% endif %}
               <td class="u-created-at"></td>
@@ -136,8 +136,8 @@
                 {% if config['USERS_HAVE_EMAIL'] %}
                   <td class="u-email">  {{ u.email if u.email is not none }} </td>
                 {% endif %}
-                {% if config['USERS_HAVE_ORG_USERNAME'] %}
-                  <td class="u-org-username"> {{ u.org_username if u.org_username is not none }} </td>
+                {% if config['USERS_HAVE_EXT_USERNAME'] %}
+                  <td class="u-org-username"> {{ u.ext_username if u.ext_username is not none }} </td>
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">

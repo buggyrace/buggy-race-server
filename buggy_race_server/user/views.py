@@ -76,8 +76,8 @@ def settings():
         has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
         has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
-        has_org_username=current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
-        org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
+        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         form=form,
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
@@ -252,7 +252,7 @@ def download_vscode_workspace():
         render_template(
             "user/vscode_workspace.json",
             project_name=project_name,
-            remote_username=current_user.org_username or current_user.username,
+            remote_username=current_user.ext_username or current_user.username,
             remote_server_address=remote_server_address, # e.g., linux.cim.rhul.ac.uk
             remote_server_name=remote_server_name, # e.g., "the CS department's teaching server"
             github_repo=github_repo,

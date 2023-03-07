@@ -24,18 +24,19 @@
           </div>
         </div>
 
-        {% if config['USERS_HAVE_ORG_USERNAME'] %}
+        {% if config['USERS_HAVE_EXT_USERNAME'] %}
           <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
-              {{form.org_username.label}}
+              {{form.ext_username.label}}
             </div>
             <div class="col-sm-4">
-              <label for="org_username">{{ org_username_name }}</label>
-              {{form.org_username(placeholder=org_username_example, class_="form-control mr-sm-1")}}
+              <label for="ext_username">{{ ext_username_name }}</label>
+              {{form.ext_username(placeholder=ext_username_example, class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
-              If users have a different username in your organisation or institution,
-              add it here. It's not used by the buggy race server.
+              If users have an external username that they use in your organisation
+              or institution, add it here. It's generally not used by the buggy race
+              server unless you're using VS workspace files.
             </div>
           </div>
         {% endif %}

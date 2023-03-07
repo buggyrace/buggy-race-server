@@ -21,7 +21,7 @@ class UserForm(FlaskForm):
     # are explicitly, dynamically removed from the form in the view
     # so they won't be submitted
 
-    org_username = StringField(f"Organisation Username")
+    ext_username = StringField(f"Exterbal Username")
     email = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")
@@ -46,7 +46,7 @@ class UserForm(FlaskForm):
         if length > max:
             raise ValidationError(f"{prettify_form_field_name(name)} is too long (at most {max} characters)")
 
-    def validate_org_username(self, field):
+    def validate_ext_username(self, field):
         value = field.data.strip()
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)

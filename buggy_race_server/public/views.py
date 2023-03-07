@@ -146,7 +146,9 @@ def register():
     return render_template(
         "public/register.html",
         form=form,
-        is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name])
+        is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]),
+        org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
+        org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
     )
 
 @blueprint.route("/specs", strict_slashes=False)

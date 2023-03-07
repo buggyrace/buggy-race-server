@@ -30,7 +30,8 @@
               {{form.org_username.label}}
             </div>
             <div class="col-sm-4">
-              {{form.org_username(placeholder="Org Username", class_="form-control mr-sm-1")}}
+              <label for="org_username">{{ org_username_name }}</label>
+              {{form.org_username(placeholder=org_username_example, class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
               If users have a different username in your organisation or institution,

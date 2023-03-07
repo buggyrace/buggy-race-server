@@ -108,6 +108,8 @@ class ConfigSettingNames(Enum):
     IS_STUDENT_USING_GITHUB_REPO = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
+    ORG_USERNAME_EXAMPLE = auto()
+    ORG_USERNAME_NAME = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -189,9 +191,11 @@ class ConfigSettings:
       ConfigGroupNames.USERS.name: (
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name,
         ConfigSettingNames.USERS_HAVE_EMAIL.name,
-        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
+        ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name,
+        ConfigSettingNames.ORG_USERNAME_NAME.name,
+        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name,
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
@@ -289,6 +293,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name: "abcd123",
+        ConfigSettingNames.ORG_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -370,6 +376,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
+        ConfigSettingNames.ORG_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -590,6 +598,19 @@ class ConfigSettings:
           is quite a specific setup: if you're not sure, you almost
           certainly do not want this.
           """,
+
+        ConfigSettingNames.ORG_USERNAME_EXAMPLE.name:
+          """If users have an external username, provide an example
+          format (e.g., `abcd123` or `ada@example.org)`, used as an
+          input placeholder. Note that we do *not* use this to validate
+          or check the format of inputs — it's just used as a suggestion
+          when inputting.""",
+
+        ConfigSettingNames.ORG_USERNAME_NAME.name:
+          """If users have an external username, what is it called? For
+          example: "College username". This is used to clearly differentiate
+          it from the username students use on the race server. Keep it
+          short, because it's used on buttons in the admin.""",
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it

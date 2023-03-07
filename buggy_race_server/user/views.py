@@ -77,6 +77,7 @@ def settings():
         has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
         has_org_username=current_app.config[ConfigSettingNames.USERS_HAVE_ORG_USERNAME.name],
+        org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
         form=form,
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],

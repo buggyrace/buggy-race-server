@@ -81,7 +81,7 @@
           {% if config['USERS_HAVE_ORG_USERNAME'] %}
             <tr>
               <td>
-                Org username
+                {{ org_username_name | title }}
               </td>
               <td>
                 {% if user.org_username is not none %}

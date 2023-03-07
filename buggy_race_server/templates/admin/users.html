@@ -34,7 +34,7 @@
           <button class="btn btn-outline-secondary btn-sm" data-column="u-email">Email</button>
         {% endif %}
         {% if config['USERS_HAVE_ORG_USERNAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">Account</button>
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ org_username_name }}</button>
         {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
@@ -64,7 +64,7 @@
               <th class="u-email">Email</th>
             {% endif %}
             {% if config['USERS_HAVE_ORG_USERNAME'] %}
-              <th  class="u-org-username">Account</th>
+              <th  class="u-org-username">{{ org_username_name | title }}</th>
             {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>

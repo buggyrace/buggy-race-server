@@ -420,6 +420,8 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
           qty_students_enabled = len([s for s in students if s.is_active]),
           qty_students_github = len([s for s in students if s.github_username]),
           qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
+          org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
+          org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
       )
 
 
@@ -588,6 +590,8 @@ def edit_user(user_id):
     "admin/user_edit.html",
     form=form,
     user=user,
+    org_username_name=current_app.config[ConfigSettingNames.ORG_USERNAME_NAME.name],
+    org_username_example=current_app.config[ConfigSettingNames.ORG_USERNAME_EXAMPLE.name],
   )
 
 @blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)

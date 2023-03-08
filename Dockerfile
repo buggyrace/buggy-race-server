@@ -7,7 +7,7 @@ RUN apt-get install -y \
     curl \
     gcc
 
-ARG INSTALL_NODE_VERSION=${INSTALL_NODE_VERSION:-12}
+ARG INSTALL_NODE_VERSION=${INSTALL_NODE_VERSION:-14}
 RUN curl -sL https://deb.nodesource.com/setup_${INSTALL_NODE_VERSION}.x | bash -
 RUN apt-get install -y \
     nodejs \
@@ -37,13 +37,13 @@ RUN npm install
 # NOTE: We don't need this as of right now but it could be useful in the future.
 FROM base AS development
 RUN pip install --user -r requirements/dev.txt
-EXPOSE 5000
+EXPOSE 443
 CMD [ "npm", "start" ]
 
 
 # ================================= PRODUCTION =================================
 FROM base AS production
 RUN pip install --user -r requirements/prod.txt
-EXPOSE 5000
+EXPOSE 443
 CMD [ "npm", "start" ]
 

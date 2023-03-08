@@ -12,7 +12,7 @@
     "webpack-watch": "run-script-os",
     "webpack-watch:win32": "SET NODE_ENV=debug && webpack --mode development --watch",
     "webpack-watch:default": "NODE_ENV=debug webpack --mode development --watch",
-    "flask-server": "sleep 15 && flask run --host=0.0.0.0",
+    "flask-server": "sleep 15 && flask run --cert=ssl/cert.pem --key=ssl/priv.key --host=0.0.0.0",
     "flask-static-digest": "flask digest compile",
     "db-init": "run-script-os",
     "db-init:default": "flask db upgrade",

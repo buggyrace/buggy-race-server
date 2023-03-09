@@ -537,3 +537,5 @@ span.btn.disabled{
 table.table-bordered.table-responsive {
   border:none
 }
+
+.status a .icon-wrench { color:white; }

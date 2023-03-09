@@ -40,7 +40,7 @@
             </td>
             <td class="status">
               {% if buggies_by_username[student.username] %}
-                <a href="{{ url_for('admin.show_buggy', username=student.username) }}" class="bg-success"></a>
+                <a href="{{ url_for('admin.show_buggy', username=student.username) }}" class="bg-success text-center p-2"><span class="icon-wrench"></span></a>
               {% endif %}
             </td>
             {% for task in tasks %}

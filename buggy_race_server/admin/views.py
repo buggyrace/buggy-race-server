@@ -1105,6 +1105,26 @@ def edit_task(task_id=None):
       task=task
     )
 
+@blueprint.route("/json/latest-json/<user_id>", methods=["GET"])
+def get_uploaded_json_for_user(user_id):
+  payload = ""
+  if current_user and current_user.is_authenticated and current_user.is_buggy_admin:
+    user = User.get_by_id(user_id)
+    if user is None:
+      status = 404
+    else:
+      status = 200
+      payload = {       
+          "user_id": user_id,
+          "text": user.latest_json,
+          "uploaded_at": stringify_datetime(user.uploaded_at),
+        }
+  else:
+     status = 403
+  response = make_response(jsonify(payload), status)
+  response.headers["Content-type"] = "application/json"
+  return response
+
 @blueprint.route("/json/note/<note_id>", methods=["GET"])
 def get_notes_for_user_task(note_id):
   payload = ""

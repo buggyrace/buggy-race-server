@@ -442,4 +442,39 @@ $(function() {
     run_countdown();
   }
 
+  const modal_user_button = document.getElementById("btn-to-user-notes");
+  if (modal_user_button) {
+    const JSON_NOTE_URL = "/admin/json/note/";
+    const modal_title = document.getElementById("notes-modal-label");
+    const modal_text_body = document.getElementById("modal-text-body");
+    const modal_timestamp = document.getElementById("modal-timestamp");
+    $('#notes-modal').on('show.bs.modal', function (event) {
+      modal_text_body.innerText = "";
+      modal_timestamp.innerText = "";
+      let $button = $(event.relatedTarget); // Button that triggered the modal
+      let note_id = $button.data("nid");
+      let username = $button.data("un");
+      let taskname = $button.data("tn");
+      let $modal = $(this);
+      modal_title.innerText = username + "'s text for " + taskname;
+      $.ajax(JSON_NOTE_URL + note_id, {dataType: "json"})
+        .done(function(json_data) {
+          modal_text_body.classList.add("task-note");
+          modal_text_body.classList.remove("alert-danger");
+          modal_text_body.innerText=json_data.text;
+          if (json_data.modified_at){
+            modal_timestamp.innerHTML="<em>Updated:</em>: " + json_data.modified_at;
+          } else if (json_data.created_at){
+            modal_timestamp.innerHTML="<em>Created:</em>: " + json_data.created_at;
+          }
+        })
+      .fail(function(response) {
+        modal_text_body.classList.add("alert-danger");
+        modal_text_body.classList.remove("task-note");
+        modal_text_body.innerText="Error: " + response.status + " " + response.statusText
+      })
+      modal_user_button.innerHTML = username + "'s notes &rtri;";
+      modal_user_button.setAttribute("href", $button.attr("href"));
+    });
+  }
 });

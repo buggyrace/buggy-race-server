@@ -52,6 +52,9 @@
                     {% else %}
                       class="bg-success"
                     {% endif %}
+                    data-toggle="modal" data-target="#notes-modal"
+                    data-nid="{{ notes_by_username[student.username][task.id].id }}"
+                    data-un="{{ student.pretty_username }}" data-tn="{{task.fullname}}"
                   >&nbsp;</a>
                 {% endif %}
               </td>
@@ -60,6 +63,27 @@
         {% endfor %}  
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="notes-modal" tabindex="-1" aria-labelledby="notes-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="notes-modal-label"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div>
+        <pre id="modal-text-body" class="m-3 p-2 task-note"></pre>
+        <p id="modal-timestamp" class="mx-3 my-1 font-weight-light"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="btn-to-user-notes" class="btn btn-outline-secondary">User's notes &rtri;</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

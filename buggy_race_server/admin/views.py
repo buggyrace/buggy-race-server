@@ -54,17 +54,18 @@ from buggy_race_server.user.forms import UserForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
-    join_to_project_root,
-    publish_task_list,
     get_download_filename,
     get_tasks_as_issues_csv,
+    join_to_project_root,
+    load_config_setting,
     load_settings_from_db,
     load_tasks_into_db,
     prettify_form_field_name,
+    publish_task_list,
     publish_tech_notes,
     refresh_global_announcements,
     set_and_save_config_setting,
-    load_config_setting,
+    stringify_datetime,
 )
 
 blueprint = Blueprint(
@@ -1103,6 +1104,29 @@ def edit_task(task_id=None):
       form=form,
       task=task
     )
+
+@blueprint.route("/json/note/<note_id>", methods=["GET"])
+def get_notes_for_user_task(note_id):
+  payload = ""
+  if current_user and current_user.is_authenticated and current_user.is_buggy_admin:
+    note = Note.get_by_id(note_id)
+    if note is None:
+      status = 404
+    else:
+      status = 200
+      payload = {       
+          "id": note.id,
+          "created_at": stringify_datetime(note.created_at),
+          "modified_at": stringify_datetime(note.modified_at),
+          "user_id": note.user_id,
+          "task_id": note.task_id,
+          "text": note.text,
+        }
+  else:
+     status = 403
+  response = make_response(jsonify(payload), status)
+  response.headers["Content-type"] = "application/json"
+  return response
 
 @blueprint.route("/notes", methods=["GET"], strict_slashes=False)
 @login_required

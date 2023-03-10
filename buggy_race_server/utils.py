@@ -149,6 +149,17 @@ def load_config_setting(app, name):
     else:
        raise ValueError(f"bad config: {name}")
 
+def stringify_datetime(dt, want_secs=True):
+    """ fails silently, returning empty string, if it's not a date """
+    date_str = ""
+    format = "%Y-%m-%d %H:%M:%S" if want_secs else "%Y-%m-%d %H:%M"
+    if dt:
+        try:
+            date_str = dt.strftime(format)
+        except (ValueError, AttributeError):
+            pass
+    return date_str 
+
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """
   return name.replace("_", " ").title()
@@ -444,6 +455,6 @@ def publish_task_list(app=current_app):
     set_and_save_config_setting(
         app,
         name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
-        value=created_at.strftime("%Y-%m-%d %H:%M"),
+        value=stringify_datetime(created_at),
     )
   

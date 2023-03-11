@@ -546,3 +546,22 @@ table.table-bordered.table-responsive {
 .table-striped tr:nth-of-type(odd) td.even-phase {
   background-color:#d0d0ee;
 }
+
+a.btn.btn-config-group {
+  padding:0;
+  text-align:center;
+}
+a.btn-config-group span::before{
+  content: "Config";
+  display:block;
+  font-size:80%;
+  padding:0.2rem 0.1rem 0.2rem 0.1rem;
+  margin:0 -0.75rem;
+  background:#99999999; /* alpha for hover effect */
+  color:white;
+  margin-bottom:0.2rem;
+}
+a.btn-config-group span{
+  display:block;
+  padding:0 0.75rem 0.375rem 0.75rem;
+}

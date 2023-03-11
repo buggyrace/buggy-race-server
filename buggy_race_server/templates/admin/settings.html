@@ -27,7 +27,7 @@
             {% set btn_class = "btn-outline-secondary" %}
           {% endif %}
           <a href="{{ url_for('admin.settings', group_name=name | lower) }}"
-          class="btn {{ btn_class }}">{{ name | replace('_', ' ') | title }}</a>
+          class="btn {{ btn_class }} btn-config-group"><span>{{ name | replace('_', ' ') | title }}</span></a>
         {% endfor %}
       </p>
     </div>

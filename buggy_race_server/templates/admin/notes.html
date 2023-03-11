@@ -28,7 +28,8 @@
           </th>
           <th class="table-vertical-heading"><div>Buggy&nbsp;upload</div></th>
           {% for task in tasks %}
-            <th class="table-vertical-heading"><div>{{ task.fullname }}</div></th>
+            {% set even_phase_class = not(task.phase % 2) %}
+            <th class="table-vertical-heading {% if even_phase_class %}even-phase{% endif %}"><div>{{ task.fullname }}</div></th>
          {% endfor %}
         </tr>
       </thead>
@@ -50,7 +51,8 @@
               {% endif %}
             </td>
             {% for task in tasks %}
-              <td class="status">
+              {% set even_phase_class = not(task.phase % 2) %}
+              <td class="status {% if even_phase_class %}even-phase{% endif %}">
                 {% if notes_by_username[student.username][task.id] %}
                   <a href="{{ url_for('admin.show_user', user_id=student.id) }}#{{ task.anchor }}"
                     {% if notes_by_username[student.username][task.id].text | length < 16 %}

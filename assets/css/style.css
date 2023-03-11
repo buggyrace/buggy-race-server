@@ -542,3 +542,7 @@ table.table-bordered.table-responsive {
 }
 
 .status a .icon-wrench { color:white; }
+.even-phase { background-color: #eaeaff; }
+.table-striped tr:nth-of-type(odd) td.even-phase {
+  background-color:#d0d0ee;
+}

@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Setup is complete
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-success">
+        <strong>Setup of the race server is complete.</strong>
+        <br>
+        The <a href="{{ url_for('admin.admin')}}">admin dashboard</a> is a good jumping-off
+        point for keeping an eye on the server and performing admin tasks.
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="alert alert-warning">
+        <p>
+          Change or inspect <strong>configuration settings</strong>:
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group=None) }}" class="btn btn-outline-secondary btn-admin">Config &rtri;</a>
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="alert alert-warning">
+        <p>
+          Publish the <strong>project tasks</strong>:
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.tasks_generate', group=None) }}" class="btn btn-outline-secondary btn-admin">Tasks &rtri;</a>
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="alert alert-warning">
+        <p>
+          Publish the <strong>tech notes</strong>:
+        </p>
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Tech notes &rtri;</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="alert alert-info">
+        <p>
+          <strong>Manage users</strong>, including 
+          <a href="{{ url_for('admin.bulk_register' )}}">registering new users</a> (students or administrators),
+          inspecting or editing existing users.
+        </p>
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

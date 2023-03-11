@@ -198,13 +198,9 @@ def setup():
   # always get setup status from database during setup:
   setup_status = load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name)
   if not setup_status:
-    flash(
-      "Setup is complete on this server (config settings "
-      "can be edited from within admin instead)", "danger"
-    )
     if ConfigSettingNames._SETUP_STATUS.name in session:
        del session[ConfigSettingNames._SETUP_STATUS.name]
-    abort(404)
+    return render_template("admin/setup_complete.html")
   try:
     setup_status_from_session = int(session.get(ConfigSettingNames._SETUP_STATUS.name) or 0)
   except ValueError():

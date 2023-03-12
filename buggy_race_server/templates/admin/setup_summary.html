@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Setup summary
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-success">
+        <h2 class="alert-title">Setup is complete</h2>
+        <div class="row">
+          <div class="col-10">
+            This is the race server for
+            {{ institution_full_name }} ({{ institution_short_name }}) —
+            <a href="{{ institution_home_url }}">{{ pretty_institution_home_url }}</a>
+          </div>
+          <div class="col-2 tex-right btn-collection text-right">
+            <a href="{{ url_for('admin.settings', group_name='org') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Org</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert {% if qty_students == 0 %} alert-danger {% else %} alert-info {% endif %}">
+        <h2 class="alert-title">Users</h2>
+        {% if qty_users ==  1 %}
+          <p>
+            There is only <strong>1 user</strong> in the database.
+          </p>
+        {% else %}
+          <p>
+            {% if qty_students == 0 %}
+              There are <strong>{{ qty_users }} users</strong>, of which none are students.
+            {% elif qty_students == 1 %}
+              There are <strong>{{ qty_users }} users</strong>, of which only 1 is a students.
+            {% else %}
+              There are <strong>{{ qty_users }} users</strong>, of which {{ qty_students }} are students.
+            {% endif %}
+          </p>
+        {% endif %}
+        <p>
+          To view or edit existing users, or reset passwords, start from the admin <em>Users</em> page:
+        </p>
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register&nbsp;users&nbsp;&rtri;</a>
+        </p>
+        <p>
+          {% if pretty_user_fields %}
+            Each user has a username, and these fields: {{ pretty_user_fields }}.
+          {% else %}
+            Each user only has a username (this may be enough!).
+          {% endif %}
+          {% if qty_students %}
+            You <em>can</em> change this, but be careful because if you add new fields
+            you'll need to edit existing students to add missing values.
+          {% else %}
+            If you're going to change fields users have, it's best to do it <strong>before</strong>
+            you register any users.
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='users') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Users</span></a>
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert {% if qty_tasks == 0 or not task_list_published_at%} alert-danger {% else %} alert-info {% endif %}">
+        <h2 class="alert-title">Tasks</h2>
+        <p>
+          {% if qty_tasks %}
+            {% if qty_tasks == 1 %}
+              There is <strong>only 1 project task</strong> for students to do.
+            {% else %}
+              There are <strong>{{ qty_tasks }} tasks</strong> for students to do.
+            {% endif %}
+          {% else %}
+            There are <strong>no project tasks</strong> for students to do yet.  
+            Load tasks from the admin <em>Tasks</em> page (accept the defaults
+            or edit and upload markdown).
+          {% endif %}
+          <br>
+          {% if not task_list_published_at %}
+            The <strong>task list has not been published</strong> yet.
+          {% else %}
+            The <strong>task list</strong> was last published on 
+            {{ task_list_published_at }}
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin">Tasks &rtri;</a>
+          <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-white">Task&nbsp;list&nbsp;&rtri;</a>
+        </p>
+      </div>
+      <div class="alert {% if not tech_notes_published_at%} alert-danger {% else %} alert-info {% endif %}">
+        <h2 class="alert-title">Tech notes</h2>
+        <p>
+          {% if tech_notes_external_url %}
+            The <strong>tech notes are not server by this server</strong>: instead
+            they are at <code>{{ tech_notes_external_url }}</code>.
+          {% else %}
+            {% if tech_notes_published_at %}
+              The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at }}.
+            {% else %}
+              The supporting <strong>tech notes not yet been published</strong>.
+            {% endif %}
+          {% endif %}
+          {% if not is_tech_note_publishing_enabled %}
+            You <strong>cannot publish tech notes</strong> on this server: the config
+            currently disables this feature.
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
+          <a class="btn btn-outline-secondary btn-white" href="{{ url_for('public.serve_tech_notes', path='index') }}">View tech notes &rtri;</a>
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='tech_notes') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Tech notes</span></a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert alert-warning">
+        <h2 class="alert-title">Project</h2>
+        <p>
+          {% if is_report %}
+            The <strong>{{ project_code }} buggy racing project</strong>
+            requires students to include
+            a {{ report_type }} in their editor.
+          {% else %}
+            The <strong>{{ project_code }} buggy racing project</strong>
+            requires no report.
+          {% endif %}
+          {% if submission_deadline %}
+            The submission deadline is {{ submission_deadline }}.
+          {% else %}
+            You have not set a submission deadline.
+          {% endif %}
+          {% if project_phase_min_target %}
+            All students are expected to complete tasks up to and including
+            phase&nbsp;{{ project_phase_min_target }}.
+          {% else %}
+            No target for completing phases (groups of tasks) has been set.
+          {% endif %}
+          {% if not workflow_url %}
+            The workflow summary is not being shown to students.
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          {% if is_report %}
+           <a class="btn btn-outline-secondary btn-white" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
+          {% endif %}
+          {% if workflow_url %}
+            <a href="{{ workflow_url }}" class="btn btn-outline-secondary btn-white">Workflow &rtri;</a>
+          {% endif %}
+          {% if submission_link %}
+              <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white">Submission &rtri;</a>
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='project') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Project</span></a>
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert alert-warning">
+        <h2 class="alert-title">GitHub</h2>
+        <p>
+          {% if not is_student_using_github_repo %}
+            The students do not need their <strong>own GitHub repos</strong>
+            for this project.
+          {% else %}
+            The students are using their <strong>own Github repos</strong>
+            for this project.
+            {% if is_using_github_api_to_fork %}
+              {% if is_using_github_api_to_inject_issues %}
+                The race server will help them <strong>fork</strong> the
+                editor repo, and <strong>inject tasks as issues</strong> into
+                their forked repo.
+              {% else %}
+                The race server will help them <strong>fork</strong> the
+                repo (but won't inject any issues).
+              {% endif %}
+            {% else %}
+              No forking (or injection of issues) is being performed by the
+              server.
+            {% endif %}
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert alert-info">
+        <h2 class="alert-title">Announcements</h2>
+        <p>
+          {% if not qty_announcements_global %}
+            Currently <strong>no global announcements</strong> are being displayed.
+          {% else %}
+            {% if qty_announcements_global == 1 %}
+              Currently <strong>1 global announcement</strong> is being displayed.
+            {% else %}
+              Currently <strong>{{ qty_announcments }} global announcements</strong> are being displayed.
+            {% endif %}
+          {% endif %}
+          {% if qty_announcements_tagline == 0 %}
+            There is <strong>no tagline</strong> on the home page.
+          {% elif qty_announcements_tagline == 1 %}
+            There is <strong>a tagline</strong> on the home page.
+          {% else %}
+            There are <strong>{{ qty_announcements_tagline }} taglines</strong> on the home page.
+          {% endif %}
+          {% if qty_announcements_login == 0 %}
+            <strong>No messages</strong> are shown on the login page.
+          {% elif qty_announcements_login == 1 %}
+            <strong>A message</strong> is shown on the login page.
+          {% else %}
+            <strong>{{ qty_announcements_login }} messages</strong> are being shown on the login page.
+          {% endif %}
+          </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.list_announcements') }}" class="btn btn-outline-secondary btn-admin">Announcements &rtri;</a>
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert alert-secondary">
+        <h2 class="alert-title">Config</h2>
+        <p>
+          Change or inspect all the <strong>configuration settings</strong>,
+          including authorising more admin users, and adding social links.
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group=None) }}" class="btn btn-outline-secondary btn-admin">Config &rtri;</a>
+          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin">System&nbsp;info&nbsp;&rtri;</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+{% endblock %}

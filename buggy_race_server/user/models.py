@@ -162,6 +162,7 @@ class User(UserMixin, SurrogatePK, Model):
                 del fields[fieldname]
         return fields
 
+    @staticmethod
     def tidy_fieldnames(fieldnames):
         """ for a list of fieldnames, strips spaces and users underscores, etc.,
             to be as forgiving as possible with that header row

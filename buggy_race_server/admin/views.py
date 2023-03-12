@@ -44,7 +44,7 @@ from buggy_race_server.admin.forms import (
     SubmitWithAuthForm,
     TaskForm,
 )
-from buggy_race_server.admin.models import Announcement, Note, Setting, SocialSetting, Task
+from buggy_race_server.admin.models import Announcement, AnnouncementType, Note, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
@@ -193,14 +193,70 @@ def _flash_errors(form):
       else:
         flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
 
+def setup_summary():
+    """ If setup is complete, this summarises the current config and db state,
+    and unlike the dashboard has some helpful suggestions as to what to do next."""
+    if not current_user or not current_user.is_authenticated or not current_user.is_buggy_admin:
+       abort(403)
+    if ConfigSettingNames._SETUP_STATUS.name in session:
+       del session[ConfigSettingNames._SETUP_STATUS.name]
+    user_fields_dict = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
+    pretty_user_fields = ".".join(
+       User.tidy_fieldnames(
+         [
+           fieldname for fieldname in user_fields_dict
+           if user_fields_dict[fieldname]
+        ]
+      )
+    )
+    institution_home_url = current_app.config[ConfigSettingNames.INSTITUTION_HOME_URL.name]
+    report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
+    qty_announcements_global = 0
+    qty_announcements_login = 0
+    qty_announcements_tagline = 0
+    for ann in current_app.config['CURRENT_ANNOUNCEMENTS']:
+        if ann.type == AnnouncementType.LOGIN.value:
+            qty_announcements_login += 1
+        elif ann.type == AnnouncementType.TAGLINE.value:
+            qty_announcements_tagline += 1
+        else:
+            qty_announcements_global += 1
+    return render_template(
+       "admin/setup_summary.html",
+       institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
+       institution_home_url=institution_home_url,
+       institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+       is_report = bool(report_type),
+       is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+       is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+       is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
+       pretty_institution_home_url=re.sub(r"^https?://", "", institution_home_url),
+       pretty_user_fields=pretty_user_fields,
+       project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+       project_phase_min_target=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
+       qty_announcements_global=qty_announcements_global,
+       qty_announcements_login=qty_announcements_login,
+       qty_announcements_tagline=qty_announcements_tagline,
+       qty_students=User.query.filter_by(is_active=True, is_student=True).count(),
+       qty_tasks=Task.query.filter_by(is_enabled=True).count(),
+       qty_users=User.query.filter_by(is_active=True).count(),
+       report_type=report_type,
+       submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+       submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+       task_list_published_at=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+       tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
+       tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
+       tech_notes_published_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+       workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
+    )
+
 @blueprint.route("/setup", methods=["GET", "POST"], strict_slashes=False)
 def setup():
   # always get setup status from database during setup:
   setup_status = load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name)
   if not setup_status:
-    if ConfigSettingNames._SETUP_STATUS.name in session:
-       del session[ConfigSettingNames._SETUP_STATUS.name]
-    return render_template("admin/setup_complete.html")
+    return setup_summary()
   try:
     setup_status_from_session = int(session.get(ConfigSettingNames._SETUP_STATUS.name) or 0)
   except ValueError():

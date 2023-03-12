@@ -262,32 +262,31 @@ def serve_project_page(page=None):
                     Task.phase.asc(),
                     Task.sort_position.asc()
                 ).all()
-
         template = "public/project/report.html"
     elif page == "workflow":
+        if not current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name]:
+            abort(404)
+        if url := current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name]:
+            return redirect(url)
         template = "public/project/workflow.html"
     else:
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
-    is_storing_notes = current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]
-    submit_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
-    workflow_url = current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name]
-    if workflow_url and not workflow_url.startswith("http"):
-        workflow_url = "/project/workflow" # if it's not a URL, force it
     return render_template(
         template,
-        site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-        is_report=is_report,
-        is_storing_notes=is_storing_notes,
-        report_type=report_type,
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-        submit_deadline=submit_deadline,
-        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        is_report=is_report,
+        is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+        is_storing_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
         is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
-        workflow_url=workflow_url,
+        project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+        report_type=report_type,
+        site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
         tasks=tasks,
+        workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
     )
 
 @blueprint.route("/assets/<path:path>")

@@ -15,8 +15,8 @@
           <a class="btn btn-outline-secondary" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
         {% endif %}
         <a class="btn btn-outline-secondary" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes &rtri;</a>
-        {% if workflow_url %}
-          <a href="{{ workflow_url }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
+        {% if is_showing_project_workflow %}
+          <a href="{{  workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
         {% endif %}
         {% if submission_link %}
             <a href="{{ submission_link }}" class="btn btn-outline-secondary">Submission &rtri;</a>
@@ -85,7 +85,7 @@
       </p>
     </div>
   </div>
-  {% if workflow_url %}
+  {% if is_showing_project_workflow %}
     <div class="row">
       <div class="col-md-6 p-3">
         <h2>Workflow</h2>
@@ -95,7 +95,7 @@
           setting it up, working on it, and ultimately submitting it.
         </p>
         <p>
-          <a href="{{ workflow_url }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
+          <a href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary">Workflow &rtri;</a>
         </p>
       </div>
     </div>

@@ -150,16 +150,19 @@
           {% else %}
             No target for completing phases (groups of tasks) has been set.
           {% endif %}
-          {% if not workflow_url %}
+          {% if not is_showing_project_workflow %}
             The workflow summary is not being shown to students.
+          {% elif workflow_url %}
+            The workflow summary is hosted externally, at
+            <code>{{ workflow_url }}</code>.
           {% endif %}
         </p>
         <p class="btn-collection">
           {% if is_report %}
-           <a class="btn btn-outline-secondary btn-white" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details &rtri;</a>
+           <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}" class="btn btn-outline-secondary btn-white">{{ report_type | title }} details &rtri;</a>
           {% endif %}
-          {% if workflow_url %}
-            <a href="{{ workflow_url }}" class="btn btn-outline-secondary btn-white">Workflow &rtri;</a>
+          {% if is_showing_project_workflow %}
+            <a href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary btn-white">Workflow &rtri;</a>
           {% endif %}
           {% if submission_link %}
               <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white">Submission &rtri;</a>

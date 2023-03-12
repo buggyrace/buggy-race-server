@@ -102,6 +102,7 @@ class ConfigSettingNames(Enum):
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
+    IS_SHOWING_PROJECT_WORKFLOW = auto()
     IS_STORING_STUDENT_TASK_NOTES = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
@@ -234,6 +235,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
@@ -287,6 +289,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
@@ -370,6 +373,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
@@ -548,6 +552,13 @@ class ConfigSettings:
           the staff running the buggy racing project will register users so
           we strongly recommend public registration is not enabled.""",
 
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name:
+          """It can be helpful for students to have a summary of the workflow
+          process. If you set `IS_SHOWING_PROJECT_WORKFLOW` to `Yes` then
+          the server will show either the default workflow page, or an external
+          one if you specify `PROJECT_WORKFLOW_URL`.
+          """,
+
         ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name:
           """Do you want students to be able to record notes on this server
           reporting they approached/did each task? If you're running
@@ -693,13 +704,10 @@ class ConfigSettings:
           so you must supply one yourself.""",
 
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
-          """It's helpful for students to have a summary of the
-          workflow process... but this often needs to be specific
-          to how you're running your project — so you can nominate
-          a URL to your own page. If the URL you specify here doesn't
-          start with `http` (i.e., it's not a fully-qualified URL),
-          it will default to `project/workflow` on this server. Leave
-          this blank if you don't want to display a workflow page.""",
+          """You can replace the default workflow page with a redirection to
+          one you've customised (and hosted elsewhere). If you leave this
+          setting blank, the default page will be shown. In either case, this
+          setting is ignored if `IS_SHOWING_PROJECT_WORKFLOW` is `No`.""",
 
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique

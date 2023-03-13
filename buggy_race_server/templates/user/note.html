@@ -30,7 +30,7 @@
   </div>
   <div class="row">
     <div class="col-lg-8">
-      <div class="border border-secondary container">
+      <div class="border border container">
         <form id="NoteForm" method="POST" action="{{ url_for('user.note', task_fullname=task.fullname)}}" role="form">
           {{ form.csrf_token }}
           {{ form.user_id(value=user.id) }}

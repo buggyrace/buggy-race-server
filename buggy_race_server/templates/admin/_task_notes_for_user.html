@@ -15,6 +15,20 @@
   </div>
 {% else %}
   <div class="row">
+    <div class="col-lg-8">
+      <div class="alert alert-info">
+        {% if is_own_note %}
+          You have created {{ qty_notes }} note{% if qty_notes > 1 %}s{% endif %}.
+          <br>
+          Remember, there's an <strong>Add&nbsp;note</strong> button on each task
+          description in the <a href="{{ url_for('public.serve_project_page', page='tasks') }}">task&nbsp;list</a>.
+        {% else %}
+          User {{ user.pretty_username }} has created {{ qty_notes }} note{% if qty_notes > 1 %}s{% endif %}.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-lg-8 btn-collection">
       {% for phase in tasks_by_phase %}
         {% for task in tasks_by_phase[phase] %}

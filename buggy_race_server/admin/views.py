@@ -599,12 +599,14 @@ def show_user(user_id):
     user = User.query.filter_by(username=user_id).first()
   if user is None:
     abort(404)
+  notes_by_task_id=Note.get_dict_notes_by_task_id(user.id),
   return  render_template(
       "admin/user.html",
       user=user,
       is_own_note=user.id == current_user.id,
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
-      notes_by_task_id=Note.get_dict_notes_by_task_id(user.id),
+      notes_by_task_id=notes_by_task_id,
+      qty_notes=len(notes_by_task_id),
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
   )

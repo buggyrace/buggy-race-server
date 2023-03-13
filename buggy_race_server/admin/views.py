@@ -307,6 +307,7 @@ def setup():
             admin_user = User.create(
               username=new_admin_username,
               password=form.admin_password.data,
+              comment=f"First admin user, created during setup :-)"
             )
             flash(f"Created new admin user \"{new_admin_username}\"", "info")
           admin_user.is_active = True

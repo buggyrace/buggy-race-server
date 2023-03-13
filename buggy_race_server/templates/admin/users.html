@@ -119,7 +119,7 @@
               <td class="u-username">
                 <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
                 {% if u.comment %}
-                 <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 float-right" href="#"
+                 <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right" href="#"
                    data-comment="{{ u.comment|replace('"', '\\"')|replace("\\n", "\\n") }}"
                    onclick='alert(this.dataset.comment.replace(/\\\"/g,"\""))'
                  ><strong>&#x2731;</strong></a>

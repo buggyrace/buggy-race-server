@@ -103,7 +103,7 @@ class ConfigSettingNames(Enum):
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
     IS_SHOWING_PROJECT_WORKFLOW = auto()
-    IS_STORING_STUDENT_TASK_NOTES = auto()
+    IS_STORING_STUDENT_TASK_TEXTS = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
     IS_STUDENT_USING_GITHUB_REPO = auto()
@@ -240,7 +240,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name,
-        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
       ),
       ConfigGroupNames.TECH_NOTES.name: (
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name,
@@ -290,7 +290,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
-        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: 1,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
@@ -374,7 +374,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
@@ -559,14 +559,14 @@ class ConfigSettings:
           one if you specify `PROJECT_WORKFLOW_URL`.
           """,
 
-        ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name:
-          """Do you want students to be able to record notes on this server
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name:
+          """Do you want students to be able to record text on this server
           reporting they approached/did each task? If you're running
           the project with a report (see `PROJECT_REPORT_TYPE`), then this
           allows students to save notes here as they go along, which in
           turn gives you some visibility of their progress (which is why we
           implemented it). If you choose `No`, this feature will be hidden.
-          Note that you _can_ choose `Yes`, letting students store task notes,
+          Note that you _can_ choose `Yes`, letting students store task texts,
           even if the project doesn't require a report.""",
 
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name:
@@ -671,7 +671,7 @@ class ConfigSettings:
           due to an historic anomaly). The report takes the form
           of an additional webpage in the student's buggy editor
           webserver. If you choose `No report`, all mentions will
-          be removed: see also the `IS_STORING_STUDENT_TASK_NOTES`
+          be removed: see also the `IS_STORING_STUDENT_TASK_TEXTS`
           setting. """,
 
         ConfigSettingNames.PROJECT_SLUG.name:

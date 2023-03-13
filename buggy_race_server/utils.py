@@ -442,7 +442,7 @@ def publish_task_list(app=current_app):
         tasks_by_phase = tasks_by_phase,
         qty_tasks=qty_tasks,
         created_at=created_at,# for debug: includes seconds, but config doesn't
-        is_storing_notes=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
+        is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
     )
     task_list_filename = app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
     generated_task_file = join_to_project_root(

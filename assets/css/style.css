@@ -62,7 +62,7 @@ textarea {
 .buggy-project .task-breakdown .task-heading {
   margin-bottom:1rem;
 }
-.buggy-project .task-breakdown .btn-task-note{
+.buggy-project .task-breakdown .btn-task-text{
   background-color:white;
 }
 
@@ -491,12 +491,12 @@ span.btn.disabled{
   display: none; /* bootstrap's d-none too heavy-handed: has !important */
 }
 
-.task-note {
+.task-text {
   border:1px solid #ccc;
   background-color: #fffff8;
   box-shadow: 0.3rem 0.3rem 0.3rem 0.1rem rgba(0,0,0,0.33);
 }
-pre.task-note {
+pre.task-text {
   white-space: pre-wrap;
 }
 
@@ -508,12 +508,12 @@ pre.task-note {
   transform:rotate(270deg);
   white-space:nowrap;
 }
-#all-student-notes td.status {
+#all-student-texts td.status {
   padding:0.1rem;
   height:3rem;
   min-height:3rem;
 }
-#all-student-notes td.status a {
+#all-student-texts td.status a {
   display:block;
   height:100%;
   width:100%;

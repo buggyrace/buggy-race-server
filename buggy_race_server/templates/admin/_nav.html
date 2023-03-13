@@ -7,8 +7,8 @@
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('race.list_races')}}">Races &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_announcements')}}">Announce &rtri;</a>
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.api_keys')}}">API keys &rtri;</a>
-      {% if config['IS_STORING_STUDENT_TASK_NOTES'] %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.notes')}}">Notes &rtri;</a>
+      {% if config['IS_STORING_STUDENT_TASK_TEXTS'] %}
+        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.task_texts')}}">Texts &rtri;</a>
       {% endif %}
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.settings')}}">Config &rtri;</a>
     </div>

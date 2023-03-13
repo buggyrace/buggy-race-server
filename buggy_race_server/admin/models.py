@@ -225,15 +225,15 @@ class Task(SurrogatePK, Model):
         db.Model.__init__(self, **kwargs)
 
 
-class Note(SurrogatePK, Model):
-    """Note by student recording how they approached/did a task"""
+class TaskText(SurrogatePK, Model):
+    """text by student recording how they approached/did a task"""
 
     @staticmethod
-    def get_dict_notes_by_task_id(user_id):
-        """Returns dict of notes keyed on task id"""
+    def get_dict_texts_by_task_id(user_id):
+        """Returns dict of texts keyed on task id"""
         return {
-           note.task_id: note
-           for note in Note.query.filter_by(user_id=user_id).all()
+           tasktext.task_id: tasktext
+           for tasktext in TaskText.query.filter_by(user_id=user_id).all()
         }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -243,7 +243,7 @@ class Note(SurrogatePK, Model):
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
     text = Column(db.Text(), unique=False, nullable=False, default="")
 
-    __tablename__ = "notes"
+    __tablename__ = "tasktexts"
     def __init__(self, **kwargs):
        """Create instance."""
        db.Model.__init__(self, **kwargs)

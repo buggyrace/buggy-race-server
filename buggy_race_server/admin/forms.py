@@ -263,7 +263,7 @@ class TaskForm(FlaskForm):
     def validate(self):
         return super(TaskForm, self).validate()
 
-class NoteForm(FlaskForm):
+class TaskTextForm(FlaskForm):
     user_id = HiddenField()
     task_id = HiddenField()
     text = TextAreaField(
@@ -271,21 +271,21 @@ class NoteForm(FlaskForm):
         [DataRequired()]
     )
     def __init__(self, *args, **kwargs):
-        super(NoteForm, self).__init__(*args, **kwargs)
+        super(TaskTextForm, self).__init__(*args, **kwargs)
   
     def validate(self):
-        return super(NoteForm, self).validate()
+        return super(TaskTextForm, self).validate()
 
 
-class NoteDeleteForm(FlaskForm):
-    note_id = HiddenField()
+class TaskTextDeleteForm(FlaskForm):
+    text_id = HiddenField()
     is_confirmed = BooleanField("Are you sure?")
   
     def __init__(self, *args, **kwargs):
-        super(NoteDeleteForm, self).__init__(*args, **kwargs)
+        super(TaskTextDeleteForm, self).__init__(*args, **kwargs)
   
     def validate(self):
-        return super(NoteDeleteForm, self).validate()
+        return super(TaskTextDeleteForm, self).validate()
 
 
 class GeneralSubmitForm(FlaskForm):

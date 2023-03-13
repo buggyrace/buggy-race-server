@@ -393,9 +393,9 @@ $(function() {
     }
 
     $task_counts.each(function(){
-      // collapse any box which doesn't have notes
+      // collapse any box which doesn't have texts
       let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
-      let is_hidden = $tasks_box.find(".task-note").length == 0;
+      let is_hidden = $tasks_box.find(".task-text").length == 0;
       this.dataset.text = this.innerText;
       this.dataset.is_hidden = is_hidden? "0" : "1";
       this.classList.add("btn", "btn-outline-secondary", "btn-white");
@@ -403,7 +403,7 @@ $(function() {
       this.dispatchEvent(new Event("click"));
     });
 
-    let $goto_btns = $(".btn-goto-note");
+    let $goto_btns = $(".btn-goto-text");
     if ($goto_btns){
       // need to unhide phase if trying to jump to anchor within it
       function reveal_goto_target(){
@@ -412,7 +412,7 @@ $(function() {
           toggle_btn.dispatchEvent(new Event("click"));
         }  
       }
-      $(".btn-goto-note").each(function(){
+      $(".btn-goto-text").each(function(){
         this.addEventListener("click", reveal_goto_target)
       });
     }
@@ -442,18 +442,18 @@ $(function() {
     run_countdown();
   }
 
-  const modal_user_button = document.getElementById("btn-to-user-notes");
+  const modal_user_button = document.getElementById("btn-to-user-texts");
   if (modal_user_button) {
     const JSON_BUGGY_URL = "/admin/json/latest-json/"
-    const JSON_NOTE_URL = "/admin/json/note/";
-    const modal_title = document.getElementById("notes-modal-label");
+    const JSON_TEXT_URL = "/admin/json/text/";
+    const modal_title = document.getElementById("texts-modal-label");
     const modal_text_body = document.getElementById("modal-text-body");
     const modal_timestamp = document.getElementById("modal-timestamp");
-    $('#notes-modal').on('show.bs.modal', function (event) {
+    $('#texts-modal').on('show.bs.modal', function (event) {
       modal_text_body.innerText = "";
       modal_timestamp.innerText = "";
       let $button = $(event.relatedTarget); // Button that triggered the modal
-      let note_id = $button.data("nid");
+      let text_id = $button.data("textid");
       let user_id = $button.data("uid");
       let username = $button.data("un");
       let taskname = $button.data("tn");
@@ -463,14 +463,14 @@ $(function() {
         title_str = username + "'s uploaded JSON";
         thru_button_str = username + "'s buggy";
       } else {
-        ajax_url = JSON_NOTE_URL + note_id;
+        ajax_url = JSON_TEXT_URL + text_id;
         title_str = username + "'s text for " + taskname;
-        thru_button_str = username + "'s notes";
+        thru_button_str = username + "'s texts";
       }
       modal_title.innerText = title_str;
       $.ajax(ajax_url, {dataType: "json"})
         .done(function(json_data) {
-          modal_text_body.classList.add("task-note");
+          modal_text_body.classList.add("task-text");
           modal_text_body.classList.remove("alert-danger");
           modal_text_body.innerText=json_data.text;
           if (json_data.uploaded_at){
@@ -483,7 +483,7 @@ $(function() {
         })
       .fail(function(response) {
         modal_text_body.classList.add("alert-danger");
-        modal_text_body.classList.remove("task-note");
+        modal_text_body.classList.remove("task-text");
         modal_text_body.innerText="Error: " + response.status + " " + response.statusText
       })
       modal_user_button.innerHTML = thru_button_str + " &rtri;";

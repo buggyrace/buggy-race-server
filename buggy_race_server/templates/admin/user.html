@@ -167,7 +167,7 @@
           <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
         </div>
         {% if user.latest_json %}
-          <pre class="p-3 ml-2 mb-4 mt-3 mr-3 task-note ">{{ user.latest_json }}</pre>
+          <pre class="p-3 ml-2 mb-4 mt-3 mr-3 task-text ">{{ user.latest_json }}</pre>
         {% else %}
           <p class="p-3">
             <em>No JSON</em>
@@ -183,10 +183,10 @@
   </div>
   <div class="row">
     <div class="col my-3">
-      <h3>{{ user.pretty_username }}'s task notes</h3>
+      <h3>{{ user.pretty_username }}'s task texts</h3>
     </div>
   </div>
-  {% include "admin/_task_notes_for_user.html" %}
+  {% include "admin/_task_texts_for_user.html" %}
   <div class="row">
     <div class="col my-3 btn-collection">
       <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}&nbsp;&rtri;</a>

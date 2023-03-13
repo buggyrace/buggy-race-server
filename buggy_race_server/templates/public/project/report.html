@@ -38,7 +38,7 @@
       </p>
       <ul>
         <li><strong>top</strong>: "sell" the features of your editor</li>
-        <li><strong>bottom</strong>: notes on each task you attempted</li>
+        <li><strong>bottom</strong>: text about each task you attempted</li>
       </ul>
 
       <h2 id="what-is-on-the-top-of-your-{{ report_type }}">What is on the top of your {{ report_type }}?</h2>
@@ -189,10 +189,10 @@ def {{ report_type }}():
   </div>
   <div class="row">
     <div class="col-lg-8">
-      <h2 id="add-a-note-for-every-task-you-attempted">Add a note for every task you attempted</h2>
+      <h2 id="add-some-text-for-every-task-you-attempted">Add some text for every task you attempted</h2>
       <p>
         We'll be looking at the code to see <em>what</em> you did, but in the
-        notes just drop a short paragraph saying <em>what you did</em>. And
+        text just drop a short paragraph saying <em>what you did</em>. And
         what was tricky or anything you learned.
       </p>
       <p>
@@ -211,8 +211,8 @@ def {{ report_type }}():
         you dived into it.
       </p>
 
-      {% if is_storing_notes %}
-        <h2>Storing notes on this race server</h2>
+      {% if is_storing_texts %}
+        <h2>Storing texts on this race server</h2>
 
         <p>
           You can make notes as you go along, and download them as text or
@@ -220,13 +220,13 @@ def {{ report_type }}():
         </p>
         <p>
           Remember that this is not your report! It's simply a convenient place
-          to collect your notes as you go along. You still have to manage putting
-          it into the <code>/{{ report_type }}</code> page of your buggy editor.
-          However, there are buttons for <strong>downloading your notes</strong>
+          to collect your texts as you go along. You still have to manage putting
+          them into the <code>/{{ report_type }}</code> page of your buggy editor.
+          However, there are buttons for <strong>downloading your texts</strong>
           which will already put them in a helpful HTML format, if you want.
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('user.list_notes') }}" class="btn btn-outline-secondary">Your notes &rtri;</a>
+          <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary">Your texts &rtri;</a>
         </p>
       {% endif %}
       

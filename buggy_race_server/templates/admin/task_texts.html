@@ -4,13 +4,13 @@
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3">
-      Students' task notes
+      Students' task texts
     </h1>
   </div>
   <div class="row">
     <div class="col">
       <div class="alert alert-warning">
-        Currently only notes belonging to <em>active students</em> are shown on this page.
+        Currently only texts belonging to <em>active students</em> are shown on this page.
       </div>
       {% if not students %}
         <div class="alert alert-danger">
@@ -20,7 +20,7 @@
     </div>
   </div>
   <div class="row">
-    <table id="all-student-notes" class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
+    <table id="all-student-texts" class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
       <thead>
         <tr>
           <th>
@@ -43,7 +43,7 @@
               {% if buggies_by_username[student.username] %}
                 <a href="{{ url_for('admin.show_buggy', username=student.username) }}"
                 class="bg-success text-center p-2"
-                data-toggle="modal" data-target="#notes-modal"
+                data-toggle="modal" data-target="#texts-modal"
                 data-buggy="1"
                 data-un="{{ student.pretty_username}}"
                 data-uid="{{ student.id }}"
@@ -53,15 +53,15 @@
             {% for task in tasks %}
               {% set even_phase_class = not(task.phase % 2) %}
               <td class="status {% if even_phase_class %}even-phase{% endif %}">
-                {% if notes_by_username[student.username][task.id] %}
+                {% if texts_by_username[student.username][task.id] %}
                   <a href="{{ url_for('admin.show_user', user_id=student.id) }}#{{ task.anchor }}"
-                    {% if notes_by_username[student.username][task.id].text | length < 16 %}
+                    {% if texts_by_username[student.username][task.id].text | length < 16 %}
                       class="bg-warning"
                     {% else %}
                       class="bg-success"
                     {% endif %}
-                    data-toggle="modal" data-target="#notes-modal"
-                    data-nid="{{ notes_by_username[student.username][task.id].id }}"
+                    data-toggle="modal" data-target="#texts-modal"
+                    data-textid="{{ texts_by_username[student.username][task.id].id }}"
                     data-un="{{ student.pretty_username }}" data-tn="{{task.fullname}}"
                   >&nbsp;</a>
                 {% endif %}
@@ -75,21 +75,21 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade bd-example-modal-lg" id="notes-modal" tabindex="-1" aria-labelledby="notes-modal-label" aria-hidden="true">
+<div class="modal fade bd-example-modal-lg" id="texts-modal" tabindex="-1" aria-labelledby="texts-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="notes-modal-label"></h5>
+        <h5 class="modal-title" id="texts-modal-label"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div>
-        <pre id="modal-text-body" class="m-3 p-2 task-note"></pre>
+        <pre id="modal-text-body" class="m-3 p-2 task-text"></pre>
         <p id="modal-timestamp" class="mx-3 my-1 font-weight-light"></p>
       </div>
       <div class="modal-footer">
-        <a href="#" id="btn-to-user-notes" class="btn btn-outline-secondary">User's notes &rtri;</a>
+        <a href="#" id="btn-to-user-texts" class="btn btn-outline-secondary">User's texts &rtri;</a>
       </div>
     </div>
   </div>

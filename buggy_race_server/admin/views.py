@@ -44,7 +44,7 @@ from buggy_race_server.admin.forms import (
     SubmitWithAuthForm,
     TaskForm,
 )
-from buggy_race_server.admin.models import Announcement, AnnouncementType, Note, Setting, SocialSetting, Task
+from buggy_race_server.admin.models import Announcement, AnnouncementType, TaskText, Setting, SocialSetting, Task
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
@@ -397,25 +397,25 @@ def admin():
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
     tasks_by_id = {task.id: task.fullname for task in tasks}
-    qty_notes_by_task = defaultdict(int)
-    qty_notes = 0
-    if is_storing_notes := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-      # TODO counting all notes, not only those of enrolled active students
-      notes = Note.query.all()
-      qty_notes = len(notes)
-      for note in notes:
-         if len(note.text) > TASK_NOTE_LENGTH_THRESHHOLD:
-            qty_notes_by_task[tasks_by_id[note.task_id]] += 1
+    qty_texts_by_task = defaultdict(int)
+    qty_texts = 0
+    if is_storing_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+      # TODO counting all texts, not only those of enrolled active students
+      texts = TaskText.query.all()
+      qty_texts = len(texts)
+      for text in texts:
+         if len(text.text) > TASK_NOTE_LENGTH_THRESHHOLD:
+            qty_texts_by_task[tasks_by_id[text.task_id]] += 1
     return render_template(
       "admin/dashboard.html",
       admin_users=admin_users,
-      is_storing_notes=is_storing_notes,
+      is_storing_texts=is_storing_texts,
       other_users=other_users,
       purge_form = GeneralSubmitForm(),
       qty_admin_users=len(admin_users),
       qty_buggies=len(buggies),
-      qty_notes_by_task=qty_notes_by_task,
-      qty_notes=qty_notes,
+      qty_texts_by_task=qty_texts_by_task,
+      qty_texts=qty_texts,
       qty_other_users=len(other_users),
       qty_students_active=len(students_active),
       qty_students_logged_in_this_week=len(students_logged_in_this_week),
@@ -538,7 +538,6 @@ def bulk_register(data_format=None):
               result = db.session.execute(
                   insert(User.__table__),
                   clean_user_data
-                  # %(username)s, %(ext_username)s, %(email)s, %(password)s, %(created_at)s, %(first_name)s, %(last_name)s, %(is_active)s, %(is_admin)s, %(latest_json)s, %(is_student)s, %(notes)s)
               )
               db.session.commit()
             except Exception as e:
@@ -599,14 +598,14 @@ def show_user(user_id):
     user = User.query.filter_by(username=user_id).first()
   if user is None:
     abort(404)
-  notes_by_task_id=Note.get_dict_notes_by_task_id(user.id),
+  texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
   return  render_template(
       "admin/user.html",
       user=user,
-      is_own_note=user.id == current_user.id,
+      is_own_text=user.id == current_user.id,
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
-      notes_by_task_id=notes_by_task_id,
-      qty_notes=len(notes_by_task_id),
+      texts_by_task_id=texts_by_task_id,
+      qty_texts=len(texts_by_task_id),
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
   )
@@ -1182,22 +1181,22 @@ def get_uploaded_json_for_user(user_id):
   response.headers["Content-type"] = "application/json"
   return response
 
-@blueprint.route("/json/note/<note_id>", methods=["GET"])
-def get_notes_for_user_task(note_id):
+@blueprint.route("/json/text/<text_id>", methods=["GET"])
+def get_text_for_user_task(text_id):
   payload = ""
   if current_user and current_user.is_authenticated and current_user.is_buggy_admin:
-    note = Note.get_by_id(note_id)
-    if note is None:
+    text = TaskText.get_by_id(text_id)
+    if text is None:
       status = 404
     else:
       status = 200
-      payload = {       
-          "id": note.id,
-          "created_at": stringify_datetime(note.created_at),
-          "modified_at": stringify_datetime(note.modified_at),
-          "user_id": note.user_id,
-          "task_id": note.task_id,
-          "text": note.text,
+      payload = {
+          "id": text.id,
+          "created_at": stringify_datetime(text.created_at),
+          "modified_at": stringify_datetime(text.modified_at),
+          "user_id": text.user_id,
+          "task_id": text.task_id,
+          "text": text.text,
         }
   else:
      status = 403
@@ -1205,9 +1204,9 @@ def get_notes_for_user_task(note_id):
   response.headers["Content-type"] = "application/json"
   return response
 
-@blueprint.route("/notes", methods=["GET"], strict_slashes=False)
+@blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
 @login_required
-def notes():
+def task_texts():
     if not current_user.is_buggy_admin:
         abort(403)
     # TODO: this should be using joins and stuff but let's make python
@@ -1216,23 +1215,23 @@ def notes():
     #       Possibly all in JSON too for interactive graphing on the page
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     if not tasks:
-        flash("Cannot display notes because there are no tasks — maybe you need to load them into the database?", "warning")
+        flash("Cannot display texts because there are no tasks — maybe you need to load them into the database?", "warning")
         return redirect(url_for("admin.admin"))
     students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
     usernames_by_id = {student.id: student.username for student in students}
-    notes_by_username = {student.username: {} for student in students}
-    for note in Note.query.all():
-        if note.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
-            notes_by_username[usernames_by_id[note.user_id]][note.task_id] = note
+    texts_by_username = {student.username: {} for student in students}
+    for text in TaskText.query.all():
+        if text.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
+            texts_by_username[usernames_by_id[text.user_id]][text.task_id] = text
     buggies_by_username = {student.username: {} for student in students}
     for buggy in Buggy.query.all():
         if buggy.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
            buggies_by_username[usernames_by_id[buggy.user_id]] = buggy
     return render_template(
-       "admin/notes.html",
+       "admin/task_texts.html",
        students=students,
        tasks=tasks,
-       notes_by_username=notes_by_username,
+       texts_by_username=texts_by_username,
        buggies_by_username=buggies_by_username
     )
 

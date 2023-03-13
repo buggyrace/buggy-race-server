@@ -8,10 +8,10 @@
       {% else %}
           {{ user.pretty_username }}'s
       {% endif %}
-      {{ report_type }} task notes
+      {{ report_type }} task texts
     </h1>
   </div>
-  {% include "admin/_task_notes_for_user.html" %}
+  {% include "admin/_task_texts_for_user.html" %}
   <div class="row mt-5">
     <div class="col btn-collection">
       <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary">Task list &rtri;</a>

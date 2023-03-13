@@ -91,9 +91,9 @@
                     <h3 class="m-0 col">
                       <a href="#{{ task.anchor }}">{{ task.fullname }}</a> {{ task.title }}
                     </h3>
-                    {% if is_storing_notes %}
+                    {% if is_storing_texts %}
                     <div class="col-md-3 text-right p-2">
-                      <a class="btn btn-outline-secondary btn-white btn-task-note" href="{{ url_for('user.note', task_fullname=task.fullname) }}">Add&nbsp;note&nbsp;&rtri;</a>
+                      <a class="btn btn-outline-secondary btn-white btn-task-text" href="{{ url_for('user.task_text', task_fullname=task.fullname) }}">Add&nbsp;texts&nbsp;&rtri;</a>
                     </div>
                     {% endif %}
                   </div>

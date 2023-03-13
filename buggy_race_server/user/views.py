@@ -22,8 +22,8 @@ from flask_login import login_required, current_user
 from functools import wraps
 from wtforms import ValidationError
 
-from buggy_race_server.admin.forms import NoteForm, NoteDeleteForm
-from buggy_race_server.admin.models import Note, Task
+from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
+from buggy_race_server.admin.models import TaskText, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
@@ -82,7 +82,7 @@ def settings():
         is_secure=True, # TODO investigate when this can be false
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-        is_using_notes=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name],
+        is_using_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
     )
 
@@ -193,7 +193,7 @@ def change_password():
 @login_required
 @active_user_required
 def set_api_secret():
-    # note: the API secret's lifespan is hardcoded (1 hour): see pretty_lifespan below
+    # the API secret's lifespan is hardcoded (1 hour): see pretty_lifespan below
     warn_if_insecure()
     form = ApiSecretForm()
     is_confirmation = False
@@ -261,40 +261,40 @@ def download_vscode_workspace():
     response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
     return response
 
-@blueprint.route("/note/delete", methods=['POST'])
+@blueprint.route("/task-text/delete", methods=['POST'])
 @login_required
 @active_user_required
-def delete_note():
-    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-        flash("Notes are not enabled on this project", "warning")
+def delete_task_text():
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        flash("Task texts are not enabled on this project", "warning")
         abort(404)
-    form = NoteDeleteForm(request.form)
+    form = TaskTextDeleteForm(request.form)
     if form.validate_on_submit():
         if not form.is_confirmed.data:
-            flash("Did not delete note (you didn't confirm it)", "warning")
+            flash("Did not delete task text (you didn't confirm it)", "warning")
         else:
-            user = current_user # TODO: admin deletes others' notes
-            note = Note.get_by_id(form.note_id.data)
-            if not note:
+            user = current_user # TODO: admin deletes others' texts
+            text = TaskText.get_by_id(form.text_id.data)
+            if not text:
                 abort(404)
-            task = Task.get_by_id(note.task_id)
-            if not task or note.user_id != user.id:
-                flash("Did not delete note: data mismatch", "warning")
+            task = Task.get_by_id(text.task_id)
+            if not task or text.user_id != user.id:
+                flash("Did not delete text: data mismatch", "warning")
             else:
-                note.delete()
-                flash(f"OK, deleted {user.pretty_username}'s note for task {task.fullname}", "success")
+                text.delete()
+                flash(f"OK, deleted {user.pretty_username}'s text for task {task.fullname}", "success")
     else:
         flash_errors(form)
-    return redirect(url_for('user.list_notes'))
+    return redirect(url_for('user.list_task_texts'))
 
 
-@blueprint.route("/note/<task_fullname>", methods=['GET', 'POST'])
+@blueprint.route("/task-text/<task_fullname>", methods=['GET', 'POST'])
 @login_required
 @active_user_required
-def note(task_fullname):
-    """Show note for current user"""
-    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-        flash(f"Notes are not enabled on this project ({ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name} is not set)", "warning")
+def task_text(task_fullname):
+    """Show task text for current user"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        flash(f"Task texts are not enabled on this project ({ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name} is not set)", "warning")
         abort(404)
     (phase, name) = Task.split_fullname(task_fullname)
     if phase is None:
@@ -309,13 +309,13 @@ def note(task_fullname):
         abort(404)
     if not task.is_enabled:
         flash("Warning: this task is currently not part of the project (it's been hidden)", "danger")
-    form = NoteForm(request.form)
-    delete_form = NoteDeleteForm()
-    user = current_user # TODO allow admins to edit notes?
-    note = Note.query.filter_by(user_id=user.id, task_id=task.id).first()
-    is_new_note = note is None
-    if is_new_note:
-        note = Note(
+    form = TaskTextForm(request.form)
+    delete_form = TaskTextDeleteForm()
+    user = current_user # TODO allow admins to edit texts?
+    tasktext = TaskText.query.filter_by(user_id=user.id, task_id=task.id).first()
+    is_new_text = tasktext is None
+    if is_new_text:
+        tasktext = TaskText(
             user_id=current_user.id,
             task_id=task.id,
             text="",
@@ -328,79 +328,79 @@ def note(task_fullname):
             flash("Mismatched user in request", "danger")
             abort(400)
         if form.validate_on_submit():
-            note.text = form.text.data
-            if not is_new_note:
-                note.modified_at = datetime.now()
-            note.save()
-            flash(f"OK, saved {user.pretty_username}'s note for task {task.fullname}", "success")
-            return redirect(url_for("user.list_notes"))
+            tasktext.text = form.text.data
+            if not is_new_text:
+                tasktext.modified_at = datetime.now()
+            tasktext.save()
+            flash(f"OK, saved {user.pretty_username}'s text for task {task.fullname}", "success")
+            return redirect(url_for("user.list_task_texts"))
         else:
             flash_errors(form)
-    is_own_note = current_user.id == note.user_id
+    is_own_text = current_user.id == tasktext.user_id
     return render_template(
-        "user/note.html",
+        "user/task_text.html",
         user=user,
-        is_own_note=is_own_note,
-        is_new_note=is_new_note,
-        note=note,
+        is_own_text=is_own_text,
+        is_new_text=is_new_text,
+        tasktext=tasktext,
         task=task,
         report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
         form=form,
         delete_form=delete_form,
-        pretty_timestamp=(note.modified_at or note.created_at).strftime("%Y-%m-%d %H:%M"),
+        pretty_timestamp=(tasktext.modified_at or tasktext.created_at).strftime("%Y-%m-%d %H:%M"),
     )
 
-@blueprint.route("/notes", methods=['GET'], strict_slashes=False)
+@blueprint.route("/task-texts", methods=['GET'], strict_slashes=False)
 @login_required
 @active_user_required
-def list_notes():
-    """Show all notes for current user"""
-    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-        flash("Notes are not enabled on this project", "warning")
+def list_task_texts():
+    """Show all texts for current user"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        flash("Task texts are not enabled on this project", "warning")
         abort(404)
     user = current_user
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
-    notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
+    texts_by_task_id = TaskText.get_dict_texts_by_task_id(user.id)
     return render_template(
-        'user/notes.html',
+        'user/task_texts.html',
         user=user,
-        is_own_note=user.id == current_user.id,
-        qty_notes=len(notes_by_task_id),
+        is_own_text=user.id == current_user.id,
+        qty_texts=len(texts_by_task_id),
         tasks_by_phase=tasks_by_phase,
-        notes_by_task_id=notes_by_task_id,
+        texts_by_task_id=texts_by_task_id,
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
 
-@blueprint.route("/download/notes/<username>/<format>", methods=['GET'])
+@blueprint.route("/download/texts/<username>/<format>", methods=['GET'])
 @login_required
 @active_user_required
-def download_notes(username, format):
-    """Get notes for current user in HTML or text format (html or txt)"""
-    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_NOTES.name]:
-        flash("Notes are not enabled on this project", "warning")
+def download_texts(username, format):
+    """Get texts for current user in HTML or text format (html or txt)"""
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        flash("Task texts are not enabled on this project", "warning")
         abort(404)
     if format not in ["html", "md2html", "txt"]:
-        flash("Notes can be downloaded as HTML or plain text (html or txt) only", "error")
+        flash("Task texts can be downloaded as HTML or plain text (html or txt) only", "error")
         abort(404)
     user = User.query.filter_by(username=username).first()
     if not user:
         flash(f"Can't find user {username}", "danger")
         abort(404)
     if username != user.username and not current_user.is_buggy_admin:
-        flash("Cannot download another user's notes", "danger")
+        flash("Cannot download another user's texts", "danger")
         abort(403)
     tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}
-    notes_by_task_id = Note.get_dict_notes_by_task_id(user.id)
+    texts_by_task_id = TaskText.get_dict_texts_by_task_id(user.id)
     if format == "md2html":
-        for task_id in notes_by_task_id:
-            notes_by_task_id[task_id].text = markdown.markdown(notes_by_task_id[task_id].text)
+        for task_id in texts_by_task_id:
+            texts_by_task_id[task_id].text = markdown.markdown(texts_by_task_id[task_id].text)
         format = "html"
-    filename = get_download_filename(f"notes-{user.username}.{format}", want_datestamp=True)        
+    filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)        
     response = make_response(
         render_template(
-            f"user/notes_download.{format}",
+            f"user/task_texts_download.{format}",
             username=user.username,
-            notes_by_task_id=notes_by_task_id,
+            texts_by_task_id=texts_by_task_id,
             tasks_by_id=tasks_by_id,
             project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
             report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],

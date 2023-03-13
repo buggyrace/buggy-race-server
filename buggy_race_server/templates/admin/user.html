@@ -93,7 +93,7 @@
           {% if config['IS_STUDENT_USING_GITHUB_REPO'] %}
             <tr>
               <td>
-                GitHub user
+                GitHub username
               </td>
               <td>
                 {% if user.github_username is not none %}
@@ -166,7 +166,13 @@
           <strong class="mr-3">Buggy JSON:</strong>
           <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
         </div>
+        {% if user.later_json %}
 <pre class="pt-3 px-3">{{ user.latest_json }}</pre>
+        {% else %}
+          <p class="pt-3 px-3">
+            <em>No JSON</em>
+          </p>
+        {% endif %}
       </div>
     </div>
   </div>

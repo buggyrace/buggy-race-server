@@ -130,14 +130,15 @@ def register():
     if form.validate_on_submit():
         User.create(
             username=form.username.data,
-            ext_username=form.ext_username.data if form.ext_username else None,
-            email=form.email.data if form.email else None,
-            first_name=form.first_name.data if form.first_name else None,
-            last_name=form.last_name.data if form.last_name else None,
-            password=form.password.data,
-            is_student=form.is_student.data,
             comment=form.comment.data,
+            email=form.email.data if form.email else None,
+            ext_username=form.ext_username.data if form.ext_username else None,
+            first_name=form.first_name.data if form.first_name else None,
             is_active=True,
+            is_student=form.is_student.data,
+            last_name=form.last_name.data if form.last_name else None,
+            latest_json="",
+            password=form.password.data,
         )
         flash("Thank you for registering. You can now log in.", "success")
         return redirect(url_for("public.home"))

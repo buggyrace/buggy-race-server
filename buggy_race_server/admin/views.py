@@ -277,9 +277,8 @@ def setup():
       ConfigSettingNames._SETUP_STATUS.name,
       setup_status
     )
-    del session[ConfigSettingNames._SETUP_STATUS.name] # clear the session: we're done
     flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
-    return redirect( url_for('public.home'))
+    return setup_summary()
   if setup_status == 1:
     form = SetupAuthForm(request.form)
     # here we grant this session (effectively, this user) setup status
@@ -520,7 +519,7 @@ def bulk_register(data_format=None):
               is_active=True,
               is_student=True,
               latest_json="",
-              notes=_csv_tidy_string(row, 'notes', want_lower=False),
+              comment=_csv_tidy_string(row, 'comment', want_lower=False),
             )
             #current_app.logger.info("{}, pw:{}".format(username, password))
             if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
@@ -623,7 +622,7 @@ def edit_user(user_id):
   form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
     if form.validate_on_submit():
-      user.notes = form.notes.data
+      user.comment = form.comment.data
       user.is_student = form.is_student.data
       user.is_active = form.is_active.data
       if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:

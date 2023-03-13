@@ -27,7 +27,7 @@ class UserForm(FlaskForm):
     last_name = StringField("Last name")
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active?")
-    notes = TextAreaField("Notes for staff", validators=[Optional(), Length(max=255)])
+    comment = TextAreaField("Comment", validators=[Optional(), Length(max=1024)])
     auth_code = PasswordField("Authorisation code",  [is_authorised])
 
     @staticmethod

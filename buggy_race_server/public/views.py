@@ -136,7 +136,7 @@ def register():
             last_name=form.last_name.data if form.last_name else None,
             password=form.password.data,
             is_student=form.is_student.data,
-            notes=form.notes.data,
+            comment=form.comment.data,
             is_active=True,
         )
         flash("Thank you for registering. You can now log in.", "success")

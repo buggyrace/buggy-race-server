@@ -83,7 +83,7 @@ class User(UserMixin, SurrogatePK, Model):
     api_secret =  Column(db.String(30), nullable=True)
     api_secret_at = Column(db.DateTime, nullable=True)
     api_key = Column(db.String(30), nullable=True)
-    notes = Column(db.Text(), default=False)
+    comment = Column(db.Text(), default=False)
 
     def __init__(self, username, ext_username=None, email=None, password=None, **kwargs):
         """Create instance."""
@@ -132,7 +132,7 @@ class User(UserMixin, SurrogatePK, Model):
             'is_admin': self.is_admin,
             'latest_json': self.latest_json,
             'is_student': self.is_student,
-            'notes': self.notes,
+            'comment': self.comment,
         }
 
     def get_fields_as_dict_for_csv(self):
@@ -154,7 +154,7 @@ class User(UserMixin, SurrogatePK, Model):
             'json_length': self.pretty_json_length,
             'github_username': self.github_username,
             'github_repo': repo,
-            'notes': self.notes,
+            'comment': self.comment,
         }
         mandatory_fieldnames = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
         for fieldname in mandatory_fieldnames:

@@ -150,14 +150,14 @@
     <div class="col-md-6">
       <div class="border mb-3">
         <div class="alert-secondary p-3 ">
-            <strong class="mr-3">Staff notes:</strong> 
+            <strong class="mr-3">Comment:</strong> 
             <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
         </div>
         <p class="pt-3 px-3">
-          {% if user.notes %}
-            {{ user.notes }}
+          {% if user.comment %}
+            {{ user.comment }}
           {% else %}
-            <em>No notes</em>
+            <em>No comment</em>
           {% endif %}
         </p>
       </div>

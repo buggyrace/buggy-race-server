@@ -114,16 +114,15 @@
                 </td>
               {% endif %}
               <td style="width:1em">
-                {% if u.username in admin_usernames %} &star; {% endif %}
-                {% if u.is_student %} &Sopf; {% endif %}
+                <span>{% if u.username in admin_usernames %}&star;{% endif %}{% if u.is_student %}&Sopf;{% endif %}</span>
               </td>
               <td class="u-username">
                 <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
-                {% if u.notes %}
-                 <a href="#" class="show-notes"
-                   data-notes="{{ u.notes|replace('"', '\\"')|replace("\\n", "\\n") }}"
-                   onclick='alert(this.dataset.notes.replace(/\\\"/g,"\""))'
-                 >*</a>
+                {% if u.comment %}
+                 <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 float-right" href="#"
+                   data-comment="{{ u.comment|replace('"', '\\"')|replace("\\n", "\\n") }}"
+                   onclick='alert(this.dataset.comment.replace(/\\\"/g,"\""))'
+                 ><strong>&#x2731;</strong></a>
                 {% endif %}
               </td>
               {%if want_detail %}

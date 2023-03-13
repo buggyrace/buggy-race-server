@@ -22,7 +22,15 @@
             <div class="col my-2">
               <div class="form-group">
                 {{form.type.label}}
-                {{form.type(placeholder="info", class_="form-control")}}
+                <select name="type" class="form-control">
+                  {% for option_group in type_option_groups %}
+                    <optgroup label="{{ option_group }}">
+                      {% for option in type_option_groups[option_group] %}
+                        <option {% if announcement.type == option %}selected{% endif %}>{{ option }}</option>
+                      {% endfor %}
+                    </optgroup>
+                  {% endfor %}
+                </select>
               </div>
             </div>
             <div class="col my-2">
@@ -59,11 +67,11 @@
       </p>
       <p>
         Announcements of type
+        <code class="alert-danger p-1">danger</code>,
         <code class="alert-info p-1">info</code>,
-        <code class="alert-warning p-1">warning</code>, 
-        <code class="alert-danger p-1">danger</code>, 
-        or
-        <code class="bg-yellow p-1">special</code> appear on all pages (except tech notes).
+        <code class="bg-yellow p-1">special</code> or
+        <code class="alert-warning p-1">warning</code>
+        appear on all pages (except tech notes).
       </p>
       <p>
         The <code>login</code> and <code>tagline</code> announcements are

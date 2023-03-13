@@ -82,6 +82,19 @@ class Announcement(SurrogatePK, Model):
     # Be careful with this: broken HTML here will cause problems!
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
 
+    TYPE_OPTION_GROUPS = {
+       "Shown at top of all pages:": [
+            AnnouncementType.DANGER.value,
+            AnnouncementType.INFO.value,
+            AnnouncementType.SPECIAL.value,
+            AnnouncementType.WARNING.value,
+        ],
+        "Shown within specific page:": [
+            AnnouncementType.LOGIN.value,
+            AnnouncementType.TAGLINE.value,
+        ]
+    }
+
     """An announcement to display on top of all pages."""
 
     __tablename__ = "announcements"

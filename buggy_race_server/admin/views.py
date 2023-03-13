@@ -858,7 +858,8 @@ def edit_announcement(announcement_id=None):
       is_html=is_html,
       is_visible=is_visible,
       announcement=announcement,
-      delete_form=delete_form
+      type_option_groups=Announcement.TYPE_OPTION_GROUPS,
+      delete_form=delete_form,
     )
 
 @blueprint.route("/announcements/<int:announcement_id>/publish", methods=["POST"])

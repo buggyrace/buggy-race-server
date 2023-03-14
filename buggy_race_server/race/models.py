@@ -12,7 +12,7 @@ from buggy_race_server.database import (
     SurrogatePK,
     db,
 )
-
+from buggy_race_server.buggy.models import Buggy
 
 class Race(SurrogatePK, Model):
     """A race."""
@@ -52,4 +52,22 @@ class Race(SurrogatePK, Model):
         return self.start_at.strftime('%Y-%m-%d-%H-%M')
 
 #      return f"{self.league}self.start_at.strftime('%Y-%m-%d-%H-%M')
+
+class RaceResult(SurrogatePK, Model):
+    """A buggy's race result 
+    Note that this links to the user not the buggy, because buggy records are
+    not constant: they can and will change between races (if you need to find
+    the details of buggie at the time they were entered in a race, follow that
+    race's buggies_csv_url).
+    """
+    __tablename__ = "results"
+    id = db.Column(db.Integer, primary_key=True)
+    race_id = db.Column(db.Integer, db.ForeignKey('races.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    flag_color = db.Column(db.String(32), nullable=False, default=Buggy.DEFAULTS["flag_color"])
+    flag_color_secondary = db.Column(db.String(32), nullable=False, default=Buggy.DEFAULTS["flag_color_secondary"])
+    flag_pattern = db.Column(db.String(32), nullable=False, default=Buggy.DEFAULTS["flag_pattern"])
+    cost = db.Column(db.Integer, nullable=True)
+    race_position = db.Column(db.Integer, nullable=False, default=0)
+    violations_str = db.Column(db.String(255), nullable=True)
 

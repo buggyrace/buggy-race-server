@@ -31,8 +31,13 @@ class Race(SurrogatePK, Model):
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
     is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name]))
-    result_log_url = Column(db.String(120), unique=True, nullable=True)
+    result_log_url = Column(db.String(255), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
+    buggies_entered = db.Column(db.Integer, nullable=False, default=0)
+    buggies_started = db.Column(db.Integer, nullable=False, default=0)
+    buggies_finished = db.Column(db.Integer, nullable=False, default=0)
+    buggies_csv_url = Column(db.String(255), nullable=True)
+    race_log_url = Column(db.String(255), nullable=True)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -47,4 +52,4 @@ class Race(SurrogatePK, Model):
         return self.start_at.strftime('%Y-%m-%d-%H-%M')
 
 #      return f"{self.league}self.start_at.strftime('%Y-%m-%d-%H-%M')
-    
+

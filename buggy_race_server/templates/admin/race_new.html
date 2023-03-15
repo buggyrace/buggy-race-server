@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Add new race
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <p>
+        If there is a race that hasn't run yet, and it's <em>not</em> hidden,
+        it <strong>will automatically be announced</strong> on the
+        <a href="{{ url_for('public.announce_races') }}">race page</a>.
+      </p>
+    </div>
+    <div class="col-lg-6">
+      <p>
+        There is currently no mechanism for handling races that have run: they
+        just don't get announced (!).
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col grey-wrapper p-2">  
+    <form id="RaceForm" class="form form-race" method="POST" action="" role="form">
+      {{ form.csrf_token }}
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{ form.title.label }}
+        </div>
+        <div class="col-sm-4">
+          {{ form.title(placeholder="Season opener") }}
+        </div>
+        <div class="col-sm-5">
+          Title is used to distinguish this race.
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{form.desc.label}}
+        </div>
+        <div class="col-sm-4">
+          {{form.desc(placeholder="Description of setting, etc" )}}
+        </div>
+        <div class="col-sm-5">
+          Use the description to add any detail including environmental factors
+          if terrain or track type matters in the races you're running.
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{form.start_at.label}}
+        </div>
+        <div class="col-sm-4">
+          {{ form.start_at(placeholder="YYYY-MM-DD HH:MM") }}
+        </div>
+        <div class="col-sm-5">
+          <p>
+            The start of the race is effectively the <strong>deadline for
+            uploading buggy JSON</strong>. This isn't enforced automatically.
+          </p>
+          <p><em>Default:</em> 2 minutes to midnight, tomorrow</p>
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{ form.cost_limit.label }}
+        </div>
+        <div class="col-sm-4">
+          {{ form.cost_limit(placeholder=default_race_cost_limit) }}
+        </div>
+        <div class="col-sm-5">
+          <p>
+            The maximum cost of buggies that qualify for this race.
+            If a buggy's cost is greater than this limit at the time
+            of the race start, it will be disqualified.
+          </p>
+          <p>
+            <em>Default:</em> {{ default_race_cost_limit }}
+          </p>
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col py-2">
+          <input class="btn btn-danger" type="submit" value="Add new race">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+

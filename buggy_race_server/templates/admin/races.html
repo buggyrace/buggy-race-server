@@ -8,36 +8,50 @@
     </h1>
   </div>
   <div class="row">
-    <table class="col table table-striped table-bordered table-hover table-responsive-lg bg-white">
+    <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
         <tr>
-          <th></th>
-          <th>id</th>
-          <th>race time</th>
-          <th>cost limit</th>
-          <th>title</th>
+          <th>Shown?</th>
+          <th>Race start</th>
+          <th>Cost limit</th>
+          <th>Title/description</th>
+          <th>Entered</th>
+          <th>Started</th>
+          <th>Finished</th>
         </tr>
       </thead>
       <tbody>
-        {% for r in races %}
-          <tr class="race-visible-{{ r.is_visible }}">
+        {% for race in races %}
+          <tr class="race-visible-{{ race.is_visible }}">
             <td>
-              {% if r.is_visible %} &check; {% endif %}
-            </td>
-            <td>
-              {{ r.id }}
-            </td>
-            <td>
-              {{ r.start_at.strftime('%Y-%m-%d %H:%M') }}
-            </td>
-            <td>
-              {{ r.cost_limit }}
-            </td>
-            <td>
-              {{ r.title }}
-              {% if r.desc %}
-              <div style="padding:0.2em 0.2em 0.2em 2em;">{{ r.desc|safe }}</div>
+              {% if race.is_visible %}
+                Yes
+              {% else %}
+                No
               {% endif %}
+            </td>
+            <td>
+              {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
+            </td>
+            <td>
+              {{ race.cost_limit }}
+            </td>
+            <td>
+              <div class="cell-title">
+                {{ race.title }}
+              </div>
+              {% if race.desc %}
+                <div class="my-2">{{ race.desc }}</div>
+              {% endif %}
+            </td>
+            <td>
+              {{ race.buggies_entered }}
+            </td>
+            <td>
+              {{ race.buggies_started }}
+            </td>
+            <td>
+              {{ race.buggies_finished }}
             </td>
           </tr>
         {% endfor %}

@@ -4,12 +4,12 @@
 import csv
 import re
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
+from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
 from flask_login import current_user, login_required
 from buggy_race_server.race.forms import RaceForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors
-
+from buggy_race_server.config import ConfigSettingNames
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
@@ -46,7 +46,11 @@ def new_race():
         else:
             flash("Did not create a race!", "danger")
             flash_errors(form)
-      return render_template("admin/new_race.html", form=form)
+      return render_template(
+         "admin/race_new.html",
+         form=form,
+         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
+      )
 
 @blueprint.route("/<league>/<race_slug>/<data_format>")
 @blueprint.route("/<league>/<race_slug>")

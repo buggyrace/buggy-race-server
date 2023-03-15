@@ -578,3 +578,11 @@ h2.alert-title {
 .alert-success h2.alert-title { background-color: #c3e6cb; }
 .alert-primary h2.alert-title { background-color: #b8daff; }
 .alert-secondary h2.alert-title { background-color: #d6d8db; }
+
+td .cell-title {
+  margin: -0.75rem -0.75rem 0.2rem -0.75rem;;
+  padding:0.5em;
+  background-color: #dddddd;
+  font-weight: bold;
+  min-height:1rem;
+}

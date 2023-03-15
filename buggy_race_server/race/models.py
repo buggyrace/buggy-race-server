@@ -38,6 +38,7 @@ class Race(SurrogatePK, Model):
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)
     buggies_csv_url = Column(db.String(255), nullable=True)
     race_log_url = Column(db.String(255), nullable=True)
+    is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
 
     def __init__(self, **kwargs):
         """Create instance."""

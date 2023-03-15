@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
     DateTimeField,
+    HiddenField,
     IntegerField,
     StringField,
     TextAreaField,
@@ -16,6 +17,7 @@ from buggy_race_server.race.models import Race
 
 class RaceForm(FlaskForm):
     """Race form."""
+    id = HiddenField()
 
     title = StringField(
         "Title", validators=[Optional(), Length(max=80)]
@@ -47,7 +49,8 @@ class RaceForm(FlaskForm):
             return False
         if self.start_at.data is None:
             self.start_at.data = Race.get_default_race_time()
-        if Race.query.filter_by(start_at=self.start_at.data).first():
+        race_at_this_time = Race.query.filter_by(start_at=self.start_at.data).first()
+        if race_at_this_time and self.id.data != str(race_at_this_time.id):
             self.start_at.errors.append("Already got a race starting at this time")
             return False
         return True

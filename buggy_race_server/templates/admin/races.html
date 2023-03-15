@@ -11,10 +11,12 @@
     <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
         <tr>
-          <th>Shown?</th>
-          <th>Race start</th>
-          <th>Cost limit</th>
-          <th>Title/description</th>
+          <th></th>
+          <th>Race<br>shown?</th>
+          <th>Results<br>shown?</th>
+          <th>Race start<br>(upload deadline)</th>
+          <th>Title &amp;<br>Description</th>
+          <th>Cost<br>limit</th>
           <th>Entered</th>
           <th>Started</th>
           <th>Finished</th>
@@ -22,9 +24,26 @@
       </thead>
       <tbody>
         {% for race in races %}
+          {% if race.start_at.date() == date_today %}
+            <tr class="">
+              <td colspan="9" class="text-center alert-success">
+                &darr; This race is today!
+              </td>
+            </tr>
+            {% endif %}
           <tr class="race-visible-{{ race.is_visible }}">
             <td>
+              <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit&nbsp;&rtri;</a>
+            </td>
+            <td class="bool-{{ race.is_visible | lower }}">
               {% if race.is_visible %}
+                Yes
+              {% else %}
+                No
+              {% endif %}
+            </td>
+            <td class="bool-{{ race.is_result_visible | lower }}">
+              {% if race.is_result_visible %}
                 Yes
               {% else %}
                 No
@@ -34,9 +53,6 @@
               {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
             </td>
             <td>
-              {{ race.cost_limit }}
-            </td>
-            <td>
               <div class="cell-title">
                 {{ race.title }}
               </div>
@@ -44,13 +60,16 @@
                 <div class="my-2">{{ race.desc }}</div>
               {% endif %}
             </td>
-            <td>
+            <td class="text-right">
+              {{ race.cost_limit }}
+            </td>
+            <td class="text-right">
               {{ race.buggies_entered }}
             </td>
-            <td>
+            <td class="text-right">
               {{ race.buggies_started }}
             </td>
-            <td>
+            <td class="text-right">
               {{ race.buggies_finished }}
             </td>
           </tr>

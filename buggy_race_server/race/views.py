@@ -7,7 +7,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
 from flask_login import current_user, login_required
-from buggy_race_server.race.forms import RaceForm
+from buggy_race_server.race.forms import RaceForm, RaceDeleteForm
 from buggy_race_server.race.models import Race
 from buggy_race_server.utils import flash_errors
 from buggy_race_server.config import ConfigSettingNames
@@ -33,59 +33,90 @@ def list_races():
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
 @login_required
 def new_race():
-    """Create a new race."""
-    if not current_user.is_buggy_admin:
-      abort(403)
-    else:
-      form = RaceForm(request.form)
-      if request.method == "POST":
-        if form.validate_on_submit():
-            Race.create(
-                title=form.title.data,
-                desc=form.desc.data,
-                cost_limit=form.cost_limit.data,
-                start_at=form.start_at.data,
-                is_visible=form.is_visible.data,
-            )
-            flash(f"Race created, to run at {form.start_at.data}", "success")
-            return redirect(url_for("race.list_races"))
-        else:
-            flash("Did not create a race!", "danger")
-            flash_errors(form)
-      return render_template(
-         "admin/race_new.html",
-         form=form,
-         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
-      )
+    return edit_race(None)
 
 @blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
 @login_required
-def edit_race(race_id):
+def edit_race(race_id=None):
     """Edit an existing race (differs from new race because may
        have some results?)."""
     if not current_user.is_buggy_admin:
         abort(403)
-    race = Race.get_by_id(race_id)
-    if race is None:
-       flash("No such race", "danger")
-       abort(404)
+    if race_id is None:
+        race = None
+        delete_form = None
+    else:
+        race = Race.get_by_id(race_id) if race_id else None
+        if race is None:
+            flash("No such race", "danger")
+            abort(404)
+        delete_form = RaceDeleteForm(race_id=race_id)
     form = RaceForm(request.form, obj=race)
     if request.method == "POST":
         if form.validate_on_submit():
-            race.title = form.title.data.strip()
-            race.desc = form.desc.data.strip()
-            race.save()
-            pretty_race_title = f"race \"{race.title}\"" if race.title else "untitled race"
-            flash(f"OK, updated {pretty_race_title}", "success")
+            if race is None:
+                race = Race.create(
+                  title=form.title.data.strip(),
+                  desc=form.desc.data.strip(),
+                  cost_limit=form.cost_limit.data,
+                  start_at=form.start_at.data,
+                  is_visible=form.is_visible.data,
+                )
+                if race.start_at.date() < datetime.now().date():
+                    success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
+                else:
+                    success_msg = f"OK, created new race"
+            else:
+                race.title = form.title.data.strip()
+                race.desc = form.desc.data.strip()
+                race.start_at = form.start_at.data
+                race.cost_limit = form.cost_limit.data
+                race.is_visible = form.is_visible.data
+                race.is_result_visible = form.is_result_visible.data
+                race.results_uploaded_at = form.results_uploaded_at.data
+                race.result_log_url = form.result_log_url.data
+                race.buggies_csv_url = form.buggies_csv_url.data
+                race.race_log_url = form.race_log_url.data
+                race.save()
+                pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
+                success_msg = f"OK, updated {pretty_title}" 
+            flash(success_msg, "success")
             return redirect(url_for("race.list_races"))
         else:
-            pretty_race_title = f"race \"{race.title}\"" if race.title else "untitled race"
-            flash(f"Did not update {pretty_race_title}", "danger")
+            if race:
+                pretty_race_title = f"race \"{race.title}\"" if race.title else "untitled race"
+                flash(f"Did not update {pretty_race_title}", "danger")
+            else:
+                flash(f"Did not create new race", "danger")
             flash_errors(form)
     return render_template(
         "admin/race_edit.html",
         form=form,
+        race=race,
+        default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
+        default_is_race_visible=current_app.config[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name],
+        delete_form=delete_form,
     )
+
+@blueprint.route("/<race_id>/delete", methods=["POST"])
+@login_required
+def delete_race(race_id):
+    if not current_user.is_buggy_admin:
+        abort(403)
+    form = RaceDeleteForm(request.form)
+    if form.validate_on_submit():
+        if not form.is_confirmed.data:
+            flash("Did not delete race (you didn't confirm it)", "danger")
+            return redirect(url_for('race.edit_race', race_id=race_id))
+        race = Race.get_by_id(race_id)
+        if race is None:
+            flash("Error: coudldn't find announcement to delete", "danger")
+        else:
+            race.delete()
+            flash("OK, deleted race", "success")
+    else:
+      flash("Error: incorrect button wiring, nothing deleted", "danger")
+    return redirect(url_for('race.list_races'))
 
 @blueprint.route("/<league>/<race_slug>/<data_format>")
 @blueprint.route("/<league>/<race_slug>")

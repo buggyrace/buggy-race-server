@@ -33,6 +33,7 @@ class Race(SurrogatePK, Model):
     is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name]))
     result_log_url = Column(db.String(255), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
+    results_uploaded_at = Column(db.DateTime, nullable=True)
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)

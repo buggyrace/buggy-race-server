@@ -4,77 +4,229 @@
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3">
-      Edit race
+      {% if race %}
+        Edit
+      {% else %}
+        New
+      {% endif %}
+      Race
     </h1>
   </div>
   <div class="row">
-    <div class="col grey-wrapper p-2">  
-    <form id="RaceForm" class="form form-race" method="POST" action="" role="form">
-      {{ form.csrf_token }}
-      {{ form.id() }}
-      <div class="row bg-white py-2 m-1">
-        <div class="col-sm-3">
-          {{ form.title.label }}
+    <div class="col grey-wrapper p-2">
+      <form id="RaceForm" class="form form-race" method="POST"
+        action="{% if race %}{{ url_for('race.edit_race', race_id=race.id)}}{% else %}{{ url_for('race.new_race') }}{% endif %}"
+        role="form">
+        {{ form.csrf_token }}
+        {{ form.id() }}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.title.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.title(placeholder="Season opener", class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            Title is used to distinguish this race.
+          </div>
         </div>
-        <div class="col-sm-4">
-          {{ form.title(placeholder="Season opener") }}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.desc.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.desc(class_="form-control mr-sm-1" )}}
+          </div>
+          <div class="col-sm-5">
+            Use the description to add any detail including environmental factors
+            if terrain or track type matters in the races you're running.
+          </div>
         </div>
-        <div class="col-sm-5">
-          Title is used to distinguish this race.
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.start_at.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.start_at(placeholder="YYYY-MM-DD HH:MM", class_="form-control mr-sm-1", type="datetime-local") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The start of the race is effectively the <strong>deadline for
+              uploading buggy JSON</strong>. This isn't enforced automatically.
+            </p>
+            <p><em>Default:</em> 2 minutes to midnight, tomorrow</p>
+          </div>
         </div>
-      </div>
-      <div class="row bg-white py-2 m-1">
-        <div class="col-sm-3">
-          {{form.desc.label}}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.cost_limit.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.cost_limit(class_="form-control mr-sm-1", type="number") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The maximum cost of buggies that qualify for this race.
+              If a buggy's cost is greater than this limit at the time
+              of the race start, it will be disqualified.
+            </p>
+            <p>
+              <em>Default:</em> {{ default_race_cost_limit }}
+            </p>
+          </div>
         </div>
-        <div class="col-sm-4">
-          {{form.desc(placeholder="Description of setting, etc" )}}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.is_visible.label }}
+          </div>
+          <div class="col-sm-4">
+            <select name="is_visible" class="form-control">
+              <option value="" {% if (not race and not default_is_race_visible) or not race.is_visible %} selected="selected" {% endif %}>No</option>
+              <option value="1" {% if (not race and default_is_race_visible) or race.is_visible %} selected="selected" {% endif %}>Yes</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Is the race displayed on the website? If it is not,
+              the students cannot see it.
+            </p>
+            <p>
+              <em>Default:</em> {{ default_is_race_visible }}
+            </p>
+          </div>
         </div>
-        <div class="col-sm-5">
-          Use the description to add any detail including environmental factors
-          if terrain or track type matters in the races you're running.
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.is_result_visible.label }}
+          </div>
+          <div class="col-sm-4">
+            <select id="is_result_visible" name="is_result_visible" class="form-control">
+              <option value="" {% if (not race) or not race.is_result_visible %} selected="selected" {% endif %}>No</option>
+              <option value="1" {% if race.is_result_visible %} selected="selected" {% endif %}>Yes</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Are the race results published on the website? Set this to
+              <code>No</code> if you don't want to display the results
+              to the students until you've confirmed them.
+            </p>
+            <p>
+              <em>Default:</em> <code>No</code>
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="row bg-white py-2 m-1">
-        <div class="col-sm-3">
-          {{form.start_at.label}}
+        <!-- skipping leagues for now -->
+        {% if race %}
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col">
+              <p>
+                Results meta-data: normally this is set when you
+                upload results, so you don't need to change these
+                here.
+              </p>
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.results_uploaded_at.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.results_uploaded_at(class_="form-control mr-sm-1", type="datetime-local") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Timestamp when results were uploaded.
+              </p>
+            </div>
+          </div>
+
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.result_log_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.result_log_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for the result log (if any).
+              </p>
+            </div>
+          </div>
+
+          <div class="row alert-warning py-2 m-1">
+            <div class="col-sm-3">
+              {{ form.buggies_csv_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.buggies_csv_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for CSV containing the buggies that were entered for the race.
+              </p>
+            </div>
+          </div>
+
+          <div class="row alert-warning py-2 m-1">
+            <div class="col-sm-3">
+              {{ form.race_log_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.race_log_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for race log that records the detailed events within the race.
+              </p>
+            </div>
+          </div>
+        {% endif %}
+        <div class="row bg-white py-2 m-1">
+          <div class="col py-2">
+            {% if race %}
+              <input class="btn btn-primary" type="submit" value="Submit race">
+            {% else %}
+              <input class="btn btn-danger" type="submit" value="Add new race">
+            {% endif %}
+          </div>
         </div>
-        <div class="col-sm-4">
-          {{ form.start_at(placeholder="YYYY-MM-DD HH:MM") }}
-        </div>
-        <div class="col-sm-5">
-          <p>
-            The start of the race is effectively the <strong>deadline for
-            uploading buggy JSON</strong>. This isn't enforced automatically.
-          </p>
-          <p><em>Default:</em> 2 minutes to midnight, tomorrow</p>
-        </div>
-      </div>
-      <div class="row bg-white py-2 m-1">
-        <div class="col-sm-3">
-          {{ form.cost_limit.label }}
-        </div>
-        <div class="col-sm-4">
-          {{ form.cost_limit(placeholder=default_race_cost_limit) }}
-        </div>
-        <div class="col-sm-5">
-          <p>
-            The maximum cost of buggies that qualify for this race.
-            If a buggy's cost is greater than this limit at the time
-            of the race start, it will be disqualified.
-          </p>
-          <p>
-            <em>Default:</em> {{ default_race_cost_limit }}
-          </p>
-        </div>
-      </div>
-      <div class="row bg-white py-2 m-1">
-        <div class="col py-2">
-          <input class="btn btn-primary" type="submit" value="Submit race">
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
+
+  {% if race %}
+    <div class="row">
+      <div class="col-lg-8 my-5">
+        <p>
+          You can delete this race — be careful, you can't undo this.
+        </p>
+        <div class="border border container">
+          <form id="RaceDeleteForm" class="form form-delete" method="POST"
+            action="{{ url_for('race.delete_race', race_id=race.id)}}" role="form">
+            {{ delete_form.csrf_token }}
+            <div class="row">
+              <div class="col-md-3 p-3">
+                {{ delete_form.is_confirmed.label }}
+              </div>
+              <div class="col-md-3 p-3">
+                <select id="is_confirmed" name="is_confirmed" class="form-control">
+                  <option selected value="">No</option>
+                  <option value="">I think so</option>
+                  <option value="y">Yes</option>
+                </select>  
+              </div>
+              <div class="col-md-6 p-3">
+                <input type="submit" class="btn btn-danger" value="Delete race"/>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
 </div>
 
 {% endblock %}

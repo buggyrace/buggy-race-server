@@ -13,7 +13,7 @@ from wtforms import (
 from wtforms.validators import Length, NumberRange, Optional
 
 from buggy_race_server.race.models import Race
-
+from buggy_race_server.config import ConfigSettings
 
 class RaceForm(FlaskForm):
     """Race form."""
@@ -31,10 +31,25 @@ class RaceForm(FlaskForm):
     )
     start_at = DateTimeField(
         "Race start time",
-        format='%Y-%m-%d %H:%M',
-        validators=[Optional()] # actually should be future
+        format='%Y-%m-%dT%H:%M', # note: T is important!
+        validators=[Optional()]
     )
     is_visible = BooleanField("Is visible?")
+    is_result_visible = BooleanField("Are results visible?")
+    results_uploaded_at = DateTimeField(
+        "Results uploaded at",
+        format='%Y-%m-%dT%H:%M', # note: T is important!
+        validators=[Optional()]
+    )
+    result_log_url = StringField(
+        "URL of result log", validators=[Optional(), Length(max=255)]
+    )
+    buggies_csv_url =StringField(
+        "URL of buggies CSV", validators=[Optional(), Length(max=255)]
+    )
+    race_log_url = StringField(
+        "URL of race log", validators=[Optional(), Length(max=255)]
+    )
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
@@ -43,7 +58,6 @@ class RaceForm(FlaskForm):
 
     def validate(self):
         """Validate the form."""
-
         initial_validation = super(RaceForm, self).validate()
         if not initial_validation:
             return False
@@ -54,3 +68,13 @@ class RaceForm(FlaskForm):
             self.start_at.errors.append("Already got a race starting at this time")
             return False
         return True
+
+class RaceDeleteForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+  
+    def __init__(self, *args, **kwargs):
+        super(RaceDeleteForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(RaceDeleteForm, self).validate()
+

@@ -581,8 +581,7 @@ h2.alert-title {
 
 td .cell-title {
   margin: -0.75rem -0.75rem 0.2rem -0.75rem;;
-  padding:0.5em;
+  padding:0.5rem 0.75rem;
   background-color: #dddddd;
-  font-weight: bold;
   min-height:1rem;
 }

@@ -87,7 +87,8 @@
     <div class="row my-3">
       <div class="col-lg-6">
         <div class="border container p-3">
-          <form id="AnnounceDeleteForm" class="form form-delete" method="POST" action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
+          <form id="AnnounceDeleteForm" class="form form-delete" method="POST"
+            action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
             {{ delete_form.csrf_token }}
             {{ delete_form.submit_delete(class="btn btn-danger")}}
           </form>

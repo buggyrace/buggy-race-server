@@ -71,7 +71,7 @@
           Maybe download a copy of all your texts as a single HTML or
           plain text file as a backup first?
         </p>
-        <div class="border border-secondary container">
+        <div class="border border container">
           <form id="TaskTextDeleteForm" method="POST" action="{{ url_for('user.delete_task_text')}}" role="form">
             {{ delete_form.csrf_token }}
             {{ delete_form.text_id(value=tasktext.id) }}

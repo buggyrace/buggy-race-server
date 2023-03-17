@@ -271,7 +271,7 @@ def delete_task_text():
     form = TaskTextDeleteForm(request.form)
     if form.validate_on_submit():
         if not form.is_confirmed.data:
-            flash("Did not delete task text (you didn't confirm it)", "warning")
+            flash("Did not delete task text (you didn't confirm it)", "danger")
         else:
             user = current_user # TODO: admin deletes others' texts
             text = TaskText.get_by_id(form.text_id.data)

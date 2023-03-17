@@ -98,6 +98,7 @@ def login():
             or (not current_user.is_anonymous and current_user.is_buggy_admin)
         ),
         local_announcement_type=AnnouncementType.LOGIN.value,
+        username_example=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     )
 
 @blueprint.route("/register", methods=["GET", "POST"], strict_slashes=False)

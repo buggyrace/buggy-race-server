@@ -136,6 +136,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_API = auto()
     TASK_URLS_USE_ANCHORS = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
+    USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
@@ -195,6 +196,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
+        ConfigSettingNames.USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_USERNAME_NAME.name,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
       ),
@@ -323,6 +325,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: 0,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
+        ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
@@ -407,6 +410,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_URLS_USE_ANCHORS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
@@ -764,6 +768,12 @@ class ConfigSettings:
           somewhere else (for example, hosted on GitHub pages), then put the
           URL here. By default, tech notes are hosted on the race
           server, so you can leave this blank.""",
+
+        ConfigSettingNames.USERNAME_EXAMPLE.name:
+          """A placeholder string used in the login form. This can be
+          especially helpful if students use a different username for
+          accessing other college systems. You can set this to be blank.
+          """,
 
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so

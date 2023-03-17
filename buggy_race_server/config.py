@@ -92,6 +92,8 @@ class ConfigSettingNames(Enum):
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_IS_VISIBLE = auto()
     DEFAULT_RACE_LEAGUE = auto()
+    EXT_USERNAME_EXAMPLE = auto()
+    EXT_USERNAME_NAME = auto()
     FORCE_REDIRECT_HTTP_TO_HTTPS = auto()
     GITHUB_CLIENT_ID = auto()
     GITHUB_CLIENT_SECRET = auto()
@@ -104,13 +106,11 @@ class ConfigSettingNames(Enum):
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
     IS_SHOWING_PROJECT_WORKFLOW = auto()
     IS_STORING_STUDENT_TASK_TEXTS = auto()
-    IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
-    IS_USING_REMOTE_VS_WORKSPACE = auto()
     IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
-    EXT_USERNAME_EXAMPLE = auto()
-    EXT_USERNAME_NAME = auto()
+    IS_USING_REMOTE_VS_WORKSPACE = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -138,9 +138,9 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
+    USERS_HAVE_EXT_USERNAME = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
-    USERS_HAVE_EXT_USERNAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -260,17 +260,17 @@ class ConfigSettings:
         ConfigSettingNames._ENV_SETTING_OVERRIDES.name: "",
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
-        ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
-        ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name: "content",
-        ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: "tech_notes",
-        ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: "pages",
-        ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
-        ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: "pelicanconflive.py",
-        ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name: "publishconf.py",
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
+        ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
+        ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: "pelicanconflive.py",
+        ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name: "publishconf.py",
+        ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name: "content",
         ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name: "",
+        ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: "tech_notes",
+        ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: "pages",
+        ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
         ConfigSettingNames.ADMIN_USERNAMES.name: "",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.AUTO_GENERATE_STATIC_CONTENT.name: 0,
@@ -281,6 +281,8 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: 0,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
+        ConfigSettingNames.EXT_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: 0,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: "",
@@ -298,8 +300,6 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
-        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
-        ConfigSettingNames.EXT_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -327,9 +327,9 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
-        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -366,6 +366,8 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.FORCE_REDIRECT_HTTP_TO_HTTPS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
@@ -378,13 +380,11 @@ class ConfigSettings:
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
-        ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -412,9 +412,9 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
     }
 
     # This is the order of the setting groups that is used during the

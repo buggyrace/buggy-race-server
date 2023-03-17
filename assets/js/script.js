@@ -421,18 +421,35 @@ $(function() {
     // be kind: hide authcode when an admin changes their _own_ password
     if (authcode_box){
       const current_username = authcode_box.dataset.username;
+      const admin_usernames_str = authcode_box.dataset.admins;
+      const is_auth_needed_for_all = !! authcode_box.dataset.is_auth_needed_for_all;
+      const admins = admin_usernames_str? admin_usernames_str.split(",") : [];
       const username_input = document.getElementById('username');
+      function is_auth_needed(){
+        return (
+          (username_input.value != current_username)
+          && (
+            is_auth_needed_for_all
+            ||
+            admins.includes(username_input.value)
+          )
+        )
+      }
+
       if (current_username && username_input) {
-        if (username_input.value == current_username) {
+        if (! is_auth_needed()) {
           authcode_box.classList.add("hidden");
         }
+
         function show_auth_code(){
-          if (username_input.value == current_username) {
-            $(authcode_box).slideUp();
-          } else {
+          let is_auth_needed_var = is_auth_needed();
+          if (is_auth_needed_var){
             $(authcode_box).slideDown();
+          } else {
+            $(authcode_box).slideUp();
           }
         }
+
         username_input.addEventListener("change", show_auth_code);
       }
     }

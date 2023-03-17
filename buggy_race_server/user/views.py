@@ -25,7 +25,7 @@ from wtforms import ValidationError
 from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
 from buggy_race_server.admin.models import TaskText, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
@@ -153,40 +153,48 @@ def setup_course_repository():
 def change_password():
     """Change user's password (must be current user unless admin)."""
     warn_if_insecure()
+    # an admin might be allowed to change another user's password without auth code
+    is_auth_needed_for_all=current_app.config[ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name]
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
         if form.validate_on_submit():
             username = form.username.data
             username = username.lower().strip() if username else current_user.username
-            if is_allowed := current_user.username == username:
-                user = current_user
+            is_allowed = current_user.username == username
+            if is_allowed:
+                target_user = current_user
             elif not current_user.is_buggy_admin:
                 flash("You cannot change another user's password", "danger")
-            else: # is_allowed is False
-                try:
-                    is_allowed = is_authorised(form, form.auth_code)
-                except ValidationError as e:
-                    flash(f"Did not change {username.pretty_username}'s password: {e}", "danger")
-                if is_allowed:
-                     # validation confirmed username is for a real user
-                    user = User.query.filter_by(username=form.username.data).first()
+            else:
+                # validation confirmed username is for a real user
+                target_user = User.query.filter_by(username=form.username.data).first()
+                if not is_auth_needed_for_all and not target_user.is_buggy_admin:
+                    is_allowed = True
+                else:
+                    try:
+                        is_allowed = is_authorised(form, form.auth_code)
+                    except ValidationError as e:
+                        flash(f"Did not change {target_user.pretty_username}'s password: {e}", "danger")
             if is_allowed:
-                user.set_password(form.password.data)
-                user.save()
+                target_user.set_password(form.password.data)
+                target_user.save()
                 if username == current_user.username:
                   success_msg = "OK, you changed your password. Don't forget it!"
                 else:
-                  success_msg = f"OK, password was changed for user {username}"
+                  success_msg = f"OK, password was changed for user {target_user.pretty_username}"
                 flash(success_msg, "success")
                 return redirect(url_for("public.home"))
         else:
             flash(f"Password was not changed", "danger")
             flash_errors(form)
-    usernames = []
-    if current_user.is_buggy_admin:
-        form.username.choices = sorted([user.username for user in User.query.all()])
-        form.username.data = form.username.data or current_user.username
-    return render_template("user/password.html", form=form)
+    form.username.choices = sorted([user.username for user in User.query.all()])
+    form.username.data = form.username.data or current_user.username
+    return render_template(
+        "user/password.html",
+        form=form,
+        is_auth_needed_for_all=is_auth_needed_for_all,
+        admin_usernames=current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name],
+    )
   
 @blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)
 @flash_explanation_if_unauth

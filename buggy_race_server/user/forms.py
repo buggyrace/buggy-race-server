@@ -135,9 +135,9 @@ class ChangePasswordForm(FlaskForm):
     )
     # auth_code here is — uniquely — optional, because it only applies
     # if the user is not the current_user (then: must be admin too)
+
     auth_code = PasswordField(
-        "You must provide the authorisation code if you're changing another user's password " + \
-        "(if you're changing your own, you can leave it blank)",
+        """Authorisation code""",
         validators=[Optional(), Length(min=4, max=40)]
     )
 

@@ -17,6 +17,10 @@ For task [0-RUN]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-run):
 
 ## Things that are useful from the start
 
+Your buggy editor is a webserver... 
+
+* [what is a webserver?](webserver)
+
 Debugging tips:
 
 * [use print()](print-debug)
@@ -36,8 +40,8 @@ Adding comments to your code:
 Notes for task
 [1-TEMPLATE: Add a new template to the app]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-1-template):
 
-* [templates in Flask]({{ BUGGY_RACE_SERVER_URL }}/jinja-templates) (where the HTML comes from)
-* [routes in Flask]({{ BUGGY_RACE_SERVER_URL }}/jinja-templates) (how it picks the right template)
+* [templates in Flask](jinja-templates) (where the HTML comes from)
+* [routes in Flask](routes-in-flask) (how it picks the right template)
 
 
 Notes for task

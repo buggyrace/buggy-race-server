@@ -125,10 +125,10 @@ in this case gets the form for creating a buggy).
 You might wonder why Flask is only looking at the route, and not the whole
 URL (that is, the subdomain and domain).
 
-The _route_ is effectively the path part of the URL. That is, if your webserver
-were a static fileserver, then it's just like asking for files from a
-directory. In fact, that's fundamentally how your buggy editor _does_ serve the
-[static resources](static-content) (images and CSS files).
+The _route_ is effectively the path part of the URL. That is, if your
+[webserver](webserver) were a static fileserver, then it's just like asking for
+files from a directory. In fact, that's fundamentally how your buggy editor
+_does_ serve the [static resources](static-content) (images and CSS files).
 
 The answer — in the case of your buggy editor running on localhost — is
 straightforward: everything up to the route in the URL already _has_ been used:

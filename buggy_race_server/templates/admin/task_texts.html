@@ -40,9 +40,9 @@
               <a class="user-link" href="{{ url_for('admin.show_user', user_id=student.id) }}">{{ student.pretty_username }}</a>
             </td>
             <td class="status">
-              {% if buggies_by_username[student.username] %}
+              {% if buggies_by_username[student.username] or student.latest_json %}
                 <a href="{{ url_for('admin.show_buggy', username=student.username) }}"
-                class="bg-success text-center p-2"
+                class="{% if buggies_by_username[student.username] %}bg-success{% else %}bg-warning{% endif %} text-center p-2"
                 data-toggle="modal" data-target="#texts-modal"
                 data-buggy="1"
                 data-un="{{ student.pretty_username}}"

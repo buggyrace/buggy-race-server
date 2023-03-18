@@ -115,7 +115,7 @@
                 </td>
               {% endif %}
               <td style="width:1em">
-                <span>{% if u.is_administrator %}&starf;{% elif u.is_teaching_assistant %}&star;{% endif %}{% if u.is_student %}&Sopf;{% endif %}</span>
+                <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
               </td>
               <td class="u-username">
                 <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>

@@ -18,19 +18,28 @@
           {% if is_using_texts %}
             <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary">List your task&nbsp;texts&nbsp;&rtri;</a>
           {% endif %}
-          {% if current_user.is_buggy_admin %}
-            <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin"><span class="icon-cog"></span> Admin&nbsp;pages&nbsp;&rtri;</a>
-          {% endif %}
         </div>
       </div>
       <div class="row">
         <div class="col my-3">
           <table class="col table table-striped table-bordered table-hover bg-white">
             <tbody>
-              {% if user.is_buggy_admin %}
+              {% if user.is_staff %}
                 <tr>
-                  <td>Admin?</td>
-                  <td>Yes<span class="icon-cog ml-2"></span></td>
+                  <td>Staff?</td>
+                  <td>
+                    Yes:
+                    {% if user.is_administrator %}
+                      &starf; administrator
+                    {% elif user.is_teaching_assistant %}
+                      &star; teaching assistant
+                    {% else %}
+                      <em>unknown</em>
+                    {% endif %}
+                    <p class="btn-collection">
+                      <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin"><span class="icon-cog"></span> Admin&nbsp;pages&nbsp;&rtri;</a>
+                    </p>
+                  </td>
                 </tr>
               {% endif %}
               {% if not user.is_active %}

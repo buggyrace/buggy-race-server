@@ -16,8 +16,9 @@
       <div class="col">
         <p>
           All {{ users|length }} users in the system.
-          {{ qty_students}} are students (&Sopf;).
-          {{ admin_usernames|count }} have admin powers (&star;).
+          {{ qty_students}} are students (&Sopf;),
+          {{ qty_admins }} are admins (&starf;),
+          {{ qty_teaching_assistants }} teaching assistants (&star;).
         </p>
       </div>
     </div>
@@ -114,7 +115,7 @@
                 </td>
               {% endif %}
               <td style="width:1em">
-                <span>{% if u.username in admin_usernames %}&star;{% endif %}{% if u.is_student %}&Sopf;{% endif %}</span>
+                <span>{% if u.is_administrator %}&starf;{% elif u.is_teaching_assistant %}&star;{% endif %}{% if u.is_student %}&Sopf;{% endif %}</span>
               </td>
               <td class="u-username">
                 <a class="user-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>

@@ -65,6 +65,7 @@ from buggy_race_server.utils import (
     publish_tech_notes,
     refresh_global_announcements,
     set_and_save_config_setting,
+    staff_only,
     stringify_datetime,
 )
 
@@ -301,12 +302,18 @@ def setup():
           )
           new_admin_username = form.admin_username.data.strip().lower()
           if admin_user := User.query.filter_by(username=new_admin_username).first():
+              # if this user is not an admin, need to promote them:
+              if admin_user.access_level != User.ADMINISTRATOR:
+                  admin_user.access_level=User.ADMINISTRATOR
+                  admin_user.save()
+                  flash(f"Promoted user {new_admin_username} to administrator")
               admin_user.set_password(form.admin_password.data)
-              flash(f"Updated existing admin user {new_admin_username}'s password", "warning")
+              flash(f"Updated existing user {new_admin_username}'s password", "warning")
           else:
             admin_user = User.create(
               username=new_admin_username,
               password=form.admin_password.data,
+              access_level=User.ADMINISTRATOR,
               comment=f"First admin user, created during setup :-)",
               latest_json="",
             )
@@ -449,6 +456,8 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
       users = User.query.all()
       users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
       students = [s for s in users if s.is_student]
+      qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
+      qty_admins = len([u for u in users if u.is_administrator])
       if data_format == "csv": # note: CSV is only students
         si = io.StringIO()
         cw = csv.writer(si)
@@ -470,6 +479,8 @@ def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
           editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
           users = users,
           admin_usernames = ConfigSettings.admin_usernames_list(current_app),
+          qty_admins=qty_admins,
+          qty_teaching_assistants=qty_teaching_assistants,
           qty_students = len(students),
           qty_students_logged_in = len([s for s in students if s.logged_in_at]),
           qty_students_enabled = len([s for s in students if s.is_active]),
@@ -1206,9 +1217,10 @@ def get_text_for_user_task(text_id):
 
 @blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
 @login_required
+@staff_only
 def task_texts():
-    if not current_user.is_buggy_admin:
-        abort(403)
+    # FIXME if not current_user.is_buggy_admin:
+    # FIXME     abort(403)
     # TODO: this should be using joins and stuff but let's make python
     #       do the work for now and optimise/make it robust when we know
     #       from playing with the page what we really need here...

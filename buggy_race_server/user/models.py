@@ -60,6 +60,10 @@ class Role(SurrogatePK, Model):
 
 
 class User(UserMixin, SurrogatePK, Model):
+
+    TEACHING_ASSISTANT = 1
+    ADMINISTRATOR = 9
+
     """A user of the app."""
 
     __tablename__ = "users"
@@ -73,6 +77,7 @@ class User(UserMixin, SurrogatePK, Model):
     last_name = Column(db.String(30), nullable=True)
     is_active = Column(db.Boolean(), default=True)
     is_admin = Column(db.Boolean(), default=False)
+    access_level = Column(db.Integer, nullable=False, default=0)
     buggies = db.relationship("Buggy", backref="users", lazy=True)
     latest_json = Column(db.Text(), default=False)
     github_username = Column(db.Text(), nullable=True)
@@ -176,9 +181,23 @@ class User(UserMixin, SurrogatePK, Model):
         additional_fields = ConfigSettings.users_additional_fieldnames(current_app)
         return [name for name in additional_fields if name not in fieldnames]
 
+    # TODO DEPRECATED
     @property
     def is_buggy_admin(self):
-      return self.is_active and self.username in ConfigSettings.admin_usernames_list(current_app)
+      # return self.is_active and self.username in ConfigSettings.admin_usernames_list(current_app)
+      return self.is_active and self.access_level == User.ADMINISTRATOR
+
+    @property
+    def is_staff(self):
+      return self.is_active and self.access_level in [User.TEACHING_ASSISTANT, User.ADMINISTRATOR]
+
+    @property
+    def is_administrator(self):
+      return self.is_active and self.access_level == User.ADMINISTRATOR
+
+    @property
+    def is_teaching_assistant(self):
+      return self.is_active and self.access_level == User.TEACHING_ASSISTANT
 
     @property
     def pretty_username(self):

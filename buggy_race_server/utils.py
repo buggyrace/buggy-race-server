@@ -3,7 +3,7 @@
 import os # for path
 import re
 import csv
-from flask import flash, request, redirect, Markup, url_for, current_app, render_template
+from flask import abort, flash, request, redirect, Markup, url_for, current_app, render_template
 from wtforms import ValidationError
 from functools import wraps
 from flask_login import current_user, logout_user
@@ -48,6 +48,36 @@ def is_authorised(form, field):
   if not bcrypt.check_password_hash(auth_code, field.data):
     raise ValidationError(f"You must provide a valid authorisation code")
   return True
+
+def minimum_access_level(access_level):
+    """ General access decorator for views — but consider using
+      requires_staff or requires_admin instead """
+    def decorator(function):
+        @wraps(function)
+        def decorated_function(*args, **kwargs):
+            if not current_user:
+                return redirect(url_for('users.login'))
+            elif not current_user.access_level >= access_level:
+                abort(403)
+            return function(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def staff_only(function):
+    @wraps(function)
+    def wrapper():
+        if current_user and not current_user.is_staff:
+            abort(403)
+        return function()
+    return wrapper
+
+def admin_only(function):
+    @wraps(function)
+    def wrapper():
+        if current_user and not current_user.is_administrator:
+            abort(403)
+        return function()
+    return wrapper
 
 # check current user is active: this catches (and logs out) a user who has been
 # made inactive _during_ their session: need this so admin can (if needed) bump

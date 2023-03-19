@@ -30,7 +30,7 @@ class Race(SurrogatePK, Model):
     created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
-    is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name]))
+    is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name]))
     result_log_url = Column(db.String(255), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
     results_uploaded_at = Column(db.DateTime, nullable=True)

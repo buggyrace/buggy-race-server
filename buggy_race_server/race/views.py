@@ -91,7 +91,7 @@ def edit_race(race_id=None):
         form=form,
         race=race,
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
-        default_is_race_visible=current_app.config[ConfigSettingNames.DEFAULT_RACE_IS_VISIBLE.name],
+        default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
     )
 

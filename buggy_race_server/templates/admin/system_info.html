@@ -8,7 +8,17 @@
     </h1>
   </div>
   <div class="row">
-    <div class="col-lg-6">
+    <div class="col">
+      <h2>Version</h2>
+      <p>
+        Local git commit/branch:
+      </p>
+        <pre class="task-text p-3">{{ git_status }}</pre>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3">
+      <h2>Config settings</h2>
       <p>
         These are config settings that are not exposed through the
         <a href="{{ url_for('admin.settings') }}">config settings</a>
@@ -147,7 +157,10 @@
         </tbody>
       </table>
     </div>
-    <div class="col-lg-6">
+  </div>
+  <div class="row">
+    <div class="col my-3">
+      <h2>Database</h2>
       <table class="table table-striped table-bordered table-hover table-responsive-md bg-white">
         <thead>
           <tr>
@@ -157,17 +170,18 @@
         </thead>
         <tbody>
           <tr>
-            <td>Unexpected config<br>(found in db):</td>
+            <td><code>DATABASE_URL</code><br>(redacted)</td>
+            <td><code style="word-break: break-all;">{{ redacted_database_url }}</code></td>
+          </tr>
+          <tr>
+            <td>Extra config (found&nbsp;in&nbsp;database):</td>
             <td>
               {% for unexpected in unexpected_config_settings %}
                 <code>{{ unexpected }}</code><br>
               {% else %}
-                &mdash;
+                <em>OK: nothing unexpected</em>
               {% endfor %}
             </td>
-          <tr>
-            <td><code>DATABASE_URL</code><br>(redacted)</td>
-            <td><code style="word-break: break-all;">{{ redacted_database_url }}</code></td>
           </tr>
         </tbody>
       </table>

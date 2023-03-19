@@ -8,6 +8,7 @@ import os
 from collections import defaultdict
 import markdown
 import re
+import subprocess
 
 from sqlalchemy.inspection import inspect
 
@@ -1276,11 +1277,20 @@ def show_system_info():
     database_url = current_app.config.get("DATABASE_URL")
     redacted_database_url = "(unavailable)"
     if current_app.config.get("DATABASE_URL"):
-      DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
-      if match := re.match(DATABASE_RE, database_url):
-        redacted_database_url = f"{match[1]}******{match[2]}"
+        DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
+        if match := re.match(DATABASE_RE, database_url):
+            redacted_database_url = f"{match[1]}******{match[2]}"
+    try:
+        result = subprocess.run(
+          "git rev-parse --short HEAD; git branch --show-current",
+          shell=True, text=True, capture_output=True, check=True
+        )
+        git_status = result.stdout
+    except ValueError as e:
+        git_status = "[Unavailable]"
     return render_template(
-       "admin/system.html",
-       redacted_database_url=redacted_database_url,
-       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
+        "admin/system_info.html",
+        git_status=git_status,
+        redacted_database_url=redacted_database_url,
+        unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
     )

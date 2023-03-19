@@ -28,7 +28,7 @@
             {% set btn_class = "btn-outline-secondary" %}
           {% endif %}
           <a href="{{ url_for('admin.settings', group_name=name | lower) }}"
-          class="btn {{ btn_class }} btn-config-group"><span>{{ name | replace('_', ' ') | title }}</span></a>
+          class="btn {{ btn_class }} btn-config-group"><span>{{ pretty_group_name_dict[name] }}</span></a>
         {% endfor %}
       </p>
     </div>
@@ -86,7 +86,7 @@
                 You must provide the current authorisation code to make changes.
               </div>
             </div>
-            <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | lower }} settings"/>
+            <input type="submit" class="btn btn-primary m-2" value="Submit {{ pretty_group_name_dict[group] }} settings"/>
           {% endif %}
         </form>
       </div>

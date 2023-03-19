@@ -76,12 +76,12 @@
               can change this later — but <em>do not forget it!</em>)
             </div>
           </div>
-          <input type="submit" class="btn btn-primary m-2" value="Submit {{ group_name | title }} settings"/>
+          <input type="submit" class="btn btn-primary m-2" value="Submit {{ pretty_group_name_dict[group_name] }} settings"/>
         {% else %}
           {% set group = group_name %}
           {% include "admin/_settings_group.html" %}
-          <input type="submit" class="btn btn-primary m-2" value="Submit {{ group | lower }} settings"/>
-          {% endif %}
+          <input type="submit" class="btn btn-primary m-2" value="Submit {{ pretty_group_name_dict[group_name] }} settings"/>
+        {% endif %}
       </form>
     </div>
   </div>

@@ -361,6 +361,7 @@ def setup():
     for setting in ConfigSettings.DESCRIPTIONS
   }
   social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+  pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
   return render_template(
     "admin/setup.html",
     setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
@@ -369,6 +370,7 @@ def setup():
     qty_setup_steps=qty_setup_steps,
     form=form,
     group_name=group_name,
+    pretty_group_name_dict=pretty_group_name_dict,
     SETTING_PREFIX=SETTING_PREFIX,
     groups=ConfigSettings.GROUPS,
     sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],
@@ -775,10 +777,12 @@ def settings(group_name=None):
         for setting in ConfigSettings.DESCRIPTIONS
     }
     task_count = Task.query.filter_by(is_enabled=True).count()
+    pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     return render_template(
       "admin/settings.html",
       form=form,
       group_name=group_name,
+      pretty_group_name_dict=pretty_group_name_dict,
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
       sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],

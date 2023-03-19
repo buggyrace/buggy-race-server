@@ -101,7 +101,7 @@ class ConfigSettingNames(Enum):
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
     IS_ALL_CONFIG_IN_TECH_NOTES = auto()
-    IS_PASSWORD_CHANGE_AUTH_NEEDED = auto()
+    IS_PASSWORD_CHANGE_BY_ANY_STAFF = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
@@ -200,7 +200,7 @@ class ConfigSettings:
         ConfigSettingNames.USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_USERNAME_NAME.name,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
-        ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name,
+        ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name,
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
@@ -292,7 +292,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
-        ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name: 1,
+        ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name: 1,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
@@ -378,7 +378,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -535,7 +535,7 @@ class ConfigSettings:
           settings will be available as subtitutions in the tech notes'
           markdown. See the Pelican config file(s) for details.""",
 
-        ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name:
+        ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name:
           """Is an auth code needed in order to change other (non-admin) users'
           passwords? Students who forget their passwords cannot reset them, so
           need to ask an admin to do it. Choose `Yes` if you want all staff

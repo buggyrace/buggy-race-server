@@ -49,7 +49,7 @@
     <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
         <tr>
-          {% if is_admin_can_edit %}
+          {% if current_user.is_administrator %}
             <th></th>
           {% endif %}
           <th></th>
@@ -78,7 +78,7 @@
       <tbody>
         <tr>
           {% if qty_students > 0 %}
-            {% if is_admin_can_edit %}
+            {% if current_user.is_administrator %}
               <td></td>
             {% endif %}
             <td></td>
@@ -109,7 +109,7 @@
         {% for u in users %}
           {% if want_detail or u.is_student %}
             <tr>
-              {% if is_admin_can_edit %}
+              {% if current_user.is_administrator %}
                 <td class="bool-{{ u.is_active | lower }}">
                   <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit&nbsp;&rtri;</a>
                 </td>
@@ -123,7 +123,7 @@
                  <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right" href="#"
                    data-comment="{{ u.comment|replace('"', '\\"')|replace("\\n", "\\n") }}"
                    onclick='alert(this.dataset.comment.replace(/\\\"/g,"\""))'
-                 ><strong>&#x2731;</strong></a>
+                 >&#x2731;</a>
                 {% endif %}
               </td>
               {%if want_detail %}
@@ -172,15 +172,19 @@
       </tbody>
     </table>
   </div>
-  <div class="row">
-    <div class="col btn-collection my-4">
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change passwords &rtri;</a>
-      {%if want_detail %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
-      {% endif %}
+  {% if current_user.is_staff %}
+    <div class="row">
+      <div class="col btn-collection my-4">
+        {% if current_user.is_administrator or is_password_change_by_any_staff %}
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change passwords &rtri;</a>
+        {% endif %}
+        {% if current_user.is_administrator %}
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
+        {% endif %}
+      </div>
     </div>
-  </div>
+  {% endif %}
 </div>
 <div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">

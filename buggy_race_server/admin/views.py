@@ -66,6 +66,7 @@ from buggy_race_server.utils import (
     refresh_global_announcements,
     set_and_save_config_setting,
     staff_only,
+    admin_only,
     stringify_datetime,
 )
 
@@ -384,10 +385,9 @@ def setup():
 
 @blueprint.route("/", strict_slashes=False)
 @login_required
+@staff_only
 def admin():
     TASK_NOTE_LENGTH_THRESHHOLD = 2 # texts shorter than this are not counted
-    if not current_user.is_buggy_admin:
-      abort(403)
     today = datetime.now().date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
@@ -448,57 +448,54 @@ def admin():
 @blueprint.route("/users", strict_slashes=False)
 @blueprint.route("/users/<data_format>")
 @login_required
-def list_users(data_format=None, want_detail=True, is_admin_can_edit=True):
+@staff_only
+def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
-    if not current_user.is_buggy_admin:
-      abort(403)
+    users = User.query.all()
+    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
+    students = [s for s in users if s.is_student]
+    qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
+    qty_admins = len([u for u in users if u.is_administrator])
+    if data_format == "csv": # note: CSV is only students
+      si = io.StringIO()
+      cw = csv.writer(si)
+      # To get the column names, use the current_user (admin) even though
+      # we're not going to save the data (there might not be any students)
+      cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
+      for s in students:
+        cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
+      filename = get_download_filename("users.csv", want_datestamp=True)
+      output = make_response(si.getvalue())
+      output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+      output.headers["Content-type"] = "text/csv"
+      return output
     else:
-      users = User.query.all()
-      users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
-      students = [s for s in users if s.is_student]
-      qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
-      qty_admins = len([u for u in users if u.is_administrator])
-      if data_format == "csv": # note: CSV is only students
-        si = io.StringIO()
-        cw = csv.writer(si)
-        # To get the column names, use the current_user (admin) even though
-        # we're not going to save the data (there might not be any students)
-        cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
-        for s in students:
-          cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
-        filename = get_download_filename("users.csv", want_datestamp=True)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        output.headers["Content-type"] = "text/csv"
-        return output
-      else:
-        # TODO want_detail shows all users (otherwise it's only students)
-        return render_template("admin/users.html",
-          want_detail = want_detail,
-          is_admin_can_edit = is_admin_can_edit,
-          editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-          users = users,
-          admin_usernames = ConfigSettings.admin_usernames_list(current_app),
-          qty_admins=qty_admins,
-          qty_teaching_assistants=qty_teaching_assistants,
-          qty_students = len(students),
-          qty_students_logged_in = len([s for s in students if s.logged_in_at]),
-          qty_students_enabled = len([s for s in students if s.is_active]),
-          qty_students_github = len([s for s in students if s.github_username]),
-          qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
-          ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-          ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
-      )
+      # TODO want_detail shows all users (otherwise it's only students)
+      return render_template("admin/users.html",
+        want_detail = want_detail,
+        editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+        users = users,
+        admin_usernames = ConfigSettings.admin_usernames_list(current_app),
+        qty_admins=qty_admins,
+        qty_teaching_assistants=qty_teaching_assistants,
+        qty_students = len(students),
+        qty_students_logged_in = len([s for s in students if s.logged_in_at]),
+        qty_students_enabled = len([s for s in students if s.is_active]),
+        qty_students_github = len([s for s in students if s.github_username]),
+        qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+        is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name],
+    )
 
 
 @blueprint.route("/users/register", methods=["GET", "POST"], strict_slashes=False)
 @blueprint.route("/users/register/<data_format>", methods=["POST"])
 @login_required
+@admin_only
 def bulk_register(data_format=None):
     """Register multiple users."""
     is_json = data_format == "json"
-    if not current_user.is_buggy_admin:
-      abort(403)
     err_msgs = []
     form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
@@ -600,9 +597,8 @@ def bulk_register(data_format=None):
 
 @blueprint.route("/user/<user_id>", methods=['GET'])
 @login_required
+@staff_only
 def show_user(user_id):
-  if not current_user.is_buggy_admin:
-      abort(403)
   if str(user_id).isdigit():
     user = User.get_by_id(int(user_id))
   else:
@@ -619,11 +615,13 @@ def show_user(user_id):
       qty_texts=len(texts_by_task_id),
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+      is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name],
   )
 
 # user_id may be username or id
 @blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])
 @login_required
+@admin_only
 def edit_user(user_id):
   if not current_user.is_buggy_admin:
       abort(403)
@@ -665,9 +663,8 @@ def edit_user(user_id):
 
 @blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)
 @login_required
+@staff_only
 def api_keys():
-    if not current_user.is_buggy_admin:
-      abort(403)
     users = User.query.all()
     users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
     form = ApiKeyForm(request.form)
@@ -716,19 +713,20 @@ def api_keys():
 
 @blueprint.route("/api-test", methods=["GET"], strict_slashes=False)
 @login_required
+@staff_only
 def api_test():
-    if not current_user.is_buggy_admin:
-      abort(403)
     return render_template("admin/api_test.html", random_qty_wheels=random.randint(1,100))
 
 @blueprint.route("/buggies/<username>")
 def show_buggy(username):
    """ Using the show_buggy code from Buggy, as that's common for non-admin too"""
+   # note that show_buggy_by_user checks the admin status of the requestor
    return show_buggy_by_user(username=username)
 
 
 @blueprint.route("/download/buggies/csv")
 @login_required
+@staff_only
 def download_buggies():
     """Download buggies as CSV (only format supported at the moment)"""
     buggies = Buggy.get_all_buggies_with_usernames()
@@ -746,10 +744,9 @@ def download_buggies():
 
 @blueprint.route("/buggies", strict_slashes=False)
 @login_required
+@staff_only
 def list_buggies(data_format=None):
     """Admin buggly list."""
-    if not current_user.is_buggy_admin:
-      abort(403)
     return render_template(
         "admin/buggies.html",
         buggies=Buggy.get_all_buggies_with_usernames()
@@ -758,10 +755,9 @@ def list_buggies(data_format=None):
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])
 @blueprint.route("/settings", methods=['GET','POST'], strict_slashes=False)
 @login_required
+@admin_only
 def settings(group_name=None):
     """Admin settings check page."""
-    if not current_user.is_buggy_admin:
-      abort(403)
     form = SettingForm(request.form)
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
     social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
@@ -802,11 +798,10 @@ def settings(group_name=None):
 
 @blueprint.route("/announcements", strict_slashes=False)
 @login_required
+@admin_only
 def list_announcements():
     # only using the form for the CSRF token at this point
     form = AnnouncementActionForm(request.form)
-    if not current_user.is_buggy_admin:
-      abort(403)
     announcements = sorted(
       Announcement.query.all(),
       key=lambda announcement: (announcement.type, announcement.text)
@@ -824,9 +819,8 @@ def list_announcements():
 @blueprint.route("/announcements/<int:announcement_id>", methods=["GET", "POST"])
 @blueprint.route("/announcements/new", methods=["GET", "POST"])
 @login_required
+@admin_only
 def edit_announcement(announcement_id=None):
-    if not current_user.is_buggy_admin:
-      abort(403)
     announcement = None
     is_visible = False
     is_html =  False
@@ -877,9 +871,8 @@ def edit_announcement(announcement_id=None):
 
 @blueprint.route("/announcements/<int:announcement_id>/publish", methods=["POST"])
 @login_required
+@admin_only
 def publish_announcement(announcement_id):
-    if not current_user.is_buggy_admin:
-      abort(403)
     form = AnnouncementActionForm(request.form)
     want_to_publish = None
     if form.submit_hide.data:
@@ -909,9 +902,8 @@ def publish_announcement(announcement_id):
 
 @blueprint.route("/announcements/<int:announcement_id>/delete", methods=["POST"])
 @login_required
+@admin_only
 def delete_announcement(announcement_id=None):
-    if not current_user.is_buggy_admin:
-      abort(403)
     form = AnnouncementActionForm(request.form)
     if form.submit_delete.data:
       announcement = Announcement.query.filter_by(id=announcement_id).first()
@@ -927,9 +919,8 @@ def delete_announcement(announcement_id=None):
 
 @blueprint.route("/announcements/new/example", methods=["POST"])
 @login_required
+@admin_only
 def add_example_announcement():
-    if not current_user.is_buggy_admin:
-      abort(403)
     form = GeneralSubmitForm(request.form)
     if form.validate_on_submit():
       Announcement.create(
@@ -944,14 +935,14 @@ def add_example_announcement():
     return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/tech-notes/publish", methods=["POST"])
+@admin_only
 def tech_notes_publish():
    return tech_notes_admin()
 
 @blueprint.route("/tech-notes", methods=["GET"], strict_slashes=False)
 @login_required
+@admin_only
 def tech_notes_admin():
-  if not current_user.is_buggy_admin:
-    abort(403)
   error_msg = None
   form = SubmitWithAuthForm(request.form)
   if request.method == "POST":
@@ -983,6 +974,8 @@ def tech_notes_admin():
   )
 
 @blueprint.route("/tasks/publish", methods=["POST"])
+@login_required
+@admin_only
 def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
     if form.validate_on_submit():
@@ -1001,14 +994,15 @@ def tasks_generate():
     return redirect(url_for('admin.tasks_admin'))
 
 @blueprint.route("/tasks/all", methods=["GET"], strict_slashes=False)
+@login_required
+@admin_only
 def tasks_admin_all():
     return tasks_admin()
 
 @blueprint.route("/tasks", methods=["GET", "POST"], strict_slashes=False)
 @login_required
+@admin_only
 def tasks_admin():
-    if not current_user.is_buggy_admin:
-        abort(403)
     form = GenerateTasksForm(request.form)
     is_fresh_update = False
     want_all = request.path.endswith("all")
@@ -1085,9 +1079,8 @@ def tasks_admin():
 
 @blueprint.route("/download/tasks/<type>/<format>", methods=["GET", "POST"])
 @login_required
+@admin_only
 def download_tasks(type=None, format=None):
-    if not current_user.is_buggy_admin:
-        abort(403)
     CURRENT = "current"
     DEFAULT = "default"
     FORMAT_MARKDOWN = "md"
@@ -1126,9 +1119,8 @@ def download_tasks(type=None, format=None):
 
 @blueprint.route("/tasks/<task_id>/edit", methods=["GET", "POST"])
 @login_required
+@admin_only
 def edit_task(task_id=None):
-    if not current_user.is_buggy_admin:
-        abort(403)
     task = None
     if str(task_id).isdigit():
         task = Task.get_by_id(int(task_id))
@@ -1175,7 +1167,7 @@ def edit_task(task_id=None):
 @blueprint.route("/json/latest-json/<user_id>", methods=["GET"])
 def get_uploaded_json_for_user(user_id):
   payload = ""
-  if current_user and current_user.is_authenticated and current_user.is_buggy_admin:
+  if current_user and current_user.is_authenticated and current_user.is_staff:
     user = User.get_by_id(user_id)
     if user is None:
       status = 404
@@ -1195,7 +1187,7 @@ def get_uploaded_json_for_user(user_id):
 @blueprint.route("/json/text/<text_id>", methods=["GET"])
 def get_text_for_user_task(text_id):
   payload = ""
-  if current_user and current_user.is_authenticated and current_user.is_buggy_admin:
+  if current_user and current_user.is_authenticated and current_user.is_staff:
     text = TaskText.get_by_id(text_id)
     if text is None:
       status = 404
@@ -1249,14 +1241,13 @@ def task_texts():
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
 @login_required
+@staff_only
 def purge_unexpected_config_setting(setting_name):
     """ Purge a config setting that has been reported as unexpected:
     In practice this is a housekeeping activity for development: unexpected
     settings are typically legacy config settings that remain in the database
     after being removed from the code.
     """
-    if not current_user.is_buggy_admin:
-        abort(403)
     unexpected_settings =  current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY]
     if setting_name not in unexpected_settings:
        flash(f"Cannot purge config setting \"{setting_name}\": it's not reported as unexpected", "warning")
@@ -1275,9 +1266,8 @@ def purge_unexpected_config_setting(setting_name):
 
 @blueprint.route("/system", strict_slashes=False, methods=["GET"])
 @login_required
+@admin_only
 def show_system_info():
-    if not current_user.is_buggy_admin:
-        abort(403)
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
     database_url = current_app.config.get("DATABASE_URL")
     redacted_database_url = "(unavailable)"
@@ -1289,5 +1279,4 @@ def show_system_info():
        "admin/system.html",
        redacted_database_url=redacted_database_url,
        unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
-
-    )   
+    )

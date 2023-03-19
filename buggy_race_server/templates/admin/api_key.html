@@ -4,7 +4,11 @@
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3">
-      Generate or clear API keys
+      {% if current_user.is_administator %}
+        Generate or clear API keys
+      {% else %}
+        API keys
+      {% endif %}
     </h1>
   </div>
   <div class="row">
@@ -35,8 +39,12 @@
             {% for user in users %}
               <tr>
                 <td class="check">
-                  <input type="checkbox" name="usernames" id="user-{{ user.username }}" value="{{ user.username }}">
-                  <label for="user-{{ user.username }}">{{ user.pretty_username }}</label>
+                  {% if current_user.is_administrator %}
+                    <input type="checkbox" name="usernames" id="user-{{ user.username }}" value="{{ user.username }}">
+                    <label for="user-{{ user.username }}">{{ user.pretty_username }}</label>
+                  {% else %}
+                    {{ user.pretty_username }}
+                  {% endif %}
                 </td>
                 {% if user.api_key == None %}
                   <td class="has-no-key">
@@ -53,16 +61,18 @@
         </table>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <p class="btn-collection">
-          <button class="btn btn-outline-secondary" id="check-all-btn">Check all &utri;</button>
-          <button class="btn btn-outline-secondary" id="toggle-all-btn">Toggle all &utri;</button>
-          {{ form.submit_generate_keys(class="btn btn-primary") }}
-          {{ form.submit_clear_keys(class="btn btn-primary") }}
-        </p>
+    {% if current_user.is_administrator %}
+      <div class="row">
+        <div class="col">
+          <p class="btn-collection">
+            <button class="btn btn-outline-secondary" id="check-all-btn">Check all &utri;</button>
+            <button class="btn btn-outline-secondary" id="toggle-all-btn">Toggle all &utri;</button>
+            {{ form.submit_generate_keys(class="btn btn-primary") }}
+            {{ form.submit_clear_keys(class="btn btn-primary") }}
+          </p>
+        </div>
       </div>
-    </div>
+    {% endif %}
   </form>
   <div class="row mt-5">
     <div class="col">

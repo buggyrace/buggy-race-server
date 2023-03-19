@@ -5,7 +5,7 @@ import re
 import csv
 from flask import abort, flash, request, redirect, Markup, url_for, current_app, render_template
 from wtforms import ValidationError
-from functools import wraps
+from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.admin.models import Announcement, Setting, Task
@@ -55,29 +55,28 @@ def minimum_access_level(access_level):
     def decorator(function):
         @wraps(function)
         def decorated_function(*args, **kwargs):
-            if not current_user:
-                return redirect(url_for('users.login'))
-            elif not current_user.access_level >= access_level:
+            if not (current_user and current_user.access_level >= access_level):
                 abort(403)
             return function(*args, **kwargs)
         return decorated_function
     return decorator
 
-def staff_only(function):
-    @wraps(function)
-    def wrapper():
-        if current_user and not current_user.is_staff:
-            abort(403)
-        return function()
-    return wrapper
-
 def admin_only(function):
     @wraps(function)
-    def wrapper():
-        if current_user and not current_user.is_administrator:
+    def wrapper(*args, **kwargs):
+        if not (current_user and current_user.is_administrator):
             abort(403)
-        return function()
+        return function(*args, **kwargs)
     return wrapper
+
+def staff_only(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not (current_user and current_user.is_staff):
+            abort(403)
+        return function(*args, **kwargs)
+    return wrapper
+
 
 # check current user is active: this catches (and logs out) a user who has been
 # made inactive _during_ their session: need this so admin can (if needed) bump

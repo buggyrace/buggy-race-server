@@ -9,10 +9,14 @@
   </div>
   <div class="row">
     <div class="col-md-8">
-      Use this page to test the API (admin accounts only).
+      Use this page to test the API (staff accounts only).
       <br>
-      <strong>Be careful:</strong> successful requests update buggy data: so
-      maybe only test with your own username?
+      {% if current_user.is_admin %}
+        <strong>Be careful:</strong> successful requests update buggy data: so
+        maybe only test with your own username?
+      {% else %}
+        You can only test with your own username.
+      {% endif %}
       <br>
       You'll get raw JSON back as the response.
       <br>
@@ -35,7 +39,12 @@
                 <code>user:</code>
               </td>
               <td>
-                <input type="text" id="user" name="user" value="{{ current_user.username }}" class="form-control mr-sm-1"/>
+                {% if current_user.is_admin %}
+                  <input type="text" id="user" name="user" value="{{ current_user.username }}" class="form-control mr-sm-1"/>
+                {% else %}
+                  <input type="hidden" is="user" name="user" value="{{ current_user.username }}"/>
+                  <code>{{ current_user.username }}</code>
+                {% endif %}
               </td>
             </tr>
             <tr>

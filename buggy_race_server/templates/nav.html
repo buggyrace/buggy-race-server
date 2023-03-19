@@ -41,7 +41,7 @@
       </ul>
       {% if current_user and current_user.is_authenticated %}
         <ul class="navbar-nav">
-          {% if current_user.is_buggy_admin %}
+          {% if current_user.is_staff %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('admin.admin') }}"><span class="icon-cog mr-2"></span>Admin</a>
             </li>

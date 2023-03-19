@@ -11,7 +11,9 @@
     <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
         <tr>
-          <th rowspan="2"></th>
+          {% if current_user.is_administrator %}
+            <th rowspan="2"></th>
+          {% endif %}
           <th rowspan="2">Race<br>shown?</th>
           <th rowspan="2">Results<br>shown?</th>
           <th rowspan="2">Race start<br>(upload deadline)</th>
@@ -35,9 +37,11 @@
             </tr>
             {% endif %}
           <tr class="race-visible-{{ race.is_visible }}">
-            <td>
-              <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit&nbsp;&rtri;</a>
-            </td>
+            {% if current_user.is_administrator %}
+              <td>
+                <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit&nbsp;&rtri;</a>
+              </td>
+            {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">
               {% if race.is_visible %}
                 Yes
@@ -81,10 +85,12 @@
     </table>
   </div>
 </div>
-<div class="container pb-5">
-  <div class="row">
-    <a href="{{ url_for('race.new_race')}}" class="btn btn-outline-secondary btn-admin">Add new race &rtri;</a>
+{% if current_user.is_administrator %}
+  <div class="container pb-5">
+    <div class="row">
+      <a href="{{ url_for('race.new_race')}}" class="btn btn-outline-secondary btn-admin">Add new race &rtri;</a>
+    </div>
   </div>
-</div>
+{% endif %}
 {% endblock %}
 

@@ -9,26 +9,24 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for,
 from flask_login import current_user, login_required
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm
 from buggy_race_server.race.models import Race
-from buggy_race_server.utils import flash_errors
+from buggy_race_server.utils import flash_errors, staff_only, admin_only
 from buggy_race_server.config import ConfigSettingNames
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
 @blueprint.route("/", strict_slashes=False)
 @login_required
+@staff_only
 def list_races():
     """Admin list of all races."""
-    if not current_user.is_buggy_admin:
-      abort(403)
-    else:
-      races = sorted(Race.query.all(), key=lambda race: (race.start_at))
-      form = RaceForm(request.form)
-      return render_template(
-         "admin/races.html",
-         races=races,
-         form=form,
-         date_today=datetime.today().date(),
-      )
+    races = sorted(Race.query.all(), key=lambda race: (race.start_at))
+    form = RaceForm(request.form)
+    return render_template(
+        "admin/races.html",
+        races=races,
+        form=form,
+        date_today=datetime.today().date(),
+    )
 
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
 @login_required
@@ -37,11 +35,10 @@ def new_race():
 
 @blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
 @login_required
+@admin_only
 def edit_race(race_id=None):
     """Edit an existing race (differs from new race because may
        have some results?)."""
-    if not current_user.is_buggy_admin:
-        abort(403)
     if race_id is None:
         race = None
         delete_form = None
@@ -100,9 +97,8 @@ def edit_race(race_id=None):
 
 @blueprint.route("/<race_id>/delete", methods=["POST"])
 @login_required
+@admin_only
 def delete_race(race_id):
-    if not current_user.is_buggy_admin:
-        abort(403)
     form = RaceDeleteForm(request.form)
     if form.validate_on_submit():
         if not form.is_confirmed.data:

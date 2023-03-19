@@ -154,7 +154,7 @@ def change_password():
     """Change user's password (must be current user unless admin)."""
     warn_if_insecure()
     # an admin might be allowed to change another user's password without auth code
-    is_auth_needed_for_all=current_app.config[ConfigSettingNames.IS_PASSWORD_CHANGE_AUTH_NEEDED.name]
+    is_auth_needed_for_all=current_app.config[ConfigSettingNames.IS_PASSWORD_CHANGE_BY_ANY_STAFF.name]
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
         if form.validate_on_submit():

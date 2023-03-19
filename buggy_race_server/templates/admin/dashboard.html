@@ -265,12 +265,14 @@
       </div>
     </div>
   {% endif %}
-  <div class="row">
-    <div class="col mt-5">
-        <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-sm">System info &rtri;</a>
-      </p>
+  {% if current_user.is_administrator %}
+    <div class="row">
+      <div class="col mt-5">
+          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-sm">System info &rtri;</a>
+        </p>
+      </div>
     </div>
-  </div>
+  {% endif %}
 </div>
 {% endblock %}
 

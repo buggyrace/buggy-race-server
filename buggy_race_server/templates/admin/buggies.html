@@ -7,70 +7,82 @@
       Buggies
     </h1>
   </div>
-  <div class="row">
-    <div class="col">
-      <p class="btn-collection">
-        <a class="btn btn-outline-secondary btn-admin"
-         href="{{ url_for('admin.download_buggies') }}">Download buggies CSV&nbsp;&dtri;</a>
-      </p>  
-      <p>
-        All buggies in the system ({{ buggies|length }}).
-      </p>  
+  {% if current_user.is_administrator %}
+    <div class="row">
+      <div class="col">
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-admin"
+          href="{{ url_for('admin.download_buggies') }}">Download buggies CSV&nbsp;&dtri;</a>
+        </p>  
+        <p>
+          All buggies in the system ({{ buggies|length }}).
+        </p>  
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <table class="col table table-striped table-bordered table-hover table-responsive-lg bg-white">
-      <thead>
-        <tr>
-          <th></th>
-          <th>username</th>
-          <th>cost</th>
-          <th>mass</th>
-          <th>id²</th>
-          <th colspan="2">flag</th>
-          <th>pattern</th>
-          <th>qty_wheels</th>
-          <th>primary</th>
-          <th>auxilliary</th>
-          <th>hb+</th>
-          <th>tyres</th>
-          <th>armour</th>
-          <th>attacks</th>
-          <th>F?</th>
-          <th>I?</th>
-          <th>A?</th>
-          <th>B?</th>
-          <th>algo</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for b in buggies %}
-        <tr>
-          <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
-          <td>  {{ b.pretty_username }} </td>
-          <td>  {{ b.total_cost }} </td>
-          <td>  {{ b.mass }} </td>
-          <td>  {{ b.buggy_id }} </td>
-          <td style="background:{{ b.flag_color }}">&nbsp;</td>
-          <td style="background:{{ b.flag_color_secondary }}">&nbsp;</td>
-          <td>  {{ b.flag_pattern }} </td>
-          <td>  {{ b.qty_wheels }} </td>
-          <td>  {{ b.power_units }}&times;{{ b.power_type }}</td>
-          <td>  {{ b.aux_power_units }}&times;{{ b.aux_power_type }} </td>
-          <td>  {{ b.hamster_booster }} </td>
-          <td>  {{ b.qty_tyres }}&times;{{ b.tyres }} </td>
-          <td>  {{ b.armour }} </td>
-          <td>  {{ b.qty_attacks }}&times;{{ b.attack }} </td>
-          <td>  {% if b.fireproof %} ✔ {% endif %} </td>
-          <td>  {% if b.insulated %} ✔ {% endif %} </td>
-          <td>  {% if b.antibiotic %} ✔ {% endif %} </td>
-          <td>  {% if b.banging %} ✔ {% endif %} </td>
-          <td>  {{ b.algo }} </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  {% endif %}
+  {% if not buggies %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-warning">
+          No buggies to show (no active students have uploaded JSON describing their buggies yet).
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="row">
+      <table class="col table table-striped table-bordered table-hover table-responsive-lg bg-white">
+        <thead>
+          <tr>
+            <th></th>
+            <th>username</th>
+            <th>cost</th>
+            <th>mass</th>
+            <th>id²</th>
+            <th colspan="2">flag</th>
+            <th>pattern</th>
+            <th>qty_wheels</th>
+            <th>primary</th>
+            <th>auxilliary</th>
+            <th>hb+</th>
+            <th>tyres</th>
+            <th>armour</th>
+            <th>attacks</th>
+            <th>F?</th>
+            <th>I?</th>
+            <th>A?</th>
+            <th>B?</th>
+            <th>algo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in buggies %}
+          <tr>
+            <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy&nbsp;&rtri;</a></td>
+            <td>  {{ b.pretty_username }} </td>
+            <td>  {{ b.total_cost }} </td>
+            <td>  {{ b.mass }} </td>
+            <td>  {{ b.buggy_id }} </td>
+            <td style="background:{{ b.flag_color }}">&nbsp;</td>
+            <td style="background:{{ b.flag_color_secondary }}">&nbsp;</td>
+            <td>  {{ b.flag_pattern }} </td>
+            <td>  {{ b.qty_wheels }} </td>
+            <td>  {{ b.power_units }}&times;{{ b.power_type }}</td>
+            <td>  {{ b.aux_power_units }}&times;{{ b.aux_power_type }} </td>
+            <td>  {{ b.hamster_booster }} </td>
+            <td>  {{ b.qty_tyres }}&times;{{ b.tyres }} </td>
+            <td>  {{ b.armour }} </td>
+            <td>  {{ b.qty_attacks }}&times;{{ b.attack }} </td>
+            <td>  {% if b.fireproof %} ✔ {% endif %} </td>
+            <td>  {% if b.insulated %} ✔ {% endif %} </td>
+            <td>  {% if b.antibiotic %} ✔ {% endif %} </td>
+            <td>  {% if b.banging %} ✔ {% endif %} </td>
+            <td>  {{ b.algo }} </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

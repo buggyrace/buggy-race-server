@@ -22,8 +22,15 @@
         <tbody>
           <tr>
             <td>Admin?</td>
-            <td {% if user.is_admin %}class="alert-success"{% endif %}>
-              {% if user.is_buggy_admin %} Yes {% else %} No {% endif %}
+            <td>
+              Yes:
+              {% if user.is_administrator %}
+                &starf; administrator
+              {% elif user.is_teaching_assistant %}
+                &star; teaching assistant
+              {% else %}
+                <em>unknown</em>
+              {% endif %}
             </td>
           </tr>
           <tr>

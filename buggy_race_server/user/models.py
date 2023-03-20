@@ -188,12 +188,6 @@ class User(UserMixin, SurrogatePK, Model):
         additional_fields = ConfigSettings.users_additional_fieldnames(current_app)
         return [name for name in additional_fields if name not in fieldnames]
 
-    # TODO DEPRECATED
-    @property
-    def is_buggy_admin(self):
-      # return self.is_active and self.username in ConfigSettings.admin_usernames_list(current_app)
-      return self.is_active and self.access_level == User.ADMINISTRATOR
-
     @property
     def is_staff(self):
       return self.is_active and self.access_level in [User.TEACHING_ASSISTANT, User.ADMINISTRATOR]

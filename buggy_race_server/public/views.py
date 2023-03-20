@@ -81,7 +81,7 @@ def login():
             flash(f"Hello {pretty_name}! You're logged in to the race server", "success")
             if setup_status := load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name):
                 redirect_url = url_for("admin.setup")
-                if current_user.is_buggy_admin:
+                if current_user.is_administrator:
                     session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
                 else:
                     flash("Not an admin user: can't do much until setup is complete", "warning")

@@ -138,7 +138,7 @@ def show_buggy(username=None):
         user = current_user
         username = user.username
     else:
-        if not current_user.is_buggy_admin:
+        if not current_user.is_staff:
           abort(403)
         user = User.query.filter_by(username=username).first()
         if not user:

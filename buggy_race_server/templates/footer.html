@@ -22,7 +22,7 @@
         <li><a href="{{ url_for('user.settings') }}">Settings</a></li>
         <li><a href="{{ url_for('public.about') }}">About</a></li>
         {% if current_user and current_user.is_authenticated %}
-            {% if current_user.is_buggy_admin %}
+            {% if current_user.is_staff %}
               <li><a href="{{ url_for('admin.admin') }}"><span class="icon-cog mr-2"></span>Admin</a></li>
             {% endif %}
             <li><a href="{{ url_for('public.logout') }}"><span class="icon-exit mr-2"></span>Logout</a></li>

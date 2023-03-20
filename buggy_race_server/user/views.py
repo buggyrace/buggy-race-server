@@ -203,13 +203,19 @@ def change_password():
         else:
             flash(f"Password was not changed", "danger")
             flash_errors(form)
-    form.username.choices = sorted([user.username for user in User.query.all()])
+    users = User.query.all() # note this does include _inactive_ users
+    admin_usernames = []
+    if current_user.is_administrator:
+        admin_usernames = [user.username for user in users if user.is_administrator]
+    else:
+        admin_usernames = [user.username for user in users if user.is_staff]
+    form.username.choices = sorted([user.username for user in users])
     form.username.data = form.username.data or current_user.username
     return render_template(
         "user/password.html",
         form=form,
 #        is_auth_needed_for_all=is_auth_needed_for_all,
-        admin_usernames=current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name],
+        admin_usernames=admin_usernames,
     )
   
 @blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)
@@ -410,7 +416,7 @@ def download_texts(username, format):
     if not user:
         flash(f"Can't find user {username}", "danger")
         abort(404)
-    if username != user.username and not current_user.is_buggy_admin:
+    if username != user.username and not current_user.is_staff:
         flash("Cannot download another user's texts", "danger")
         abort(403)
     tasks_by_id = {task.id: task for task in Task.query.filter_by(is_enabled=True).all()}

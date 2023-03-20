@@ -199,7 +199,7 @@ def _flash_errors(form):
 def setup_summary():
     """ If setup is complete, this summarises the current config and db state,
     and unlike the dashboard has some helpful suggestions as to what to do next."""
-    if not current_user or not current_user.is_authenticated or not current_user.is_buggy_admin:
+    if not current_user or not current_user.is_authenticated or not current_user.is_administrator:
        abort(403)
     if ConfigSettingNames._SETUP_STATUS.name in session:
        del session[ConfigSettingNames._SETUP_STATUS.name]
@@ -288,8 +288,8 @@ def setup():
     session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
   else:
     # after initial setup (auth), user must be logged in
-    if current_user.is_anonymous or not current_user.is_buggy_admin:
-      admins = current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name]
+    if current_user.is_anonymous or not current_user.is_administrator:
+      admins = ", ".join([u.name for u in User.query.filter_by(access_level=User.ADMINISTRATOR)])
       flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
       logout_user()
       return redirect( url_for('public.login'))
@@ -323,11 +323,6 @@ def setup():
           admin_user.is_active = True
           admin_user.is_student = False
           admin_user.save()
-          set_and_save_config_setting(
-            current_app,
-            ConfigSettingNames.ADMIN_USERNAMES.name,
-            new_admin_username
-          )
           setup_status += 1
           set_and_save_config_setting(
             current_app,
@@ -402,7 +397,7 @@ def admin():
     students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
-    admin_users = [u for u in users if u.is_active and u.is_buggy_admin]
+    admin_users = [u for u in users if u.is_active and u.is_administrator]
     other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
@@ -455,10 +450,11 @@ def admin():
 def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
+    users = sorted(users, key=lambda user: (not user.is_administrator, user.username))
     students = [s for s in users if s.is_student]
     qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
-    qty_admins = len([u for u in users if u.is_administrator])
+    admin_usernames = [user.username for user in users if user.is_administrator]
+    qty_admins = len(admin_usernames)
     if data_format == "csv": # note: CSV is only students
       si = io.StringIO()
       cw = csv.writer(si)
@@ -477,8 +473,8 @@ def list_users(data_format=None, want_detail=True):
       return render_template("admin/users.html",
         want_detail = want_detail,
         editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-        users = users,
-        admin_usernames = ConfigSettings.admin_usernames_list(current_app),
+        users=users,
+        admin_usernames=admin_usernames,
         qty_admins=qty_admins,
         qty_teaching_assistants=qty_teaching_assistants,
         qty_students = len(students),
@@ -712,7 +708,7 @@ def edit_user(user_id):
 @staff_only
 def api_keys():
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_buggy_admin, user.username))
+    users = sorted(users, key=lambda user: (not user.is_staff, user.username))
     form = ApiKeyForm(request.form)
     if request.method == "POST":
       want_api_key_generated = None
@@ -1259,8 +1255,6 @@ def get_text_for_user_task(text_id):
 @login_required
 @staff_only
 def task_texts():
-    # FIXME if not current_user.is_buggy_admin:
-    # FIXME     abort(403)
     # TODO: this should be using joins and stuff but let's make python
     #       do the work for now and optimise/make it robust when we know
     #       from playing with the page what we really need here...

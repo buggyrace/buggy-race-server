@@ -43,11 +43,12 @@
         {% include "admin/_env_setting_override.html" %}
         {{ html_descriptions[name] | safe }}
         <div class="setting-default">
-          {% if name == "ADMIN_USERNAMES" %}
-            <em>Currently:</em> <strong>must</strong> include <code>{{ current_user.username }}</code>
-          {% else %}
-            <em>Default:</em> <code>{{ pretty_default_settings[name] }}</code>
-          {% endif %}
+            <em>Default:</em>
+            {% if pretty_default_settings[name] == "" %}
+              <em class="empty-setting">nothing/empty</em>
+            {% else %}
+              <code>{{ pretty_default_settings[name] }}</code>
+            {% endif %}
         </div>
       </div>
     </div>

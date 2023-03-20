@@ -95,63 +95,15 @@ def login():
         form=form,
         is_registration_allowed=(
             current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
-            or (not current_user.is_anonymous and current_user.is_buggy_admin)
+            or (not current_user.is_anonymous and current_user.is_administrator)
         ),
         local_announcement_type=AnnouncementType.LOGIN.value,
         username_example=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     )
 
-@blueprint.route("/register", methods=["GET", "POST"], strict_slashes=False)
-def register():
-    """Register new user.
-       This is the "convenience" of allowing a single-user registration, which
-       is probably most useful for adding new admins... because the "bulk
-       registration" of users (i.e., students) from a CSV is probably better.
-       IS_PUBLIC_REGISTRATION_ALLOWED should always be 0 (i.e., switched OFF)
-       unless you're running in an enclosed environment.
-    """
-    form = RegisterForm(request.form)
-    if current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
-        del form.auth_code
-    elif not (not current_user.is_anonymous and current_user.is_buggy_admin):
-        flash(
-          "You must be logged in as an administrator to register new users "
-          "(you'll need to know the authorisation code too)", "warning"
-        )
-        abort(403)
-    if not current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
-        del form.email
-    if not current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
-        del form.first_name
-    if not current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
-        del form.last_name
-    if not current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
-        del form.ext_username
-
-    if form.validate_on_submit():
-        User.create(
-            username=form.username.data,
-            comment=form.comment.data,
-            email=form.email.data if form.email else None,
-            ext_username=form.ext_username.data if form.ext_username else None,
-            first_name=form.first_name.data if form.first_name else None,
-            is_active=True,
-            is_student=form.is_student.data,
-            last_name=form.last_name.data if form.last_name else None,
-            latest_json="",
-            password=form.password.data,
-        )
-        flash("Thank you for registering. You can now log in.", "success")
-        return redirect(url_for("public.home"))
-    else:
-        flash_errors(form)
-    return render_template(
-        "public/register.html",
-        form=form,
-        is_registration_allowed=bool(current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]),
-        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-        ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
-    )
+@blueprint.route("/register")
+def register_new_user():
+    return redirect(url_for('admin.new_user'))
 
 @blueprint.route("/specs", strict_slashes=False)
 def showspecs():

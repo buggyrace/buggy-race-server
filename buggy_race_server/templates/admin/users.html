@@ -181,6 +181,7 @@
         {% if current_user.is_administrator %}
           <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
           <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.new_user') }}">Register new user &rtri;</a>
         {% endif %}
       </div>
     </div>

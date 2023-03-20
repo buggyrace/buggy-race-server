@@ -51,7 +51,7 @@ from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
-from buggy_race_server.user.forms import UserForm
+from buggy_race_server.user.forms import UserForm, RegisterForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
@@ -531,6 +531,7 @@ def bulk_register(data_format=None):
               created_at=datetime.now(),
               is_active=True,
               is_student=True,
+              access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit
               latest_json="",
               comment=_csv_tidy_string(row, 'comment', want_lower=False),
             )
@@ -621,22 +622,30 @@ def show_user(user_id):
       is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
   )
 
-# user_id may be username or id
-@blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])
-@login_required
-@admin_only
-def edit_user(user_id):
-  if not current_user.is_buggy_admin:
-      abort(403)
-  if str(user_id).isdigit():
-    user = User.get_by_id(int(user_id))
+def manage_user(user_id):
+  is_registering_new_user = user_id is None
+  if is_registering_new_user:
+    user = None
+    action_url=url_for('admin.new_user')
+    form=RegisterForm(request.form)
   else:
-    user = User.query.filter_by(username=user_id).first()
-  if user is None:
-    abort(404)
-  form = UserForm(request.form, obj=user, app=current_app)
+    if str(user_id).isdigit():
+      user = User.get_by_id(int(user_id))
+    else:
+      user = User.query.filter_by(username=user_id).first()
+    if user is None:
+      flash("No such user", "info")
+      abort(404)
+    action_url=url_for('admin.edit_user', user_id=user.id)
+    form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
     if form.validate_on_submit():
+      if is_registering_new_user:
+         user = User(
+            username=form.username.data,
+            password=form.password.data,
+          )
+      user.username = form.username.data # validation catches non-unique usernames
       user.comment = form.comment.data
       user.is_student = form.is_student.data
       user.is_active = form.is_active.data
@@ -648,21 +657,55 @@ def edit_user(user_id):
           user.email = form.email.data
       if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
           user.ext_username = form.ext_username.data
-      # if username wasn't unique, validation should have caught it
-      user.username = form.username.data
+      if not is_registering_new_user and form.access_level.data > user.access_level:
+          flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
+      user.access_level = form.access_level.data
       user.save()
-      flash(f"OK, updated user {user.pretty_username}", "success")
-      return redirect(url_for("admin.list_users"))
+      if is_registering_new_user:
+         success_msg = f"OK, registered new user {user.pretty_username}"
+      else:
+        success_msg = f"OK, updated user {user.pretty_username}"
+      if current_user.is_anonymous or not current_user.is_administrator:
+         return_url = url_for("public.login")
+      else:
+         return_url = url_for("admin.list_users")
+      flash(success_msg, "success")
+      return redirect(return_url)
     else:
-      flash(f"Did not update user {user.pretty_username}", "danger")
       flash_errors(form)
+      if is_registering_new_user:
+        flash("Did not register new user", "danger")
+      else:
+        flash(f"Did not update user {user.pretty_username}", "danger")
   return render_template(
     "admin/user_edit.html",
-    form=form,
-    user=user,
-    ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+    action_url=action_url,
     ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+    ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+    form=form,
+    is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
+    is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
+    user=user,
   )
+
+
+@blueprint.route("/users/new", methods=['GET', 'POST'])
+def new_user():
+    is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
+    if not (
+        is_registration_allowed or
+        (not current_user.is_anonymous and current_user.is_administrator)
+      ):
+        flash("You need to be an administrator to register new users (registration is not public)", "warning")
+        abort(403)
+    return manage_user(user_id=None)
+
+# user_id may be username or id
+@blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])
+@login_required
+@admin_only
+def edit_user(user_id):
+   return manage_user(user_id=None)
 
 @blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)
 @login_required

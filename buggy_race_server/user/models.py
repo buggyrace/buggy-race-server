@@ -61,8 +61,15 @@ class Role(SurrogatePK, Model):
 
 class User(UserMixin, SurrogatePK, Model):
 
+    NO_STAFF_ROLE = 0
     TEACHING_ASSISTANT = 1
     ADMINISTRATOR = 9
+
+    ROLE_NAMES = {
+        NO_STAFF_ROLE: "Not staff",
+        TEACHING_ASSISTANT: "Teaching Assistant",
+        ADMINISTRATOR: "Administrator",
+    }
 
     """A user of the app."""
 

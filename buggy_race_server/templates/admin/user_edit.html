@@ -1,14 +1,48 @@
 {% extends "layout.html" %}
 {% block content %}
-{%include "admin/_nav.html" %}
+{% if is_current_user_administrator %}
+  {%include "admin/_nav.html" %}
+{% endif %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="p-0 my-2">Edit user {{ user.pretty_username }}</h1>
+    <h1 class="col my-3">
+      {% if user %}
+        Edit user {{ user.pretty_username }}
+      {% else %}
+        Register new user
+      {% endif %}
+      </h1>
   </div>
 
+  {% if not user and is_registration_allowed %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-warning">
+          <h2 class="alert-title">This page is public</h2>
+          <div class="row">
+            <div class="col-10">
+              You can register a new user here <em>without being logged in</em> (if you
+              know the authorisation code) because the server config setting
+              <code>IS_PUBLIC_REGISTRATION_ALLOWED</code> is currently <code>Yes</code>.
+              <br>
+              <strong>This is an emergency setting</strong>. Normally, set it to
+              <code>No</code> and register new users by logging in as an administrator.
+            </div>
+            {% if current_user.is_administrator %}
+              <div class="col-2 tex-right btn-collection text-right">
+                <a href="{{ url_for('admin.settings', group_name='server') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Server</span></a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+
   <div class="row">
-    <div class="col grey-wrapper p-2">
-      <form id="userForm" class="form-announce" method="POST" action="{{url_for('admin.edit_user', user_id=user.id)}}" role="form">
+    <div class="col grey-wrapper p-2 mx-3">
+      <form id="userForm" class="form-announce" method="POST" action="{{ action_url }}" role="form">
         {{ form.csrf_token }}
         {{form.id()}}
         <div class="row bg-white py-2 m-1">
@@ -23,6 +57,29 @@
             in title case: see the User settings in config).
           </div>
         </div>
+
+        {% if not user %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.password.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.password(class_="form-control mr-sm-1")}}
+            </div>
+            <div class="col-sm-5">
+            </div>
+          </div>
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.confirm.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.confirm(class_="form-control mr-sm-1")}}
+            </div>
+            <div class="col-sm-5">
+            </div>
+          </div>
+        {% endif %}
 
         {% if config['USERS_HAVE_EXT_USERNAME'] %}
           <div class="row bg-white py-2 m-1">
@@ -88,22 +145,13 @@
             {{form.is_student.label}}
           </div>
           <div class="col-sm-4">
-            {{form.is_student(class_="form-control", checked=user.is_student)}}
+            <select name="is_student" class="form-control mr-sm-1">
+              <option value="" {% if user and not user.is_student %}selected{% endif %}>No</option>
+              <option value="Yes" {% if user and user.is_student %}selected{% endif %}>Yes</option>
+            </select>
           </div>
           <div class="col-sm-5">
             Admin users or teaching assistants aren't students (used in the dashboard).
-          </div>
-        </div>
-
-        <div class="row py-2 m-1 {% if not user.is_active %}alert-danger{% else %}bg-white{% endif %}">
-          <div class="col-sm-3">
-            {{form.is_active.label}}
-          </div>
-          <div class="col-sm-4 ">
-            {{form.is_active(class_="form-control", checked=user.is_active)}}
-          </div>
-          <div class="col-sm-5">
-            Users that are not active cannot log in, and are effectively suspended.
           </div>
         </div>
 
@@ -115,7 +163,43 @@
             {{form.comment(class_="form-control mr-sm-1")}}
           </div>
           <div class="col-sm-5">
-            Comments on a user are displayed here, and are only shown to admin users.
+            Comments on a user are only shown to staff users, inside the admin.
+          </div>
+        </div>
+
+        {% if user %}
+          <div class="row py-2 m-1 {% if user and not user.is_active %}alert-danger{% else %}bg-white{% endif %}">
+            <div class="col-sm-3">
+              {{form.is_active.label}}
+            </div>
+            <div class="col-sm-4 ">
+              {{form.is_active(class_="form-control", checked=user.is_active)}}
+            </div>
+            <div class="col-sm-5">
+              Users that are not active cannot log in, and are effectively suspended.
+            </div>
+          </div>
+        {% else %}
+          {# registration: new users always active to start with #}
+          <input type="hidden" name="is_active" value="1"/>
+        {% endif %}
+
+        <div class="row alert-warning py-2 m-1">
+          <div class="col-sm-3">
+            {{form.access_level.label}}
+          </div>
+          <div class="col-sm-4">
+            <select name="access_level" id="access_level" class="form-control mr-sm-1">
+              <option value="0">Not staff</option>
+              <optgroup label="Staff">
+                <option value="1">Teaching assistant</option>
+                <option value="9">Administrator</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            Teaching assistants have mostly read-only access to the data on the race server.
+            Administrators have full access and can make changes.
           </div>
         </div>
 
@@ -127,25 +211,34 @@
             {{form.auth_code(class_="form-control mr-sm-1")}}
           </div>
           <div class="col-sm-5">
-            You must provide a valid authorisation code to
-            edit user data.
+            {% if user %}
+              You must provide a valid authorisation code to
+              edit user data.
+            {% else %}
+              You must provide a valid authorisation code to
+              register new users.
+            {% endif %}
           </div>
         </div>
         <div class="row bg-white py-2 m-1">
           <div class="col py-2">
-            <input class="btn btn-primary" type="submit" value="Submit changes">
+            <input class="btn btn-primary" type="submit" value="{% if user %}Submit changes{% else %}Register new user{% endif %}">
           </div>
         </div>
       </div>
     </form>
   </div>
-  <div class="row">
-    <div class="col btn-collection my-3">
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}&nbsp;&rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password&nbsp;&rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users&nbsp;&rtri;</a>
+  {% if is_current_user_administrator %}
+    <div class="row">
+      <div class="col btn-collection my-3">
+        {% if user %}
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}&nbsp;&rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password&nbsp;&rtri;</a>
+        {% endif %}
+        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users&nbsp;&rtri;</a>
+      </div>
     </div>
-  </div>
+  {% endif %}
 </div>
 {% endblock %}
 

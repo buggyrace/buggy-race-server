@@ -3,8 +3,8 @@
 
 from flask import current_app
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, ValidationError
+from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField, IntegerField
+from wtforms.validators import DataRequired, EqualTo, Length, Optional, ValidationError
 
 from buggy_race_server.utils import is_authorised, prettify_form_field_name
 from buggy_race_server.user.models import User
@@ -28,6 +28,7 @@ class UserForm(FlaskForm):
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active?")
     comment = TextAreaField("Comment", validators=[Optional(), Length(max=1024)])
+    access_level = IntegerField("Staff role", validators=[Optional()])
     auth_code = PasswordField("Authorisation code",  [is_authorised])
 
     @staticmethod
@@ -72,14 +73,19 @@ class UserForm(FlaskForm):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 
+    def validate_access_level(self, field):
+        if field.data not in [0, User.TEACHING_ASSISTANT, User.ADMINISTRATOR]:
+            raise ValidationError("Access level not recognised")
+        return field.data
+
     def validate(self):
         """Validate the form."""
         initial_validation = super(UserForm, self).validate()
         if not initial_validation:
             return False
         user = User.query.filter_by(username=self.username.data).first()
-        if user and int(user.id) != int(self.id.data):
-            self.username.errors.append(f"Username \"{self.pretty_username}\" already registered")
+        if user and (not self.id.data or (int(user.id) != int(self.id.data))):
+            self.username.errors.append(f"Sorry: \"{user.pretty_username}\" is already registered")
             return False
         return True
 
@@ -122,7 +128,7 @@ class RegisterForm(UserForm):
         return True
 
 class ChangePasswordForm(FlaskForm):
-    """Register form."""
+    """Change password form."""
     username = SelectField(
         "Username", validators=[Optional()], choices=[], validate_choice=False
     )

@@ -83,10 +83,13 @@
     </form>
   </div>
   <div class="row">
-    <div class="col my-3">
+    <div class="col mt-5">
       <p>
-        Alternatively: <a href="{{ url_for('public.register') }}">individual registration</a>.
-       </p>
+        Alternatively you can register users individually:
+      </p>
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.new_user') }}" class="btn btn-outline-secondary btn-admin">Register user &rtri;</a>
+      </p>
     </div>
   </div>
 </div>

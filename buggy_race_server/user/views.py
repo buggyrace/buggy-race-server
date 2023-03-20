@@ -55,6 +55,16 @@ def flash_explanation_if_unauth(function):
     return function()
   return wrapper
 
+@blueprint.route("/new")
+def register_new_user():
+    if not current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
+        flash(
+          "You must be logged in as an administrator to register new users "
+          "(public registration is not enabled)", "warning"
+        )
+        abort(403)
+    return redirect(url_for('admin.new_user'))
+
 @blueprint.route("/upload", strict_slashes=False)
 @flash_explanation_if_unauth
 @login_required
@@ -151,30 +161,36 @@ def setup_course_repository():
 @login_required
 @active_user_required
 def change_password():
-    """Change user's password (must be current user unless admin)."""
+    """Change user's password (staff may be able to change another user's password)."""
     warn_if_insecure()
-    # an admin might be allowed to change another user's password without auth code
-    is_auth_needed_for_all=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name]
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
         if form.validate_on_submit():
             username = form.username.data
             username = username.lower().strip() if username else current_user.username
-            is_allowed = current_user.username == username
-            if is_allowed:
+            is_allowed = False
+            if current_user.username == username:
+                is_allowed = True
                 target_user = current_user
-            elif not current_user.is_buggy_admin:
+            elif not current_user.is_staff:
                 flash("You cannot change another user's password", "danger")
             else:
-                # validation confirmed username is for a real user
                 target_user = User.query.filter_by(username=form.username.data).first()
-                if not is_auth_needed_for_all and not target_user.is_buggy_admin:
-                    is_allowed = True
+                if target_user is None: # actually was confirmed by validation
+                    abort(404)
+                if current_user.is_administrator:
+                    if not target_user.is_administrator:
+                        is_allowed = True
+                    else:
+                        try:
+                            is_allowed = is_authorised(form, form.auth_code)
+                        except ValidationError as e:
+                            flash(f"You must provide a valid authorisation code", "warning")
+                elif target_user.is_staff:
+                    is_allowed = False
+                    flash("You can't change another staff member's password (needs an administrator)", "warning")
                 else:
-                    try:
-                        is_allowed = is_authorised(form, form.auth_code)
-                    except ValidationError as e:
-                        flash(f"Did not change {target_user.pretty_username}'s password: {e}", "danger")
+                    is_allowed = current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name]
             if is_allowed:
                 target_user.set_password(form.password.data)
                 target_user.save()
@@ -192,7 +208,7 @@ def change_password():
     return render_template(
         "user/password.html",
         form=form,
-        is_auth_needed_for_all=is_auth_needed_for_all,
+#        is_auth_needed_for_all=is_auth_needed_for_all,
         admin_usernames=current_app.config[ConfigSettingNames.ADMIN_USERNAMES.name],
     )
   

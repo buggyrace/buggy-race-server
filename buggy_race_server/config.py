@@ -547,10 +547,13 @@ class ConfigSettings:
           """,
 
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
-          """Can users register themselves? If not, only an admin user who
-          knows the `AUTHORISATION_CODE` can register new users. Normally,
-          the staff running the buggy racing project will register users so
-          we strongly recommend public registration is not enabled.""",
+          """Normally, only a logged-in administrator who knows the
+          `AUTHORISATION_CODE` can register new users. But if you accidentally
+          end up unable to log in (deleted/demoted user, forgotten password)
+          set this to `Yes` (or `1`) in the ENV to allow **emergency access**
+          to the registration page, and create a new (admin) user. You'll also
+          need to know the auth code (which can also be set via ENV if
+          it's been lost).""",
 
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name:
           """Should a race be public as soon as you create it? If you choose
@@ -606,11 +609,12 @@ class ConfigSettings:
           via the race server.""",
 
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name:
-          """Is an auth code needed in order to change other (non-admin) users'
-          passwords? Students who forget their passwords cannot reset them, so
-          need to ask an admin to do it. Choose `Yes` if you want all staff
-          (for example, Teaching Assistants) to be able to do this without
-          needing to share the auth code with them.""",
+          """Can Teaching Assistants (as well as administrators) change
+          other users' passwords? Students who forget their passwords cannot
+          reset them, so need to ask a staff member to do it. By default, only
+          administrators can change other users' passwords. Choose `Yes` if
+          you want Teaching Assistants to also be able to do this too. TAs
+          can only change other _students'_ passwords (not staff).""",
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
           """By default, task URLs go direct to the server

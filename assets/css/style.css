@@ -585,3 +585,7 @@ td .cell-title {
   background-color: #dddddd;
   min-height:1rem;
 }
+
+.empty-setting {
+  color: #aaaaaa;
+}

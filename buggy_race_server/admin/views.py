@@ -701,7 +701,7 @@ def new_user():
 @login_required
 @admin_only
 def edit_user(user_id):
-   return manage_user(user_id=None)
+   return manage_user(user_id=user_id)
 
 @blueprint.route("/api-keys", methods=['GET','POST'], strict_slashes=False)
 @login_required

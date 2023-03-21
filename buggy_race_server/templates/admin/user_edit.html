@@ -50,7 +50,7 @@
             {{form.username.label}}
           </div>
           <div class="col-sm-4">
-            {{form.username(placeholder="Username", class_="form-control mr-sm-1")}}
+            {{form.username(placeholder=example_username, class_="form-control mr-sm-1")}}
           </div>
           <div class="col-sm-5">
             Usernames are always lower case (although they may be displayed
@@ -147,11 +147,12 @@
           <div class="col-sm-4">
             <select name="is_student" class="form-control mr-sm-1">
               <option value="" {% if user and not user.is_student %}selected{% endif %}>No</option>
-              <option value="Yes" {% if user and user.is_student %}selected{% endif %}>Yes</option>
+              <option value="Yes" {% if not user or user.is_student %}selected{% endif %}>Yes</option>
             </select>
           </div>
           <div class="col-sm-5">
-            Admin users or teaching assistants aren't students (used in the dashboard).
+            Staff users probably shouldn't be marked as students (once the
+            project is running).
           </div>
         </div>
 
@@ -198,8 +199,9 @@
             </select>
           </div>
           <div class="col-sm-5">
-            Teaching assistants have mostly read-only access to the data on the race server.
-            Administrators have full access and can make changes.
+            <strong>Teaching assistants</strong> have mostly read-only access to the
+            data on the race server.
+            <strong>Administrators</strong> have full access and can make changes.
           </div>
         </div>
 

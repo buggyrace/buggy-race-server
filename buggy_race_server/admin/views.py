@@ -676,6 +676,7 @@ def manage_user(user_id):
   return render_template(
     "admin/user_edit.html",
     action_url=action_url,
+    example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
     ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
     form=form,

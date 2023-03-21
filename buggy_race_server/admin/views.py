@@ -317,7 +317,6 @@ def setup():
               password=form.admin_password.data,
               access_level=User.ADMINISTRATOR,
               comment=f"First admin user, created during setup :-)",
-              latest_json="",
             )
             flash(f"Created new admin user \"{new_admin_username}\"", "info")
           admin_user.is_active = True
@@ -640,6 +639,7 @@ def manage_user(user_id):
          user = User(
             username=form.username.data,
             password=form.password.data,
+            
           )
       user.username = form.username.data # validation catches non-unique usernames
       user.comment = form.comment.data

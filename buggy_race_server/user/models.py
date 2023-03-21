@@ -86,7 +86,7 @@ class User(UserMixin, SurrogatePK, Model):
     is_admin = Column(db.Boolean(), default=False)
     access_level = Column(db.Integer, nullable=False, default=0)
     buggies = db.relationship("Buggy", backref="users", lazy=True)
-    latest_json = Column(db.Text(), default=False)
+    latest_json = Column(db.Text(), default="")
     github_username = Column(db.Text(), nullable=True)
     github_access_token = Column(db.Text(), nullable=True)
     is_student = Column(db.Boolean(), default=True)

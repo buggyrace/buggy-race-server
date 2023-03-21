@@ -48,7 +48,7 @@
   <div class="row">
     <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
-        <tr>
+        <tr class="sticky-top bg-white">
           {% if current_user.is_administrator %}
             <th></th>
           {% endif %}
@@ -72,7 +72,7 @@
           {% endif %}
           <th class="u-login-at">last login</th>
           <th class="u-github">GitHub (&rarr; repo)</th>
-          <th colspan="2" class="u-uploaded">Uploaded JSON? (&rarr; buggy)</th>
+          <th colspan="2" class="u-uploaded">JSON chars</th>
         </tr>
       </thead>
       <tbody>
@@ -141,7 +141,11 @@
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">
-                    {{ u.is_active | lower }}
+                  {% if u.is_active %}
+                    Yes
+                  {% else %}
+                    No
+                  {% endif %}
                 </td>
               {% endif %}
               <td class="u-login-at">
@@ -155,13 +159,17 @@
               </td>
               <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
-                  <span  data-username='{{ u.username  | replace("-","_") }}' class="json-btn">
-                    {{ u.latest_json|length }} chars
+                  <span  data-username='{{ u.username  | replace("-","_") }}' class="json-btn icon-wrench p-2">
+                   {{ u.latest_json|length }}
                   </span>
                 {% else %}
-                  none
+                  <em class="empty-setting">none</em>
                 {% endif %}
-                <a href="{{ url_for('admin.show_buggy', username=u.username) }}">&rarr;</a>
+                <!-- not showing buggy link
+                <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right"
+                  href="{{ url_for('admin.show_buggy', username=u.username) }}"
+                  >&rtri;</a>
+                -->
               </td>
               <td  class="u-uploaded">
                 {{ u.pretty_uploaded_at }}

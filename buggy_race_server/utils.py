@@ -487,3 +487,36 @@ def publish_task_list(app=current_app):
         value=stringify_datetime(created_at),
     )
   
+
+# get_flag_color_defs for handling pennant/flag display with 
+# custom CSS and SVG masks
+FLAG_COLOR_NAME_RE = re.compile(r"\W+")
+FLAG_COLOR_VALUE_RE = re.compile(r"[^-a-zA-Z0-9_(). ]+")
+
+def _get_flag_color(flag, want_secondary=False):
+    try:
+        fc = flag.flag_color_secondary if want_secondary else flag.flag_color
+    except AttributeError:
+        return None # flag item doesn't have a color
+    fc = str(fc).strip()
+    # it's possible for fc to be empty string: no definition
+    return (
+        re.sub(FLAG_COLOR_NAME_RE, "-", fc),
+        re.sub(FLAG_COLOR_VALUE_RE, "", fc)
+      ) if fc else None
+ 
+def get_flag_color_css_defs(buggy_data_list):
+    """ Extract name:value pairs of CSS class definition for flag colours:
+        The buggy_data_list might be from a Buggy model or a RaceResult:
+        we're looking for flag_color, flag_color_secondary, and flag_pattern
+        fields
+        Also: this is dumbly de-tainting the color string by removing
+        anything beyond: word, #hex, rgb(x.x, x.x, x.x)
+        returns dictionary of class name : background colour defs
+    """
+    flag_colors = {}
+    for flag in buggy_data_list:
+        for want_secondary in [True, False]:
+          if name_value := _get_flag_color(flag, want_secondary=want_secondary):
+            flag_colors[f"flag-col-{name_value[0]}"] = f"background-color:{name_value[1]}"
+    return flag_colors

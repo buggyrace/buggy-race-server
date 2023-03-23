@@ -10,7 +10,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for,
 from flask_login import current_user, login_required
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
 from buggy_race_server.race.models import Race, RaceResult, load_race_results
-from buggy_race_server.utils import flash_errors, staff_only, admin_only
+from buggy_race_server.utils import flash_errors, staff_only, admin_only, get_flag_color_css_defs
 from buggy_race_server.config import ConfigSettingNames
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
@@ -109,7 +109,6 @@ def upload_results(race_id):
         print(request.files)
         if form.validate_on_submit():
             is_ignoring_warnings = form.is_ignoring_warnings.data
-            print(f"FIXME >>>> is_ignoring_warnings={is_ignoring_warnings}")
             # not robust, but pragmatically...
             # we can anticipate only one admin uploading one race at a time
             delete_path = None
@@ -208,5 +207,6 @@ def show_race_results(race_id):
         results_nonfinishers=results_nonfinishers,
         results_disqualified=results_disqualified,
         is_tied=is_tied,
+        flag_color_css_defs=get_flag_color_css_defs(all_results)
     )
   

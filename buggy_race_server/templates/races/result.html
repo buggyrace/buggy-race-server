@@ -71,9 +71,7 @@
                 </strong>
               </td>
               <td>
-                {{ res.flag_color }}
-                {{ res.flag_color_secondary }}
-                {{ res.flag_pattern }}
+                <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
               <td>
                 {{ res.user_id }}
@@ -95,9 +93,7 @@
                 &mdash;
               </td>
               <td>
-                {{ res.flag_color }}
-                {{ res.flag_color_secondary }}
-                {{ res.flag_pattern }}
+                <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
               <td>
                 {{ res.user_id }}
@@ -122,9 +118,7 @@
         {% for res in results_disqualified %}
           <tr>
             <td>
-              {{ res.flag_color }}
-              {{ res.flag_color_secondary }}
-              {{ res.flag_pattern }}
+              <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
             </td>
             <td>
               {{ res.user_id }}
@@ -148,7 +142,6 @@
       </table>
     </div>
   </div>
-
 </div>
 
 {% endblock %}

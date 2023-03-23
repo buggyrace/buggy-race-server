@@ -117,16 +117,28 @@
           </div>
         </div>
         <!-- skipping leagues for now -->
+        <div class="row bg-white py-2 m-1">
+          <div class="col py-2">
+            {% if race %}
+              <input class="btn btn-primary" type="submit" value="Submit race">
+            {% else %}
+              <input class="btn btn-danger" type="submit" value="Add new race">
+            {% endif %}
+          </div>
+        </div>
         {% if race %}
           <div class="row alert-warning py-2 m-1 ">
-            <div class="col">
+            <div class="col-sm-8">
               <p>
                 Results meta-data: normally this is set when you
                 upload results, so you don't need to change these
                 here.
               </p>
             </div>
-          </div>
+            <div class="col-sm-4">
+              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin">Upload results &rtri;</a>
+            </div>
+            </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
               {{ form.results_uploaded_at.label }}
@@ -183,15 +195,6 @@
             </div>
           </div>
         {% endif %}
-        <div class="row bg-white py-2 m-1">
-          <div class="col py-2">
-            {% if race %}
-              <input class="btn btn-primary" type="submit" value="Submit race">
-            {% else %}
-              <input class="btn btn-danger" type="submit" value="Add new race">
-            {% endif %}
-          </div>
-        </div>
       </form>
     </div>
   </div>

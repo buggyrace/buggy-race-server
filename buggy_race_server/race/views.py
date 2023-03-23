@@ -3,12 +3,13 @@
 
 import csv
 import re
+import json
 from datetime import datetime
-
+import os
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
 from flask_login import current_user, login_required
-from buggy_race_server.race.forms import RaceForm, RaceDeleteForm
-from buggy_race_server.race.models import Race
+from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
+from buggy_race_server.race.models import Race, RaceResult, load_race_results
 from buggy_race_server.utils import flash_errors, staff_only, admin_only
 from buggy_race_server.config import ConfigSettingNames
 
@@ -95,6 +96,79 @@ def edit_race(race_id=None):
         delete_form=delete_form,
     )
 
+@blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])
+@login_required
+@admin_only
+def upload_results(race_id):
+    race = Race.get_by_id(race_id)
+    if race is None:
+        flash("Error: coudldn't find race", "danger")
+        abort(404)
+    form = RaceResultsForm(request.form)
+    if request.method == "POST":
+        print(request.files)
+        if form.validate_on_submit():
+            is_ignoring_warnings = form.is_ignoring_warnings.data
+            print(f"FIXME >>>> is_ignoring_warnings={is_ignoring_warnings}")
+            # not robust, but pragmatically...
+            # we can anticipate only one admin uploading one race at a time
+            delete_path = None
+            if "results_json_file" in request.files:
+                json_file = request.files['results_json_file']
+                if json_file.filename:
+                    json_filename_with_path = os.path.join(
+                        current_app.config['UPLOAD_FOLDER'],
+                        f"results-{str(race_id).zfill(4)}.json"
+                    )
+                    json_file.save(json_filename_with_path)
+                    try:
+                        with open(json_filename_with_path, "r") as read_file:
+                            result_data = json.load(read_file)
+                    except UnicodeDecodeError as e:
+                        flash("Encoding error (maybe that wasn't a good JSON file you uploaded?)", "warning")
+                    except json.decoder.JSONDecodeError as e:
+                        flash("Failed to parse JSON data", "danger")
+                        flash(str(e), "warning")
+                        flash("No data was accepted", "info")
+                    if result_data:
+                        try:
+                            warnings = load_race_results(
+                                result_data,
+                                is_ignoring_warnings=is_ignoring_warnings
+                            )
+                        except ValueError as e:
+                            flash(f"Failed to load race results: {e}", "danger")
+                        else:
+                            for warning in warnings:
+                                flash(warning, "warning")
+                            if not warnings or is_ignoring_warnings:
+                                flash("OK, updated race results", "success")
+                            else:
+                                if len(warnings) == 1:
+                                    msg = "Did not upload race results because there was a warning"
+                                else:
+                                    msg = "Did not upload race results because there were warnings"
+                                flash(msg, "danger")
+                    delete_path = json_filename_with_path
+                else:
+                    flash("NO json_file.filename", "info")
+            else:
+                flash("NO results_json_file was false", "info")
+            if delete_path:
+                try:
+                    os.unlink(delete_path)
+                except os.error as e:
+                    # could sanitise this, but the diagnostic might be useful
+                    flash(f"Problem deleting uploaded file: {e}", "warning")
+        else:
+            flash_errors(form)
+            flash("Did not accept race results", "danger")
+    return render_template(
+        "admin/race_upload.html",
+        form=form,
+        race=race
+    )
+
 @blueprint.route("/<race_id>/delete", methods=["POST"])
 @login_required
 @admin_only
@@ -114,27 +188,25 @@ def delete_race(race_id):
       flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for('race.list_races'))
 
-@blueprint.route("/<league>/<race_slug>/<data_format>")
-@blueprint.route("/<league>/<race_slug>")
-def race_results(league, race_slug, data_format=None):
-    if data_format == 'csv':
-        return "TODO:CSV"
-    time_match = re.match(r"(\d{4}-\d{2}-\d{2})-(\d{2})-(\d{2})", race_slug)
-    if not time_match: # YYY MM DD HH mm
-        flash("No race matches those criteria", "warning")
-        return redirect(url_for("public.announce_races"))
-    time_str = f"{time_match.group(1)} {time_match.group(2)}:{time_match.group(3)}:00.000000"
-    #start_at=datetime.fromisoformat(time_str).replace(second=0,microsecond=0)
-    race = Race.query.filter_by(league=league, start_at=time_str).first()
-    buggies = []
-    with open('buggy_race_server/static/races/fy/2021-06-02-23-00.csv', newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            buggies.append(row)
-    return render_template("races/result.html",
-      league=league,
-      slug=race_slug,
-      race=race,
-      buggies=buggies
+@blueprint.route("/<race_id>/result")
+def show_race_results(race_id):
+    race = Race.query.filter_by(id=race_id).first_or_404()
+    all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
+    results_finishers = [res for res in all_results if res.race_position > 0 ]
+    results_nonfinishers = [res for res in all_results if res.race_position == 0 ]
+    results_disqualified = [res for res in all_results if res.race_position < 0 ]
+    is_tied = {}
+    prev_pos = 0
+    for res in results_finishers:
+        if res.race_position == prev_pos:
+            is_tied[prev_pos] = "="
+        prev_pos = res.race_position
+    return render_template(
+        "races/result.html",
+        race=race,
+        results_finishers=results_finishers,
+        results_nonfinishers=results_nonfinishers,
+        results_disqualified=results_disqualified,
+        is_tied=is_tied,
     )
   

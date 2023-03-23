@@ -1058,6 +1058,8 @@ def tasks_admin():
                 md_filename_with_path = "project/tasks.md"
                 delete_path = None
                 pretty_source = "default tasks"
+                print("FIXME-2")
+                print(request.files)
                 if "markdown_file" in request.files:
                     md_file = request.files['markdown_file']
                     if md_file.filename:

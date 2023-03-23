@@ -86,7 +86,10 @@
       <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
         <thead>
           <tr>
-            <th colspan="2"><span class="icon-trophy"></span></th>
+            <th><span class="icon-trophy"></span></th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
             <th>Race time</th>
             <th>Cost limit</th>
             <th>Title & details</th>
@@ -96,18 +99,23 @@
             {% for race in races %}
               <tr class="race-visible-{{ race.is_visible }}">
                 <td>
-                  {% if race.uploaded_results_at %}
-                    <a class="btn btn-outline-secondary"
-                    href="{{ url_for('race.race_results', league=race.league, race_slug=race.slug())}}">results &rtri;</a>
+                  {% if race.results_uploaded_at %}
+                    <a class="btn btn-outline-secondary btn-white"
+                    href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result &rtri;</a>
                   {% endif %}
                 </td>
-                <td>
-                  {% if race.uploaded_results_at %}
-                    <em>TODO</em>
-                  {% else %}
+                {% if race.results_uploaded_at %}
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                  <td>
+                  </td>
+                {% else %}
+                  <td colspan="3">
                     <em>Awaiting race report</em>
-                  {% endif %}
-                </td>
+                  </td>
+                {% endif %}
                 <td>
                   {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
                 </td>

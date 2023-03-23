@@ -70,15 +70,21 @@
             <td class="text-right">
               {{ race.cost_limit }}
             </td>
-            <td class="text-right">
-              {{ race.buggies_entered }}
-            </td>
-            <td class="text-right">
-              {{ race.buggies_started }}
-            </td>
-            <td class="text-right">
-              {{ race.buggies_finished }}
-            </td>
+            {% if race.results_uploaded_at %}
+              <td class="text-right">
+                {{ race.buggies_entered }}
+              </td>
+              <td class="text-right">
+                {{ race.buggies_started }}
+              </td>
+              <td class="text-right">
+                {{ race.buggies_finished }}
+              </td>
+            {% else %}
+              <td colspan="3" class="text-right">
+                <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm">Upload results &rtri;</a>
+              </td>
+            {% endif %}
           </tr>
         {% endfor %}
       </tbody>

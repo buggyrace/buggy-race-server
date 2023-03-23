@@ -5,12 +5,13 @@ from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
     DateTimeField,
+    FileField,
     HiddenField,
     IntegerField,
     StringField,
     TextAreaField,
 )
-from wtforms.validators import Length, NumberRange, Optional
+from wtforms.validators import Length, NumberRange, Optional, DataRequired
 
 from buggy_race_server.race.models import Race
 from buggy_race_server.config import ConfigSettings
@@ -69,6 +70,7 @@ class RaceForm(FlaskForm):
             return False
         return True
 
+
 class RaceDeleteForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")
   
@@ -78,3 +80,13 @@ class RaceDeleteForm(FlaskForm):
     def validate(self):
         return super(RaceDeleteForm, self).validate()
 
+
+class RaceResultsForm(FlaskForm):
+    results_json_file = FileField("JSON results file")
+    is_ignoring_warnings = BooleanField("Ignore warnings?")
+
+    def __init__(self, *args, **kwargs):
+        super(RaceResultsForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        return super(RaceResultsForm, self).validate()

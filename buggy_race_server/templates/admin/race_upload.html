@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Upload race results
+      {% if race.title %}
+        for <em>{{ race.title }}</em>
+      {% endif %}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="border container">
+        <form id="RaceResultsForm" method="POST"
+          action="{{ url_for('race.upload_results', race_id=race.id) }}"
+          enctype="multipart/form-data" role="form">
+          {{ form.csrf_token }}
+          <div class="row">
+            <div class="col-sm-4 p-3">
+              <label for="results_json_file">
+                Upload a JSON results file
+              </label>
+            </div>
+            <div class="col-sm-8 p-3">
+              {{ form.results_json_file(required='required') }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4 p-3">
+              <label for="results_json_file">
+                Ignore warnings?
+              </label>
+            </div>
+            <div class="col-sm-8 p-3">
+              <select name="is_ignoring_warnings" class="form-control">
+                <option value="" selected>No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col my-2 p-3">
+              <button class="btn btn-primary">Upload results</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-6">
+      {% if race.results_uploaded_at %}
+        <div class="alert alert-warning">
+          Uploading will <strong>replace any existing results</strong>
+          for this race!
+        </div>
+      {% endif %}
+      <p>
+        If there are any problems with the results uploaded, you'll see
+        warnings and the race results will not be updated. Sometimes it's OK to
+        <strong>ignore warnings</strong> (for example, if a user has changed
+        their username since the race, so the name can't be found in the JSON).
+        Otherwise, you may need to edit and fix the JSON file you are uploading.
+        If you're <em>sure</em> the warnings can be ignored, choose
+        <code>No</code> and upload the JSON file again.
+      </p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

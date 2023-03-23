@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Buggy model."""
 import datetime as datetime
+from enum import Enum, auto
 
 from sqlalchemy import event
 
@@ -96,22 +97,42 @@ class Buggy(SurrogatePK, Model):
       'algo':                 "steady"
     }
 
+    class RuleNames(Enum):
+
+        def _generate_next_value_(name, start, count, last_values):
+            """ ConfigSettingNames values are the same (as strings) as their names."""
+            return name
+    
+        RACE_COST_THRESHHOLD = auto()
+        VALID_ALGO = auto()
+        VALID_ARMOUR = auto()
+        VALID_ATTACK = auto()
+        VALID_AUX_POWER = auto()
+        VALID_POWER = auto()
+        VALID_TYRES = auto()
+        VALID_PATTERN = auto()
+        MIN_WHEELS = auto()
+        EVEN_WHEELS = auto()
+        FLAG_COLOURS = auto()
+        ENOUGH_TYRES = auto()
+        SOFTWARE = auto()
+
 
     RULES = {
-      'RACE_COST_THRESHHOLD': "buggy over cost for this race",
-      'VALID_ALGO':       "unknown algorithm",
-      'VALID_ARMOUR':     "unknown type of armour",
-      'VALID_ATTACK':     "unknown type of attack",
-      'VALID_AUX_POWER':  "unknown type of auxiliary power",
-      'VALID_POWER':      "unknown type of primary power",
-      'VALID_TYRES':      "unknown type of tyre",
-      "VALID_PATTERN":    "unknown flag pattern",
+      RuleNames.RACE_COST_THRESHHOLD.name: "buggy over cost for this race",
+      RuleNames.VALID_ALGO.name:       "unknown algorithm",
+      RuleNames.VALID_ARMOUR.name:     "unknown type of armour",
+      RuleNames.VALID_ATTACK.name:     "unknown type of attack",
+      RuleNames.VALID_AUX_POWER.name:  "unknown type of auxiliary power",
+      RuleNames.VALID_POWER.name:      "unknown type of primary power",
+      RuleNames.VALID_TYRES.name:      "unknown type of tyre",
+      RuleNames.VALID_PATTERN.name:    "unknown flag pattern",
 
-      'MIN_WHEELS':   "must have at least {} wheels".format(DEFAULTS['qty_wheels']),
-      'EVEN_WHEELS':  "must have even number of wheels",
-      'FLAG_COLOURS': "flag must have two different colours if pattern is not plain",
-      'ENOUGH_TYRES': "must have at least as many tyres as wheels",
-      'SOFTWARE':     "must not load buggy software"
+      RuleNames.MIN_WHEELS.name:   "must have at least {} wheels".format(DEFAULTS['qty_wheels']),
+      RuleNames.EVEN_WHEELS.name:  "must have even number of wheels",
+      RuleNames.FLAG_COLOURS.name: "flag must have two different colours if pattern is not plain",
+      RuleNames.ENOUGH_TYRES.name: "must have at least as many tyres as wheels",
+      RuleNames.SOFTWARE.name:     "must not load buggy software"
     }
 
     BASE_MASS_PER_WHEEL = 12

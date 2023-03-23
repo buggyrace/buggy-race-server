@@ -181,7 +181,7 @@ def delete_race(race_id):
             return redirect(url_for('race.edit_race', race_id=race_id))
         race = Race.get_by_id(race_id)
         if race is None:
-            flash("Error: coudldn't find announcement to delete", "danger")
+            flash("Error: coudldn't find race to delete", "danger")
         else:
             race.delete()
             flash("OK, deleted race", "success")

@@ -8,8 +8,10 @@ from datetime import datetime
 import os
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
 from flask_login import current_user, login_required
+from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
 from buggy_race_server.race.models import Race, RaceResult, load_race_results
+from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, staff_only, admin_only, get_flag_color_css_defs
 from buggy_race_server.config import ConfigSettingNames
 
@@ -190,13 +192,17 @@ def delete_race(race_id):
 @blueprint.route("/<race_id>/result")
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
-    all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
-    results_finishers = [res for res in all_results if res.race_position > 0 ]
-    results_nonfinishers = [res for res in all_results if res.race_position == 0 ]
-    results_disqualified = [res for res in all_results if res.race_position < 0 ]
+ 
+    all_results = db.session.query(RaceResult, User).outerjoin(User).filter(RaceResult.race_id==race.id).order_by(RaceResult.race_position.asc()).all()
+ 
+    # all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
+    results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
+    results_nonfinishers = [(res, user) for (res, user) in all_results if res.race_position == 0 ]
+    results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
     is_tied = {}
     prev_pos = 0
-    for res in results_finishers:
+    flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
+    for (res, _) in results_finishers:
         if res.race_position == prev_pos:
             is_tied[prev_pos] = "="
         prev_pos = res.race_position
@@ -207,6 +213,6 @@ def show_race_results(race_id):
         results_nonfinishers=results_nonfinishers,
         results_disqualified=results_disqualified,
         is_tied=is_tied,
-        flag_color_css_defs=get_flag_color_css_defs(all_results)
+        flag_color_css_defs=flag_color_css_defs,
     )
   

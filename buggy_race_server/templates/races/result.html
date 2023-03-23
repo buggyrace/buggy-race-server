@@ -63,7 +63,7 @@
             </td>
           </tr>
         {% else %}
-          {% for res in results_finishers %}
+          {% for (res, user) in results_finishers %}
             <tr>
               <td class="text-center">
                 <strong>
@@ -74,7 +74,7 @@
                 <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
               <td>
-                {{ res.user_id }}
+                {{ user.pretty_username }}
               </td>
               <td>
                 {{ res.cost }}
@@ -87,7 +87,7 @@
               </td>
             </tr>
           {% endfor %}
-          {% for res in results_nonfinishers %}
+          {% for (res, user) in results_nonfinishers %}
             <tr>
               <td class="text-center">
                 &mdash;
@@ -96,7 +96,7 @@
                 <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
               <td>
-                {{ res.user_id }}
+                {{ user.pretty_username }}
               </td>
               <td>
                 {{ res.cost }}
@@ -115,13 +115,13 @@
           <th>Violation</th>
           <th>Cost</th>
         </tr>
-        {% for res in results_disqualified %}
+        {% for (res, user) in results_disqualified %}
           <tr>
             <td>
               <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
             </td>
             <td>
-              {{ res.user_id }}
+              {{ user.pretty_username }}
             </td>
             <td>
               {% for v in res.violations_str.split(',') %}

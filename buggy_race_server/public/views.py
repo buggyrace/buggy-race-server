@@ -155,6 +155,7 @@ def announce_races():
             Race.is_visible==True,
             Race.start_at < datetime.now()
           ).all()
+
     return render_template(
         "public/race.html",
         next_race=next_race,

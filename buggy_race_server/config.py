@@ -109,6 +109,7 @@ class ConfigSettingNames(Enum):
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
+    IS_USERNAME_PUBLIC_IN_RESULTS = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
@@ -208,6 +209,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
       ),
       ConfigGroupNames.RACES.name: (
+        ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
@@ -303,6 +305,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
+        ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
@@ -388,6 +391,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
@@ -624,6 +628,10 @@ class ConfigSettings:
           creation. This setting doesn't affect the display of tech notes
           (see `TECH_NOTES_EXTERNAL_URL`), only whether the interface
           for publishing them is shown.""",
+
+        ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name:
+          """When you publish race results, are usernames (as well as the
+          buggies' pennants) shown?""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
           """If students must work with the buggy editor in their own GitHub

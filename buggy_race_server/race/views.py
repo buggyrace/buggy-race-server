@@ -217,5 +217,7 @@ def show_race_results(race_id):
         results_disqualified=results_disqualified,
         is_tied=is_tied,
         flag_color_css_defs=flag_color_css_defs,
+        is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
+        current_user_id=0 if current_user.is_anonymous else current_user.id,
     )
   

@@ -73,8 +73,12 @@
               <td>
                 <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
-              <td>
-                {{ user.pretty_username }}
+              <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
+                {% if is_showing_usernames %}
+                  {{ user.pretty_username }}
+                {% elif user.id == current_user_id %}
+                  <em>Your buggy!</em>
+                {% endif %}
               </td>
               <td>
                 {{ res.cost }}
@@ -95,8 +99,12 @@
               <td>
                 <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
               </td>
-              <td>
-                {{ user.pretty_username }}
+              <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
+                {% if is_showing_usernames %}
+                  {{ user.pretty_username }}
+                {% elif user.id == current_user_id %}
+                  <em>Your buggy!</em>
+                {% endif %}
               </td>
               <td>
                 {{ res.cost }}
@@ -120,10 +128,14 @@
             <td>
               <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
             </td>
-            <td>
-              {{ user.pretty_username }}
+            <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
+              {% if is_showing_usernames %}
+                {{ user.pretty_username }}
+              {% elif user.id == current_user_id %}
+                <em>Your buggy!</em>
+              {% endif %}
             </td>
-            <td>
+          <td>
               {% for v in res.violations_str.split(',') %}
                 <code>{{ v }}</code>
               {% endfor %}

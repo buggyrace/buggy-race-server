@@ -87,9 +87,9 @@
         <thead>
           <tr>
             <th><span class="icon-trophy"></span></th>
-            <th>1</th>
-            <th>2</th>
-            <th>3</th>
+            <th class="text-center">1</th>
+            <th class="text-center">2</th>
+            <th class="text-center">3</th>
             <th>Race time</th>
             <th>Cost limit</th>
             <th>Title & details</th>
@@ -98,28 +98,37 @@
         <tbody>
             {% for race in races %}
               <tr class="race-visible-{{ race.is_visible }}">
-                <td>
-                  {% if race.results_uploaded_at %}
-                    <a class="btn btn-outline-secondary btn-white"
-                    href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result &rtri;</a>
-                  {% endif %}
-                </td>
                 {% if race.results_uploaded_at %}
                   <td>
+                    {% if race.results_uploaded_at %}
+                      <a class="btn btn-outline-secondary btn-white"
+                      href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result &rtri;</a>
+                    {% endif %}
                   </td>
                   <td>
+                    {% for res in race.results if res.race_position == 1 %}
+                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                    {% endfor %}
                   </td>
                   <td>
+                    {% for res in race.results if res.race_position == 2 %}
+                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% for res in race.results if res.race_position == 3 %}
+                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                    {% endfor %}
                   </td>
                 {% else %}
-                  <td colspan="3">
+                  <td colspan="4" class="text-center">
                     <em>Awaiting race report</em>
                   </td>
                 {% endif %}
                 <td>
                   {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
                 </td>
-                <td>
+                <td class="text-center">
                   {{ race.cost_limit }}
                 </td>
                 <td>

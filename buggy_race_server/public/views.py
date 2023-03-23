@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Public section, including homepage and signup."""
 from datetime import datetime
-from collections import defaultdict
 from os import path
 
 from flask import (
@@ -20,13 +19,13 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
+from buggy_race_server.database import db
 from buggy_race_server.admin.models import AnnouncementType
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
-from buggy_race_server.race.models import Race
-from buggy_race_server.user.forms import RegisterForm
+from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
 from buggy_race_server.admin.models import SocialSetting, Task
 
@@ -37,6 +36,7 @@ from buggy_race_server.utils import (
     join_to_project_root,
     warn_if_insecure,
     load_config_setting,
+    get_flag_color_css_defs,
 )
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -151,15 +151,26 @@ def announce_races():
         Race.is_visible==True,
         Race.start_at > datetime.now()
       ).order_by(Race.start_at.asc()).first()
-    races = Race.query.filter(
+
+    races = db.session.query(
+            Race
+        ).join(RaceResult).filter(
             Race.is_visible==True,
-            Race.start_at < datetime.now()
-          ).all()
+            Race.start_at < datetime.now(),
+            RaceResult.race_position > 0,
+            RaceResult.race_position <= 3,
+        ).order_by(Race.start_at.asc()).all()
+
+    results = [ race.results for race in races ]
+    flag_color_css_defs = get_flag_color_css_defs(
+        [result for sublist in results for result in sublist]
+    )
 
     return render_template(
         "public/race.html",
         next_race=next_race,
-        races=races
+        races=races,
+        flag_color_css_defs=flag_color_css_defs,
     )
 
 def _send_tech_notes_assets(type, path):

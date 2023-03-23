@@ -193,7 +193,10 @@ def delete_race(race_id):
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
  
-    all_results = db.session.query(RaceResult, User).outerjoin(User).filter(RaceResult.race_id==race.id).order_by(RaceResult.race_position.asc()).all()
+    all_results = db.session.query(
+        RaceResult, User).outerjoin(User).filter(
+            RaceResult.race_id==race.id
+        ).order_by(RaceResult.race_position.asc()).all()
  
     # all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
     results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
@@ -201,11 +204,11 @@ def show_race_results(race_id):
     results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
     is_tied = {}
     prev_pos = 0
-    flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     for (res, _) in results_finishers:
         if res.race_position == prev_pos:
             is_tied[prev_pos] = "="
         prev_pos = res.race_position
+    flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     return render_template(
         "races/result.html",
         race=race,

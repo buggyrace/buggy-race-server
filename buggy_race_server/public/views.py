@@ -159,7 +159,7 @@ def announce_races():
             Race.start_at < datetime.now(),
             RaceResult.race_position > 0,
             RaceResult.race_position <= 3,
-        ).order_by(Race.start_at.asc()).all()
+        ).order_by(Race.start_at.desc()).all()
 
     results = [ race.results for race in races ]
     flag_color_css_defs = get_flag_color_css_defs(

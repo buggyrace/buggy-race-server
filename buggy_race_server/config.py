@@ -210,7 +210,7 @@ class ConfigSettings:
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
-        ConfigSettingNames.DEFAULT_RACE_LEAGUE.name,
+        # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
       ),

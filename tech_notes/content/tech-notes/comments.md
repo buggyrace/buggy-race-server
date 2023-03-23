@@ -5,8 +5,6 @@ Title: comments
 
 ---
 
-...{{ XXX }}... test fixme!
-
 You already know that comments are a really way to drop notes into your code.
 
 A more technical way to understand them is that comments are effectively a way

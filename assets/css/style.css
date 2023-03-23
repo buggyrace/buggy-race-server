@@ -589,3 +589,42 @@ td .cell-title {
 .empty-setting {
   color: #aaaaaa;
 }
+
+.flag, .flag-sm {
+  width:3em;
+  aspect-ratio:1.3;
+  border:1px solid #cccccc;
+}
+.flag-sm {
+  width:2em;
+}
+.flag-sm div, .flag div {
+  width:100%;
+  height:100%;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+}
+.flag-spot {
+  -webkit-mask: url(/static/build/img/spot.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/spot.svg) no-repeat 50% 50%;
+}
+.flag-checker {
+  -webkit-mask: url(/static/build/img/checker.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/checker.svg) no-repeat 50% 50%;
+}
+.flag-vstripe {
+  -webkit-mask: url(/static/build/img/vstripe.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/vstripe.svg) no-repeat 50% 50%;
+}
+.flag-hstripe {
+  -webkit-mask: url(/static/build/img/hstripe.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/hstripe.svg) no-repeat 50% 50%;
+}
+.flag-dstripe {
+  -webkit-mask: url(/static/build/img/dstripe.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/dstripe.svg) no-repeat 50% 50%;
+}
+.flag-plain {
+  -webkit-mask: none;
+  mask:none;
+}

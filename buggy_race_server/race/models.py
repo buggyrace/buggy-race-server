@@ -56,7 +56,6 @@ def load_race_results(results_data, is_ignoring_warnings=False):
     results = [] # will be used to mass-insert the race results
     usernames_in_race = {} # used to check for duplicate entries
     for i, bugres in enumerate(buggy_results):
-        print(f"FIXME-looping {i} : {bugres}")
         race_position = bugres.get("race_position")
         if race_position is None:
             raise ValueError(f"missing race_position in result ({i})")
@@ -95,7 +94,6 @@ def load_race_results(results_data, is_ignoring_warnings=False):
                         violations.append(v)
                     else:
                         warnings.append(f"result ({i}) contains unknown rule violation: \"{v}\"")
-                        print(f"FIXME ::::<><<>>>:::: {valid_violation_names}", flush=True)
                 violations_str = ",".join(sorted(violations))
             if race_position < 0: # position -1 means buggy never started
                 if not violations_str:
@@ -113,14 +111,11 @@ def load_race_results(results_data, is_ignoring_warnings=False):
             for item in ["flag_color", "flag_color_secondary", "flag_pattern", "violations_str"]:
                 result[item] = bugres.get(item) or ""
             results.append(result)
-            print(f"FIXME::::: race.buggies_started = {race.buggies_started}, race.buggies_finished={race.buggies_finished}")
     multi_usernames = [ username for username in usernames_in_race if usernames_in_race[username] > 1]
     if multi_usernames:
         warnings.append(f"usernames with more than one buggy in this race: {', '.join(sorted(multi_usernames))}")
-    print(f"FIXME results contains {len(results)} results:")
     for r in results:
         print(r)
-    print("FIXME .................")
     if total_buggies_entered != race.buggies_entered:
         warnings.append(f"number of buggies entered ({total_buggies_entered}) does not match total ({race.buggies_entered})")
     if total_buggies_started != race.buggies_started:

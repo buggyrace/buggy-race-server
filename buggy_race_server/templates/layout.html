@@ -18,7 +18,7 @@
     {% block css %}{% endblock %}
     {% if flag_color_css_defs %}
       <style>
-        {% for fc in flag_color_css_defs %}.{{ fc }} { {{ flag_color_css_defs[fc] }}; }
+        {% for fc in flag_color_css_defs %}.{{ flag_color_css_defs[fc][0] }} {{ flag_color_css_defs[fc][1] }}
         {% endfor %}
       </style>
     {% endif %}

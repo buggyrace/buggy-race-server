@@ -107,17 +107,20 @@
                   </td>
                   <td>
                     {% for res in race.results if res.race_position == 1 %}
-                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                      <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+                       ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
                     {% endfor %}
                   </td>
                   <td>
                     {% for res in race.results if res.race_position == 2 %}
-                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                      <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+                        ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
                     {% endfor %}
                   </td>
                   <td>
                     {% for res in race.results if res.race_position == 3 %}
-                      <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                      <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+                        ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
                     {% endfor %}
                   </td>
                 {% else %}

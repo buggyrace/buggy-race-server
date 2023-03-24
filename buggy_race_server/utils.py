@@ -491,7 +491,7 @@ def publish_task_list(app=current_app):
 # get_flag_color_defs for handling pennant/flag display with 
 # custom CSS and SVG masks
 FLAG_COLOR_NAME_RE = re.compile(r"\W+")
-FLAG_COLOR_VALUE_RE = re.compile(r"[^-a-zA-Z0-9_(). ]+")
+FLAG_COLOR_VALUE_RE = re.compile(r"[^-a-zA-Z0-9_().,#]+")
 
 def _get_flag_color(flag, want_secondary=False):
     try:
@@ -501,8 +501,11 @@ def _get_flag_color(flag, want_secondary=False):
     fc = str(fc).strip()
     # it's possible for fc to be empty string: no definition
     return (
-        re.sub(FLAG_COLOR_NAME_RE, "-", fc),
-        re.sub(FLAG_COLOR_VALUE_RE, "", fc)
+        fc,
+        (
+          f"flag-col-{re.sub(FLAG_COLOR_NAME_RE, '-', fc).strip('-')}",
+          "{"+f"background-color:{re.sub(FLAG_COLOR_VALUE_RE, '', fc)};"+"}"
+        )
       ) if fc else None
  
 def get_flag_color_css_defs(buggy_data_list):
@@ -518,5 +521,6 @@ def get_flag_color_css_defs(buggy_data_list):
     for flag in buggy_data_list:
         for want_secondary in [True, False]:
           if name_value := _get_flag_color(flag, want_secondary=want_secondary):
-            flag_colors[f"flag-col-{name_value[0]}"] = f"background-color:{name_value[1]}"
+            flag_colors[name_value[0]] = name_value[1]
+    print(f"FIXME {flag_colors}")
     return flag_colors

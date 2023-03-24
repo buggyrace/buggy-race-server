@@ -71,7 +71,8 @@
                 </strong>
               </td>
               <td>
-                <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+                <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+                ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
               </td>
               <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
                 {% if is_showing_usernames %}
@@ -97,8 +98,9 @@
                 &mdash;
               </td>
               <td>
-                <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
-              </td>
+                <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+                ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
+             </td>
               <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
                 {% if is_showing_usernames %}
                   {{ user.pretty_username }}
@@ -126,7 +128,8 @@
         {% for (res, user) in results_disqualified %}
           <tr>
             <td>
-              <div class="flag flag-col-{{ res.flag_color_secondary }}"><div class="flag-{{ res.flag_pattern }} flag-col-{{ res.flag_color }}">&nbsp;</div></div>
+              <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
+              ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
             </td>
             <td {% if user.id == current_user_id %}class="alert-info"{% endif %}>
               {% if is_showing_usernames %}

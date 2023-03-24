@@ -522,5 +522,4 @@ def get_flag_color_css_defs(buggy_data_list):
         for want_secondary in [True, False]:
           if name_value := _get_flag_color(flag, want_secondary=want_secondary):
             flag_colors[name_value[0]] = name_value[1]
-    print(f"FIXME {flag_colors}")
     return flag_colors

@@ -38,6 +38,15 @@
               <td>ID</td>
               <td class="text-center">{{ buggy.buggy_id }}</td>
             </tr>
+            {% if flag_color_css_defs %}
+              <tr>
+                <td>Flag</td>
+                <td class="text-center">
+                  <div class="mx-auto flag {{ flag_color_css_defs[buggy.flag_color_secondary][0] }}"
+                  ><div class="flag-{{ buggy.flag_pattern }} {{ flag_color_css_defs[buggy.flag_color][0] }}">&nbsp;</div></div>
+                </td>
+              </tr>
+            {% endif %}
             <tr>
               <td>Flag color</td>
               <td class="text-center" style="background-color:{{ buggy.flag_color }};">

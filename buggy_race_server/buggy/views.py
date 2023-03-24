@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import flash_errors, active_user_required
+from buggy_race_server.utils import flash_errors, active_user_required, get_flag_color_css_defs
 
 
 blueprint = Blueprint("buggy", __name__, url_prefix="/buggy", static_folder="../static")
@@ -150,9 +150,13 @@ def show_buggy(username=None):
         flash("No buggy exists for this user", "danger")
     else:
         is_plain_flag = buggy.flag_pattern == 'plain'
+    
+    flag_color_css_defs = get_flag_color_css_defs([buggy])
+
     return render_template("buggy/buggy.html",
         is_own_buggy=user==current_user,
         user=user,
         buggy=buggy,
-        is_plain_flag=is_plain_flag
+        is_plain_flag=is_plain_flag,
+        flag_color_css_defs=flag_color_css_defs,
     )

@@ -635,13 +635,14 @@ def manage_user(user_id):
     form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
     if form.validate_on_submit():
+      username = form.username.data.lower()
       if is_registering_new_user:
          user = User(
-            username=form.username.data,
+            username=username,
             password=form.password.data,
             
           )
-      user.username = form.username.data # validation catches non-unique usernames
+      user.username = username # validation catches non-unique usernames
       user.comment = form.comment.data
       user.is_student = form.is_student.data
       user.is_active = form.is_active.data

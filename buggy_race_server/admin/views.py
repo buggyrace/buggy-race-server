@@ -1157,7 +1157,7 @@ def download_tasks(type=None, format=None):
         if format == FORMAT_CSV:
             payload = get_tasks_as_issues_csv(
                 tasks,
-                want_double_spaced=current_app.config[ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name]
+                is_line_terminator_crlf=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
             )
         else:
             payload = "".join([task.raw_markdown for task in tasks if task.is_enabled])

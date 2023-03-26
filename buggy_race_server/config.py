@@ -67,9 +67,6 @@ class ConfigSettingNames(Enum):
     # Filename of the generated task list (effectively static content)
     _TASK_LIST_HTML_FILENAME = auto()
 
-    # might be a case for needing CSV double-spaced (TBC)
-    _IS_ISSUES_CSV_DOUBLE_SPACED = auto()
-
     # Tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) but  putting them in config
     # to allow future tech notes to come from a different source
@@ -100,6 +97,7 @@ class ConfigSettingNames(Enum):
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
     IS_ALL_CONFIG_IN_TECH_NOTES = auto()
+    IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
@@ -155,6 +153,7 @@ class ConfigGroupNames(str, Enum):
     RACES = "races"
     SERVER = "server"
     SOCIAL = "social"
+    TASKS = "tasks"
     TECH_NOTES = "tech_notes"
     USERS = "users"
 
@@ -249,18 +248,20 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
+      ),
+      ConfigGroupNames.TASKS.name: (
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
-      ),
+        ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
+      ),  
       ConfigGroupNames.TECH_NOTES.name: (
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
-        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,       
+        ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,
       )
     }
-
 
     # **Every** config setting in ConfigSettingNames **must** have an entry
     # in the DEFAULTS (it's used during setup to populate the database)
@@ -268,7 +269,6 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
         ConfigSettingNames._ENV_SETTING_OVERRIDES.name: "",
-        ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
@@ -297,6 +297,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
+        ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
@@ -355,7 +356,6 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames._ENV_SETTING_OVERRIDES.name: ConfigTypes.STRING,
-        ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
@@ -384,6 +384,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -442,6 +443,7 @@ class ConfigSettings:
       ConfigGroupNames.SOCIAL,
       ConfigGroupNames.USERS,
       ConfigGroupNames.PROJECT,
+      ConfigGroupNames.TASKS,
       ConfigGroupNames.TECH_NOTES,
       ConfigGroupNames.RACES,
       ConfigGroupNames.GITHUB
@@ -526,6 +528,11 @@ class ConfigSettings:
           them externally. If `No`, only (sensible) selected config
           settings will be available as subtitutions in the tech notes'
           markdown. See the Pelican config file(s) for details.""",
+
+        ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:
+          """Choose `Yes` is you need Windows newlines at the end of each
+          line of the task issues CSV file (you probably don't need to
+          change this).""", # NB: possibly needed for GitHub API?
 
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using

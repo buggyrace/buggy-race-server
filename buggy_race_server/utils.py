@@ -212,7 +212,7 @@ def get_download_filename(filename, want_datestamp=False):
   else:
     return filename
 
-def get_tasks_as_issues_csv(tasks, want_double_spaced=True):
+def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
 
     class CsvString(object):
       def __init__(self):
@@ -220,16 +220,18 @@ def get_tasks_as_issues_csv(tasks, want_double_spaced=True):
       def write(self, row):
           self.rows.append(row)
       def __str__(self):
-        return "\n".join(self.rows)
+        return "".join(self.rows) # CSV writer adds newline?
 
+    line_terminator = "\r\n" if is_line_terminator_crlf else "\n"
     issues_str = CsvString()
-    sep = "\n\n" if want_double_spaced else "\n"
-    issue_writer = csv.writer(issues_str)
+    issue_writer = csv.writer(issues_str, lineterminator=line_terminator)
     for task in tasks:
       issue_writer.writerow(
+         # row is: * task name (with title)
+         #         * markdown description: problem + solution + link
         [
           f"{task.fullname} {task.title}",
-          sep.join([
+          "\n\n".join([ # markdown: blank line between paras
             task.problem_text,
             task.solution_text,
             f"[{task.fullname}]({task.get_url(current_app.config)})"
@@ -495,7 +497,7 @@ def publish_tasks_as_issues_csv(app=current_app):
     )
     csv = get_tasks_as_issues_csv(
       Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),
-      want_double_spaced=app.config[ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name]
+      is_line_terminator_crlf=app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
     )
     issue_csv_file = open(generated_issuefile, "w")
     issue_csv_file.write(csv)

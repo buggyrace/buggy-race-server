@@ -62,6 +62,7 @@ from buggy_race_server.utils import (
     load_settings_from_db,
     load_tasks_into_db,
     prettify_form_field_name,
+    publish_tasks_as_issues_csv,
     publish_task_list,
     publish_tech_notes,
     refresh_global_announcements,
@@ -1028,6 +1029,7 @@ def tasks_generate():
         # render the template and save it as _task_list.html
         try:
             publish_task_list(current_app)
+            publish_tasks_as_issues_csv(current_app)
         except IOError as e:
             flash(f"Failed to create task list: problem with file: {e}", "danger")
         else:
@@ -1153,7 +1155,10 @@ def download_tasks(type=None, format=None):
           Task.sort_position.asc()
         ).all()
         if format == FORMAT_CSV:
-            payload = get_tasks_as_issues_csv(tasks)
+            payload = get_tasks_as_issues_csv(
+                tasks,
+                want_double_spaced=current_app.config[ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name]
+            )
         else:
             payload = "".join([task.raw_markdown for task in tasks if task.is_enabled])
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=True)

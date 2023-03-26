@@ -212,7 +212,7 @@ def get_download_filename(filename, want_datestamp=False):
   else:
     return filename
 
-def get_tasks_as_issues_csv(tasks):
+def get_tasks_as_issues_csv(tasks, want_double_spaced=True):
 
     class CsvString(object):
       def __init__(self):
@@ -223,7 +223,7 @@ def get_tasks_as_issues_csv(tasks):
         return "\n".join(self.rows)
 
     issues_str = CsvString()
-    sep = "\n\n"
+    sep = "\n\n" if want_double_spaced else "\n"
     issue_writer = csv.writer(issues_str)
     for task in tasks:
       issue_writer.writerow(
@@ -486,7 +486,21 @@ def publish_task_list(app=current_app):
         name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         value=stringify_datetime(created_at),
     )
-  
+
+def publish_tasks_as_issues_csv(app=current_app):
+    issue_csv_filename = app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+    generated_issuefile = join_to_project_root(
+        app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        issue_csv_filename
+    )
+    csv = get_tasks_as_issues_csv(
+      Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),
+      want_double_spaced=app.config[ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name]
+    )
+    issue_csv_file = open(generated_issuefile, "w")
+    issue_csv_file.write(csv)
+    issue_csv_file.close()
+
 
 # get_flag_color_defs for handling pennant/flag display with 
 # custom CSS and SVG masks

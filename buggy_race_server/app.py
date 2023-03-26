@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.utils import (
     refresh_global_announcements,
+    publish_tasks_as_issues_csv,
     publish_task_list,
     publish_tech_notes,
     save_config_env_overrides_to_db,
@@ -76,6 +77,8 @@ def create_app():
             print(f"* publishing task list (for {server_url})", flush=True)
             publish_task_list(app)
             print(f"* published task list", flush=True)
+            publish_tasks_as_issues_csv(app)
+            print(f"* published task issues CSV", flush=True)
 
             print(f"* publishing tech notes (for {server_url})", flush=True)
             publish_tech_notes(app)

@@ -67,6 +67,9 @@ class ConfigSettingNames(Enum):
     # Filename of the generated task list (effectively static content)
     _TASK_LIST_HTML_FILENAME = auto()
 
+    # might be a case for needing CSV double-spaced (TBC)
+    _IS_ISSUES_CSV_DOUBLE_SPACED = auto()
+
     # Tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) but  putting them in config
     # to allow future tech notes to come from a different source
@@ -263,8 +266,9 @@ class ConfigSettings:
     # in the DEFAULTS (it's used during setup to populate the database)
 
     DEFAULTS = {
-        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggyrace-issues.csv",
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
         ConfigSettingNames._ENV_SETTING_OVERRIDES.name: "",
+        ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
@@ -351,6 +355,7 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames._ENV_SETTING_OVERRIDES.name: ConfigTypes.STRING,
+        ConfigSettingNames._IS_ISSUES_CSV_DOUBLE_SPACED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,

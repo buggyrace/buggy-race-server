@@ -40,8 +40,8 @@ class Race(SurrogatePK, Model):
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)
-    buggies_csv_url = Column(db.String(255), nullable=True)
-    race_log_url = Column(db.String(255), nullable=True)
+    buggies_csv_url = Column(db.String(255), unique=True, nullable=True)
+    race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
 
     results = db.relationship('RaceResult', backref='race')

@@ -27,8 +27,20 @@
   {% if is_publishing_enabled %}
     <div class="row">
       <div class="col-md-6">
+        <div class="border container p-3">
+          <form method="POST" action="{{ url_for('admin.tech_notes_publish') }}" role="form">
+            {{ form.csrf_token }}
+            <p>
+              Last&nbsp;generated:
+              {{ notes_generated_timestamp or "never/unknown" }}
+            </p>
+            <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-6">
         <p>
-          Generating the tech notes updates them using the most
+          Publishing the tech notes updates them using the most
           recent config settings (some examples are shown below).
           Do this if you've made any changes to the config since
           the server last restarted.
@@ -42,31 +54,10 @@
           Note that the HTML pages of the tech notes may be cached
           by your (or your students') browsers.
         </p>
-      </div>
-      <div class="col-md-6">
-        <p>
+        <p class="btn-collection my-3">
           <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
             class="btn btn-outline-secondary">View tech notes &rtri;</a>
         </p>
-        <p>
-          Last generated: {{ notes_generated_timestamp or "never/unknown" }}
-        </p>
-        <div class="border container">
-          <form method="POST" action="{{ url_for('admin.tech_notes_publish') }}" role="form">
-            {{ form.csrf_token }}
-            <div class="row bg-warning py-3">
-              <div class="col-sm-4">
-                Authorisation code
-              </div>
-              <div class="col-sm-8">
-                  <input id="auth_code" name="auth_code" type="password" value="" class="form-control mr-sm-1"/>
-              </div>
-            </div>
-            <p class="my-4">
-              <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
-            </p>
-          </form>
-        </div>
       </div>
     </div>
     <div class="row my-3">

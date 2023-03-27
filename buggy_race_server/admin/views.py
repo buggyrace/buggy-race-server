@@ -42,7 +42,6 @@ from buggy_race_server.admin.forms import (
     SettingForm,
     SetupAuthForm,
     SetupSettingForm,
-    SubmitWithAuthForm,
     TaskForm,
 )
 from buggy_race_server.admin.models import Announcement, AnnouncementType, TaskText, Setting, SocialSetting, Task
@@ -991,7 +990,7 @@ def tech_notes_publish():
 @admin_only
 def tech_notes_admin():
   error_msg = None
-  form = SubmitWithAuthForm(request.form)
+  form = GeneralSubmitForm(request.form) # no auth required
   if request.method == "POST":
     if form.validate_on_submit():
       try:
@@ -1110,6 +1109,7 @@ def tasks_admin():
         form=form,
         is_showing_all_tasks=want_all,
         is_fresh_update=is_fresh_update,
+        is_injecting_github_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
         tasks=tasks,
         qty_tasks=qty_tasks,
         qty_disabled_tasks=qty_disabled_tasks,

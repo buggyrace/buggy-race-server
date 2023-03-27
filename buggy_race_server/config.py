@@ -48,10 +48,6 @@ class ConfigSettingNames(Enum):
     # Current announcements are cached to avoid database reads on every hit
     _CURRENT_ANNOUNCEMENTS = auto()
 
-    # Settings that are being overridden by ENV variables (by this class)
-    # are noted here so a warning can be displayed on the settings page
-    _ENV_SETTING_OVERRIDES = auto()
-
     # Path where published HTML (task list and tech notes) is written
     _PUBLISHED_PATH = auto()
 
@@ -268,7 +264,6 @@ class ConfigSettings:
 
     DEFAULTS = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
-        ConfigSettingNames._ENV_SETTING_OVERRIDES.name: "",
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
@@ -355,7 +350,6 @@ class ConfigSettings:
 
     TYPES = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
-        ConfigSettingNames._ENV_SETTING_OVERRIDES.name: ConfigTypes.STRING,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
@@ -893,6 +887,12 @@ class ConfigSettings:
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key
 
+    # config key for list of config settings that are being overridden by
+    # declarations in the environment (e.g., from .env)
+    ENV_SETTING_OVERRIDES_KEY = "_ENV_OVERRIDES"
+
+    # config key for list of config settings that are found in the database
+    # but aren't used (e.g., deprecated config no longer used)
     UNEXPECTED_SETTINGS_KEY = "_UNEXPECTED_CONFIG_SETTINGS"
 
     @staticmethod
@@ -1034,16 +1034,16 @@ class ConfigFromEnv():
       # the database (e.g., goofing up the admin user list could be a problem)
       # although in normal use everything can/should be done through the
       # database (i.e., through the web interface in admin/settings) 
-      # By putting the env names into _ENV_SETTING_OVERRIDES, the settings
+      # By putting the env names into ENV_SETTING_OVERRIDES_KEY, the settings
       # pages can usefully indicate when these have been overridden: this
       # matters because any changes to the database settings table won't
       # persist if it's being overridden by an ENV declaration at start-up.
       env_setting_overrides = []
       for name in ConfigSettings.DEFAULTS:
-          setting_value = env.str(name, default=None) 
+          setting_value = env.str(name, default=None)
           if setting_value is not None:
               if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
                  setting_value = bcrypt.generate_password_hash(setting_value).decode('utf8')
               setattr(self, name, setting_value)
               env_setting_overrides.append(name)
-      self._ENV_SETTING_OVERRIDES = ",".join(env_setting_overrides)
+      self.__setattr__(ConfigSettings.ENV_SETTING_OVERRIDES_KEY, env_setting_overrides)

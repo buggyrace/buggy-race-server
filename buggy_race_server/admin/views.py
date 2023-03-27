@@ -377,7 +377,7 @@ def setup():
       for name in ConfigSettings.DEFAULTS
     },
     html_descriptions=html_descriptions,
-    env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
+    env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
   )
 
 @blueprint.route("/", strict_slashes=False)
@@ -836,7 +836,7 @@ def settings(group_name=None):
         for name in ConfigSettings.DEFAULTS
       },
       html_descriptions=html_descriptions,
-      env_setting_overrides=current_app.config[ConfigSettingNames._ENV_SETTING_OVERRIDES.name].split(","),
+      env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
       tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
@@ -1334,7 +1334,6 @@ def show_system_info():
         git_status = "[Unavailable]"
     config_settings_to_display = [
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
-      ConfigSettingNames._ENV_SETTING_OVERRIDES.name,
       ConfigSettingNames._PUBLISHED_PATH.name,
       ConfigSettingNames._SETUP_STATUS.name,
       ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
@@ -1368,5 +1367,7 @@ def show_system_info():
         config_settings_to_display=config_settings_to_display,
         git_status=git_status,
         redacted_database_url=redacted_database_url,
+        env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
+        env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
     )

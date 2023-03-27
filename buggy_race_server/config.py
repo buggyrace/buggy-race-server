@@ -625,12 +625,12 @@ class ConfigSettings:
           staff passwords).""",
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
-          """By default, task URLs go direct to the server
-          (e.g., `/project/tasks/3-multi`) and then redirect
-          to an anchor within the page showing all tasks
-          (e.g., `/project/tasks#task-3-multi`). This works fine
-          on this server, and makes "nicer" URLs, but if you
-          don't like this behaviour, switch it off.""",
+          """By default, task URLs go direct to the server (e.g.,
+          `/project/tasks/3-multi`) which then redirects to an anchor within
+          the all-tasks page (e.g., `/project/tasks#task-3-multi`). This works
+          fine on this server and makes "nicer" URLs, but if you don't like
+          this behaviour, choose `Yes` to have any generated links go directly
+          to the anchor tag.""",
 
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name:
           """The admin interface normally lets you publish the tech

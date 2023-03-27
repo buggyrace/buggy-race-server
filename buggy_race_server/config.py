@@ -616,12 +616,13 @@ class ConfigSettings:
           via the race server.""",
 
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name:
-          """Can Teaching Assistants (as well as administrators) change
-          other users' passwords? Students who forget their passwords cannot
-          reset them, so need to ask a staff member to do it. By default, only
-          administrators can change other users' passwords. Choose `Yes` if
-          you want Teaching Assistants to also be able to do this too. TAs
-          can only change other _students'_ passwords (not staff).""",
+          """Administrators can change other users' passwords. Choose `Yes`
+          if you want Teaching Assistants to also be able to do this. Note
+          that students who forget their passwords cannot reset them, and will
+          need to ask a staff member to do it — so enabling TAs might be
+          helpful. Changing a student's password does not require the auth
+          code, and TAs can only change _students'_ passwords (not other
+          staff passwords).""",
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
           """By default, task URLs go direct to the server

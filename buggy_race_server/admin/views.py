@@ -99,7 +99,7 @@ def _update_settings_in_db(form):
     is_changed_value = False
     if name in settings_as_dict:
       if settings_as_dict[name] != value:
-          if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
+          if ConfigSettings.TYPES.get(name) in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
             changed_msg = f"Changed {name} to a new value"
           else:
             pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])

@@ -154,12 +154,15 @@ class ConfigGroupNames(str, Enum):
     USERS = "users"
 
 class ConfigTypes(str, Enum):
-    """ Explicit types of config settings (useful for validation, etc) """
+    """ Explicit types of config settings (useful for validation, etc).
+      A sensitive string is one that should be obscured by default on
+      screens but — unlike a password — _is_ stored in plaintext. """
     BOOLEAN = "bool"
     DATETIME = "datetime"
     INT = "int"
     PASSWORD = "pass"
-    STRING = "str" # default TODO maybe ""?
+    SENSITIVE_STRING = "sensitive" # string, but obscured in display
+    STRING = "str"
     URL = "url"
 
 class ConfigSettings:
@@ -373,7 +376,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
-        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.STRING,
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigTypes.SENSITIVE_STRING,
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,

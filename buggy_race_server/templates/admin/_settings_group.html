@@ -26,7 +26,7 @@
                 <input name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control mr-sm-1" 
                 {% if type_of_settings[name] == "int" %}
                     type="number"
-                {% elif type_of_settings[name] == "pass"%}
+                {% elif type_of_settings[name] in ['pass', 'sensitive'] %}
                     type="password"
                 {% elif type_of_settings[name] == "datetime"%}
                     type="datetime-local"

@@ -11,7 +11,7 @@ from wtforms import (
     StringField,
     TextAreaField,
 )
-from wtforms.validators import Length, NumberRange, Optional, DataRequired
+from wtforms.validators import Length, NumberRange, Optional, ValidationError
 
 from buggy_race_server.race.models import Race
 from buggy_race_server.config import ConfigSettings
@@ -60,6 +60,7 @@ class RaceForm(FlaskForm):
     def validate(self):
         """Validate the form."""
         initial_validation = super(RaceForm, self).validate()
+        is_valid = True
         if not initial_validation:
             return False
         if self.start_at.data is None:
@@ -67,8 +68,13 @@ class RaceForm(FlaskForm):
         race_at_this_time = Race.query.filter_by(start_at=self.start_at.data).first()
         if race_at_this_time and self.id.data != str(race_at_this_time.id):
             self.start_at.errors.append("Already got a race starting at this time")
-            return False
-        return True
+            is_valid = False
+        if self.result_log_url.data:
+            race_with_these_results = Race.query.filter_by(result_log_url=self.result_log_url.data).first()
+            if race_with_these_results and self.id.data != str(race_with_these_results.id):
+                self.result_log_url.errors.append(f"Already got a race with these results (result log URLs must be unique)")
+                is_valid = False
+        return is_valid
 
 
 class RaceDeleteForm(FlaskForm):

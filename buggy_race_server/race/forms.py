@@ -69,11 +69,16 @@ class RaceForm(FlaskForm):
         if race_at_this_time and self.id.data != str(race_at_this_time.id):
             self.start_at.errors.append("Already got a race starting at this time")
             is_valid = False
-        if self.result_log_url.data:
-            race_with_these_results = Race.query.filter_by(result_log_url=self.result_log_url.data).first()
-            if race_with_these_results and self.id.data != str(race_with_these_results.id):
-                self.result_log_url.errors.append(f"Already got a race with these results (result log URLs must be unique)")
-                is_valid = False
+        dup_fields = Race.get_duplicate_urls(
+            self.id.data, self.result_log_url.data, self.buggies_csv_url.data, self.race_log_url.data)
+        if dup_fields:
+            if "result_log_url" in dup_fields:
+                self.result_log_url.errors.append(f"Already got a race with that result log URL (must be unique)")
+            if "buggies_csv_url" in dup_fields:
+                self.result_log_url.errors.append(f"Already got a race with that buggies CSV URL (must be unique)")
+            if "race_log_url" in dup_fields:
+                self.result_log_url.errors.append(f"Already got a race with that race log URL (must be unique)")
+            is_valid = False
         return is_valid
 
 

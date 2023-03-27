@@ -10,7 +10,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for,
 from flask_login import current_user, login_required
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
-from buggy_race_server.race.models import Race, RaceResult, load_race_results
+from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import flash_errors, staff_only, admin_only, get_flag_color_css_defs
 from buggy_race_server.config import ConfigSettingNames
@@ -108,7 +108,6 @@ def upload_results(race_id):
         abort(404)
     form = RaceResultsForm(request.form)
     if request.method == "POST":
-        print(request.files)
         if form.validate_on_submit():
             is_ignoring_warnings = form.is_ignoring_warnings.data
             # not robust, but pragmatically...
@@ -133,7 +132,7 @@ def upload_results(race_id):
                         flash("No data was accepted", "info")
                     if result_data:
                         try:
-                            warnings = load_race_results(
+                            warnings = race.load_race_results(
                                 result_data,
                                 is_ignoring_warnings=is_ignoring_warnings
                             )

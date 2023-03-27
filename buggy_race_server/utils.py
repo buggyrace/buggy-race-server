@@ -489,10 +489,9 @@ def publish_task_list(app=current_app):
     )
 
 def publish_tasks_as_issues_csv(app=current_app):
-    issue_csv_filename = app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
     generated_issuefile = join_to_project_root(
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-        issue_csv_filename
+        app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
     )
     csv = get_tasks_as_issues_csv(
       Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),

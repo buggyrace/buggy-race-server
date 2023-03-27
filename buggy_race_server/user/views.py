@@ -121,7 +121,7 @@ def setup_course_repository():
     # needs to run in current app context (same thread)
     issues_parser = IssueParser(
         join_to_project_root(
-          "project",
+          current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
           current_app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
         )
     )

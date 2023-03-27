@@ -228,9 +228,17 @@
         repos. If you're using your own mechanism this might be handy,
         so you can download it here.
       </p> 
+      <p>
+        The issues CSV file is public (so the GitHub API can access it from
+        outside) and is generated whenever you publish the task list. The
+        <em>current</em> list is calculated on-the-fly here if you need it
+        <em>before</em> you've published it.
+      </p>
       <p class="btn-collection my-4">
+        <a href="{{ url_for('public.tasks_as_issues_csv') }}"
+        class="btn btn-outline-secondary btn-white">Download published issues CSV&nbsp;&dtri;</a>
         <a href="{{ url_for('admin.download_tasks', type='current', format='csv') }}"
-        class="btn btn-outline-secondary btn-admin">Download&nbsp;<strong>current</strong> tasks as issues CSV&nbsp;&dtri;</a>
+        class="btn btn-outline-secondary btn-admin">Download <strong>current</strong>tasks as issues CSV&nbsp;&dtri;</a>
       </p>
       <p>
         Check that the config settings it uses (shown below) are correct,

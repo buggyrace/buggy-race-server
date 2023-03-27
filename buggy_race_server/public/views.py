@@ -188,6 +188,23 @@ def _send_tech_notes_assets(type, path):
     except FileNotFoundError:
         return "File not found", 404
 
+@blueprint.route("/project/tasks/issues.csv")
+def tasks_as_issues_csv():
+    local_filename = current_app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+    try:
+        response = make_response(
+          send_file(
+            join_to_project_root(
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                local_filename
+            )
+          )
+        )
+    except FileNotFoundError as e:
+        abort(404)
+    response.headers['content-disposition'] = f"attachment; filename=\"{get_download_filename(local_filename)}\""
+    return response
+
 @blueprint.route("/project/tasks/<task_id>", strict_slashes=False)
 def show_single_task(task_id):
     """Redirect individual tasks to single task page, with anchor tag"""

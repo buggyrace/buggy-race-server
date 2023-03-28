@@ -158,7 +158,7 @@
       <div class="border mb-3">
         <div class="alert-secondary p-3 ">
             <strong class="mr-3">Comment:</strong> 
-            <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }} &rtri;</a>
+            <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
         </div>
         <p class="pt-3 px-3">
           {% if user.comment %}
@@ -171,7 +171,7 @@
       <div class="border">
         <div class="alert-secondary p-3 ">
           <strong class="mr-3">Buggy JSON:</strong>
-          <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white">View&nbsp;buggy&nbsp;&rtri;</a>
+          <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white btn-jump">View&nbsp;buggy</a>
         </div>
         {% if user.latest_json %}
           <pre class="p-3 ml-2 mb-4 mt-3 mr-3 task-text ">{{ user.latest_json }}</pre>
@@ -197,12 +197,12 @@
   <div class="row">
     <div class="col my-3 btn-collection">
       {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}&nbsp;&rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
       {% endif %}
       {% if current_user.is_administrator or is_password_change_by_any_staff %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password&nbsp;&rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password</a>
       {% endif %}
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users&nbsp;&rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
     </div>
   </div>
 </div>

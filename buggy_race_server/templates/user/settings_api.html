@@ -75,7 +75,7 @@
               Your API secret is never displayed here (you have to remember it).
             </p>
             <p>
-              <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary my-3">Set new API secret &rtri;</a>
+              <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-jump my-3">Set new API secret</a>
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@
       </div>
       {% if current_user.is_staff %}
         <div class="my-3">
-          <a href="{{ url_for('admin.api_keys') }}" class="btn btn-outline-secondary btn-admin">API keys &rtri;</a>
+          <a href="{{ url_for('admin.api_keys') }}" class="btn btn-outline-secondary btn-admin btn-jump">API keys</a>
         </div>
       {% endif %}
     </div>

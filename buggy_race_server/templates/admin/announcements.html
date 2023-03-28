@@ -23,7 +23,7 @@
             <tr>
               <td>
                 <a href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id)}}"
-                class="btn btn-outline-secondary btn-admin">Edit&nbsp;&rtri;</a>
+                class="btn btn-outline-secondary btn-admin btn-jump">Edit</a>
               </td>
               <td>{{announcement.type}}</td>
               <td>
@@ -58,7 +58,7 @@
   <div class="row">
     <div class="col">
       <p class="btn-collection">
-        <a href="{{ url_for('admin.edit_announcement') }}" class="btn btn-outline-secondary btn-admin">New announcement &rtri;</a>
+        <a href="{{ url_for('admin.edit_announcement') }}" class="btn btn-outline-secondary btn-admin btn-jump">New announcement</a>
       </p>
       {% if example_form %}
         <form action="{{ url_for('admin.add_example_announcement') }}" method="POST">

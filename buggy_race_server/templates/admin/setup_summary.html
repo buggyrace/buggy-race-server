@@ -47,8 +47,8 @@
           To view or edit existing users, or reset passwords, start from the admin <em>Users</em> page:
         </p>
         <p class="btn-collection">
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register&nbsp;users&nbsp;&rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.bulk_register') }}">Register&nbsp;users</a>
         </p>
         <p>
           {% if pretty_user_fields %}
@@ -93,8 +93,8 @@
           {% endif %}
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin">Tasks &rtri;</a>
-          <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-white">Task&nbsp;list&nbsp;&rtri;</a>
+          <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin btn-jump">Tasks</a>
+          <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-white btn-jump">Task&nbsp;list</a>
         </p>
       </div>
       <div class="alert {% if not tech_notes_published_at%} alert-danger {% else %} alert-info {% endif %}">
@@ -116,8 +116,8 @@
           {% endif %}
         </p>
         <p class="btn-collection">
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes &rtri;</a>
-          <a class="btn btn-outline-secondary btn-white" href="{{ url_for('public.serve_tech_notes', path='index') }}">View tech notes &rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
+          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">View tech notes</a>
         </p>
         <p class="btn-collection">
           <a href="{{ url_for('admin.settings', group_name='tech_notes') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Tech notes</span></a>
@@ -159,13 +159,13 @@
         </p>
         <p class="btn-collection">
           {% if is_report %}
-           <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}" class="btn btn-outline-secondary btn-white">{{ report_type | title }} details &rtri;</a>
+           <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}" class="btn btn-outline-secondary btn-white btn-jump">{{ report_type | title }} details</a>
           {% endif %}
           {% if is_showing_project_workflow %}
-            <a href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary btn-white">Workflow &rtri;</a>
+            <a href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary btn-white btn-jump">Workflow</a>
           {% endif %}
           {% if submission_link %}
-              <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white">Submission &rtri;</a>
+              <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white btn-jump">Submission</a>
           {% endif %}
         </p>
         <p class="btn-collection">
@@ -234,7 +234,7 @@
           {% endif %}
           </p>
         <p class="btn-collection">
-          <a href="{{ url_for('admin.list_announcements') }}" class="btn btn-outline-secondary btn-admin">Announcements &rtri;</a>
+          <a href="{{ url_for('admin.list_announcements') }}" class="btn btn-outline-secondary btn-admin btn-jump">Announcements</a>
         </p>
       </div>
     </div>
@@ -246,8 +246,8 @@
           including authorising more admin users, and adding social links.
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('admin.settings', group=None) }}" class="btn btn-outline-secondary btn-admin">Config &rtri;</a>
-          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin">System&nbsp;info&nbsp;&rtri;</a>
+          <a href="{{ url_for('admin.settings', group=None) }}" class="btn btn-outline-secondary btn-admin btn-jump">Config</a>
+          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System&nbsp;info</a>
         </p>
       </div>
     </div>

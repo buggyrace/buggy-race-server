@@ -101,8 +101,8 @@
                 {% if race.results_uploaded_at %}
                   <td>
                     {% if race.results_uploaded_at %}
-                      <a class="btn btn-outline-secondary btn-white"
-                      href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result &rtri;</a>
+                      <a class="btn btn-outline-secondary btn-white btn-jump"
+                      href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result</a>
                     {% endif %}
                   </td>
                   <td>

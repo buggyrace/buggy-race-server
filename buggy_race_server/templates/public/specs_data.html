@@ -33,14 +33,14 @@
           This data <strong>does include</strong> values for mass but you don't
           normally need it.
         </p>
-        <a href="{{ url_for('public.showspecs_data') }}" class="btn btn-outline-secondary">Exclude mass&nbsp;&rtri;</a>
+        <a href="{{ url_for('public.showspecs_data') }}" class="btn btn-outline-secondary btn-jump">Exclude mass</a>
       {% else %}
         <h3 id="json" class="mb-3">Data excludes mass (kg)</h3>
         <p>
           This data does <strong>not</strong> include values for mass because
           you don't normally need it.
         </p>
-        <a href="{{ url_for('public.showspecs_data') }}?extra=mass" class="btn btn-outline-secondary">Include mass&nbsp;&rtri;</a>
+        <a href="{{ url_for('public.showspecs_data') }}?extra=mass" class="btn btn-outline-secondary btn-jump">Include mass</a>
       {% endif %}
 
       <h3 id="json" class="mt-4">Get data in JSON format</h3>
@@ -49,8 +49,8 @@
         as JSON files too.
       </p>
       <p class="btn-collection">
-        <a class="btn btn-outline-secondary" href="{{ url_for('public.showspecs_data', data_filename='types.json')}}">Download <strong>values</strong> as JSON &dtri;</a>
-        <a class="btn btn-outline-secondary" href="{{ url_for('public.showspecs_data', data_filename='defaults.json')}}">Download <strong>defaults</strong> as JSON &dtri;</a>
+        <a class="btn btn-outline-secondary btn-download" href="{{ url_for('public.showspecs_data', data_filename='types.json')}}">Download <strong>values</strong> as JSON</a>
+        <a class="btn btn-outline-secondary btn-download" href="{{ url_for('public.showspecs_data', data_filename='defaults.json')}}">Download <strong>defaults</strong> as JSON</a>
       </p>
     </div>
   </div>

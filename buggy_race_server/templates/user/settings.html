@@ -13,12 +13,12 @@
       </div>
       <div class="row">
         <div class="col btn-collection">
-          <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary">Change password &rtri;</a>
-          <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary">Set API secret &rtri;</a>
+          <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary btn-jump">Change password</a>
+          <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-jump">Set&nbsp;API&nbsp;secret</a>
           {% if is_using_texts %}
-            <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary">List your task&nbsp;texts&nbsp;&rtri;</a>
+            <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary btn-jump">List&nbsp;your&nbsp;task&nbsp;texts</a>
           {% endif %}
-          <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary">View buggy&nbsp;&rtri;</a>
+          <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary btn-jump">View&nbsp;buggy</a>
         </div>
       </div>
       <div class="row">
@@ -52,7 +52,7 @@
                       <em>unknown</em>
                     {% endif %}
                     <p class="btn-collection">
-                      <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin"><span class="icon-cog"></span> Admin&nbsp;pages&nbsp;&rtri;</a>
+                      <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin btn-jump"><span class="icon-cog"></span> Admin&nbsp;pages</a>
                     </p>
                   </td>
                 </tr>
@@ -117,7 +117,7 @@
                 the secure server.
               </p>
               <p>
-                <a href="{{ server_url }}" class="btn btn-warning">Switch to {{ server_url }}&nbsp;&rtri;</a>
+                <a href="{{ server_url }}" class="btn btn-warning btn-jump">Switch to {{ server_url }}</a>
               </p>
             </div>
           </div>
@@ -137,14 +137,14 @@
                     GitHub account ({{ current_user.github_username }}).
                   </p>
                   <p class="btn-collection">
-                    <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary">Your GitHub repo&nbsp;&rtri;</a>
+                    <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your GitHub repo</a>
                   </p>
                   {% if is_using_vs_workspace %}
                     <p>
                       Download your VScode workspace to load <!-- TODO ...and some instruction! -->
                     </p>
                     <p class="btn-collection">
-                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary">Download VS&nbsp;Code workspace&nbsp;&dtri;</a>
+                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
                     </p>
                   {% endif %}
                 </div>
@@ -163,7 +163,7 @@
                   <div class="my-3">
                     <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                      <button type="submit" class="btn btn-primary">Fork Racing Buggy Editor repo&nbsp;&rtri;</button>
+                      <button type="submit" class="btn btn-primary btn-jump">Fork Racing Buggy Editor repo</button>
                     </form>
                   </div>
                   <p>
@@ -195,7 +195,7 @@
                   you start).
                 </p>
                 <p class="my-3">
-                  <a href="{{ url_for('oauth.github') }}" class="btn btn-primary">Connect your GitHub account &rtri;</a>
+                  <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your GitHub account</a>
                 </p>
                 <p>
                   Afterwards, expect to receive an email from GitHub alerting

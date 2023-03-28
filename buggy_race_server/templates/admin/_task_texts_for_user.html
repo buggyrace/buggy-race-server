@@ -50,9 +50,9 @@
         {% endif %}
       {% endif %}
       <p class="btn-collection">
-        <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-outline-secondary {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML&nbsp;&dtri;</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-outline-secondary {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)&dtri;</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-outline-secondary {% if not is_own_text %}btn-admin{% endif %}">Download as plain&nbsp;text&nbsp;&dtri;</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as plain&nbsp;text</a>
       </p>
     </div>
   </div>
@@ -89,15 +89,14 @@
               <pre class="p-3 mb-4 mt-3 mr-3 task-text ">{{ texts_by_task_id[task.id].text }}</pre>
             {% endif %}
             <p class="btn-collection">
-              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary">{{ task.fullname }} &rtri;</a>
+              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump">{{ task.fullname }}</a>
               {% if is_own_text %}
-                <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">
                   {% if texts_by_task_id[task.id] %}
                     Edit text
                   {% else %}
                     Create text
                   {% endif %}
-                  &rtri;
                 </a>
               {% endif %}
             </p>

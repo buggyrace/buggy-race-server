@@ -1,19 +1,19 @@
 <div class="container w-100">
   <div class="row">
     <div class="btn-collection col p-1">
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.admin')}}">Dashboard &rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users')}}">Users &rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_buggies')}}">Buggies &rtri;</a>
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('race.list_races')}}">Races &rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.admin')}}">Dashboard</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_buggies')}}">Buggies</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.list_races')}}">Races</a>
       {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_announcements')}}">Announce &rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_announcements')}}">Announce</a>
       {% endif %}
-      <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.api_keys')}}">API keys &rtri;</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.api_keys')}}">API keys</a>
       {% if config['IS_STORING_STUDENT_TASK_TEXTS'] %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.task_texts')}}">Texts &rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.task_texts')}}">Texts</a>
       {% endif %}
       {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.settings')}}">Config &rtri;</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.settings')}}">Config</a>
       {% endif %}
     </div>
   </div>

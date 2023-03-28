@@ -39,7 +39,7 @@
           <tr class="race-visible-{{ race.is_visible }}">
             {% if current_user.is_administrator %}
               <td>
-                <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit&nbsp;&rtri;</a>
+                <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit</a>
               </td>
             {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">
@@ -82,7 +82,7 @@
               </td>
             {% else %}
               <td colspan="3" class="text-right">
-                <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm">Upload results &rtri;</a>
+                <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">Upload results</a>
               </td>
             {% endif %}
           </tr>
@@ -94,7 +94,7 @@
     <div class="row">
       <div class="col my-3">
         <p class="btn-collection">
-          <a href="{{ url_for('race.new_race')}}" class="btn btn-outline-secondary btn-admin">Add new race &rtri;</a>
+          <a href="{{ url_for('race.new_race')}}" class="btn btn-outline-secondary btn-admin btn-jump">Add new race</a>
         </p>
       </div>
     </div>

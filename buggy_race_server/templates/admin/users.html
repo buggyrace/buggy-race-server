@@ -111,7 +111,7 @@
             <tr>
               {% if current_user.is_administrator %}
                 <td class="bool-{{ u.is_active | lower }}">
-                  <a class="btn btn-outline-secondary btn-admin btn-sm" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit&nbsp;&rtri;</a>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
                 </td>
               {% endif %}
               <td style="width:1em">
@@ -166,9 +166,9 @@
                   <em class="empty-setting">none</em>
                 {% endif %}
                 <!-- not showing buggy link
-                <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right"
+                <a class="show-comment btn btn-outline-secondary btn-admin btn-sm btn-jump p-1 ml-1 float-right"
                   href="{{ url_for('admin.show_buggy', username=u.username) }}"
-                  >&rtri;</a>
+                  ></a>
                 -->
               </td>
               <td  class="u-uploaded">
@@ -184,12 +184,12 @@
     <div class="row">
       <div class="col btn-collection my-4">
         {% if current_user.is_administrator or is_password_change_by_any_staff %}
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('user.change_password') }}">Change passwords &rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change passwords</a>
         {% endif %}
         {% if current_user.is_administrator %}
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV &dtri;</a>
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.bulk_register') }}">Register new students &rtri;</a>
-          <a class="btn btn-outline-secondary btn-admin" href="{{ url_for('admin.new_user') }}">Register new user &rtri;</a>
+          <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.bulk_register') }}">Register new students</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.new_user') }}">Register new user</a>
         {% endif %}
       </div>
     </div>

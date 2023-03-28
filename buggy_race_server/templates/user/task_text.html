@@ -15,9 +15,9 @@
   <div class="row">
     <div class="col">
       <p class="my-3 btn-collection">
-        <a class="btn btn-outline-secondary"
-          href="{{ url_for('public.show_single_task', task_id=task.fullname) }}">See task {{ task.fullname }} &rtri;</a>
-        <a class="btn btn-outline-secondary" href="{{ url_for('user.list_task_texts') }}">List all task&nbsp;texts&nbsp;&rtri;</a>
+        <a class="btn btn-outline-secondary btn-jump"
+          href="{{ url_for('public.show_single_task', task_id=task.fullname) }}">See task {{ task.fullname }}</a>
+        <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('user.list_task_texts') }}">List all task&nbsp;texts</a>
       </p>
     </div>
   </div>

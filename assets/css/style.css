@@ -52,6 +52,7 @@ textarea {
   background-color:#6c757d;
 }
 
+
 /* the buggy project page */
 
 .buggy-project .task-breakdown  {
@@ -410,6 +411,20 @@ input#auth_code,
 }
 .btn-admin.btn-outline-danger:hover,
 .btn-outline-secondary.btn-admin:hover { color:black; }
+
+/* add triangle pointers to buttons */
+.btn-jump::after {
+  content: "\0025B9"; /* &rtri; */
+  padding-left:0.33rem;
+}
+.btn-download::after {
+  content: "\0025BD"; /* &dtri; */
+  padding-left:0.33rem;
+}
+.btn-up::after {
+  content: "\0025B3"; /* udtri; */
+  padding-left:0.33rem;
+}
 
 p.btn-collection {
   margin:0.5rem 0.25rem;

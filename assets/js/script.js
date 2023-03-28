@@ -503,7 +503,7 @@ $(function() {
         modal_text_body.classList.remove("task-text");
         modal_text_body.innerText="Error: " + response.status + " " + response.statusText
       })
-      modal_user_button.innerHTML = thru_button_str + " &rtri;";
+      modal_user_button.innerHTML = thru_button_str;
       modal_user_button.setAttribute("href", $button.attr("href"));
     });
   }

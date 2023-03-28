@@ -18,12 +18,27 @@
           {% if is_using_texts %}
             <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary">List your task&nbsp;texts&nbsp;&rtri;</a>
           {% endif %}
+          <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary">View buggy&nbsp;&rtri;</a>
         </div>
       </div>
       <div class="row">
         <div class="col my-3">
           <table class="col table table-striped table-bordered table-hover bg-white">
             <tbody>
+              <tr>
+                <td>Username</td>
+                <td><code>{{ user.username }}</code></td>
+              </tr>
+              <tr>
+                <td>Student?</td>
+                <td class="{% if user.is_student %}alert-success{% endif %}">
+                  {% if user.is_student %}
+                    Yes
+                  {% else %}
+                    No
+                  {% endif %}
+                  </td>
+              </tr>
               {% if user.is_staff %}
                 <tr>
                   <td>Staff?</td>
@@ -49,10 +64,6 @@
                   <td class="alert-danger">No</td>
                 </tr>
               {% endif %}
-              <tr>
-                <td>Student?</td>
-                <td class="{% if user.is_student %}alert-success{% endif %}">Yes</td>
-              </tr>
               {% if has_first_name or has_last_name %}
               <tr>
                 <td>

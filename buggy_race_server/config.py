@@ -434,16 +434,16 @@ class ConfigSettings:
     # into this array: when the setup is complete, _SETUP_STATUS is zero.
     # (the settings page uses the same order, because it's sensible)
     SETUP_GROUPS = [
-      ConfigGroupNames.AUTH,
-      ConfigGroupNames.SERVER,
-      ConfigGroupNames.ORG,
-      ConfigGroupNames.SOCIAL,
-      ConfigGroupNames.USERS,
-      ConfigGroupNames.PROJECT,
-      ConfigGroupNames.TASKS,
-      ConfigGroupNames.TECH_NOTES,
-      ConfigGroupNames.RACES,
-      ConfigGroupNames.GITHUB
+      ConfigGroupNames.AUTH.name,
+      ConfigGroupNames.SERVER.name,
+      ConfigGroupNames.ORG.name,
+      ConfigGroupNames.SOCIAL.name,
+      ConfigGroupNames.USERS.name,
+      ConfigGroupNames.PROJECT.name,
+      ConfigGroupNames.TASKS.name,
+      ConfigGroupNames.TECH_NOTES.name,
+      ConfigGroupNames.RACES.name,
+      ConfigGroupNames.GITHUB.name
     ]
 
     DESCRIPTIONS = {
@@ -869,6 +869,17 @@ class ConfigSettings:
         educational accounts. If you run support sites like Moodle
         or Discord or Teams for this project, add them here.""",
 
+      ConfigGroupNames.TASKS.name:
+        """The work the students must do to develop their buggy editor
+        is divided into named tasks. Tasks are grouped into phases
+        (for example phase 0 is all about getting and running the basic
+        code). The default project has 26 tasks, but you can change
+        any and all of this once you've completed this config setup.
+        The tasks are published as a task list that itself depends on
+        other config settings, so you'll need to publish the task
+        list once you've finished — or if you change any settings in
+        the future.""",
+
       ConfigGroupNames.TECH_NOTES.name:
         """The tech notes are static webpages with supporting or
         explanatory material specific to the project, and even some
@@ -876,7 +887,10 @@ class ConfigSettings:
         through this web interface) but you can host them externally
         (e.g., on your own course website or GitHub pages), in which
         case set the external URL here. For details on how to extract
-        the tech notes for self-publication, see separate docs.""",
+        the tech notes for self-publication, see separate docs. Like
+        the task list, the tech notes depend on other config settings,
+        so you need to publish them once you've finished — or if you
+        change any settings in the future""",
 
       ConfigGroupNames.USERS.name:
         """Every student will need a username. These settings define what

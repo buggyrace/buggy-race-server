@@ -349,7 +349,7 @@ def setup():
       else:
         _flash_errors(form)
 
-  group_name = ConfigSettings.SETUP_GROUPS[setup_status-1].name
+  group_name = ConfigSettings.SETUP_GROUPS[setup_status-1]
   settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
   html_descriptions = { 
     setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
@@ -368,7 +368,7 @@ def setup():
     pretty_group_name_dict=pretty_group_name_dict,
     SETTING_PREFIX=SETTING_PREFIX,
     groups=ConfigSettings.GROUPS,
-    sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],
+    sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     settings=settings_as_dict,
     social_settings=social_settings,
     type_of_settings=ConfigSettings.TYPES,
@@ -827,7 +827,7 @@ def settings(group_name=None):
       pretty_group_name_dict=pretty_group_name_dict,
       SETTING_PREFIX=SETTING_PREFIX,
       groups=ConfigSettings.GROUPS,
-      sorted_groupnames=[name.name for name in ConfigSettings.SETUP_GROUPS],
+      sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
       settings=settings_as_dict,
       social_settings=social_settings,
       type_of_settings=ConfigSettings.TYPES,

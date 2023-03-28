@@ -79,9 +79,11 @@ textarea {
 .buggy-project .phase-list li {
   padding:0.25em 0.5em;
   background-color: #f5f5f5;
+  color:black;
 }
 .buggy-project .phase-list li:nth-child(2n) {
   background-color: #f0f0f0;
+  color:black;
 }
 .buggy-project .phase-list a span {
   min-width:5em;
@@ -111,12 +113,15 @@ textarea {
 }
 .buggy-project .task .problem {
   background:#ffeeee;
+  color:black;
 }
 .buggy-project .task .solution {
   background:#eeffee;
+  color:black;
 }
 .buggy-project .task .hints {
   background:#fff9e9;
+  color:black;
 }
 .buggy-project .task .item p, .buggy-project .task .item ul {
   margin:1em 1em 0.5em 2em;
@@ -134,15 +139,17 @@ textarea {
 .buggy-project .task .problem:before {
   content: "Problem";
   background-color: #eedddd;
+  color:black;
 }
 .buggy-project .task .solution:before {
   content: "Solution";
   background-color: #ddeedd;
+  color:black;
 }
 .buggy-project .task .hints:before {
   content: "Hints";
-  background:#fff9e9;
   background:#eee6d6;
+  color:black;
 }
 
 .buggy-project .task h3 {
@@ -187,17 +194,17 @@ textarea {
 
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
 .buggy-project .phase-6 .task .task-heading,
-.buggy-project .phase-0 .task .task-heading { background-color: #ffffbb; }
+.buggy-project .phase-0 .task .task-heading { background-color: #ffffbb; color:black; }
 .buggy-project .phase-1 .task:before{ background: repeating-linear-gradient(-45deg, #ffe600, #ffe600 1em, black 1em, black 2em);}
-.buggy-project .phase-1 .task .task-heading { background-color: #ffeebb; }
+.buggy-project .phase-1 .task .task-heading { background-color: #ffeebb; color:black; }
 .buggy-project .phase-2 .task:before{ background: repeating-linear-gradient(-45deg, #ffc100, #ffc100 1em, black 1em, black 2em);}
-.buggy-project .phase-2 .task .task-heading { background-color: #ffe3bb; }
+.buggy-project .phase-2 .task .task-heading { background-color: #ffe3bb; color:black; }
 .buggy-project .phase-3 .task:before{ background: repeating-linear-gradient(-45deg, #ff9c00, #ff9c00 1em, black 1em, black 2em);}
-.buggy-project .phase-3 .task .task-heading { background-color: #ffd2bb; }
+.buggy-project .phase-3 .task .task-heading { background-color: #ffd2bb; color:black; }
 .buggy-project .phase-4 .task:before{ background: repeating-linear-gradient(-45deg, #ff7600, #ff7600 1em, black 1em, black 2em);}
-.buggy-project .phase-4 .task .task-heading { background-color: #ffc6bb; }
+.buggy-project .phase-4 .task .task-heading { background-color: #ffc6bb; color:black; }
 .buggy-project .phase-5 .task:before{ background: repeating-linear-gradient(-45deg, #ff0000, #ff0000 1em, black 1em, black 2em);}
-.buggy-project .phase-5 .task .task-heading { background-color: #ffbbbb; }
+.buggy-project .phase-5 .task .task-heading { background-color: #ffbbbb; color:black; }
 
 .buggy-text-overlay {
   background-color: rgba(0,0,0,0.333);
@@ -628,3 +635,65 @@ td .cell-title {
   -webkit-mask: none;
   mask:none;
 }
+.alert-tech-notes {
+  color:white;
+  background:#1e1e1e;
+  display:grid;
+}
+.alert-tech-notes::before{
+  content:"";
+  background: repeating-linear-gradient(-45deg, #000, #000 2rem, #ff0 2rem, #ff0 4rem);
+  height:2rem;
+  margin:-1rem -1rem 1rem -1rem;
+}
+.alert-tech-notes h2 {
+  color:#b5e853;
+}
+.alert-tasks {
+  color:white;
+  background:#1e331e;
+  display:grid;
+}
+.alert-tasks::before{
+  content:"";
+  background: repeating-linear-gradient(-45deg, #000, #000 2rem, green 2rem, green 4rem);
+  height:2rem;
+  margin:-1rem -1rem 1rem -1rem;
+}
+.alert-tech-notes h2 {
+  color:#b5e853;
+}
+.alert-poster{
+  display:grid;
+  background:#dff0f8;
+}
+.alert-poster::before {
+  content:"";
+  background: repeating-linear-gradient(-45deg, #000, #000 2rem, #bee5eb 2rem, #bee5eb 4rem);
+  height:2rem;
+  margin:-1rem -1rem 1rem -1rem;
+}
+
+body.report-page main {
+  background-color: #dff0f8;
+  display:grid;
+}
+body.report-page main::before{
+  content:"";
+  background: repeating-linear-gradient(-45deg, #000, #000 2rem, #bee5eb 2rem, #bee5eb 4rem);
+  height:2rem;
+}
+body.report-page main pre {
+  background-color:white;
+}
+body.task-list-page main {
+  background-color: #1e331e;
+  display:grid;
+  color: white;
+}
+body.task-list-page main::before{
+  content:"";
+  background: repeating-linear-gradient(-45deg, #000, #000 2rem, green 2rem, green 4rem);
+  height:2rem;
+}
+

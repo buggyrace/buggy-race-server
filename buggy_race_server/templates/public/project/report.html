@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block body_class%}report-page{% endblock %}
 {% block content %}
 
 
@@ -226,7 +227,7 @@ def {{ report_type }}():
           which will already put them in a helpful HTML format, if you want.
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary">Your texts &rtri;</a>
+          <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary btn-white">Your texts &rtri;</a>
         </p>
       {% endif %}
       

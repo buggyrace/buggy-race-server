@@ -16,19 +16,21 @@
   </div>
   <div class="row">
     <div class="col-md-6">
-      <h2 id="phases_and_tasks">Phases and tasks</h2>
-      <p>
-        You should work on your project in phases, completing every task in
-        each phase before moving on to the next. Apart from phase 0, you can
-        tackle the tasks within each phase in any order  you like.
-      </p>
-      {% if expected_phase_completion %}
+      <div class="alert alert-secondary">
+        <h2 id="phases_and_tasks">Phases and tasks</h2>
         <p>
-          If you're not an experienced programmer, we don't expect you to get
-          much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
-          before you run out of time.
+          You should work on your project in phases, completing every task in
+          each phase before moving on to the next. Apart from phase 0, you can
+          tackle the tasks within each phase in any order  you like.
         </p>
-      {% endif %}
+        {% if expected_phase_completion %}
+          <p>
+            If you're not an experienced programmer, we don't expect you to get
+            much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
+            before you run out of time.
+          </p>
+        {% endif %}
+      </div>
     </div>
     <div class="col-md-6">
       <div class="alert-danger border border-danger p-4 my-3">
@@ -54,20 +56,22 @@
     <div class="buggy-project">
       <div class="row">
         <div class="col-md-6">
-          {% for phase in tasks_by_phase %}
-            <h3>
-              Phase {{ phase }}
-              {% if tasks_by_phase|length == 1 %} task {% else %} tasks {% endif %}
-            </h3>
-            <ul>
-              {% for task in tasks_by_phase[phase] %}  
-                <li><a href="#{{ task.anchor }}"><span>{{ task.fullname }}</span> {{ task.title }}</a></li>
-              {% endfor %}
-            </ul>
-          {% endfor %}
+          <div class="alert alert-secondary">
+            {% for phase in tasks_by_phase %}
+              <h3>
+                Phase {{ phase }}
+                {% if tasks_by_phase|length == 1 %} task {% else %} tasks {% endif %}
+              </h3>
+              <ul>
+                {% for task in tasks_by_phase[phase] %}  
+                  <li><a href="#{{ task.anchor }}"><span>{{ task.fullname }}</span> {{ task.title }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endfor %}
+          </div>
         </div>
         <div class="col-md-6">
-          <div class="alert border border-secondary p-4 my-5 btn-collection">
+          <div class="alert alert-secondary p-4 my-5 btn-collection">
             {% for phase in tasks_by_phase %}
               {% for task in tasks_by_phase[phase] %}  
                 <a class="btn btn-sm btn-secondary" href="#{{ task.anchor }}">{{ task.fullname }}</a>
@@ -76,7 +80,7 @@
           </div>
         </div>
       </div>
-
+  
       {% for phase in tasks_by_phase %}
         <div class="task-breakdown">
           <h2>

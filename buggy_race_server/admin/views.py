@@ -753,7 +753,12 @@ def api_keys():
         else:
             flash(f"Did not change any API keys: no users selected", "warning")
     form.usernames.choices = [u.username for u in users]
-    return render_template("admin/api_key.html", form=form, users=users)
+    return render_template(
+       "admin/api_key.html",
+       form=form,
+       users=users,
+       api_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
+    )
 
 @blueprint.route("/api-test", methods=["GET"], strict_slashes=False)
 @login_required

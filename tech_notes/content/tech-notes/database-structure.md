@@ -74,7 +74,7 @@ The _type_ of the column here is either `INTEGER` or `VARCHAR(20)`.
 * `INTEGER` columns are good for numbers of course (note though that SQLite,
   which is the database your editor is using, will let you put strings in there
   too: that might be why you need to do
-  [1-VALID]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-1-valid) to stop `banana`
+  [{{ TASK_NAME_FOR_VALIDATION }}]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-{{ TASK_NAME_FOR_VALIDATION }}) to stop `banana`
   going into `qty_wheels`).
 
 * `VARCHAR(20)` columns are for storing text (it means "variable length

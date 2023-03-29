@@ -133,6 +133,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
     TASK_NAME_FOR_API = auto()
+    TASK_NAME_FOR_VALIDATION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
@@ -250,6 +251,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
       ),
       ConfigGroupNames.TASKS.name: (
+        ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
@@ -335,6 +337,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
+        ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
@@ -421,6 +424,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
@@ -786,10 +790,16 @@ class ConfigSettings:
           """The name of the task (or tasks) that require use of the
           upload API. If set, this is shown as a helpful link in the
           explanotary text on the student's API settings page.
-          If you set this to be empty, no link is show. You can provide
+          If you set this to be empty, no link is shown. You can provide
           mulitple task names by separating them with commas. If you
           haven't customised the task list, you don't need to change
           this.""",
+
+        ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name:
+          """The name of the single task that requires use of the
+          validation. If set, this is shown as a helpful link in the
+          explanotary text on the reports page. If you haven't customised
+          the task list, you don't need to change this.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted

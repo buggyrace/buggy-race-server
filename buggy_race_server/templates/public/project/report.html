@@ -212,17 +212,20 @@ def {{ report_type }}():
         <em>understood</em> what you were doing. That's why it's OK if you
         didn't do a task completely: tell us why.
       </p>
-      <p>
-        For example, for 1-VALID the different <em>types</em> of data are not
-        equally easy to validate. "I did not validate the <code>xyz</code>
-        field in the same way as <code>qty_wheels</code> because&#8230;". You
-        need to show us you understood what you did (and learned from it) so
-        sometimes that includes explaining the bits you didn't do, and why.
-        Doing is better than not doing, obviously: but if you couldn't
-        do a complete task you can still get some credit for it if it's clear
-        you dived into it.
-      </p>
-
+      {% if validation_task %}
+        <p>
+          For example, for
+          <a href="{{ url_for('public.show_single_task', task_id=validation_task) }}">{{ validation_task }}</a>
+          the different <em>types</em> of data are not equally easy to validate.
+          "I did not validate the <code>xyz</code> field in the same way as 
+          <code>qty_wheels</code> because&#8230;". You need to show us you
+          understood what you did (and learned from it) so sometimes that
+          includes explaining the bits you didn't do, and why.
+          Doing is better than not doing, obviously: but if you couldn't do
+          a complete task you can still get some credit for it if it's clear
+          you dived into it.
+        </p>
+      {% endif %}
       {% if is_storing_texts %}
         <h2 id="storing-texts-on-this-race-server" class="mt-4">
           Storing texts on this race server

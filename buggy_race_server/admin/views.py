@@ -757,7 +757,7 @@ def api_keys():
        "admin/api_key.html",
        form=form,
        users=users,
-       api_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
+       api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
     )
 
 @blueprint.route("/api-test", methods=["GET"], strict_slashes=False)

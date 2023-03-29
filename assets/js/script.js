@@ -507,4 +507,38 @@ $(function() {
       modal_user_button.setAttribute("href", $button.attr("href"));
     });
   }
+
+  const CSS_INNER_BTN = "inner-btn";
+  const CSS_BTN_DEFAUT = "btn-primary";
+  const CSS_BTN_SUCCESS = "btn-success";
+  const CSS_BTN_FAIL = "btn-danger";
+  function reset_all_copy_buttons(){
+    let copy_btns = document.getElementsByClassName(CSS_INNER_BTN);
+    for (let btn of copy_btns){
+      btn.classList.add(CSS_BTN_DEFAUT);
+      btn.classList.remove(CSS_BTN_SUCCESS, CSS_BTN_FAIL);
+    }
+  }
+  $(".copy-to-clipboard").each(function(){
+    let target = document.getElementById(this.dataset.target);
+    if (target){
+      let copybtn = document.createElement("button");
+      copybtn.classList.add("btn", "btn-sm", CSS_INNER_BTN, CSS_BTN_DEFAUT);
+      copybtn.innerHTML="<span class='icon-copy'></span> Copy";
+      this.prepend(copybtn); // appended to container
+      copybtn.addEventListener("click", function(e){
+        reset_all_copy_buttons();
+        navigator.clipboard.writeText(target.innerText).then(
+          () => { /* copy success */
+                  this.classList.add(CSS_BTN_SUCCESS);
+                  this.classList.remove(CSS_BTN_DEFAUT, CSS_BTN_FAIL)
+                },
+          () => { /* copy fail */
+                  this.classList.add(CSS_BTN_FAIL);
+                  this.classList.remove(CSS_BTN_DEFAUT, CSS_BTN_SUCCESS)
+                }
+        );
+      });
+    }
+  })
 });

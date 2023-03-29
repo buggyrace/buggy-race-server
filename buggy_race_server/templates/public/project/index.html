@@ -11,12 +11,15 @@
     <div class="col">
       <p class="btn-collection">
         <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">Task list</a>
+        {% if is_storing_texts %}
+          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('user.list_task_texts') }}">Texts</a>
+        {% endif %}
         {% if is_report %}
           <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details</a>
         {% endif %}
         <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes</a>
         {% if is_showing_project_workflow %}
-          <a class="btn btn-outline-secondary btn-jump" href="{{  workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
+          <a class="btn btn-outline-secondary btn-jump" href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
         {% endif %}
         {% if submission_link %}
             <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-jump">Submission</a>

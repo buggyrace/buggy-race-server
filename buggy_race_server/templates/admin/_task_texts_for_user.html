@@ -50,9 +50,9 @@
         {% endif %}
       {% endif %}
       <p class="btn-collection">
-        <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-outline-secondary btn-download {% if not is_own_text %}btn-admin{% endif %}">Download as plain&nbsp;text</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as&nbsp;HTML</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
+        <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as plain&nbsp;text</a>
       </p>
     </div>
   </div>

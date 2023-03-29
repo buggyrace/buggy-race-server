@@ -2,7 +2,6 @@
 {% block body_class%}report-page{% endblock %}
 {% block content %}
 
-
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3" id="project-details">
@@ -26,13 +25,16 @@
       </p>
       <ul>
         <li>
-          <a href="http://localhost:5000/poster">http://localhost:5000/{{ report_type }}</a>
+          <a href="http://localhost:5000/{{ report_type }}">http://localhost:5000/{{ report_type }}</a>
         </li>
       </ul>
 
-      <h2 id="what-is-in-your-{{ report_type }}">
-        What is {% if report_type == "poster" %} on {% else %} in {% endif %}
-        your {{ report_type }}?
+      <h2 id="what-is-in-your-{{ report_type }}" class="mt-4">
+        {% if report_type == "poster" %}
+          What is on your poster?
+        {% else %}
+          What is on your {{ report_type }}?
+        {% endif %}
       </h2>
       <p>
         There are two parts: the top and the bottom (of the single web page):
@@ -42,7 +44,9 @@
         <li><strong>bottom</strong>: text about each task you attempted</li>
       </ul>
 
-      <h2 id="what-is-on-the-top-of-your-{{ report_type }}">What is on the top of your {{ report_type }}?</h2>
+      <h2 id="what-is-on-the-top-of-your-{{ report_type }}" class="mt-4">
+        What is on the top of your {{ report_type }}?
+      </h2>
       <p>
         You've made a working (up to a point) buggy editor! Tell someone who
         lands on this page what's great about it! What does it offer? What can
@@ -84,7 +88,9 @@
         editor has).
       </p>
 
-      <h2 id="what-is-on-the-bottom-of-your-{{ report_type }}">What is on the bottom of your {{ report_type }}?</h2>
+      <h2 id="what-is-on-the-bottom-of-your-{{ report_type }}" class="mt-4">
+        What is on the bottom of your {{ report_type }}?
+      </h2>
       <p>
         Underneath that we want to see a list of the tasks your attempted with
         a couple of sentences on each: what you did and anything you did and
@@ -93,11 +99,13 @@
         working.
       </p>
       
-      <h2 id="how-to-set-it-up">How to set it up</h2>
+      <h2 id="how-to-set-it-up" class="mt-4">
+        How to set it up
+      </h2>
       <p>
         As you'll know by the time you set this up, there is more than one way
         to do this, but you are <em>strongly recommended</em> to add your
-        poster like this:
+        {{ report_type }} like this:
       </p>
       <p>
         In <code>app.py</code> add another route (drop it in with your other
@@ -107,8 +115,8 @@
     </div>
   </div>
   <div class="row">
-    <div class="col">
-      <pre class="border border-secondary p-3">
+    <div class="col copy-to-clipboard" data-target="route-html">
+      <pre class="border border-secondary p-3" id="route-html">
 @app.route('/{{ report_type }}')
 def {{ report_type }}():
   return render_template('{{ report_type }}.html')
@@ -118,21 +126,22 @@ def {{ report_type }}():
   <div class="row">
     <div class="col-lg-8">
       <p>
-        Incidentally this makes sense to you because you know how Flask
-        webservers work now. How cool is that? Well done!
+        Incidentally if this makes sense to you it's because you know how
+        Flask webservers work now... and if you didn't before the project 
+        started, how cool is that? Well done!
       </p>
       <p>
         And in <code>templates/{{ report_type }}.html</code> add this: (maybe
         copy-and-paste it?) (we've written the first one — <code>0-GET</code>
-        for you as an example — of course you can edit it!)
+        for you as an example — of course you must edit it!)
       </p>
 
     </div>
   </div> 
   <div class="row">
-    <div class="col">
+    <div class="col copy-to-clipboard" data-target="page-html">
 
-      <pre class="border border-secondary p-3">
+      <pre class="border border-secondary p-3" id="page-html">
 &lbrace;% extends "base.html" %&rbrace;
 &lbrace;% block content %&rbrace;
 
@@ -167,7 +176,7 @@ def {{ report_type }}():
 &lt;section class="{{ report_type }}-tasks"&gt;
 
 &lt;div class="task"&gt;
-  &lt;h2&gt;0-GET&lt;/h2&gt;
+  &lt;h2&gt;0-GET Get the source code&lt;/h2&gt;
   &lt;p&gt;
     I forked the repo on GitHub and then used &lt;code&gt;git clone&lt;/code&gt; to make
     a local copy.
@@ -190,7 +199,9 @@ def {{ report_type }}():
   </div>
   <div class="row">
     <div class="col-lg-8">
-      <h2 id="add-some-text-for-every-task-you-attempted">Add some text for every task you attempted</h2>
+      <h2 id="add-some-text-for-every-task-you-attempted" class="mt-4">
+        Add some text for every task you attempted
+      </h2>
       <p>
         We'll be looking at the code to see <em>what</em> you did, but in the
         text just drop a short paragraph saying <em>what you did</em>. And
@@ -213,8 +224,9 @@ def {{ report_type }}():
       </p>
 
       {% if is_storing_texts %}
-        <h2>Storing texts on this race server</h2>
-
+        <h2 id="storing-texts-on-this-race-server" class="mt-4">
+          Storing texts on this race server
+        </h2>
         <p>
           You can make notes as you go along, and download them as text or
           already in HTML format (see below) to put into your report.
@@ -231,29 +243,35 @@ def {{ report_type }}():
         </p>
       {% endif %}
       
-      <h2 id="helpful-html-to-copy-and-paste">Helpful HTML to copy-and-paste</h2>
-      <p>
-        For each task you attempted, take this and add it to your poster (in the
-        <code>tasks</code> <code>section</code>).
-        Be kind to your marker and put them in the right order too please ;-)
-      </p>
-
-      {% if expected_phase_completion %}
-        <p>
-          Remember:
-          if you're not an experienced programmer, we don't expect you to get
-          much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
-          before you run out of time.
-        </p>
+      <h2 id="helpful-html-to-copy-and-paste" class="mt-5">
+        Helpful HTML to copy-and-paste
+      </h2>
+      {% if is_storing_texts %}
+        <div class="alert alert-danger border border-danger">
+          This section describes the <em>empty HTML code</em> you can use in
+          your <code>{{report_type}}.html</code> template.
+          <strong>If you create "task texts" as described above, you don't
+          have to do this!</strong> It's what you get when you
+          download <a href="{{ url_for('user.list_task_texts') }}">your texts</a>: choose the <strong>download as HTML</strong>
+          button (with markdown, if you want).
+        </div>
       {% endif %}
+      <p>
+        For each task you attempted, take this HTML and add it to your
+        {{ report_type }} (in the <code>tasks</code> <code>section</code>).
+        Remember to edit it!
+        Be kind to your marker and put the tasks in the right order too please ;-)
+      </p>
+      <p>
+        You'll need one of these for each task you attempted:
+      </p>
     </div>
   </div>
 
   <div class="row">
-    <div class="col example-report">
-      {% for task in tasks %}
-        <pre class="border border-secondary p-3">&lt;div class="task"&gt;
-  &lt;h2&gt;{{ task.fullname }} {{ task.title }}&lt;/h2&gt;
+    <div class="col example-report copy-to-clipboard" data-target="general-task-html">
+        <pre id="general-task-html" class="border border-secondary p-3">&lt;div class="task"&gt;
+  &lt;h2&gt;<span id="task-html-task-id">TASK-NAME TASK-TITLE</span>&lt;/h2&gt;
   &lt;p&gt;
     &lt;!-- sentence on _how_ you fixed it --&gt;
   &lt;/p&gt;
@@ -261,9 +279,50 @@ def {{ report_type }}():
     &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
   &lt;/p&gt;
 &lt;/div&gt;</pre>
-      {% endfor %}
-
     </div>
   </div>
+  <script>
+    const TASK_HTML_PRE = document.getElementById("general-task-html");
+    const TASK_ID_SPAN = document.getElementById("task-html-task-id");
+    if (TASK_HTML_PRE && TASK_ID_SPAN){
+      let task_select = document.createElement("select");
+      task_select.classList.add("form-control");
+      let tasks_by_name = {"TASK-NAME": "TASK-TITLE"};
+      let opt = document.createElement("option");
+      opt.innerText = "Choose a task:";
+      opt.setAttribute("value", "TASK-NAME");
+      opt.setAttribute("selected", "1");
+      task_select.append(opt);
+      {% for task in tasks %}
+      tasks_by_name["{{ task.fullname }}"]="{{ task.title }}";
+      opt = document.createElement("option");
+      opt.innerText = "{{ task.fullname }}";
+      task_select.append(opt);
+      {% endfor %}
+      task_select.addEventListener("change", function(e){
+        TASK_ID_SPAN.innerText=this.value + " " + tasks_by_name[this.value];
+        let copy_btn = TASK_HTML_PRE.parentElement.querySelector("button");
+        if (copy_btn){ /* reset copy-to-clipboard button when text changes */
+          copy_btn.classList.add("btn-primary");
+          copy_btn.classList.remove("btn-success", "btn-danger");
+        }
+      });
+      TASK_HTML_PRE.after(task_select);
+    }
+  </script>
+
+  {% if expected_phase_completion %}
+    <div class="row mt-4">
+      <div class="col-lg-8">
+        <p>
+          Remember:
+          if you're not an experienced programmer, we don't expect you to get
+          much further than <strong>phase&nbsp;{{ expected_phase_completion }}</strong>
+          before you run out of time.
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
 </div>
 {% endblock %}

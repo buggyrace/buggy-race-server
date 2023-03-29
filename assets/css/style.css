@@ -299,33 +299,17 @@ footer .footer-nav {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-book:before {
-  content: "\e91f";
-}
-.icon-bubbles:before {
-  content: "\e96c";
-}
-.icon-wrench:before {
-  content: "\e991";
-}
-.icon-cog:before {
-  content: "\e994";
-}
-.icon-trophy:before {
-  content: "\e99e";
-}
-.icon-info:before {
-  content: "\ea0c";
-}
-.icon-enter:before {
-  content: "\ea13";
-}
-.icon-exit:before {
-  content: "\ea14";
-}
-.icon-github:before {
-  content: "\eab0";
-}
+.icon-book:before { content: "\e91f"; }
+.icon-bubbles:before { content: "\e96c"; }
+.icon-clipboard:before { content: "\e9b8"; }
+.icon-cog:before { content: "\e994"; }
+.icon-copy:before { content: "\e92c"; }
+.icon-enter:before { content: "\ea13"; }
+.icon-exit:before { content: "\ea14"; }
+.icon-github:before { content: "\eab0"; }
+.icon-trophy:before { content: "\e99e"; }
+.icon-wrench:before { content: "\e991"; }
+
 .nav-link .icon-cog {color:#dddd00}
 .nav-link .icon-cog:hover {color:#ffff00}
 

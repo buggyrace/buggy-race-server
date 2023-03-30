@@ -54,8 +54,9 @@ def create_buggy_with_json_via_api():
       if (datetime.now() - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
         return Response("{'error':'not authorised (secret has expired)'}", status=401, mimetype='application/json')
       if user.is_api_secret_otp:
-          user.api_secret = None
-          user.api_secret_at = None
+          if user.api_secret_count > 0:
+            return Response("{'error':'one-time secret has already been used'}", status=401, mimetype='application/json')
+          user.api_secret_count += 1
           user.save()
       response_to_update = handle_uploaded_json(BuggyJsonForm(request.form), user, True)
       # note send 200 even if there was an error

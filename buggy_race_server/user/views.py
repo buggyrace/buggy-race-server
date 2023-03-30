@@ -238,6 +238,7 @@ def set_api_secret():
             else:
                 current_user.api_secret = form.api_secret.data
                 current_user.api_secret_at = datetime.now()
+                current_user.api_secret_count = 0
                 if is_student_api_otp_allowed:
                     current_user.is_api_secret_otp = form.is_one_time_password.data
                 else:

@@ -12,13 +12,13 @@
     </h1>
   </div>
   <div class="row">
-    <div class="col">
-      <div class="alert alert-info">
-        {% if api_task %}
+    <div class="col-md-8">
+      {% if api_task_name %}
+        <div class="alert alert-info">
           The API is needed by students doing task 
-          <a href="{{ url_for('public.show_single_task', task_id=api_task) }}">{{ api_task }}</a>.
-        {% endif %}
-      </div>
+          <a href="{{ url_for('public.show_single_task', task_id=api_task_name) }}">{{ api_task_name }}</a>.
+        </div>
+      {% endif %}
       <p>
         A user can only access the API if they provide an API key that matches
         what is set here. 
@@ -85,6 +85,30 @@
     <div class="col">
       <a href="{{url_for('admin.api_test')}}" class="btn btn-outline-secondary btn-admin btn-jump">Test API</a>
     </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-md-8">
+      <p>
+        API secrets expire after about <strong>{{ api_secret_ttl_pretty }}</strong>.
+        {% if is_api_secret_otp %}
+          Users' secrets are <em>one-time passwords</em>
+          (can only be used once before they must be reset).
+        {% else %}
+          Users' secrets can be used repeatedly until they expire.
+        {% endif %}
+        {% if is_student_api_otp_allowed %}
+          Students <strong>can override</strong> the
+          one-time password behaviour on their own secrets.
+        {% else %}
+          Students cannot override this.
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-md-4">
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.settings', group_name='server') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Server</span></a>
+      </p>
+  </div>
   </div>
 </div>
 <script>

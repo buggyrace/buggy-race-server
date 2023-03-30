@@ -240,6 +240,31 @@
     </div>
     <div class="col-md-6">
       <div class="alert alert-secondary">
+        <h2 class="alert-title">Server API</h2>
+        <p>
+          API secrets expire after about <strong>{{ api_secret_ttl_pretty }}</strong>.
+          {% if is_api_secret_otp %}
+            Users' secrets are <em>one-time passwords</em>
+            (can only be used once before they must be reset).
+          {% else %}
+            Users' secrets can be used repeatedly until they expire.
+          {% endif %}
+          {% if is_student_api_otp_allowed %}
+            Students <strong>can override</strong> the
+            one-time password behaviour on their own secrets.
+          {% else %}
+            Students cannot override this.
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='server') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Server</span></a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert alert-secondary">
         <h2 class="alert-title">Config</h2>
         <p>
           Change or inspect all the <strong>configuration settings</strong>,

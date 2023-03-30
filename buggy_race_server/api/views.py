@@ -4,11 +4,12 @@
 import json
 from datetime import datetime
 
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, request, current_app
 
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.views import handle_uploaded_json
 from buggy_race_server.user.models import User
+from buggy_race_server.config import ConfigSettingNames
 
 blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../static")
 
@@ -50,8 +51,12 @@ def create_buggy_with_json_via_api():
     if user.api_secret is not None and user.api_secret_at is not None:
       if user.api_secret != secret:
         return Response("{'error':'not authorised (bad secret)'}", status=401, mimetype='application/json')
-      if (datetime.now() - user.api_secret_at).seconds/60 > API_SECRET_LIFESPAN_MINS:
+      if (datetime.now() - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
         return Response("{'error':'not authorised (secret has expired)'}", status=401, mimetype='application/json')
+      if user.is_api_secret_otp:
+          user.api_secret = None
+          user.api_secret_at = None
+          user.save()
       response_to_update = handle_uploaded_json(BuggyJsonForm(request.form), user, True)
       # note send 200 even if there was an error
       return Response(json.dumps(response_to_update), status=200, mimetype='application/json')

@@ -35,6 +35,7 @@ from buggy_race_server.utils import (
     flash_errors,
     flash_suggest_if_not_yet_githubbed,
     get_download_filename,
+    get_pretty_approx_duration,
     is_authorised,
     warn_if_insecure,
 )
@@ -228,6 +229,8 @@ def set_api_secret():
     form = ApiSecretForm()
     is_confirmation = False
     delta_mins = int((datetime.now()-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
+    is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
+    is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name]
     if request.method == "POST":
         if form.validate_on_submit():
             if current_user.api_secret == form.api_secret.data:
@@ -235,25 +238,30 @@ def set_api_secret():
             else:
                 current_user.api_secret = form.api_secret.data
                 current_user.api_secret_at = datetime.now()
+                if is_student_api_otp_allowed:
+                    current_user.is_api_secret_otp = form.is_one_time_password.data
+                else:
+                    current_user.is_api_secret_otp = is_api_secret_otp
                 current_user.save()
-                flash("OK, you set your API secret: it's good for one hour from now.", "success")
+                pretty_ttl = get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name])
+                flash(f"OK, you set your API secret: it's good for about {pretty_ttl} from now.", "success")
                 is_confirmation = True
                 delta_mins = 1
         else:
             flash(f"Warning! Your API secret was not set.", "danger")
             flash_errors(form)
-    if task_names := current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name].split(","):
-        api_task_names = [task_name.strip() for task_name in task_names]
-    else:
-        api_task_names = []
-    
+    api_task_name = current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name]
     return render_template(
         "user/settings_api.html",
         form=form,
         delta_mins=delta_mins,
         is_confirmation=is_confirmation,
-        pretty_lifespan="one hour",
-        api_task_names=api_task_names,
+        pretty_lifespan=get_pretty_approx_duration(
+            current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]
+        ),
+        is_api_secret_otp=is_api_secret_otp,
+        is_student_api_otp_allowed=is_student_api_otp_allowed,
+        api_task_name=api_task_name,
     )
 
 @blueprint.route("/vscode-workspace", methods=['GET'], strict_slashes=False)

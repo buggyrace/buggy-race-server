@@ -537,3 +537,16 @@ def get_flag_color_css_defs(buggy_data_list):
           if name_value := _get_flag_color(flag, want_secondary=want_secondary):
             flag_colors[name_value[0]] = name_value[1]
     return flag_colors
+
+def get_pretty_approx_duration(secs):
+    """ Make a pretty duration string"""
+    if secs < 60:
+        return "1 second" if secs == 1 else f"{secs} seconds"
+    mins = int(secs/60)
+    if mins < 60:
+        return "1 minute" if mins == 1 else f"{mins} minutes"
+    hours = int(mins/60)
+    if hours < 24:
+        return "1 hour" if hours == 1 else f"{hours} hours"
+    days = int(hours/24)
+    return "1 day" if days == 1 else f"{days} days"

@@ -94,6 +94,7 @@ class User(UserMixin, SurrogatePK, Model):
     uploaded_at = Column(db.DateTime, nullable=True)
     api_secret =  Column(db.String(30), nullable=True)
     api_secret_at = Column(db.DateTime, nullable=True)
+    is_api_secret_otp = Column(db.Boolean, nullable=False, default=False)
     api_key = Column(db.String(30), nullable=True)
     comment = Column(db.Text(), default=False)
 

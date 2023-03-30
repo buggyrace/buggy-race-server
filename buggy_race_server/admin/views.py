@@ -55,6 +55,7 @@ from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
+    get_pretty_approx_duration,
     get_tasks_as_issues_csv,
     join_to_project_root,
     load_config_setting,
@@ -226,11 +227,14 @@ def setup_summary():
             qty_announcements_global += 1
     return render_template(
        "admin/setup_summary.html",
+       api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]),
        institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
        institution_home_url=institution_home_url,
        institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+       is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
        is_report=bool(report_type),
        is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
        is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
        is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
        is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
@@ -529,6 +533,7 @@ def bulk_register(data_format=None):
               access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit
               latest_json="",
               comment=_csv_tidy_string(row, 'comment', want_lower=False),
+              is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
             )
             #current_app.logger.info("{}, pw:{}".format(username, password))
             if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
@@ -640,7 +645,6 @@ def manage_user(user_id):
          user = User(
             username=username,
             password=form.password.data,
-            
           )
       user.username = username # validation catches non-unique usernames
       user.comment = form.comment.data
@@ -657,6 +661,7 @@ def manage_user(user_id):
       if not is_registering_new_user and form.access_level.data > user.access_level:
           flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
       user.access_level = form.access_level.data
+      user.is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
       user.save()
       if is_registering_new_user:
          success_msg = f"OK, registered new user {user.pretty_username}"
@@ -756,6 +761,9 @@ def api_keys():
     return render_template(
        "admin/api_key.html",
        form=form,
+       api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]),
+       is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
+       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
        users=users,
        api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
     )

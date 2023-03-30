@@ -169,6 +169,9 @@ class ApiSecretForm(FlaskForm):
     api_secret = StringField(
         "API secret", validators=[DataRequired(), Length(min=4, max=40)]
     )
+    is_one_time_password = BooleanField(
+        "Is one-time password?", validators=[Optional()]
+    )
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

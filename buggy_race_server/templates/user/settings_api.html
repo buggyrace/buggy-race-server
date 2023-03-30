@@ -129,8 +129,8 @@
               You need to ask us to add one for you.
             </div>
           {% else %}
-            <div class="col alert alert-success text-center">
-              <code>{{ current_user.api_key }}</code>
+            <div class="py-5 alert alert-success text-center copy-to-clipboard" data-target="api-key">
+              <code id="api-key" class="lead">{{ current_user.api_key }}</code>
             </div>
           {% endif %}
           <p>

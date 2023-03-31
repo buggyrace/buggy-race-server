@@ -154,7 +154,7 @@ This loads the buggies *from the database* (not the CSV,
 see above), asks you for a point-cost cutoff, and then
 applies the rules to disqualify any who don't qualify:
 it identifies each disqualified buggy together with the
-rules (multiple) it violated (RACE_COST_THRESHHOLD is
+rules (multiple) it violated (RACE_COST_THRESHOLD is
 the only variable one); all these violations are potentially
 motivating for students to address in their buggy editors,
 so are presumably important to provide to the students.

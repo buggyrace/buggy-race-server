@@ -110,7 +110,7 @@ def showspecs():
     """Buggy specifications page."""
     return render_template("public/specs.html",
       defaults=Buggy.DEFAULTS,
-      data=Buggy.game_data
+      data=Buggy.GAME_DATA
     )
 
 @blueprint.route("/specs/data/<data_filename>")
@@ -123,7 +123,7 @@ def showspecs_data(data_filename=""):
             if data_filename == "defaults.json":
                 download = make_response(jsonify(Buggy.DEFAULTS))
             else:
-                download = make_response(jsonify(Buggy.game_data))
+                download = make_response(jsonify(Buggy.GAME_DATA))
             download.headers["Content-Disposition"] = f"attachment; filename={get_download_filename(data_filename)}"
             download.headers["Content-type"] = "application/json"
             return download
@@ -132,7 +132,7 @@ def showspecs_data(data_filename=""):
     return render_template(
         "public/specs_data.html", 
         defaults=Buggy.DEFAULTS,
-        data=Buggy.game_data,
+        data=Buggy.GAME_DATA,
         is_showing_mass=want_mass
     )
 

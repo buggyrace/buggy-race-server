@@ -388,7 +388,7 @@ def setup():
 @login_required
 @staff_only
 def admin():
-    TASK_NOTE_LENGTH_THRESHHOLD = 2 # texts shorter than this are not counted
+    TASK_NOTE_LENGTH_THRESHOLD = 2 # texts shorter than this are not counted
     today = datetime.now().date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
@@ -412,7 +412,7 @@ def admin():
       texts = TaskText.query.all()
       qty_texts = len(texts)
       for text in texts:
-         if len(text.text) > TASK_NOTE_LENGTH_THRESHHOLD:
+         if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
             qty_texts_by_task[tasks_by_id[text.task_id]] += 1
     return render_template(
       "admin/dashboard.html",

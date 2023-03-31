@@ -14,6 +14,7 @@ from buggy_race_server.database import (
     db,
 )
 from buggy_race_server.buggy.models import Buggy
+from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
 
 
@@ -103,7 +104,7 @@ class Race(SurrogatePK, Model):
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)
         total_buggies_finished = int(results_data.get("buggies_finished") or 0)
-        valid_violation_names = [ rn.value for rn in Buggy.RuleNames]
+        valid_violation_names = [ rn.value for rn in RuleNames]
         buggy_results = results_data.get("results")
         qty_buggies_entered = 0
         qty_buggies_started = 0

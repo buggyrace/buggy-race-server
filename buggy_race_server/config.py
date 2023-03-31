@@ -494,7 +494,7 @@ class ConfigSettings:
           (for example, 3600 seconds = 1 hour).""",
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
-          """The default point cost threshhold for buggies: you can always
+          """The default point cost threshold for buggies: you can always
           override this when you create each race.""",
 
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name:

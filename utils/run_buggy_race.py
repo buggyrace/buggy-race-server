@@ -6,294 +6,358 @@
 #
 # If you're running this locally, before you run the first time:
 #
-#  * set up environment stuff: cp env.example to .env and edit it
-#  * (it should run fine with sqlite, i.e., no complex database config needed)
-#  * create the database with:
-#       flask db init
-#       flask db migrate
-#       flask db upgrade
 #  * make sure you have a buggies.csv to hand (download one from the race
 #    server if necessary)
 #  * now you can run this script:
 #
-#       FLASK_ENV=development flask shell
-#       >>> from utils import run_buggy_race
-#       >>> run_buggy_race.load_csv()
-#       >>> run_buggy_race.run_race()
 
-#       synonyms:
-#
-#       FLASK_ENV=development flask shell
-#       >>> from utils import run_buggy_race as r
-#       >>> r.l()
-#       >>> r.r()
-#
-#
-import json
-import os.path
+import os
 import sys
 import csv
+import json
 from datetime import datetime
 from random import randint
-from buggy_race_server.buggy.models import Buggy
-from buggy_race_server.user.models import User
 
-DEFAULT_RACE_FILENAME = 'race.log'
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
+from buggy_race_server.lib.race_specs import BuggySpecs
+
 DEFAULT_CSV_FILENAME = 'buggies.csv'
-DEFAULT_COST_THRESHHOLD = 200
+DEFAULT_RACE_FILENAME = 'race.log'
+DEFAULT_RESULTS_FILENAME = 'buggies.json'
+DEFAULT_COST_LIMIT = 200
 DEFAULT_INITIAL_CLICKS = 1000
 DEFAULT_MORE_CLICKS =  300
 
 DEFAULT_PK_OF_PUNCTURE = {
-  "knobbly":   3,
-  "slick":     6,
-  "steelband": 2,
-  "reactive":  1,
-  "maglev":    0
+    "knobbly":   3,
+    "slick":     6,
+    "steelband": 2,
+    "reactive":  1,
+    "maglev":    0
 }
-
-def load_csv(csv_filename=None):
-  buggies = Buggy.query.all()
-  print(f"[ ] Read {len(buggies)} buggies from database")
-  if csv_filename is None or csv_filename == '':
-    csv_filename = str(input(f"[?] Filename of buggy data in CSV: [{DEFAULT_CSV_FILENAME}] ")).strip()
-  if csv_filename == "":
-    print(f"[ ] defaulting to {DEFAULT_CSV_FILENAME}")
-    csv_filename = DEFAULT_CSV_FILENAME
-  if not os.path.isfile(csv_filename):
-    print("[!] no such file, quitting")
-    return
-  print("[ ] reading CSV...")
-  with open(csv_filename) as csvfile:
-    reader = csv.DictReader(csvfile)
-    headers = []
-    buggy_data = []
-    for row in reader:
-      if len(headers):
-        buggy_data.append(row)
-      else:
-        headers = row.keys()
-    print(f"[+] read data for {len(buggy_data)} buggies")
-    for b in buggy_data:
-      print(f"[ ]    {b['username']}")
-    if len(buggies):
-      y_or_n = str(input("f[?] Delete existing {len(buggies)} buggies? [Yn] ")).strip()
-      if y_or_n.lower() == 'n':
-        print("[!] OK: quitting, database unchanged")
-        return
-      print("[ ] OK deleting old data:")
-      Buggy.query.delete();
-      buggies = Buggy.query.all()
-      print("[ ] done: now {len(buggies)} buggies in database")
-    print("[ ] inserting buggies:", end="", flush=True)
-    for b in buggy_data:
-      username = b.pop("username")
-      user = User.query.filter_by(username=username).first()
-      b.pop("id")
-      b.pop("created_at")
-      if user is None:
-        email = username if '@' in username else str(randint(1000, 9999))+"@example.com"
-        user = User.create(
-          username=username,
-          email=email,
-          password='password',
-          is_active=True,
-        )
-        #print("[:] read user: {} id={}".format(newbie.username, newbie.id ))
-      b["user_id"]=user.id
-      for k in Buggy.DEFAULTS:
-        if b[k] == 'none' or b[k] == '': # anomaly of CSV dumping: tidy nones
-          b[k] = None
-        if type(Buggy.DEFAULTS[k]) == bool:
-          # print("{} is boolean! ({})".format(k, b[k]))
-          b[k] = b[k].lower() == "true"
-      new_buggy = Buggy.create(**b)
-      print(".", end="", flush=True)
-    print(" OK")
-  buggies = Buggy.query.all()
-  print(f"[ ] database now contains {len(buggies)} buggies")
 
 
 def pk(prob): # prob in 1000
-  return randint(0, 1000) < prob
+    return randint(0, 1000) < prob
 
-class RacingBuggy():
-  def __init__(self, source_buggy):
-    self.buggy = source_buggy
-    self.buggy.calculate_total_cost()
-    self.id = source_buggy.id
-    self.qty_wheels = source_buggy.qty_wheels
-    self.qty_good_wheels = self.qty_wheels
-    self.user = User.query.filter_by(id=source_buggy.user_id).first()
-    self.username = self.user.username
-    self.usernick = self.username.partition("@")[0]
-    self.initials = ".".join([s[0].upper() for s in list(
-      filter(lambda x: (x[0].isalpha()), self.usernick.split(".")))])+"."
-    self.d = 0   # distance from start
-    self.a = 0   # acceleration
-    self.s = 0   # speed
-    self.power_units = source_buggy.power_units
-    self.qty_attacks = source_buggy.qty_attacks
-    self.qty_tyres = source_buggy.qty_tyres
-    self.mass = source_buggy.mass
-    self.is_on_aux = False
-    self.is_parked = False
-    self.violations = None
-    self.nom = "[" + self.username + "]"
+class RacingBuggy(BuggySpecs):
 
-  def power_in_use(self):
-    if self.is_parked:
-      return None
-    elif self.is_on_aux:
-      return self.buggy.aux_power_type
-    else:
-      return self.buggy.power_type
+    ATTRIB_TYPES = {
+        "algo": str,
+        "antibiotic": bool,
+        "armour": str,
+        "attack": str,
+        "aux_power_type": str,
+        "aux_power_units": int,
+        "banging": bool,
+        "buggy_id": int,
+        "created_at": str, # datetime
+        "fireproof": bool,
+        "flag_color_secondary": str,
+        "flag_color": str,
+        "flag_pattern": str,
+        "hamster_booster": int,
+        "id": int,
+        "insulated": bool,
+        "mass": int,
+        "power_type": str,
+        "power_units": int,
+        "qty_attacks": int,
+        "qty_tyres": int,
+        "qty_wheels": int,
+        "total_cost": int,
+        "tyres": str,
+        "user_id": int,
+        "user_id": int,
+        "username": str,
+    }
 
-  def consume_power(self):
-    pwr = self.power_in_use()
-    if pwr is not None and Buggy.POWER_TYPES[pwr]['consum']:
-      if self.power_units > 0:
-        self.power_units -= 0.2 # FIXME rate of consumption?
-        # FIXME reduced mass
-      else:
-        if self.is_on_aux or self.buggy.aux_power_type is None:
-          self.is_parked = True
+    def __init__(self, buggy_data):
+        self.data = buggy_data
+        self.id = buggy_data.get("id")
+        self.position = -1
+        # TODO: buggy_data[mass] and buggy_data[total_cost] are probably being
+        # ignored, because they can (should?) be recalculated before the race
+        for k in buggy_data.keys():
+            if k in RacingBuggy.ATTRIB_TYPES:
+                creator = RacingBuggy.ATTRIB_TYPES[k] # e.g., str, int, bool
+                if creator == str: # check value is a member
+                    kk = "power_type" if k == "aux_power_type" else k
+                    if kk in RacingBuggy.GAME_DATA: # do we have members?
+                        if buggy_data[k] not in RacingBuggy.GAME_DATA[kk]:
+                            buggy_data[k] = RacingBuggy.DEFAULTS[k]
+                try: # to cast the value to the expected type...
+                    self.__setattr__(k, creator(buggy_data[k])) 
+                except ValueError: # missing value (or wrong format?)
+                    # TODO would be helpful to report this for debug
+                    default = RacingBuggy.DEFAULTS.get(k)
+                    if default is None:
+                        self.__setattr__(k, creator()) # empty default
+                    else:
+                      self.__setattr__(k, creator(default))
+            else:
+                pass
+                print(f"[!] key {k} not in attrib types — ignoring")
+        self.qty_good_wheels = self.qty_wheels
+        self.d = 0   # distance from start
+        self.a = 0   # acceleration
+        self.s = 0   # speed
+        self.is_on_aux = False
+        self.is_parked = False
+        self.violations = None
+        self.nom = "[" + self.username + "]"
+        # TODO maybe report if the calculations yield different results
+        #      from the values stored in the CSV?
+        self.calculate_total_cost()
+        self.calculate_mass()
+
+    def result_data(self):
+        return {
+            "username": self.username,
+            "user_id": self.user_id,
+            "flag_color": self.flag_color,
+            "flag_color_secondary": self.flag_color_secondary,
+            "flag_pattern": self.flag_pattern,
+            "cost": self.total_cost,
+            "race_position": self.position,
+            "violations_str": ",".join(self.violations)
+        }
+
+
+    def power_in_use(self):
+        if self.is_parked:
+            return None
+        elif self.is_on_aux:
+            return self.aux_power_type
         else:
-          self.power_units = self.buggy.aux_power_units
-          self.is_on_aux = True
+            return self.power_type
 
-  def suffer_puncture(self):
-    self.qty_tyres -= 1
-    if self.qty_tyres < self.qty_good_wheels:
-      self.qty_good_wheels = self.qty_tyres
-    if self.qty_tyres == 0:
-      self.is_parked = True
-    
-  def set_rule_violations(self, cost_threshhold):
-    self.violations = self.buggy.get_rule_violations(cost_threshhold)
+    def consume_power(self):
+        pwr = self.power_in_use()
+        if pwr is not None and BuggySpecs.POWER_TYPES[pwr]['consum']:
+            if self.power_units > 0:
+                self.power_units -= 0.2 # FIXME rate of consumption?
+                # FIXME reduced mass
+            else:
+                if self.is_on_aux or self.aux_power_type is None:
+                  self.is_parked = True
+                else:
+                  self.power_units = self.aux_power_units
+                  self.is_on_aux = True
 
-def run_race():
-  records = Buggy.query.all()
-  print(f"[ ] Read {len(records)} buggies from database")
-  cost_threshhold = 0
-  while cost_threshhold < 1:
-    cost_threshhold = str(
-      input(f"[?] Maximum buggy cost for this race? [{DEFAULT_COST_THRESHHOLD}] ")).strip()
-    if cost_threshhold == '':
-      cost_threshhold = DEFAULT_COST_THRESHHOLD
-    else:
-      try:
-        cost_threshhold = int(cost_threshhold)
-      except ValueError:
-        print("[!] integer greater than 1 needed")
-        cost_threshhold = 0
-  print(f"[ ] race threshhold: {cost_threshhold}")
-  logfilename = DEFAULT_RACE_FILENAME
-  print(f"[ ] opening race log file {logfilename}... ")
-  logfile = open(logfilename, "w")
-  logfile.write(f"# race cost<={cost_threshhold} run at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-  print("[ ] Checking race rules...")
-  buggies = []
-  qty_violators = 0
-  for b in records:
-    buggy = RacingBuggy(b)
-    buggy.set_rule_violations(cost_threshhold)
-    if buggy.violations is not None:
-      qty_violators += 1
-      print(f"[ ]    {buggy.nom} {buggy.qty_wheels}×o {buggy.buggy.flag_color}")
-      print(f"[-]    violates: {'+'.join(buggy.violations)}")
-      logfile.write(f"VIOLATION: {buggy.username},{'+'.join(buggy.violations)}\n")
-    else:
-      buggies.append(buggy)
-  print(f"[*] {qty_violators} buggies are excluded due to race rule violations")
-  logfile.write("#\n")
-  print(f"[ ] next: {len(buggies)} buggies ready to start the race:")
-  for b in buggies:
-    logfile.write(f"ENTRANT: {b.username},{b.buggy.flag_color},{b.buggy.flag_pattern},{b.buggy.flag_color_secondary}\n")
-  logfile.write("#\n")
-  if len(buggies) == 0:
-    logfile.write("# race abandoned: no buggies available to run\n")
-    print("[!] race abandoned")
-    return
-  logfile.write("# race starts...\n")
-  print("[ ] GO!")
-  clicks = 0
-  max_clicks = DEFAULT_INITIAL_CLICKS 
-  winners = []
+    def suffer_puncture(self):
+        self.qty_tyres -= 1
+        if self.qty_tyres < self.qty_good_wheels:
+            self.qty_good_wheels = self.qty_tyres
+        if self.qty_tyres == 0:
+            self.is_parked = True
 
-  def racelog(rb, msg):
-    text = f"{clicks:=5} {rb.nom:12s} {msg}"
-    print(text)
-    print(text, file=logfile)
+    def set_rule_violations(self, cost_limit):
+        self.violations = self.get_rule_violations(cost_limit)
 
-  while clicks < max_clicks:
-    clicks += 1
-    qty_active = 0
+
+
+
+# ---------------------------------------------------------------------
+
+def load_csv(csv_filename=None):
+    if csv_filename is None or csv_filename == '':
+        csv_filename = str(input(f"[?] Filename of buggy data in CSV: [{DEFAULT_CSV_FILENAME}] ")).strip()
+    if csv_filename == "":
+        print(f"[ ] defaulting to {DEFAULT_CSV_FILENAME}")
+        csv_filename = DEFAULT_CSV_FILENAME
+    if not os.path.isfile(csv_filename):
+        raise FileNotFoundError(f"can't find CSV file containing buggy data (csv_filename) ")
+    print("[ ] reading CSV...")
+    with open(csv_filename) as csvfile:
+        reader = csv.DictReader(csvfile)
+        headers = []
+        buggy_data = []
+        for row in reader:
+            if len(headers):
+                buggy_data.append(row)
+            else:
+                headers = row.keys()
+        print(f"[+] read data for {len(buggy_data)} buggies")
+    buggies = []
+    print("[ ] Processing: ", end="")
+    for buggy_data in buggy_data:
+        for k in BuggySpecs.DEFAULTS:
+            if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
+                buggy_data[k] = None
+            if type(BuggySpecs.DEFAULTS[k]) == bool:
+                # print(f"{} is boolean! ({})".format(k, b[k]))
+                buggy_data[k] = buggy_data[k].lower() == "true"
+        buggies.append(RacingBuggy(buggy_data))
+        print(".", end="", flush=True)
+    print(" OK")
+    return buggies
+
+def run_race(buggies_entered):
+
+    def racelog(rb, msg):
+        text = f"{clicks:=5} {rb.nom:12s} {msg}"
+        print(text)
+        print(text, file=logfile)
+
+    print(f"[ ] buggies entered for this race (i.e., from CSV): {len(buggies_entered)}")
+    cost_limit = 0
+    while cost_limit < 1:
+        cost_limit = str(
+            input(f"[?] Maximum buggy cost for this race? [{DEFAULT_COST_LIMIT}] ")).strip()
+        if cost_limit == '':
+            cost_limit = DEFAULT_COST_LIMIT
+        else:
+            try:
+                cost_limit = int(cost_limit)
+            except ValueError:
+                print("[!] integer greater than 1 needed")
+                cost_limit = 0
+    print(f"[ ] race cost limit: {cost_limit}")
+    logfilename = DEFAULT_RACE_FILENAME
+    print(f"[ ] opening race log file {logfilename}... ")
+    logfile = open(logfilename, "w")
+    race_start_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    logfile.write(f"# race cost<={cost_limit} run at {race_start_at}\n")
+    print("[ ] Checking race rules...")
+    qty_violators = 0
+    buggies = []
+    fake_position = 1
+    for buggy in buggies_entered:
+        try:
+            buggy.set_rule_violations(cost_limit)
+        except ValueError as e:
+            print(f"[!] cost problem: {e}")
+            continue
+        if buggy.violations:
+            qty_violators += 1
+            print(f"[ ]    {buggy.nom} {buggy.qty_wheels}×o ({buggy.qty_tyres}) {buggy.flag_color} £{buggy.total_cost}")
+            print(f"[-]    violates: {'+'.join(buggy.violations)}")
+            logfile.write(f"VIOLATION: {buggy.username},{'+'.join(buggy.violations)}\n")
+        else:
+            buggy.position = fake_position
+            buggies.append(buggy)
+            fake_position += 1
+    print(f"[*] {qty_violators} buggies are excluded due to race rule violations")
+    logfile.write("#\n")
+    print(f"[ ] next: {len(buggies)} buggies ready to start the race:")
     for b in buggies:
-      if b.is_parked:
-        continue
-      qty_active += 1
-      if pk(1) and pk(b.buggy.mass/b.buggy.qty_wheels):
-        racelog(b, "catastrophic chassis failure: buggy breaks.")
-        b.is_parked = True
-      if pk(DEFAULT_PK_OF_PUNCTURE[b.buggy.tyres] * b.qty_good_wheels):
-        b.suffer_puncture()
-        if b.qty_good_wheels == 0:
-          punc_str = "no tyres left: parked"
-        else:
-          punc_str = "use spare: still" if b.qty_good_wheels == b.qty_wheels else "now"
-          punc_str += f" running on {b.qty_good_wheels} of {b.qty_wheels} wheels"
-        racelog(b, f"puncture! {punc_str}")
-      
-      power = b.power_in_use()
-      if power is not None:
-        b.consume_power()
-        #racelog(b, "power {} consumed (units {})".format(power, b.power_units))
-        new_power = b.power_in_use()
-        if  new_power != power:
-          if new_power is None:
-            racelog(b, f"ran out of {power} power")
-          else:
-            racelog(b, f"ran out of {power}, switched to auxiliary power {new_power}")
-          
-      #   ? risk of primary power fail?
+        logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
+    logfile.write("#\n")
+    if len(buggies) == 0:
+      logfile.write("# race abandoned: no buggies available to run\n")
+      print("[!] race abandoned")
+      return
+    logfile.write("# race starts...\n")
+    print("[ ] GO!")
+    clicks = 0
+    max_clicks = DEFAULT_INITIAL_CLICKS 
+    winners = []
 
-      #   distance travelled x % of tires
-      #   data[id][x]+=speed
-      #   if data[id][x] > race_distance
-      #     winners.append(b)
-      #   if len(winnners): bail out
-      #   data[id]["attacks"] > 0?
-      #     anyone near? chance of attack?
-      #     target defensive? steady?
-      #        ? chance of attack backfire
-      #          calculate damage of attack
-    if qty_active == 0:
-      print("[ ] no buggies moving...")
-      break
-    else:
-      if clicks == max_clicks:
-        more_clicks = str(
-          input(f"[?] {clicks} clicks so far: add more? [+{DEFAULT_MORE_CLICKS}] ")).strip()
-        if more_clicks == '':
-          more_clicks = DEFAULT_MORE_CLICKS
-        else:
-          try:
-            more_clicks = int(more_clicks)
-          except ValueError:
-            print("[!] integer greater than 1 needed")
-            more_clicks = 0
-        if more_clicks > 0:
-          print(f"[+] running race for another +{more_clicks} clicks")
-        else:
-          print("[-] no more clicks, time is up")
-        max_clicks += more_clicks
-  logfile.close()
-  print(f"[:] race ends after {clicks} clicks")
-  print(f"[ ] see race log in {logfilename}")
+    while clicks < max_clicks:
+        clicks += 1
+        qty_active = 0
+        for buggy in buggies:
+            if buggy.is_parked:
+                continue
+            qty_active += 1
+            if pk(1) and pk(buggy.mass/buggy.qty_wheels):
+                racelog(b, "catastrophic chassis failure: buggy breaks.")
+                buggy.is_parked = True
+            if pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
+                buggy.suffer_puncture()
+                if buggy.qty_good_wheels == 0:
+                    punc_str = "no tyres left: parked"
+                else:
+                    punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
+                    punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
+                racelog(buggy, f"puncture! {punc_str}")
+            
+            power = buggy.power_in_use()
+            if power is not None:
+                b.consume_power()
+                #racelog(buggy, "power {} consumed (units {})".format(power, buggy.power_units))
+                new_power = buggy.power_in_use()
+                if new_power != power:
+                    if new_power is None:
+                        racelog(buggy, f"ran out of {power} power")
+                    else:
+                        racelog(buggy, f"ran out of {power}, switched to auxiliary power {new_power}")
+            
+                #   ? risk of primary power fail?
+
+                #   distance travelled x % of tires
+                #   data[id][x]+=speed
+                #   if data[id][x] > race_distance
+                #     winners.append(b)
+                #   if len(winnners): bail out
+                #   data[id]["attacks"] > 0?
+                #     anyone near? chance of attack?
+                #     target defensive? steady?
+                #        ? chance of attack backfire
+                #          calculate damage of attack
+            if qty_active == 0:
+                print("[ ] no buggies moving...")
+                break
+            else:
+                if clicks == max_clicks:
+                    more_clicks = str(
+                      input(f"[?] {clicks} clicks so far: add more? [+{DEFAULT_MORE_CLICKS}] ")).strip()
+                    if more_clicks == '':
+                        more_clicks = DEFAULT_MORE_CLICKS
+                    else:
+                        try:
+                            more_clicks = int(more_clicks)
+                        except ValueError:
+                            print("[!] integer greater than 1 needed")
+                        more_clicks = 0
+                    if more_clicks > 0:
+                        print(f"[+] running race for another +{more_clicks} clicks")
+                    else:
+                        print("[-] no more clicks, time is up")
+                    max_clicks += more_clicks
+    logfile.close()
+    print(f"[:] race ends after {clicks} clicks")
+    print(f"[ ] see race log in {logfilename}")
+    results = {
+      # "race_title": "",
+      # "cost_limit": 200,
+      # "start_at": "2023-03-22 23:58",
+      "raced_at": race_start_at,
+      "league": "",
+      "buggies_entered": len(buggies_entered),
+      "buggies_started": len(buggies),
+      "buggies_finished": len(buggies),
+      # "buggies_csv_url": "https://example.com/buggies223.csv",
+      # "race_log_url":  "https://example.com/race-log223.log",
+      # "result_log_url" :  "https://example.com/result223.log",
+      "results": [buggy.result_data() for buggy in buggies_entered], # TODO sorted?
+      "version": "1.0"
+    }
+    jsonfilename = DEFAULT_RESULTS_FILENAME
+    print(f"[ ] opening results JSON file {jsonfilename}... ")
+    jsonfile = open(jsonfilename, "w")
+    print(json.dumps(results, indent=2), file=jsonfile)
+    jsonfile.close()
+    print(f"[ ] wrote to {jsonfilename}, ready to upload")
+    print(f"[.] bye")
 
 def l():
-  load_csv()
+    load_csv()
 def r():
-  run_race()
+    run_race()
 
+
+def main():
+    print("[ ] Ready to race!")
+    buggies = None
+    try:
+        buggies = load_csv()
+    except FileNotFoundError as e:
+        print(f"[!] File not found: {e}")
+
+    run_race(buggies)
+
+
+if __name__ == "__main__":
+    main()

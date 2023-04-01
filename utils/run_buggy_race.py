@@ -129,7 +129,7 @@ class RacingBuggy(BuggySpecs):
         the JSON that is uploaded to the server."""
 
         return {
-            "username": self.username,
+            "username": "dave", #self.username,
             "user_id": self.user_id,
             "flag_color": self.flag_color,
             "flag_color_secondary": self.flag_color_secondary,

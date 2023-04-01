@@ -140,10 +140,29 @@ class Race(SurrogatePK, Model):
                     or
                     user_id_by_username.get(username) != user_id
                 ):
-                    warnings.append(
-                        f"result ({i}) username (\"{username}\") does not match user_id"
-                        f" ({user_id}), which is \"{username_by_id.get(user_id)}\")"
-                    )
+                    if found_user_id := user_id_by_username.get(username):
+                        if wrong_username := username_by_id.get(user_id):
+                            wrong_username = f"which is \"{ wrong_username }\""
+                        else:
+                            wrong_username = "which is missing"
+                        warnings.append(
+                            f"result ({i}) username \"{username}\" does not match user_id"
+                            f" {user_id} ({wrong_username}) — match on username finds id={found_user_id} instead"
+                        )
+                        user_id = found_user_id
+                        bugres[user_id] = found_user_id # if warnings ignored, use this
+                    elif found_username := username_by_id.get(user_id):
+                        if wrong_id := user_id_by_username.get(username):
+                            wrong_id = f"which is { wrong_id }"
+                        else:
+                            wrong_id = "which is missing"
+                        warnings.append(
+                            f"result ({i}) user id {user_id} does not match username"
+                            f" \"{username}\" ({wrong_id}) — match on id finds \"{found_username}\" instead"
+                        )
+                        bugres[username] = found_username # if warnings ignored, carry on
+                    else: # couldn't resolve either username or id
+                        raise ValueError(f"no user found with either username \"{username}\" or an id of {user_id} ({i})")
                 if username in usernames_in_race:
                     usernames_in_race[username] += 1
                 else:

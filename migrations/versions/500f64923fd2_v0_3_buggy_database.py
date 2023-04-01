@@ -1,8 +1,8 @@
-"""intial db v0.2
+"""v0.3 buggy database
 
-Revision ID: 57a458972f11
+Revision ID: 500f64923fd2
 Revises: 
-Create Date: 2023-03-28 08:10:43.369209
+Create Date: 2023-04-01 12:39:46.178798
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '57a458972f11'
+revision = '500f64923fd2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,11 +27,47 @@ def upgrade():
     sa.Column('is_html', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('races',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=80), nullable=False),
+    sa.Column('desc', sa.Text(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('start_at', sa.DateTime(), nullable=False),
+    sa.Column('cost_limit', sa.Integer(), nullable=True),
+    sa.Column('is_visible', sa.Boolean(), nullable=True),
+    sa.Column('result_log_url', sa.String(length=255), nullable=True),
+    sa.Column('league', sa.String(length=32), nullable=True),
+    sa.Column('results_uploaded_at', sa.DateTime(), nullable=True),
+    sa.Column('buggies_entered', sa.Integer(), nullable=False),
+    sa.Column('buggies_started', sa.Integer(), nullable=False),
+    sa.Column('buggies_finished', sa.Integer(), nullable=False),
+    sa.Column('buggies_csv_url', sa.String(length=255), nullable=True),
+    sa.Column('race_log_url', sa.String(length=255), nullable=True),
+    sa.Column('is_result_visible', sa.Boolean(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('buggies_csv_url'),
+    sa.UniqueConstraint('race_log_url'),
+    sa.UniqueConstraint('result_log_url')
+    )
     op.create_table('settings',
     sa.Column('id', sa.String(length=64), nullable=False),
     sa.Column('value', sa.String(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
+    )
+    op.create_table('tasks',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('modified_at', sa.DateTime(), nullable=True),
+    sa.Column('phase', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=16), nullable=False),
+    sa.Column('title', sa.String(length=80), nullable=False),
+    sa.Column('problem_text', sa.Text(), nullable=False),
+    sa.Column('solution_text', sa.Text(), nullable=False),
+    sa.Column('hints_text', sa.Text(), nullable=False),
+    sa.Column('is_enabled', sa.Boolean(), nullable=False),
+    sa.Column('sort_position', sa.Integer(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -53,6 +89,8 @@ def upgrade():
     sa.Column('uploaded_at', sa.DateTime(), nullable=True),
     sa.Column('api_secret', sa.String(length=30), nullable=True),
     sa.Column('api_secret_at', sa.DateTime(), nullable=True),
+    sa.Column('api_secret_count', sa.Integer(), nullable=False),
+    sa.Column('is_api_secret_otp', sa.Boolean(), nullable=False),
     sa.Column('api_key', sa.String(length=30), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -132,6 +170,8 @@ def downgrade():
     op.drop_table('results')
     op.drop_table('buggies')
     op.drop_table('users')
+    op.drop_table('tasks')
     op.drop_table('settings')
+    op.drop_table('races')
     op.drop_table('announcements')
     # ### end Alembic commands ###

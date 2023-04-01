@@ -658,8 +658,11 @@ def manage_user(user_id):
           user.email = form.email.data
       if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
           user.ext_username = form.ext_username.data
-      if not is_registering_new_user and form.access_level.data > user.access_level:
-          flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
+      if not is_registering_new_user:
+          if form.access_level.data > user.access_level:
+              flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
+          elif form.access_level.data < user.access_level:
+              flash(f"Demoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
       user.access_level = form.access_level.data
       user.is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
       user.save()

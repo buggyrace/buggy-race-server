@@ -191,10 +191,10 @@
           </div>
           <div class="col-sm-4">
             <select name="access_level" id="access_level" class="form-control mr-sm-1">
-              <option value="0">Not staff</option>
+              <option value="0" {% if not user.access_level %}selected{% endif %}>Not staff</option>
               <optgroup label="Staff">
-                <option value="1">Teaching assistant</option>
-                <option value="9">Administrator</option>
+                <option value="1" {% if user.access_level == 1 %}selected{% endif %}>Teaching assistant</option>
+                <option value="9" {% if user.access_level == 9 %}selected{% endif %}>Administrator</option>
               </optgroup>
             </select>
           </div>

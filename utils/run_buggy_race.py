@@ -1,16 +1,28 @@
-# run buggy race with the flask shell
-#
+# run buggy race
+#================
+
+# Does not require access to database, etc: just the race_specs.py
+# from buggy_race_server.lib (for the shared specifications)
+
 # Doing it this way for now so no load on production server
 # and can run as many times here as wanted
-# Manual process for now
 #
-# If you're running this locally, before you run the first time:
+# Before you start:
+#   * Download the a buggy CSV file from the race server
 #
-#  * make sure you have a buggies.csv to hand (download one from the race
-#    server if necessary)
-#  * now you can run this script:
+# When you've finished:
 #
-
+#   * on race server: admin → races → [select race] → upload results
+#   * check the warnings (if any) are acceptable
+#   * if there were warnings, either:
+#      * edit the JSON to fix them
+#      * upload again, this time with "ignore warnings"
+#
+#   * (TODO): (not implemented; and even then maybe optional):
+#     publish the race log, buggies.csv and result log and add their
+#     URLs by editing the race.
+#     These three files are needed to _replay_ the race.
+#
 import os
 import sys
 import csv
@@ -37,10 +49,12 @@ DEFAULT_PK_OF_PUNCTURE = {
 }
 
 
-def pk(prob): # prob in 1000
+def pk(prob): # probability in 1000
     return randint(0, 1000) < prob
 
 class RacingBuggy(BuggySpecs):
+
+    NO_RACE_POSITION = -1
 
     ATTRIB_TYPES = {
         "algo": str,
@@ -68,17 +82,11 @@ class RacingBuggy(BuggySpecs):
         "total_cost": int,
         "tyres": str,
         "user_id": int,
-        "user_id": int,
         "username": str,
     }
 
     def __init__(self, buggy_data):
-        self.data = buggy_data
-        self.id = buggy_data.get("id")
-        self.position = -1
-        # TODO: buggy_data[mass] and buggy_data[total_cost] are probably being
-        # ignored, because they can (should?) be recalculated before the race
-        for k in buggy_data.keys():
+        for i, k in enumerate(buggy_data.keys()):
             if k in RacingBuggy.ATTRIB_TYPES:
                 creator = RacingBuggy.ATTRIB_TYPES[k] # e.g., str, int, bool
                 if creator == str: # check value is a member
@@ -89,15 +97,20 @@ class RacingBuggy(BuggySpecs):
                 try: # to cast the value to the expected type...
                     self.__setattr__(k, creator(buggy_data[k])) 
                 except ValueError: # missing value (or wrong format?)
-                    # TODO would be helpful to report this for debug
                     default = RacingBuggy.DEFAULTS.get(k)
                     if default is None:
                         self.__setattr__(k, creator()) # empty default
                     else:
                       self.__setattr__(k, creator(default))
             else:
-                pass
-                print(f"[!] key {k} not in attrib types — ignoring")
+                pass # debug: f"[!] key {k} not in attrib types — ignoring ({i})"
+        for k in RacingBuggy.ATTRIB_TYPES:
+            if k not in vars(self):
+                # unexpected, because we're checking that every column in present
+                # when we load CSV: this is belt-and-braces 
+                raise ValueError(f"column/key \"{k}\" is missing from buggy {i}")
+        self.data = buggy_data
+        self.position = RacingBuggy.NO_RACE_POSITION
         self.qty_good_wheels = self.qty_wheels
         self.d = 0   # distance from start
         self.a = 0   # acceleration
@@ -112,6 +125,9 @@ class RacingBuggy(BuggySpecs):
         self.calculate_mass()
 
     def result_data(self):
+        """Data for each buggy that is presented in the `results` section of
+        the JSON that is uploaded to the server."""
+
         return {
             "username": self.username,
             "user_id": self.user_id,
@@ -181,8 +197,10 @@ def load_csv(csv_filename=None):
         print(f"[+] read data for {len(buggy_data)} buggies")
     buggies = []
     print("[ ] Processing: ", end="")
-    for buggy_data in buggy_data:
+    for i, buggy_data in enumerate(buggy_data):
         for k in BuggySpecs.DEFAULTS:
+            if k not in buggy_data:
+               raise ValueError(f"column/key \"{k}\" is missing from CSV (buggy {i})")
             if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
                 buggy_data[k] = None
             if type(BuggySpecs.DEFAULTS[k]) == bool:
@@ -331,7 +349,12 @@ def run_race(buggies_entered):
       # "buggies_csv_url": "https://example.com/buggies223.csv",
       # "race_log_url":  "https://example.com/race-log223.log",
       # "result_log_url" :  "https://example.com/result223.log",
-      "results": [buggy.result_data() for buggy in buggies_entered], # TODO sorted?
+      "results": [buggy.result_data() for buggy in
+                    sorted(
+                        buggies_entered,
+                        key=lambda buggy: (buggy.position, buggy.total_cost, buggy.username)
+                    )
+                 ],
       "version": "1.0"
     }
     jsonfilename = DEFAULT_RESULTS_FILENAME
@@ -354,9 +377,12 @@ def main():
     try:
         buggies = load_csv()
     except FileNotFoundError as e:
-        print(f"[!] File not found: {e}")
+        print(f"\n[!] File not found: {e}")
+    except ValueError as e:
+        print(f"\n[!] Problem in CSV: {e}")
 
-    run_race(buggies)
+    if buggies:
+        run_race(buggies)
 
 
 if __name__ == "__main__":

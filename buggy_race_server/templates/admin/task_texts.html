@@ -37,7 +37,7 @@
         {% for student in students %}
           <tr>
             <td class="username-display">
-              <a class="user-link" href="{{ url_for('admin.show_user', user_id=student.id) }}">{{ student.pretty_username }}</a>
+              <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=student.id) }}">{{ student.pretty_username }}</a>
             </td>
             <td class="status">
               {% if buggies_by_username[student.username] or student.latest_json %}

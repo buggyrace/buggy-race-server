@@ -422,20 +422,18 @@ p.btn-collection {
 #registration-progress {
   display:none;
 }
-#registration-progress ul, ul.user-list {
+#registration-progress ul, ul.sm-item-list {
   list-style-type:none;
   padding-inline-start: 0;
   margin-bottom:0.1em;
 }
-#registration-progress ul li, ul.user-list li {
+#registration-progress ul li, ul.sm-item-list li {
   display:inline-block;
   margin:0.1em 0.25em;
 }
-#registration-progress ul li, a.user-link {
+#registration-progress ul li, .sm-item-link {
   padding:0.33em;
   border-radius:0.33em;
-}
-#registration-progress ul li, a.user-link {
   color: black;
 }
 #registration-progress ul li span {
@@ -450,11 +448,11 @@ p.btn-collection {
   margin:4px 4px 0 0;
 }
 
-a.user-link{
+a.sm-item-link, span.sm-item-link{
   background-color: #e8e8e8;
   min-width:2em;
 }
-a.user-link:hover {
+a.sm-item-link:hover {
   background-color: #666666;
   color:white;
   text-decoration: none;

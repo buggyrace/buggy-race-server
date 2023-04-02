@@ -139,9 +139,11 @@
               {% endif %}
             </td>
           <td>
+              <ul class="sm-item-list">
               {% for v in res.violations_str.split(',') %}
-                <code>{{ v }}</code>
+                <li><span class="sm-item-link" href="#">{{ v }}</span></li>
               {% endfor %}
+              </ul>
             </td>
             <td>
               {{ res.cost }}

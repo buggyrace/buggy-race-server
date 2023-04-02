@@ -112,6 +112,8 @@
             The main source of motive power that moves your buggy forward.
             <br>
             See <a href="#types-of-motive-power">power table</a> for details.
+            <br>
+            <strong>Must not be none.</strong>
           </td>
           <td><em>varies, per unit</em></td>
           <td>
@@ -121,11 +123,11 @@
           </td>
           <td>
             <code>
-              petrol
+              {{ defaults.power_type }}
             </code>
           </td>
           <td>
-            {% for t in data['power_type'] %}
+            {% for t in data['power_type'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -152,7 +154,7 @@
           </td>
           <td>
             <code>
-              1
+              {{ defaults.power_units }}
             </code>
           </td>
           <td>
@@ -180,10 +182,10 @@
             </code>
           </td>
           <td>
-              <em>none</em>
+            <code>{{ defaults.aux_power_type }}</code>
           </td>
           <td>
-            {% for t in data['power_type'] %}
+            {% for t in data['power_type'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -205,7 +207,7 @@
           </td>
           <td>
             <code>
-              0
+              <code>{{ defaults.aux_power_units }}</code>
             </code>
           </td>
           <td>
@@ -262,7 +264,6 @@
           <td>
             <code>
               {{ defaults.flag_color }}
-              
             </code>
           </td>
           <td>
@@ -291,7 +292,7 @@
             </code>
           </td>
           <td>
-            {% for t in data['flag_pattern'] %}
+            {% for t in data['flag_pattern'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -349,7 +350,7 @@
             </code>
           </td>
           <td>
-            {% for t in data['tyres'] %}
+            {% for t in data['tyres'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -404,7 +405,7 @@
             </code>
           </td>
           <td>
-            {% for t in data['armour'] %}
+            {% for t in data['armour'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -436,7 +437,7 @@
             </code>
           </td>
           <td>
-            {% for t in data['attack'] %}
+            {% for t in data['attack'] | sort %}
                 <code>{{ t }}</code>{{ "," if not loop.last }}
             {% endfor %}
           </td>
@@ -592,12 +593,9 @@
             </code>
           </td>
           <td>
-            <code>defensive</code>,
-            <code>steady</code>,
-            <code>offensive</code>,
-            <code>titfortat</code>,
-            <code>random</code>,
-            <code>buggy</code>
+            {% for t in data['algo'] | sort %}
+                <code>{{ t }}</code>{{ "," if not loop.last }}
+            {% endfor %}
           </td>
         </tr>
 

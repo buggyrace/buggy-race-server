@@ -144,7 +144,7 @@ class RacingBuggy(BuggySpecs):
         if self.is_parked:
             return None
         elif self.is_on_aux:
-            return self.aux_power_type
+            return None if self.aux_power_type == "none" else self.aux_power_type
         else:
             return self.power_type
 
@@ -155,7 +155,7 @@ class RacingBuggy(BuggySpecs):
                 self.power_units -= 0.2 # FIXME rate of consumption?
                 # FIXME reduced mass
             else:
-                if self.is_on_aux or self.aux_power_type is None:
+                if self.is_on_aux or self.aux_power_type == "none":
                   self.is_parked = True
                 else:
                   self.power_units = self.aux_power_units
@@ -300,7 +300,7 @@ def run_race(buggies_entered):
                     if new_power is None:
                         racelog(buggy, f"ran out of {power} power")
                     else:
-                        racelog(buggy, f"ran out of {power}, switched to auxiliary power {new_power}")
+                        racelog(buggy, f"ran out of {power}, switched to auxiliary power: {new_power}")
             
                 #   ? risk of primary power fail?
 

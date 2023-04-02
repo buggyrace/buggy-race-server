@@ -88,20 +88,20 @@ class RacingBuggy(BuggySpecs):
     def __init__(self, buggy_data):
         for i, k in enumerate(buggy_data.keys()):
             if k in RacingBuggy.ATTRIB_TYPES:
-                creator = RacingBuggy.ATTRIB_TYPES[k] # e.g., str, int, bool
-                if creator == str: # check value is a member
+                attr_type = RacingBuggy.ATTRIB_TYPES[k] # e.g., str, int, bool
+                if attr_type == str: # check value is a member
                     kk = "power_type" if k == "aux_power_type" else k
                     if kk in RacingBuggy.GAME_DATA: # do we have members?
                         if buggy_data[k] not in RacingBuggy.GAME_DATA[kk]:
                             buggy_data[k] = RacingBuggy.DEFAULTS[k]
                 try: # to cast the value to the expected type...
-                    self.__setattr__(k, creator(buggy_data[k])) 
+                    self.__setattr__(k, attr_type(buggy_data[k])) 
                 except ValueError: # missing value (or wrong format?)
                     default = RacingBuggy.DEFAULTS.get(k)
                     if default is None:
-                        self.__setattr__(k, creator()) # empty default
+                        self.__setattr__(k, attr_type()) # empty default
                     else:
-                      self.__setattr__(k, creator(default))
+                      self.__setattr__(k, attr_type(default))
             else:
                 pass # debug: f"[!] key {k} not in attrib types — ignoring ({i})"
         for k in RacingBuggy.ATTRIB_TYPES:

@@ -501,7 +501,24 @@ def bulk_register(data_format=None):
     err_msgs = []
     form = BulkRegisterForm(request.form)
     if form.validate_on_submit():
-        lines = form.userdata.data.splitlines()
+        delete_path = None
+        lines = []
+        if "csv_file" in request.files:
+            csv_file = request.files['csv_file']
+            if csv_file.filename:
+                csv_filename_with_path = os.path.join(
+                    current_app.config['UPLOAD_FOLDER'],
+                    secure_filename(csv_file.filename)
+                )
+                csv_file.save(csv_filename_with_path)
+                delete_path = csv_filename_with_path
+                try:
+                    with open(csv_filename_with_path) as uploaded_file:
+                      lines = uploaded_file.readlines()
+                except Exception as e:
+                    err_msgs.append(f"Error reading CSV file: {e}", "danger")
+        else:
+            lines = form.userdata.data.splitlines()
         if len(lines):
           lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
         reader = csv.DictReader(lines, delimiter=',')
@@ -562,6 +579,11 @@ def bulk_register(data_format=None):
                 err_msgs.append(f"{bad_username}{ex_str}")
             if not is_json:
                 flash(f"Bulk registered {qty_users} users", "warning")
+        if delete_path:
+            try:
+                os.unlink(delete_path)
+            except os.error as e:
+                err_msgs.append(f"Problem deleting uploaded file: {e}")
         if is_json:
           if err_msgs:
             payload = {

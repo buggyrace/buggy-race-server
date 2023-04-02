@@ -3,6 +3,9 @@
 // if both these elements are present on the page, do bulk-registration:
 const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
+
+let csv_upload_file_contents = "";
+const USER_REGISTER_CSV_FILE = "csv_file";
 const USER_REGISTER_CSV_EXAMPLE = "example-csv";
 const USER_REGISTER_CSV_EXAMPLE_TRIGGER = "example-csv-trigger";
 
@@ -138,31 +141,40 @@ function bulk_registration_by_ajax(bulk_register_form){
 
   reset_display();
   $reg_container.slideDown("slow");
-  let csv_raw_rows = bulk_register_form[USER_REGISTER_CSV_ID].value.split("\n");
+  let csv_raw_rows = [];
   let csv_rows_as_dicts = [];
   let header_row = [];
   let err_msg = null;
-  for (let i=0; i<csv_raw_rows.length; i++) {
-    let row = csv_raw_rows[i].split(/\s*,\s*/);
-    if (i === 0) {
-      if (row.length < 2 || row[0] != "username") {
-        err_msg = "Missing header row: the first line should be something like 'username,password,...";
-        break;
-      } else {
-        header_row = row;
-      }
-    } else {
-      if (row.length == header_row.length) {
-        let user_data = {};
-        for (let j=0; j<header_row.length; j++) {
-          user_data[header_row[j]] = row[j]
+  if (! authcode) {
+    err_msg = "You must supply the authorisation code";
+  } else {
+    if (csv_upload_file_contents){ // use uploaded file
+      csv_raw_rows = csv_upload_file_contents.split("\n");
+    } else { // use textarea's contents
+      csv_raw_rows = bulk_register_form[USER_REGISTER_CSV_ID].value.split("\n");
+    }
+    for (let i=0; i<csv_raw_rows.length; i++) {
+      let row = csv_raw_rows[i].split(/\s*,\s*/);
+      if (i === 0) {
+        if (row.length < 2 || row[0] != "username") {
+          err_msg = "Missing header row: the first line should be something like 'username,password,...";
+          break;
+        } else {
+          header_row = row;
         }
-        csv_rows_as_dicts.push(user_data);
+      } else {
+        if (row.length == header_row.length) {
+          let user_data = {};
+          for (let j=0; j<header_row.length; j++) {
+            user_data[header_row[j]] = row[j]
+          }
+          csv_rows_as_dicts.push(user_data);
+        }
       }
     }
-  }
-  if (! err_msg && csv_rows_as_dicts.length === 0) {
-    err_msg = "Cannot process CSV: found a header row, but no data"
+    if (! err_msg && csv_rows_as_dicts.length === 0) {
+      err_msg = "Cannot process CSV: found a header row, but no data"
+    }
   }
   if (err_msg) {
     update_status(err_msg, "alert-danger");
@@ -287,6 +299,14 @@ $(function() {
   // registration is frustratingly timing out (sigh: cookiecutter+SqlAlchemy)
   let bulk_register_form = document.getElementById(USER_REGISTER_FORM_ID);
   if (bulk_register_form && document.getElementById(USER_REGISTER_CSV_ID)){
+    let csv_file_upload = document.getElementById(USER_REGISTER_CSV_FILE);
+    csv_file_upload.addEventListener("change", function(){
+      let GetCsvFile = new FileReader();
+      GetCsvFile .onload=function(){
+        csv_upload_file_contents = GetCsvFile.result;
+      }
+      GetCsvFile.readAsText(this.files[0]);
+    });
     bulk_register_form.addEventListener('submit', function(e){
       e.preventDefault();
       bulk_register_form.classList.remove("d-none");

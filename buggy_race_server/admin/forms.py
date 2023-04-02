@@ -54,9 +54,13 @@ class ApiKeyForm(FlaskForm):
         return True
 
 class BulkRegisterForm(FlaskForm):
+    # requires either CSV field (copy & pasted) or uploaded CSV file
     """Bulk register form."""
     userdata = TextAreaField(
-        f"Userdata (CSV including header)", validators=[DataRequired()]
+        f"User data (CSV including header)", validators=[Optional()]
+    )
+    csv_file = FileField(
+       f"User data CSV file", validators=[Optional()]
     )
     auth_code = PasswordField("You must provide a valid authorisation code to bulk-register users",  [is_authorised])
 
@@ -67,8 +71,12 @@ class BulkRegisterForm(FlaskForm):
 
     def validate(self):
         """Validate the form."""
-        initial_validation = super(BulkRegisterForm, self).validate()
-        return initial_validation
+        is_valid = super(BulkRegisterForm, self).validate()
+        if is_valid:
+          if not (self.userdata.data or self.csv_file):
+              self.csv_file.errors.append("You must provide CSV data either by uploading a file, or as data")
+              is_valid = False
+        return is_valid
 
 class AnnouncementForm(FlaskForm):
     text = TextAreaField("Message text", validators=[DataRequired()])

@@ -77,7 +77,7 @@ class BuggySpecs:
       "vstripe": {"desc": "Vertical stripes"},
       "hstripe": {"desc": "Horizontal stripes"},
       "dstripe": {"desc": "Diagonal stripes"},
-      "checker": {"desc": "A chequered grid"},
+      "check":   {"desc": "A chequered grid"},
       "spot":    {"desc": "Spotted" }
     }
 

@@ -614,9 +614,9 @@ td .cell-title {
   -webkit-mask: url(/static/build/img/spot.svg) no-repeat 50% 50%;
   mask: url(/static/build/img/spot.svg) no-repeat 50% 50%;
 }
-.flag-checker {
-  -webkit-mask: url(/static/build/img/checker.svg) no-repeat 50% 50%;
-  mask: url(/static/build/img/checker.svg) no-repeat 50% 50%;
+.flag-check {
+  -webkit-mask: url(/static/build/img/check.svg) no-repeat 50% 50%;
+  mask: url(/static/build/img/check.svg) no-repeat 50% 50%;
 }
 .flag-vstripe {
   -webkit-mask: url(/static/build/img/vstripe.svg) no-repeat 50% 50%;

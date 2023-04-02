@@ -124,28 +124,36 @@
         {% else %}
           {% if current_user.is_github_connected() %}
             <div class="row">
-              <div class="col alert alert-warning">
-                This buggy racing account is connected to your
-                <strong>{{ current_user.github_username }}</strong> GitHub account.
+              <div class="col">
+                <div class="alert alert-warning">
+                  This buggy racing account is connected to your
+                  <strong>{{ current_user.github_username }}</strong> GitHub account.
+                </div>
               </div>
             </div>
             {% if current_user.has_course_repository() %}
               <div class="row">
                 <div class="col">
                   <p>
-                    You have forked the Racing Buggy Editor repo into your 
-                    GitHub account ({{ current_user.github_username }}).
+                    You have forked the Racing Buggy Editor repo into your
+                    GitHub account (<code>{{ current_user.github_username }}</code>).
                   </p>
                   <p class="btn-collection">
                     <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your GitHub repo</a>
                   </p>
                   {% if is_using_vs_workspace %}
-                    <p>
-                      Download your VScode workspace to load <!-- TODO ...and some instruction! -->
-                    </p>
-                    <p class="btn-collection">
-                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
-                    </p>
+                    <div class="alert alert-info my-3">
+                      <h2 class="alert-title">VS Code workspace</h2>
+                      <p>
+                        This workspace file connections your Visual Studio Code application to
+                        your account on {{ project_remote_server_name or "the remote server" }}.
+                        Download your VScode workspace file and load it into VS Code.
+                        <!-- TODO ...and some instruction! -->
+                      </p>
+                      <p class="btn-collection">
+                        <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
+                      </p>
+                    </div>
                   {% endif %}
                 </div>
               </div>

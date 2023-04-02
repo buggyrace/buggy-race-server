@@ -12,13 +12,15 @@
         <h2 class="col">Your racing server account</h2>
       </div>
       <div class="row">
-        <div class="col btn-collection">
-          <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary btn-jump">Change password</a>
-          <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-jump">Set&nbsp;API&nbsp;secret</a>
-          {% if is_using_texts %}
-            <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary btn-jump">List&nbsp;your&nbsp;task&nbsp;texts</a>
-          {% endif %}
-          <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary btn-jump">View&nbsp;buggy</a>
+        <div class="col">
+          <p class="btn-collection">
+            <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary btn-jump">Change password</a>
+            <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-jump">Set&nbsp;API&nbsp;secret</a>
+            {% if is_using_texts %}
+              <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary btn-jump">List&nbsp;your&nbsp;task&nbsp;texts</a>
+            {% endif %}
+            <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary btn-jump">View&nbsp;buggy</a>
+          </p>
         </div>
       </div>
       <div class="row">
@@ -126,8 +128,8 @@
             <div class="row">
               <div class="col">
                 <div class="alert alert-warning">
-                  This buggy racing account is connected to your
-                  <strong>{{ current_user.github_username }}</strong> GitHub account.
+                  This buggy racing account is connected to your GitHub account
+                  (<strong>{{ current_user.github_username }}</strong>).
                 </div>
               </div>
             </div>
@@ -136,7 +138,7 @@
                 <div class="col">
                   <p>
                     You have forked the Racing Buggy Editor repo into your
-                    GitHub account (<code>{{ current_user.github_username }}</code>).
+                    GitHub account.
                   </p>
                   <p class="btn-collection">
                     <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your GitHub repo</a>
@@ -159,24 +161,26 @@
               </div>
             {% else %}
               <div class="row">
-                <div class="col alert alert-primary">
-                  <p>
-                    You can now <em>fork</em> the Racing Buggy Editor repo.
-                    This will copy all the files you need into your own
-                    GitHub account
-                    (<code>{{ current_user.github_username }}</code>).
-                    It will also add the project tasks as <em>issues</em>
-                    to that repo.
-                  </p>
-                  <div class="my-3">
-                    <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                      <button type="submit" class="btn btn-primary btn-jump">Fork Racing Buggy Editor repo</button>
-                    </form>
+                <div class="col">
+                  <div class="alert alert-primary">
+                    <p>
+                      You can now <em>fork</em> the Racing Buggy Editor repo.
+                      This will copy all the files you need into your own
+                      GitHub account
+                      (<strong>{{ current_user.github_username }}</strong>).
+                      It will also add the project tasks as <em>issues</em>
+                      to that repo.
+                    </p>
+                    <div class="my-3">
+                      <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit" class="btn btn-primary btn-jump">Fork Racing Buggy Editor repo</button>
+                      </form>
+                    </div>
+                    <p>
+                      Forking may take a few moments, so be patient when you click the button.
+                    </p>
                   </div>
-                  <p>
-                    Forking may take a few moments, so be patient when you click the button.
-                  </p>
                 </div>
               </div>
             {% endif %}

@@ -1,14 +1,14 @@
 {
-	"folders": [],
-	"tasks": {
-		"version": "2.0.0",
-		"tasks": [
-		  {
+  "folders": [],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
         "label": "{{ project_name }}: download from GitHub",
         "type": "shell",
         "command": "echo \"Enter the password for your account ({{ remote_username }}) on {{ remote_server_name }}: \" && ssh {{ remote_username }}@{{ remote_server_address }} \"git clone {{ github_repo }} buggy-editor\""
       }
-		]
+    ]
   },
-	"remoteAuthority": "ssh-remote+{{ remote_username }}@{{ remote_server_address }}"
+  "remoteAuthority": "ssh-remote+{{ remote_username }}@{{ remote_server_address }}"
 }

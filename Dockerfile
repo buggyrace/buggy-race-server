@@ -21,15 +21,13 @@ COPY requirements requirements
 COPY . .
 
 # TODO: Fix permissions on webpack
-#RUN useradd -m buggy
-#RUN chown -R buggy:buggy /app
-#RUN chmod -R 777 /app
-#USER buggy
+RUN useradd -m buggy
+RUN chown -R buggy:buggy /app
+USER buggy
 
 
 ENV FLASK_APP="buggy_race_server/app.py"
-# TODO: Replace root with buggy user when above is fixed
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/home/buggy/.local/bin:${PATH}"
 RUN npm install
 
 
@@ -45,5 +43,6 @@ CMD [ "npm", "start" ]
 FROM base AS production
 RUN pip install --user -r requirements/prod.txt
 EXPOSE 443
+#CMD [ "gunicorn", "buggy_race_server.app:app", "-b", "0.0.0.0:5000", "-w", "1", "--timeout 60" ]
 CMD [ "npm", "start" ]
 

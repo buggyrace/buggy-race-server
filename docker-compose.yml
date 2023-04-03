@@ -6,9 +6,8 @@ x-build-args: &build_args
 
 x-default-volumes: &default_volumes
   volumes:
-    - ./:/app
+    - app_data:/app
     - node-modules:/app/node_modules
-    - ./dev.db:/tmp/dev.db
 
 services:
   db:
@@ -28,42 +27,19 @@ services:
       - ./db:/docker-entrypoint-initdb.d/
 
 
-  flask-dev:
-    build:
-      context: .
-      target: development
-      args:
-        <<: *build_args
-    image: "buggy_race_server-development"
-    ports:
-      - "443:5000"
-    env_file:
-      - .env
-    environment:
-      FLASK_ENV: development
-      LOG_LEVEL: debug
-      GUNICORN_WORKERS: 1
-    <<: *default_volumes
-    depends_on:
-      - db
-    links:
-      - db
-
-
-  flask-prod:
+  buggy-server:
     build:
       context: .
       target: production
       args:
         <<: *build_args
-    image: "buggy_race_server-production"
+    image: 'buggy_race_server-production'
     ports:
-      - "443:5000"
+      - '443:5000'
     env_file:
       - .env
     environment:
       FLASK_ENV: production
-      FLASK_DEBUG: 0
       LOG_LEVEL: info
       GUNICORN_WORKERS: 1
     <<: *default_volumes
@@ -74,7 +50,6 @@ services:
 
 volumes:
   node-modules:
-  static-build:
-  dev-db:
+  app_data:
   db_data:
     driver: local

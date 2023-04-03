@@ -7,6 +7,7 @@ import re
 from flask import current_app
 from flask_login import UserMixin
 from sqlalchemy import orm
+from socket import gaierror
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -249,12 +250,19 @@ class User(UserMixin, SurrogatePK, Model):
         """Check if the course repo exists for this user"""
         if not self._has_course_repository:
             # This only matches on repo name, not if it is a fork of the og repo.
-            repo = self.github.get(f"/repos/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}").json()
-            if not 'html_url' in repo:
+            try:
+                repo = self.github.get(f"/repos/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}").json()
+            except gaierror as gaie:
+                # name address failure: if network connection isn't possible or
+                # GitHub has... gone, then Just Say No
+                # This may be temporary, but we'll probably reconnect on next try?
+                print(f"[!] failed to connect to GitHub: {gaie}")
+                self._has_course_repository = False 
                 return False
-
+            else:
+                if not 'html_url' in repo:
+                    return False
             self._has_course_repository = True
-
         return True
 
     @property

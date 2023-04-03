@@ -293,9 +293,10 @@ def setup():
   else:
     # after initial setup (auth), user must be logged in
     if current_user.is_anonymous or not current_user.is_administrator:
-      admins = ", ".join([u.name for u in User.query.filter_by(access_level=User.ADMINISTRATOR)])
+      admins = ", ".join([u.username for u in User.query.filter_by(access_level=User.ADMINISTRATOR)])
       flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
-      logout_user()
+      if not current_user.is_anonymous:
+        logout_user()
       return redirect( url_for('public.login'))
     form = SetupSettingForm(request.form)
   if request.method == "POST":

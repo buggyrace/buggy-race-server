@@ -1368,7 +1368,7 @@ def show_system_info():
           shell=True, text=True, capture_output=True, check=True
         )
         git_status = result.stdout
-    except ValueError as e:
+    except (ValueError, subprocess.CalledProcessError) as e:
         git_status = "[Unavailable]"
     config_settings_to_display = [
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,

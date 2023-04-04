@@ -6,8 +6,8 @@ import sys
 sys.path.append(os.curdir)
 try:
   from pelicanconflive import *
-except:
-  print("* failed to read from pelicanconflive.py (maybe not published yet?) ")
+except Exception as e:
+  print(f"* failed to read from pelicanconflive.py (maybe not published yet?) {e}")
   from pelicanconf import *
 
 # If your site is available via HTTPS, make sure SITEURL begins with https://

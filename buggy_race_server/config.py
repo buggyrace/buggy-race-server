@@ -987,7 +987,7 @@ class ConfigSettings:
       """ Used in Pelican conf files, within dictionary """
       type = ConfigSettings.TYPES.get(name)
       str_value = str(value)
-      if type == ConfigTypes.PASSWORD:
+      if type in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
         str_value = None
       elif type is None or type in (
          ConfigTypes.DATETIME,

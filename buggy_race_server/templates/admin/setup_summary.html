@@ -257,6 +257,10 @@
           {% endif %}
         </p>
         <p class="btn-collection">
+          <a href="{{ url_for('admin.api_keys') }}" class="btn btn-outline-secondary btn-admin btn-jump">API keys</a>
+          <a href="{{url_for('admin.api_test')}}" class="btn btn-outline-secondary btn-admin btn-jump">Test API</a>
+        </p>
+        <p class="btn-collection">
           <a href="{{ url_for('admin.settings', group_name='server') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Server</span></a>
         </p>
       </div>

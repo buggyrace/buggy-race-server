@@ -259,10 +259,10 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
       ),
       ConfigGroupNames.TASKS.name: (
+        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
-        ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
       ),  
       ConfigGroupNames.TECH_NOTES.name: (
@@ -562,7 +562,7 @@ class ConfigSettings:
           """,
 
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:
-          """Choose `Yes` is you need Windows newlines at the end of each
+          """Choose `Yes` if you need Windows newlines at the end of each
           line of the task issues CSV file (you probably don't need to
           change this).""", # NB: possibly needed for GitHub API?
 

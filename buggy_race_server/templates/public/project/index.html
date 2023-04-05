@@ -158,13 +158,23 @@
           <p>
             Make a zip file that contains your webserver and submit that
             (it'll look a lot like your repo did when you cloned it: for
-            example, it will contain `app.py` on the top level).
+            example, it should contain <code>app.py</code> in the root level).
           </p>
-          <p>
-            Make or rename your zip file to be your username. For example,
-            when Jane Holloway did this project her username on this server
-            was <code>jane2</code>, so she submitted a file called
-            <code>jane2.zip</code>.
+          <p class="alert alert-info">
+            Make or rename your zip file to be your {{ example_zip_filename_type }}
+            with a <code>.zip</code> extension.
+            {% if current_user and not current_user.is_anonymous %}
+              That is, <strong>you</strong> should submit a file called
+              {% if is_zip_name_ext_username %}
+                  <code>{{ current_user.ext_username}}.zip</code>.
+                {% else %}
+                  <code>{{ current_user.username}}.zip</code>.
+                {% endif %}
+            {% else %}
+                For example, if your {{ example_zip_filename_type }} is 
+                <code>{{ example_zip_filename }}</code>, you should submit
+                a file called <code>{{ example_zip_filename }}.zip</code>.
+            {% endif %}
           </p>
           <p>
             Please do <strong>not</strong> include the <code>venv</code> or

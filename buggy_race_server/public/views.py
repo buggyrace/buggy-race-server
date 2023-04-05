@@ -258,13 +258,25 @@ def serve_project_page(page=None):
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
+    is_zip_info_displayed = current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
+    is_ext_username_available = current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]
+    is_zip_name_ext_username = current_app.config[ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name] and is_ext_username_available
+    if is_zip_name_ext_username:
+        example_zip_filename_type = current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name]
+        example_zip_filename = current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name]
+    else:
+        example_zip_filename_type = "username"
+        example_zip_filename=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name]
     return render_template(
         template,
+        example_zip_filename=example_zip_filename,
+        example_zip_filename_type=example_zip_filename_type,
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_zip_info_displayed=current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
+        is_zip_info_displayed=is_zip_info_displayed,
+        is_zip_name_ext_username=is_zip_name_ext_username,
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         report_type=report_type,
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],

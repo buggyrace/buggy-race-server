@@ -113,6 +113,7 @@ class ConfigSettingNames(Enum):
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
+    IS_ZIP_NAME_EXT_USERNAME = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -249,6 +250,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SLUG.name,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
+        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
@@ -324,6 +326,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -354,6 +357,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
+
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -414,6 +418,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -702,6 +707,14 @@ class ConfigSettings:
           server and subequently acccess it through VS Code. This
           is quite a specific setup: if you're not sure, you almost
           certainly do not want this.
+          """,
+
+        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name:
+          """Normally the suggested filename for submissions (the students'
+          zip file) is their username. Set this to `Yes` if you want them
+          to use their _external username_ instead. This setting is ignored
+          if `IS_PROJECT_ZIP_INFO_DISPLAYED` or `USERS_HAVE_EXT_USERNAME`
+          are `No`.
           """,
 
         ConfigSettingNames.PROJECT_CODE.name:

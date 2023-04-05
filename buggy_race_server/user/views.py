@@ -44,17 +44,15 @@ blueprint = Blueprint("user", __name__, url_prefix="/user", static_folder="../st
 
 DELAY_BEFORE_INJECTING_ISSUES = 30 # give repo generous time to get issue auth before starting
 
-def flash_explanation_if_unauth(function):
-  @wraps(function)
-  def wrapper():
-    if not current_user.is_authenticated:
-      if request.path == '/user/settings':
-        msg = "You must log in before you can access your settings"
-      else:
-        msg = "You must log in before you can upload data for your buggy"
-      flash(msg, "warning")
-    return function()
-  return wrapper
+def flash_explanation_if_unauth(msg):
+    """Improve a 403 by explaining what it is you could do if you were logged in"""
+    def decorator(function):
+        @wraps(function)
+        def decorated_function(*args, **kwargs):
+            if msg: flash(msg, "warning")
+            return function(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @blueprint.route("/new")
 def register_new_user():
@@ -67,7 +65,7 @@ def register_new_user():
     return redirect(url_for('admin.new_user'))
 
 @blueprint.route("/upload", strict_slashes=False)
-@flash_explanation_if_unauth
+@flash_explanation_if_unauth("You must log in before you can upload data for your buggy ")
 @login_required
 @active_user_required
 @flash_suggest_if_not_yet_githubbed
@@ -76,7 +74,7 @@ def submit_buggy_data():
   return render_template("user/submit_buggy_data.html", form = BuggyJsonForm(request.form))
 
 @blueprint.route("/settings", strict_slashes=False)
-@flash_explanation_if_unauth
+@flash_explanation_if_unauth("You must log in before you can access your settings")
 @login_required
 @active_user_required
 def settings():
@@ -222,7 +220,7 @@ def change_password():
     )
   
 @blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)
-@flash_explanation_if_unauth
+@flash_explanation_if_unauth("You must log in before you can access your settings")
 @login_required
 @active_user_required
 def set_api_secret():
@@ -392,6 +390,7 @@ def task_text(task_fullname):
     )
 
 @blueprint.route("/task-texts", methods=['GET'], strict_slashes=False)
+@flash_explanation_if_unauth("You must log in before you can access or edit your texts")
 @login_required
 @active_user_required
 def list_task_texts():

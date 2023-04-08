@@ -54,6 +54,7 @@ def home():
         "public/home.html",
         social_site_links=SocialSetting.get_socials_from_config(current_app.config),
         local_announcement_type=AnnouncementType.TAGLINE.value,
+        is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
     )
 
 @blueprint.route("/logout", strict_slashes=False)

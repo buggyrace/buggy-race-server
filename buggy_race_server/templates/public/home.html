@@ -57,8 +57,12 @@
         <h2><span class="icon-github"></span> Source code</h2>
         <p>
           The basic <strong>buggy editor</strong> is a Python
-          Flask webserver (we'll automatically fork this into
-          your GitHub account).
+          Flask webserver.
+          {% if is_forking_github %}
+            We'll automatically fork this into your GitHub account.
+          {% else %}
+            We'll tell you how to make your own copy to work on.
+          {% endif %}
         </p>
         <p><a class="btn btn-outline-secondary btn-jump" href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">See the code</a></p>
       </div>

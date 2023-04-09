@@ -224,6 +224,7 @@ def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
     line_terminator = "\r\n" if is_line_terminator_crlf else "\n"
     issues_str = CsvString()
     issue_writer = csv.writer(issues_str, lineterminator=line_terminator)
+    any_newline = re.compile(r"\r?\n")
     for task in tasks:
       issue_writer.writerow(
          # row is: * task name (with title)
@@ -231,8 +232,8 @@ def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
         [
           f"{task.fullname} {task.title}",
           "\n\n".join([ # markdown: blank line between paras
-            task.problem_text,
-            task.solution_text,
+            re.sub(any_newline, "\\n", task.problem_text),
+            re.sub(any_newline, "\\n", task.solution_text),
             f"[{task.fullname}]({task.get_url(current_app.config)})"
           ]).replace("\n", "\\n")
         ]

@@ -55,6 +55,7 @@ from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
+    get_flag_color_css_defs,
     get_pretty_approx_duration,
     get_tasks_as_issues_csv,
     join_to_project_root,
@@ -829,10 +830,13 @@ def download_buggies():
 @login_required
 @staff_only
 def list_buggies(data_format=None):
-    """Admin buggly list."""
+    """Admin buggy list."""
+    buggies=Buggy.get_all_buggies_with_usernames()
+    flag_color_css_defs = get_flag_color_css_defs(buggies)
     return render_template(
         "admin/buggies.html",
-        buggies=Buggy.get_all_buggies_with_usernames()
+        buggies=buggies,
+        flag_color_css_defs=flag_color_css_defs
     )
 
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])

@@ -38,8 +38,7 @@
             <th>cost</th>
             <th>mass</th>
             <th>id²</th>
-            <th colspan="2">flag</th>
-            <th>pattern</th>
+            <th>flag</th>
             <th>qty_wheels</th>
             <th>primary</th>
             <th>auxilliary</th>
@@ -57,14 +56,15 @@
         <tbody>
           {% for b in buggies %}
           <tr>
-            <td><a class="btn btn-sm btn-outline-secondary btn-jump" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy</a></td>
+            <td><a class="btn btn-sm btn-outline-secondary btn-jump btn-white" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy</a></td>
             <td>  {{ b.pretty_username }} </td>
             <td>  {{ b.total_cost }} </td>
             <td>  {{ b.mass }} </td>
             <td>  {{ b.buggy_id }} </td>
-            <td style="background:{{ b.flag_color }}">&nbsp;</td>
-            <td style="background:{{ b.flag_color_secondary }}">&nbsp;</td>
-            <td>  {{ b.flag_pattern }} </td>
+            <td>
+              <div class="flag {{ flag_color_css_defs[b.flag_color_secondary][0] }}"
+                ><div class="flag-{{ b.flag_pattern }} {{ flag_color_css_defs[b.flag_color][0] }}">&nbsp;</div></div>
+            </td>
             <td>  {{ b.qty_wheels }} </td>
             <td>  {{ b.power_units }}&times;{{ b.power_type }}</td>
             <td>  {{ b.aux_power_units }}&times;{{ b.aux_power_type }} </td>

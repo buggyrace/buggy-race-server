@@ -325,24 +325,37 @@ def publish_tech_notes(app=current_app):
         app=app
       )
     )
-
-    subprocess.run(
-      [
-        "pelican",
-        "-s", publish_conf_file,
-        "-o", output_path,
-        content_path
-      ],
-      check=True # throw exception if this goes wrong
-    )
-    set_and_save_config_setting(
-      app,
-      name=ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
-      value=datetime.now().strftime("%Y-%m-%d %H:%M")
-    )
+    command_result = None
+    error_msg = None
+    try:
+        command_result = subprocess.run(
+          [
+            "pelican",
+            "-s", publish_conf_file,
+            "-o", output_path,
+            content_path
+          ],
+          check=True, capture_output=True # throw exception if this goes wrong
+        )
+    except subprocess.CalledProcessError as e:
+        error_msg = "Tech notes publication failed (using Pelican): see message in log"
+    else:
+        set_and_save_config_setting(
+          app,
+          name=ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
+          value=datetime.now().strftime("%Y-%m-%d %H:%M")
+        )
     # there's a keepfile (for git) in the technotes output dir
     # Pelican has probably deleted it, so replace it
     if has_keepfile: open(keepfile, 'a').close()
+    if error_msg:
+        raise SystemError(error_msg)
+    if command_result:
+        try:
+            msg = command_result.stdout.decode('utf-8')
+        except Exception as e:
+            msg = "(nothing)"
+        return f"Pelican: {msg}"
 
 
 def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):

@@ -1037,12 +1037,13 @@ def tech_notes_admin():
   if request.method == "POST":
     if form.validate_on_submit():
       try:
-        publish_tech_notes(current_app)
+        output_msg = publish_tech_notes(current_app)
       except Exception as e:
-        error_msg = f"Problem publishing tech notes: {e}"
+        error_msg = f"Error: {e}"
         flash(error_msg, "danger")
       else:
-        flash("Re-generated tech notes OK", "success")
+        flash(output_msg, "info")
+        flash("Re-generated tech notes (static web pages) OK", "success")
     else:
       flash_errors(form)
   return render_template(

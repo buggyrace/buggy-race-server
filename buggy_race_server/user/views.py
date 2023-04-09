@@ -49,7 +49,8 @@ def flash_explanation_if_unauth(msg):
     def decorator(function):
         @wraps(function)
         def decorated_function(*args, **kwargs):
-            if msg: flash(msg, "warning")
+            if not (current_user.is_authenticated and current_user.is_active):
+                if msg: flash(msg, "warning")
             return function(*args, **kwargs)
         return decorated_function
     return decorator

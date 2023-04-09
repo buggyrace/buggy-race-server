@@ -128,7 +128,9 @@ def setup_course_repository():
         )
     )
 
-    def create_issues(user):
+    def inject_issues_into_repo(user, repo_name, issues_parser):
+        # passing arguments to avoid dependency on app context (this runs in another thread)
+        #
         # CONTEXT ONY: ---Issues appear in most recent order and we want the first task
         # to appear as the most recent issue!---
         #
@@ -136,7 +138,7 @@ def setup_course_repository():
         # don't get delivered :(
         for i, issue in enumerate(issues_parser.parse_issues()):
             response = user.github.post(
-                f"/repos/{user.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}/issues",
+                f"/repos/{user.github_username}/{repo_name}/issues",
                 {},
                 {
                     'title': issue['title'],
@@ -151,10 +153,16 @@ def setup_course_repository():
 
     # delay here in case the has_issues patch is taking a while to authenticate...
     # since the repo is always being made but the first 1d6 issues aren't making it
+    #
+    # Note: inject_issues_into_repo must will run _without_ an app context
     threading.Timer(
         DELAY_BEFORE_INJECTING_ISSUES,
-        create_issues,
-        args=[current_user._get_current_object()]
+        inject_issues_into_repo,
+        args=[
+          current_user._get_current_object(),
+          current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+          issues_parser,
+        ]
     ).start()
 
     return redirect(url_for('user.settings'))

@@ -72,7 +72,7 @@
           {% endif %}
           <th class="u-login-at">last login</th>
           <th class="u-github">GitHub (&rarr; repo)</th>
-          <th colspan="2" class="u-uploaded">JSON chars</th>
+          <th colspan="2" class="u-uploaded">JSON uploaded</th>
         </tr>
       </thead>
       <tbody>
@@ -154,7 +154,8 @@
               <td class="u-github">  
                 {% if u.github_username %}
                   <a href="https://github.com/{{ u.github_username }}" title="GitHub account">{{u.github_username}}</a>
-                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo">&rarr;</a>
+                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
                 {% endif %}
               </td>
               <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 

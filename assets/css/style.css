@@ -701,3 +701,7 @@ body.task-list-page main::before{
   top:0;
   margin:1em;
 }
+
+code {
+  color: #661111;
+}

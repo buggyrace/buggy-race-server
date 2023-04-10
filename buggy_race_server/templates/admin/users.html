@@ -137,7 +137,7 @@
                   <td class="u-email">  {{ u.email if u.email is not none }} </td>
                 {% endif %}
                 {% if config['USERS_HAVE_EXT_USERNAME'] %}
-                  <td class="u-org-username"> {{ u.ext_username if u.ext_username is not none }} </td>
+                  <td class="u-org-username">{% if u.ext_username is not none %}<code>{{ u.ext_username }}</code>{% endif %}</td>
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">
@@ -153,7 +153,7 @@
               </td>
               <td class="u-github">  
                 {% if u.github_username %}
-                  <a href="https://github.com/{{ u.github_username }}" title="GitHub account">{{u.github_username}}</a>
+                  <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
                   <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
                   class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
                 {% endif %}

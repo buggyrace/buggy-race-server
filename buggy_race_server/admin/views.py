@@ -1415,3 +1415,25 @@ def show_system_info():
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
     )
+
+@blueprint.route("/buggy-editor", strict_slashes=False, methods=["GET"])
+@login_required
+@admin_only
+def show_buggy_editor_info():
+    project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+    buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    return render_template(
+      "admin/buggy_editor.html",
+      buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      buggy_editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+      buggy_editor_repo_owner=buggy_editor_repo_owner,
+      buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+      editor_title=f"{project_code} Racing Buggy editor".strip(),
+      institution_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
+      institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+      is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
+      is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+      project_code=project_code,
+      task_0_get_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
+      task_3_env_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
+   )

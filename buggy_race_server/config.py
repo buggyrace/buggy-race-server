@@ -137,6 +137,8 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
     TASK_NAME_FOR_API = auto()
+    TASK_NAME_FOR_ENV_VARS = auto()
+    TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
@@ -261,6 +263,8 @@ class ConfigSettings:
       ConfigGroupNames.TASKS.name: (
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name,
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name,
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
@@ -349,6 +353,8 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
@@ -441,6 +447,8 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
@@ -833,7 +841,7 @@ class ConfigSettings:
           """Full URL to external site/resource""",
 
         ConfigSettingNames.TASK_NAME_FOR_API.name:
-          """The name of the task (or tasks) that require use of the
+          """The name of the task that require use of the
           upload API. If set, this is shown as a helpful link in the
           explanotary text on the student's API settings page.
           If you set this to be empty, no link is shown. You can provide
@@ -841,9 +849,20 @@ class ConfigSettings:
           haven't customised the task list, you don't need to change
           this.""",
 
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name:
+          """The name of the task for setting environment variables. If
+          you haven't customised the task list, you don't need to change
+          this.
+          """,
+
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name:
+          """The name of the task for getting the source code. If you
+          haven't customised the task list, you don't need to change
+          this.""",
+
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name:
-          """The name of the single task that requires use of the
-          validation. If set, this is shown as a helpful link in the
+          """The name of the task that requires use of validation.
+         If set, this is shown as a helpful link in the
           explanotary text on the reports page. If you haven't customised
           the task list, you don't need to change this.""",
 

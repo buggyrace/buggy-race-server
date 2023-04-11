@@ -268,7 +268,10 @@
   {% if current_user.is_administrator %}
     <div class="row">
       <div class="col mt-5">
-          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">System info</a>
+          <p class="btn-collection">
+            <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System info</a>
+            <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
+          </p>
         </p>
       </div>
     </div>

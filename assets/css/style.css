@@ -352,16 +352,21 @@ footer .footer-nav {
 }
 .announcement-special .announcement-inner-box {
   background-color:#f0f000;
+  color: #000000;
 }
 .announcement-info .announcement-inner-box {
   background-color: #d1ecf1;
+  color: #212529;
 }
 .announcement-warning .announcement-inner-box {
   background-color: #fff3cd;
+  color: #212529;
 }
 .announcement-danger .announcement-inner-box {
   background-color:#f8d7da;
+  color: #212529;
 }
+
 .announcement-special, .buggy-stripes {
     background: repeating-linear-gradient(
       -45deg,

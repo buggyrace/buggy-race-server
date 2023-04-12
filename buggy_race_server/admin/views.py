@@ -226,13 +226,17 @@ def setup_summary():
             qty_announcements_tagline += 1
         else:
             qty_announcements_global += 1
+    buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
     return render_template(
        "admin/setup_summary.html",
        api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]),
+       buggy_editor_repo_owner=buggy_editor_repo_owner,
+       buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
        institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
        institution_home_url=institution_home_url,
        institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
        is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
+       is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
        is_report=bool(report_type),
        is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
        is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],

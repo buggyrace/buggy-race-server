@@ -175,7 +175,20 @@
     </div>
     <div class="col-md-6">
       <div class="alert alert-warning">
-        <h2 class="alert-title">GitHub</h2>
+        <h2 class="alert-title">GitHub &amp; editor repo</h2>
+        <p>
+          <code><a href="{{ buggy_editor_github_url }}">{{ buggy_editor_github_url }}</a></code>
+          <br>
+          {% if is_default_repo_owner  %}
+             The editor repo is owned by <code>{{ buggy_editor_repo_owner }}</code>
+             (it's better to fork this and customise it).
+          {% else %}
+             The editor repo is a fork owned by <code>{{ buggy_editor_repo_owner }}</code>.
+          {% endif %}
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
+        </p>
         <p>
           {% if not is_student_using_github_repo %}
             The students do not need their <strong>own GitHub repos</strong>

@@ -161,19 +161,16 @@
             example, it should contain <code>app.py</code> in the root level).
           </p>
           <p class="alert alert-info">
-            Make or rename your zip file to be your {{ example_zip_filename_type }}
+            Make or rename your zip file to be your
+            <strong>{{ zip_filename_type_name }}</strong>
             with a <code>.zip</code> extension.
-            {% if current_user and not current_user.is_anonymous %}
-              That is, <strong>you</strong> should submit a file called
-              {% if is_zip_name_ext_username %}
-                  <code>{{ current_user.ext_username}}.zip</code>.
-                {% else %}
-                  <code>{{ current_user.username}}.zip</code>.
-                {% endif %}
+            {% if is_personalsed_example %}
+              That is, <em>you</em> should submit a file called
+              <code>{{ zip_filename_example }}.zip</code>
             {% else %}
-                For example, if your {{ example_zip_filename_type }} is 
-                <code>{{ example_zip_filename }}</code>, you should submit
-                a file called <code>{{ example_zip_filename }}.zip</code>.
+              For example, if your {{ zip_filename_type_name }} is 
+              <code>{{ zip_filename_example }}</code>, you should submit
+              a file called <code>{{ zip_filename_example }}.zip</code>.
             {% endif %}
           </p>
           <p>

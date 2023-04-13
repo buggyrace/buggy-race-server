@@ -1,0 +1,11 @@
+<select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control">
+  <option value="username" {% if settings[name] not in ['ext_id', 'ext_username'] %} selected="selected" {% endif %}>
+    Race server username
+  </option>
+  <option value="ext_id" {% if settings[name] == "ext_id" %} selected="selected" {% endif %}>
+    {{ config['EXT_ID_NAME'] or 'External ID'}}
+  </option>
+  <option value="ext_username" {% if settings[name] == "ext_username" %} selected="selected" {% endif %}>
+    {{ config['EXT_USERNAME_NAME'] or 'External username'}}
+  </option>
+</select>

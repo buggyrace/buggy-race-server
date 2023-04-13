@@ -87,6 +87,7 @@ class ConfigSettingNames(Enum):
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EXT_ID_NAME = auto()
+    EXT_ID_EXAMPLE = auto()
     EXT_USERNAME_EXAMPLE = auto()
     EXT_USERNAME_NAME = auto()
     GITHUB_CLIENT_ID = auto()
@@ -114,7 +115,6 @@ class ConfigSettingNames(Enum):
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
-    IS_ZIP_NAME_EXT_USERNAME = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
@@ -124,6 +124,7 @@ class ConfigSettingNames(Enum):
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
     PROJECT_WORKFLOW_URL = auto()
+    PROJECT_ZIP_NAME_TYPE = auto()
     SECRET_KEY = auto()
     SOCIAL_0_NAME = auto()
     SOCIAL_0_TEXT = auto()
@@ -218,6 +219,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_NAME.name,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_ID_NAME.name,
+        ConfigSettingNames.EXT_ID_EXAMPLE.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
       ),
       ConfigGroupNames.RACES.name: (
@@ -254,9 +256,9 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
         ConfigSettingNames.PROJECT_CODE.name,
         ConfigSettingNames.PROJECT_SLUG.name,
-        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
-        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name,
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
+        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
@@ -306,7 +308,8 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
-        ConfigSettingNames.EXT_ID_NAME.name: "12345",
+        ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
+        ConfigSettingNames.EXT_ID_NAME.name: "External ID",
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
         ConfigSettingNames.EXT_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
@@ -335,7 +338,6 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
-        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name: 0,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -345,6 +347,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
+        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: "username",
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
         ConfigSettingNames.SOCIAL_0_NAME.name: "",
         ConfigSettingNames.SOCIAL_0_TEXT.name: "",
@@ -403,6 +406,7 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
@@ -431,7 +435,6 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -441,6 +444,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
@@ -524,11 +528,15 @@ class ConfigSettings:
           run the race server without using leagues, so if you're not sure,
           leave this blank.""",
 
+        ConfigSettingNames.EXT_ID_EXAMPLE.name:
+          """If users have an external ID, provide an example of what it
+          might look like. This setting is ignored if `USERS_HAVE_EXT_ID` is
+          `No`.""",
+
         ConfigSettingNames.EXT_ID_NAME.name:
           """If user have an external ID, what is it called? For example:
           "Student number", "Moodle ID", "Blackboard ID", "Canvas ID".
-          This setting is ignored if `USERS_HAVE_EXT_ID` is `No`.
-          """,
+          This setting is ignored if `USERS_HAVE_EXT_ID` is `No`.""",
 
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
           """If users have an external username, provide an example
@@ -731,14 +739,6 @@ class ConfigSettings:
           certainly do not want this.
           """,
 
-        ConfigSettingNames.IS_ZIP_NAME_EXT_USERNAME.name:
-          """Normally the suggested filename for submissions (the students'
-          zip file) is their username. Set this to `Yes` if you want them
-          to use their _external username_ instead. This setting is ignored
-          if `IS_PROJECT_ZIP_INFO_DISPLAYED` or `USERS_HAVE_EXT_USERNAME`
-          are `No`.
-          """,
-
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it
           (for example, when we ran it at Royal Holloway, it was CS1999).
@@ -785,7 +785,7 @@ class ConfigSettings:
           of an additional webpage in the student's buggy editor
           webserver. If you choose `No report`, all mentions will
           be removed: see also the `IS_STORING_STUDENT_TASK_TEXTS`
-          setting. """,
+          setting in the **Tasks** group of settings. """,
 
         ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears — as a prefix — in any
@@ -821,6 +821,14 @@ class ConfigSettings:
           one you've customised (and hosted elsewhere). If you leave this
           setting blank, the default page will be shown. In either case, this
           setting is ignored if `IS_SHOWING_PROJECT_WORKFLOW` is `No`.""",
+
+        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name:
+          """Normally the suggested filename for submissions (the students'
+          zip file) is their username + `.zip`. But if you prefer your
+          students to use an external username or ID, you can suggest it here.
+          If you pick a type that users don't have, it will fall back to
+          `username` (because all users have one). This setting is ignored if
+          `IS_PROJECT_ZIP_INFO_DISPLAYED` is `No`.""",
 
         ConfigSettingNames.SECRET_KEY.name:
           """A secret used by the webserver in cookies, etc. This should be unique

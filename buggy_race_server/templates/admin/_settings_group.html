@@ -17,6 +17,8 @@
               <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
               {%if name == "PROJECT_REPORT_TYPE" %}
                 {%include "admin/_report_type_input.html" %}
+              {% elif name == "PROJECT_ZIP_NAME_TYPE" %}
+                {% include "admin/_zip_name_type_input.html" %}
               {% elif type_of_settings[name] == "bool" %}
                 <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control">
                   <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>

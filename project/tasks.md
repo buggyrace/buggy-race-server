@@ -753,6 +753,30 @@ with it) as you go along. But you should write some _automated_ tests.
   instructions in the README which describe how to run them.
 
 
+# 4-API
+
+## Use the server API for submitting the buggy data
+
+### Problem
+
+Manually copying the JSON data from the editor to paste into the race server is
+clunky — use the buggy submission API instead.
+
+### Solution
+
+Ask for the API specification and implement an **upload to server** feature for
+a selected buggy.
+
+### Hints
+
+* The API isn't published: we'll provide it when you need it.
+
+* You'll need some way of storing information about the server (including
+  authorisation criteria) — maybe where/how to set config is related
+  to the way you managed the email settings needed for
+  [resetting passwords (5-RESET)](#task-5-reset)?
+
+
 # 4-USERS
 
 ## Add users (and sessions) so you know who is editing a buggy
@@ -1054,29 +1078,6 @@ capability for manipulating buggies and users.
 
 * What happens if you delete the only remaining admin user? What's a design
   solution to this?
-
-# 5-API
-
-## Use the server API for submitting the buggy data
-
-### Problem
-
-Manually copying the JSON data from the editor to paste into the race server is
-clunky — use the buggy submission API instead.
-
-### Solution
-
-Ask for the API specification and implement an **upload to server** feature for
-a selected buggy.
-
-### Hints
-
-* The API isn't published: we'll provide it when you need it.
-
-* You'll need some way of storing information about the server (including
-  authorisation criteria) — maybe where/how to set config is related
-  to the way you managed the email settings needed for
-  [resetting passwords (5-RESET)](#task-5-reset)?
 
 # 6-FREE
 

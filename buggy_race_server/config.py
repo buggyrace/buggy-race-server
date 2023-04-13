@@ -363,7 +363,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name: "",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
-        ConfigSettingNames.TASK_NAME_FOR_API.name: "5-API",
+        ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",

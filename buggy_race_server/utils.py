@@ -245,9 +245,6 @@ def publish_tech_notes(app=current_app):
         Creates a pelican config file with "live" config settings (as
         JINJA_GLOBALS) that are passed into the build.
         Throws exceptions if anything goes wrong.
-        Note: this executes chdir to the tech_notes dir before executing
-        the pelican command (couldn't get it to work as an internal pelican
-        call).
     """
     JINJA_GLOBAL_MATCH_RE = re.compile(
       # "SOME_SETTING": "some value"
@@ -318,12 +315,10 @@ def publish_tech_notes(app=current_app):
     keepfile = os.path.join(output_path, ".keep")
     has_keepfile = os.path.exists(keepfile)
 
-    # cd to the pelican dir so that the imports work
-    os.chdir(
-      join_to_project_root(
+    # cwd must be the pelican dir so that the imports work
+    pelican_dir = join_to_project_root(
         app.config[ConfigSettingNames._TECH_NOTES_PATH.name],
         app=app
-      )
     )
     command_result = None
     error_msg = None
@@ -335,7 +330,9 @@ def publish_tech_notes(app=current_app):
             "-o", output_path,
             content_path
           ],
-          check=True, capture_output=True # throw exception if this goes wrong
+          cwd=pelican_dir,
+          check=True,
+          capture_output=True # throw exception if this goes wrong
         )
     except subprocess.CalledProcessError as e:
         error_msg = "Tech notes publication failed (using Pelican): see message in log"

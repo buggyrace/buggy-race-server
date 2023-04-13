@@ -97,6 +97,18 @@
               </td>
             </tr>
           {% endif %}
+          {% if config['USERS_HAVE_EXT_ID'] %}
+            <tr>
+              <td>
+                {{ ext_id_name | title }}
+              </td>
+              <td>
+                {% if user.ext_id is not none %}
+                  <code>{{ user.ext_id }}</code>
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
           {% if config['IS_STUDENT_USING_GITHUB_REPO'] %}
             <tr>
               <td>

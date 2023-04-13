@@ -86,7 +86,9 @@ def settings():
         has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
         has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
         has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         form=form,
         is_secure=True, # TODO investigate when this can be false

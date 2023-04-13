@@ -86,6 +86,7 @@ class ConfigSettingNames(Enum):
     API_SECRET_TIME_TO_LIVE = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
+    EXT_ID_NAME = auto()
     EXT_USERNAME_EXAMPLE = auto()
     EXT_USERNAME_NAME = auto()
     GITHUB_CLIENT_ID = auto()
@@ -143,6 +144,7 @@ class ConfigSettingNames(Enum):
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
+    USERS_HAVE_EXT_ID = auto()
     USERS_HAVE_EXT_USERNAME = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
@@ -211,9 +213,11 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
+        ConfigSettingNames.USERS_HAVE_EXT_ID.name,
         ConfigSettingNames.USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_USERNAME_NAME.name,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
+        ConfigSettingNames.EXT_ID_NAME.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
       ),
       ConfigGroupNames.RACES.name: (
@@ -302,6 +306,7 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EXT_ID_NAME.name: "12345",
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
         ConfigSettingNames.EXT_USERNAME_NAME.name: "Ext. username",
         ConfigSettingNames.GITHUB_CLIENT_ID.name: "",
@@ -360,6 +365,7 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
+        ConfigSettingNames.USERS_HAVE_EXT_ID.name: 0,
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
@@ -397,6 +403,7 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EXT_ID_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigTypes.STRING,
@@ -454,6 +461,7 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_EXT_ID.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
@@ -515,6 +523,12 @@ class ConfigSettings:
           can nominate the league that new races are in here. It's common to
           run the race server without using leagues, so if you're not sure,
           leave this blank.""",
+
+        ConfigSettingNames.EXT_ID_NAME.name:
+          """If user have an external ID, what is it called? For example:
+          "Student number", "Moodle ID", "Blackboard ID", "Canvas ID".
+          This setting is ignored if `USERS_HAVE_EXT_ID` is `No`.
+          """,
 
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
           """If users have an external username, provide an example
@@ -879,6 +893,14 @@ class ConfigSettings:
           accessing other college systems. You can set this to be blank.
           """,
 
+        ConfigSettingNames.USERS_HAVE_EXT_ID.name:
+          """Do users have an ID from an external system? This might be
+          useful if you want to match students with their existing ID on
+          another system like Moodle, Blackboard or Canvas. You don't need
+          this unless it's a useful way of identifying a student. If you do
+          set this to `Yes`, you should also set `EXT_ID_NAME` to describe
+          what it is.""",
+
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name:
           """Do users have an external username or account that's specific to
           your organsiation or institution? You might not need this, or you
@@ -1057,6 +1079,9 @@ class ConfigSettings:
         return {
             "email": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_EMAIL.name)
+            ),
+            "ext_id": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_EXT_ID.name)
             ),
             "ext_username": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name)

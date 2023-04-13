@@ -140,6 +140,26 @@
           </div>
         {% endif %}
 
+        {% if config['USERS_HAVE_EXT_ID'] %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              <label for="ext_id">{{ ext_id_name }}</label>
+            </div>
+            <div class="col-sm-4">
+              {{form.ext_id(class_="form-control mr-sm-1")}}
+            </div>
+            <div class="col-sm-5">
+              {% if external_id_name %}
+                {{ external_id_name }}
+              {% else %}
+                If users have an external ID (for example, if you're
+                using a system like Moodle, Canvas or Blackboard)
+                add it here.
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{form.is_student.label}}

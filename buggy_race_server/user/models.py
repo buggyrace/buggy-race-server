@@ -31,6 +31,7 @@ EXAMPLE_USER_DATA = {
         "first_name": "Ada",
         "last_name": "Lovelace",
         "ext_username": "al003",
+        "ext_id": "123003",
         "email": "a.lovelace@example.com"
     },
     "chaz":{
@@ -39,6 +40,7 @@ EXAMPLE_USER_DATA = {
         "first_name": "Charles",
         "last_name": "Babbage",
         "ext_username": "cb002",
+        "ext_id": "123013",
         "email": "c.babbage@example.com"
     },
 }
@@ -77,6 +79,7 @@ class User(UserMixin, SurrogatePK, Model):
     __tablename__ = "users"
     username = Column(db.String(80), unique=True, nullable=False)
     ext_username = Column(db.String(80), unique=True, nullable=True)
+    ext_id = Column(db.String(80), unique=True, nullable=True)
     email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
@@ -138,6 +141,7 @@ class User(UserMixin, SurrogatePK, Model):
         return {
             'username': self.username,
             'ext_username': self.ext_username,
+            'ext_id': self.ext_id,
             'email': self.email,
             'password': self.password,
             'created_at': self.created_at,
@@ -160,6 +164,7 @@ class User(UserMixin, SurrogatePK, Model):
         fields = {
             'username': self.username,
             'ext_username': self.ext_username,
+            'ext_id': self.ext_id,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,

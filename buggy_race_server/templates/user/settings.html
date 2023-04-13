@@ -76,7 +76,11 @@
                   {% endif %}
                 </td>
                 <td>
-                  {{ user.full_name }}
+                  {% if user.full_name is none %}
+                    <em class="empty-setting">none</em>
+                  {% else %}
+                    {{ user.full_name }}
+                  {% endif %}
                 </td>
               </tr>
               {% endif %}
@@ -84,7 +88,11 @@
                 <tr>
                   <td>Email</td>
                   <td>
-                    {{ user.email }}
+                    {% if user.email is none %}
+                      <em class="empty-setting">none</em>
+                    {% else %}
+                      {{ user.email }}
+                    {% endif %}
                   </td>
                 </tr>
               {% endif %}
@@ -92,7 +100,23 @@
                 <tr>
                   <td>{{ ext_username_name }}</td>
                   <td>
-                    <code>{{ user.ext_username }}</code>
+                    {% if user.ext_username is none %}
+                      <em class="empty-setting">none</em>
+                    {% else %}
+                      {{ user.ext_username }}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endif %}
+              {% if config['USERS_HAVE_EXT_ID'] %}
+                <tr>
+                  <td>{{ ext_id_name }}</td>
+                  <td>
+                    {% if user.ext_id is none %}
+                      <em class="empty-setting">none</em>
+                    {% else %}
+                      {{ user.ext_id }}
+                    {% endif %}
                   </td>
                 </tr>
               {% endif %}

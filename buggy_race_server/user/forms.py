@@ -22,6 +22,7 @@ class UserForm(FlaskForm):
     # so they won't be submitted
 
     ext_username = StringField(f"External Username")
+    ext_id = StringField("External ID")
     email = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")

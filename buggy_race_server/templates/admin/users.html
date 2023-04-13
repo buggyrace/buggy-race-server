@@ -37,6 +37,9 @@
         {% if config['USERS_HAVE_EXT_USERNAME'] %}
           <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ ext_username_name }}</button>
         {% endif %}
+        {% if config['USERS_HAVE_EXT_ID'] %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-ext-id">{{ ext_id_name }}</button>
+        {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Logged&nbsp;in?</button>
@@ -67,6 +70,9 @@
             {% if config['USERS_HAVE_EXT_USERNAME'] %}
               <th  class="u-org-username">{{ ext_username_name | title }}</th>
             {% endif %}
+            {% if config['USERS_HAVE_EXT_ID'] %}
+              <th  class="u-ext-id">{{ ext_id_name | title }}</th>
+            {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>
           {% endif %}
@@ -95,6 +101,9 @@
               {% endif %}
               {% if config['USERS_HAVE_EXT_USERNAME'] %}
                 <td class="u-org-username"></td>
+              {% endif %}
+              {% if config['USERS_HAVE_EXT_ID'] %}
+                <td class="u-ext-id"></td>
               {% endif %}
               <td class="u-created-at"></td>
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
@@ -138,6 +147,9 @@
                 {% endif %}
                 {% if config['USERS_HAVE_EXT_USERNAME'] %}
                   <td class="u-org-username">{% if u.ext_username is not none %}<code>{{ u.ext_username }}</code>{% endif %}</td>
+                {% endif %}
+                {% if config['USERS_HAVE_EXT_ID'] %}
+                  <td class="u-org-username">{% if u.ext_id is not none %}<code>{{ u.ext_id }}</code>{% endif %}</td>
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">

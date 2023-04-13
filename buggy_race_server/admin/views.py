@@ -491,6 +491,7 @@ def list_users(data_format=None, want_detail=True):
         qty_students_enabled = len([s for s in students if s.is_active]),
         qty_students_github = len([s for s in students if s.github_username]),
         qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
+        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
@@ -545,6 +546,7 @@ def bulk_register(data_format=None):
               usernames.append(username)
             new_user = User(
               username=username,
+              ext_id=row['ext_id'].strip() if 'ext_id' in row else None,
               ext_username=row['ext_username'].strip().lower() if 'ext_username' in row else None,
               email=_csv_tidy_string(row, 'email', want_lower=True),
               password=_csv_tidy_string(row, 'password', want_lower=False),
@@ -645,6 +647,7 @@ def show_user(user_id):
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       texts_by_task_id=texts_by_task_id,
       qty_texts=len(texts_by_task_id),
+      ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
       is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
@@ -686,6 +689,8 @@ def manage_user(user_id):
           user.email = form.email.data
       if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
           user.ext_username = form.ext_username.data
+      if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name]:
+          user.ext_id = form.ext_id.data
       if not is_registering_new_user:
           if form.access_level.data > user.access_level:
               flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
@@ -714,6 +719,7 @@ def manage_user(user_id):
     "admin/user_edit.html",
     action_url=action_url,
     example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
+    ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
     ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
     ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
     form=form,

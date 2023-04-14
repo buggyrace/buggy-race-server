@@ -226,8 +226,8 @@ def change_password():
     return render_template(
         "user/password.html",
         form=form,
-#        is_auth_needed_for_all=is_auth_needed_for_all,
-        admin_usernames=admin_usernames,
+        is_auth_needed_for_all=False, # because it's conditional on admin statuses
+        admin_usernames_str=",".join(admin_usernames),
     )
   
 @blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)

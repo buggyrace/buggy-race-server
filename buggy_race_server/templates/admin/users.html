@@ -149,7 +149,7 @@
                   <td class="u-org-username">{% if u.ext_username is not none %}<code>{{ u.ext_username }}</code>{% endif %}</td>
                 {% endif %}
                 {% if config['USERS_HAVE_EXT_ID'] %}
-                  <td class="u-org-username">{% if u.ext_id is not none %}<code>{{ u.ext_id }}</code>{% endif %}</td>
+                  <td class="u-ext-id">{% if u.ext_id is not none %}<code>{{ u.ext_id }}</code>{% endif %}</td>
                 {% endif %}
                 <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">

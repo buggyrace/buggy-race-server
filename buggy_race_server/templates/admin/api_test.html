@@ -9,18 +9,23 @@
   </div>
   <div class="row">
     <div class="col-md-8">
-      Use this page to test the API (staff accounts only).
-      <br>
-      {% if current_user.is_admin %}
-        <strong>Be careful:</strong> successful requests update buggy data: so
-        maybe only test with your own username?
-      {% else %}
-        You can only test with your own username.
-      {% endif %}
-      <br>
-      You'll get raw JSON back as the response.
-      <br>
-      The example JSON contains a random number of wheels.
+      <p>
+        Use this page to test the API (staff accounts only).
+        <br>
+        {% if current_user.is_admin %}
+          <strong>Be careful:</strong> successful requests update
+          buggy data: so maybe only test with your own username?
+        {% else %}
+          You can only test with your own username.
+        {% endif %}
+        <br>
+        You'll get raw JSON back as the response.
+      </p>
+      <div class="alert alert-danger">
+        The example JSON only contains a <strong>random number of wheels</strong>:
+        remember that any values missing from the JSON in a successful API post
+        will be set to their defaults in the buggy! 
+      </div>
     </div>
   </div>
   <form method="POST" action="/api/upload" role="form">

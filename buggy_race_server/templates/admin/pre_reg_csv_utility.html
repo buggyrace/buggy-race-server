@@ -22,18 +22,35 @@
   <div class="row my-3">
     <div class="col-md-6">
       <div class="alert alert-info p-3">
-        If you've got a CSV for users that doesn't (yet) have the columns needed
-        for registration, use this utility to create it. Upload the CSV you have
-        and nominate which columns to populate or rename. You can then download
-        the new copy (for example, use this to add a password column). You'll need
-        this copy if you're going to notify the students of their initial
-        passwords.
+        <p>
+          If you've got a CSV for users that doesn't (yet) have the columns
+          needed for registration, use this utility to create it. Upload the
+          source CSV and nominate which columns to populate or rename. You can
+          then download the new copy (for example, use this to add a password
+          column). You'll need the downloaded copy if you're going to notify
+          the students of their initial passwords.
+        </p>
+        <p>
+          The secondary CSV will automatically be joined with your source one
+          if there is a matching column common to both (make sure the column's
+          heading and the values <em>exactly</em> match the source).
+        </p>
       </div>
     </div>
     <div class="col-md-6">
       <div class="container border p-3">
-        <label for="csv_file">Source CSV file (student data)</label>
-        <input class="form-control mr-sm-1" id="csv_file" name="csv_file" type="file">
+        <div class="row">
+          <div class="col my-3">
+            <label for="csv_file">Source CSV file (student data)</label>
+            <input class="form-control mr-sm-1" id="csv-file-1" name="csv_file" type="file">    
+          </div>
+        </div>
+        <div class="row">
+          <div class="col my-3">
+            <label for="csv_file_2">Secondary CSV file (optional extra data)</label>
+            <input class="form-control mr-sm-1" id="csv-file-2" name="csv_file_2" type="file">    
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -42,8 +59,9 @@
       <div class="border container p-3 pt-1 hidden" id="select-container">
         <div class="row">
           <div class="col">
-            Choose which column from your source CSV you want to use for each column in
-            the CSV for registration.
+             
+            For each item needed for registration, choose the column
+            from your source CSV.
           </div>
         </div>
         <div class="row">
@@ -72,21 +90,21 @@
             <button class="btn btn-primary" id="btn-create-csv">Create CSV</button>
           </div>
         </div>
-        <div class="row">
-          <div class="col">
-            <div id="csv-result-msg" class="alert hidden"></div>
-          </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div id="csv-result-msg" class="alert hidden"></div>
         </div>
-        <div class="row hidden" id="download-container">
-          <div class="col">
-            <form action="{{ url_for('admin.pre_registration_csv_utility') }}" method="POST">
-              {{ form.csrf_token }}
-              <input name="data" id="csv-data-textarea" type="hidden"/>
-              <button type="submit" class="btn btn-download btn-primary">Download CSV</button>
-            </form>
-            <div class="col copy-to-clipboard" data-target="csv-display">
-              <pre class="task-text p-3 my-3" id="csv-display"></pre>
-            </div>
+      </div>
+      <div class="row hidden" id="download-container">
+        <div class="col">
+          <form action="{{ url_for('admin.pre_registration_csv_utility') }}" method="POST">
+            {{ form.csrf_token }}
+            <input name="data" id="csv-data-textarea" type="hidden"/>
+            <button type="submit" class="btn btn-download btn-primary">Download CSV</button>
+          </form>
+          <div class="col copy-to-clipboard" data-target="csv-display">
+            <pre class="task-text p-3 my-3" id="csv-display"></pre>
           </div>
         </div>
       </div>
@@ -94,34 +112,15 @@
   </div>
 </div>
 <script>
-  let MANDATORY_COLS = [{% for fieldname in csv_fieldnames %}"{{fieldname}}"{%- if not loop.last %}, {% endif %}{% endfor %}];
-  let csv_upload_rows = [];
-  let csv_file_upload = document.getElementById("csv_file");
-  let select_container = document.getElementById("select-container");
-  let create_btn = document.getElementById("btn-create-csv");
-  let download_container = document.getElementById("download-container");
-  let csv_textarea = document.getElementById("csv-data-textarea");
-  let csv_display = document.getElementById("csv-display");
-  let result_msg_container = document.getElementById("csv-result-msg");
-  let dinopass_passwords = [];
-  csv_file_upload.addEventListener("change", function(){
-      let GetCsvFile = new FileReader();
-      GetCsvFile .onload=function(){
-          csv_upload_rows = GetCsvFile.result.split("\n");
-          do_setup();
-      }
-      GetCsvFile.readAsText(this.files[0]);
-  });
-
-  // not attempting to be secure! But playfully seeding placeholder
-  // passwords inspired by http://www.dinopass.com
-  const dp_adjectives = ["erq", "oyhr", "terra", "lryybj", "benatr", "oebja",
-  "terl", "oynpx", "juvgr", "cvax", "checyr", "fgevcrl", "fcbggrq", "fcrpxyrq",
-  "syhssl", "sheel", "unvel", "fzbbgu", "fbsg", "uneq", "fcvxl", "ybat",
-  "fubeg", "ovt", "fznyy", "gval", "uhtr", "svrepr", "jvyq", "ntvyr", "pyhzfl",
-  "abvfl", "dhvrg", "farnxl", "unccl", "fnq", "qnapvat", "whzcvat", "ohfl",
-  "pyrire", "ful"];
-  const dp_nouns = ["png", "qbt", "zbhfr", "chccl", "ryrcunag", "yvba",
+// not attempting to be secure! But playfully seeding placeholder
+// passwords inspired by http://www.dinopass.com
+const dp_adjectives = ["erq", "oyhr", "terra", "lryybj", "benatr", "oebja",
+  "terl", "oynpx", "juvgr", "cvax", "checyr", "fgevcrl", "fcbggrq",
+  "fcrpxyrq", "syhssl", "sheel", "unvel", "fzbbgu", "fbsg", "uneq", "fcvxl",
+  "ybat", "fubeg", "ovt", "fznyy", "gval", "uhtr", "svrepr", "jvyq", "ntvyr",
+  "pyhzfl", "abvfl", "dhvrg", "farnxl", "unccl", "fnq", "qnapvat", "whzcvat",
+  "ohfl", "pyrire", "ful"];
+const dp_nouns = ["png", "qbt", "zbhfr", "chccl", "ryrcunag", "yvba",
   "gvtre", "tvenssr", "tbevyyn", "puvzcnamrr", "orne", "jbys", "sbk", "qrre",
   "ubefr", "pbj", "cvt", "furrc", "tbng", "enoovg", "xnatnebb", "xbnyn",
   "cynglchf", "pebpbqvyr", "nyyvtngbe", "fanxr", "yvmneq", "sebt", "ghegyr",
@@ -130,155 +129,314 @@
   "rntyr", "unjx", "snypba", "bjy", "ong", "fdhveery", "urqtrubt", "zbyr",
   "bggre", "ornire", "jnyehf", "frny", "wryylsvfu", "peno", "ybofgre",
   "fuevzc", "bpgbchf", "fdhvq", "fgnesvfu", "svfu", "funex", "fgvatenl",
-  "fanvy", "nag", "orr", "ohggresyl", "pngrecvyyne", "tenffubccre", "zbfdhvgb",
-  "fcvqre", "jbez", "pnzry", "mroen", "euvab", "uvccb", "tvenssr", "purrgnu",
-  "ulran", "bfgevpu", "tnmryyr", "vzcnyn", "qentba", "wnthne", "yrbcneq",
-  "fybgu", "neznqvyyb", "gncve", "yrzhe", "zrrexng"];
-  function rot13(str){
-    return str.replace(
-      /[a-z]/gi,
-      x=>String.fromCharCode(x.charCodeAt(0)+(x<='m'? 13:-13))
-    )
-  }
-  function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
-  function mock_dinopass(){
-    let adjective = rot13(dp_adjectives[getRandomInt(dp_adjectives.length)]);
-    let noun = rot13(dp_nouns[getRandomInt(dp_nouns.length)]);
-    let number = getRandomInt(998)+1;
-    return adjective + noun + number;
-  }
+  "fanvy", "nag", "orr", "ohggresyl", "pngrecvyyne", "tenffubccre",
+  "zbfdhvgb", "fcvqre", "jbez", "pnzry", "mroen", "euvab", "uvccb",
+  "tvenssr", "purrgnu", "ulran", "bfgevpu", "tnmryyr", "vzcnyn", "qentba",
+  "wnthne", "yrbcneq", "fybgu", "neznqvyyb", "gncve", "yrzhe", "zrrexng"];
+function rot13(str){
+  return str.replace(
+    /[a-z]/gi,
+    x=>String.fromCharCode(x.charCodeAt(0)+(x<='m'? 13:-13))
+  )
+}
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+function mock_dinopass(){
+  let adjective = rot13(dp_adjectives[getRandomInt(dp_adjectives.length)]);
+  let noun = rot13(dp_nouns[getRandomInt(dp_nouns.length)]);
+  let number = getRandomInt(998)+1;
+  return adjective + noun + number;
+}
 
-  function do_setup(){
-    let source_cols = csv_upload_rows[0].split(",");
-    for (let target_col of MANDATORY_COLS){
-      let select = document.getElementById("choose-"+target_col);
-      select.innerHTML = ""; // clear everything
-      if (select){
-        let opt = document.createElement("option"); // blank
-        opt.innerText = "Choose:";
-        opt.setAttribute("value", "");
-        select.appendChild(opt);
-        let opt_group = document.createElement("optgroup");
-        if (target_col == "password"){
-          opt_group = document.createElement("optgroup");
-          opt_group.setAttribute("label", "Automatic:");
-          opt = document.createElement("option");
-          opt = document.createElement("option");
-          opt.setAttribute("value", "_dinopass"); // _dinopass to randomise
-          opt.innerText = "Random pick";
-          opt_group.appendChild(opt);
-          select.appendChild(opt_group);
-        }
+let EXT_ID_NAME = "{{ ext_id_name }}";
+let EXT_USERNAME_NAME = "{{ ext_username_name }}";
+let MANDATORY_COLS = [{% for fieldname in csv_fieldnames %}"{{fieldname}}"{%- if not loop.last %}, {% endif %}{% endfor %}];
+let csv_primary_rows = []; // from the primary CSV (mandatory)
+let csv_secondary_rows = []; // from the secondary CSV (optional, mapped via a common key)
+let join_col_name = null;
+let join_col_index = -1;
+let csv_file_primary = document.getElementById("csv-file-1");
+let csv_file_secondary = document.getElementById("csv-file-2");
+let select_container = document.getElementById("select-container");
+let create_btn = document.getElementById("btn-create-csv");
+let download_container = document.getElementById("download-container");
+let csv_textarea = document.getElementById("csv-data-textarea");
+let csv_display = document.getElementById("csv-display");
+let result_msg_container = document.getElementById("csv-result-msg");
+
+function find_join_col_index(){
+  let primary_cols = csv_primary_rows.length? csv_primary_rows[0].split(",") : [];
+  let secondary_cols = csv_secondary_rows.length? csv_secondary_rows[0].split(",") : [];
+  join_col_name = null;
+  join_col_index = -1; // index of join_col_name in the secondary row
+  for (let col of primary_cols){
+    for (let i=0; i<secondary_cols.length; i++){
+      if (col == secondary_cols[i]) {
+        return i;
+      }
+    }
+  }
+  return -1
+}
+
+function populate_select_inputs(){
+  download_container.classList.add("hidden");
+  select_container.classList.add("hidden");
+  let primary_cols = csv_primary_rows.length? csv_primary_rows[0].split(",") : [];
+  let secondary_cols = csv_secondary_rows.length? csv_secondary_rows[0].split(",") : [];
+  if (primary_cols.length < 2) {
+    display_error("Source CSV file must have at least two columns (or maybe that's not really a CSV file?)");
+    return
+  }
+  if (csv_secondary_rows.length > 0 && secondary_cols.length < 2) {
+    display_error("Secondary CSV file must have at least two columns (or maybe that's not really a CSV file?)");
+    return
+  }
+  join_col_index = find_join_col_index();
+  join_col_name = join_col_index < 0 ? null : secondary_cols[join_col_index];
+  for (let target_col of MANDATORY_COLS){
+    let select = document.getElementById("choose-"+target_col);
+    select.innerHTML = ""; // clear everything
+    if (select){
+      let opt = document.createElement("option"); // blank
+      opt.innerText = "Choose:";
+      opt.setAttribute("value", "");
+      select.appendChild(opt);
+      let opt_group = document.createElement("optgroup");
+      if (target_col == "password"){
         opt_group = document.createElement("optgroup");
-        opt_group.setAttribute("label", "From uploaded CSV:");
+        opt_group.setAttribute("label", "Automatic:");
+        opt = document.createElement("option");
+        opt.setAttribute("value", "_dinopass"); // _dinopass to randomise
+        opt.innerText = "Generate random";
+        opt_group.appendChild(opt);
         select.appendChild(opt_group);
-        for (let source_col of source_cols) {
+      }
+      opt_group = document.createElement("optgroup");
+      opt_group.setAttribute("label", "From source CSV:");
+      select.appendChild(opt_group);
+      for (let source_col of primary_cols) {
+        opt = document.createElement("option");
+        opt.innerText = source_col;
+        opt.setAttribute("value", "1:"+source_col)
+        if (target_col == source_col) {
+          opt.setAttribute("selected", "true");
+        }
+        opt_group.appendChild(opt);
+      }
+      if (csv_secondary_rows.length > 0) {
+        opt_group = document.createElement("optgroup");
+        opt_group.setAttribute("label", "From secondary CSV:");
+        select.appendChild(opt_group);
+        for (let secondary_col of secondary_cols) {
+          if (secondary_col === join_col_name) {
+            continue; // no point having the join col, it's in the primary
+          }
           opt = document.createElement("option");
-          opt.innerText = source_col;
-          if (target_col == source_col) {
+          opt.setAttribute("value", "2:"+secondary_col)
+          opt.innerText = secondary_col;
+          if (target_col == secondary_col) {
             opt.setAttribute("selected", "true");
           }
           opt_group.appendChild(opt);
         }
       }
     }
-    select_container.classList.remove("hidden");
-    create_btn.addEventListener("click", function(){
-      let source = {};
-      let extra = {};
-      for (let col of MANDATORY_COLS){
-        source[col] = document.getElementById("choose-" + col).value;
-        extra[col] =  document.getElementById("extra-" + col).value;
-        console.log("SOURCE COL FOR " + col + " IS " + source[col])
+  }
+  select_container.classList.remove("hidden");
+}
+
+function clear_message(){
+  result_msg_container.classList.add("hidden");
+  result_msg_container.innerHTML = "";
+}
+
+function display_error(msg){display_message(msg, true)}
+function display_success(msg){display_message(msg, false)}
+
+function display_message(msg, is_error){
+  if (is_error){
+    result_msg_container.classList.remove("alert-success");
+    result_msg_container.classList.add("alert-danger");
+  } else {
+    result_msg_container.classList.remove("alert-danger");
+    result_msg_container.classList.add("alert-success");
+  }
+  result_msg_container.classList.remove("hidden");
+  result_msg_container.innerHTML = "<p>"+msg+"</p>";
+}
+
+//-----------------------------------------------------------------
+function construct_download_csv(){
+  // clear the outputs
+  csv_textarea.innnerText="";
+  csv_display.innerText="";
+  download_container.classList.add("hidden");
+
+  // gather the sources: where we're getting each col from
+  if (csv_primary_rows.length == 0) {
+    display_error("Missing student CSV: start by uploading a CSV of students");
+    return; 
+  }
+
+  let primary_cols = csv_primary_rows[0].split(",");
+  let bad_sources = [];
+  let source = {};
+  let extra = {};
+  for (let col of MANDATORY_COLS){
+    source[col] = document.getElementById("choose-" + col).value;
+    extra[col] =  document.getElementById("extra-" + col).value;
+    if (! source[col]) { // empty string is bad
+      let pretty_col = col;
+      if (col === 'ext_username') { pretty_col = EXT_USERNAME_NAME; }
+      else if (col === 'ext_id') { pretty_col = EXT_ID_NAME; }
+      bad_sources.push(pretty_col);
+    }
+  }
+  if (bad_sources.length) {
+    display_error(
+      "Some columns haven't been mapped to columns in the uploaded CSV: "
+      + bad_sources.join(", ")
+    );
+    return
+  }
+
+  // build the csv_upload by running through the CSV data and for each
+  // user construct the whole record, and then select the fields indicated
+  // by the sources
+  // for now, ignore quotes and commas (normal case from moodle won't have them, hmm)
+
+  let all_students = [];
+
+  for (let i=1; i < csv_primary_rows.length; i++){
+    if (csv_primary_rows[i].indexOf(",") < 0) {
+      continue; // no data if there's no comma
+    }
+    let primary_row = csv_primary_rows[i].split(",");
+
+    let student = {}
+    // populate the student  with data keyed on "1:col-name" or "2:col-name"
+    // first the primary CSV
+
+    for (let j=0; j < primary_cols.length; j++){
+      student["1:"+primary_cols[j]] = j < primary_row.length? primary_row[j]:"";
+    }
+    all_students.push(student);
+  }
+
+  join_col_index = find_join_col_index();
+  // must have a common column with the primary, and at least 2 rows (header+data)
+  if (join_col_index >= 0 && csv_secondary_rows.length > 1) {
+    let secondary_cols = csv_secondary_rows[0].split(",");
+    join_col_name = secondary_cols[join_col_index];
+    for (let i=1; i < csv_secondary_rows.length; i++){
+      if (csv_secondary_rows[i].indexOf(",") < 0) {
+        continue; // no data if there's no comma
       }
-      csv_textarea.innnerText="";
-      csv_display.innerText="";
-      // calculate the CSV using the selections
-      let username_counts = {};
-      let source_cols;
-      let new_rows = [MANDATORY_COLS.join(",")];
-      let bad_cols = new Set();
-      for (let i=0; i < csv_upload_rows.length; i++){
-        if (i == 0){ // header row
-          source_cols = csv_upload_rows[0].split(",");
-        } else {
-          if (csv_upload_rows[i].indexOf(",") < 0) {
-            console.log("FIXME line " + i + " can't be split? <" + csv_upload_rows[i] + ">")
-            continue; // no data if there's no comma (TODO: single-col files?)
-          }
-          let uploaded_data_fields = [];
-          let uploaded_data_item = {};
-          // for now, ignore quotes and commas (normal case from moodle won't have them, hmm)
-          let uploaded_row = csv_upload_rows[i].split(",");
-          for (let i=0; i< source_cols.length; i++){
-            uploaded_data_item[source_cols[i]] = i < uploaded_row.length? uploaded_row[i]:"";
-          }
-          for (let j=0; j<MANDATORY_COLS.length; j++){
-            let col = MANDATORY_COLS[j];
-            let value = null;
-            if (col === "password"){
-              if (source[col] === '_dinopass') {
-                value = mock_dinopass();
-              }
+      let secondary_row = csv_secondary_rows[i].split(",");
+      for (let s=0; s < all_students.length; s++){
+        if (all_students[s]["1:"+join_col_name] === secondary_row[join_col_index]){
+          for (let k=0; k<secondary_cols.length; k++) {
+            let col_name = secondary_cols[k];
+            if (col_name != join_col_name) {
+              all_students[s]["2:"+col_name] = k < secondary_row.length? secondary_row[k]:"";
             }
-            if (value === null) {
-              value = uploaded_data_item[source[col]];
-              if (value != undefined) {
-                let s = value.split(/[ \t@]+/);
-                if (extra[col] === "first") {
-                  value = s[0]
-                } else if (extra[col] === "last") {
-                  value = s.slice(-1)
-                } else if (extra[col] === "nose") {
-                  value = s.slice(0,-1)
-                } else if (extra[col] === "tail") {
-                  value = s.slice(1)
-                }
-              }
-            }
-            if (value === undefined) {
-              bad_cols.add(col); // unique Set
-            } else {
-              if (col === "username") {
-                // usernames get count suffix, for uniqueness
-                value = value.toLowerCase();
-                if (username_counts[value]) {
-                  username_counts[value] = +1;
-                  value += username_counts[value];
-                } else {
-                  username_counts[value] = 1
-                }
-              }
-            }
-            uploaded_data_fields.push(value)
           }
-          new_rows.push(uploaded_data_fields.join(","))
+          break; // no longer need to seek for this student, start next
         }
       }
-      result_msg_container.classList.remove("hidden");
-      download_container.classList.add("hidden");
-      if (bad_cols.size > 0 || new_rows.length < 2) {
-        csv_textarea.value = "";
-        csv_display.innerText = "";
-        result_msg_container.classList.remove("alert-success");
-        result_msg_container.classList.add("alert-danger");
-        if (bad_cols.size > 0) {
-          result_msg_container.innerText = "Some columns haven't been mapped to columns in the uploaded CSV: " + [...bad_cols].join(", ");
-        } else {
-          result_msg_container.innerText = "No data rows found (maybe the file you uploaded only contains a header, or nothing at all?)";
+    }
+  }
+
+  // now all_students has keys from both sources (1:col_name, 1:another, 2:different)
+  // loop through the primary CSV rows, picking the source columns, creating new output rowa
+  // calculate the CSV using the selections
+  let output_csv_rows = [MANDATORY_COLS.join(",")];
+
+  // keep track of the usernames (to detect and increment duplicates)
+  let username_counts = {};
+  let bumped_usernames = [];
+
+  for (let student of all_students) {
+    let output_row = [];
+    for (let j=0; j<MANDATORY_COLS.length; j++){
+      let col = MANDATORY_COLS[j];
+      let value = null;
+      if (source[col] === '_dinopass') {
+        value = mock_dinopass();
+      } else { // source col should be "1:thing" or "2:thing"
+        value = student[source[col]];
+      }
+      if (value != undefined) {
+        let s = value.split(/[ \t@]+/);
+        if (extra[col] === "first") {
+          value = s[0]
+        } else if (extra[col] === "last") {
+          value = s.slice(-1)
+        } else if (extra[col] === "nose") {
+          value = s.slice(0,-1)
+        } else if (extra[col] === "tail") {
+          value = s.slice(1)
         }
       } else {
-        csv_textarea.value = new_rows.join("\n");
-        csv_display.innerText = new_rows.join("\n");
-        download_container.classList.remove("hidden");
-        result_msg_container.classList.remove("alert-danger");
-        result_msg_container.classList.add("alert-success");
-        result_msg_container.innerText = "CSV is ready to download: " + (new_rows.length - 1) + " users";
+        console.log("unexpected: bad col " + col, student)
       }
-    })
+      if (col === "username" && value != null) {
+        // usernames get count suffix, for uniqueness
+        value = value.toLowerCase().replace(/\s+/g, "");
+        if (username_counts[value]) {
+          username_counts[value] += 1;
+          value += username_counts[value];
+          bumped_usernames.push(value);
+        } else {
+          username_counts[value] = 1
+        }
+      }
+      output_row.push(value)
+    }
+    output_csv_rows.push(output_row.join(","))
   }
+
+  if (output_csv_rows.length < 2) {
+    display_error("No CSV data to download — check the CSV file you uploaded has good data in it");
+  } else {
+    csv_textarea.value = output_csv_rows.join("\n");
+    csv_display.innerText = output_csv_rows.join("\n");
+    download_container.classList.remove("hidden");
+    let msg = "CSV is ready to download: " + (output_csv_rows.length - 1) + " users";
+    if (bumped_usernames.length) {
+      if (bumped_usernames.length == 1) {
+        msg += "<br>Note this username was 'bumped': " + bumped_usernames[0];
+      } else {
+        msg += "<br>Note these usernames were 'bumped': " + bumped_usernames.sort().join(", ");
+      }
+    }
+    display_success(msg);
+  }
+
+} // -----------------------------------------------------------------
+
+
+csv_file_primary.addEventListener("change", function(){
+    let GetCsvFile = new FileReader();
+    GetCsvFile .onload=function(){
+        csv_primary_rows = GetCsvFile.result.split("\n");
+        populate_select_inputs();
+    }
+    GetCsvFile.readAsText(this.files[0]);
+});
+
+csv_file_secondary.addEventListener("change", function(){
+    let GetCsvFile = new FileReader();
+    GetCsvFile .onload=function(){
+        csv_secondary_rows = GetCsvFile.result.split("\n");
+        populate_select_inputs();
+    }
+    GetCsvFile.readAsText(this.files[0]);
+});
+
+create_btn.addEventListener("click", construct_download_csv);
+
 </script>
 {% endblock %}
-

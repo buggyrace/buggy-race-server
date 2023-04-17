@@ -144,6 +144,8 @@ function bulk_registration_by_ajax(bulk_register_form){
   let csv_raw_rows = [];
   let csv_rows_as_dicts = [];
   let header_row = [];
+  let example_csv = document.getElementById(USER_REGISTER_CSV_EXAMPLE);
+  let ideal_header_items = ("" + example_csv? example_csv.dataset.headerRow : "").split(",");
   let err_msg = null;
   if (! authcode) {
     err_msg = "You must supply the authorisation code";
@@ -156,8 +158,24 @@ function bulk_registration_by_ajax(bulk_register_form){
     for (let i=0; i<csv_raw_rows.length; i++) {
       let row = csv_raw_rows[i].split(/\s*,\s*/);
       if (i === 0) {
-        if (row.length < 2 || row[0] != "username") {
-          err_msg = "Missing header row: the first line should be something like 'username,password,...";
+        let missing_cols = [];
+        for (let colname of ideal_header_items){
+          if (! row.includes(colname)){
+            missing_cols.push(colname);
+          }
+        }
+        if (row.length < 2) {
+          if (ideal_header_items.length > 0) {
+            err_msg = "Missing header row: the first line should look something like this: " + ideal_header_items.join(",");
+          } else {
+            err_msg = "Missing header row: the first line should have the column titles";
+          }
+          break;
+        } else if (missing_cols.length == 1) {
+          err_msg = "The header row (first line) is missing this column: " + missing_cols[0];
+          break;
+        } else if (missing_cols.length > 1) {
+          err_msg = "The header row (first line) is missing these columns: " + missing_cols.join(", ");
           break;
         } else {
           header_row = row;

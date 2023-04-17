@@ -1,0 +1,266 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Pre-registration CSV utility
+    </h1>
+  </div>
+  <noscript>
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-danger my-3">
+          <h2 class="alert-title">Javascript required</h2>
+          <p>
+            The CSV utility requires Javascript to be enabled in your browser.
+          </p>
+        </div>
+      </div>
+    </div>
+  </noscript>  
+  <div class="row my-3">
+    <div class="col-md-6">
+      <div class="alert alert-info p-3">
+        If you've got a CSV for users that doesn't (yet) have the columns needed
+        for registration, use this utility to create it. Upload the CSV you have
+        and nominate which columns to populate or rename. You can then download
+        the new copy (for example, use this to add a password column). You'll need
+        this copy if you're going to notify the students of their initial
+        passwords.
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="container border p-3">
+        <label for="csv_file">User data CSV file</label>
+        <input class="form-control mr-sm-1" id="csv_file" name="csv_file" type="file">
+      </div>
+    </div>
+  </div>
+  <div class="row my-3">
+    <div class="col">
+      <div class="border container p-3 pt-1 hidden" id="select-container">
+        <div class="row">
+          <div class="col">
+            Choose which column from the uploaded CSV you want to use for each column in
+            the CSV for user registration.
+          </div>
+        </div>
+        <div class="row">
+          {% for col in csv_fieldnames %}
+            <div class="col-sm-4 p-3 mb-3">
+              <label for="choose-{{ col }}">{{ col | title }}</label>
+              <select id="choose-{{ col }}" class="form-control mr-sm-1"></select>
+              <select id="extra-{{ col }}" class="form-control mr-sm-1 mt-1">
+                <option>all</option>
+                <option value="first">first word</option>
+                <option value="last">last word</option>
+                <option value="nose">all but last</option>
+                <option value="tail">all but first</option>
+              </select>
+            </div>
+          {% endfor %}
+          <div class="col-sm-4 p-3 mb-3">
+            <button class="btn btn-primary" id="btn-create-csv">Create CSV</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div id="csv-result-msg" class="alert hidden"></div>
+          </div>
+        </div>
+        <div class="row hidden" id="download-container">
+          <div class="col">
+            <textarea disabled name="csv_data" id="csv-data-textarea" rows="4" style="width:100%"></textarea>
+            <button class="btn btn-primary btn-download">Download CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let MANDATORY_COLS = [{% for fieldname in csv_fieldnames %}"{{fieldname}}"{%- if not loop.last %}, {% endif %}{% endfor %}];
+  let csv_upload_rows = [];
+  let csv_file_upload = document.getElementById("csv_file");
+  let select_container = document.getElementById("select-container");
+  let create_btn = document.getElementById("btn-create-csv");
+  let download_container = document.getElementById("download-container");
+  let csv_textarea = document.getElementById("csv-data-textarea");
+  let result_msg_container = document.getElementById("csv-result-msg");
+  let dinopass_passwords = [];
+  csv_file_upload.addEventListener("change", function(){
+      let GetCsvFile = new FileReader();
+      GetCsvFile .onload=function(){
+          csv_upload_rows = GetCsvFile.result.split("\n");
+          do_setup();
+      }
+      GetCsvFile.readAsText(this.files[0]);
+  });
+
+  // not attempting to be secure! But playfully seeding placeholder
+  // passwords inspired by http://www.dinopass.com
+  const dp_adjectives = ["erq", "oyhr", "terra", "lryybj", "benatr", "oebja",
+  "terl", "oynpx", "juvgr", "cvax", "checyr", "fgevcrl", "fcbggrq", "fcrpxyrq",
+  "syhssl", "sheel", "unvel", "fzbbgu", "fbsg", "uneq", "fcvxl", "ybat",
+  "fubeg", "ovt", "fznyy", "gval", "uhtr", "svrepr", "jvyq", "ntvyr", "pyhzfl",
+  "abvfl", "dhvrg", "farnxl", "unccl", "fnq", "qnapvat", "whzcvat", "ohfl",
+  "pyrire", "ful"];
+  const dp_nouns = ["png", "qbt", "zbhfr", "chccl", "ryrcunag", "yvba",
+  "gvtre", "tvenssr", "tbevyyn", "puvzcnamrr", "orne", "jbys", "sbk", "qrre",
+  "ubefr", "pbj", "cvt", "furrc", "tbng", "enoovg", "xnatnebb", "xbnyn",
+  "cynglchf", "pebpbqvyr", "nyyvtngbe", "fanxr", "yvmneq", "sebt", "ghegyr",
+  "qbycuva", "junyr", "funex", "crathva", "bfgevpu", "puvpxra", "qhpx",
+  "tbbfr", "fjna", "fcneebj", "cvtrba", "frnthyy", "cryvpna", "cneebg",
+  "rntyr", "unjx", "snypba", "bjy", "ong", "fdhveery", "urqtrubt", "zbyr",
+  "bggre", "ornire", "jnyehf", "frny", "wryylsvfu", "peno", "ybofgre",
+  "fuevzc", "bpgbchf", "fdhvq", "fgnesvfu", "svfu", "funex", "fgvatenl",
+  "fanvy", "nag", "orr", "ohggresyl", "pngrecvyyne", "tenffubccre", "zbfdhvgb",
+  "fcvqre", "jbez", "pnzry", "mroen", "euvab", "uvccb", "tvenssr", "purrgnu",
+  "ulran", "bfgevpu", "tnmryyr", "vzcnyn", "qentba", "wnthne", "yrbcneq",
+  "fybgu", "neznqvyyb", "gncve", "yrzhe", "zrrexng"];
+  function rot13(str){
+    return str.replace(
+      /[a-z]/gi,
+      x=>String.fromCharCode(x.charCodeAt(0)+(x<='m'? 13:-13))
+    )
+  }
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+  function mock_dinopass(){
+    let adjective = rot13(dp_adjectives[getRandomInt(dp_adjectives.length)]);
+    let noun = rot13(dp_nouns[getRandomInt(dp_nouns.length)]);
+    let number = getRandomInt(998)+1;
+    return adjective + noun + number;
+  }
+
+  function do_setup(){
+    let source_cols = csv_upload_rows[0].split(",");
+    for (let target_col of MANDATORY_COLS){
+      let select = document.getElementById("choose-"+target_col);
+      select.innerHTML = ""; // clear everything
+      if (select){
+        let opt = document.createElement("option"); // blank
+        opt.innerText = "Choose:";
+        opt.setAttribute("value", "");
+        select.appendChild(opt);
+        let opt_group = document.createElement("optgroup");
+        if (target_col == "password"){
+          opt_group = document.createElement("optgroup");
+          opt_group.setAttribute("label", "Automatic:");
+          opt = document.createElement("option");
+          opt = document.createElement("option");
+          opt.setAttribute("value", "_dinopass"); // _dinopass to randomise
+          opt.innerText = "Random pick";
+          opt_group.appendChild(opt);
+          select.appendChild(opt_group);
+        }
+        opt_group = document.createElement("optgroup");
+        opt_group.setAttribute("label", "From uploaded CSV:");
+        select.appendChild(opt_group);
+        for (let source_col of source_cols) {
+          opt = document.createElement("option");
+          opt.innerText = source_col;
+          if (target_col == source_col) {
+            opt.setAttribute("selected", "true");
+          }
+          opt_group.appendChild(opt);
+        }
+      }
+    }
+    select_container.classList.remove("hidden");
+    create_btn.addEventListener("click", function(){
+      let source = {};
+      let extra = {};
+      for (let col of MANDATORY_COLS){
+        source[col] = document.getElementById("choose-" + col).value;
+        extra[col] =  document.getElementById("extra-" + col).value;
+        console.log("SOURCE COL FOR " + col + " IS " + source[col])
+      }
+      csv_textarea.innnerText="";
+      // calculate the CSV using the selections
+      let username_counts = {};
+      let source_cols;
+      let new_rows = [MANDATORY_COLS.join(",")];
+      let bad_cols = new Set();
+      for (let i=0; i < csv_upload_rows.length; i++){
+        if (i == 0){ // header row
+          source_cols = csv_upload_rows[0].split(",");
+        } else {
+          if (csv_upload_rows[i].indexOf(",") < 0) {
+            console.log("FIXME line " + i + " can't be split? <" + csv_upload_rows[i] + ">")
+            continue; // no data if there's no comma (TODO: single-col files?)
+          }
+          let uploaded_data_fields = [];
+          let uploaded_data_item = {};
+          // for now, ignore quotes and commas (normal case from moodle won't have them, hmm)
+          let uploaded_row = csv_upload_rows[i].split(",");
+          for (let i=0; i< source_cols.length; i++){
+            uploaded_data_item[source_cols[i]] = i < uploaded_row.length? uploaded_row[i]:"";
+          }
+          for (let j=0; j<MANDATORY_COLS.length; j++){
+            let col = MANDATORY_COLS[j];
+            let value = null;
+            if (col === "password"){
+              if (source[col] === '_dinopass') {
+                value = mock_dinopass();
+              }
+            }
+            if (value === null) {
+              value = uploaded_data_item[source[col]];
+              if (value != undefined) {
+                let s = value.split(/\s+/);
+                if (extra[col] === "first") {
+                  value = s[0]
+                } else if (extra[col] === "last") {
+                  value = s.slice(-1)
+                } else if (extra[col] === "nose") {
+                  value = s.slice(0,-1)
+                } else if (extra[col] === "tail") {
+                  value = s.slice(1)
+                }
+              }
+            }
+            if (value === undefined) {
+              bad_cols.add(col); // unique Set
+            } else {
+              if (col === "username") {
+                // usernames get count suffix, for uniqueness
+                value = value.toLowerCase();
+                if (username_counts[value]) {
+                  username_counts[value] = +1;
+                  value += username_counts[value];
+                } else {
+                  username_counts[value] = 1
+                }
+              }
+            }
+            uploaded_data_fields.push(value)
+          }
+          new_rows.push(uploaded_data_fields.join(","))
+        }
+      }
+      result_msg_container.classList.remove("hidden");
+      download_container.classList.add("hidden");
+      if (bad_cols.size > 0 || new_rows.length < 2) {
+        csv_textarea.value = "";
+        result_msg_container.classList.remove("alert-success");
+        result_msg_container.classList.add("alert-danger");
+        if (bad_cols.size > 0) {
+          result_msg_container.innerText = "Some columns haven't been mapped to columns in the uploaded CSV: " + [...bad_cols].join(", ");
+        } else {
+          result_msg_container.innerText = "No data rows found (maybe the file you uploaded only contains a header, or nothing at all?)";
+        }
+      } else {
+        csv_textarea.value = new_rows.join("\n");
+        download_container.classList.remove("hidden");
+        result_msg_container.classList.remove("alert-danger");
+        result_msg_container.classList.add("alert-success");
+        result_msg_container.innerText = "CSV is ready to download: " + (new_rows.length - 1) + " users";
+      }
+    })
+  }
+</script>
+{% endblock %}
+

@@ -37,6 +37,7 @@ from buggy_race_server.admin.forms import (
     AnnouncementForm,
     ApiKeyForm,
     BulkRegisterForm,
+    CsvUploadForm,
     GeneralSubmitForm,
     GenerateTasksForm,
     SettingForm,
@@ -81,6 +82,26 @@ blueprint = Blueprint(
 )
 
 SETTING_PREFIX = "settings" # the name of settings subform
+
+def _save_read_del_csv(csv_file):
+    lines = None
+    err_msgs = []
+    if csv_file.filename:
+        csv_filename_with_path = os.path.join(
+            current_app.config['UPLOAD_FOLDER'],
+            secure_filename(csv_file.filename)
+        )
+        csv_file.save(csv_filename_with_path)
+        try:
+            with open(csv_filename_with_path) as uploaded_file:
+                lines = uploaded_file.readlines()
+        except Exception as e:
+            err_msgs.append(f"Error reading CSV file: {e}")
+        try:
+            os.unlink(csv_filename_with_path)
+        except os.error as e:
+            err_msgs.append(f"Problem deleting uploaded file: {e}")
+    return (lines, err_msgs)
 
 def _update_settings_in_db(form):
   """ Used by setup and settings: returns boolean success.
@@ -1447,3 +1468,78 @@ def show_buggy_editor_info():
       task_0_get_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
       task_3_env_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
    )
+
+@blueprint.route("/pre-reg-csv-utility", strict_slashes=False, methods=["GET"])
+@login_required
+@admin_only
+def pre_registration_csv_utility():
+    """ generating a CSV that only contains necessary columns for registration"""
+    form = CsvUploadForm(request.form)
+    new_csv_dump = None
+    uploaded_fieldnames = []
+    csv_fieldnames = ['username', 'password'] + ConfigSettings.users_additional_fieldnames(current_app)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            password_strategy = form.password_strategy.data
+            err_msgs = None
+            lines = None
+            if "csv_file" in request.files:
+                (lines, err_msgs) = _save_read_del_csv(request.files['csv_file'])
+            if lines is None:
+                for err_msg in err_msgs:
+                    flash(err_msg, "warning")
+                flash("Nothing to use", "danger")
+            else:
+                is_populating = {
+                   "username": False,
+                   "password": bool(password_strategy),
+                   "ext_id": False,
+                   "ext_username": False
+                }
+                if len(lines) < 2:
+                    flash("Need CSV with a header row, then at least one line of data", "warning")
+                missing_fieldnames = {}
+                csv_data = []
+                line_no = 0
+                reader = csv.DictReader(lines, delimiter=',')
+                for row in reader:
+                    line_no += 1
+                    item = {}
+                    for fieldname in csv_fieldnames:
+                        if is_populating.get(fieldname):
+                             item[fieldname] = f"FIXME-{fieldname}"
+                        else:
+                            if fieldname not in reader.fieldnames:
+                                missing_fieldnames[fieldname] = True
+                            existing_value = row.get(fieldname)
+                            if existing_value is None:
+                                missing_fieldnames[fieldname] =  True
+                            else:
+                                item[fieldname] = existing_value.strip()
+                    csv_data.append(item)
+                if missing_fieldnames:
+                    flash(f"CSV header row is missing some required fields: {', '.join(missing_fieldnames)}", "warning")
+                elif not csv_data:
+                   flash("No data found inside uploaded CSV file", "warning")
+                else:
+                    with open('employee_file2.csv', mode='w') as csv_file:
+                        new_csv_dump = io.StringIO()
+                        writer = csv.DictWriter(new_csv_dump, fieldnames=csv_fieldnames)
+                        writer.writeheader()
+                        writer.writerows(csv_data)
+                        new_csv_dump = new_csv_dump.getvalue()
+                        flash("OK, CSV data has been prepared and is available for download, below", "success")
+        else:
+            _flash_errors(form)
+    return render_template(
+        "admin/pre_reg_csv_utility.html",
+        csv_data=new_csv_dump,
+        csv_fieldnames=csv_fieldnames,
+        form=form,
+        uploaded_columns=uploaded_fieldnames,
+        users_have_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        users_have_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
+        users_have_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        users_have_first_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
+    )

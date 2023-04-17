@@ -52,7 +52,8 @@
             Bulk upload by submitting a CSV in here, with a header row as
             the first line.
             <span id="example-csv-trigger">For example:</span>
-          <div id="example-csv" class="border bg-light p-2 my-2">
+          <div id="example-csv" class="border bg-light p-2 my-2"
+            data-header-row="{% if example_csv_data %}{{ example_csv_data[0] }}{% endif %}">
             {% for line in example_csv_data %}
               <code>{{ line }}</code><br>
             {% endfor %}

@@ -32,7 +32,7 @@
     </div>
     <div class="col-md-6">
       <div class="container border p-3">
-        <label for="csv_file">User data CSV file</label>
+        <label for="csv_file">Source CSV file (student data)</label>
         <input class="form-control mr-sm-1" id="csv_file" name="csv_file" type="file">
       </div>
     </div>
@@ -42,14 +42,22 @@
       <div class="border container p-3 pt-1 hidden" id="select-container">
         <div class="row">
           <div class="col">
-            Choose which column from the uploaded CSV you want to use for each column in
-            the CSV for user registration.
+            Choose which column from your source CSV you want to use for each column in
+            the CSV for registration.
           </div>
         </div>
         <div class="row">
           {% for col in csv_fieldnames %}
             <div class="col-sm-4 p-3 mb-3">
-              <label for="choose-{{ col }}">{{ col | title }}</label>
+              <label for="choose-{{ col }}">
+                {% if col == 'ext_username' %}
+                  {{ ext_username_name }}
+                {% elif col == 'ext_id' %}
+                  {{ ext_id_name }}
+                {% else %}
+                  {{ col | replace("_", " ") | title }}
+                {% endif %}
+              </label>
               <select id="choose-{{ col }}" class="form-control mr-sm-1"></select>
               <select id="extra-{{ col }}" class="form-control mr-sm-1 mt-1">
                 <option>all</option>
@@ -71,8 +79,14 @@
         </div>
         <div class="row hidden" id="download-container">
           <div class="col">
-            <textarea disabled name="csv_data" id="csv-data-textarea" rows="4" style="width:100%"></textarea>
-            <button class="btn btn-primary btn-download">Download CSV</button>
+            <form action="{{ url_for('admin.pre_registration_csv_utility') }}" method="POST">
+              {{ form.csrf_token }}
+              <input name="data" id="csv-data-textarea" type="hidden"/>
+              <button type="submit" class="btn btn-download btn-primary">Download CSV</button>
+            </form>
+            <div class="col copy-to-clipboard" data-target="csv-display">
+              <pre class="task-text p-3 my-3" id="csv-display"></pre>
+            </div>
           </div>
         </div>
       </div>
@@ -87,6 +101,7 @@
   let create_btn = document.getElementById("btn-create-csv");
   let download_container = document.getElementById("download-container");
   let csv_textarea = document.getElementById("csv-data-textarea");
+  let csv_display = document.getElementById("csv-display");
   let result_msg_container = document.getElementById("csv-result-msg");
   let dinopass_passwords = [];
   csv_file_upload.addEventListener("change", function(){
@@ -179,6 +194,7 @@
         console.log("SOURCE COL FOR " + col + " IS " + source[col])
       }
       csv_textarea.innnerText="";
+      csv_display.innerText="";
       // calculate the CSV using the selections
       let username_counts = {};
       let source_cols;
@@ -210,7 +226,7 @@
             if (value === null) {
               value = uploaded_data_item[source[col]];
               if (value != undefined) {
-                let s = value.split(/\s+/);
+                let s = value.split(/[ \t@]+/);
                 if (extra[col] === "first") {
                   value = s[0]
                 } else if (extra[col] === "last") {
@@ -245,6 +261,7 @@
       download_container.classList.add("hidden");
       if (bad_cols.size > 0 || new_rows.length < 2) {
         csv_textarea.value = "";
+        csv_display.innerText = "";
         result_msg_container.classList.remove("alert-success");
         result_msg_container.classList.add("alert-danger");
         if (bad_cols.size > 0) {
@@ -254,6 +271,7 @@
         }
       } else {
         csv_textarea.value = new_rows.join("\n");
+        csv_display.innerText = new_rows.join("\n");
         download_container.classList.remove("hidden");
         result_msg_container.classList.remove("alert-danger");
         result_msg_container.classList.add("alert-success");

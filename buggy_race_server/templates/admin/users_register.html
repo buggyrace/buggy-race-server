@@ -7,7 +7,19 @@
       Register new students
     </h1>
   </div>
-
+  <div class="row">
+    <div class="col-md-7">
+      <p>
+        If you have a spreadsheet of student data that's not in the right format (yet), use
+        the CSV utility to create the CSV to upload on this registration page.
+      </p>
+    </div>
+    <div class="col-md-5">
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.pre_registration_csv_utility') }}" class="btn btn-outline-secondary btn-admin btn-jump">CSV pre-registration utility</a>
+      </p>
+    </div>
+  </div>
   <div id="registration-progress" class="container mb-2 hidden">
     <div class="row">
       <div class="col-sm-4">
@@ -49,9 +61,11 @@
       {{ form.csrf_token }}
       <div class="row pt-3">
         <div class="col">
-            Bulk upload by submitting a CSV in here, with a header row as
-            the first line.
-            <span id="example-csv-trigger">For example:</span>
+            <p>
+              Bulk upload by submitting a CSV in here, with a header row as
+              the first line.
+              <span id="example-csv-trigger">For example:</span>
+            </p>
           <div id="example-csv" class="border bg-light p-2 my-2"
             data-header-row="{% if example_csv_data %}{{ example_csv_data[0] }}{% endif %}">
             {% for line in example_csv_data %}
@@ -95,8 +109,8 @@
       </div>
     </form>
   </div>
-  <div class="row">
-    <div class="col mt-5">
+  <div class="row my-4">
+    <div class="col">
       <p>
         Alternatively you can register users individually:
       </p>

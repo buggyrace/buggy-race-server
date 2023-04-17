@@ -285,12 +285,11 @@ class TaskTextForm(FlaskForm):
         return super(TaskTextForm, self).validate()
 
 
-class CsvUploadForm(FlaskForm):
-    csv_file = FileField( f"User data CSV file", validators=[Optional()] )
-    add_csv_file = FileField( f"Additional CSV file", validators=[Optional()] )
-    password_strategy = StringField(validators=[Optional()])
+class SimpleStringForm(FlaskForm):
+    """ Simple form used by the CSV upload/download utility"""
+    data = StringField()
     def __init__(self, *args, **kwargs):
-        super(CsvUploadForm, self).__init__(*args, **kwargs)
+        super(SimpleStringForm, self).__init__(*args, **kwargs)
   
 
 class TaskTextDeleteForm(FlaskForm):

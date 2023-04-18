@@ -379,13 +379,13 @@ function construct_download_csv(){
       if (value != undefined) {
         let s = value.split(/[ \t@]+/);
         if (extra[col] === "first") {
-          value = s[0]
+          value = s[0];
         } else if (extra[col] === "last") {
-          value = s.slice(-1)
+          value = s[s.length-1];
         } else if (extra[col] === "nose") {
-          value = s.slice(0,-1)
+          value = s.slice(0,-1).join(" ");
         } else if (extra[col] === "tail") {
-          value = s.slice(1)
+          value = s.slice(1).join(" ");
         }
       } else {
         console.log("unexpected: bad col " + col, student)
@@ -397,7 +397,7 @@ function construct_download_csv(){
             bumped_usernames.push(value);
           }
         } else {
-          value = value.toLowerCase().replace(/\s+/g, "");
+          value = (value).toLowerCase().replace(/\s+/g, "");
         }
         // usernames get count suffix, for uniqueness
         if (username_counts[value]) {

@@ -382,16 +382,23 @@ function construct_download_csv(){
       } else {
         console.log("unexpected: bad col " + col, student)
       }
-      if (col === "username" && value != null) {
+      if (col === "username"){
+        if (! value) {
+          value = "user"; // crisis fallback
+          if (!bumped_usernames.includes(value)){
+            bumped_usernames.push(value);
+          }
+        } else {
+          value = value.toLowerCase().replace(/\s+/g, "");
+        }
         // usernames get count suffix, for uniqueness
-        value = value.toLowerCase().replace(/\s+/g, "");
         if (username_counts[value]) {
           username_counts[value] += 1;
           value += username_counts[value];
           bumped_usernames.push(value);
-        } else {
-          username_counts[value] = 1
+          // the bumped value itself might occur in the source
         }
+        username_counts[value] = 1;
       }
       output_row.push(value)
     }

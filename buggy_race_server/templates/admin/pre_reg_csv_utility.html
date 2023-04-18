@@ -165,9 +165,17 @@ let csv_textarea = document.getElementById("csv-data-textarea");
 let csv_display = document.getElementById("csv-display");
 let result_msg_container = document.getElementById("csv-result-msg");
 
+function comma_split(row){
+  result = [];
+  for (let item of row.split(",")){
+    result.push(item.replace(/^\s*"(.*)"\s*$/, "$1").replace(/^\s+|\s+$/g, "").replace(/""/g, '"'));
+  }
+  return result;
+}
+
 function find_join_col_index(){
-  let primary_cols = csv_primary_rows.length? csv_primary_rows[0].split(",") : [];
-  let secondary_cols = csv_secondary_rows.length? csv_secondary_rows[0].split(",") : [];
+  let primary_cols = csv_primary_rows.length? comma_split(csv_primary_rows[0]) : [];
+  let secondary_cols = csv_secondary_rows.length? comma_split(csv_secondary_rows[0]) : [];
   join_col_name = null;
   join_col_index = -1; // index of join_col_name in the secondary row
   for (let col of primary_cols){
@@ -183,8 +191,8 @@ function find_join_col_index(){
 function populate_select_inputs(){
   download_container.classList.add("hidden");
   select_container.classList.add("hidden");
-  let primary_cols = csv_primary_rows.length? csv_primary_rows[0].split(",") : [];
-  let secondary_cols = csv_secondary_rows.length? csv_secondary_rows[0].split(",") : [];
+  let primary_cols = csv_primary_rows.length? comma_split(csv_primary_rows[0]) : [];
+  let secondary_cols = csv_secondary_rows.length? comma_split(csv_secondary_rows[0]) : [];
   if (primary_cols.length < 2) {
     display_error("Source CSV file must have at least two columns (or maybe that's not really a CSV file?)");
     return
@@ -280,7 +288,7 @@ function construct_download_csv(){
     return; 
   }
 
-  let primary_cols = csv_primary_rows[0].split(",");
+  let primary_cols = comma_split(csv_primary_rows[0]);
   let bad_sources = [];
   let source = {};
   let extra = {};
@@ -313,7 +321,7 @@ function construct_download_csv(){
     if (csv_primary_rows[i].indexOf(",") < 0) {
       continue; // no data if there's no comma
     }
-    let primary_row = csv_primary_rows[i].split(",");
+    let primary_row = comma_split(csv_primary_rows[i]);
 
     let student = {}
     // populate the student  with data keyed on "1:col-name" or "2:col-name"
@@ -328,13 +336,13 @@ function construct_download_csv(){
   join_col_index = find_join_col_index();
   // must have a common column with the primary, and at least 2 rows (header+data)
   if (join_col_index >= 0 && csv_secondary_rows.length > 1) {
-    let secondary_cols = csv_secondary_rows[0].split(",");
+    let secondary_cols = comma_split(csv_secondary_rows[0]);
     join_col_name = secondary_cols[join_col_index];
     for (let i=1; i < csv_secondary_rows.length; i++){
       if (csv_secondary_rows[i].indexOf(",") < 0) {
         continue; // no data if there's no comma
       }
-      let secondary_row = csv_secondary_rows[i].split(",");
+      let secondary_row = comma_split(csv_secondary_rows[i]);
       for (let s=0; s < all_students.length; s++){
         if (all_students[s]["1:"+join_col_name] === secondary_row[join_col_index]){
           for (let k=0; k<secondary_cols.length; k++) {

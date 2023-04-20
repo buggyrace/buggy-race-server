@@ -40,17 +40,29 @@
     <div class="col-md-6">
       <div class="container border p-3">
         <div class="row">
-          <div class="col my-3">
+          <div class="col mb-3">
             <label for="csv_file">Source CSV file (student data)</label>
             <input class="form-control mr-sm-1" id="csv-file-1" name="csv_file" type="file">    
           </div>
         </div>
         <div class="row">
           <div class="col my-3">
-            <label for="csv_file_2">Secondary CSV file (optional extra data)</label>
-            <input class="form-control mr-sm-1" id="csv-file-2" name="csv_file_2" type="file">    
+            <label for="csv_file_2">
+              <strong>Optional</strong> secondary CSV file<br>
+              (must have one column that matches source CSV)
+            </label>
+            <input class="form-control mr-sm-1" id="csv-file-2" name="csv_file_2" type="file">
+            <p class="mt-2 p-2 hidden" id="secondary-match-column">
+            </p>
           </div>
         </div>
+        <div class="row">
+          <div class="col">
+            <p class="btn-collection">
+              <button id="btn-show-options" class="btn btn-primary hidden">Show options</button>
+            </p>
+          </div>
+        </div>  
       </div>
     </div>
   </div>
@@ -59,7 +71,6 @@
       <div class="border container p-3 pt-1 hidden" id="select-container">
         <div class="row">
           <div class="col">
-             
             For each item needed for registration, choose the column
             from your source CSV.
           </div>
@@ -158,6 +169,8 @@ let join_col_name = null;
 let join_col_index = -1;
 let csv_file_primary = document.getElementById("csv-file-1");
 let csv_file_secondary = document.getElementById("csv-file-2");
+let secondary_match_column = document.getElementById("secondary-match-column");
+let btn_show_options = document.getElementById("btn-show-options");
 let select_container = document.getElementById("select-container");
 let create_btn = document.getElementById("btn-create-csv");
 let download_container = document.getElementById("download-container");
@@ -174,6 +187,9 @@ function comma_split(row){
 }
 
 function find_join_col_index(){
+  secondary_match_column.classList.add("hidden");
+  secondary_match_column.classList.remove("alert-success");
+  secondary_match_column.classList.remove("alert-danger");
   let primary_cols = csv_primary_rows.length? comma_split(csv_primary_rows[0]) : [];
   let secondary_cols = csv_secondary_rows.length? comma_split(csv_secondary_rows[0]) : [];
   join_col_name = null;
@@ -181,9 +197,17 @@ function find_join_col_index(){
   for (let col of primary_cols){
     for (let i=0; i<secondary_cols.length; i++){
       if (col == secondary_cols[i]) {
+        secondary_match_column.innerText = "Matching on column \"" + col+ "\"";
+        secondary_match_column.classList.add("alert-success");
+        secondary_match_column.classList.remove("hidden");
         return i;
       }
     }
+  }
+  secondary_match_column.innerText = "Not matching on any column";
+  secondary_match_column.classList.add("alert-danger");
+  if (secondary_cols.length > 0){
+    secondary_match_column.classList.remove("hidden");
   }
   return -1
 }
@@ -201,7 +225,6 @@ function populate_select_inputs(){
     display_error("Secondary CSV file must have at least two columns (or maybe that's not really a CSV file?)");
     return
   }
-  join_col_index = find_join_col_index();
   join_col_name = join_col_index < 0 ? null : secondary_cols[join_col_index];
   for (let target_col of MANDATORY_COLS){
     let select = document.getElementById("choose-"+target_col);
@@ -432,12 +455,25 @@ function construct_download_csv(){
 
 } // -----------------------------------------------------------------
 
+function clear_display(){
+   // clear display after a CSV file is uploaded, forcing the
+   // show options button to be pressed to display it: this is because
+   // adding the second CSV after having populated the options based
+   // on the first one is confusing and doesn't really make sense.
+   select_container.classList.add("hidden");
+   download_container.classList.add("hidden");
+   secondary_match_column.classList.add("hidden");
+   secondary_match_column.innerText = "";
+   clear_message();
+   btn_show_options.classList.remove("hidden");
+}
 
 csv_file_primary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
         csv_primary_rows = GetCsvFile.result.split("\n");
-        populate_select_inputs();
+        clear_display();
+        join_col_index = find_join_col_index();
     }
     GetCsvFile.readAsText(this.files[0]);
 });
@@ -446,9 +482,14 @@ csv_file_secondary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
         csv_secondary_rows = GetCsvFile.result.split("\n");
-        populate_select_inputs();
+        clear_display();
+        join_col_index = find_join_col_index();
     }
     GetCsvFile.readAsText(this.files[0]);
+});
+
+btn_show_options.addEventListener("click", function(){
+  populate_select_inputs();
 });
 
 create_btn.addEventListener("click", construct_download_csv);

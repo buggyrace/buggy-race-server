@@ -27,13 +27,16 @@
           needed for registration, use this utility to create it. Upload the
           source CSV and nominate which columns to populate or rename. You can
           then download the new copy (for example, use this to add a password
-          column). You'll need the downloaded copy if you're going to notify
-          the students of their initial passwords.
+          column: you'll need the downloaded copy if you're going to notify
+          the students of their initial passwords).
         </p>
         <p>
-          The secondary CSV will automatically be joined with your source one
-          if there is a matching column common to both (make sure the column's
-          heading and the values <em>exactly</em> match the source).
+          The secondary CSV is for the special case of you needing to include
+          data (such as an external ID) that comes from a different system —
+          it's fine not to need it! If you do upload a secondary CSV, its
+          columns will be added to each student's source columns, provided
+          there's a single column in both CSVs that the data can be joined on
+          (using an identical match). 
         </p>
       </div>
     </div>
@@ -228,6 +231,8 @@ function populate_select_inputs(){
   join_col_name = join_col_index < 0 ? null : secondary_cols[join_col_index];
   for (let target_col of MANDATORY_COLS){
     let select = document.getElementById("choose-"+target_col);
+    let option_to_generate_password = null;
+    let has_auto_match = false; // true if we can recommend a matching col
     select.innerHTML = ""; // clear everything
     if (select){
       let opt = document.createElement("option"); // blank
@@ -243,6 +248,7 @@ function populate_select_inputs(){
         opt.innerText = "Generate random";
         opt_group.appendChild(opt);
         select.appendChild(opt_group);
+        option_to_generate_password = opt;
       }
       opt_group = document.createElement("optgroup");
       opt_group.setAttribute("label", "From source CSV:");
@@ -253,6 +259,7 @@ function populate_select_inputs(){
         opt.setAttribute("value", "1:"+source_col)
         if (target_col == source_col) {
           opt.setAttribute("selected", "true");
+          has_auto_match = true;
         }
         opt_group.appendChild(opt);
       }
@@ -269,10 +276,14 @@ function populate_select_inputs(){
           opt.innerText = secondary_col;
           if (target_col == secondary_col) {
             opt.setAttribute("selected", "true");
+            has_auto_match = true;
           }
           opt_group.appendChild(opt);
         }
       }
+    }
+    if (target_col == "password" && ! has_auto_match && option_to_generate_password){
+      option_to_generate_password.setAttribute("selected", "true");
     }
   }
   select_container.classList.remove("hidden");

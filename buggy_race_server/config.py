@@ -25,6 +25,14 @@ import re
 from os import path
 from buggy_race_server.extensions import bcrypt
 
+# ----------------------------------------------------------------------------
+#  When you do a release, [try to remember to] bump the release details here!
+# ----------------------------------------------------------------------------
+#
+MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.0"
+#
+# ----------------------------------------------------------------------------
+
 class ConfigSettingNames(Enum):
 
     def _generate_next_value_(name, start, count, last_values):
@@ -74,6 +82,8 @@ class ConfigSettingNames(Enum):
     _TECH_NOTES_OUTPUT_DIR = auto()
     _TECH_NOTES_PAGES_DIR = auto()
     _TECH_NOTES_PATH = auto()
+
+    _VERSION_IN_SOURCE = auto()
 
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
@@ -1114,6 +1124,9 @@ env = Env()
 env.read_env()
 
 class ConfigFromEnv():
+
+    # current version (sanity check vs. git)
+    _VERSION_IN_SOURCE = MANUAL_LATEST_VERSION_IN_SOURCE
 
     # set up phase:
     # 0 - all done! (admin has full access to settings)

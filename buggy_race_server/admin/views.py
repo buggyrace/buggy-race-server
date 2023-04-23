@@ -1445,6 +1445,7 @@ def show_system_info():
         env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
+        version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )
 
 @blueprint.route("/buggy-editor", strict_slashes=False, methods=["GET"])

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">Config docs helper</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
+      This is an (undocumented) page for producing up-to-date config
+      details suitable for pasting (carefully) into the customisation
+      docs on the www site.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <pre class="border border-secondary my-3 p-2">
+{% for group_name in sorted_groupnames %}{% if group_name != "AUTH" %}
+---------------------------------------------------------
+# {{ pretty_group_name_dict[group_name] }}
+---------------------------------------------------------
+
+## Config settings ("{{ pretty_group_name_dict[group_name] }}")
+
+{: .config-settings}
+| Setting  | Description   |
+|----------|---------------|
+{% for setting_name in groups[group_name] %}| `{{ setting_name }}` | {{ descriptions[ setting_name ] }}  &lt;br&gt;&lt;br&gt; _Default value:_ {{ md_pretty_default_settings[ setting_name ] }} |
+{% endfor %}{% endif %}
+{% endfor %}
+      </pre>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

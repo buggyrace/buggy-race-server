@@ -4,7 +4,7 @@
 import json
 from datetime import datetime
 
-from flask import Blueprint, Response, request, current_app
+from flask import Blueprint, Response, request, current_app, render_template
 
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.views import handle_uploaded_json
@@ -15,50 +15,74 @@ blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../stat
 
 API_SECRET_LIFESPAN_MINS = 60
 
-@blueprint.route("/upload", methods=["POST"], strict_slashes=False)
+def get_json_error_response(msg, status=401):
+  return Response(
+    '{"error": "' + msg + '"}',
+    status=status,
+    mimetype="application/json"
+  )
+
+@blueprint.route("/", methods=["GET"], strict_slashes=False)
+def describe_api():
+  return render_template(
+    "public/api.html",
+    api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
+    buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+  )
+
+@blueprint.route("/upload", methods=["POST"], strict_slashes=True)
 def create_buggy_with_json_via_api():
   """ API call  """
-  # basic API call to /api/upload with three params:
+  # basic API call to /api/upload with four params:
   #        user (the username for the user whose buggy to use)
+  #        key (the API key for this user)
   #        secret (must match recent secret)
   #        buggy_json
   #
-  username = ''
-  buggy_json = ''
-  if "user" in request.form:
-    username = request.form['user'].strip()
+  API_KEY_USER = "user"
+  API_KEY_KEY = "key" # API key for the API key, heh
+  API_KEY_SECRET = "secret"
+  API_KEY_JSON = "buggy_json"
+
+  username = ""
+  buggy_json = ""
+  if API_KEY_USER in request.form:
+    username = request.form[API_KEY_USER].strip()
   if not username:
-    return Response("{'error':'missing user'}", status=401, mimetype='application/json')
+    return get_json_error_response("missing user")
 
-  if "key" in request.form:
-    api_key = request.form['key'].strip()
+  if API_KEY_KEY in request.form:
+    api_key = request.form[API_KEY_KEY].strip()
   if not api_key:
-    return Response("{'error':'missing API key'}", status=401, mimetype='application/json')
+    return get_json_error_response("missing API key")
 
-  if "secret" in request.form:
-    secret = request.form['secret'].strip()
+  if API_KEY_SECRET in request.form:
+    secret = request.form[API_KEY_SECRET].strip()
   if not secret:
-    return Response("{'error':'missing secret'}", status=401, mimetype='application/json')
-  if "buggy_json" in request.form:
-    buggy_json = request.form['buggy_json'].strip()
+    return get_json_error_response("missing secret")
+  if API_KEY_JSON in request.form:
+    buggy_json = request.form[API_KEY_JSON].strip()
   if not buggy_json:
-    return Response("{'error':'no JSON (buggy_json) provided'}", status=401, mimetype='application/json')
+    return get_json_error_response(f"no JSON ({API_KEY_JSON}) provided", status=200)
 
   user = User.query.filter_by(username=username).first()
   if user is not None:
     if user.api_key != api_key:
-      return Response("{'error':'not authorised (wrong API key for this user)'}", status=401, mimetype='application/json')
+      return get_json_error_response("not authorised (wrong API key for this user)")
     if user.api_secret is not None and user.api_secret_at is not None:
       if user.api_secret != secret:
-        return Response("{'error':'not authorised (bad secret)'}", status=401, mimetype='application/json')
+        return get_json_error_response(f"not authorised (bad secret) FIXME {user.api_secret} != {secret}")
       if (datetime.now() - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
-        return Response("{'error':'not authorised (secret has expired)'}", status=401, mimetype='application/json')
+        return get_json_error_response("not authorised (secret has expired)")
       if user.is_api_secret_otp:
           if user.api_secret_count > 0:
-            return Response("{'error':'one-time secret has already been used'}", status=401, mimetype='application/json')
+            return get_json_error_response("one-time secret has already been used")
           user.api_secret_count += 1
           user.save()
-      response_to_update = handle_uploaded_json(BuggyJsonForm(request.form), user, True)
-      # note send 200 even if there was an error
-      return Response(json.dumps(response_to_update), status=200, mimetype='application/json')
-  return Response("{'error':'not authorised (bad user)'}", status=401, mimetype='application/json')
+      # now send 200 even when response is an error (e.g., JSON parse fail)
+      return Response(
+        json.dumps(handle_uploaded_json(BuggyJsonForm(request.form), user, True)),
+        status=200,
+        mimetype="application/json"
+      )
+  return get_json_error_response("not authorised (bad user)")

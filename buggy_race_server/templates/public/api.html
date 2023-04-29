@@ -84,7 +84,7 @@
           <td>
             The JSON data describing the buggy (properties with names and
             values according to
-            <a href="{{ url_for('public.showspecs')}}">the race specs</a>)
+            <a href="{{ url_for('public.show_specs')}}">the race specs</a>)
           </td>
         </tr>
       </table>
@@ -104,7 +104,7 @@
         <code>error</code> property (with a string message as its value) if
         anything went wrong, otherwise it will have an <code>ok</code>
         property. Note that the update operation is forgiving about bad values
-        (according to the <a href="{{ url_for('public.showspecs') }}">the race
+        (according to the <a href="{{ url_for('public.show_specs') }}">the race
         specs</a>) and silently replaces them with defaults — so you'll get an
         <code>ok</code> even if some or all of the properties in your JSON were
         ignored and substituted with default values instead. 

@@ -83,8 +83,14 @@ if (! window.KsDiagram) {
       return diagram.timelines()[0]; // primary timeline
     }
     function get_timeline_markers(diagram) { // names, but in chrono order
-      let m = diagram.timelines()[0].l.markers;
-      return Object.keys(m).sort(function(a, b) {return m[a] - m[b]});
+      let first_timeline = diagram.timelines()[0];
+      let m;
+      if (diagram.version.indexOf("1.2") === 0) {
+        m = first_timeline.h.markers;
+      } else {  // older KeyShape
+        m = first_timeline.l.markers;
+      }
+      return Object.keys(m).sort(function(a, b) {return _time(m[a]) - _time(m[b])});
     }
     function set_timeline_range(diagram, from, to) {
       diagram._ksd.timeline.range(from, to);
@@ -101,6 +107,12 @@ if (! window.KsDiagram) {
     }
 
     //---  end bindings ^
+
+    
+    function _time(item){
+      // timeline markers differ (Keyshape 1.1 vs. 1.2), just roll with it
+      return item.hasOwnProperty("time")? item.time : item
+    }
 
     function create_button(diagram, btn_type, container){
       let btn = document.createElement("button");
@@ -125,9 +137,11 @@ if (! window.KsDiagram) {
     }
 
     function has_initial_step_name(diagram) {
-      return (diagram && diagram._ksd.timeline
+      return (
+        diagram && diagram._ksd.timeline
         && diagram._ksd.markers.length > 1
-        && diagram._ksd.timeline.marker(diagram._ksd.markers[0]) === 0)
+        && _time(diagram._ksd.timeline.marker(diagram._ksd.markers[0])) === 0
+      )
     }
 
     function make_caption_id(diagram, cid) { // yes, it's long
@@ -368,7 +382,7 @@ if (! window.KsDiagram) {
     KsDiagram.run_step = function(diagram) {
       let ksd = diagram._ksd;
       if (ksd.timeline == undefined) {
-        console.log("KsDiagram:  [" + ksd.id + "]no timeline found: cannot run animation");
+        console.log("KsDiagram:  [" + ksd.id + "] no timeline found: cannot run animation");
         return;
       }
       if (ksd.current_marker_index == undefined) {
@@ -389,6 +403,9 @@ if (! window.KsDiagram) {
       } else if (ksd.current_marker_index >= ksd.markers.length - 1) {
         ksd.current_marker_index = undefined; // end of timeline
       } else { // section of timeline
+        if (ksd.current_marker_index == undefined) {
+          ksd.current_marker_index = 1; // going to run from this -1 in following call
+        }
         set_timeline_range(diagram, ksd.markers[ksd.current_marker_index-1], ksd.markers[ksd.current_marker_index]);
       }
       if (ksd.current_marker_index >= ksd.markers.length - 1) {

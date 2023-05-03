@@ -230,7 +230,7 @@ def change_password():
         admin_usernames_str=",".join(admin_usernames),
     )
   
-@blueprint.route("/secret", methods=['GET','POST'], strict_slashes=False)
+@blueprint.route("/api", methods=['GET','POST'], strict_slashes=False)
 @flash_explanation_if_unauth("You must log in before you can access your settings")
 @login_required
 @active_user_required

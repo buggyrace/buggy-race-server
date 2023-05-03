@@ -83,7 +83,10 @@
   </form>
   <div class="row mt-5">
     <div class="col">
-      <a href="{{url_for('admin.api_test')}}" class="btn btn-outline-secondary btn-admin btn-jump">Test API</a>
+      <p class="btn-collection">
+        <a href="{{ url_for('api.describe_api') }}" class="btn btn-outline-secondary btn-jump">API specification</a>
+        <a href="{{url_for('admin.api_test')}}" class="btn btn-outline-secondary btn-admin btn-jump">Test API</a>
+      </p>
     </div>
   </div>
   <div class="row mt-5">

@@ -107,6 +107,7 @@ class ConfigSettingNames(Enum):
     INSTITUTION_SHORT_NAME = auto()
     IS_ALL_CONFIG_IN_TECH_NOTES = auto()
     IS_API_SECRET_ONE_TIME_PW = auto()
+    IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
@@ -289,6 +290,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,
+        ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name,
       )
     }
 
@@ -330,6 +332,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
+        ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
@@ -427,6 +430,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
@@ -600,6 +604,19 @@ class ConfigSettings:
           `Yes` respectively) mean OTPs are not used except where students
           enable them on their own accounts.
           """,
+
+        ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
+          """The tech notes are static pages, rendered on a dark background
+          (to clearly distinguish from the race server's pages). If you
+          choose `Yes`, this option adds a small button to the bottom
+          right-hand corner of each page that toggles the style between the
+          dark style, and a simulation of a classic page created with LaTeX,
+          the excellent typesetting system beloved of academics. Because the
+          tech notes are static content, this CSS toggle is implemented in
+          JavaScript. This feature is an in-joke that only need be engaged if
+          you are fee feeling playful, or if there are academics in your
+          institution who might be horrified by the prospect of reading text
+          in a san-serif font on anything other than white paper.""",
 
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:
           """Choose `Yes` if you need Windows newlines at the end of each

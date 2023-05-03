@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      The Race Server's API
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        The race server API accepts JSON data for a single racing buggy
+        via HTTP POST and saves it in the database. It lets you to upload your
+        buggy data <em>programmatically</em>, instead of copying-and-pasting it
+        into <a href="{{ url_for('user.submit_buggy_data') }}">the web form</a>.
+      </p>
+      <div class="alert alert-warning">
+        <p>
+          If you don't have an API key yet (check 
+          <a href="{{ url_for('user.set_api_secret') }}">your API settings page</a>),
+          ask us to issue you with one.
+          {% if api_task_name %}
+          You only need this when you get to task
+          <a href="{{ url_for('public.show_single_task', task_id=api_task_name)}}">{{ api_task_name }}</a>.
+        {% endif %}
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <p>
+        An important difference between using the API and web form — which is
+        also simply an HTTP POST request — is that you can only access the web
+        form during an authenticated session (that is, you must log in before
+        the server will let you get to it). The API uses explicit credentials
+        (a key and a secret) to determine if the requester is allowed to update
+        the buggy.
+      </p>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h3>Request</h3>
+      <p>
+        The server accepts HTTP POST requests to this endpoint:
+      </p>
+      <table class="col table table-striped table-bordered table-hover bg-white">
+        <tr>
+          <th>Endpoint URL</th>
+        </tr>
+        <tr>
+          <td>
+            <code>{{ buggy_race_server_url }}{{ url_for('api.create_buggy_with_json_via_api') }}</code>
+          </td>
+        </tr>
+      </table>
+      <p>
+        The request must provide these four items of data (name/value pairs):
+      </p>
+      <table class="col table table-striped table-bordered table-hover bg-white">
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+        <tr>
+          <td><code>user</code></td>
+          <td>
+            The buggy owner's username on the race server
+          </td>
+        </tr>
+        <tr>
+          <td><code>key</code></td>
+          <td>
+            The API key for this user (which was set by staff)
+          </td>
+        </tr>
+        <tr>
+          <td><code>secret</code></td>
+          <td>
+            The API secret for this user (which was set by the user)
+          </td>
+        </tr>
+        <tr>
+          <td><code>buggy_json</code></td>
+          <td>
+            The JSON data describing the buggy (properties with names and
+            values according to
+            <a href="{{ url_for('public.show_specs')}}">the race specs</a>)
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <h3>Response</h3>
+      <p>
+        The server responds with a JSON payload (MIME type
+        <code>application/json</code>).
+        If any of the authorisation credentials were rejected, a response code
+        of <code>401</code> is returned, otherwise <code>200</code>.
+      </p>
+      <p>
+        <strong>A response with <code>200</code> does not necessarily indicate
+        success</strong>: you must inspect the content (JSON) of the response
+        to determine the success of the update operation. It will contain an
+        <code>error</code> property (with a string message as its value) if
+        anything went wrong, otherwise it will have an <code>ok</code>
+        property. Note that the update operation is forgiving about bad values
+        (according to the <a href="{{ url_for('public.show_specs') }}">the race
+        specs</a>) and silently replaces them with defaults — so you'll get an
+        <code>ok</code> even if some or all of the properties in your JSON were
+        ignored and substituted with default values instead. 
+      </p>
+      <table class="col table table-striped table-bordered table-hover bg-white">
+        <tr>
+          <th>Code</th>
+          <th>JSON payload</th>
+        </tr>
+        <tr><th colspan="2" class="alert-success">Example success response:</th></tr>
+        <tr>
+          <td><code>200</code></td>
+          <td><code>{"ok": "buggy updated OK"}</code></td>
+        </tr>
+        <tr>
+          <th colspan="2"  class="alert-danger">Example failure responses:</th>
+        </tr>
+        <tr>
+          <td><code>401</code></td>
+          <td><code>{"error": "missing API key"}</code></td>
+        </tr>
+        <tr>
+          <td><code>200</code></td>
+          <td><code>{"error": "Failed to parse JSON data"}</code></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

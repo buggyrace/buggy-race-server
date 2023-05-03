@@ -1502,3 +1502,29 @@ def pre_registration_csv_utility():
         users_have_first_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
         users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
     )
+
+@blueprint.route("/config-docs-helper")
+@login_required
+@admin_only
+def config_docs_helper():
+    """ undocumented helper method for dumping config setting markdown for www site"""
+    pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
+    pretty_default_settings={
+        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
+        for name in ConfigSettings.DEFAULTS
+    }
+    return render_template(
+        "admin/config_docs_helper.html",
+        descriptions={
+            name: re.sub(r"(\n|\s)+", " ", ConfigSettings.DESCRIPTIONS[name])
+            for name in ConfigSettings.DESCRIPTIONS
+        },
+        groups=ConfigSettings.GROUPS,
+        md_pretty_default_settings={
+            name: "_none/empty_" if pretty_default_settings[name] == "" else f"`{pretty_default_settings[name]}`"
+            for name in pretty_default_settings
+        },
+        pretty_group_name_dict=pretty_group_name_dict,
+        sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+    )
+

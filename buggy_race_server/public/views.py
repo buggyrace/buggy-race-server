@@ -107,7 +107,7 @@ def register_new_user():
     return redirect(url_for('admin.new_user'))
 
 @blueprint.route("/specs", strict_slashes=False)
-def showspecs():
+def show_specs():
     """Buggy specifications page."""
     return render_template("public/specs.html",
       defaults=Buggy.DEFAULTS,
@@ -116,7 +116,7 @@ def showspecs():
 
 @blueprint.route("/specs/data/<data_filename>")
 @blueprint.route("/specs/data", strict_slashes=False)
-def showspecs_data(data_filename=""):
+def show_specs_data(data_filename=""):
     """Buggy specifications: data page."""
     want_mass = request.args.get('extra')=="mass" 
     if data_filename:

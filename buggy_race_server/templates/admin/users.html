@@ -117,7 +117,7 @@
         </tr>
         {% for u in users %}
           {% if want_detail or u.is_student %}
-            <tr>
+            <tr {% if u.is_staff %}class="staff" {% endif %}>
               {% if current_user.is_administrator %}
                 <td class="bool-{{ u.is_active | lower }}">
                   <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>

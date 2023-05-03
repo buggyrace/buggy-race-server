@@ -300,6 +300,7 @@ def serve_project_page(page=None):
         is_using_remote_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         is_zip_info_displayed=is_zip_info_displayed,
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+        project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
         report_type=report_type,
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],

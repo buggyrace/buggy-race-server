@@ -116,120 +116,149 @@
  </div>
  <div class="inner">
   <ul class="timeline init">
-   <li>
-    <h3 id="get-login-details">
-     <a class="toclink" href="#get-login-details">get login details</a>
-    </h3>
-    <p>
-     You'll need your username and password for this
-     <a href="{{ url_for('public.home') }}"></a>race server</a>
-    </p>
-   </li>
-   <li>
-    <h3 id="log-into-race-server">
-     <a class="toclink" href="#log-into-race-server">log into race server</a>
-    </h3>
-    <p>
-     <a href="{{ url_for('public.login') }}">Log in to the race server</a>
-     (make sure it's a secure connection: https).
-    </p>
-   </li>
-   <li>
-    <h3 id="change-password">
-     <a class="toclink" href="#change-password">change password</a>
-    </h3>
-    <p>
-     <a href="{{ url_for('user.change_password') }}">Change your password</a>
-     to something secret. This is basic good practice if we communicated your
-     racing server password to you in plaintext.
-    </p>
-   </li>
-   <li>
-    <h3 id="sign-in-to-github">
-     <a class="toclink" href="#sign-in-to-github">sign in to GitHub</a>
-    </h3>
-    <p>
-     You'll need to register a new account on
-     <a href="https://github.com">GitHub</a>
-     if you haven't already got one. Then, log into your GitHub account (it makes
-     the next step slightly easier if you're <em>already</em> logged in there).
-    </p>
-   </li>
-   <li>
-    <h3 id="connect-to-github">
-     <a class="toclink" href="#connect-to-github">connect to GitHub</a>
-    </h3>
-    <p>
-     On the race server, there's a button for this:
-     <a href="{{ url_for('user.settings') }}">Connect your race server account</a>
-     to your GitHub account.
-    </p>
-   </li>
-   <li>
-    <h3 id="fork-the-repo">
-     <a class="toclink" href="#fork-the-repo">fork the repo</a>
-    </h3>
-    <p>
-     Fork the Buggy Editor repo into your GitHub account (by pressing
-     the <a href="{{ url_for('user.settings') }}">button</a>
-     on the race server — this is what you authorised the server
-     to do in the previous step).
-    </p>
-   </li>
-   <li>
-    <h3 id="see-the-issues-arrive">
-     <a class="toclink" href="#see-the-issues-arrive">see the issues arrive</a>
-    </h3>
-    <p>
-     Moments after forking, our server tries to inject GitHub issues into
-     your repo (one for each task). You don't <em>need</em> these — they are
-     just for fun/learning.
-    </p>
-    <p class="alert-danger border border-danger p-2">
-     <strong>NOTE</strong>:
-      there is a bug — some of you are not getting all the issues... we're
-      working on that!
-    </p>
-   </li>
-   <li>
-    <h3 id="clone-your-repo">
-     <a class="toclink" href="#clone-your-repo">clone your repo</a>
-    </h3>
-    <p>
-     There are a number of ways to do this but the one we suggest is using VSCode
-     (video:
-     <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=62729d9b-9202-4686-90f6-ae8d002c0a88">0-GET VSCode</a>)
-      as it avoids installing lots of dependencies on your machine
-      (which can get complicated... so best to avoid it).
-    </p>
-    <p>
-     If you're struggling to get VSCode to work and don't feel up to figuring out
-      how to use git then you can try one of:
-    </p>
-    <ul>
-     <li>
-      Use <a href="https://replit.com">repl.it</a>
-      (video:
-      <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=79c7f430-ca06-45a9-ad36-ae8d002c0a57">0-GET with repl.it</a>)
-      and work entirely in-browser.
-     </li>
-     <li>
-      Download the zip file from GitHub (click the green <strong>code</strong>
-      button on your repo) and unzip it on your own machine. (This will require
-      installing python, pip and sqlite3 locally on your computer).
-     </li>
-    </ul>
-    <p>
-     If you're feeling up to the challenge of using git, we have some options for you!
-    </p>
-    <p>
-     The best way is probably to use GitHub GUI (video:
-     <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dc1be577-db16-4f23-b975-ad200135c7a0">0-GET with GitHub GUI</a>),
-      or install Git and try the command line (video:
-     <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=66081520-cc38-4ef5-a40a-ad2001272186">0-GET with command-line git</a>)
-     in a terminal or (Windows) git bash.
-    </p>
-   </li>
+    <li>
+      <h3 id="get-login-details">
+        <a class="toclink" href="#get-login-details">get login details</a>
+      </h3>
+      <p>
+        You'll need your username and password for this
+        <a href="{{ url_for('public.home') }}"></a>race server</a>
+      </p>
+    </li>
+    <li>
+      <h3 id="log-into-race-server">
+        <a class="toclink" href="#log-into-race-server">log into race server</a>
+      </h3>
+      <p>
+        <a href="{{ url_for('public.login') }}">Log in to the race server</a>
+        (make sure it's a secure connection: https).
+      </p>
+    </li>
+    <li>
+      <h3 id="change-password">
+         <a class="toclink" href="#change-password">change password</a>
+      </h3>
+      <p>
+        <a href="{{ url_for('user.change_password') }}">Change your password</a>
+        to something secret. This is basic good practice if we communicated your
+        racing server password to you in plaintext.
+      </p>
+    </li>
+    {% if is_student_using_github_repo %}
+      <li>
+        <h3 id="sign-in-to-github">
+          <a class="toclink" href="#sign-in-to-github">sign in to GitHub</a>
+        </h3>
+        <p>
+          You'll need to register a new account on
+          <a href="https://github.com">GitHub</a>
+          if you haven't already got one. Then, log into your GitHub account (it makes
+          the next step slightly easier if you're <em>already</em> logged in there).
+        </p>
+      </li>
+      {% if is_using_github_api_to_fork %}
+        <li>
+          <h3 id="connect-to-github">
+            <a class="toclink" href="#connect-to-github">connect to GitHub</a>
+          </h3>
+          <p>
+            On the race server, there's a button for this:
+            <a href="{{ url_for('user.settings') }}">Connect your race server account</a>
+            to your GitHub account.
+          </p>
+        </li>
+        <li>
+          <h3 id="fork-the-repo">
+            <a class="toclink" href="#fork-the-repo">fork the repo</a>
+          </h3>
+          <p>
+            Fork the Buggy Editor repo into your GitHub account (by pressing
+            the <a href="{{ url_for('user.settings') }}">button</a>
+            on the race server — this is what you authorised the server
+            to do in the previous step).
+          </p>
+        </li>
+        {% if is_using_github_api_to_inject_issues %}
+          <li>
+            <h3 id="see-the-issues-arrive">
+              <a class="toclink" href="#see-the-issues-arrive">see the issues arrive</a>
+            </h3>
+            <p>
+              Moments after forking, our server tries to inject GitHub issues into
+              your repo (one for each task). You don't <em>need</em> these — they are
+              just for fun/learning.
+            </p>
+            <p class="alert-danger border border-danger p-2">
+              <strong>NOTE</strong>:
+              there is a bug — some of you are not getting all the issues... we're
+              working on that!
+            </p>
+          </li>
+        {% endif %}
+      {% endif %}
+      <li>
+        <h3 id="clone-your-repo">
+            <a class="toclink" href="#clone-your-repo">clone your repo</a>
+        </h3>
+        <p>
+          There are a number of ways to do this but the one we suggest is using VSCode
+          (video:
+          <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=62729d9b-9202-4686-90f6-ae8d002c0a88">0-GET VSCode</a>)
+          as it avoids installing lots of dependencies on your machine
+          (which can get complicated... so best to avoid it).
+        </p>
+        <p>
+          If you're struggling to get VSCode to work and don't feel up to figuring out
+          how to use git then you can try one of:
+        </p>
+        <ul>
+          <li>
+            Use <a href="https://replit.com">repl.it</a>
+            (video:
+            <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=79c7f430-ca06-45a9-ad36-ae8d002c0a57">0-GET with repl.it</a>)
+            and work entirely in-browser.
+          </li>
+          <li>
+            Download the zip file from GitHub (click the green <strong>code</strong>
+            button on your repo) and unzip it on your own machine. (This will require
+            installing python, pip and sqlite3 locally on your computer).
+          </li>
+        </ul>
+        <!--
+          <p>
+            If you're feeling up to the challenge of using git, we have some options for you!
+          </p>
+          <p>
+            The best way is probably to use GitHub GUI (video:
+            <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dc1be577-db16-4f23-b975-ad200135c7a0">0-GET with GitHub GUI</a>),
+            or install Git and try the command line (video:
+            <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=66081520-cc38-4ef5-a40a-ad2001272186">0-GET with command-line git</a>)
+            in a terminal or (Windows) git bash.
+          </p>
+        -->
+      </li>
+    {% else %}
+      <li>
+        <h3 id="get-editor-source-files">
+          <a class="toclink" href="#get-editor-source-files">get editor source files</a>
+        </h3>
+        {# note this is very dependent on how the project is being run: should be a custom edit #}
+        <p>
+          Get your copy of the editor code. You can download it from GitHub but going to
+          <a href="buggy_editor_github_url">the buggy editor repo</a> and clicking on the
+          green <strong>Code</strong> button:
+        </p>
+        <ul>
+          <li>
+            If you're OK using git, choose <strong>Clone</strong> and copy the URL from
+            one of the tabs (HTTP or SSH), and do <code>git clone</code> with that URL.
+          </li>
+          <li>
+            Or choose <strong>Download ZIP</strong> and unzip the files
+          </li>
+        </ul>
+      </li>
+    {% endif %}
    <li>
     <h3 id="find-directory">
      <a class="toclink" href="#find-directory">find directory</a>
@@ -246,11 +275,13 @@
      <a href="https://superbasics.beholder.uk/file-system/">Read these superbasics</a>
      because you <em>must</em> be very comfortable with them!
     </p>
-    <p>
-     If you didn't clone the repo into a place you're happy with, you can
-     <em>move the whole repo</em> on your machine. It's best to do this before
-     you start working on it, though.
-    </p>
+    {% if is_student_using_github_repo and not is_using_remote_vs_workspace %}
+      <p>
+        If you didn't clone the repo into a place you're happy with, you can
+        <em>move the whole repo</em> on your machine. It's best to do this before
+        you start working on it, though.
+      </p>
+    {% endif %}
    </li>
    <li>
     <h3 id="cd-to-directory">
@@ -319,8 +350,8 @@
     </p>
    </li>
    <li>
-    <h3 id="init-the-db">
-     <a class="toclink" href="#init-the-db">init the db</a>
+    <h3 id="initialise-the-db">
+     <a class="toclink" href="#init-the-db">initialise the db</a>
     </h3>
     <p>
      The Buggy Editor comes with a wee Python program for creating and/or
@@ -397,18 +428,29 @@
     </p>
    </li>
    <li>
-    <h3 id="browse-to-localhost">
-     <a class="toclink" href="#browse-to-localhost">browse to localhost</a>
+    <h3 id="view-app-in-browser">
+     <a class="toclink" href="#view-app-in-browser">view app in browser</a>
     </h3>
+    {% if is_using_remote_vs_workspace %}
+      <p>
+        When the app is running on the remote sever, you can use the URL
+        that includes the port number we've allocated to you.  
+      </p>
+      <p>
+        If you're running locally, you can hit it on 
+        <a href="http://localhost:5000">http://localhost:5000</a>
+      </p>
+    {% else %}
+      <p>
+        Visit
+        <a href="http://localhost:5000">http://localhost:5000</a>
+        in your browser: edit your buggy.
+      </p> 
+    {% endif %}
     <p>
-     Visit
-     <a href="http://localhost:5000">http://localhost:5000</a>
-     in your browser: edit your buggy.
-    </p>
-    <p>
-     0.0.0.0:5000 or 127.0.0.0:5000
-     <a href="{{ url_for('public.serve_tech_notes', path='localhost') }}">might work too</a>
-     (it's handy to understand why).
+       On your local host, 0.0.0.0:5000 or 127.0.0.0:5000
+       <a href="{{ url_for('public.serve_tech_notes', path='localhost') }}">might work too</a>
+       (it's handy to understand why).
     </p>
    </li>
    <li>
@@ -424,19 +466,21 @@
      You're a web dev now.
     </p>
    </li>
-   <li class="optional">
-    <h3 id="commit-changes">
-     <a class="toclink" href="#commit-changes">commit changes</a>
-    </h3>
-    <p>
-     If you are
-     <a href="https://www.atlassian.com/git">using Git</a>, you can
-     <em>add</em> and <em>commit</em> your changes, and <em>push</em>
-     them up to your repo — you can even close the
-     <a href="https://guides.github.com/features/issues/">Github issues</a>
-     if you want!
-    </p>
-   </li>
+   {% if is_student_using_github_repo %}
+    <li class="optional">
+      <h3 id="commit-changes">
+        <a class="toclink" href="#commit-changes">commit changes</a>
+      </h3>
+      <p>
+        If you are
+        <a href="https://www.atlassian.com/git">using Git</a>, you can
+        <em>add</em> and <em>commit</em> your changes, and <em>push</em>
+        them up to your repo — you can even close the
+        <a href="https://guides.github.com/features/issues/">Github issues</a>
+        if you want!
+      </p>
+    </li>
+  {% endif %}
    <li>
     <h3 id="repeat-for-tasks-and-phases">
      <a class="toclink" href="#repeat-for-tasks-and-phases">repeat for tasks and phases</a>
@@ -497,6 +541,17 @@
      <a href="{{ url_for( 'public.serve_project_page', page='index' ) }}">project page</a>
     </p>
    </li>
+   {% if submission_link %}
+   <li>
+    <h3 id="submit-the-project">
+     <a class="toclink" href="#follow-the-project-instructions">submit the project</a>
+    </h3>
+    <p>
+     See 
+     <a href="{{ submission_link }}">the submission information</a>
+    </p>
+   </li>
+   {% endif %}
   </ul>
  </div>
 </div>

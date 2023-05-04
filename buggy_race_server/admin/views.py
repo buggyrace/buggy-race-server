@@ -427,8 +427,8 @@ def admin():
     students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
-    admin_users = [u for u in users if u.is_active and u.is_administrator]
-    other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
+    staff_users = [u for u in users if u.is_active and u.is_staff]
+    other_users = [u for u in users if u.is_active and not (u in students or u in staff_users)]
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
     tasks_by_id = {task.id: task.fullname for task in tasks}
@@ -443,11 +443,11 @@ def admin():
             qty_texts_by_task[tasks_by_id[text.task_id]] += 1
     return render_template(
       "admin/dashboard.html",
-      admin_users=admin_users,
+      staff_users=staff_users,
       is_storing_texts=is_storing_texts,
       other_users=other_users,
       purge_form = GeneralSubmitForm(),
-      qty_admin_users=len(admin_users),
+      qty_staff_users=len(staff_users),
       qty_buggies=len(buggies),
       qty_texts_by_task=qty_texts_by_task,
       qty_texts=qty_texts,

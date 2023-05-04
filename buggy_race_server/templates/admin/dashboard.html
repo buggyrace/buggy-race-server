@@ -125,13 +125,13 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2">Admin users</td>
-          <td class="text-right">{{ qty_admin_users }}</td>
+          <td colspan="2">Staff users</td>
+          <td class="text-right">{{ qty_staff_users }}</td>
         </tr>
         <tr>
           <td colspan="3">
             <ul class="sm-item-list">
-              {% for u in admin_users %}
+              {% for u in staff_users %}
                 <li>
                   <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.username) }}">{{ u.pretty_username }}</a>
                 </li>

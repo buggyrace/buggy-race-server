@@ -70,7 +70,7 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div class="alert {% if qty_tasks == 0 or not task_list_published_at%} alert-danger {% else %} alert-info {% endif %}">
+      <div class="alert {% if qty_tasks == 0 or not (is_task_list_published and task_list_published_at) %} alert-danger {% else %} alert-info {% endif %}">
         <h2 class="alert-title">Tasks</h2>
         <p>
           {% if qty_tasks %}
@@ -85,7 +85,7 @@
             or edit and upload markdown).
           {% endif %}
           <br>
-          {% if not task_list_published_at %}
+          {% if not (is_task_list_published and task_list_published_at) %}
             The <strong>task list has not been published</strong> yet.
           {% else %}
             The <strong>task list</strong> was last published on 
@@ -97,17 +97,17 @@
           <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-white btn-jump">Task&nbsp;list</a>
         </p>
       </div>
-      <div class="alert {% if not tech_notes_published_at%} alert-danger {% else %} alert-info {% endif %}">
+      <div class="alert {% if not (is_tech_notes_index_published and tech_notes_published_at) %} alert-danger {% else %} alert-info {% endif %}">
         <h2 class="alert-title">Tech notes</h2>
         <p>
           {% if tech_notes_external_url %}
             The <strong>tech notes are not server by this server</strong>: instead
             they are at <code>{{ tech_notes_external_url }}</code>.
           {% else %}
-            {% if tech_notes_published_at %}
+            {% if is_tech_notes_index_published and tech_notes_published_at %}
               The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at }}.
             {% else %}
-              The supporting <strong>tech notes not yet been published</strong>.
+              The supporting <strong>tech notes have not yet been published</strong>.
             {% endif %}
           {% endif %}
           {% if not is_tech_note_publishing_enabled %}

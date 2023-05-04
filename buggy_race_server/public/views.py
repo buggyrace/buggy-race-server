@@ -288,16 +288,19 @@ def serve_project_page(page=None):
                 zip_filename_example = current_user.username
     return render_template(
         template,
-        zip_filename_type=zip_filename_type,
-        zip_filename_type_name=zip_filename_type_name,
-        zip_filename_example=zip_filename_example,
+        buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-        is_report=is_report,
         is_personalsed_example=is_personalsed_example,
+        is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
+        is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+        is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
+        is_using_remote_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         is_zip_info_displayed=is_zip_info_displayed,
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+        project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
         report_type=report_type,
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
@@ -305,6 +308,9 @@ def serve_project_page(page=None):
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],
         workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
+        zip_filename_example=zip_filename_example,
+        zip_filename_type_name=zip_filename_type_name,
+        zip_filename_type=zip_filename_type,
     )
 
 @blueprint.route("/assets/<path:path>")

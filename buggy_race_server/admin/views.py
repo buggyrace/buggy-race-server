@@ -83,6 +83,27 @@ blueprint = Blueprint(
 
 SETTING_PREFIX = "settings" # the name of settings subform
 
+
+def _is_task_list_published():
+    task_list_fname = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+    return task_list_fname and os.path.exists(
+        join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            task_list_fname
+        )
+    )
+
+def _is_tech_notes_index_published():
+    return os.path.exists(
+        join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
+            current_app.config[ConfigSettingNames._TECH_NOTES_PAGES_DIR.name],
+            "index.html"
+        )
+    )
+
+
 def _save_read_del_csv(csv_file):
     lines = None
     err_msgs = []
@@ -262,6 +283,8 @@ def setup_summary():
        is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
        is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
        is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+       is_task_list_published=_is_task_list_published(),
+       is_tech_notes_index_published=_is_tech_notes_index_published(),
        is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
        is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
        is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
@@ -427,8 +450,8 @@ def admin():
     students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
-    admin_users = [u for u in users if u.is_active and u.is_administrator]
-    other_users = [u for u in users if u.is_active and not (u in students or u in admin_users)]
+    staff_users = [u for u in users if u.is_active and u.is_staff]
+    other_users = [u for u in users if u.is_active and not (u in students or u in staff_users)]
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
     tasks_by_id = {task.id: task.fullname for task in tasks}
@@ -443,11 +466,13 @@ def admin():
             qty_texts_by_task[tasks_by_id[text.task_id]] += 1
     return render_template(
       "admin/dashboard.html",
-      admin_users=admin_users,
+      staff_users=staff_users,
       is_storing_texts=is_storing_texts,
+      is_task_list_published=_is_task_list_published(),
+      is_tech_notes_index_published=_is_tech_notes_index_published(),
       other_users=other_users,
       purge_form = GeneralSubmitForm(),
-      qty_admin_users=len(admin_users),
+      qty_staff_users=len(staff_users),
       qty_buggies=len(buggies),
       qty_texts_by_task=qty_texts_by_task,
       qty_texts=qty_texts,
@@ -480,7 +505,7 @@ def admin():
 def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_administrator, user.username))
+    users = sorted(users, key=lambda user: (not user.is_staff, user.username))
     students = [s for s in users if s.is_student]
     qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
     admin_usernames = [user.username for user in users if user.is_administrator]

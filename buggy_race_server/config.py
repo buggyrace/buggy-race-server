@@ -29,7 +29,7 @@ from buggy_race_server.extensions import bcrypt
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.0"
+MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.2"
 #
 # ----------------------------------------------------------------------------
 
@@ -129,6 +129,7 @@ class ConfigSettingNames(Enum):
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
+    PROJECT_REMOTE_SERVER_APP_URL = auto()
     PROJECT_REMOTE_SERVER_NAME = auto()
     PROJECT_REPORT_TYPE = auto()
     PROJECT_SLUG = auto()
@@ -273,6 +274,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
@@ -354,6 +356,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
         ConfigSettingNames.PROJECT_SLUG.name: "",
@@ -452,6 +455,7 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
@@ -803,6 +807,12 @@ class ConfigSettings:
           Leave this blank if your students are all working on their
           own machines (i.e., not a single teaching server with login
           accounts, python, and personalised HTTP ports).""",
+
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name:
+          """If students are going to develop on a remote server, what is the
+          URL then need to hit in their browser to see their app? Presumably
+          it will have a custom port on the end too. If you're not using a
+          remote project server, leave this blank.""",
 
         ConfigSettingNames.PROJECT_REPORT_TYPE.name:
           """If you require students to include a report of how

@@ -13,6 +13,15 @@
       and either accept the default tasks or upload your own customised markdown file.
     </div>
   {% endif %}
+  {% if not is_task_list_published %} 
+    <div class="alert alert-danger">
+      <strong>The task list has not been published</strong>
+      <br>
+      Specifically, the generated task list file cannot be found.
+      Go to <a href="{{ url_for('admin.tasks_admin') }}">config for tasks</a>
+      to publish it.
+    </div>
+  {% endif %}
   {% if not students_active %}
     <div class="alert alert-warning">
       <strong>There are no active enrolled students</strong>
@@ -22,8 +31,8 @@
     </div>
   {% endif %}
   {% if not external_tech_notes_url %}
-    {% if not tech_notes_generated_at %}
-      <div class="alert alert-warning">
+    {% if not (is_tech_notes_index_published and tech_notes_generated_at) %}
+      <div class="alert alert-danger">
         <strong>Tech notes have not been published yet</strong>
         <br>
         When you have finished changing any config settings they might use, go to
@@ -125,13 +134,13 @@
           </tr>
         {% endif %}
         <tr>
-          <td colspan="2">Admin users</td>
-          <td class="text-right">{{ qty_admin_users }}</td>
+          <td colspan="2">Staff users</td>
+          <td class="text-right">{{ qty_staff_users }}</td>
         </tr>
         <tr>
           <td colspan="3">
             <ul class="sm-item-list">
-              {% for u in admin_users %}
+              {% for u in staff_users %}
                 <li>
                   <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.username) }}">{{ u.pretty_username }}</a>
                 </li>

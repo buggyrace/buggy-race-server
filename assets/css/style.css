@@ -331,6 +331,10 @@ footer .footer-nav {
 .table.elastic tr td:last-child {
   width:100%;;
 }
+.table-striped tbody tr.staff{ background-color: #fff3cd; }
+.table-striped tbody tr.staff:hover{ background-color: #f6f0cb; }
+.table-striped tbody tr:nth-of-type(odd).staff{ background-color: #f0e0aa; }
+.table-striped tbody tr:nth-of-type(odd).staff:hover{ background-color: #eddca6; }
 
 .buggy-warn{
   padding:0.5em 0.5em;

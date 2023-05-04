@@ -57,7 +57,7 @@ class UserForm(FlaskForm):
     def validate_email(self, field):
         value = field.data.strip()
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
-            UserForm.check_length(field.name, value, min=3, max=32)
+            UserForm.check_length(field.name, value, min=3, max=80)
             if not '@' in value:
                 raise ValidationError("Email must contain @-sign")
         return value

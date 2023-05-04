@@ -29,7 +29,7 @@ from buggy_race_server.extensions import bcrypt
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.0"
+MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.2"
 #
 # ----------------------------------------------------------------------------
 

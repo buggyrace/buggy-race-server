@@ -56,6 +56,15 @@ you might need to do
 
     npm install --save-dev run-script-os
 
+### How to set up the database on a new install
+
+`flask update` should run the migrations, so you end up with the right
+tables in the database. But for convenience we try to keep `db/schema.sql`
+up-to-date: that's a SQL dump of the structure of the database, so you
+can run that to initialise the tables (etc) _instead_ of migrations. Ideally
+you don't do it this way because the migrations are likely to always be
+the definitive way to do it. But this gives you a way to get the database
+up and running separately from Flask and the app.
 
 ### How to connect to sqlite (in dev)
 
@@ -66,13 +75,6 @@ environment file):
     
 ... but (sigh) SQLAlchemy makes migrations that break in sqlite (something about `ALTER TABLE` or
 `COLUMN`) so in the end I switched to using mySQL for local quick-and-dirty dev (see below).
-
-Might be worth dumping a `dev.db` into the repo with the current schema and a default
-admin user so just pointing DATABASE_URL to it could get going quickly (avoiding any `flask db`
-setup that hits the migration problem). Currently there's a register-an-admin dance in dev that
-this would bypass (Might only be handy for me cos I'm currently avoiding
-using containers: possibly more useful to have a latest `dev.sql` to load up bypassing the migrations
-entirely.
 
 ### How to connect to mySQL
 
@@ -99,78 +101,14 @@ Oops.
 
 ### How to run a race 
 
-Here's how I ran the race, having cloned the repo:
+This used to require running within the Flask shell. That's been dropped and
+for now this is simpler — running `utils/run-buggy-race.py` is enough, provided
+the import of the `BuggySpecs` from `buggy_race_server.lib.race_specs` works.
+That's OK for now but maybe there's a case for importing the buggy specs as
+data.
 
-    $ cd buggy-race-server
-
-Set up a venv to keep things tidy
-
-    $ python3 -m venv venv
-    $ source venv/bin/activate
-    $ pip install -r requirements.txt
-
-Copy the local dev settings into `.env`
-
-    $ cp env.example .env
-
-Might not need this but belt and braces
-
-    $ export FLASK_APP=autoapp.py
-
-Make the (SQL database): upgrade basically makes it
-
-    $ flask db upgrade
-
-(You can also do `flask db migrate` — which is safe — to be
-sure you've got any changes since, but if you've just cloned it
-you'll see "No changes in schema detected")
-
-Now go into the shell: the point is this give access
-to all the app's models in a commandable shell, nice
-
-    $ flask shell
-
-You should see "App: buggy_race_server [development]".
-Grab the buggy_race which (potentially) runs the races!
-
-    $ import buggy_race
-
-Load the CSV that you downloaded from the race server
-
-    $ buggy_race.load_csv()
-
-This starts by reading the buggies from the database, if
-there are any. This is because Flask uses an ORM, so
-creating models basically requires them to go into the
-database. Once you've loaded them, they persist, so you
-can run the (randomised) race as many times as you want
-without needing to reload.
-
-Now run the race!
-
-    $ buggy_race.run_race()
-
-This loads the buggies *from the database* (not the CSV,
-see above), asks you for a point-cost cutoff, and then
-applies the rules to disqualify any who don't qualify:
-it identifies each disqualified buggy together with the
-rules (multiple) it violated (RACE_COST_THRESHOLD is
-the only variable one); all these violations are potentially
-motivating for students to address in their buggy editors,
-so are presumably important to provide to the students.
-
-Then it runs the race: you can see it's *partially*
-implemented. Didn't get finished :-( A bit of thought is
-required to make this log parseable so it could be consumed
-and then replayed by JavaScript on the browser (this is
-why the buggy penant colours/patterns were collected and
-are exposed here: presumably those would be used as the icons
-on the playback screen.)
-
-Output is written to `race.log`
-
-You can leave the arena with
-
-    $ quit()
+Running the race provides the necessary file for uploading results, but it
+doesn't (yet) produce the event log that presumably would be required to
+replay it.
 
 

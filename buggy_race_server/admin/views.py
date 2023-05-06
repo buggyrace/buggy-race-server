@@ -55,6 +55,7 @@ from buggy_race_server.user.forms import UserForm, RegisterForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
+    get_day_of_week,
     get_download_filename,
     get_flag_color_css_defs,
     get_pretty_approx_duration,
@@ -464,6 +465,7 @@ def admin():
       for text in texts:
          if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
             qty_texts_by_task[tasks_by_id[text.task_id]] += 1
+    submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
       "admin/dashboard.html",
       staff_users=staff_users,
@@ -491,7 +493,8 @@ def admin():
       students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
       students_logged_in_today=students_logged_in_today,
       students_never_logged_in=students_never_logged_in,
-      submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+      submission_deadline=submission_deadline,
+      submit_deadline_day=get_day_of_week(submission_deadline),
       tasks=tasks,
       tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],

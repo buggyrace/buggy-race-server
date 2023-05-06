@@ -561,3 +561,10 @@ def get_pretty_approx_duration(secs):
         return "1 hour" if hours == 1 else f"{hours} hours"
     days = int(hours/24)
     return "1 day" if days == 1 else f"{days} days"
+
+def get_day_of_week(datestr):
+    """ doing this silently-robustly (e.g. deadline dates might not exist)"""
+    try:
+        return datetime.strptime(datestr, "%Y-%m-%dT%H:%M").strftime("%A")
+    except ValueError:
+        return ""

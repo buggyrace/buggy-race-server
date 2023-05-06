@@ -30,8 +30,8 @@ from buggy_race_server.user.models import User
 from buggy_race_server.admin.models import SocialSetting, Task
 
 from buggy_race_server.utils import (
-    active_user_required,
     flash_errors,
+    get_day_of_week,
     get_download_filename,
     join_to_project_root,
     warn_if_insecure,
@@ -286,6 +286,7 @@ def serve_project_page(page=None):
             zip_filename_type = 'username'
             if is_personalsed_example:
                 zip_filename_example = current_user.username
+    submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
         template,
         buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
@@ -304,7 +305,8 @@ def serve_project_page(page=None):
         report_type=report_type,
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
-        submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+        submit_deadline=submit_deadline,
+        submit_deadline_day=get_day_of_week(submit_deadline),
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],
         workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],

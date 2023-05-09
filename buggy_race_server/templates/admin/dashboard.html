@@ -49,7 +49,7 @@
           <td class="text-right">{{ qty_students_active }}</td>
         </tr>
         <tr>
-          <td>Logged in today</td>
+          <td>Active today</td>
           <td class="text-right">
             {% if qty_students_active > 0 %}
               {{ (100 * qty_students_logged_in_today/qty_students_active) | int }}%
@@ -71,7 +71,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td>Logged in last 7 days</td>
+          <td>Active last 7 days</td>
           <td class="text-right">
             {% if qty_students_active > 0 %}
               {{ (100 * qty_students_logged_in_this_week/qty_students_active) | int }}%

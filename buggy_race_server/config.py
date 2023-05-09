@@ -88,6 +88,7 @@ class ConfigSettingNames(Enum):
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
+    USER_ACTVITY_PERIOD_S = auto()
     AUTHORISATION_CODE = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
@@ -233,6 +234,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_ID_NAME.name,
         ConfigSettingNames.EXT_ID_EXAMPLE.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
+        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
@@ -382,6 +384,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
+        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_EXT_ID.name: 0,
@@ -481,6 +484,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_EXT_ID.name: ConfigTypes.BOOLEAN,
@@ -931,6 +935,14 @@ class ConfigSettings:
           somewhere else (for example, hosted on GitHub pages), then put the
           URL here. By default, tech notes are hosted on the race
           server, so you can leave this blank.""",
+
+        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name:
+          """The period (in seconds) over which each logged-in user's activity
+          is logged. Pragmatically, this avoids updating the database on every
+          request, because usually you're only concerned about whether or not a
+          student has logged in recently, not the accuracy of the timestamp.
+          This updates the "last activity" timestamp if the user sends a
+          request this-number-of-seconds since the last recorded activity.""",
 
         ConfigSettingNames.USERNAME_EXAMPLE.name:
           """A placeholder string used in the login form. This can be

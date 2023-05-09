@@ -508,7 +508,7 @@ def admin():
 def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_staff, user.username))
+    users = sorted(users, key=lambda user: (user.is_staff, user.username))
     students = [s for s in users if s.is_student]
     qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
     admin_usernames = [user.username for user in users if user.is_administrator]

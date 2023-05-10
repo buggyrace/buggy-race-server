@@ -308,7 +308,7 @@ $(function() {
       $json_payload.text(USER_BUGGY_JSON[username]);
       $json_modal.modal('show')
     };
-    $json_buttons.addClass("btn btn-outline-secondary btn-sm");
+    $json_buttons.addClass("btn btn-outline-secondary btn-white btn-sm");
     $json_buttons.on("click", display_json);
   }
 

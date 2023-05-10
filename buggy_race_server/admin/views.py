@@ -73,6 +73,7 @@ from buggy_race_server.utils import (
     staff_only,
     admin_only,
     stringify_datetime,
+    servertime_str,
 )
 
 blueprint = Blueprint(
@@ -1123,7 +1124,10 @@ def tech_notes_admin():
     ],
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
-    notes_generated_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+    notes_generated_timestamp=servertime_str(
+      current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+      current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+    ),
   )
 
 @blueprint.route("/tasks/publish", methods=["POST"])

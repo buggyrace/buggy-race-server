@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Public section, including homepage and signup."""
-from datetime import datetime
+from datetime import datetime, timezone
 from os import path
 
 from flask import (
@@ -73,7 +73,7 @@ def login():
     if request.method == "POST":
         if form.validate_on_submit():
             login_user(form.user)
-            form.user.logged_in_at = datetime.now()
+            form.user.logged_in_at = datetime.now(timezone.utc)
             form.user.save()
             if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
                 pretty_name = current_user.first_name or current_user.pretty_username
@@ -150,14 +150,14 @@ def announce_races():
     """Race announcement page."""
     next_race=Race.query.filter(
         Race.is_visible==True,
-        Race.start_at > datetime.now()
+        Race.start_at > datetime.now(timezone.utc)
       ).order_by(Race.start_at.asc()).first()
 
     races = db.session.query(
             Race
         ).join(RaceResult).filter(
             Race.is_visible==True,
-            Race.start_at < datetime.now(),
+            Race.start_at < datetime.now(timezone.utc),
             RaceResult.race_position > 0,
             RaceResult.race_position <= 3,
         ).order_by(Race.start_at.desc()).all()

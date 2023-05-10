@@ -2,7 +2,7 @@
 """Buggy views."""
 import json
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
 from flask_login import current_user, login_required
@@ -21,7 +21,7 @@ def handle_uploaded_json(form, user, is_api=False):
   # so we're checking buggy_json field explicitly before getting here
   if form.validate_on_submit() or is_api:
     user.latest_json = form.buggy_json.data
-    user.uploaded_at = datetime.now()
+    user.uploaded_at = datetime.now(timezone.utc)
     user.save()
     try:
       dirty_buggy_data = json.loads(form.buggy_json.data)

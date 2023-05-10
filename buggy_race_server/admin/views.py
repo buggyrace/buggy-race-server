@@ -3,7 +3,7 @@
 import csv
 import io  # for CSV dump
 import random  # for API tests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 from collections import defaultdict
 import markdown
@@ -300,6 +300,7 @@ def setup_summary():
        qty_tasks=Task.query.filter_by(is_enabled=True).count(),
        qty_users=User.query.filter_by(is_active=True).count(),
        report_type=report_type,
+       server_time=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime('%Y-%m-%d %H:%M:%S %Z (%z)'),
        submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
        task_list_published_at=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
@@ -384,7 +385,7 @@ def setup():
             setup_status
           )
           login_user(admin_user)
-          admin_user.logged_in_at = datetime.now()
+          admin_user.logged_in_at = datetime.now(timezone.utc)
           admin_user.save()
           flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
         else: # handle a regular settings update, which may also be part of setup
@@ -440,7 +441,7 @@ def setup():
 @staff_only
 def admin():
     TASK_NOTE_LENGTH_THRESHOLD = 2 # texts shorter than this are not counted
-    today = datetime.now().date()
+    today = datetime.now(timezone.utc).date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
     buggies = Buggy.query.all()
@@ -601,7 +602,7 @@ def bulk_register(data_format=None):
               password=_csv_tidy_string(row, 'password', want_lower=False),
               first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
               last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
-              created_at=datetime.now(),
+              created_at=datetime.now(timezone.utc),
               is_active=True,
               is_student=True,
               access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit

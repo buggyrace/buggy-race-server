@@ -1083,10 +1083,13 @@ def add_example_announcement():
       flash("Problem with example announcement submit", "warning")
     return redirect(url_for("admin.list_announcements"))
 
-@blueprint.route("/tech-notes/publish", methods=["POST"])
+@blueprint.route("/tech-notes/publish", methods=["POST", "GET"])
 @admin_only
 def tech_notes_publish():
-   return tech_notes_admin()
+    if request.method == "GET":
+         # convenience for testing: publishing only makes sense with POST
+        return redirect(url_for('admin.tech_notes_admin'))
+    return tech_notes_admin()
 
 @blueprint.route("/tech-notes", methods=["GET"], strict_slashes=False)
 @login_required

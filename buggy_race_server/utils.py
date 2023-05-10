@@ -568,3 +568,25 @@ def get_day_of_week(datestr):
         return datetime.strptime(datestr, "%Y-%m-%dT%H:%M").strftime("%A")
     except ValueError:
         return ""
+
+def servertime_str(server_timezone, utc_datetime):
+  """ returns a timestamp, as a string, to the server's timezone
+      TODO: this is not handling Daylight Saving correctly:
+            pytz's localise would do that, but from a naive object,
+            and we're coming from UTC.  Experiments with times in
+            "Europe/London" using pytz's timezone localize did not
+            produce correct results.
+            Looks like we need to calculate the DST offset and
+            manually apply it... really?
+  """
+  if utc_datetime is None:
+    return None
+  if type(utc_datetime) == str:
+      # inefficiently robust, but here we are:
+      # timestamp comes in as a string (which is common in the code),
+      # so parse it into a datetime now
+      utc_datetime = datetime.strptime(
+        utc_datetime, "%Y-%m-%d %H:%M"
+      ).astimezone(timezone.utc)
+  # Note: this is converting to the timezone... but not applying daylight saving
+  return utc_datetime.astimezone(server_timezone).strftime("%Y-%m-%d %H:%M")

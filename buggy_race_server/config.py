@@ -1116,6 +1116,7 @@ class ConfigSettings:
          ConfigTypes.DATETIME,
          ConfigTypes.STRING,
          ConfigTypes.URL,
+         ConfigTypes.TIMEZONE,
         ):
         str_value = str_value.replace("\"", "\\\"").replace("\n", " ")
         str_value = f"\"{str_value}\""

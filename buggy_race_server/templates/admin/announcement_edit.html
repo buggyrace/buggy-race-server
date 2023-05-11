@@ -54,13 +54,15 @@
           <input class="btn btn-primary my-3" type="submit" value="Submit announcment" />
         </form>
       </div>
-      <div class="border container my-4 p-3">
-              <form id="AnnounceDeleteForm" class="form form-delete" method="POST"
-                action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
-                {{ delete_form.csrf_token }}
-                {{ delete_form.submit_delete(class="btn btn-danger")}}
-              </form>
-      </div>
+      {% if announcement %}
+        <div class="border container my-4 p-3">
+                <form id="AnnounceDeleteForm" class="form form-delete" method="POST"
+                  action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
+                  {{ delete_form.csrf_token }}
+                  {{ delete_form.submit_delete(class="btn btn-danger")}}
+                </form>
+        </div>
+      {% endif %}
     </div>
     <div class="col-lg-6">
       <div class="alert alert-danger mb-3">
@@ -94,7 +96,7 @@
         <tr>
           <td><code>get-editor</code></td>
           <td>
-            <a href="{{ url_for('public.home') }}">User settings</a> page
+            <a href="{{ url_for('user.settings') }}">User settings</a> page
             (when the student has forked their editor repo)
           </td>
         </tr>

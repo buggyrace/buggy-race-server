@@ -293,6 +293,17 @@
         </p>
       </div>
     </div>
+    <div class="col-md-6">
+      <div class="alert alert-secondary">
+        <h2 class="alert-title">Server time</h2>
+        <p>
+          <code>{{ server_time }}</code>
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='server') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Server</span></a>
+        </p>
+      </div>
+    </div>
   </div>
 
 

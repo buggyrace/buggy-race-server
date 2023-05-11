@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Race model."""
-import datetime as datetime
+from datetime import datetime, timedelta, timezone
 import os
 from sqlalchemy import delete, insert
 
@@ -23,7 +23,7 @@ class Race(SurrogatePK, Model):
 
     def get_default_race_time():
         # two minutes to midnight ;-)
-        tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
+        tomorrow = datetime.today() + timedelta(days=1)
         tomorrow = tomorrow.replace(hour=23, minute=58, second=0, microsecond=0)
         return tomorrow
 
@@ -31,7 +31,7 @@ class Race(SurrogatePK, Model):
     id = db.Column(db.Integer, primary_key=True)
     title = Column(db.String(80), unique=False, nullable=False, default="")
     desc = Column(db.Text(), unique=False, nullable=False, default="")
-    created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
     is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name]))
@@ -204,7 +204,7 @@ class Race(SurrogatePK, Model):
         if not warnings or is_ignoring_warnings:
             db.session.execute(delete(RaceResult).where(RaceResult.race_id==self.id))
             db.session.execute(insert(RaceResult).values(results))
-            self.results_uploaded_at = datetime.datetime.now()
+            self.results_uploaded_at = datetime.now(timezone.utc)
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished

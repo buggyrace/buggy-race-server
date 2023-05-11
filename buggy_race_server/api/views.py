@@ -2,7 +2,7 @@
 """API views."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, Response, request, current_app, render_template
 
@@ -71,8 +71,8 @@ def create_buggy_with_json_via_api():
       return get_json_error_response("not authorised (wrong API key for this user)")
     if user.api_secret is not None and user.api_secret_at is not None:
       if user.api_secret != secret:
-        return get_json_error_response(f"not authorised (bad secret) FIXME {user.api_secret} != {secret}")
-      if (datetime.now() - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
+        return get_json_error_response(f"not authorised (bad secret)")
+      if (datetime.now(timezone.utc) - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
         return get_json_error_response("not authorised (secret has expired)")
       if user.is_api_secret_otp:
           if user.api_secret_count > 0:

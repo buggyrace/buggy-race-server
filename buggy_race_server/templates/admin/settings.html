@@ -11,6 +11,7 @@
     <div class="col">
       <p class="btn-collection">
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.setup') }}">Summary</a>
+        <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
         <a class="btn {% if is_tasks_ok %}btn-outline-secondary{% else %}btn-outline-danger{% endif %} btn-admin btn-jump" href="{{ url_for('admin.tasks_admin')}}">Tasks</a>
         {% if is_tech_note_publishing_enabled %}
           <a class="btn {% if tech_notes_timestamp %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin btn-jump" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
@@ -57,7 +58,9 @@
                 {% set name = "AUTHORISATION_CODE" %}
                 {% include "admin/_env_setting_override.html" %}
                 <p>
-                  Do not forget the new value of the authorisation code!
+                  Admin staff need to know the authorisation code when they make changes
+                  to user or system data.<br>
+                  Do not forget the new value of the authorisation code when you change it!
                 </p>
               </div>
             </div>

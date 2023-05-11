@@ -27,7 +27,7 @@ import os
 import sys
 import csv
 import json
-from datetime import datetime
+from datetime import datetime, timezone # will need locale really
 from random import randint
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
@@ -235,7 +235,7 @@ def run_race(buggies_entered):
     logfilename = DEFAULT_RACE_FILENAME
     print(f"[ ] opening race log file {logfilename}... ")
     logfile = open(logfilename, "w")
-    race_start_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    race_start_at = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
     logfile.write(f"# race cost<={cost_limit} run at {race_start_at}\n")
     print("[ ] Checking race rules...")
     qty_violators = 0

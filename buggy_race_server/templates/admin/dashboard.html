@@ -49,7 +49,7 @@
           <td class="text-right">{{ qty_students_active }}</td>
         </tr>
         <tr>
-          <td>Logged in today</td>
+          <td>Active today</td>
           <td class="text-right">
             {% if qty_students_active > 0 %}
               {{ (100 * qty_students_logged_in_today/qty_students_active) | int }}%
@@ -71,7 +71,7 @@
           </tr>
         {% endif %}
         <tr>
-          <td>Logged in last 7 days</td>
+          <td>Active last 7 days</td>
           <td class="text-right">
             {% if qty_students_active > 0 %}
               {{ (100 * qty_students_logged_in_this_week/qty_students_active) | int }}%
@@ -209,7 +209,7 @@
           <!-- "dedaline-container" is magic: js enhanced -->
           <td id="deadline-container" colspan="3">
             {% if submission_deadline %}
-              <span style="display:inline-block;margin-right:1em;">{{ submission_deadline | replace("T", " ") }}</span>
+              <span style="display:inline-block;margin-right:1em;">{{ submit_deadline_day }} {{ submission_deadline | replace("T", " ") }}</span>
               <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submission_deadline }}"></span>
             {% else %}
               not set
@@ -279,7 +279,6 @@
       <div class="col mt-5">
           <p class="btn-collection">
             <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System info</a>
-            <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
           </p>
         </p>
       </div>

@@ -4,7 +4,7 @@
 import csv
 import re
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
 from flask_login import current_user, login_required
@@ -62,7 +62,7 @@ def edit_race(race_id=None):
                   start_at=form.start_at.data,
                   is_visible=form.is_visible.data,
                 )
-                if race.start_at.date() < datetime.now().date():
+                if race.start_at.date() < datetime.now(timezone.utc).date():
                     success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
                 else:
                     success_msg = f"OK, created new race"

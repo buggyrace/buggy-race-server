@@ -2,10 +2,12 @@
 """The app module, containing the app factory function."""
 import logging
 import sys
+from datetime import datetime, timezone
 
 #import traceback # for debug/dev work
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_login import current_user
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.utils import (
@@ -104,6 +106,28 @@ def create_app():
         def force_redirect_http_to_https():
             if not request.is_secure:
                 return redirect(request.url.replace('http://', 'https://', 1), code=301)
+
+    @app.before_request
+    def bump_login_timestamp():
+        ACTIVITY_AT = "activity_at"
+        activity_update_period_s = app.config.get(ConfigSettingNames.USER_ACTVITY_PERIOD_S.name) or 0
+        if current_user and current_user.is_authenticated and session:
+            now_utc = datetime.now(timezone.utc)
+            active_timestamp = session.get(ACTIVITY_AT)
+            if not active_timestamp:
+                active_timestamp = session[ACTIVITY_AT] = now_utc
+                delta_s = 0
+            else:
+                try:
+                    delta_s = (now_utc - active_timestamp).total_seconds()
+                except TypeError as e: # login timestamp wasn't UTC
+                    current_user.logged_in_at = now_utc
+                    current_user.save()
+                    delta_s = 0
+            if delta_s and delta_s > activity_update_period_s:
+                current_user.logged_in_at = now_utc
+                current_user.save()
+                active_timestamp = session[ACTIVITY_AT] = now_utc
 
     return app
 

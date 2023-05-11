@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """User views."""
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import threading
 import markdown
 from flask import (
@@ -23,9 +23,9 @@ from functools import wraps
 from wtforms import ValidationError
 
 from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
-from buggy_race_server.admin.models import TaskText, Task
+from buggy_race_server.admin.models import TaskText, Task, AnnouncementType
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames
+from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
@@ -98,6 +98,7 @@ def settings():
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
         project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
+        local_announcement_type=AnnouncementType.GET_EDITOR.value,
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)
@@ -239,7 +240,7 @@ def set_api_secret():
     warn_if_insecure()
     form = ApiSecretForm()
     is_confirmation = False
-    delta_mins = int((datetime.now()-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
+    delta_mins = int((datetime.now(timezone.utc)-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
     is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
     is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name]
     if request.method == "POST":
@@ -248,7 +249,7 @@ def set_api_secret():
                 flash(f"Warning! Your API secret was not set: must be different from the last one.", "danger")
             else:
                 current_user.api_secret = form.api_secret.data
-                current_user.api_secret_at = datetime.now()
+                current_user.api_secret_at = datetime.now(timezone.utc)
                 current_user.api_secret_count = 0
                 if is_student_api_otp_allowed:
                     current_user.is_api_secret_otp = form.is_one_time_password.data
@@ -369,7 +370,7 @@ def task_text(task_fullname):
             user_id=current_user.id,
             task_id=task.id,
             text="",
-            created_at=datetime.now())
+            created_at=datetime.now(timezone.utc))
     if request.method == "POST":
         if form.task_id.data != str(task.id):
             flash("Mismatched task in request", "danger")
@@ -380,7 +381,7 @@ def task_text(task_fullname):
         if form.validate_on_submit():
             tasktext.text = form.text.data
             if not is_new_text:
-                tasktext.modified_at = datetime.now()
+                tasktext.modified_at = datetime.now(timezone.utc)
             tasktext.save()
             flash(f"OK, saved {user.pretty_username}'s text for task {task.fullname}", "success")
             return redirect(url_for("user.list_task_texts"))
@@ -455,7 +456,7 @@ def download_texts(username, format):
             tasks_by_id=tasks_by_id,
             project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
             report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-            downloaded_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
             buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         )
     )

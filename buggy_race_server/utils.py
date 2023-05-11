@@ -11,7 +11,7 @@ from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigT
 from buggy_race_server.admin.models import Announcement, Setting, Task
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
-from datetime import datetime
+from datetime import datetime, timezone
 import subprocess
 
 def refresh_global_announcements(app):
@@ -192,10 +192,10 @@ def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """
   return name.replace("_", " ").title()
 
-def get_download_filename(filename, want_datestamp=False):
+def get_download_filename(filename, want_datestamp=False, timezone=timezone.utc):
   """ For download files, returns the filename with a slug/project prefix, if configured. """
   if want_datestamp:
-    datestamp = datetime.now().strftime('%Y-%m-%d')
+    datestamp = datetime.now(timezone).strftime('%Y-%m-%d')
     parts = filename.rsplit(".", 1) # (filename, extension)
     if len(parts) == 2:
       filename = f"{parts[0]}-{datestamp}.{parts[1]}"
@@ -340,7 +340,7 @@ def publish_tech_notes(app=current_app):
         set_and_save_config_setting(
           app,
           name=ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
-          value=datetime.now().strftime("%Y-%m-%d %H:%M")
+          value=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )
     # there's a keepfile (for git) in the technotes output dir
     # Pelican has probably deleted it, so replace it
@@ -374,7 +374,7 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
         set_and_save_config_setting(
             app,
             ConfigSettingNames._TASKS_LOADED_DATETIME.name,
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         )
     return len(new_tasks)
 
@@ -474,7 +474,7 @@ def publish_task_list(app=current_app):
     # render the tasklist template and save it as _task_list.html
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
-    created_at = datetime.now()
+    created_at = datetime.now(timezone.utc)
     html = render_template(
         "public/project/_tasks.html",
         poster_word = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
@@ -482,7 +482,7 @@ def publish_task_list(app=current_app):
         expected_phase_completion = app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         tasks_by_phase = tasks_by_phase,
         qty_tasks=qty_tasks,
-        created_at=created_at,# for debug: includes seconds, but config doesn't
+        created_at=datetime.now(app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]),
         is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
     )
     task_list_filename = app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
@@ -561,3 +561,32 @@ def get_pretty_approx_duration(secs):
         return "1 hour" if hours == 1 else f"{hours} hours"
     days = int(hours/24)
     return "1 day" if days == 1 else f"{days} days"
+
+def get_day_of_week(datestr):
+    """ doing this silently-robustly (e.g. deadline dates might not exist)"""
+    try:
+        return datetime.strptime(datestr, "%Y-%m-%dT%H:%M").strftime("%A")
+    except ValueError:
+        return ""
+
+def servertime_str(server_timezone, utc_datetime):
+  """ returns a timestamp, as a string, to the server's timezone
+      TODO: this is not handling Daylight Saving correctly:
+            pytz's localise would do that, but from a naive object,
+            and we're coming from UTC.  Experiments with times in
+            "Europe/London" using pytz's timezone localize did not
+            produce correct results.
+            Looks like we need to calculate the DST offset and
+            manually apply it... really?
+  """
+  if utc_datetime is None:
+    return None
+  if type(utc_datetime) == str:
+      # inefficiently robust, but here we are:
+      # timestamp comes in as a string (which is common in the code),
+      # so parse it into a datetime now
+      utc_datetime = datetime.strptime(
+        utc_datetime, "%Y-%m-%d %H:%M"
+      ).astimezone(timezone.utc)
+  # Note: this is converting to the timezone... but not applying daylight saving
+  return utc_datetime.astimezone(server_timezone).strftime("%Y-%m-%d %H:%M")

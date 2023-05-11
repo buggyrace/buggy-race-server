@@ -3,7 +3,7 @@
 import csv
 import io  # for CSV dump
 import random  # for API tests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 from collections import defaultdict
 import markdown
@@ -55,6 +55,7 @@ from buggy_race_server.user.forms import UserForm, RegisterForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
+    get_day_of_week,
     get_download_filename,
     get_flag_color_css_defs,
     get_pretty_approx_duration,
@@ -72,6 +73,7 @@ from buggy_race_server.utils import (
     staff_only,
     admin_only,
     stringify_datetime,
+    servertime_str,
 )
 
 blueprint = Blueprint(
@@ -299,6 +301,7 @@ def setup_summary():
        qty_tasks=Task.query.filter_by(is_enabled=True).count(),
        qty_users=User.query.filter_by(is_active=True).count(),
        report_type=report_type,
+       server_time=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime('%Y-%m-%d %H:%M:%S %Z (%z)'),
        submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
        task_list_published_at=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
@@ -383,7 +386,7 @@ def setup():
             setup_status
           )
           login_user(admin_user)
-          admin_user.logged_in_at = datetime.now()
+          admin_user.logged_in_at = datetime.now(timezone.utc)
           admin_user.save()
           flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
         else: # handle a regular settings update, which may also be part of setup
@@ -439,7 +442,7 @@ def setup():
 @staff_only
 def admin():
     TASK_NOTE_LENGTH_THRESHOLD = 2 # texts shorter than this are not counted
-    today = datetime.now().date()
+    today = datetime.now(timezone.utc).date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
     buggies = Buggy.query.all()
@@ -464,6 +467,7 @@ def admin():
       for text in texts:
          if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
             qty_texts_by_task[tasks_by_id[text.task_id]] += 1
+    submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
       "admin/dashboard.html",
       staff_users=staff_users,
@@ -491,7 +495,8 @@ def admin():
       students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
       students_logged_in_today=students_logged_in_today,
       students_never_logged_in=students_never_logged_in,
-      submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+      submission_deadline=submission_deadline,
+      submit_deadline_day=get_day_of_week(submission_deadline),
       tasks=tasks,
       tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
@@ -598,7 +603,7 @@ def bulk_register(data_format=None):
               password=_csv_tidy_string(row, 'password', want_lower=False),
               first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
               last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
-              created_at=datetime.now(),
+              created_at=datetime.now(timezone.utc),
               is_active=True,
               is_student=True,
               access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit
@@ -1079,10 +1084,13 @@ def add_example_announcement():
       flash("Problem with example announcement submit", "warning")
     return redirect(url_for("admin.list_announcements"))
 
-@blueprint.route("/tech-notes/publish", methods=["POST"])
+@blueprint.route("/tech-notes/publish", methods=["POST", "GET"])
 @admin_only
 def tech_notes_publish():
-   return tech_notes_admin()
+    if request.method == "GET":
+         # convenience for testing: publishing only makes sense with POST
+        return redirect(url_for('admin.tech_notes_admin'))
+    return tech_notes_admin()
 
 @blueprint.route("/tech-notes", methods=["GET"], strict_slashes=False)
 @login_required
@@ -1116,7 +1124,10 @@ def tech_notes_admin():
     ],
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
-    notes_generated_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+    notes_generated_timestamp=servertime_str(
+      current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+      current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+    ),
   )
 
 @blueprint.route("/tasks/publish", methods=["POST"])

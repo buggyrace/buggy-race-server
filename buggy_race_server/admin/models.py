@@ -69,6 +69,7 @@ class Setting(SurrogatePK, Model):
 
 class AnnouncementType(Enum):
     DANGER = 'danger'
+    GET_EDITOR = 'get-editor'
     INFO = 'info'
     LOGIN = 'login'
     SPECIAL = 'special'
@@ -92,6 +93,7 @@ class Announcement(SurrogatePK, Model):
         "Shown within specific page:": [
             AnnouncementType.LOGIN.value,
             AnnouncementType.TAGLINE.value,
+            AnnouncementType.GET_EDITOR.value,
         ]
     }
 

@@ -54,6 +54,13 @@
           <input class="btn btn-primary my-3" type="submit" value="Submit announcment" />
         </form>
       </div>
+      <div class="border container my-4 p-3">
+              <form id="AnnounceDeleteForm" class="form form-delete" method="POST"
+                action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
+                {{ delete_form.csrf_token }}
+                {{ delete_form.submit_delete(class="btn btn-danger")}}
+              </form>
+      </div>
     </div>
     <div class="col-lg-6">
       <div class="alert alert-danger mb-3">
@@ -65,6 +72,7 @@
         You may need to hide/publish announcements to see changes take
         effect after you have submitted them.  
       </p>
+      <h3>Top-of-page announcements</h3>
       <p>
         Announcements of type
         <code class="alert-danger p-1">danger</code>,
@@ -73,29 +81,34 @@
         <code class="alert-warning p-1">warning</code>
         appear on all pages (except tech notes).
       </p>
+      <h3>Page-specific announcements</h3>
       <p>
         The <code>login</code> and <code>tagline</code> announcements are
-        not styled, and <strong>only</strong> appear on the
-        <a href="{{ url_for('public.login') }}">login</a> and
-        <a href="{{ url_for('public.home') }}">home</a> pages respectively.
+        not styled, and <strong>only</strong> appear on these pages:
       </p>
-
+      <table class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
+        <tr>
+          <th>Announcement</th>
+          <th>Where does it appear?</th>
+        </tr>
+        <tr>
+          <td><code>get-editor</code></td>
+          <td>
+            <a href="{{ url_for('public.home') }}">User settings</a> page
+            (when the student has forked their editor repo)
+          </td>
+        </tr>
+        <tr>
+          <td><code>home</code></td>
+          <td><a href="{{ url_for('public.home') }}">Home page</a></td>
+        </tr>
+        <tr>
+          <td><code>login</code></td>
+          <td><a href="{{ url_for('public.login') }}">Login form</a></td>
+        </tr>
+      </table>
     </div>
   </div>
-
-  {% if announcement %}
-    <div class="row my-3">
-      <div class="col-lg-6">
-        <div class="border container p-3">
-          <form id="AnnounceDeleteForm" class="form form-delete" method="POST"
-            action="{{ url_for('admin.delete_announcement', announcement_id=announcement.id)}}" role="form">
-            {{ delete_form.csrf_token }}
-            {{ delete_form.submit_delete(class="btn btn-danger")}}
-          </form>
-        </div>
-      </div>
-    </div>
-  {% endif %}
 </div>
 
 {% endblock %}

@@ -29,7 +29,7 @@ import pytz # timezones
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.2"
+MANUAL_LATEST_VERSION_IN_SOURCE = "1.0.3"
 #
 # ----------------------------------------------------------------------------
 

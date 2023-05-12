@@ -7,26 +7,11 @@
     Bad Request
   </p>
   <p>
-    This problem is nearly always because your request didn't have the correct
-    CSRF token.
-    <br>
-    The racing server puts a token into every form, and when you
-    click a button it checks that the token matches what it expected.
-    <br>
-    These tokens timeout, and that's probably what happened here.
-  </p>
-  <p>
-    <strong>Go back and refresh the page you came from</strong>
-    <br>
-    and then try to click on the button again.
-    <br>
-    That will probably solve the problem.
-  </p>
-  <h4 class="mt-5">What are CSRF tokens? Why does this happen?</h4>
-  <p>
-    These <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">Cross-site
-    Request Forgery</a> tokens prevent someone hijacking your login by
-    <em>pretending</em> to be a request you sent. 
+    This problem <em>might</em> be because your request didn't have the correct
+    <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">Cross-site
+    Request Forgery token</a>. This happens if you click a button on a stale
+    form. If so, try going back, refreshing the page, and submitting the form
+    again.
   </p>
 </div>
 {% endblock %}

@@ -125,7 +125,19 @@
                 {% endif %}
               </td>  
             </tr>
-          {% endif %}
+            <tr>
+              <td>
+                GitHub access token
+              </td>
+              <td>
+                {% if user.github_access_token %}
+                  <em><code>[redacted]</code></em>
+                {% else %}
+                  <em>not set</em>
+                {% endif %}
+              </td>  
+            </tr>
+            {% endif %}
           <tr>
             <td>
               Last logged-in activity
@@ -163,7 +175,7 @@
               API key
             </td>
             <td>
-              {% if user.api_secret %}
+              {% if user.api_key %}
                 <code>{{ user.api_key }}</code>
               {% endif %}
             </td>  

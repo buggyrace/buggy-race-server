@@ -43,6 +43,7 @@ from buggy_race_server.admin.forms import (
     SetupAuthForm,
     SetupSettingForm,
     SimpleStringForm,
+    SubmitWithConfirmForm,
     TaskForm,
 )
 from buggy_race_server.admin.models import Announcement, AnnouncementType, TaskText, Setting, SocialSetting, Task
@@ -779,6 +780,41 @@ def manage_user(user_id):
     user=user,
   )
 
+# user_id may be username or id
+@blueprint.route("/user/<user_id>/delete-github", methods=['POST'])
+@login_required
+@admin_only
+def delete_github_details(user_id):
+    if str(user_id).isdigit():
+      user = User.get_by_id(int(user_id))
+    else:
+      user = User.query.filter_by(username=user_id).first()
+    if user is None:
+      abort(404)
+    form = SubmitWithConfirmForm(request.form)
+    if form.validate_on_submit():
+        if (user.github_username is None and user.github_access_token is None):
+            flash("Nothing changed: user's GitHub details were already removed", "warning")
+        elif not form.is_confirmed.data:
+            flash(
+              f"Did not not delete GitHub details because you did not explicity confirm it",
+              "danger"
+            )
+            return redirect(url_for("admin.edit_user", user_id=user.id))
+        else:
+            user.github_username = None
+            user.github_access_token = None
+            user.save()
+            flash(
+              f"OK, user {user.pretty_username}'s GitHub details have been removed",
+              "success"
+            )
+            flash(
+              "Reminder: this hasn't changed anything on GitHub.com — "
+              "if they forked the buggy editor repo, it will still be there",
+              "info"
+            )
+    return redirect(url_for("admin.list_users"))
 
 @blueprint.route("/users/new", methods=['GET', 'POST'])
 def new_user():

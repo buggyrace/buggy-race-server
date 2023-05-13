@@ -569,7 +569,7 @@ def get_day_of_week(datestr):
     except ValueError:
         return ""
 
-def servertime_str(server_timezone, utc_datetime, want_datetime=False):
+def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
   """ returns a timestamp, (default: as a string), in the server's timezone
       All dates here (backstage) should are UTC.
       TODO: this is not handling Daylight Saving correctly:
@@ -580,15 +580,20 @@ def servertime_str(server_timezone, utc_datetime, want_datetime=False):
             Looks like we need to calculate the DST offset and
             manually apply it... really?
   """
-  if utc_datetime is None:
+  if utc_datetime_input is None:
     return None
-  if type(utc_datetime) == str:
+  if type(utc_datetime_input) == str:
       # inefficiently robust, but here we are:
       # timestamp comes in as a string (which is common in the code),
-      # so parse it into a datetime now
+      # so parse it into a datetime now — may or may not have seconds
+      m = re.search(
+        "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
+        utc_datetime_input).groups()
       utc_datetime = datetime.strptime(
-        utc_datetime, "%Y-%m-%d %H:%M"
+        f"{m[0]}{m[1] or ':00'}", "%Y-%m-%d %H:%M:%S"
       ).astimezone(timezone.utc)
+  else:
+    utc_datetime = utc_datetime_input
   utc_datetime = utc_datetime.astimezone(server_timezone)
   # Note: this is converting to the timezone... but not applying daylight saving
   if want_datetime:

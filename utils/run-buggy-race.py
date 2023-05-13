@@ -190,10 +190,12 @@ def load_csv(csv_filename=None):
         headers = []
         buggy_data = []
         for row in reader:
-            if len(headers):
-                buggy_data.append(row)
-            else:
-                headers = row.keys()
+            print(row)
+            buggy_data.append(row)
+            # if len(headers):
+            #     buggy_data.append(row)
+            # else:
+            #     headers = row.keys()
         print(f"[+] read data for {len(buggy_data)} buggies")
     buggies = []
     print("[ ] Processing: ", end="")
@@ -263,79 +265,79 @@ def run_race(buggies_entered):
         logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
     logfile.write("#\n")
     if len(buggies) == 0:
-      logfile.write("# race abandoned: no buggies available to run\n")
-      print("[!] race abandoned")
-      return
-    logfile.write("# race starts...\n")
-    print("[ ] GO!")
-    clicks = 0
-    max_clicks = DEFAULT_INITIAL_CLICKS 
-    winners = []
+        logfile.write("# race abandoned: no buggies available to run\n")
+        print("[!] race abandoned because nobody entered it")
+    else:
+        logfile.write("# race starts...\n")
+        print("[ ] GO!")
+        clicks = 0
+        max_clicks = DEFAULT_INITIAL_CLICKS 
+        winners = []
 
-    while clicks < max_clicks:
-        clicks += 1
-        qty_active = 0
-        for buggy in buggies:
-            if buggy.is_parked:
-                continue
-            qty_active += 1
-            if pk(1) and pk(buggy.mass/buggy.qty_wheels):
-                racelog(b, "catastrophic chassis failure: buggy breaks.")
-                buggy.is_parked = True
-            if pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
-                buggy.suffer_puncture()
-                if buggy.qty_good_wheels == 0:
-                    punc_str = "no tyres left: parked"
+        while clicks < max_clicks:
+            clicks += 1
+            qty_active = 0
+            for buggy in buggies:
+                if buggy.is_parked:
+                    continue
+                qty_active += 1
+                if pk(1) and pk(buggy.mass/buggy.qty_wheels):
+                    racelog(b, "catastrophic chassis failure: buggy breaks.")
+                    buggy.is_parked = True
+                if pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
+                    buggy.suffer_puncture()
+                    if buggy.qty_good_wheels == 0:
+                        punc_str = "no tyres left: parked"
+                    else:
+                        punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
+                        punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
+                    racelog(buggy, f"puncture! {punc_str}")
+                
+                power = buggy.power_in_use()
+                if power is not None:
+                    b.consume_power()
+                    #racelog(buggy, "power {} consumed (units {})".format(power, buggy.power_units))
+                    new_power = buggy.power_in_use()
+                    if new_power != power:
+                        if new_power is None:
+                            racelog(buggy, f"ran out of {power} power")
+                        else:
+                            racelog(buggy, f"ran out of {power}, switched to auxiliary power: {new_power}")
+                
+                    #   ? risk of primary power fail?
+
+                    #   distance travelled x % of tires
+                    #   data[id][x]+=speed
+                    #   if data[id][x] > race_distance
+                    #     winners.append(b)
+                    #   if len(winnners): bail out
+                    #   data[id]["attacks"] > 0?
+                    #     anyone near? chance of attack?
+                    #     target defensive? steady?
+                    #        ? chance of attack backfire
+                    #          calculate damage of attack
+                if qty_active == 0:
+                    print("[ ] no buggies moving...")
+                    break
                 else:
-                    punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
-                    punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
-                racelog(buggy, f"puncture! {punc_str}")
-            
-            power = buggy.power_in_use()
-            if power is not None:
-                b.consume_power()
-                #racelog(buggy, "power {} consumed (units {})".format(power, buggy.power_units))
-                new_power = buggy.power_in_use()
-                if new_power != power:
-                    if new_power is None:
-                        racelog(buggy, f"ran out of {power} power")
-                    else:
-                        racelog(buggy, f"ran out of {power}, switched to auxiliary power: {new_power}")
-            
-                #   ? risk of primary power fail?
-
-                #   distance travelled x % of tires
-                #   data[id][x]+=speed
-                #   if data[id][x] > race_distance
-                #     winners.append(b)
-                #   if len(winnners): bail out
-                #   data[id]["attacks"] > 0?
-                #     anyone near? chance of attack?
-                #     target defensive? steady?
-                #        ? chance of attack backfire
-                #          calculate damage of attack
-            if qty_active == 0:
-                print("[ ] no buggies moving...")
-                break
-            else:
-                if clicks == max_clicks:
-                    more_clicks = str(
-                      input(f"[?] {clicks} clicks so far: add more? [+{DEFAULT_MORE_CLICKS}] ")).strip()
-                    if more_clicks == '':
-                        more_clicks = DEFAULT_MORE_CLICKS
-                    else:
-                        try:
-                            more_clicks = int(more_clicks)
-                        except ValueError:
-                            print("[!] integer greater than 1 needed")
-                        more_clicks = 0
-                    if more_clicks > 0:
-                        print(f"[+] running race for another +{more_clicks} clicks")
-                    else:
-                        print("[-] no more clicks, time is up")
-                    max_clicks += more_clicks
-    logfile.close()
-    print(f"[:] race ends after {clicks} clicks")
+                    if clicks == max_clicks:
+                        more_clicks = str(
+                        input(f"[?] {clicks} clicks so far: add more? [+{DEFAULT_MORE_CLICKS}] ")).strip()
+                        if more_clicks == '':
+                            more_clicks = DEFAULT_MORE_CLICKS
+                        else:
+                            try:
+                                more_clicks = int(more_clicks)
+                            except ValueError:
+                                print("[!] integer greater than 1 needed")
+                            more_clicks = 0
+                        if more_clicks > 0:
+                            print(f"[+] running race for another +{more_clicks} clicks")
+                        else:
+                            print("[-] no more clicks, time is up")
+                        max_clicks += more_clicks
+        logfile.close()
+        print(f"[:] race ends after {clicks} clicks")
     print(f"[ ] see race log in {logfilename}")
     results = {
       # "race_title": "",
@@ -365,12 +367,6 @@ def run_race(buggies_entered):
     print(f"[ ] wrote to {jsonfilename}, ready to upload")
     print(f"[.] bye")
 
-def l():
-    load_csv()
-def r():
-    run_race()
-
-
 def main():
     print("[ ] Ready to race!")
     buggies = None
@@ -381,9 +377,7 @@ def main():
     except ValueError as e:
         print(f"\n[!] Problem in CSV: {e}")
 
-    if buggies:
-        run_race(buggies)
-
+    run_race(buggies)
 
 if __name__ == "__main__":
     main()

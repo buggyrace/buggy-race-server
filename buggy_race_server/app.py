@@ -16,7 +16,8 @@ from buggy_race_server.utils import (
     publish_task_list,
     publish_tech_notes,
     save_config_env_overrides_to_db,
-    load_settings_from_db
+    load_settings_from_db,
+    servertime_str,
 )
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -128,6 +129,13 @@ def create_app():
                 current_user.logged_in_at = now_utc
                 current_user.save()
                 active_timestamp = session[ACTIVITY_AT] = now_utc
+
+    def get_servertime(utc_datetime):
+        return servertime_str(
+            app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+            utc_datetime
+        )
+    app.jinja_env.filters['servertime'] = get_servertime
 
     return app
 

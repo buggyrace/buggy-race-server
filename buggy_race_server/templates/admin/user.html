@@ -144,7 +144,7 @@
             </td>
             <td>
               {% if user.logged_in_at is not none %}
-                {{ user.logged_in_at }}
+                {{ user.logged_in_at | servertime }}
               {% endif %}
             </td>  
           </tr>
@@ -154,7 +154,7 @@
             </td>
             <td>
               {% if user.uploaded_at is not none %}
-                {{ user.uploaded_at }}
+                {{ user.uploaded_at | servertime }}
               {% endif %}
             </td>  
           </tr>
@@ -166,7 +166,7 @@
               {% if user.api_secret %}
                 <code>{{ user.api_secret }}</code>
                 <br>
-                {{ user.api_secret_at }}
+                {{ user.api_secret_at | servertime }}
               {% endif %}
             </td>  
           </tr>

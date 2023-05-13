@@ -153,9 +153,7 @@ def announce_races():
         Race.start_at > datetime.now(timezone.utc)
       ).order_by(Race.start_at.asc()).first()
 
-    races = db.session.query(
-            Race
-        ).join(RaceResult).filter(
+    races = db.session.query(Race).join(RaceResult).filter(
             Race.is_visible==True,
             Race.start_at < datetime.now(timezone.utc),
             RaceResult.race_position > 0,

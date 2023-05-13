@@ -161,7 +161,7 @@
           <div class="row py-3">
             <div class="col">
               {% if tasks_loaded_at %}
-                Tasks loaded into&nbsp;database: {{ tasks_loaded_at }}
+                Tasks loaded into&nbsp;database: {{ tasks_loaded_at | servertime }}
               {% else %}
                 Missing timestamp
                 (maybe no tasks have been loaded&nbsp;yet)

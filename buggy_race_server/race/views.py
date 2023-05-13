@@ -12,7 +12,13 @@ from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
 from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import flash_errors, staff_only, admin_only, get_flag_color_css_defs
+from buggy_race_server.utils import (
+    admin_only,
+    flash_errors,
+    get_flag_color_css_defs,
+    servertime_str,
+    staff_only,
+)
 from buggy_race_server.config import ConfigSettingNames
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
@@ -210,13 +216,13 @@ def show_race_results(race_id):
     flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     return render_template(
         "races/result.html",
-        race=race,
-        results_finishers=results_finishers,
-        results_nonfinishers=results_nonfinishers,
-        results_disqualified=results_disqualified,
-        is_tied=is_tied,
+        current_user_id=0 if current_user.is_anonymous else current_user.id,
         flag_color_css_defs=flag_color_css_defs,
         is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
-        current_user_id=0 if current_user.is_anonymous else current_user.id,
+        is_tied=is_tied,
+        race=race,
+        results_disqualified=results_disqualified,
+        results_finishers=results_finishers,
+        results_nonfinishers=results_nonfinishers,
     )
   

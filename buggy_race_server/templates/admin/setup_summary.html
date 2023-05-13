@@ -89,7 +89,7 @@
             The <strong>task list has not been published</strong> yet.
           {% else %}
             The <strong>task list</strong> was last published on 
-            {{ task_list_published_at }}
+            {{ task_list_published_at | servertime }}
           {% endif %}
         </p>
         <p class="btn-collection">
@@ -105,7 +105,7 @@
             they are at <code>{{ tech_notes_external_url }}</code>.
           {% else %}
             {% if is_tech_notes_index_published and tech_notes_published_at %}
-              The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at }}.
+              The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at | servertime }}.
             {% else %}
               The supporting <strong>tech notes have not yet been published</strong>.
             {% endif %}

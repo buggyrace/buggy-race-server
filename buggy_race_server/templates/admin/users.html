@@ -161,7 +161,7 @@
                 </td>
               {% endif %}
               <td class="u-login-at">
-                {{ u.pretty_login_at }}
+                {{ u.logged_in_at | servertime }}
               </td>
               <td class="u-github">  
                 {% if u.github_username %}
@@ -185,7 +185,7 @@
                 -->
               </td>
               <td  class="u-uploaded">
-                {{ u.pretty_uploaded_at }}
+                {{ u.uploaded_at | servertime }}
               </td>
             </tr>
           {% endif %}

@@ -93,7 +93,11 @@ The first request is the for the webpage `cat.html`.
   .ksd button.ksd-stop.ksd-stopping,
   .ksd button.ksd-stop.ksd-stopping:hover { background-color: #ff0000; color: #fff;}
 
-  .ksd-captions { min-height:6rem; }
+  .ksd-captions {
+    min-height:6rem;
+    border-top:1px solid #ccc;
+    padding-bottom: 1em;
+  }
   .ksd-captions p, .ksd-captions li {padding: 1em;}
   .ksd-hidden {
     display: none;
@@ -170,7 +174,7 @@ if(document.location.search.substr(1).split('&').indexOf('global=paused')>=0)ks.
       The example starts with a call to <code>example.com/cat.html</code>
     </li>
     <li>
-      The client (browser) makes a GET request for the resource (<code>cat.html</code>)
+      The client (browser) sends a GET request for the resource (<code>cat.html</code>)
     </li>
     <li>
       The webserver serves the GET request: it sends a response

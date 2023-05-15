@@ -84,8 +84,8 @@
                 Email
               </td>
               <td>
-                {% if user.last_name is not none %}
-                  {{ user.last_name }}
+                {% if user.email is not none %}
+                  {{ user.email }}
                 {% endif %}
               </td>
             </tr>
@@ -125,14 +125,26 @@
                 {% endif %}
               </td>  
             </tr>
-          {% endif %}
+            <tr>
+              <td>
+                GitHub access token
+              </td>
+              <td>
+                {% if user.github_access_token %}
+                  <em><code>[redacted]</code></em>
+                {% else %}
+                  <em>not set</em>
+                {% endif %}
+              </td>  
+            </tr>
+            {% endif %}
           <tr>
             <td>
               Last logged-in activity
             </td>
             <td>
               {% if user.logged_in_at is not none %}
-                {{ user.logged_in_at }}
+                {{ user.logged_in_at | servertime }}
               {% endif %}
             </td>  
           </tr>
@@ -142,7 +154,7 @@
             </td>
             <td>
               {% if user.uploaded_at is not none %}
-                {{ user.uploaded_at }}
+                {{ user.uploaded_at | servertime }}
               {% endif %}
             </td>  
           </tr>
@@ -154,7 +166,7 @@
               {% if user.api_secret %}
                 <code>{{ user.api_secret }}</code>
                 <br>
-                {{ user.api_secret_at }}
+                {{ user.api_secret_at | servertime }}
               {% endif %}
             </td>  
           </tr>
@@ -163,7 +175,7 @@
               API key
             </td>
             <td>
-              {% if user.api_secret %}
+              {% if user.api_key %}
                 <code>{{ user.api_key }}</code>
               {% endif %}
             </td>  

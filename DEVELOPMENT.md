@@ -98,6 +98,37 @@ If you try to connect to mySQL credentials with the `postgres` scheme, you get t
 
 Oops.
 
+### How to add animated diagrams to the Tech Notes (202)
+
+> There are currently two: in webserver and flask-webserver
+> (`/tech-notes/contnet/tech-notes/*.md`)
+
+The SVG diagrams are made with [KeyShape](https://www.keyshapeapp.com) (Mac only)
+and then made interactive with the
+[KeyshapeDiagram script](https://github.com/davewhiteland/keyshape-diagram)
+([docs](https://davewhiteland.github.io/keyshape-diagram/docs))
+(which was written for the SuperBasics project).
+
+* in KeyShape, add _named time markers_ to the diagram
+* export as SVG with these settings:
+  * Format: **SVG**
+  * Animation: **KeyshapeJS Animation**
+    * _do not write SVG1.1 filters_ (my diagrams probably haven't needed them anyway)
+    * _do check all these:_ write text as paths, embed images, Optimize (defaults are OK)
+  * Object IDs: **Prefix** `svg-01-` (probably doesn't matter)
+  * JS Library: **External** (see below: you're pasting it into the page anyway)
+  * Loops: **Play once**
+* add a `<div class="example"></div>` to the markdown page in tech notes
+* copy-and-paste the contents of the external `keyshapejs-1.2.0.min.js` script into a `<script>`
+  tag inside the example div (unless it's being served as an external resource, which it isn't (yet)
+  because the two tech_note diagrams are from different versions of KS)
+* copy-and-paste the SVG the div as the `<svg>` element it already is...
+* add `class="ksd"` to the that SVG!
+* add the captions as `<ol class="ksd-captions">` (the order is critical (of course): match the
+  timestamps in your animation... otherwise you _can_ do by matching IDs but I haven't needed to)
+* add a no-JS fallback div too: `<div class="ksd-no-js">`
+* finally remember to call `ksd.js` at the bottom of the page to make it happen
+
 
 ### How to run a race 
 

@@ -21,6 +21,7 @@ from buggy_race_server.database import (
 )
 from buggy_race_server.extensions import bcrypt
 from buggy_race_server.lib.http import Http
+from buggy_race_server.utils import servertime_str
 
 API_KEY_LENGTH = 16
 
@@ -160,7 +161,6 @@ class User(UserMixin, SurrogatePK, Model):
             repo = self.course_repository
         else:
             repo = None
-
         fields = {
             'username': self.username,
             'ext_username': self.ext_username,
@@ -169,8 +169,8 @@ class User(UserMixin, SurrogatePK, Model):
             'last_name': self.last_name,
             'email': self.email,
             'is_active': 1 if self.is_active else 0,
-            'last_login': self.pretty_login_at,
-            'last_upload_at': self.pretty_uploaded_at,
+            'last_login': self.logged_in_at,
+            'last_upload_at': self.uploaded_at,
             'json_length': self.pretty_json_length,
             'github_username': self.github_username,
             'github_repo': repo,
@@ -216,22 +216,6 @@ class User(UserMixin, SurrogatePK, Model):
     def full_name(self):
         """Full user name."""
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
-
-    @property
-    def pretty_login_at(self):
-        """last logged-in timestamp or empty string."""
-        if self.logged_in_at:
-            return self.logged_in_at.strftime("%Y-%m-%d %H:%M")
-        else:
-            return ""
-
-    @property
-    def pretty_uploaded_at(self):
-        """last logged-in timestamp or empty string."""
-        if self.uploaded_at:
-            return self.uploaded_at.strftime("%Y-%m-%d %H:%M")
-        else:
-            return ""
 
     @property
     def pretty_json_length(self):

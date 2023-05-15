@@ -302,6 +302,14 @@ class TaskTextDeleteForm(FlaskForm):
     def validate(self):
         return super(TaskTextDeleteForm, self).validate()
 
+class SubmitWithConfirmForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+  
+    def __init__(self, *args, **kwargs):
+        super(SubmitWithConfirmForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(SubmitWithConfirmForm, self).validate()
 
 class GeneralSubmitForm(FlaskForm):
 

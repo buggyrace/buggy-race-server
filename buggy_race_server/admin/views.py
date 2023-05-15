@@ -43,6 +43,7 @@ from buggy_race_server.admin.forms import (
     SetupAuthForm,
     SetupSettingForm,
     SimpleStringForm,
+    SubmitWithConfirmForm,
     TaskForm,
 )
 from buggy_race_server.admin.models import Announcement, AnnouncementType, TaskText, Setting, SocialSetting, Task
@@ -510,7 +511,7 @@ def admin():
 def list_users(data_format=None, want_detail=True):
     """Admin list-of-uses/students page (which is the admin home page too)."""
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_staff, user.username))
+    users = sorted(users, key=lambda user: (user.is_staff, user.username))
     students = [s for s in users if s.is_student]
     qty_teaching_assistants = len([u for u in users if u.is_teaching_assistant])
     admin_usernames = [user.username for user in users if user.is_administrator]
@@ -779,6 +780,41 @@ def manage_user(user_id):
     user=user,
   )
 
+# user_id may be username or id
+@blueprint.route("/user/<user_id>/delete-github", methods=['POST'])
+@login_required
+@admin_only
+def delete_github_details(user_id):
+    if str(user_id).isdigit():
+      user = User.get_by_id(int(user_id))
+    else:
+      user = User.query.filter_by(username=user_id).first()
+    if user is None:
+      abort(404)
+    form = SubmitWithConfirmForm(request.form)
+    if form.validate_on_submit():
+        if (user.github_username is None and user.github_access_token is None):
+            flash("Nothing changed: user's GitHub details were already removed", "warning")
+        elif not form.is_confirmed.data:
+            flash(
+              f"Did not not delete GitHub details because you did not explicity confirm it",
+              "danger"
+            )
+            return redirect(url_for("admin.edit_user", user_id=user.id))
+        else:
+            user.github_username = None
+            user.github_access_token = None
+            user.save()
+            flash(
+              f"OK, user {user.pretty_username}'s GitHub details have been removed",
+              "success"
+            )
+            flash(
+              "Reminder: this hasn't changed anything on GitHub.com — "
+              "if they forked the buggy editor repo, it will still be there",
+              "info"
+            )
+    return redirect(url_for("admin.list_users"))
 
 @blueprint.route("/users/new", methods=['GET', 'POST'])
 def new_user():
@@ -803,7 +839,7 @@ def edit_user(user_id):
 @staff_only
 def api_keys():
     users = User.query.all()
-    users = sorted(users, key=lambda user: (not user.is_staff, user.username))
+    users = sorted(users, key=lambda user: (user.is_staff, user.username))
     form = ApiKeyForm(request.form)
     if request.method == "POST":
       want_api_key_generated = None

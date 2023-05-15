@@ -57,7 +57,7 @@
               {% endif %}
             </td>
             <td>
-              {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
+              {{ race.start_at | servertime }}
             </td>
             <td>
               <div class="cell-title">

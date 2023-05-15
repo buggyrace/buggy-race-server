@@ -20,6 +20,7 @@ For task [0-RUN]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-run):
 Your buggy editor is a webserver... 
 
 * [what is a webserver?](webserver)
+* ...then: [how Flask works as a webserver](flask-webserver)
 
 Debugging tips:
 

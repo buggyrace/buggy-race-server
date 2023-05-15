@@ -32,12 +32,11 @@
         <div class="col">
           <div class="alert alert-success text-center">
             <h2 class="m-3">
-              <strong>
-              {{ next_race.start_at.strftime('%A') }}
+              {{ next_race.start_at_servertime.strftime('%A') }}
               <br>
-              {{ next_race.start_at.strftime('%Y-%m-%d') }}
+              {{ next_race.start_at_servertime.strftime('%Y-%m-%d') }}
               <br>
-              {{ next_race.start_at.strftime('%H:%M') }}
+              {{ next_race.start_at_servertime.strftime('%H:%M') }}
               </strong>
             </h2>
           </div>
@@ -129,7 +128,7 @@
                   </td>
                 {% endif %}
                 <td>
-                  {{ race.start_at.strftime('%Y-%m-%d %H:%M') }}
+                  {{ race.start_at | servertime }}
                 </td>
                 <td class="text-center">
                   {{ race.cost_limit }}

@@ -16,6 +16,7 @@ from buggy_race_server.database import (
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
+from buggy_race_server.utils import servertime_str
 
 
 class Race(SurrogatePK, Model):
@@ -59,7 +60,14 @@ class Race(SurrogatePK, Model):
     def slug(self):
         return self.start_at.strftime('%Y-%m-%d-%H-%M')
 
-#      return f"{self.league}self.start_at.strftime('%Y-%m-%d-%H-%M')
+    @property
+    def start_at_servertime(self):
+        """ Allows Jinja to display day/month/time as separate elements"""
+        return servertime_str(
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+            self.start_at,
+            want_datetime=True # otherwise we get a string
+        )
 
     @staticmethod
     def get_duplicate_urls(race_id, result_log_url, buggies_csv_url, race_log_url):
@@ -203,7 +211,9 @@ class Race(SurrogatePK, Model):
             warnings.append(f"number of buggies finished ({qty_buggies_finished}) does not match total in JSON ({total_buggies_finished})")
         if not warnings or is_ignoring_warnings:
             db.session.execute(delete(RaceResult).where(RaceResult.race_id==self.id))
-            db.session.execute(insert(RaceResult).values(results))
+            if results:
+                # TODO: not having results is problematic — see issue #129
+                db.session.execute(insert(RaceResult).values(results))
             self.results_uploaded_at = datetime.now(timezone.utc)
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started

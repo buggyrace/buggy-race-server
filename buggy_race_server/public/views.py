@@ -153,9 +153,7 @@ def announce_races():
         Race.start_at > datetime.now(timezone.utc)
       ).order_by(Race.start_at.asc()).first()
 
-    races = db.session.query(
-            Race
-        ).join(RaceResult).filter(
+    races = db.session.query(Race).join(RaceResult).filter(
             Race.is_visible==True,
             Race.start_at < datetime.now(timezone.utc),
             RaceResult.race_position > 0,
@@ -261,7 +259,7 @@ def serve_project_page(page=None):
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
     is_zip_info_displayed = current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
     zip_filename_type = current_app.config[ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name]
-    zip_filename_type_name = "race server username"
+    zip_filename_type_name = None
     zip_filename_example = current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name]
     is_personalsed_example = current_user and not current_user.is_anonymous
     if zip_filename_type == 'ext_id':
@@ -282,10 +280,13 @@ def serve_project_page(page=None):
             if not zip_filename_example:
                 zip_filename_example = current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name]
                 is_personalsed_example = False
-        else:
-            zip_filename_type = 'username'
-            if is_personalsed_example:
-                zip_filename_example = current_user.username
+    else:
+        zip_filename_type = 'username'
+    if zip_filename_type == 'username':
+        zip_filename_type_name = "race server username"
+        if is_personalsed_example:
+            zip_filename_example = current_user.username
+
     submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
         template,

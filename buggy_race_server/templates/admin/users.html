@@ -151,7 +151,13 @@
                 {% if config['USERS_HAVE_EXT_ID'] %}
                   <td class="u-ext-id">{% if u.ext_id is not none %}<code>{{ u.ext_id }}</code>{% endif %}</td>
                 {% endif %}
-                <td class="u-created-at">  {{ u.created_at.strftime('%Y-%m-%d')}}</td>
+                <td class="u-created-at">
+                    {% if u.created_at %}
+                      {{ u.created_at | servertime }}
+                    {% else %}
+                    <em class="empty-setting">none</em>
+                    {% endif %}
+                </td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">
                   {% if u.is_active %}
                     Yes
@@ -161,7 +167,11 @@
                 </td>
               {% endif %}
               <td class="u-login-at">
-                {{ u.logged_in_at | servertime }}
+                {% if u.logged_in_at %}
+                  {{ u.logged_in_at | servertime }}
+                {% else %}
+                  <em class="empty-setting">none</em>
+                {% endif %}
               </td>
               <td class="u-github">  
                 {% if u.github_username %}
@@ -185,7 +195,11 @@
                 -->
               </td>
               <td  class="u-uploaded">
-                {{ u.uploaded_at | servertime }}
+                {% if u.uploaded_at %}
+                  {{ u.uploaded_at | servertime }}
+                {% else %}
+                  <em class="empty-setting">none</em>
+                {% endif %}
               </td>
             </tr>
           {% endif %}

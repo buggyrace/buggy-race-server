@@ -308,6 +308,7 @@ def serve_project_page(page=None):
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         submit_deadline=submit_deadline,
         submit_deadline_day=get_day_of_week(submit_deadline),
+        superbasics_url=current_app.config[ConfigSettingNames.SUPERBASICS_URL.name],
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],
         workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],

@@ -153,6 +153,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
+    SUPERBASICS_URL = auto()
     TASK_NAME_FOR_API = auto()
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
@@ -284,7 +285,8 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
+        ConfigSettingNames.SUPERBASICS_URL.name,
       ),
       ConfigGroupNames.TASKS.name: (
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
@@ -386,6 +388,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
@@ -488,6 +491,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
@@ -922,6 +926,15 @@ class ConfigSettings:
           """Short description""",
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
+
+        ConfigSettingNames.SUPERBASICS_URL.name:
+          """There are a few places (for example in the workflow
+          page and the tech notes) that link to a "superbasics" site
+          which explains basic concepts for students. You can use the
+          default, but you can also fork it and customise it, in which
+          case put its URL here. Note that the links are to specific
+          paths within the superbasics, which are added to this base
+          URL.""",
 
         ConfigSettingNames.TASK_NAME_FOR_API.name:
           """The name of the task that require use of the

@@ -206,13 +206,13 @@ if(document.location.search.substr(1).split('&').indexOf('global=paused')>=0)ks.
 The browser doesn't know (or care) about the name of the directory the
 webserver is using to store the information. It's called the "server root"
 because it's _effectively_ the
-[root directory](https://superbasics.beholder.uk/files/root/)
+[root directory]({{ SUPERBASICS_URL }}/files/root/)
 of the webserver. In fact there will be many other directories <em>below</em>
 that one — so it's not the root directory of that machine's file system. But
 when the websever looks for the file requested, it _only_ looks inside the
 server root (and any directories it contains).
 
-URLs often look like [file paths](https://superbasics.beholder.uk/files/paths/)
+URLs often look like [file paths]({{ SUPERBASICS_URL }}/files/paths/)
 because sometimes that's exactly what they are: paths through the filesystem
 starting at the server root. But as you'll discover in your Buggy Editor, in
 practice there are good reasons why it doesn't always work this way.

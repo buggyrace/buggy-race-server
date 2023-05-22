@@ -52,7 +52,7 @@
     <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
       <thead>
         <tr class="sticky-top bg-white">
-          {% if current_user.is_administrator %}
+          {% if current_user_can_edit %}
             <th></th>
           {% endif %}
           <th></th>
@@ -84,7 +84,7 @@
       <tbody>
         <tr>
           {% if qty_students > 0 %}
-            {% if current_user.is_administrator %}
+            {% if current_user_can_edit %}
               <td></td>
             {% endif %}
             <td></td>
@@ -118,9 +118,9 @@
         {% for u in users %}
           {% if want_detail or u.is_student %}
             <tr {% if u.is_staff %}class="staff" {% endif %}>
-              {% if current_user.is_administrator %}
+              {% if current_user_can_edit %}
                 <td class="bool-{{ u.is_active | lower }}">
-                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin.edit_user', user_id=u.id) }}">Edit</a>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for(edit_method, user_id=u.id) }}">Edit</a>
                 </td>
               {% endif %}
               <td style="width:1em">

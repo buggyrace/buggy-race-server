@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+{% if is_current_user_administrator %}
+  {%include "admin/_nav.html" %}
+{% endif %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Edit comment on user {{ user.pretty_username }}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-6 p-3">
+      <div class="border container">
+        <div class="row">
+          <div class="col p-3">
+            <form id="delete_github_form" method="POST" action="{{ url_for('admin.edit_user_comment', user_id=user.id) }}" role="form">
+              {{ form.csrf_token }}
+              <div class="row">
+                <div class="col">
+                  <p>
+                    Comments on a user are only shown to staff users, inside the admin.
+                  </p>
+                  {{ form.comment.label }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  {{ form.comment(class_="form-control mr-sm-1", rows=8) }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col p-3">
+                  <input type="submit" class="btn btn-primary" value="Submit comment"/>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if current_user.is_teaching_assistant and (is_ta_edit_comment_enabled or is_ta_password_change_enabled) %}
+      <div class="col-lg-6 p-3">
+        <div class="alert alert-info">
+          <h2 class="alert-title"></h2>
+          <p>
+            In general, as a Teaching Assistant you cannot edit user data.
+            However:
+          </p>
+          <ul>
+            {% if is_ta_edit_comment_enabled %}
+              <li>You <strong>can</strong> edit user comments.</li>
+            {% endif %}
+            {% if is_ta_password_change_enabled %}
+              <li>You <strong>can</strong> reset students' passwords.</li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  <div class="row">
+    <div class="col-lg-6 p-3">
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary btn-admin btn-jump">Users</a>
+        <a href="{{ url_for('admin.show_user', user_id=user.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Show user {{ user.pretty_username }}</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

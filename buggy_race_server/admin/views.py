@@ -52,7 +52,7 @@ from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
-from buggy_race_server.user.forms import UserForm, RegisterForm
+from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
@@ -531,6 +531,14 @@ def list_users(data_format=None, want_detail=True):
       return output
     else:
       # TODO want_detail shows all users (otherwise it's only students)
+      current_user_can_edit = current_user.is_administrator
+      edit_method = "admin.edit_user"
+      if (
+          current_user.is_teaching_assistant and
+          current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
+      ):
+          current_user_can_edit = True
+          edit_method = "admin.edit_user_comment"
       return render_template("admin/users.html",
         want_detail = want_detail,
         editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
@@ -547,6 +555,8 @@ def list_users(data_format=None, want_detail=True):
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+        current_user_can_edit=current_user_can_edit,
+        edit_method=edit_method,
     )
 
 
@@ -826,6 +836,43 @@ def new_user():
         flash("You need to be an administrator to register new users (registration is not public)", "warning")
         abort(403)
     return manage_user(user_id=None)
+
+@blueprint.route("/user/<user_id>/edit-comment", methods=['GET', 'POST'])
+@login_required
+@staff_only
+def edit_user_comment(user_id):
+    if not(
+        current_user.is_administrator or
+        (
+          current_user.is_teaching_assistant and
+          current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
+        )
+    ):
+        abort(403)
+    if str(user_id).isdigit():
+        user = User.get_by_id(int(user_id))
+    else:
+        user = User.query.filter_by(username=user_id).first()
+    if user is None:
+        flash("No such user", "danger")
+        abort(404)
+    form = UserCommentForm(request.form, obj=user)
+    if request.method=="POST":
+        if form.validate_on_submit():
+            user.comment = form.comment.data.strip()
+            user.save()
+            flash(f"OK, updated comment on user {user.pretty_username}", "success")
+            return redirect(url_for("admin.show_user", user_id=user_id))
+        else:
+          flash("Did not update comment!", "danger")
+          flash_errors(form)
+    return render_template(
+      "admin/user_edit_comment.html",
+      user=user,
+      form=form,
+      is_ta_edit_comment_enabled=current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name],
+      is_ta_password_change_enabled=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+    )
 
 # user_id may be username or id
 @blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])

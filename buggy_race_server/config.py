@@ -121,6 +121,7 @@ class ConfigSettingNames(Enum):
     IS_STORING_STUDENT_TASK_TEXTS = auto()
     IS_STUDENT_API_OTP_ALLOWED = auto()
     IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
@@ -235,6 +236,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_ID_NAME.name,
         ConfigSettingNames.EXT_ID_EXAMPLE.name,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
       ),
@@ -352,6 +354,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: 1,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
@@ -453,6 +456,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
@@ -730,6 +734,10 @@ class ConfigSettings:
           using GitHub. If you choose `Yes`, make sure you've set
           `IS_USING_GITHUB_API_TO_FORK` if you want this to be automated
           via the race server.""",
+        
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
+          """Teaching Assistants cannot edit user data. Do you want TAs
+          to be able to add or edit comments left by staff?""",
 
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name:
           """Administrators can change other users' passwords. Choose `Yes`

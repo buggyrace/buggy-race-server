@@ -1029,10 +1029,16 @@ def settings(group_name=None):
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     )
 
+@blueprint.route("/announcements/no-html", strict_slashes=False)
+@login_required
+@admin_only
+def list_announcements_without_html():
+    return list_announcements(is_html_enabled=False)
+
 @blueprint.route("/announcements", strict_slashes=False)
 @login_required
 @admin_only
-def list_announcements():
+def list_announcements(is_html_enabled=True):
     # only using the form for the CSRF token at this point
     form = AnnouncementActionForm(request.form)
     announcements = sorted(
@@ -1042,12 +1048,20 @@ def list_announcements():
     has_example_already = bool(
        [ann for ann in announcements if ann.text == Announcement.EXAMPLE_ANNOUNCEMENT]
     )
+    is_html_suppressed = True
     return render_template(
       "admin/announcements.html",
       announcements=announcements,
       form=form,
       example_form=None if has_example_already else GeneralSubmitForm(),
+      is_html_enabled=is_html_enabled
     )
+
+@blueprint.route("/announcements/<int:announcement_id>/no-html", methods=["GET"])
+def edit_announcement_without_html(announcement_id):
+    """ exists solely to allow suppression of HTML inside announcement 
+        in the event of an announcement having broken the page layout """
+    return edit_announcement(announcement_id)
 
 @blueprint.route("/announcements/<int:announcement_id>", methods=["GET", "POST"])
 @blueprint.route("/announcements/new", methods=["GET", "POST"])

@@ -35,7 +35,7 @@
           {% if not announcement.type in ["login", "tagline", "get-editor"] %}
             <div class="row my-2 mx-0 announcement-wrapper announcement-{{ announcement.type }} w-100">
               <div class="announcement-inner-box text-center alert">
-                  {% if announcement.is_html %}
+                  {% if announcement.is_html and not request.url.endswith('/no-html') %}
                     {{ announcement.text|safe }}
                   {% else %}
                     {{ announcement.text }}

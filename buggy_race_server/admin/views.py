@@ -52,7 +52,7 @@ from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
-from buggy_race_server.user.forms import UserForm, RegisterForm
+from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     flash_errors,
@@ -531,6 +531,14 @@ def list_users(data_format=None, want_detail=True):
       return output
     else:
       # TODO want_detail shows all users (otherwise it's only students)
+      current_user_can_edit = current_user.is_administrator
+      edit_method = "admin.edit_user"
+      if (
+          current_user.is_teaching_assistant and
+          current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
+      ):
+          current_user_can_edit = True
+          edit_method = "admin.edit_user_comment"
       return render_template("admin/users.html",
         want_detail = want_detail,
         editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
@@ -547,6 +555,8 @@ def list_users(data_format=None, want_detail=True):
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+        current_user_can_edit=current_user_can_edit,
+        edit_method=edit_method,
     )
 
 
@@ -827,6 +837,43 @@ def new_user():
         abort(403)
     return manage_user(user_id=None)
 
+@blueprint.route("/user/<user_id>/edit-comment", methods=['GET', 'POST'])
+@login_required
+@staff_only
+def edit_user_comment(user_id):
+    if not(
+        current_user.is_administrator or
+        (
+          current_user.is_teaching_assistant and
+          current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
+        )
+    ):
+        abort(403)
+    if str(user_id).isdigit():
+        user = User.get_by_id(int(user_id))
+    else:
+        user = User.query.filter_by(username=user_id).first()
+    if user is None:
+        flash("No such user", "danger")
+        abort(404)
+    form = UserCommentForm(request.form, obj=user)
+    if request.method=="POST":
+        if form.validate_on_submit():
+            user.comment = form.comment.data.strip()
+            user.save()
+            flash(f"OK, updated comment on user {user.pretty_username}", "success")
+            return redirect(url_for("admin.show_user", user_id=user_id))
+        else:
+          flash("Did not update comment!", "danger")
+          flash_errors(form)
+    return render_template(
+      "admin/user_edit_comment.html",
+      user=user,
+      form=form,
+      is_ta_edit_comment_enabled=current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name],
+      is_ta_password_change_enabled=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+    )
+
 # user_id may be username or id
 @blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])
 @login_required
@@ -982,10 +1029,16 @@ def settings(group_name=None):
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     )
 
+@blueprint.route("/announcements/no-html", strict_slashes=False)
+@login_required
+@admin_only
+def list_announcements_without_html():
+    return list_announcements(is_html_enabled=False)
+
 @blueprint.route("/announcements", strict_slashes=False)
 @login_required
 @admin_only
-def list_announcements():
+def list_announcements(is_html_enabled=True):
     # only using the form for the CSRF token at this point
     form = AnnouncementActionForm(request.form)
     announcements = sorted(
@@ -995,12 +1048,20 @@ def list_announcements():
     has_example_already = bool(
        [ann for ann in announcements if ann.text == Announcement.EXAMPLE_ANNOUNCEMENT]
     )
+    is_html_suppressed = True
     return render_template(
       "admin/announcements.html",
       announcements=announcements,
       form=form,
       example_form=None if has_example_already else GeneralSubmitForm(),
+      is_html_enabled=is_html_enabled
     )
+
+@blueprint.route("/announcements/<int:announcement_id>/no-html", methods=["GET"])
+def edit_announcement_without_html(announcement_id):
+    """ exists solely to allow suppression of HTML inside announcement 
+        in the event of an announcement having broken the page layout """
+    return edit_announcement(announcement_id)
 
 @blueprint.route("/announcements/<int:announcement_id>", methods=["GET", "POST"])
 @blueprint.route("/announcements/new", methods=["GET", "POST"])

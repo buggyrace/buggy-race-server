@@ -185,3 +185,17 @@ class ApiSecretForm(FlaskForm):
         if not initial_validation:
             return False
         return initial_validation
+
+class UserCommentForm(FlaskForm):
+    comment = TextAreaField(
+        "Comment",
+        validators=[Optional(), Length(max=1024)]
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Create instance."""
+        super(UserCommentForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        """Validate the form."""
+        return super(UserCommentForm, self).validate()

@@ -29,7 +29,7 @@ import pytz # timezones
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v1.0.41"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v1.0.42"
 #
 # ----------------------------------------------------------------------------
 
@@ -121,6 +121,7 @@ class ConfigSettingNames(Enum):
     IS_STORING_STUDENT_TASK_TEXTS = auto()
     IS_STUDENT_API_OTP_ALLOWED = auto()
     IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
@@ -152,6 +153,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
+    SUPERBASICS_URL = auto()
     TASK_NAME_FOR_API = auto()
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
@@ -235,6 +237,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
         ConfigSettingNames.EXT_ID_NAME.name,
         ConfigSettingNames.EXT_ID_EXAMPLE.name,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
       ),
@@ -282,7 +285,8 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
+        ConfigSettingNames.SUPERBASICS_URL.name,
       ),
       ConfigGroupNames.TASKS.name: (
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
@@ -352,6 +356,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: 1,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
@@ -383,6 +388,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
@@ -453,6 +459,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
@@ -484,6 +491,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
@@ -730,6 +738,10 @@ class ConfigSettings:
           using GitHub. If you choose `Yes`, make sure you've set
           `IS_USING_GITHUB_API_TO_FORK` if you want this to be automated
           via the race server.""",
+        
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
+          """Teaching Assistants cannot edit user data. Do you want TAs
+          to be able to add or edit comments left by staff?""",
 
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name:
           """Administrators can change other users' passwords. Choose `Yes`
@@ -914,6 +926,15 @@ class ConfigSettings:
           """Short description""",
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
+
+        ConfigSettingNames.SUPERBASICS_URL.name:
+          """There are a few places (for example in the workflow
+          page and the tech notes) that link to a "superbasics" site
+          which explains basic concepts for students. You can use the
+          default, but you can also fork it and customise it, in which
+          case put its URL here. Note that the links are to specific
+          paths within the superbasics, which are added to this base
+          URL.""",
 
         ConfigSettingNames.TASK_NAME_FOR_API.name:
           """The name of the task that require use of the

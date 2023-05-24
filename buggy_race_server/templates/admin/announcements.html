@@ -8,6 +8,15 @@
     </h1>
   </div>
   <div class="row">
+    <div class="col pb-2 text-right">
+      {% if is_html_enabled %}
+        <a href="{{ url_for('admin.list_announcements_without_html') }}" class="btn btn-sm btn-outline-primary">Suppress HTML in list</a>
+      {% else %}
+      <a href="{{ url_for('admin.list_announcements') }}" class="btn btn-sm btn-outline-primary">Apply HTML in list</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row">
     {% if announcements %}
       <table class="col table table-striped table-bordered table-hover table-responsive-md bg-white">
         <thead>
@@ -22,12 +31,17 @@
           {% for announcement in announcements %}
             <tr>
               <td>
-                <a href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id)}}"
-                class="btn btn-outline-secondary btn-admin btn-jump">Edit</a>
+                {% if is_html_enabled %}
+                  <a href="{{ url_for('admin.edit_announcement', announcement_id=announcement.id)}}"
+                  class="btn btn-outline-secondary btn-admin btn-jump">Edit</a>
+                {% else %}
+                  <a href="{{ url_for('admin.edit_announcement_without_html', announcement_id=announcement.id)}}"
+                  class="btn btn-outline-secondary btn-admin btn-jump">Edit</a>
+                {% endif %}
               </td>
               <td>{{announcement.type}}</td>
               <td>
-                {% if announcement.is_html %}
+                {% if is_html_enabled and announcement.is_html %}
                   {{announcement.text|safe}}
                 {% else %}
                   {{announcement.text}}

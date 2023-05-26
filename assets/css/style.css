@@ -461,6 +461,7 @@ p.btn-collection {
 a.sm-item-link, span.sm-item-link{
   background-color: #e8e8e8;
   min-width:2em;
+  border: 1px solid #666;
 }
 a.sm-item-link:hover {
   background-color: #666666;

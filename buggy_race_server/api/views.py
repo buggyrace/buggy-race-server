@@ -72,7 +72,14 @@ def create_buggy_with_json_via_api():
     if user.api_secret is not None and user.api_secret_at is not None:
       if user.api_secret != secret:
         return get_json_error_response(f"not authorised (bad secret)")
-      if (datetime.now(timezone.utc) - user.api_secret_at).seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
+      now_utc = datetime.now(timezone.utc)
+      try:
+          delta_time = now_utc - user.api_secret_at
+      except TypeError:
+          # TODO the current_user.api_secret_at WAS NAIVE
+          # TODO see issue #139
+          delta_time = now_utc - user.api_secret_at.replace(tzinfo=timezone.utc)
+      if delta_time.seconds > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
         return get_json_error_response("not authorised (secret has expired)")
       if user.is_api_secret_otp:
           if user.api_secret_count > 0:

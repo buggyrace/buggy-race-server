@@ -240,7 +240,17 @@ def set_api_secret():
     warn_if_insecure()
     form = ApiSecretForm()
     is_confirmation = False
-    delta_mins = int((datetime.now(timezone.utc)-current_user.api_secret_at).seconds/60) if current_user.api_secret_at else -1
+    if current_user.api_secret_at:
+        now_utc = datetime.now(timezone.utc)
+        try:
+            delta_mins =  now_utc - current_user.api_secret_at
+        except TypeError as error:
+            # TODO the current_user.api_secret_at WAS NAIVE (but how? just saved it as UTC)
+            # TODO see issue #139
+            delta_mins = now_utc - current_user.api_secret_at.replace(tzinfo=timezone.utc)
+        delta_mins = int(delta_mins.seconds/60)
+    else:
+        delta_mins = -1
     is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
     is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name]
     if request.method == "POST":

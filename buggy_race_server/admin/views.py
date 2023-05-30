@@ -502,6 +502,13 @@ def admin():
       tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
       users_deactivated=users_deactivated,
+      is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+      notes_generated_timestamp=servertime_str(
+        current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+        current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+      ),
+      task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+      form=GeneralSubmitForm(), # for publish submit buttons
     )
 
 @blueprint.route("/users", strict_slashes=False)

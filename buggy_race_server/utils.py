@@ -580,10 +580,10 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
             Looks like we need to calculate the DST offset and
             manually apply it... really?
   """
-  if utc_datetime_input is None:
+  if not utc_datetime_input: # may be None or exceptionally ""
     return None
   if type(utc_datetime_input) == str:
-      # inefficiently robust, but here we are:
+      # insufficiently robust, but here we are:
       # timestamp comes in as a string (which is common in the code),
       # so parse it into a datetime now — may or may not have seconds
       m = re.search(

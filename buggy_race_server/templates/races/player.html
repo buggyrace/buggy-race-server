@@ -10,6 +10,7 @@
 .player-container {
   display:flex;
   flex-direction: column;
+  align-items: flex-start;
   height:100vh;
 }
 #race-canvas {
@@ -26,6 +27,8 @@
   overflow:hidden; /* otherwise SVG pushes div a bit wider */
   flex-shrink: 0;
   transition: background-image 1s ease-in-out;
+  width:95%;
+  max-width:95%;
 }
 #info-panel {
   flex-grow:1;
@@ -38,6 +41,18 @@
   display:grid;
   grid-template-columns: 1fr;
   grid-template-rows: 3rem 1fr;
+  height:95%;
+  width:95%;
+  max-width:95%;
+}
+@media (orientation: landscape) {
+  .player-container {
+    flex-direction: row;
+  }
+  #race-canvas, #info-panel {
+    width: 50%;
+    max-width:50%;
+  }
 }
 #racetrack-svg {
   position: relative;

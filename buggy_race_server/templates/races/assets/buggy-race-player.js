@@ -62,11 +62,14 @@ const TIME_INDICATOR = document.getElementById("time-indicator");
 var is_first_race = true;
 var is_paused = true;
 var lap_count = 1;
-var racetrack_svg;
+var leading_buggy_before = null;
+var leading_buggy = null;
 var race_json;
+var racetrack_svg;
 var resize_time_id = null;
 var step_count = 0;
 var svg_buggies = [];
+
 
 function get_query_var(var_name){
   let query = window.location.search.substring(1);
@@ -248,7 +251,7 @@ function reset_replay(){
   report(
     RACE_INFO.title,
     "title",
-    " <" + plural(RACE_INFO.qty_buggies, "buggy", "buggies") + ">"
+    " <" + plural(RACE_INFO.qty_buggies, "starting buggy", "starting buggies") + ">"
   );
 }
 
@@ -298,35 +301,20 @@ function pretty_id(buggy_id){
   return buggy_id.substr(BUGGY_ID_PREFIX.length);
 }
 
-/* for testing output: not-every-step dynamic output */
-let last_loser = null;
-let last_leader = null;
-let loser = null;
-let leader = null;
-
 function do_step(){
   display_time_string();
 
-  // ------------------------------- testing output ------vvv
   if (step_count > 0) {
     for (let buggy of svg_buggies) {
-      if (!leader || buggy.track_data.distance > leader.track_data.distance) {
-        leader = buggy;
-      }
-      if (!loser || buggy.track_data.distance < loser.track_data.distance) {
-          loser = buggy
+      if (!leading_buggy || buggy.track_data.distance > leading_buggy.track_data.distance) {
+        leading_buggy = buggy;
       }
     }
-    if (leader && leader != last_leader) {
-      report(pretty_id(leader.id) + " is winning");
-      last_leader = leader;
-    }
-    if (loser && loser != last_loser) {
-      report(pretty_id(loser.id) + " is losing");
-      last_loser = loser;
+    if (leading_buggy && leading_buggy != leading_buggy_before) {
+      report(pretty_id(leading_buggy.id) + " takes the lead");
+      leading_buggy_before = leading_buggy;
     }
   }
-  // ------------------------------- testing output ------^^^
 
   let step_promises = [];
   for (let buggy of svg_buggies){
@@ -435,7 +423,6 @@ window.onresize = on_resize;
   }
   freeze_racelog_height();
 
-  let json_data = null;
   /* if embedded (on the race server), RACE_LOG_JSON_URL will be defined */
   let race_url = RACE_LOG_JSON_URL;
   let is_running_embedded = race_url!=undefined && race_url.indexOf("{")===-1;
@@ -491,7 +478,6 @@ window.onresize = on_resize;
             console.log("ERROR:FIXME")
             throw new Error("failed to parse SVG data")
           }
-          console.log("FIXME good to go?")
           set_up_race();
           setTimeout(reset_replay, 1000);
         })

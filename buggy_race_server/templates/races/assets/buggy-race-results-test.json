@@ -1,0 +1,427 @@
+{
+  "SELF_URL": "http://localhost:8000/races/assets/buggy-race-results-test.json",
+  "title": "Test XXX race",
+  "description": "A test race",
+  "max_laps": 4,
+  "track_image_url": "/static/build/img/racetrack-bg-desert-1.jpg",
+  "track_svg_url": "/static/build/img/racetrack-path-1.svg",
+  "race_log_url": "/races/assets/buggy-race-results-test.json",
+  "raced_at": "2023-05-25 16:52:43",
+  "league": "",
+  "buggies_entered": 41,
+  "buggies_started": 38,
+  "buggies_finished": 38,
+  "results": [
+    {
+      "username": "user-01",
+      "user_id": 1,
+      "flag_color": "green",
+      "flag_color_secondary": "black",
+      "flag_pattern": "check",
+      "cost": 64,
+      "race_position": 19,
+      "violations_str": ""
+    },
+    {
+      "username": "user-02",
+      "user_id": 105,
+      "flag_color": "yellow",
+      "flag_color_secondary": "green",
+      "flag_pattern": "plain",
+      "cost": 109,
+      "race_position": -1,
+      "violations_str": "EVEN_WHEELS,ENOUGH_TYRES"
+    },
+    {
+      "username": "user-03",
+      "user_id": 3,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "dstripe",
+      "cost": 204,
+      "race_position": -1,
+      "violations_str": "RACE_COST_THRESHOLD"
+    },
+    {
+      "username": "user-04",
+      "user_id": 18,
+      "flag_color": "#ffa500",
+      "flag_color_secondary": "#ff0000",
+      "flag_pattern": "hstripe",
+      "cost": 490,
+      "race_position": -1,
+      "violations_str": "RACE_COST_THRESHOLD,ENOUGH_TYRES"
+    },
+    {
+      "username": "user-05",
+      "user_id": 108,
+      "flag_color": "yellow",
+      "flag_color_secondary": "red",
+      "flag_pattern": "hstripe",
+      "cost": 64,
+      "race_position": 1,
+      "violations_str": ""
+    },
+    {
+      "username": "user-06",
+      "user_id": 60,
+      "flag_color": "#80ff00",
+      "flag_color_secondary": "#20fafe",
+      "flag_pattern": "hstripe",
+      "cost": 64,
+      "race_position": 2,
+      "violations_str": ""
+    },
+    {
+      "username": "user-07",
+      "user_id": 17,
+      "flag_color": "blue",
+      "flag_color_secondary": "red",
+      "flag_pattern": "plain",
+      "cost": 160,
+      "race_position": 3,
+      "violations_str": ""
+    },
+    {
+      "username": "user-08",
+      "user_id": 16,
+      "flag_color": "#ff9191",
+      "flag_color_secondary": "#c9b927",
+      "flag_pattern": "vstripe",
+      "cost": 180,
+      "race_position": 4,
+      "violations_str": ""
+    },
+    {
+      "username": "user-09",
+      "user_id": 4,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 100,
+      "race_position": 5,
+      "violations_str": ""
+    },
+    {
+      "username": "user-10",
+      "user_id": 20,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 64,
+      "race_position": 6,
+      "violations_str": ""
+    },
+    {
+      "username": "user-11",
+      "user_id": 45,
+      "flag_color": "green",
+      "flag_color_secondary": "maroon",
+      "flag_pattern": "plain",
+      "cost": 140,
+      "race_position": 7,
+      "violations_str": ""
+    },
+    {
+      "username": "user-12",
+      "user_id": 55,
+      "flag_color": "#ff00c8",
+      "flag_color_secondary": "#9500e6",
+      "flag_pattern": "vstripe",
+      "cost": 180,
+      "race_position": 8,
+      "violations_str": ""
+    },
+    {
+      "username": "user-13",
+      "user_id": 50,
+      "flag_color": "red",
+      "flag_color_secondary": "blue",
+      "flag_pattern": "vstripe",
+      "cost": 140,
+      "race_position": 9,
+      "violations_str": ""
+    },
+    {
+      "username": "user-14",
+      "user_id": 24,
+      "flag_color": "#c9413f",
+      "flag_color_secondary": "#ff2600",
+      "flag_pattern": "plain",
+      "cost": 180,
+      "race_position": 10,
+      "violations_str": ""
+    },
+    {
+      "username": "user-15",
+      "user_id": 7,
+      "flag_color": "turquoise",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 64,
+      "race_position": 11,
+      "violations_str": ""
+    },
+    {
+      "username": "user-16",
+      "user_id": 39,
+      "flag_color": "blue",
+      "flag_color_secondary": "red",
+      "flag_pattern": "plain",
+      "cost": 193,
+      "race_position": 12,
+      "violations_str": ""
+    },
+    {
+      "username": "user-17",
+      "user_id": 93,
+      "flag_color": "green",
+      "flag_color_secondary": "green",
+      "flag_pattern": "plain",
+      "cost": 100,
+      "race_position": 13,
+      "violations_str": ""
+    },
+    {
+      "username": "user-18",
+      "user_id": 116,
+      "flag_color": "yellow",
+      "flag_color_secondary": "red",
+      "flag_pattern": "plain",
+      "cost": 64,
+      "race_position": 14,
+      "violations_str": ""
+    },
+    {
+      "username": "user-19",
+      "user_id": 26,
+      "flag_color": "#004cff",
+      "flag_color_secondary": "#ffffff",
+      "flag_pattern": "hstripe",
+      "cost": 180,
+      "race_position": 15,
+      "violations_str": ""
+    },
+    {
+      "username": "user-20",
+      "user_id": 69,
+      "flag_color": "green",
+      "flag_color_secondary": "white",
+      "flag_pattern": "vstripe",
+      "cost": 170,
+      "race_position": 16,
+      "violations_str": ""
+    },
+    {
+      "username": "user-21",
+      "user_id": 74,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "vstripe",
+      "cost": 170,
+      "race_position": 17,
+      "violations_str": ""
+    },
+    {
+      "username": "user-22",
+      "user_id": 73,
+      "flag_color": "black",
+      "flag_color_secondary": "white",
+      "flag_pattern": "dstripe",
+      "cost": 44,
+      "race_position": 18,
+      "violations_str": ""
+    },
+    {
+      "username": "user-23",
+      "user_id": 65,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 120,
+      "race_position": 20,
+      "violations_str": ""
+    },
+    {
+      "username": "user-24",
+      "user_id": 104,
+      "flag_color": "#3c1111",
+      "flag_color_secondary": "#0de331",
+      "flag_pattern": "dstripe",
+      "cost": 180,
+      "race_position": 21,
+      "violations_str": ""
+    },
+    {
+      "username": "user-25",
+      "user_id": 51,
+      "flag_color": "#d12323",
+      "flag_color_secondary": "#bdd643",
+      "flag_pattern": "dstripe",
+      "cost": 123,
+      "race_position": 22,
+      "violations_str": ""
+    },
+    {
+      "username": "user-26",
+      "user_id": 13,
+      "flag_color": "red",
+      "flag_color_secondary": "blue",
+      "flag_pattern": "dstripe",
+      "cost": 64,
+      "race_position": 23,
+      "violations_str": ""
+    },
+    {
+      "username": "user-27",
+      "user_id": 91,
+      "flag_color": "blue",
+      "flag_color_secondary": "red",
+      "flag_pattern": "plain",
+      "cost": 160,
+      "race_position": 24,
+      "violations_str": ""
+    },
+    {
+      "username": "user-28",
+      "user_id": 54,
+      "flag_color": "#ee2f2f",
+      "flag_color_secondary": "#e60000",
+      "flag_pattern": "vstripe",
+      "cost": 64,
+      "race_position": 25,
+      "violations_str": ""
+    },
+    {
+      "username": "user-29",
+      "user_id": 6,
+      "flag_color": "#3155af",
+      "flag_color_secondary": "#9b8113",
+      "flag_pattern": "plain",
+      "cost": 200,
+      "race_position": 26,
+      "violations_str": ""
+    },
+    {
+      "username": "user-30",
+      "user_id": 70,
+      "flag_color": "#cd5c5c",
+      "flag_color_secondary": "#ff0000",
+      "flag_pattern": "vstripe",
+      "cost": 160,
+      "race_position": 27,
+      "violations_str": ""
+    },
+    {
+      "username": "user-31",
+      "user_id": 11,
+      "flag_color": "#f03c00",
+      "flag_color_secondary": "#ffffff",
+      "flag_pattern": "plain",
+      "cost": 180,
+      "race_position": 28,
+      "violations_str": ""
+    },
+    {
+      "username": "user-32",
+      "user_id": 32,
+      "flag_color": "#792e3d",
+      "flag_color_secondary": "#54feb5",
+      "flag_pattern": "vstripe",
+      "cost": 199,
+      "race_position": 29,
+      "violations_str": ""
+    },
+    {
+      "username": "user-33",
+      "user_id": 107,
+      "flag_color": "white",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 64,
+      "race_position": 30,
+      "violations_str": ""
+    },
+    {
+      "username": "user-34",
+      "user_id": 61,
+      "flag_color": "#ffffff",
+      "flag_color_secondary": "#ff0000",
+      "flag_pattern": "vstripe",
+      "cost": 200,
+      "race_position": 31,
+      "violations_str": ""
+    },
+    {
+      "username": "user-35",
+      "user_id": 76,
+      "flag_color": "#ca0000",
+      "flag_color_secondary": "#caffff",
+      "flag_pattern": "plain",
+      "cost": 156,
+      "race_position": 32,
+      "violations_str": ""
+    },
+    {
+      "username": "user-36",
+      "user_id": 15,
+      "flag_color": "blue",
+      "flag_color_secondary": "black",
+      "flag_pattern": "spot",
+      "cost": 156,
+      "race_position": 33,
+      "violations_str": ""
+    },
+    {
+      "username": "user-37",
+      "user_id": 78,
+      "flag_color": "blue",
+      "flag_color_secondary": "yellow",
+      "flag_pattern": "plain",
+      "cost": 183,
+      "race_position": 34,
+      "violations_str": ""
+    },
+    {
+      "username": "user-38",
+      "user_id": 9,
+      "flag_color": "black",
+      "flag_color_secondary": "black",
+      "flag_pattern": "plain",
+      "cost": 180,
+      "race_position": 35,
+      "violations_str": ""
+    },
+    {
+      "username": "user-39",
+      "user_id": 68,
+      "flag_color": "blue",
+      "flag_color_secondary": "black",
+      "flag_pattern": "dstripe",
+      "cost": 144,
+      "race_position": 36,
+      "violations_str": ""
+    },
+    {
+      "username": "user-40",
+      "user_id": 41,
+      "flag_color": "purple",
+      "flag_color_secondary": "red",
+      "flag_pattern": "dstripe",
+      "cost": 200,
+      "race_position": 37,
+      "violations_str": ""
+    },
+    {
+      "username": "user-41",
+      "user_id": 112,
+      "flag_color": "#f66a6a",
+      "flag_color_secondary": "#000000",
+      "flag_pattern": "plain",
+      "cost": 180,
+      "race_position": 38,
+      "violations_str": ""
+    }
+  ],
+  "version": "1.0"
+}

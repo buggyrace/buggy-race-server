@@ -26,7 +26,6 @@
   padding:0;
   overflow:hidden; /* otherwise SVG pushes div a bit wider */
   flex-shrink: 0;
-  transition: background-image 1s ease-in-out;
   width:95%;
   max-width:95%;
 }
@@ -184,6 +183,7 @@ button.disabled {
 <script>
 //================================================//
   const RACE_LOG_JSON_URL = "{{ race_log_url }}";
+  const USER_TRACKING_ID = "user-01"; //"{{ current_user.username }}";
 //================================================//
 </script>
 <div class="player-container">

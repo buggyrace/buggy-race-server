@@ -1,6 +1,9 @@
 /* =====================================================================
    buggy race runner: 
-   accepts a race "results JSON" file URL as the ?race= query variable
+   accepts a race "results JSON" file URL
+   (via ?race= if standalone, otherwise from RACE_LOG_JSON_URL if
+   embedded on the race server)
+
    - loads the race, and linked resources
    - replays the events
 
@@ -47,6 +50,8 @@ const IS_RANDOMISED_FOR_DEV = true; // only true pending real race data
 const MAX_STEPS = 100; // used by random race generator, pending real events
 const NAMESPACE_SVG = "http://www.w3.org/2000/svg";
 const NAMESPACE_XLINK = "http://www.w3.org/1999/xlink";
+const PAUSE_BEFORE_PLAY_ENABLE = 2000; // ms
+const PAUSE_BEFORE_TRACK_REVEAL = 500; // ms
 const PLAY_BUTTON = document.getElementById("btn-play");
 const RACE_URL_VAR_NAME = "race";
 const RACELOG_DISPLAY = document.getElementById("race-log");
@@ -70,8 +75,11 @@ var race_json;
 var racetrack_svg;
 var resize_time_id = null;
 var step_count = 0;
-var svg_buggies = {}; // keyed on id
+var  svg_buggies = {}; // keyed on id
 
+// picked up from template/HTML definitions:
+var race_url = RACE_LOG_JSON_URL;
+var user_tracking_id = USER_TRACKING_ID;
 
 function get_query_var(var_name){
   let query = window.location.search.substring(1);
@@ -205,7 +213,7 @@ function set_up_race(){
   RACE_INFO.qty_buggies = 0;
   for (let buggy of race_json.results) {
     if (buggy.race_position >= 0){
-      svg_buggies[buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
+      svg_buggies[BUGGY_ID_PREFIX + buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
       RACE_INFO.qty_buggies += 1;
     }
   }
@@ -214,12 +222,19 @@ function set_up_race(){
   crosshairs.setAttribute("transform", RACETRACK_DATA.transform + " translate(4,3)");
   crosshairs.classList.add("display-none");
   RACETRACK_SVG.append(crosshairs);
+  if (user_tracking_id){
+    user_tracking_id = BUGGY_ID_PREFIX + user_tracking_id;
+    if (svg_buggies[user_tracking_id]) {
+      track_with_crosshairs(user_tracking_id, true)
+    }
+  }
   setTimeout(
     function(){
       SCREEN_MASK.style.opacity = 0;
-      setTimeout(function(){SCREEN_MASK.remove()},4000);
+      // see CSS #screen-mask transition (4s)
+      setTimeout(function(){SCREEN_MASK.remove()}, 4000);
     },
-    1000
+    PAUSE_BEFORE_TRACK_REVEAL
   )
 }
 
@@ -256,11 +271,11 @@ function reset_replay(){
       jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
     };
   }
-  crosshairs_tracking_id = null;
-  crosshairs.classList.add("display-none");
   display_time_string();
   if (! is_first_race){
     clear_race_log();
+    crosshairs_tracking_id = null;
+    crosshairs.classList.add("display-none");
   }
   is_first_race = false;
   report(
@@ -270,12 +285,16 @@ function reset_replay(){
   );
 }
 
+function init_track_data(buggy){
+  buggy.track_data = {
+    distance: 0, // current distance along the (modular) track
+    jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
+  };
+}
+
 function step_move(buggy, distance_to_move){
   if (buggy.track_data == undefined) {
-    buggy.track_data = {
-      distance: 0, // current distance along the (modular) track
-      jitter: 0
-    };
+    init_track_data(buggy)
   }
   buggy.track_data.distance_at_start = buggy.track_data.distance;
   buggy.track_data.distance_moved = 0; // new step, haven't moved yet
@@ -313,20 +332,30 @@ function step_move(buggy, distance_to_move){
   })
 }
 
-function buggy_click(){
+function track_with_crosshairs(buggy_id, want_tracking){
   if (crosshairs){
-    if (crosshairs_tracking_id === this.id) {
-      crosshairs_tracking_id = null;
-      crosshairs.classList.add("display-none");
-    } else {
-      crosshairs_tracking_id = this.id;
-      let point = RACETRACK_DATA.path.getPointAtLength(this.track_data.distance);
+    if (want_tracking && svg_buggies[buggy_id]){
+      crosshairs_tracking_id = buggy_id;
+      let point = RACETRACK_DATA.path.getPointAtLength(
+        svg_buggies[buggy_id].track_data.distance
+      );
       crosshairs.setAttribute('x', point.x);
       crosshairs.setAttribute('y', point.y);
       crosshairs.classList.remove("display-none");
-      report("Tracking " + pretty_id(this.id), "user-action");
+      let msg = "Tracking " + pretty_id(buggy_id);
+      if (is_first_race){
+        msg += " (click buggies to change)"
+      }
+      report(msg, "user-action");
+    } else {
+      crosshairs_tracking_id = null;
+      crosshairs.classList.add("display-none");
     }
   }
+}
+
+function buggy_click(){
+  track_with_crosshairs(this.id, crosshairs_tracking_id != this.id)
 }
 
 function end_race(msg){
@@ -423,6 +452,7 @@ function create_svg_buggy(buggy_data){
     buggy_rect.setAttribute("transform", RACETRACK_DATA.transform);
   }
   buggy_rect.setAttribute("class", "svg-buggy");
+  init_track_data(buggy_rect);
   buggy_rect.addEventListener("click", buggy_click);
   RACETRACK_SVG.appendChild(buggy_rect);
   return buggy_rect;
@@ -464,7 +494,6 @@ window.onresize = on_resize;
   freeze_racelog_height();
 
   /* if embedded (on the race server), RACE_LOG_JSON_URL will be defined */
-  let race_url = RACE_LOG_JSON_URL;
   let is_running_embedded = race_url!=undefined && race_url.indexOf("{")===-1;
   if (! is_running_embedded) {
     race_url = get_query_var(RACE_URL_VAR_NAME);
@@ -480,7 +509,8 @@ window.onresize = on_resize;
     if (race_url.substr(-5) != ".json") {
       race_url += ".json";
     }
-    report("loading race JSON from " + race_url, "system");
+    report("loading race JSON", "system");
+    console.log("loading race JSON from " + race_url);
     
     fetch(race_url).then((response) => {
       if (!response.ok) {
@@ -516,7 +546,9 @@ window.onresize = on_resize;
             throw new Error("failed to parse SVG data")
           }
           set_up_race();
-          setTimeout(reset_replay, 1000);
+          setTimeout(function(){
+            reset_replay();
+          }, PAUSE_BEFORE_PLAY_ENABLE);
         })
       })
     })

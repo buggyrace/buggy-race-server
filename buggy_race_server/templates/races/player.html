@@ -244,5 +244,5 @@ button.disabled {
   </div>
 </div>
 <script src="{{ url_for('race.serve_race_player_asset', filename='gsap.min.js') }}"></script>
-<script src="{{ url_for('race.serve_race_player_asset', filename='buggy-race-player.js') }}"></script>
+<script src="{{ url_for('race.serve_race_player_asset', filename='buggy-race-player.js') }}?cachebuster={{ cachebuster }}"></script>
 {% endblock %}

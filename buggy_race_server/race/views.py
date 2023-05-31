@@ -22,7 +22,7 @@ from buggy_race_server.utils import (
     staff_only,
     join_to_project_root,
 )
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
@@ -256,5 +256,6 @@ def replay_race(race_id):
     
     return render_template(
         "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
         race_log_url=race_log_url # "race-log-test-1-via-server.json"
     )

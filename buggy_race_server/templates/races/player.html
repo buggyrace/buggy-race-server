@@ -4,6 +4,21 @@
 {% block content %}
 
 <style>
+.noscript {
+  background-color:#640000;
+  color:white;
+  border:1px solid red;
+  margin:1em;
+  padding:1em 2em;
+  text-align:center;
+  font-weight: bold;
+}
+.noscript hr {
+  margin:1em;
+  height:1px;
+  background-color:red;
+}
+
 .display-none {
   display:none;
 }
@@ -183,7 +198,7 @@ button.disabled {
 <script>
 //================================================//
   const RACE_LOG_JSON_URL = "{{ race_log_url }}";
-  const USER_TRACKING_ID = "user-01"; //"{{ current_user.username }}";
+  const USER_TRACKING_ID = "{{ current_user.username }}";
 //================================================//
 </script>
 <div class="player-container">
@@ -251,11 +266,21 @@ button.disabled {
     <div id="replay-indicator">REPLAY</div>
   </div>
   <div id="info-panel">
-    <div id="buttons">
+    <noscript>
+      <div class="noscript">
+        <strong>
+          You need JavaScript enabled!
+        </strong>
+        <hr>
+        Sorry, can't replay the race without&nbsp;it.
+      </div>
+    </noscript>
+    <div id="buttons" class="hidden">
       <button id="btn-reset" class="btn-reset disabled">RESET</button>
       <button id="btn-play" class="btn-play disabled">PLAY</button>
     </div>
-    <div id="race-log"></div>
+    <div id="race-log" class="hidden">
+    </div>
   </div>
 </div>
 <script src="{{ url_for('race.serve_race_player_asset', filename='gsap.min.js') }}"></script>

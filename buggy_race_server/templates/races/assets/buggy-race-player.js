@@ -222,10 +222,15 @@ function set_up_race(){
   crosshairs.setAttribute("transform", RACETRACK_DATA.transform + " translate(4,3)");
   crosshairs.classList.add("display-none");
   RACETRACK_SVG.append(crosshairs);
-  if (user_tracking_id){
-    user_tracking_id = BUGGY_ID_PREFIX + user_tracking_id;
-    if (svg_buggies[user_tracking_id]) {
-      track_with_crosshairs(user_tracking_id, true)
+  if (RACE_INFO.qty_buggies > 0){
+    if (user_tracking_id){
+      user_tracking_id = BUGGY_ID_PREFIX + user_tracking_id;
+      if (svg_buggies[user_tracking_id]) {
+        track_with_crosshairs(user_tracking_id, true)
+      }
+    }
+    if (! crosshairs_tracking_id) {
+      report("Click on a buggy to track it", "user-action");
     }
   }
   setTimeout(
@@ -486,13 +491,16 @@ RESET_BUTTON.addEventListener("click", function(){
 window.onresize = on_resize;
 
 (() => {
+  // because here we are, with JS reveal the critical interface elements
+  BUTTONS.classList.remove("hidden");
+  RACELOG_DISPLAY.classList.remove("hidden");
+
   let httpRequest = new XMLHttpRequest();
   if (!httpRequest) {
     report("cannot load race: no XMLHTTP instance");
     return false;
   }
   freeze_racelog_height();
-
   /* if embedded (on the race server), RACE_LOG_JSON_URL will be defined */
   let is_running_embedded = race_url!=undefined && race_url.indexOf("{")===-1;
   if (! is_running_embedded) {

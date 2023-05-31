@@ -324,6 +324,7 @@ function buggy_click(){
       crosshairs.setAttribute('x', point.x);
       crosshairs.setAttribute('y', point.y);
       crosshairs.classList.remove("display-none");
+      report("Tracking " + pretty_id(this.id), "user-action");
     }
   }
 }

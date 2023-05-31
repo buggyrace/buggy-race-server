@@ -253,6 +253,7 @@ def replay_race(race_id):
             "race.serve_race_player_asset",
             filename=race_log_url
         )
+    
     return render_template(
         "races/player.html",
         race_log_url=race_log_url # "race-log-test-1-via-server.json"

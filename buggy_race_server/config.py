@@ -93,6 +93,7 @@ class ConfigSettingNames(Enum):
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
+    BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
     API_SECRET_TIME_TO_LIVE = auto()
@@ -246,6 +247,7 @@ class ConfigSettings:
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
+        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name,
       ),
       ConfigGroupNames.SERVER.name: (
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -327,6 +329,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
@@ -431,6 +434,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
@@ -545,6 +549,14 @@ class ConfigSettings:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           You don't need to change this unless you've forked your own custom
           version of the repo.""",
+
+        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name:
+        """If you want to override the default race player and host your own,
+        specify it here and races will link to that instead (passing the
+        'results file' URL as a query variable called `race`). Do this if
+        you want or need to run this as a standalone service (e.g., hosted on
+        GitHubPages and potentially totally customised). If you don't specify
+        a URL, races will use the race player on this server.""",
 
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name:
         """The timezone the race server is running in (that's almost certainly

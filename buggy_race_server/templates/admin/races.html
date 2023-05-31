@@ -40,6 +40,7 @@
             {% if current_user.is_administrator %}
               <td>
                 <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit</a>
+                <a class="btn btn-outline-danger btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}">Test</a>
               </td>
             {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">

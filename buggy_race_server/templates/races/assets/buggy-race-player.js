@@ -437,11 +437,16 @@ window.onresize = on_resize;
 
   let json_data = null;
   /* if embedded (on the race server), RACE_LOG_JSON_URL will be defined */
-  let is_running_embedded = RACE_LOG_JSON_URL && RACE_LOG_JSON_URL.indexOf("{") === -1;
-  let race_url = is_running_embedded? RACE_LOG_JSON_URL : get_query_var(RACE_URL_VAR_NAME);
+  let race_url = RACE_LOG_JSON_URL;
+  let is_running_embedded = race_url!=undefined && race_url.indexOf("{")===-1;
+  if (! is_running_embedded) {
+    race_url = get_query_var(RACE_URL_VAR_NAME);
+  }
   if (!race_url) {
-    if (!is_running_embedded) {
-      report("try adding ?race=xyx to the URL (xyz must be a valid race id)", "system");
+    if (is_running_embedded) {
+      report("maybe the race results/log file has not been uploaded yet", "system");
+    } else {
+      report("try adding ?race=xyx to the URL (xyz must be a valid race file name", "system");
     }
     report("cannot load race: missing the URL", "alert");
   } else {

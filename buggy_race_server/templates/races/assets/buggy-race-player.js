@@ -206,9 +206,9 @@ function set_up_race(){
   for (let buggy of race_json.results) {
     if (buggy.race_position >= 0){
       svg_buggies[buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
+      RACE_INFO.qty_buggies += 1;
     }
   }
-  RACE_INFO.qty_buggies = svg_buggies.length;
   crosshairs = document.createElementNS(NAMESPACE_SVG, 'use');
   crosshairs.setAttributeNS(NAMESPACE_XLINK, "xlink:href", "#crosshair-indicator");
   crosshairs.setAttribute("transform", RACETRACK_DATA.transform + " translate(4,3)");

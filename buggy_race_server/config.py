@@ -24,6 +24,7 @@ from random import randint
 from os import path
 from buggy_race_server.extensions import bcrypt
 import pytz # timezones
+from time import time
 
 # ----------------------------------------------------------------------------
 #  When you do a release, [try to remember to] bump the release details here!
@@ -1111,6 +1112,9 @@ class ConfigSettings:
     # but aren't used (e.g., deprecated config no longer used)
     UNEXPECTED_SETTINGS_KEY = "_UNEXPECTED_CONFIG_SETTINGS"
 
+    # config key for cachebuster: a number expected to be different each run
+    CACHEBUSTER_KEY = "_CACHEBUSTER"
+
     @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
@@ -1276,3 +1280,4 @@ class ConfigFromEnv():
               setattr(self, name, setting_value)
               env_setting_overrides.append(name)
       self.__setattr__(ConfigSettings.ENV_SETTING_OVERRIDES_KEY, env_setting_overrides)
+      self.__setattr__(ConfigSettings.CACHEBUSTER_KEY, int(time()))

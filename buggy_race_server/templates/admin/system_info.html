@@ -52,7 +52,7 @@
               <br>
               (settings overridden by ENV)
             </td>
-            <td {% if env_overrides %}class="alert-danger"{% endif %}>
+            <td class="{% if env_overrides %}alert-danger{% else %}alert-success{% endif %}"">
               {% for name in env_overrides %}
                 <code>{{ name }}</code><br>
               {% else %}
@@ -87,13 +87,17 @@
           </tr>
           <tr>
             <td>Extra config (found&nbsp;in&nbsp;database):</td>
-            <td>
-              {% for unexpected in unexpected_config_settings %}
-                <code>{{ unexpected }}</code><br>
-              {% else %}
+            {% if unexpected_config_settings %}
+              <td class="alert-danger">
+                {% for unexpected in unexpected_config_settings %}
+                  <code>{{ unexpected }}</code><br>
+                {% endfor %}
+              </td>
+            {% else %}
+              <td class="alert-success">
                 <em>OK: nothing unexpected</em>
-              {% endfor %}
-            </td>
+              </td>
+            {% endif %}
           </tr>
         </tbody>
       </table>

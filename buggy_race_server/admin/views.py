@@ -1547,7 +1547,8 @@ def show_system_info():
         git_status = result.stdout
     except (ValueError, subprocess.CalledProcessError) as e:
         git_status = "[Unavailable]"
-    config_settings_to_display = [
+    config_settings_to_display = sorted([
+      ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
       ConfigSettingNames._PUBLISHED_PATH.name,
       ConfigSettingNames._SETUP_STATUS.name,
@@ -1576,7 +1577,7 @@ def show_system_info():
       "SEND_FILE_MAX_AGE_DEFAULT",
       "SQLALCHEMY_TRACK_MODIFICATIONS",
       "UPLOAD_FOLDER",
-    ]
+    ])
     return render_template(
         "admin/system_info.html",
         config_settings_to_display=config_settings_to_display,

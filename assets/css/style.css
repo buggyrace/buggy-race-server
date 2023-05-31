@@ -726,3 +726,7 @@ img.roadent-portrait{
 img.roadent-portrait:hover{
   transform: rotate(-10deg)  scale(108%);
 }
+
+body.race-player main {
+  background-color:transparent;
+}

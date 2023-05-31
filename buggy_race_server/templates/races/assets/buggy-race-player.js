@@ -59,6 +59,8 @@ const RESET_BUTTON = document.getElementById("btn-reset");
 const SCREEN_MASK = document.getElementById("screen-mask");
 const TIME_INDICATOR = document.getElementById("time-indicator");
 
+var crosshairs;
+var crosshairs_tracking_id = null;
 var is_first_race = true;
 var is_paused = true;
 var lap_count = 1;
@@ -68,7 +70,7 @@ var race_json;
 var racetrack_svg;
 var resize_time_id = null;
 var step_count = 0;
-var svg_buggies = [];
+var svg_buggies = {}; // keyed on id
 
 
 function get_query_var(var_name){
@@ -203,12 +205,22 @@ function set_up_race(){
   RACE_INFO.qty_buggies = 0;
   for (let buggy of race_json.results) {
     if (buggy.race_position >= 0){
-      svg_buggies.push(create_svg_buggy(buggy));
+      svg_buggies[buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
     }
   }
   RACE_INFO.qty_buggies = svg_buggies.length;
-  SCREEN_MASK.style.opacity = 0;
-  setTimeout(function(){SCREEN_MASK.remove()},4000);
+  crosshairs = document.createElementNS(NAMESPACE_SVG, 'use');
+  crosshairs.setAttributeNS(NAMESPACE_XLINK, "xlink:href", "#crosshair-indicator");
+  crosshairs.setAttribute("transform", RACETRACK_DATA.transform + " translate(4,3)");
+  crosshairs.classList.add("display-none");
+  RACETRACK_SVG.append(crosshairs);
+  setTimeout(
+    function(){
+      SCREEN_MASK.style.opacity = 0;
+      setTimeout(function(){SCREEN_MASK.remove()},4000);
+    },
+    1000
+  )
 }
 
 function start_replay(){
@@ -235,7 +247,8 @@ function reset_replay(){
   is_paused = true;
   RESET_BUTTON.classList.add(CSS_DISABLED);
   PLAY_BUTTON.classList.remove(CSS_DISABLED);
-  for (let buggy of svg_buggies){
+  for (let buggy_id in svg_buggies){
+    let buggy = svg_buggies[buggy_id];
     buggy.setAttribute('x', RACETRACK_DATA.start_point.x);
     buggy.setAttribute('y', RACETRACK_DATA.start_point.y);
     buggy.track_data = {
@@ -243,6 +256,8 @@ function reset_replay(){
       jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
     };
   }
+  crosshairs_tracking_id = null;
+  crosshairs.classList.add("display-none");
   display_time_string();
   if (! is_first_race){
     clear_race_log();
@@ -281,8 +296,14 @@ function step_move(buggy, distance_to_move){
         const point = RACETRACK_DATA.path.getPointAtLength(
           buggy.track_data.distance % RACETRACK_DATA.lap_length
         );
-        buggy.setAttribute('x', point.x + buggy.track_data.jitter);
-        buggy.setAttribute('y', point.y + buggy.track_data.jitter);
+        point.x += buggy.track_data.jitter;
+        point.y += buggy.track_data.jitter;
+        buggy.setAttribute('x', point.x);
+        buggy.setAttribute('y', point.y);
+        if (crosshairs_tracking_id === buggy.id){
+          crosshairs.setAttribute('x', point.x);
+          crosshairs.setAttribute('y', point.y);  
+        }
       }
     }
   ).then(function(){
@@ -290,6 +311,21 @@ function step_move(buggy, distance_to_move){
                                       buggy.track_data.distance_at_start;
     return buggy // value used in promise
   })
+}
+
+function buggy_click(){
+  if (crosshairs){
+    if (crosshairs_tracking_id === this.id) {
+      crosshairs_tracking_id = null;
+      crosshairs.classList.add("display-none");
+    } else {
+      crosshairs_tracking_id = this.id;
+      let point = RACETRACK_DATA.path.getPointAtLength(this.track_data.distance);
+      crosshairs.setAttribute('x', point.x);
+      crosshairs.setAttribute('y', point.y);
+      crosshairs.classList.remove("display-none");
+    }
+  }
 }
 
 function end_race(msg){
@@ -305,7 +341,8 @@ function do_step(){
   display_time_string();
 
   if (step_count > 0) {
-    for (let buggy of svg_buggies) {
+    for (let buggy_id in svg_buggies) {
+      let buggy = svg_buggies[buggy_id];
       if (!leading_buggy || buggy.track_data.distance > leading_buggy.track_data.distance) {
         leading_buggy = buggy;
       }
@@ -317,10 +354,10 @@ function do_step(){
   }
 
   let step_promises = [];
-  for (let buggy of svg_buggies){
+  for (let buggy_id in svg_buggies){
     if (IS_RANDOMISED_FOR_DEV){
       step_promises.push(
-        step_move(buggy, get_random(30, 4))
+        step_move(svg_buggies[buggy_id], get_random(30, 4))
       );
     }
   }
@@ -351,7 +388,7 @@ function create_svg_buggy(buggy_data){
   let attribs = {
     id: "pat-" + buggy_data[BUGGY_ID_SOURCE],
     width: BUGGY_RECT_WIDTH, height: BUGGY_RECT_HEIGHT,
-    x: "0", y: "0"
+    x: "0", y: "0",
   }
   for (let k in attribs){
     custom_pattern.setAttribute(k, attribs[k]);
@@ -384,6 +421,8 @@ function create_svg_buggy(buggy_data){
   if (RACETRACK_DATA.transform) {
     buggy_rect.setAttribute("transform", RACETRACK_DATA.transform);
   }
+  buggy_rect.setAttribute("class", "svg-buggy");
+  buggy_rect.addEventListener("click", buggy_click);
   RACETRACK_SVG.appendChild(buggy_rect);
   return buggy_rect;
 }
@@ -462,7 +501,6 @@ window.onresize = on_resize;
         }
         return response.json();
       }).then((json_data) => {
-        console.log("race log JSON", json_data);
         // now SVG
         fetch(race_json.track_svg_url).then((response) => {
           if (!response.ok) {
@@ -470,12 +508,10 @@ window.onresize = on_resize;
           }
           return response.text();
         }).then((svg_src) => {
-          console.log("FIXME about to parse", svg_src)
           try {
             var parser = new DOMParser();
             racetrack_svg = parser.parseFromString(svg_src, "image/svg+xml");
           } catch (error) {
-            console.log("ERROR:FIXME")
             throw new Error("failed to parse SVG data")
           }
           set_up_race();

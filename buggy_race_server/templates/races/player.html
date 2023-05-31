@@ -4,8 +4,8 @@
 {% block content %}
 
 <style>
-.hidden {
-  visibility:hidden;
+.display-none {
+  display:none;
 }
 .player-container {
   display:flex;
@@ -164,6 +164,7 @@ button.disabled {
 #race-log p.title span{
   font-weight:normal;
 }
+.svg-buggy { cursor: pointer; }
 </style>
 <script>
 //================================================//
@@ -218,8 +219,18 @@ button.disabled {
           </g>
           <use href="#flag-plain" fill="none" stroke="black" stroke-width="0.2" />
         </g>
+        <g id="crosshair-indicator" transform="translate(-10, -10)">
+          <g>
+              <path d="M0,0L0,6" stroke="#ffff00" fill="none" stroke-width="1" transform="translate(10,0)"/>
+              <path d="M0,0L0,6" stroke="#ffff00" fill="none" stroke-width="1" transform="translate(10,14)"/>
+              <path d="M0,0L6,0" stroke="#ffff00" fill="none" stroke-width="1" transform="translate(0,10)"/>
+              <path d="M0,0L6,0" stroke="#ffff00" fill="none" stroke-width="1" transform="translate(14,10)"/>
+          </g>
+          <circle cx="10" cy="10" r="7" fill="none" stroke="#ffff00" stroke-width="1"/>
+        </g>
+
       </defs>
-    </svg>
+     </svg>
     <div id="screen-mask"></div>
     <div id="time-indicator">NO-RACE</div>
     <div id="replay-indicator">REPLAY</div>

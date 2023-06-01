@@ -176,7 +176,18 @@
             </td>
             <td>
               {% if user.api_key %}
-                <code>{{ user.api_key }}</code>
+                <code>{{ user.api_key }}</code><br><br>
+              {% endif %}
+              {% if current_user.is_staff %}
+                <form id="api-key-form" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
+                  {{ api_form.csrf_token }}
+                  <input type="hidden" name="usernames" value="{{ user.username}}"/>
+                  {% if user.api_key %}
+                    <button class="btn btn-danger" name="submit_clear_keys" value="Clear API keys">Clear API key</button>
+                  {% else %}
+                    <button class="btn btn-primary" name="submit_generate_keys" value="Generate API keys">Generate API key</button>
+                  {% endif %}
+                </form>
               {% endif %}
             </td>  
           </tr>

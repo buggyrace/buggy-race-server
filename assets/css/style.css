@@ -370,7 +370,6 @@ footer .footer-nav {
   background-color:#f8d7da;
   color: #212529;
 }
-
 .announcement-special, .buggy-stripes {
     background: repeating-linear-gradient(
       -45deg,
@@ -461,11 +460,21 @@ p.btn-collection {
 a.sm-item-link, span.sm-item-link{
   background-color: #e8e8e8;
   min-width:2em;
+  border: 1px solid #666;
 }
 a.sm-item-link:hover {
   background-color: #666666;
   color:white;
   text-decoration: none;
+}
+span.sm-item{
+  background-color: #e8e8e8;
+  min-width:2em;
+}
+span.rule-violation{
+  color: #990000;
+  padding:0.1em 0.25em;
+  background-color:transparent;
 }
 
 a.toclink{
@@ -585,6 +594,9 @@ h2.alert-title {
   margin:0;
   margin: -0.75rem -1.25rem 0.75rem -1.25rem;
   font-weight:bold;
+}
+h2.alert-title .subtitle {
+  font-weight:normal;
 }
 .alert-info h2.alert-title { background-color: #bee5eb; }
 .alert-warning h2.alert-title { background-color: #ffeeba; }
@@ -722,4 +734,8 @@ img.roadent-portrait{
 }
 img.roadent-portrait:hover{
   transform: rotate(-10deg)  scale(108%);
+}
+
+body.race-player main {
+  background-color:transparent;
 }

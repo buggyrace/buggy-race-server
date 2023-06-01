@@ -502,6 +502,13 @@ def admin():
       tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
       unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
       users_deactivated=users_deactivated,
+      is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+      notes_generated_timestamp=servertime_str(
+        current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+        current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+      ),
+      task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+      form=GeneralSubmitForm(), # for publish submit buttons
     )
 
 @blueprint.route("/users", strict_slashes=False)
@@ -705,6 +712,7 @@ def show_user(user_id):
   return  render_template(
       "admin/user.html",
       user=user,
+       api_form=ApiKeyForm(),
       is_own_text=user.id == current_user.id,
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       texts_by_task_id=texts_by_task_id,
@@ -1540,7 +1548,8 @@ def show_system_info():
         git_status = result.stdout
     except (ValueError, subprocess.CalledProcessError) as e:
         git_status = "[Unavailable]"
-    config_settings_to_display = [
+    config_settings_to_display = sorted([
+      ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
       ConfigSettingNames._PUBLISHED_PATH.name,
       ConfigSettingNames._SETUP_STATUS.name,
@@ -1569,7 +1578,7 @@ def show_system_info():
       "SEND_FILE_MAX_AGE_DEFAULT",
       "SQLALCHEMY_TRACK_MODIFICATIONS",
       "UPLOAD_FOLDER",
-    ]
+    ])
     return render_template(
         "admin/system_info.html",
         config_settings_to_display=config_settings_to_display,

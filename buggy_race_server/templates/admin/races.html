@@ -38,8 +38,11 @@
             {% endif %}
           <tr class="race-visible-{{ race.is_visible }}">
             {% if current_user.is_administrator %}
-              <td>
+              <td class="btn-collection">
                 <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit</a>
+                {% if race.result_log_url %}
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}#replay">Replay</a>
+                {% endif %}
               </td>
             {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">

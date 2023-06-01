@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Buggy views."""
+"""Race views."""
 
-import csv
-import re
 import json
 from datetime import datetime, timezone
 import os
-from flask import Blueprint, flash, redirect, render_template, request, url_for, abort, current_app
+import re
+from flask import (
+    Blueprint, flash, redirect, render_template, request,
+    url_for, abort, current_app, send_file
+)
 from flask_login import current_user, login_required
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
@@ -18,8 +20,9 @@ from buggy_race_server.utils import (
     get_flag_color_css_defs,
     servertime_str,
     staff_only,
+    join_to_project_root,
 )
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
@@ -225,4 +228,37 @@ def show_race_results(race_id):
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
     )
+
+# temporary /assets/ filename while developing/experimenting in beta
+@blueprint.route("/assets/<filename>")
+def serve_race_player_asset(filename):
+    """ Serving statically because it's more robust than trying to
+        figure out how to exclude this from webpack, and even then it's
+        too complex in the event of changes: keep it simple.
+        Want it standalone because it's handy to be able to dev/run it
+        in isolation outwith the race server, at least for now."""
+    full_filename = join_to_project_root(
+        "buggy_race_server", "templates", "races", "assets", filename
+    )
+    if not os.path.exists(full_filename):
+        abort(404)
+    return send_file(full_filename)
   
+@blueprint.route("/<race_id>/replay")
+def replay_race(race_id):
+    race = Race.query.filter_by(id=race_id).first_or_404()
+    result_log_url = race.result_log_url
+    if result_log_url and not (re.match(r"^https?://", result_log_url)):
+        result_log_url = url_for(
+            "race.serve_race_player_asset",
+            filename=result_log_url
+        )
+    if not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("The results of this race are not available yet", "warning")
+            abort(403)
+    return render_template(
+        "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        result_log_url=result_log_url,
+    )

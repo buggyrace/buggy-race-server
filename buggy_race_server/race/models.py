@@ -46,7 +46,7 @@ class Race(SurrogatePK, Model):
     race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
 
-    results = db.relationship('RaceResult', backref='race')
+    results = db.relationship('RaceResult', backref='race', cascade="all, delete")
 
     def __init__(self, **kwargs):
         """Create instance."""

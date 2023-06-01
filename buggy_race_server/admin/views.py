@@ -712,6 +712,7 @@ def show_user(user_id):
   return  render_template(
       "admin/user.html",
       user=user,
+       api_form=ApiKeyForm(),
       is_own_text=user.id == current_user.id,
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       texts_by_task_id=texts_by_task_id,

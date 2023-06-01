@@ -471,6 +471,11 @@ span.sm-item{
   background-color: #e8e8e8;
   min-width:2em;
 }
+span.rule-violation{
+  color: #990000;
+  padding:0.1em 0.25em;
+  background-color:transparent;
+}
 
 a.toclink{
   border-bottom:none;

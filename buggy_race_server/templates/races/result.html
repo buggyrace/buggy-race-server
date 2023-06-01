@@ -122,7 +122,7 @@
         <tr>
           <th>Buggy</th>
           <th>Racer</th>
-          <th>Violation</th>
+          <th>Violations</th>
           <th>Cost</th>
         </tr>
         {% for (res, user) in results_disqualified %}
@@ -141,7 +141,7 @@
           <td>
               <ul class="sm-item-list">
               {% for v in res.violations_str.split(',') %}
-                <li><span class="sm-item">{{ v }}</span></li>
+                <li><span class="sm-item rule-violation">{{ v }}</span></li>
               {% endfor %}
               </ul>
             </td>

@@ -247,15 +247,18 @@ def serve_race_player_asset(filename):
 @blueprint.route("/<race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
-    race_log_url = race.race_log_url
-    if race_log_url and not (re.match(r"^https?://", race_log_url)):
-        race_log_url = url_for(
+    result_log_url = race.result_log_url
+    if result_log_url and not (re.match(r"^https?://", result_log_url)):
+        result_log_url = url_for(
             "race.serve_race_player_asset",
-            filename=race_log_url
+            filename=result_log_url
         )
-    
+    if not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("The results of this race are not available yet", "warning")
+            abort(403)
     return render_template(
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        race_log_url=race_log_url # "race-log-test-1-via-server.json"
+        result_log_url=result_log_url,
     )

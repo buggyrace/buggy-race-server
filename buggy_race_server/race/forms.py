@@ -43,13 +43,13 @@ class RaceForm(FlaskForm):
         validators=[Optional()]
     )
     result_log_url = StringField(
-        "URL of result log", validators=[Optional(), Length(max=255)]
+        "URL of results JSON", validators=[Optional(), Length(max=255)]
     )
     buggies_csv_url =StringField(
         "URL of buggies CSV", validators=[Optional(), Length(max=255)]
     )
     race_log_url = StringField(
-        "URL of race log", validators=[Optional(), Length(max=255)]
+        "URL of race event log", validators=[Optional(), Length(max=255)]
     )
 
     def __init__(self, *args, **kwargs):

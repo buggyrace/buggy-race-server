@@ -83,7 +83,7 @@ var step_count = 0;
 var  svg_buggies = {}; // keyed on id
 
 // picked up from template/HTML definitions:
-var race_url = RACE_LOG_JSON_URL;
+var race_url = RACE_RESULTS_JSON_URL;
 var user_tracking_id = USER_TRACKING_ID;
 
 function get_query_var(var_name){

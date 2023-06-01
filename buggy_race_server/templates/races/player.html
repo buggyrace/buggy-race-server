@@ -2,7 +2,6 @@
 {% block page_title %}race player{% endblock %}
 {% block body_class %}race-player{% endblock %}
 {% block content %}
-
 <style>
 .noscript {
   background-color:#640000;
@@ -195,12 +194,6 @@ button.disabled {
 }
 .svg-buggy { cursor: pointer; }
 </style>
-<script>
-//================================================//
-  const RACE_LOG_JSON_URL = "{{ race_log_url }}";
-  const USER_TRACKING_ID = "{{ current_user.username }}";
-//================================================//
-</script>
 <div class="player-container">
   <a id="replay"></a><!-- #replay to skip header (if any) when loading -->
   <div id="race-canvas">
@@ -284,5 +277,11 @@ button.disabled {
   </div>
 </div>
 <script src="{{ url_for('race.serve_race_player_asset', filename='gsap.min.js') }}"></script>
+<script>
+//================================================//
+  const RACE_RESULTS_JSON_URL = "{{ result_log_url }}";
+  const USER_TRACKING_ID = "{{ current_user.username }}";
+//================================================//
+</script>  
 <script src="{{ url_for('race.serve_race_player_asset', filename='buggy-race-player.js') }}?cachebuster={{ cachebuster }}"></script>
 {% endblock %}

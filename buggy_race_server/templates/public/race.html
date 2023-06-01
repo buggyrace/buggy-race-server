@@ -98,10 +98,13 @@
             {% for race in races %}
               <tr class="race-visible-{{ race.is_visible }}">
                 {% if race.results_uploaded_at %}
-                  <td>
+                  <td class="btn-collection">
                     {% if race.results_uploaded_at %}
                       <a class="btn btn-outline-secondary btn-white btn-jump"
-                      href="{{ url_for('race.show_race_results', race_id=race.id) }}">Result</a>
+                      href="{{ url_for('race.show_race_results', race_id=race.id) }}">Results</a>
+                    {% endif %}
+                    {% if race.result_log_url %}
+                      <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}#replay">Replay</a>
                     {% endif %}
                   </td>
                   <td>

@@ -31,15 +31,20 @@ const RACE_INFO = {
 
 const RACETRACK_DATA = {
   path: null,
-  lap_ength: null,
+  lap_length: null,
   start_point: null,
   transform: null
 };
+
+function half_str(w, h){
+  return "translate(" + (-w/2) + "," + (-h/2) + ")";
+}
 
 const BUGGY_ID_PREFIX = "buggy-"; // ensure buggy IDs don't collide
 const BUGGY_ID_SOURCE = "username"; // or "user_id"
 const BUGGY_RECT_HEIGHT = 6;
 const BUGGY_RECT_WIDTH = 8;
+const BUGGY_RECT_TRANSFORM = half_str(BUGGY_RECT_WIDTH, BUGGY_RECT_HEIGHT);
 const BUTTONS = document.getElementById("buttons");
 const CLICK_DURATION = 1;
 const CSS_DISABLED = "disabled";
@@ -204,11 +209,9 @@ function set_up_race(){
   RACETRACK_SVG.append(racetrack_path);
   RACETRACK_DATA.lap_length = Math.round(racetrack_path.getTotalLength());
   RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(0);
-  if (racetrack_path.attributes['transform']){
-    RACETRACK_DATA.transform = racetrack_path.attributes['transform'].value;
-  }
+  RACETRACK_DATA.transform = racetrack_path.attributes['transform']?
+    racetrack_path.attributes['transform'].value : "";
   RACETRACK_DATA.path = racetrack_path;
-  
   RACETRACK_CANVAS.style.backgroundImage = "url(" + race_json.track_image_url + ")";
   RACE_INFO.qty_buggies = 0;
   for (let buggy of race_json.results) {
@@ -219,7 +222,7 @@ function set_up_race(){
   }
   crosshairs = document.createElementNS(NAMESPACE_SVG, 'use');
   crosshairs.setAttributeNS(NAMESPACE_XLINK, "xlink:href", "#crosshair-indicator");
-  crosshairs.setAttribute("transform", RACETRACK_DATA.transform + " translate(4,3)");
+  crosshairs.setAttribute("transform", RACETRACK_DATA.transform);
   crosshairs.classList.add("display-none");
   RACETRACK_SVG.append(crosshairs);
   if (RACE_INFO.qty_buggies > 0){
@@ -342,7 +345,7 @@ function track_with_crosshairs(buggy_id, want_tracking){
     if (want_tracking && svg_buggies[buggy_id]){
       crosshairs_tracking_id = buggy_id;
       let point = RACETRACK_DATA.path.getPointAtLength(
-        svg_buggies[buggy_id].track_data.distance
+        svg_buggies[buggy_id].track_data.distance % RACETRACK_DATA.lap_length
       );
       crosshairs.setAttribute('x', point.x);
       crosshairs.setAttribute('y', point.y);
@@ -454,7 +457,9 @@ function create_svg_buggy(buggy_data){
     "id", BUGGY_ID_PREFIX + buggy_data[BUGGY_ID_SOURCE]
   );
   if (RACETRACK_DATA.transform) {
-    buggy_rect.setAttribute("transform", RACETRACK_DATA.transform);
+    buggy_rect.setAttribute(
+      "transform", RACETRACK_DATA.transform + " " + BUGGY_RECT_TRANSFORM
+    );
   }
   buggy_rect.setAttribute("class", "svg-buggy");
   init_track_data(buggy_rect);

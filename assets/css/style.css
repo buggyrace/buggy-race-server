@@ -467,6 +467,10 @@ a.sm-item-link:hover {
   color:white;
   text-decoration: none;
 }
+span.sm-item{
+  background-color: #e8e8e8;
+  min-width:2em;
+}
 
 a.toclink{
   border-bottom:none;

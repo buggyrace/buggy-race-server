@@ -135,21 +135,24 @@ button {
   background-size: 1rem 1rem;
   background-repeat: no-repeat;
 }
-button:hover {
-  background-color: #ffff00;
+button:hover, button.btn-play:hover, button.btn-pause:hover{
+  background-color: #cccc00;
 }
 button.btn-play {
   min-width:6rem;
+  background-color: #ffff00;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Cpath id='play' d='M0,0L69.75,41.75L0,83.5Z' fill='%23000000' stroke='none' transform='translate(18.25,7.75)'/%3E%3C/svg%3E%0A");
 }
 button.btn-pause {
   min-width:6rem;
+  background-color: #eeee00;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Crect width='33' height='86' fill='%23000000' stroke='none' transform='translate(10,7)'/%3E%3Crect width='33' height='86' fill='%23000000' stroke='none' transform='translate(60,7)'/%3E%3C/svg%3E");
 }
 button.btn-reset {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Crect width='33.281' height='86.2034' fill='%23000000' stroke='none' transform='translate(27.4604,48.4664) translate(-17.4589,-41.4649)'/%3E%3Cpath d='M0.75,0L-43.25,41.75L0.75,84Z' fill='%23000000' stroke='none' transform='translate(88.25,7.75)'/%3E%3C/svg%3E");
 }
-button.disabled {
+button.disabled, button.btn-play.disabled, button.btn-pause.disabled {
+  background-color:#eee;
   opacity:0.2;
 }
 
@@ -168,12 +171,34 @@ button.disabled {
   border-top: 1px solid #333;
   padding:0.3rem 0.5rem;
 }
-#race-log p .ts {
-  color: #ffffff;
+#race-log p span {
+  margin-right:1em;
+}
+#race-log p.event .ts {
+  color: #aaaaaa;
   margin-right:1rem;
 }
-#race-log p .ts.now {
+#race-log p.event .ts.now {
   color: #ffff33;
+}
+#race-log p.event {
+  color: #99ff99;
+}
+#race-log p .buggy {
+  color: #ffffff;
+}
+#race-log p .buggy:before {
+  content: "[";
+  color:#999999;
+}
+#race-log p .buggy:after {
+  content: "]";
+  color:#999999;
+}
+#race-log p .buggy.tracking {
+  background-color: #ffff33;
+  color:black;
+  outline:3px solid #ffff33;
 }
 #race-log p.user-action {
   color: #ffff33;
@@ -189,7 +214,7 @@ button.disabled {
   background-color:#cccc44;
   font-weight:bold;
 }
-#race-log p.title span{
+#race-log p.title .m2{
   font-weight:normal;
 }
 .svg-buggy { cursor: pointer; }

@@ -10,6 +10,15 @@
       {% endif %}
     </h1>
   </div>
+  {% if race.results_uploaded_at %}
+    <div class="row m-3">
+      <div class="col alert alert-danger text-center">
+        Uploading will <strong>replace any existing results</strong>
+        for this race!
+      </div>
+    </div>
+  {% endif %}
+
   <div class="row">
     <div class="col-md-6 mb-3">
       <div class="border container">
@@ -29,12 +38,26 @@
           </div>
           <div class="row">
             <div class="col-sm-4 p-3">
-              <label for="results_json_file">
+              <label for="is_ignoring_warnings">
                 Ignore warnings?
               </label>
             </div>
             <div class="col-sm-8 p-3">
               <select name="is_ignoring_warnings" class="form-control">
+                <option value="">No</option>
+                <option value="1" selected>Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4 p-3">
+              <label for="is_overwriting_urls">
+                Overwrite existing URLs with any
+                found in JSON?
+              </label>
+            </div>
+            <div class="col-sm-8 p-3">
+              <select name="is_overwriting_urls" class="form-control">
                 <option value="" selected>No</option>
                 <option value="1">Yes</option>
               </select>
@@ -49,12 +72,6 @@
       </div>
     </div>
     <div class="col-md-6">
-      {% if race.results_uploaded_at %}
-        <div class="alert alert-warning">
-          Uploading will <strong>replace any existing results</strong>
-          for this race!
-        </div>
-      {% endif %}
       <p>
         If there are any problems with the results uploaded, you'll see
         warnings and the race results will not be updated. Sometimes it's OK to
@@ -64,8 +81,75 @@
         If you're <em>sure</em> the warnings can be ignored, choose
         <code>No</code> and upload the JSON file again.
       </p>
+      {% if race.has_urls %}
+        <div class="alert alert-warning">
+          This race already has some URLs associated with it
+          — see below.
+          If you choose to <strong>overwrite URLs</strong>
+          these will be replaced with values (if any) found 
+          in the JSON.
+        </div>
+      {% endif %}
     </div>
   </div>
+  {% if race.has_urls %}
+    <div clas="row">
+      <div class="col">
+        <table class="table table-striped table-bordered table-hover">
+          <tr>
+            <th colspan="2">
+              Current URLs for this race 
+            </th>
+          </tr>
+          {% if race.result_log_url %}
+            <tr>
+              <td><code>result_log_url</code></td>
+              <td>
+                <p>
+                  The URL of the results file, that is, <em>the file you are uploading</em>
+                  <br>
+                  <em>This URL is necessary for replaying the race.</em>
+                </p>
+                <p>
+                  <a href="{{ race.result_log_url }}">{{ race.result_log_url }}</a>
+                </p>
+              </td>
+            </tr>
+          {% endif %}
+          {% if race.buggies_csv_url %}
+            <tr>
+              <td><code>buggies_csv_url</code></td>
+              <td>
+                <p>
+                  The URL of the CSV file containing the buggies used to run the race.
+                  <br>
+                  <em>This URL is currently not used.</em>
+                </p>
+                <p>
+                  <a href="{{ race.buggies_csv_url }}">{{ race.buggies_csv_url }}</a>
+                </p>
+              </td>
+            </tr>
+          {% endif %}
+          {% if race.race_log_url %}
+            <tr>
+              <td><code>race_log_url</code></td>
+              <td>
+                <p>
+                  The URL of the <strong>event log</strong> (step-by-step description of what happened).
+                  <br>
+                  <em>This URL is necessary for replaying the race.</em>
+                </p>
+                <p>
+                  <a href="{{ race.race_log_url }}">{{ race.race_log_url }}</a>
+                </p>
+              </td>
+            </tr>
+          {% endif %}
+        </table>
+      </div>
+    </div>
+  {% endif %}
 </div>
 
 {% endblock %}

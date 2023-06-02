@@ -61,6 +61,10 @@ class Race(SurrogatePK, Model):
         return self.start_at.strftime('%Y-%m-%d-%H-%M')
 
     @property
+    def has_urls(self):
+        return bool (self.result_log_url or self.buggies_csv_url or self.race_log_url)
+
+    @property
     def start_at_servertime(self):
         """ Allows Jinja to display day/month/time as separate elements"""
         return servertime_str(
@@ -92,7 +96,7 @@ class Race(SurrogatePK, Model):
         return dup_fields.keys()
 
 
-    def load_race_results(self, results_data, is_ignoring_warnings=False):
+    def load_race_results(self, results_data, is_ignoring_warnings=False, is_overwriting_urls=True):
         """ results data has been read from JSON"""
         if race_id := results_data.get("race_id"):
             if str(self.id) != race_id:
@@ -218,9 +222,30 @@ class Race(SurrogatePK, Model):
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
-            self.result_log_url = results_data.get("result_log_url")
-            self.buggies_csv_url = results_data.get("buggies_csv_url")
-            self.race_log_url = results_data.get("race_log_url")
+            if results_data.get("result_log_url"):
+                if self.result_log_url:
+                    if is_overwriting_urls:
+                        self.result_log_url = results_data.get("result_log_url")
+                    else:
+                        warnings.append("Did not overwrite race result log URL")
+                else:
+                    self.result_log_url = results_data.get("result_log_url")
+            if results_data.get("buggies_csv_url"):
+                if self.buggies_csv_url:
+                    if is_overwriting_urls:
+                        self.buggies_csv_url = results_data.get("buggies_csv_url")
+                    else:
+                        warnings.append("Did not overwrite buggies CSV URL")
+                else:
+                    self.buggies_csv_url = results_data.get("buggies_csv_url")
+            if results_data.get("race_log_url"):
+                if self.race_log_url:
+                    if is_overwriting_urls:
+                        self.race_log_url = results_data.get("race_log_url")
+                    else:
+                        warnings.append("Did not overwrite race events log URL")
+                else:
+                    self.race_log_url = results_data.get("race_log_url")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 

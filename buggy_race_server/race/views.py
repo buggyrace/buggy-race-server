@@ -119,6 +119,7 @@ def upload_results(race_id):
     if request.method == "POST":
         if form.validate_on_submit():
             is_ignoring_warnings = form.is_ignoring_warnings.data
+            is_overwriting_urls = form.is_overwriting_urls.data
             # not robust, but pragmatically...
             # we can anticipate only one admin uploading one race at a time
             delete_path = None
@@ -143,7 +144,8 @@ def upload_results(race_id):
                         try:
                             warnings = race.load_race_results(
                                 result_data,
-                                is_ignoring_warnings=is_ignoring_warnings
+                                is_ignoring_warnings=is_ignoring_warnings,
+                                is_overwriting_urls=is_overwriting_urls
                             )
                         except ValueError as e:
                             flash(f"Failed to load race results: {e}", "danger")
@@ -175,7 +177,7 @@ def upload_results(race_id):
     return render_template(
         "admin/race_upload.html",
         form=form,
-        race=race
+        race=race,
     )
 
 @blueprint.route("/<race_id>/delete", methods=["POST"])

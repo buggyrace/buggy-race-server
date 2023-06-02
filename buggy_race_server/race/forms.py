@@ -95,6 +95,7 @@ class RaceDeleteForm(FlaskForm):
 class RaceResultsForm(FlaskForm):
     results_json_file = FileField("JSON results file")
     is_ignoring_warnings = BooleanField("Ignore warnings?")
+    is_overwriting_urls = BooleanField("Use URLs found inside JSON?")
 
     def __init__(self, *args, **kwargs):
         super(RaceResultsForm, self).__init__(*args, **kwargs)

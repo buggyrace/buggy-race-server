@@ -12,6 +12,23 @@
       Race
     </h1>
   </div>
+  {% if race %}
+    <div class="row">
+      <div class="col my-3">
+        <div class="alert-info">
+          <div class="row p-3">
+            <div class="col-md-4">
+              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
+            </div>
+            <div class="col-md-8">
+              To upload results, you'll need to have the <strong>results JSON
+              file</strong> that is produced when you run the race using the
+              (offline) run-buggy-race utliity.
+            </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col grey-wrapper p-2">
       <form id="RaceForm" class="form form-race" method="POST"
@@ -116,29 +133,16 @@
             </p>
           </div>
         </div>
-        <!-- skipping leagues for now -->
-        <div class="row bg-white py-2 m-1">
-          <div class="col py-2">
-            {% if race %}
-              <input class="btn btn-primary" type="submit" value="Submit race">
-            {% else %}
-              <input class="btn btn-danger" type="submit" value="Add new race">
-            {% endif %}
-          </div>
-        </div>
         {% if race %}
           <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-8">
+            <div class="col">
               <p>
-                Results meta-data: normally this is set when you
-                upload results, so you don't need to change these
+                Results meta-data: normally these fields are set when
+                you upload results, so you don't need to change these
                 here.
               </p>
             </div>
-            <div class="col-sm-4">
-              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
-            </div>
-            </div>
+          </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
               {{ form.results_uploaded_at.label }}
@@ -195,6 +199,17 @@
             </div>
           </div>
         {% endif %}
+
+        <!-- skipping leagues for now -->
+        <div class="row bg-white py-2 m-1">
+          <div class="col py-2">
+            {% if race %}
+              <input class="btn btn-primary" type="submit" value="Submit race">
+            {% else %}
+              <input class="btn btn-danger" type="submit" value="Add new race">
+            {% endif %}
+          </div>
+        </div>
       </form>
     </div>
   </div>

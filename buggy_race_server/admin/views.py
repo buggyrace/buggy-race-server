@@ -204,7 +204,10 @@ def _update_settings_in_db(form):
       # as well as any existing sessions probably
       # so this isn't really recommended
       csrf.init_app(current_app)
-    if not is_in_setup_mode:
+    if (
+      not is_in_setup_mode
+      and current_app.config[ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name]
+    ):
       flash(
         "When you've finished changing settings, "
         "it's a good idea to restart the server", "info"

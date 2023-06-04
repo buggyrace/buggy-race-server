@@ -30,8 +30,9 @@
               {% include "admin/_env_setting_override.html" %}
               <p>
                 You must provide the current authorisation code to commmence setup.
-                You'll also need the auth code whenever you register or edit
-                users, or change configuration settings.
+                Depending on how your race server has been installed, this will
+                either be what you've set in your server environment or the default
+                that's shown in the documentation.
               </p>
             </div>
           </div>
@@ -44,12 +45,19 @@
             </div>
             <div class="col-sm-5">
               You <strong>must</strong> change the authorisation code.
-              Do not forget the new value! (It is possible to change
-              it later, but only if you remember what it is).
-              <em>This should <strong>not</strong> be the same</em> as the admin account
-              password you're also setting at this stage. Later you might add more
-              admin accounts (e.g., for teaching assistants) but can choose not to
-              share the authorisation code with them.
+              Do not forget the new value! (It is possible to change it later,
+              but only if you remember what it is).
+              <p class="alert-danger p-2 mt-2">
+                This should not be the same as the admin account password
+                you're also setting at this stage. 
+              </p>
+              <p class="alert-warning p-2">
+                You'll need this auth code whenever you register or edit users,
+                or change configuration settings: keep it safe, and keep it
+                secret. Later you might add more admin accounts (for staff
+                colleagues) but can choose not to share the authorisation code
+                with them.
+              </p>
             </div>
           </div>
           <div class="row bg-white py-2 m-1">
@@ -74,6 +82,10 @@
             <div class="col-sm-5">
               Password of the admin user (once you've finished setup, you
               can change this later — but <em>do not forget it!</em>)
+              <p class="alert-danger p-2 mt-2">
+                This should not be the same as the authorisation code you're
+                also setting at this stage. 
+              </p>
             </div>
           </div>
           <input type="submit" class="btn btn-primary m-2" value="Submit {{ pretty_group_name_dict[group_name] }} settings"/>

@@ -2,6 +2,8 @@
 """Race model."""
 from datetime import datetime, timedelta, timezone
 import os
+import re
+import json
 from sqlalchemy import delete, insert
 
 # get the config settings (without the app context):
@@ -60,8 +62,12 @@ class Race(SurrogatePK, Model):
     def log_path(self):
         return os.path.join(self.league, self.start_at.strftime('%Y-%m-%d-%H-%M'))
 
+    @property
     def slug(self):
-        return self.start_at.strftime('%Y-%m-%d-%H-%M')
+        s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
+        s = re.sub(r"(^-+|-+$)", "", s)
+        s = re.sub(r"--+", "-", s)
+        return f"{self.id}-{s}"
 
     @property
     def has_urls(self):
@@ -264,6 +270,30 @@ class Race(SurrogatePK, Model):
                     self.race_log_url = results_data.get("race_log_url")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
+
+    def get_results_json(self):
+        results = RaceResult.query.all()
+        results_dict = {
+          "result_log_url": self.result_log_url,
+          "title": self.title,
+          "description": self.desc,
+          "max_laps": 0,
+          "track_image_url": "TODO",
+          "track_svg_url": "TODO",
+          "race_log_url": self.race_log_url,
+          "raced_at": servertime_str(
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+            self.start_at
+          ),
+          "league": self.league,
+          "buggies_csv_url": self.buggies_csv_url,
+          "buggies_entered": self.buggies_entered,
+          "buggies_started": self.buggies_started,
+          "buggies_finished": self.buggies_finished,
+          "results": [],
+          "version": "1.0"
+        }
+        return json.dumps(results_dict, indent=None, separators=(',\n', ': '))
 
 class RaceResult(SurrogatePK, Model):
 

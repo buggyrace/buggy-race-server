@@ -1670,3 +1670,15 @@ def config_docs_helper():
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     )
 
+@blueprint.route("race/replay")
+@login_required
+@staff_only
+def staff_race_replayer():
+    """ race replayer for staff testing that isn't linked to datatabase races:
+    this will try to load whatever URL is passed into the ?race= query var.
+    This isn't suitable for replaying races because only staff can access it."""
+    return render_template(
+        "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        result_log_url="{{}}" # force JavaScript into believing it's standalone
+    )

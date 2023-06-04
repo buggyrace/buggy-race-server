@@ -51,6 +51,16 @@ class RaceForm(FlaskForm):
     race_log_url = StringField(
         "URL of race event log", validators=[Optional(), Length(max=255)]
     )
+    track_image_url = StringField(
+        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+    )
+    track_svg_url = StringField(
+        "URL of path SVG", validators=[Optional(), Length(max=255)]
+    )
+    max_laps = IntegerField(
+        "Number of laps",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
 
     def __init__(self, *args, **kwargs):
         """Create instance."""

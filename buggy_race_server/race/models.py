@@ -77,6 +77,19 @@ class Race(SurrogatePK, Model):
         )
 
     @staticmethod
+    def get_replay_anchor():
+        """ returns empty string or the replay anchor prefixed with #
+            This method is protecting against easy mistake of config setting
+            already having a # at the start — and we've got no easy way of
+            policing individual config setting validation like this (yet)
+        """
+        anchor = ""
+        if anchor := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name]:
+            if not anchor.startswith("#"):
+                anchor = f"#{anchor}"
+        return anchor
+
+    @staticmethod
     def get_duplicate_urls(race_id, result_log_url, buggies_csv_url, race_log_url):
         """ Returns list of fields with duplicate (non-unique) URLs for a race"""
         dup_fields = {}

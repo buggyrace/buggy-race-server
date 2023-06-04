@@ -169,6 +169,7 @@ def announce_races():
         "public/race.html",
         next_race=next_race,
         races=races,
+        replay_anchor=Race.get_replay_anchor(),
         flag_color_css_defs=flag_color_css_defs,
     )
 

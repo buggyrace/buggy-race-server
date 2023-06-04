@@ -38,6 +38,7 @@ def list_races():
         races=races,
         form=form,
         date_today=datetime.today().date(),
+        replay_anchor=Race.get_replay_anchor(),
     )
 
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)

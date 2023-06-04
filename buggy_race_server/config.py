@@ -94,10 +94,13 @@ class ConfigSettingNames(Enum):
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
+    BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
     API_SECRET_TIME_TO_LIVE = auto()
+    DEFAULT_RACETRACK_IMAGE = auto()
+    DEFAULT_RACETRACK_PATH_SVG = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EXT_ID_NAME = auto()
@@ -246,9 +249,12 @@ class ConfigSettings:
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
+        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name,
+        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name,
+        ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name,
       ),
       ConfigGroupNames.SERVER.name: (
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -330,10 +336,13 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+        ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
+        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name: "",
+        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name: "",
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -436,9 +445,12 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
+        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name: ConfigTypes.URL,
+        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name: ConfigTypes.URL,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
@@ -551,6 +563,12 @@ class ConfigSettings:
           You don't need to change this unless you've forked your own custom
           version of the repo.""",
 
+        ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
+          """Anchor which is appended to any race player URLs. If the race
+          player page has a header (which the default player on this server
+          does), this scrolls that out of the way. If you don't prefix
+          this with `#`, it will automatically be added.""",
+
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name:
         """If you want to override the default race player and host your own,
         specify it here and races will link to that instead (passing the
@@ -572,6 +590,16 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
           """The default time-to-live for a users' API secret, in seconds
           (for example, 3600 seconds = 1 hour).""",
+
+        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name:
+         """URL of the default background image (2:1 aspect ratio JPG or PNG
+         for racetracks used in the race replayer).
+         """,
+
+        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name:
+         """The default path — described as a <path> element within the
+         SVG file found at this URL — for racetracks used in the race replayer).
+         """,
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshold for buggies: you can always
@@ -1032,9 +1060,9 @@ class ConfigSettings:
 
     SETUP_GROUP_DESCRIPTIONS = {
       ConfigGroupNames.AUTH.name:
-        """You must complete the setup. It takes around 5 minutes, and
-        you can leave most settings to be default (and you can change
-        most things later, if you need to).""",
+        """You must complete the setup. It takes around 5–10 minutes, and
+        you may be able to leave most settings to their defaults (and you
+        can change most things later, if you need to).""",
 
       ConfigGroupNames.GITHUB.name:
         """Setup the GitHub details here. If you're injecting issues

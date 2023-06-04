@@ -191,6 +191,8 @@ def upload_results(race_id):
         "admin/race_upload.html",
         form=form,
         race=race,
+        default_racetrack_image=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name],
+        default_racetrack_path_svg=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name],
     )
 
 @blueprint.route("/<race_id>/download-results", methods=["GET"])

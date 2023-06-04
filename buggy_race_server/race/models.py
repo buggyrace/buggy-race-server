@@ -45,6 +45,9 @@ class Race(SurrogatePK, Model):
     buggies_csv_url = Column(db.String(255), unique=True, nullable=True)
     race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
+    track_image_url = Column(db.String(255), unique=False, nullable=True)
+    track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    max_laps = db.Column(db.Integer(),  nullable=True)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
 

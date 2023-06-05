@@ -41,8 +41,12 @@
               <td class="btn-collection">
                 <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit</a>
                 {% if race.result_log_url %}
-                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}#replay">Replay</a>
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}{{ replay_anchor }}">Replay</a>
                 {% endif %}
+                {% if race.results_uploaded_at %}
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-download" href="{{ url_for('race.download_results', race_id=race.id) }}">Download&nbsp;results</a>
+                {% endif %}
+                
               </td>
             {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">

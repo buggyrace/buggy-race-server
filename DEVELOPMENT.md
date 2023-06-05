@@ -129,6 +129,11 @@ and then made interactive with the
 * add a no-JS fallback div too: `<div class="ksd-no-js">`
 * finally remember to call `ksd.js` at the bottom of the page to make it happen
 
+### How to keep the customising pages up to date in the docs
+
+Go to `/admin/config-docs-helper` in any current install of the server to
+get the markdown for the config settings (including their default values)
+and copy-and-paste the section that's changed.
 
 ### How to run a race 
 
@@ -141,5 +146,4 @@ data.
 Running the race provides the necessary file for uploading results, but it
 doesn't (yet) produce the event log that presumably would be required to
 replay it.
-
 

@@ -12,6 +12,23 @@
       Race
     </h1>
   </div>
+  {% if race %}
+    <div class="row">
+      <div class="col my-3">
+        <div class="alert-info">
+          <div class="row p-3">
+            <div class="col-md-4">
+              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
+            </div>
+            <div class="col-md-8">
+              To upload results, you'll need to have the <strong>results JSON
+              file</strong> that is produced when you run the race using the
+              (offline) run-buggy-race utliity.
+            </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col grey-wrapper p-2">
       <form id="RaceForm" class="form form-race" method="POST"
@@ -116,29 +133,22 @@
             </p>
           </div>
         </div>
-        <!-- skipping leagues for now -->
-        <div class="row bg-white py-2 m-1">
-          <div class="col py-2">
-            {% if race %}
-              <input class="btn btn-primary" type="submit" value="Submit race">
-            {% else %}
-              <input class="btn btn-danger" type="submit" value="Add new race">
-            {% endif %}
-          </div>
-        </div>
         {% if race %}
           <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-8">
-              <p>
-                Results meta-data: normally this is set when you
-                upload results, so you don't need to change these
-                here.
-              </p>
+            <div class="col-sm-3">
+              Results meta-data
             </div>
             <div class="col-sm-4">
-              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
+              <p>
+                <em>&darr; You might not need to change these manually here.</em>
+              </p>
             </div>
+            <div class="col-sm-5">
+              Some or all of the following fields may be set automatically
+              when you upload results, because they can be included in the
+              result JSON that is generated when you run the race.
             </div>
+          </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
               {{ form.results_uploaded_at.label }}
@@ -152,7 +162,6 @@
               </p>
             </div>
           </div>
-
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
               {{ form.result_log_url.label }}
@@ -162,7 +171,48 @@
             </div>
             <div class="col-sm-5">
               <p>
-                URL for the result log (if any).
+                URL for the JSON file containing the race results (if any).
+              </p>
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.track_image_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.track_image_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for the racetrack image (2:1 aspect ratio background image,
+                typically JPEG or PNG).
+              </p>
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.track_svg_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.track_svg_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for the SVG file containing the racetrack path described
+                as the single <code>&lt;path&gt;</code> element within it.
+              </p>
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.max_laps.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.max_laps(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Number of laps to complete the race.
               </p>
             </div>
           </div>
@@ -176,7 +226,8 @@
             </div>
             <div class="col-sm-5">
               <p>
-                URL for CSV containing the buggies that were entered for the race.
+                URL for CSV containing the buggies that were entered for
+                the race (optional).
               </p>
             </div>
           </div>
@@ -190,11 +241,29 @@
             </div>
             <div class="col-sm-5">
               <p>
-                URL for race log that records the detailed events within the race.
+                URL for race log that records the detailed events within the
+                race — these are the events that the race player replays.
               </p>
             </div>
           </div>
         {% endif %}
+
+        <!-- skipping leagues for now -->
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-7 py-2">
+            {% if race %}
+              <input class="btn btn-primary" type="submit" value="Submit race">
+            {% else %}
+              <input class="btn btn-danger" type="submit" value="Add new race">
+            {% endif %}
+          </div>
+          <div class="col-sm-5 py-2">
+            {% if not race %}
+              Note that there are more fields which you can update once you've
+              created the race.
+            {% endif %}
+          </div>
+        </div>
       </form>
     </div>
   </div>

@@ -2,6 +2,8 @@
 """Race model."""
 from datetime import datetime, timedelta, timezone
 import os
+import re
+import json
 from sqlalchemy import delete, insert
 
 # get the config settings (without the app context):
@@ -45,6 +47,9 @@ class Race(SurrogatePK, Model):
     buggies_csv_url = Column(db.String(255), unique=True, nullable=True)
     race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
+    track_image_url = Column(db.String(255), unique=False, nullable=True)
+    track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    max_laps = db.Column(db.Integer(),  nullable=True)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
 
@@ -57,8 +62,16 @@ class Race(SurrogatePK, Model):
     def log_path(self):
         return os.path.join(self.league, self.start_at.strftime('%Y-%m-%d-%H-%M'))
 
+    @property
     def slug(self):
-        return self.start_at.strftime('%Y-%m-%d-%H-%M')
+        s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
+        s = re.sub(r"(^-+|-+$)", "", s)
+        s = re.sub(r"--+", "-", s)
+        return f"{self.id}-{s}"
+
+    @property
+    def has_urls(self):
+        return bool (self.result_log_url or self.buggies_csv_url or self.race_log_url)
 
     @property
     def start_at_servertime(self):
@@ -68,6 +81,19 @@ class Race(SurrogatePK, Model):
             self.start_at,
             want_datetime=True # otherwise we get a string
         )
+
+    @staticmethod
+    def get_replay_anchor():
+        """ returns empty string or the replay anchor prefixed with #
+            This method is protecting against easy mistake of config setting
+            already having a # at the start — and we've got no easy way of
+            policing individual config setting validation like this (yet)
+        """
+        anchor = ""
+        if anchor := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name]:
+            if not anchor.startswith("#"):
+                anchor = f"#{anchor}"
+        return anchor
 
     @staticmethod
     def get_duplicate_urls(race_id, result_log_url, buggies_csv_url, race_log_url):
@@ -92,7 +118,7 @@ class Race(SurrogatePK, Model):
         return dup_fields.keys()
 
 
-    def load_race_results(self, results_data, is_ignoring_warnings=False):
+    def load_race_results(self, results_data, is_ignoring_warnings=False, is_overwriting_urls=True):
         """ results data has been read from JSON"""
         if race_id := results_data.get("race_id"):
             if str(self.id) != race_id:
@@ -218,11 +244,70 @@ class Race(SurrogatePK, Model):
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
-            self.result_log_url = results_data.get("result_log_url")
-            self.buggies_csv_url = results_data.get("buggies_csv_url")
-            self.race_log_url = results_data.get("race_log_url")
+            if results_data.get("result_log_url"):
+                if self.result_log_url:
+                    if is_overwriting_urls:
+                        self.result_log_url = results_data.get("result_log_url")
+                    else:
+                        warnings.append("Did not overwrite race result log URL")
+                else:
+                    self.result_log_url = results_data.get("result_log_url")
+            if results_data.get("buggies_csv_url"):
+                if self.buggies_csv_url:
+                    if is_overwriting_urls:
+                        self.buggies_csv_url = results_data.get("buggies_csv_url")
+                    else:
+                        warnings.append("Did not overwrite buggies CSV URL")
+                else:
+                    self.buggies_csv_url = results_data.get("buggies_csv_url")
+            if results_data.get("race_log_url"):
+                if self.race_log_url:
+                    if is_overwriting_urls:
+                        self.race_log_url = results_data.get("race_log_url")
+                    else:
+                        warnings.append("Did not overwrite race events log URL")
+                else:
+                    self.race_log_url = results_data.get("race_log_url")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
+
+    def get_results_json(self):
+        all_results = db.session.query(
+            RaceResult, User).outerjoin(User).filter(
+                RaceResult.race_id==self.id
+            ).order_by(RaceResult.race_position.asc()).all()
+        results_dict = {
+            "result_log_url": self.result_log_url,
+            "title": self.title,
+            "description": self.desc,
+            "max_laps": 0,
+            "track_image_url": self.track_image_url,
+            "track_svg_url": self.track_svg_url,
+            "race_log_url": self.race_log_url,
+            "raced_at": servertime_str(
+                current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+                self.start_at
+            ),
+            "league": self.league,
+            "buggies_csv_url": self.buggies_csv_url,
+            "buggies_entered": self.buggies_entered,
+            "buggies_started": self.buggies_started,
+            "buggies_finished": self.buggies_finished,
+            "results":  [
+                {
+                    "username": user.username,
+                    "user_id": user.id,
+                    "flag_color": res.flag_color,
+                    "flag_color_secondary": res.flag_color_secondary,
+                    "flag_pattern": res.flag_pattern,
+                    "cost": res.cost,
+                    "race_position": res.race_position,
+                    "violations_str": res.violations_str
+                } for (res, user) in all_results
+            ],
+            "version": "1.0"
+        }
+        return json.dumps(results_dict, indent=None, separators=(',\n', ': '))
 
 class RaceResult(SurrogatePK, Model):
 
@@ -242,4 +327,3 @@ class RaceResult(SurrogatePK, Model):
     cost = db.Column(db.Integer, nullable=True)
     race_position = db.Column(db.Integer, nullable=False, default=0)
     violations_str = db.Column(db.String(255), nullable=True)
-

@@ -204,7 +204,10 @@ def _update_settings_in_db(form):
       # as well as any existing sessions probably
       # so this isn't really recommended
       csrf.init_app(current_app)
-    if not is_in_setup_mode:
+    if (
+      not is_in_setup_mode
+      and current_app.config[ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name]
+    ):
       flash(
         "When you've finished changing settings, "
         "it's a good idea to restart the server", "info"
@@ -1670,3 +1673,15 @@ def config_docs_helper():
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     )
 
+@blueprint.route("race/replay")
+@login_required
+@staff_only
+def staff_race_replayer():
+    """ race replayer for staff testing that isn't linked to datatabase races:
+    this will try to load whatever URL is passed into the ?race= query var.
+    This isn't suitable for replaying races because only staff can access it."""
+    return render_template(
+        "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        result_log_url="{{}}" # force JavaScript into believing it's standalone
+    )

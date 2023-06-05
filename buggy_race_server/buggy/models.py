@@ -72,17 +72,19 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
         # TODO relationship isn't putting User into the buggy. Don't look
         # TODO Used db.session with .joins and everything. Sigh.
         users_by_id = dict()
-        criteria = {}
-        if want_inactive_users or not want_students_only:
-           print("* not implemented — buggies only for active students")
-        # users = User.query.filter_by(is_active=True, is_student=True).all()
-        users = User.query.all()
+        if want_inactive_users:
+           print("* not implemented — buggies only for active users")
+        if want_students_only:
+            users = User.query.filter_by(is_active=True, is_student=True).all()
+        else:
+            users = User.query.filter_by(is_active=True).all()
         for user in users:
             users_by_id[user.id] = user
         buggies = Buggy.query.all()
         for b in buggies:
-          b.username = users_by_id[b.user_id].username
-          b.pretty_username = users_by_id[b.user_id].pretty_username
+          if user := users_by_id.get(b.user_id):
+            b.username = user.username
+            b.pretty_username = user.pretty_username
         return buggies
 
 @event.listens_for(Buggy, 'before_update')

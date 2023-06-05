@@ -6,8 +6,16 @@ from datetime import datetime, timezone
 import os
 import re
 from flask import (
-    Blueprint, flash, redirect, render_template, request,
-    url_for, abort, current_app, send_file
+    abort,
+    Blueprint,
+    current_app,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
 )
 from flask_login import current_user, login_required
 from buggy_race_server.database import db
@@ -17,6 +25,7 @@ from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
     flash_errors,
+    get_download_filename,
     get_flag_color_css_defs,
     servertime_str,
     staff_only,
@@ -38,6 +47,7 @@ def list_races():
         races=races,
         form=form,
         date_today=datetime.today().date(),
+        replay_anchor=Race.get_replay_anchor(),
     )
 
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
@@ -86,6 +96,9 @@ def edit_race(race_id=None):
                 race.result_log_url = form.result_log_url.data
                 race.buggies_csv_url = form.buggies_csv_url.data
                 race.race_log_url = form.race_log_url.data
+                race.track_image_url = form.track_image_url.data
+                race.track_svg_url = form.track_svg_url.data
+                race.max_laps = form.max_laps.data
                 race.save()
                 pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
                 success_msg = f"OK, updated {pretty_title}" 
@@ -119,6 +132,7 @@ def upload_results(race_id):
     if request.method == "POST":
         if form.validate_on_submit():
             is_ignoring_warnings = form.is_ignoring_warnings.data
+            is_overwriting_urls = form.is_overwriting_urls.data
             # not robust, but pragmatically...
             # we can anticipate only one admin uploading one race at a time
             delete_path = None
@@ -143,7 +157,8 @@ def upload_results(race_id):
                         try:
                             warnings = race.load_race_results(
                                 result_data,
-                                is_ignoring_warnings=is_ignoring_warnings
+                                is_ignoring_warnings=is_ignoring_warnings,
+                                is_overwriting_urls=is_overwriting_urls
                             )
                         except ValueError as e:
                             flash(f"Failed to load race results: {e}", "danger")
@@ -175,8 +190,31 @@ def upload_results(race_id):
     return render_template(
         "admin/race_upload.html",
         form=form,
-        race=race
+        race=race,
+        default_racetrack_image=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name],
+        default_racetrack_path_svg=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name],
     )
+
+@blueprint.route("/<race_id>/download-results", methods=["GET"])
+@login_required
+@admin_only
+def download_results(race_id):
+    """ produces the results file suitable for replaying:
+    This is useful because the URLs (especially of the result file)
+    might have been added/become known _after_ the race was run and
+    the (oringinal) results file was created.
+    """
+    race = Race.get_by_id(race_id)
+    if race is None:
+        flash("Error: coudldn't find race", "danger")
+        abort(404)
+    #  = = = = = =  FIXME download results JSON not implemented yet = = = = = = 
+    filename = get_download_filename(f"race-{race.slug}-results.json", want_datestamp=False)
+    output = make_response(race.get_results_json())
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    output.headers["Content-type"] = "application/json"
+    return output
+
 
 @blueprint.route("/<race_id>/delete", methods=["POST"])
 @login_required
@@ -224,6 +262,7 @@ def show_race_results(race_id):
         is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
         is_tied=is_tied,
         race=race,
+        replay_anchor=Race.get_replay_anchor(),
         results_disqualified=results_disqualified,
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
@@ -257,6 +296,9 @@ def replay_race(race_id):
         if current_user.is_anonymous or not current_user.is_staff:
             flash("The results of this race are not available yet", "warning")
             abort(403)
+    if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
+        anchor = Race.get_replay_anchor()
+        return redirect(f"{player_url}?race={result_log_url}{anchor}")
     return render_template(
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],

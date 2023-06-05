@@ -22,11 +22,18 @@ const VALID_PATTERNS = [
   PATTERN_CHECK, PATTERN_DSTRIPE, PATTERN_HSTRIPE,
   PATTERN_PLAIN, PATTERN_SPOT, PATTERN_VSTRIPE
 ];
-  
+
+const EVENT_BUGGY = 'b';
+const EVENT_TYPE = 'e';
+const EVENT_DELTA = 'd';
+const EVENT_STRING = 's';
+
 const RACE_INFO = {
   title: "Race",
   description: "Description",
   qty_buggies: 0, // buggies that start
+  events: [], // [[ {s: 1, b: buggy_id, e: event_type, t: target_buggy_id, d:distance_delta }, ... ] , ...]
+  qty_steps: 0,
 };
 
 const RACETRACK_DATA = {
@@ -47,11 +54,20 @@ const BUGGY_RECT_WIDTH = 8;
 const BUGGY_RECT_TRANSFORM = half_str(BUGGY_RECT_WIDTH, BUGGY_RECT_HEIGHT);
 const BUTTONS = document.getElementById("buttons");
 const CLICK_DURATION = 1;
+const CSS_ALERT = "alert";
+const CSS_BLINK = "blink";
+const CSS_BTN_PAUSE = "btn-pause";
+const CSS_BTN_PLAY = "btn-play";
 const CSS_DISABLED = "disabled";
+const CSS_DISPLAY_NONE = "display-none"
+const CSS_EVENT = "event";
+const CSS_SYSTEM = "system";
+const CSS_TRACKING = "tracking";
+const CSS_USER_ACTION = "user-action";
 const INFO_PANEL = document.getElementById("info-panel");
 const IS_INVISIBLE_PATH = true; // force path stroke to be none? (CDC prevention)
 const IS_JITTERED = false; // experimental bumpiness off the path
-const IS_RANDOMISED_FOR_DEV = true; // only true pending real race data
+const IS_RANDOMISED_FOR_DEV = false; // only true pending real race data
 const MAX_STEPS = 100; // used by random race generator, pending real events
 const NAMESPACE_SVG = "http://www.w3.org/2000/svg";
 const NAMESPACE_XLINK = "http://www.w3.org/1999/xlink";
@@ -80,7 +96,7 @@ var race_json;
 var racetrack_svg;
 var resize_time_id = null;
 var step_count = 0;
-var  svg_buggies = {}; // keyed on id
+var svg_buggies = {}; // keyed on id
 
 // picked up from template/HTML definitions:
 var race_url = RACE_RESULTS_JSON_URL;
@@ -157,32 +173,54 @@ function display_time_string() {
   TIME_INDICATOR.innerText = get_time_string() + "/LAP" + lap_count;
 }
 
-function report(msg, css_class, extra_span){
+function get_span(text, css_class) {
+  let span = document.createElement("span");
+  span.classList.add(css_class);
+  span.innerText = text;
+  return span;
+}
+
+function report(text, css_class, text2){
   let p = document.createElement("p");
-  p.innerText = msg;
-  if (! css_class){
-    let span = document.createElement("span");
-    span.classList.add("ts");
-    span.classList.add("now");
-    span.innerText = get_time_string();
-    p.prepend(span);
-  } else {
+  if (css_class === CSS_EVENT){
+    let timestamp = get_span(get_time_string(), "ts");
+    timestamp.classList.add("now");
+  }
+  if (css_class){
     p.classList.add(css_class);
   }
-  if (extra_span) {
-    let span = document.createElement("span");
-    span.innerText = extra_span;
-    p.append(span);
+  p.append(get_span(text, "m1"));
+  if (text2) {
+    p.append(get_span(text2, "m2"));
   }
-  RACELOG_DISPLAY.prepend(p)
+  RACELOG_DISPLAY.prepend(p);
+}
+
+function report_event(text, buggy_id){
+  let p = document.createElement("p");
+  p.classList.add(CSS_EVENT);
+  let timestamp = get_span(get_time_string(), "ts");
+  timestamp.classList.add("now");
+  p.append(timestamp);
+  if (buggy_id) {
+    let bspan = get_span(pretty_id(buggy_id), "buggy");
+    bspan.classList.add(buggy_id);
+    if (crosshairs_tracking_id === buggy_id){
+      bspan.classList.add(CSS_TRACKING);
+    }
+    p.append(bspan);
+  }
+  p.append(get_span(text, "m1"));
+  RACELOG_DISPLAY.prepend(p);
 }
 
 function set_up_race(){
-  report("preparing race", "system");
+  report("preparing race", CSS_SYSTEM);
   if (race_json.title) {
     RACE_INFO.title = race_json.title;
   }
   RACE_INFO.description = race_json.description || "";
+  
   let svg_tag = racetrack_svg.getElementsByTagName('svg');
   for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
     try {
@@ -192,16 +230,16 @@ function set_up_race(){
       }
     } catch (error) {
       console.log(error); // probably not fatal, so carry on
-      report("warning: problem with SVG " + attrib_name, "system")
+      report("warning: problem with SVG " + attrib_name, CSS_SYSTEM)
     }
   }
 
-  let paths = racetrack_svg.getElementsByTagName('path');
+  let paths = racetrack_svg.getElementsByTagName("path");
   if (paths.length != 1) {
-    report("error in racetrack (expected single path in SVG)", "alert");
+    report("error in racetrack (expected single path in SVG)", CSS_ALERT);
     return
   }
-  let racetrack_path = racetrack_svg.getElementsByTagName('path')[0];
+  let racetrack_path = racetrack_svg.getElementsByTagName("path")[0];
   racetrack_path.setAttribute("id", RACETRACK_PATH_ID);
   if (IS_INVISIBLE_PATH){
     racetrack_path.setAttribute("stroke", "none");
@@ -209,8 +247,8 @@ function set_up_race(){
   RACETRACK_SVG.append(racetrack_path);
   RACETRACK_DATA.lap_length = Math.round(racetrack_path.getTotalLength());
   RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(0);
-  RACETRACK_DATA.transform = racetrack_path.attributes['transform']?
-    racetrack_path.attributes['transform'].value : "";
+  RACETRACK_DATA.transform = racetrack_path.attributes["transform"]?
+    racetrack_path.attributes["transform"].value : "";
   RACETRACK_DATA.path = racetrack_path;
   RACETRACK_CANVAS.style.backgroundImage = "url(" + race_json.track_image_url + ")";
   RACE_INFO.qty_buggies = 0;
@@ -220,10 +258,10 @@ function set_up_race(){
       RACE_INFO.qty_buggies += 1;
     }
   }
-  crosshairs = document.createElementNS(NAMESPACE_SVG, 'use');
+  crosshairs = document.createElementNS(NAMESPACE_SVG, "use");
   crosshairs.setAttributeNS(NAMESPACE_XLINK, "xlink:href", "#crosshair-indicator");
   crosshairs.setAttribute("transform", RACETRACK_DATA.transform);
-  crosshairs.classList.add("display-none");
+  crosshairs.classList.add(CSS_DISPLAY_NONE);
   RACETRACK_SVG.append(crosshairs);
   if (RACE_INFO.qty_buggies > 0){
     if (user_tracking_id){
@@ -233,7 +271,7 @@ function set_up_race(){
       }
     }
     if (! crosshairs_tracking_id) {
-      report("Click on a buggy to track it", "user-action");
+      report("Click on a buggy to track it", CSS_USER_ACTION);
     }
   }
   setTimeout(
@@ -247,20 +285,23 @@ function set_up_race(){
 }
 
 function start_replay(){
-  REPLAY_INDICATOR.classList.add("blink");
+  REPLAY_INDICATOR.classList.add(CSS_BLINK);
   PLAY_BUTTON.innerText = "PAUSE";
-  PLAY_BUTTON.classList.add("btn-pause");
-  PLAY_BUTTON.classList.remove("btn-play");
+  PLAY_BUTTON.classList.add(CSS_BTN_PAUSE);
+  PLAY_BUTTON.classList.remove(CSS_BTN_PLAY);
   RESET_BUTTON.classList.remove(CSS_DISABLED);
+  leading_buggy_before = null;
+  leading_buggy = null;
   is_paused = false;
+  report_event("race starts");
   do_step();
 }
 
 function stop_replay(){
-  REPLAY_INDICATOR.classList.remove("blink");
+  REPLAY_INDICATOR.classList.remove(CSS_BLINK);
   PLAY_BUTTON.innerText = "PLAY";
-  PLAY_BUTTON.classList.add("btn-play");
-  PLAY_BUTTON.classList.remove("btn-pause");
+  PLAY_BUTTON.classList.add(CSS_BTN_PLAY);
+  PLAY_BUTTON.classList.remove(CSS_BTN_PAUSE);
   is_paused = true;
 }
 
@@ -272,8 +313,8 @@ function reset_replay(){
   PLAY_BUTTON.classList.remove(CSS_DISABLED);
   for (let buggy_id in svg_buggies){
     let buggy = svg_buggies[buggy_id];
-    buggy.setAttribute('x', RACETRACK_DATA.start_point.x);
-    buggy.setAttribute('y', RACETRACK_DATA.start_point.y);
+    buggy.setAttribute("x", RACETRACK_DATA.start_point.x);
+    buggy.setAttribute("y", RACETRACK_DATA.start_point.y);
     buggy.track_data = {
       distance: 0, // current distance along the (modular) track
       jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
@@ -283,7 +324,7 @@ function reset_replay(){
   if (! is_first_race){
     clear_race_log();
     crosshairs_tracking_id = null;
-    crosshairs.classList.add("display-none");
+    crosshairs.classList.add(CSS_DISPLAY_NONE);
   }
   is_first_race = false;
   report(
@@ -298,6 +339,13 @@ function init_track_data(buggy){
     distance: 0, // current distance along the (modular) track
     jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
   };
+}
+
+function resolve_after_1_second(x) {
+  return new Promise((resolve) => {setTimeout(() => {resolve(x);}, 1000)});
+}
+async function pause_1_second() {
+  await resolve_after_1_second(true);
 }
 
 function step_move(buggy, distance_to_move){
@@ -325,11 +373,11 @@ function step_move(buggy, distance_to_move){
         );
         point.x += buggy.track_data.jitter;
         point.y += buggy.track_data.jitter;
-        buggy.setAttribute('x', point.x);
-        buggy.setAttribute('y', point.y);
+        buggy.setAttribute("x", point.x);
+        buggy.setAttribute("y", point.y);
         if (crosshairs_tracking_id === buggy.id){
-          crosshairs.setAttribute('x', point.x);
-          crosshairs.setAttribute('y', point.y);  
+          crosshairs.setAttribute("x", point.x);
+          crosshairs.setAttribute("y", point.y);  
         }
       }
     }
@@ -340,6 +388,23 @@ function step_move(buggy, distance_to_move){
   })
 }
 
+function track_buggy_in_event_log(buggy_id){
+  let mentions = RACELOG_DISPLAY.getElementsByClassName(CSS_TRACKING);
+  while( mentions.length > 0) {
+    for (let mention of mentions){
+      mention.classList.remove(CSS_TRACKING);
+    }
+    // sometimes misses one (race condition?)
+    mentions = RACELOG_DISPLAY.getElementsByClassName(CSS_TRACKING);
+  }
+  if (buggy_id) {
+    mentions = RACELOG_DISPLAY.getElementsByClassName(buggy_id);
+    for (let mention of mentions){
+      mention.classList.add(CSS_TRACKING);
+    }  
+  }
+}
+
 function track_with_crosshairs(buggy_id, want_tracking){
   if (crosshairs){
     if (want_tracking && svg_buggies[buggy_id]){
@@ -347,17 +412,19 @@ function track_with_crosshairs(buggy_id, want_tracking){
       let point = RACETRACK_DATA.path.getPointAtLength(
         svg_buggies[buggy_id].track_data.distance % RACETRACK_DATA.lap_length
       );
-      crosshairs.setAttribute('x', point.x);
-      crosshairs.setAttribute('y', point.y);
-      crosshairs.classList.remove("display-none");
+      crosshairs.setAttribute("x", point.x);
+      crosshairs.setAttribute("y", point.y);
+      crosshairs.classList.remove(CSS_DISPLAY_NONE);
       let msg = "Tracking " + pretty_id(buggy_id);
       if (is_first_race){
         msg += " (click buggies to change)"
       }
-      report(msg, "user-action");
+      report(msg, CSS_USER_ACTION);
+      track_buggy_in_event_log(buggy_id);
     } else {
       crosshairs_tracking_id = null;
       crosshairs.classList.add("display-none");
+      track_buggy_in_event_log(null);
     }
   }
 }
@@ -367,7 +434,7 @@ function buggy_click(){
 }
 
 function end_race(msg){
-  report(msg, "alert");
+  report(msg, CSS_ALERT);
   PLAY_BUTTON.classList.add(CSS_DISABLED);
 }
 
@@ -377,43 +444,55 @@ function pretty_id(buggy_id){
 
 function do_step(){
   display_time_string();
-
-  if (step_count > 0) {
-    for (let buggy_id in svg_buggies) {
-      let buggy = svg_buggies[buggy_id];
-      if (!leading_buggy || buggy.track_data.distance > leading_buggy.track_data.distance) {
-        leading_buggy = buggy;
+  let step_promises = [];
+  if (step_count >= RACE_INFO.qty_steps) {
+    stop_replay();
+    end_race("Race ended: no more events in log");
+    return;
+  }
+  if (IS_RANDOMISED_FOR_DEV){
+    for (let buggy_id in svg_buggies){
+      if (IS_RANDOMISED_FOR_DEV){
+        step_promises.push(
+          step_move(svg_buggies[buggy_id], get_random(30, 4))
+        );
       }
     }
-    if (leading_buggy && leading_buggy != leading_buggy_before) {
-      report(pretty_id(leading_buggy.id) + " takes the lead");
-      leading_buggy_before = leading_buggy;
+  } else {
+    for (let event of RACE_INFO.events[step_count]) {
+      let buggy_id = event[EVENT_BUGGY];
+      let buggy = svg_buggies[BUGGY_ID_PREFIX + buggy_id];
+      let delta = event[EVENT_DELTA]; // TODO parseFloat
+      if (buggy && delta){
+          step_promises.push(step_move(buggy, delta));
+      }
+      if (event[EVENT_TYPE]) {
+        // TODO animation/graphic etc
+      }
+      if (event[EVENT_STRING]) {
+        report_event(event[EVENT_STRING], BUGGY_ID_PREFIX+buggy_id)
+      }
     }
   }
-
-  let step_promises = [];
-  for (let buggy_id in svg_buggies){
-    if (IS_RANDOMISED_FOR_DEV){
-      step_promises.push(
-        step_move(svg_buggies[buggy_id], get_random(30, 4))
-      );
-    }
+  if (step_promises.length === 0) {
+    step_promises = [ pause_1_second() ]
   }
   Promise.all(step_promises).then((buggies) => {
     bump_now_report();
-    let total_distances_moved = 0;
-    for (let buggy of buggies) {
-      total_distances_moved += buggy.track_data.distance_moved;
+    if (step_count > 0) {
+      for (let buggy_id in svg_buggies) {
+        let buggy = svg_buggies[buggy_id];
+        if (!leading_buggy || buggy.track_data.distance > leading_buggy.track_data.distance) {
+          leading_buggy = buggy;
+        }
+      }
+      if (leading_buggy && leading_buggy != leading_buggy_before) {
+        report_event("takes the lead", leading_buggy.id);
+        leading_buggy_before = leading_buggy;
+      }
     }
     step_count += 1;
-    if (step_count > MAX_STEPS) {
-      stop_replay()
-      end_race("race ended: no more events in log")
-    } else if (total_distances_moved === 0) {
-      // slightly risky if buggies can start again (they can't)
-      stop_replay()
-      end_race("race ended: no buggies moving");
-    } else if (! is_paused) {
+    if (! is_paused) {
       do_step()
     }
   });
@@ -472,10 +551,10 @@ PLAY_BUTTON.addEventListener("click", function(){
   if (PLAY_BUTTON.classList.contains(CSS_DISABLED)){
     return
   }
-  if (PLAY_BUTTON.classList.contains("btn-play")){
+  if (PLAY_BUTTON.classList.contains(CSS_BTN_PLAY)){
     start_replay();
   } else {
-    report("Paused replay", "user-action");
+    report("Paused replay", CSS_USER_ACTION);
     stop_replay();
   }
 });
@@ -488,8 +567,16 @@ RESET_BUTTON.addEventListener("click", function(){
     reset_replay();
   } else {
     // if currently running — pause instead of reset
-    report("Paused replay (press RESET again to reset!)", "user-action");
+    report("Paused replay (press RESET again to reset!)", CSS_USER_ACTION);
     stop_replay();
+  }
+});
+
+RACELOG_DISPLAY.addEventListener("click", function(e){
+  if (e.target.classList.contains("buggy")){
+    e.preventDefault();
+    let buggy_id = BUGGY_ID_PREFIX + e.target.innerText;
+    track_with_crosshairs(buggy_id, crosshairs_tracking_id != buggy_id);
   }
 });
 
@@ -513,16 +600,16 @@ window.onresize = on_resize;
   }
   if (!race_url) {
     if (is_running_embedded) {
-      report("maybe the race results/log file has not been uploaded yet", "system");
+      report("maybe the race results/log file has not been uploaded yet", CSS_SYSTEM);
     } else {
-      report("try adding ?race=xyx to the URL (xyz must be a valid race file name", "system");
+      report("try adding ?race=xyx to the URL (xyz must be a valid race file name", CSS_SYSTEM);
     }
-    report("cannot load race: missing the URL", "alert");
+    report("cannot load race: missing the URL", CSS_ALERT);
   } else {
     if (race_url.substr(-5) != ".json") {
       race_url += ".json";
     }
-    report("loading race JSON", "system");
+    report("loading race JSON", CSS_SYSTEM);
     console.log("loading race JSON from " + race_url);
     
     fetch(race_url).then((response) => {
@@ -538,14 +625,21 @@ window.onresize = on_resize;
       if (! race_json.race_log_url) {
         throw new Error("there's no race log URL in the race JSON")
       }
-      report("loading resources", "system");
+      report("loading resources", CSS_SYSTEM);
       fetch(race_json.race_log_url).then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error: ${response.status} fetching race log JSON`);
         }
         return response.json();
-      }).then((json_data) => {
-        // now SVG
+      }).then((json_events_data) => {
+        RACE_INFO.events = json_events_data['events'] || [];
+        if (RACE_INFO.events.length > 0) {
+          RACE_INFO.qty_steps = RACE_INFO.events.length;
+        } else if (IS_RANDOMISED_FOR_DEV) {
+          RACE_INFO.qty_steps = MAX_STEPS;
+        } else {
+          console.log("unexpected: no events to play");
+        }
         fetch(race_json.track_svg_url).then((response) => {
           if (!response.ok) {
             throw new Error(`HTTP error: ${response.status} fetching track SVG`);
@@ -565,6 +659,6 @@ window.onresize = on_resize;
         })
       })
     })
-    .catch((error) => {report(`cannot load race - ${error}`, "alert")})
+    .catch((error) => {report(`cannot load race - ${error}`, CSS_ALERT)})
   }
 })();

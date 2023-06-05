@@ -262,6 +262,7 @@ def show_race_results(race_id):
         is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
         is_tied=is_tied,
         race=race,
+        replay_anchor=Race.get_replay_anchor(),
         results_disqualified=results_disqualified,
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,

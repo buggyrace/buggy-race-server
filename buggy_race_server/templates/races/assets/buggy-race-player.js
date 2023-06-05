@@ -341,6 +341,13 @@ function init_track_data(buggy){
   };
 }
 
+function resolve_after_1_second(x) {
+  return new Promise((resolve) => {setTimeout(() => {resolve(x);}, 1000)});
+}
+async function pause_1_second() {
+  await resolve_after_1_second(true);
+}
+
 function step_move(buggy, distance_to_move){
   if (buggy.track_data == undefined) {
     init_track_data(buggy)
@@ -467,8 +474,8 @@ function do_step(){
       }
     }
   }
-  if (!step_promises) {
-    console.log("TODO no events: wait one second before next step: force a promise");
+  if (step_promises.length === 0) {
+    step_promises = [ pause_1_second() ]
   }
   Promise.all(step_promises).then((buggies) => {
     bump_now_report();

@@ -382,12 +382,16 @@ function step_move(buggy, distance_to_move){
 }
 
 function track_buggy_in_event_log(buggy_id){
-  let mentions = document.getElementsByClassName(CSS_TRACKING);
-  for (let mention of mentions){
-    mention.classList.remove(CSS_TRACKING);
+  let mentions = RACELOG_DISPLAY.getElementsByClassName(CSS_TRACKING);
+  while( mentions.length > 0) {
+    for (let mention of mentions){
+      mention.classList.remove(CSS_TRACKING);
+    }
+    // sometimes misses one (race condition?)
+    mentions = RACELOG_DISPLAY.getElementsByClassName(CSS_TRACKING);
   }
   if (buggy_id) {
-    mentions = document.getElementsByClassName(buggy_id);
+    mentions = RACELOG_DISPLAY.getElementsByClassName(buggy_id);
     for (let mention of mentions){
       mention.classList.add(CSS_TRACKING);
     }  
@@ -558,6 +562,14 @@ RESET_BUTTON.addEventListener("click", function(){
     // if currently running — pause instead of reset
     report("Paused replay (press RESET again to reset!)", CSS_USER_ACTION);
     stop_replay();
+  }
+});
+
+RACELOG_DISPLAY.addEventListener("click", function(e){
+  if (e.target.classList.contains("buggy")){
+    e.preventDefault();
+    let buggy_id = BUGGY_ID_PREFIX + e.target.innerText;
+    track_with_crosshairs(buggy_id, crosshairs_tracking_id != buggy_id);
   }
 });
 

@@ -272,26 +272,40 @@ class Race(SurrogatePK, Model):
         return [ f"Warning: {warning}" for warning in warnings ]
 
     def get_results_json(self):
-        results = RaceResult.query.all()
+        all_results = db.session.query(
+            RaceResult, User).outerjoin(User).filter(
+                RaceResult.race_id==self.id
+            ).order_by(RaceResult.race_position.asc()).all()
         results_dict = {
-          "result_log_url": self.result_log_url,
-          "title": self.title,
-          "description": self.desc,
-          "max_laps": 0,
-          "track_image_url": "TODO",
-          "track_svg_url": "TODO",
-          "race_log_url": self.race_log_url,
-          "raced_at": servertime_str(
-            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
-            self.start_at
-          ),
-          "league": self.league,
-          "buggies_csv_url": self.buggies_csv_url,
-          "buggies_entered": self.buggies_entered,
-          "buggies_started": self.buggies_started,
-          "buggies_finished": self.buggies_finished,
-          "results": [],
-          "version": "1.0"
+            "result_log_url": self.result_log_url,
+            "title": self.title,
+            "description": self.desc,
+            "max_laps": 0,
+            "track_image_url": self.track_image_url,
+            "track_svg_url": self.track_svg_url,
+            "race_log_url": self.race_log_url,
+            "raced_at": servertime_str(
+                current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+                self.start_at
+            ),
+            "league": self.league,
+            "buggies_csv_url": self.buggies_csv_url,
+            "buggies_entered": self.buggies_entered,
+            "buggies_started": self.buggies_started,
+            "buggies_finished": self.buggies_finished,
+            "results":  [
+                {
+                    "username": user.username,
+                    "user_id": user.id,
+                    "flag_color": res.flag_color,
+                    "flag_color_secondary": res.flag_color_secondary,
+                    "flag_pattern": res.flag_pattern,
+                    "cost": res.cost,
+                    "race_position": res.race_position,
+                    "violations_str": res.violations_str
+                } for (res, user) in all_results
+            ],
+            "version": "1.0"
         }
         return json.dumps(results_dict, indent=None, separators=(',\n', ': '))
 
@@ -313,4 +327,3 @@ class RaceResult(SurrogatePK, Model):
     cost = db.Column(db.Integer, nullable=True)
     race_position = db.Column(db.Integer, nullable=False, default=0)
     violations_str = db.Column(db.String(255), nullable=True)
-

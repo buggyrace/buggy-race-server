@@ -135,7 +135,7 @@ button {
   background-size: 1rem 1rem;
   background-repeat: no-repeat;
 }
-button:hover, button.btn-play:hover, button.btn-pause:hover{
+button:hover, button.btn-play:hover, button.btn-pause:hover, button.btn-pause:hover{
   background-color: #cccc00;
 }
 button.btn-play {
@@ -151,6 +151,14 @@ button.btn-pause {
 button.btn-reset {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Crect width='33.281' height='86.2034' fill='%23000000' stroke='none' transform='translate(27.4604,48.4664) translate(-17.4589,-41.4649)'/%3E%3Cpath d='M0.75,0L-43.25,41.75L0.75,84Z' fill='%23000000' stroke='none' transform='translate(88.25,7.75)'/%3E%3C/svg%3E");
 }
+button.btn-ff {
+  min-width:6rem;
+  background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Cpath d='M0,0C0.53,0.47,0,84,0,84L44,42.36C44,42.36,-0.53,-0.47,0,0Z' fill='%23000000' stroke='none' transform='translate(5.89,7.63)'/%3E%3Cpath d='M0,0C0.53,0.47,0,84,0,84L44,42.36C44,42.36,-0.53,-0.47,0,0Z' fill='%23000000' stroke='none' transform='translate(49.90,7.63)'/%3E%3C/svg%3E%0A");
+}
+button.btn-ff.is-fast-fwd{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' text-rendering='geometricPrecision' shape-rendering='geometricPrecision' style='white-space: pre;'%3E%3Crect width='68' height='68' fill='none' stroke='%23000000' stroke-width='12' transform='translate(16,16)'/%3E%3C/svg%3E%0A");
+}
+
 button.disabled, button.btn-play.disabled, button.btn-pause.disabled {
   background-color:#eee;
   opacity:0.2;
@@ -301,6 +309,7 @@ button.disabled, button.btn-play.disabled, button.btn-pause.disabled {
     <div id="buttons" class="hidden">
       <button id="btn-reset" class="btn-reset disabled">RESET</button>
       <button id="btn-play" class="btn-play disabled">PLAY</button>
+      <button id="btn-ff" class="btn-ff disabled">FAST</button>
     </div>
     <div id="race-log" class="hidden">
     </div>

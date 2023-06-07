@@ -10,7 +10,7 @@
    www.buggyrace.net
 
    =====================================================================*/
-  
+
 const PATTERN_CHECK = "check";
 const PATTERN_DSTRIPE = "dstripe";
 const PATTERN_HSTRIPE = "hstripe";
@@ -53,17 +53,22 @@ const BUGGY_RECT_HEIGHT = 6;
 const BUGGY_RECT_WIDTH = 8;
 const BUGGY_RECT_TRANSFORM = half_str(BUGGY_RECT_WIDTH, BUGGY_RECT_HEIGHT);
 const BUTTONS = document.getElementById("buttons");
-const CLICK_DURATION = 1;
 const CSS_ALERT = "alert";
 const CSS_BLINK = "blink";
+const CSS_BTN_FF = "btn-ff";
 const CSS_BTN_PAUSE = "btn-pause";
 const CSS_BTN_PLAY = "btn-play";
 const CSS_DISABLED = "disabled";
 const CSS_DISPLAY_NONE = "display-none"
 const CSS_EVENT = "event";
+const CSS_FAST_FWD = "is-fast-fwd"; // when it is running fast
 const CSS_SYSTEM = "system";
 const CSS_TRACKING = "tracking";
 const CSS_USER_ACTION = "user-action";
+const FAST_FORWARD_BUTTON = document.getElementById("btn-ff");
+const FAST_FORWARD_SPEED_UP = 8;
+const FF_BTN_FAST = "FAST";
+const FF_BTN_NORMAL = "ACTUAL";
 const INFO_PANEL = document.getElementById("info-panel");
 const IS_INVISIBLE_PATH = true; // force path stroke to be none? (CDC prevention)
 const IS_JITTERED = false; // experimental bumpiness off the path
@@ -83,10 +88,12 @@ const RACETRACK_SVG_DEFS = RACETRACK_SVG.querySelector("defs");
 const REPLAY_INDICATOR = document.getElementById("replay-indicator");
 const RESET_BUTTON = document.getElementById("btn-reset");
 const SCREEN_MASK = document.getElementById("screen-mask");
+const STEP_DURATION_IN_S = 1;
 const TIME_INDICATOR = document.getElementById("time-indicator");
 
 var crosshairs;
 var crosshairs_tracking_id = null;
+var is_fast_fwd = false;
 var is_first_race = true;
 var is_paused = true;
 var lap_count = 1;
@@ -290,6 +297,9 @@ function start_replay(){
   PLAY_BUTTON.classList.add(CSS_BTN_PAUSE);
   PLAY_BUTTON.classList.remove(CSS_BTN_PLAY);
   RESET_BUTTON.classList.remove(CSS_DISABLED);
+  FAST_FORWARD_BUTTON.classList.remove(CSS_DISABLED);
+  FAST_FORWARD_BUTTON.innerText = "FAST";
+  is_fast_fwd = false;
   leading_buggy_before = null;
   leading_buggy = null;
   is_paused = false;
@@ -302,6 +312,10 @@ function stop_replay(){
   PLAY_BUTTON.innerText = "PLAY";
   PLAY_BUTTON.classList.add(CSS_BTN_PLAY);
   PLAY_BUTTON.classList.remove(CSS_BTN_PAUSE);
+  FAST_FORWARD_BUTTON.classList.add(CSS_DISABLED);
+  FAST_FORWARD_BUTTON.classList.remove(CSS_FAST_FWD);
+  FAST_FORWARD_BUTTON.innerText = FF_BTN_FAST;
+  is_fast_fwd = false;
   is_paused = true;
 }
 
@@ -311,6 +325,10 @@ function reset_replay(){
   is_paused = true;
   RESET_BUTTON.classList.add(CSS_DISABLED);
   PLAY_BUTTON.classList.remove(CSS_DISABLED);
+  FAST_FORWARD_BUTTON.classList.add(CSS_DISABLED);
+  FAST_FORWARD_BUTTON.classList.remove(CSS_FAST_FWD);
+  FAST_FORWARD_BUTTON.innerText = FF_BTN_FAST;
+  is_fast_fwd = false;
   for (let buggy_id in svg_buggies){
     let buggy = svg_buggies[buggy_id];
     buggy.setAttribute("x", RACETRACK_DATA.start_point.x);
@@ -341,8 +359,12 @@ function init_track_data(buggy){
   };
 }
 
+function ff_multiplier(){ return is_fast_fwd? 1/FAST_FORWARD_SPEED_UP : 1}
+
 function resolve_after_1_second(x) {
-  return new Promise((resolve) => {setTimeout(() => {resolve(x);}, 1000)});
+  return new Promise((resolve) => {
+    setTimeout(() => {resolve(x);}, 1000 * ff_multiplier())
+  });
 }
 async function pause_1_second() {
   await resolve_after_1_second(true);
@@ -366,7 +388,7 @@ function step_move(buggy, distance_to_move){
       distance: buggy.track_data.target_distance,
       repeat: 0, // no repetition!
       ease: "none",
-      duration: CLICK_DURATION,
+      duration: 1 * ff_multiplier(),
       onUpdate: () => {
         const point = RACETRACK_DATA.path.getPointAtLength(
           buggy.track_data.distance % RACETRACK_DATA.lap_length
@@ -571,6 +593,20 @@ RESET_BUTTON.addEventListener("click", function(){
     stop_replay();
   }
 });
+
+FAST_FORWARD_BUTTON.addEventListener("click", function(){
+  if (FAST_FORWARD_BUTTON.classList.contains(CSS_DISABLED)) {
+    return
+  }
+  is_fast_fwd = ! FAST_FORWARD_BUTTON.classList.contains(CSS_FAST_FWD);
+  if (is_fast_fwd) {
+    FAST_FORWARD_BUTTON.classList.add(CSS_FAST_FWD);
+    FAST_FORWARD_BUTTON.innerText = FF_BTN_NORMAL;
+  } else {
+    FAST_FORWARD_BUTTON.classList.remove(CSS_FAST_FWD);
+    FAST_FORWARD_BUTTON.innerText = FF_BTN_FAST;
+  }
+})
 
 RACELOG_DISPLAY.addEventListener("click", function(e){
   if (e.target.classList.contains("buggy")){

@@ -86,6 +86,10 @@ blueprint = Blueprint(
 
 SETTING_PREFIX = "settings" # the name of settings subform
 
+def _is_from_dashboard():
+  if ref := request.referrer:
+    return ref.endswith("/admin/") or ref.referrer.endswith("/admin")
+  return False
 
 def _is_task_list_published():
     task_list_fname = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
@@ -1216,6 +1220,8 @@ def tech_notes_admin():
       else:
         flash(output_msg, "info")
         flash("Re-generated tech notes (static web pages) OK", "success")
+        if _is_from_dashboard():
+            return redirect(url_for('admin.admin'))
     else:
       flash_errors(form)
   return render_template(
@@ -1257,6 +1263,8 @@ def tasks_generate():
                 flash("You should load some tasks into the database before the project can start", "warning")
             else:
                 flash(f"OK, task list page has been generated with latest data ({qty_tasks} tasks)", "success")
+            if _is_from_dashboard():
+                return redirect(url_for('admin.admin'))
     return redirect(url_for('admin.tasks_admin'))
 
 @blueprint.route("/tasks/all", methods=["GET"], strict_slashes=False)

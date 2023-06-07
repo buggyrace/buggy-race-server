@@ -141,7 +141,13 @@ def show_specs_data(data_filename=""):
 def about():
     """About page."""
     form = LoginForm(request.form)
-    response = make_response(render_template("public/about.html", form=form))
+    response = make_response(
+        render_template(
+            "public/about.html",
+            form=form,
+            version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
+        )
+    )
     response.headers.set("Cache-Control", "no-cache")
     return response
 

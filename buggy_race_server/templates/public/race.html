@@ -6,70 +6,68 @@
   <div class="row">
     <h1 class="col my-3">Next buggy race</h1>
   </div>
-  <div class="row">
-    {% if next_race %}
-      <div class="d-flex align-items-start w-100">
-        <div class="col">
-          <div class="w-100 buggy-stripes">&nbsp;</div>
-          <div class="alert alert-info text-center">
-            <h4>
-              {% if next_race.title %}
-                <strong>{{ next_race.title }}</strong>
-              {% else %}
-                <strong>Next Race</strong>
-              {% endif %}
-            </h4>
-            {% if next_race.desc %}
-              <div class="m-3">
-                {{ next_race.desc|safe }}
-              </div>
+  {% if next_race %}
+    <div class="row">
+      <div class="col">
+        <div class="w-100 buggy-stripes">&nbsp;</div>
+        <div class="alert alert-info text-center">
+          <h4>
+            {% if next_race.title %}
+              <strong>{{ next_race.title }}</strong>
+            {% else %}
+              <strong>Next Race</strong>
             {% endif %}
-          </div>
+          </h4>
+          {% if next_race.desc %}
+            <div class="m-3">
+              {{ next_race.desc|safe }}
+            </div>
+          {% endif %}
         </div>
       </div>
-
-      <div class="d-flex align-items-start w-100">
-        <div class="col">
-          <div class="alert alert-success text-center">
-            <h2 class="m-3">
-              {{ next_race.start_at_servertime.strftime('%A') }}
-              <br>
-              {{ next_race.start_at_servertime.strftime('%Y-%m-%d') }}
-              <br>
-              {{ next_race.start_at_servertime.strftime('%H:%M') }}
-              </strong>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="alert alert-success text-center">
+          <h2 class="m-3">
+            {{ next_race.start_at_servertime.strftime('%A') }}
+            <br>
+            {{ next_race.start_at_servertime.strftime('%Y-%m-%d') }}
+            <br>
+            {{ next_race.start_at_servertime.strftime('%H:%M') }}
+            </strong>
+          </h2>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="alert alert-danger text-center">
+          <h2 class="m-3">
+            <strong>
+              Cost limit<br>
+              <span style="font-size:200%">{{ next_race.cost_limit }}</span>
+            </strong>
             </h2>
-          </div>
-        </div>
-        <div class="col">
-          <div class="alert alert-danger text-center">
-            <h2 class="m-3">
-              <strong>
-                Cost limit<br>
-                <span style="font-size:200%">{{ next_race.cost_limit }}</span>
-              </strong>
-              </h2>
-          </div>
         </div>
       </div>
+    </div>
 
-      <div class="d-flex align-items-start w-100">
-        <div class="col">
-          <div class="alert alert-warning text-center">
-            <p class="m-3">
-              Make sure you've uploaded a buggy with a total cost less than or
-              equal to {{ next_race.cost_limit }} <em>before</em> the race starts.
-            </p>
-          </div>
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-warning text-center">
+          <p class="m-3">
+            Make sure you've uploaded a buggy with a total cost less than or
+            equal to {{ next_race.cost_limit }} <em>before</em> the race starts.
+          </p>
         </div>
       </div>
-      
-    {% else %}
+    </div>  
+  {% else %}
+    <div class="row">
       <div class="alert alert-warning w-100 text-center">
         <p class="m-3"><strong>Next race not yet announced.</strong></p>
       </div>
-    {% endif %}  
-  </div>
+    </div>
+  {% endif %}  
 </div>
 
 <div class="container pb-5">

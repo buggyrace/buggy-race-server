@@ -27,18 +27,23 @@ import os
 import sys
 import csv
 import json
+import re
 from datetime import datetime, timezone # will need locale really
 from random import randint
+from enum import Enum
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
 from buggy_race_server.lib.race_specs import BuggySpecs
 
-DEFAULT_CSV_FILENAME = 'buggies.csv'
+DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-05-NO-STAFF-CORRECTED.csv' # 'buggies.csv'
 DEFAULT_RACE_FILENAME = 'race.log'
-DEFAULT_RESULTS_FILENAME = 'buggies.json'
-DEFAULT_COST_LIMIT = 200
-DEFAULT_INITIAL_CLICKS = 1000
-DEFAULT_MORE_CLICKS =  300
+DEFAULT_RESULTS_FILENAME = 'race-results.json'
+DEFAULT_EVENT_LOG_FILENAME = "race-events.json"
+DEFAULT_COST_LIMIT = 300 # 200
+DEFAULT_INITIAL_STEPS = 100
+DEFAULT_MORE_STEPS =  10
+DEFAULT_MAX_LAPS = 2
+DEFAULT_LAP_LENGTH = 528
 
 DEFAULT_PK_OF_PUNCTURE = {
     "knobbly":   3,
@@ -48,9 +53,103 @@ DEFAULT_PK_OF_PUNCTURE = {
     "maglev":    0
 }
 
+POSITIONS = {
+    1: "FIRST PLACE",
+    2: "nd",
+    3: "rd",
+    4: "th",
+    5: "th",
+}
+
+# later... F=ma, but for now, just move like Ludo
+POWER_DATA = {
+    "bio": {
+      "delta": "3d6",
+      "rate": 0.2,
+    }, 
+    "electric": {
+      "delta": "3d4",
+      "rate": 0.06,
+    }, 
+    "fusion": {
+      "delta": "3d6",
+      "rate": 0,
+    }, 
+    "hamster": {
+      "delta": "1d6+2",
+      "rate": 0.3,
+    }, 
+    "none": {
+      "delta": "0d6",
+      "rate": 0,
+    }, 
+    "petrol": {
+      "delta": "3d6+2",
+      "rate": 0.2,
+    }, 
+    "rocket": {
+      "delta": "8d6",
+      "rate": 1,
+    }, 
+    "solar": {
+      "delta": "1d8",
+      "rate": 0,
+    }, 
+    "steam": {
+      "delta": "3d4",
+      "rate": 0.2,
+    }, 
+    "thermo": {
+      "delta": "5d6",
+      "rate": 0,
+    }, 
+    "wind": {
+      "delta": "1d10",
+      "rate": 0,
+    }
+}
+
+DICE_STR_RE = re.compile(r"(\d+)d(\d+)\+?(\d+)?")
+def score_from_dice(dstring):
+    if m := re.match(DICE_STR_RE, dstring):
+        qty = int(m.group(1))
+        sides = int(m.group(2))
+        total = int(m.group(3)) if m.group(3) else 0
+        for i in range(qty):
+            total += randint(1, sides)
+        return total
+    else:
+        return 0
+
+def get_pretty_position(n):
+    if n == 1:
+        return "FIRST PLACE"
+    elif n == 2:
+        return "SECOND PLACE"
+    elif n == 3:
+        return "THIRD PLACE"
+    last_digit = n % 10
+    if n == 11 or n == 12:
+        suffix = "th"
+    if last_digit == 1:
+        suffix = "st"
+    elif last_digit == 2:
+        suffix = "nd"
+    elif last_digit == 3:
+        suffix = "rd"
+    else:
+        suffix = "th"
+    return f"{n}{suffix} place"
+
+class EventType(Enum):
+    PUNCTURE = "p"
+    CHASSIS_FAIL = "xc"
 
 def pk(prob): # probability in 1000
     return randint(0, 1000) < prob
+
+def distance_by_power(power_type):
+    return 3 + randint(1 ,6) +  randint(1, 6)
 
 class RacingBuggy(BuggySpecs):
 
@@ -124,6 +223,9 @@ class RacingBuggy(BuggySpecs):
         self.calculate_total_cost()
         self.calculate_mass()
 
+    def __str__(self):
+        return f"<{self.username}>"
+
     def result_data(self):
         """Data for each buggy that is presented in the `results` section of
         the JSON that is uploaded to the server."""
@@ -139,7 +241,6 @@ class RacingBuggy(BuggySpecs):
             "violations_str": ",".join(self.violations)
         }
 
-
     def power_in_use(self):
         if self.is_parked:
             return None
@@ -148,18 +249,48 @@ class RacingBuggy(BuggySpecs):
         else:
             return self.power_type
 
+    def advance(self, power_in_use):
+        if not self.qty_wheels:
+            return
+        good_wheel_ratio = self.qty_good_wheels / self.qty_wheels
+        dstring = POWER_DATA[power_in_use]["delta"]
+        delta = score_from_dice(dstring)
+        delta *= good_wheel_ratio
+        self.d += delta
+
     def consume_power(self):
         pwr = self.power_in_use()
-        if pwr is not None and BuggySpecs.POWER_TYPES[pwr]['consum']:
-            if self.power_units > 0:
-                self.power_units -= 0.2 # FIXME rate of consumption?
-                # FIXME reduced mass
-            else:
-                if self.is_on_aux or self.aux_power_type == "none":
-                  self.is_parked = True
-                else:
-                  self.power_units = self.aux_power_units
-                  self.is_on_aux = True
+        msg = None
+        if pwr is not None:
+            if BuggySpecs.POWER_TYPES[pwr]['consum']:
+                if self.power_units > 0:
+                    # have not run out of power
+                    self.power_units -= POWER_DATA[pwr]['rate'] * (randint(0, 10)/50)
+                    self.advance(pwr)
+                    if pwr == "hamster" and self.hamster_booster > 0 and pk(10):
+                        self.d += score_from_dice("1d6+10")
+                        self.hamster_booster -= 1
+                        msg = f"employs hamster boost ({self.hamster_booster} left)"
+                    # FIXME reduced mass
+                else: # have run out of power
+                    self.power_units = 0
+                    if self.is_on_aux: # no auxiliary power left, race over for this one
+                        if not self.is_parked:
+                            msg = "is out of auxillary power"
+                        self.is_parked = True
+                    elif self.aux_power_type == "none": # didn't pack any auxilliary
+                        if not self.is_parked:
+                            msg = "is out of power (and has no auxillary power)"
+                        self.is_parked = True
+                    else:
+                        self.power_units = self.aux_power_units
+                        self.is_on_aux = True
+                        msg = f"is out of {pwr} power so switches to auxillary ({self.aux_power_type})"
+            else: # non-consumable power source
+                self.advance(pwr)
+        else:
+            pass # power is none
+        return msg
 
     def suffer_puncture(self):
         self.qty_tyres -= 1
@@ -172,7 +303,25 @@ class RacingBuggy(BuggySpecs):
         self.violations = self.get_rule_violations(cost_limit)
 
 
-
+class RaceEvent():
+    def __init__(self, buggy=None, delta=None, event_type=None, msg=None):
+        self.buggy = buggy if buggy else None
+        # if delta is not None and not f"{delta}".isnumeric():
+        #     raise ValueError(f"delta is not number ({delta})")
+        self.delta = delta
+        if event_type is not None and type(event_type) is not EventType:
+            raise ValueError(f"event_type is not valid ({event_type})")
+        self.event_type = event_type.value if event_type else None
+        self.string = msg # it's 's' for string, not 'm' for message
+    
+    def to_json(self):
+        spacer = " " * 8
+        sparse_dict = {}
+        if self.buggy is not None: sparse_dict["b"] = self.buggy.username
+        if self.delta is not None: sparse_dict["d"] = self.delta
+        if self.event_type is not None: sparse_dict["e"] = self.event_type
+        if self.string is not None: sparse_dict["s"] = self.string
+        return spacer + json.dumps(sparse_dict, indent=2).replace("\n", "\n"+spacer)
 
 # ---------------------------------------------------------------------
 
@@ -190,7 +339,7 @@ def load_csv(csv_filename=None):
         headers = []
         buggy_data = []
         for row in reader:
-            print(row)
+            # print(row)
             buggy_data.append(row)
             # if len(headers):
             #     buggy_data.append(row)
@@ -214,11 +363,18 @@ def load_csv(csv_filename=None):
     return buggies
 
 def run_race(buggies_entered):
+    events = [] # into here goes one array for each step
+    events_this_step = []
+    result_position = 0
+    finishers_this_step = 0
 
-    def racelog(rb, msg):
-        text = f"{clicks:=5} {rb.nom:12s} {msg}"
-        print(text)
-        print(text, file=logfile)
+    def racelog(**kwargs):
+        ev = RaceEvent(**kwargs)
+        #text = f"{steps:=5} {ev.buggy_id:12s} {ev.string}"
+        buggy_id = ev.buggy.username if buggy else ""
+        show_delta = f"delta: {ev.delta}" if ev.delta else ""
+        print(f"[.] {steps:=5} [{buggy_id}] {show_delta} {ev.string or ''}", flush=True)
+        events_this_step.append(ev)
 
     print(f"[ ] buggies entered for this race (i.e., from CSV): {len(buggies_entered)}")
     cost_limit = 0
@@ -234,6 +390,37 @@ def run_race(buggies_entered):
                 print("[!] integer greater than 1 needed")
                 cost_limit = 0
     print(f"[ ] race cost limit: {cost_limit}")
+
+    max_laps = 0
+    while max_laps < 1:
+        max_laps = str(
+            input(f"[?] Number of laps for this race? [{DEFAULT_MAX_LAPS}] ")).strip()
+        if max_laps == '':
+            max_laps = DEFAULT_MAX_LAPS
+        else:
+            try:
+                max_laps = int(max_laps)
+            except ValueError:
+                print("[!] integer greater than 1 needed")
+                max_laps = 0
+    print(f"[ ] race laps: {max_laps}")
+
+    lap_length = 0
+    while lap_length < 1:
+        lap_length = str(
+            input(f"[?] Lap length? [{DEFAULT_LAP_LENGTH}] ")).strip()
+        if lap_length == '':
+            lap_length = DEFAULT_LAP_LENGTH
+        else:
+            try:
+                lap_length = int(lap_length)
+            except ValueError:
+                print("[!] integer greater than 1 needed")
+                lap_length = 0
+    print(f"[ ] lap length: {lap_length}")
+
+    pretty_race_length = f"{max_laps} lap race"
+
     logfilename = DEFAULT_RACE_FILENAME
     print(f"[ ] opening race log file {logfilename}... ")
     logfile = open(logfilename, "w")
@@ -242,7 +429,7 @@ def run_race(buggies_entered):
     print("[ ] Checking race rules...")
     qty_violators = 0
     buggies = []
-    fake_position = 1
+
     for buggy in buggies_entered:
         try:
             buggy.set_rule_violations(cost_limit)
@@ -255,12 +442,12 @@ def run_race(buggies_entered):
             print(f"[-]    violates: {'+'.join(buggy.violations)}")
             logfile.write(f"VIOLATION: {buggy.username},{'+'.join(buggy.violations)}\n")
         else:
-            buggy.position = fake_position
+            buggy.position = 0
             buggies.append(buggy)
-            fake_position += 1
     print(f"[*] {qty_violators} buggies are excluded due to race rule violations")
     logfile.write("#\n")
     print(f"[ ] next: {len(buggies)} buggies ready to start the race:")
+    print("[ ]       " + ", ".join([b.username for b in buggies]))
     for b in buggies:
         logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
     logfile.write("#\n")
@@ -270,87 +457,130 @@ def run_race(buggies_entered):
     else:
         logfile.write("# race starts...\n")
         print("[ ] GO!")
-        clicks = 0
-        max_clicks = DEFAULT_INITIAL_CLICKS 
-        winners = []
+        steps = 0
+        max_steps = DEFAULT_INITIAL_STEPS 
+        finishers = []
 
-        while clicks < max_clicks:
-            clicks += 1
+        while steps < max_steps:
+            events_this_step = []
+            result_position += finishers_this_step # 2 buggies tie, next one is 3rd
+            finishers_this_step = 0
+            steps += 1
+            print(f"------------------------ step {steps} ------------------------")
             qty_active = 0
             for buggy in buggies:
-                if buggy.is_parked:
-                    continue
-                qty_active += 1
-                if pk(1) and pk(buggy.mass/buggy.qty_wheels):
-                    racelog(b, "catastrophic chassis failure: buggy breaks.")
-                    buggy.is_parked = True
-                if pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
-                    buggy.suffer_puncture()
-                    if buggy.qty_good_wheels == 0:
-                        punc_str = "no tyres left: parked"
+                if not buggy.is_parked:
+                    delta = 0
+                    qty_active += 1
+                    if pk(1) and pk(buggy.mass/buggy.qty_wheels):
+                        racelog(
+                            buggy=buggy,
+                            event_type=EventType.CHASSIS_FAIL,
+                            msg="catastrophic chassis failure: buggy breaks."
+                        )
+                        buggy.is_parked = True
                     else:
-                        punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
-                        punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
-                    racelog(buggy, f"puncture! {punc_str}")
-                
-                power = buggy.power_in_use()
-                if power is not None:
-                    b.consume_power()
-                    #racelog(buggy, "power {} consumed (units {})".format(power, buggy.power_units))
-                    new_power = buggy.power_in_use()
-                    if new_power != power:
-                        if new_power is None:
-                            racelog(buggy, f"ran out of {power} power")
+                        power = buggy.power_in_use()
+                        if power is not None:
+                            distance_before = buggy.d
+                            if msg := buggy.consume_power():
+                                racelog(buggy=buggy, msg=msg)
+                            delta = buggy.d - distance_before
+                            if (delta):
+                                racelog(buggy=buggy, delta=delta)
+                            # else: print(f"[ ] {buggy.username} does not move")
                         else:
-                            racelog(buggy, f"ran out of {power}, switched to auxiliary power: {new_power}")
-                
-                    #   ? risk of primary power fail?
-
-                    #   distance travelled x % of tires
-                    #   data[id][x]+=speed
-                    #   if data[id][x] > race_distance
-                    #     winners.append(b)
-                    #   if len(winnners): bail out
-                    #   data[id]["attacks"] > 0?
-                    #     anyone near? chance of attack?
-                    #     target defensive? steady?
-                    #        ? chance of attack backfire
-                    #          calculate damage of attack
-                if qty_active == 0:
-                    print("[ ] no buggies moving...")
-                    break
+                            racelog(
+                                buggy=buggy,
+                                msg=f"ran out of {power} power"
+                            )
+                    if delta and pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
+                        buggy.suffer_puncture()
+                        if buggy.qty_good_wheels == 0:
+                            punc_str = "no tyres left: parked"
+                        else:
+                            punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
+                            punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
+                        racelog(
+                            buggy=buggy,
+                            event_type=EventType.PUNCTURE,
+                            msg="puncture! " + punc_str
+                        )
+                        #   ? risk of primary power fail?
+                        #   data[id]["attacks"] > 0?
+                        #     anyone near? chance of attack?
+                        #     target defensive? steady?
+                        #        ? chance of attack backfire
+                        #          calculate damage of attack
+                    if max_laps and buggy.d // lap_length >= max_laps:
+                        buggy.is_parked = True
+                        if finishers_this_step == 0:
+                            result_position += 1
+                        buggy.position = result_position
+                        position_str = get_pretty_position(result_position)
+                        finishers_this_step += 1
+                        finishers.append(buggy)
+                        if finishers_this_step > 1:
+                            position_str = f"tied {position_str}"
+                        racelog(
+                            buggy=buggy,
+                            msg=f"crosses the finish line in {position_str} ({pretty_race_length})"
+                        )
+                        buggy.d += score_from_dice("3d4") # nudge over line
                 else:
-                    if clicks == max_clicks:
-                        more_clicks = str(
-                        input(f"[?] {clicks} clicks so far: add more? [+{DEFAULT_MORE_CLICKS}] ")).strip()
-                        if more_clicks == '':
-                            more_clicks = DEFAULT_MORE_CLICKS
-                        else:
-                            try:
-                                more_clicks = int(more_clicks)
-                            except ValueError:
-                                print("[!] integer greater than 1 needed")
-                            more_clicks = 0
-                        if more_clicks > 0:
-                            print(f"[+] running race for another +{more_clicks} clicks")
-                        else:
-                            print("[-] no more clicks, time is up")
-                        max_clicks += more_clicks
+                    pass # buggy is parked
+
+            if qty_active == 0:
+                print("[ ] no buggies moving...")
+                break
+            else:
+                if steps == max_steps:
+                    more_steps = str(
+                    input(f"[?] {steps} steps so far: add more? [+{DEFAULT_MORE_STEPS}] ")).strip()
+                    if more_steps == '':
+                        more_steps = DEFAULT_MORE_STEPS
+                    else:
+                        try:
+                            more_steps = int(more_steps)
+                        except ValueError:
+                            print("[!] integer greater than 1 needed")
+                        more_steps = 0
+                    if more_steps > 0:
+                        print(f"[+] running race for another +{more_steps} steps")
+                    else:
+                        print("[-] no more steps, time is up")
+                    max_steps += more_steps
+            events.append(events_this_step)
+
         logfile.close()
-        print(f"[:] race ends after {clicks} clicks")
+        print(f"[:] race ends after {steps} steps")
+        non_finishers = sorted(
+            [buggy for buggy in buggies if buggy.position == 0 ],
+            key=lambda buggy: buggy.d,
+            reverse=True
+        )
+        for buggy in non_finishers:
+            buggy.position = result_position
+            result_position += 1
+
     print(f"[ ] see race log in {logfilename}")
     results = {
-      # "race_title": "",
-      # "cost_limit": 200,
-      # "start_at": "2023-03-22 23:58",
-      "raced_at": race_start_at,
+      "result_log_url": "________",
+      "title": "________",
+      "description": "________",
+      "cost_limit": cost_limit,
+      "max_laps": max_laps,
+      "track_image_url": "________",
+      "track_svg_url": "________",
+      "race_log_url": "________",
+      "buggies_csv_url": "________",
+      "raced_at": "________",
       "league": "",
+      "start_at": "_________",
+      "raced_at": race_start_at,
       "buggies_entered": len(buggies_entered),
       "buggies_started": len(buggies),
-      "buggies_finished": len(buggies),
-      # "buggies_csv_url": "https://example.com/buggies223.csv",
-      # "race_log_url":  "https://example.com/race-log223.log",
-      # "result_log_url" :  "https://example.com/result223.log",
+      "buggies_finished": len(finishers),
       "results": [buggy.result_data() for buggy in
                     sorted(
                         buggies_entered,
@@ -365,6 +595,26 @@ def run_race(buggies_entered):
     print(json.dumps(results, indent=2), file=jsonfile)
     jsonfile.close()
     print(f"[ ] wrote to {jsonfilename}, ready to upload")
+    print(f"[.] bye")
+
+    json_strings = []
+    for events_in_step in events:
+        json_strings.append(
+            "    [\n"
+            + ",\n".join([ev.to_json() for ev in events_in_step])
+            + "\n    ]"
+        )
+
+
+    jsonfilename = DEFAULT_EVENT_LOG_FILENAME
+    print(f"[ ] opening events JSON file {jsonfilename}... ")
+    jsonfile = open(jsonfilename, "w")
+    print('{\n "events": [', file=jsonfile)
+    print(",\n".join(json_strings), file=jsonfile)
+    print('  ]\n}', file=jsonfile)
+    jsonfile.close()
+    print(f"[ ] wrote to {jsonfilename}, ready to upload")
+
     print(f"[.] bye")
 
 def main():

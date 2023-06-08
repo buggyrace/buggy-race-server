@@ -35,15 +35,15 @@ from enum import Enum
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
 from buggy_race_server.lib.race_specs import BuggySpecs
 
-DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-05-NO-STAFF-CORRECTED.csv' # 'buggies.csv'
+DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-07-FOURTH-RACE-STUDENTS.csv' # 'buggies.csv'
 DEFAULT_RACE_FILENAME = 'race.log'
 DEFAULT_RESULTS_FILENAME = 'race-results.json'
 DEFAULT_EVENT_LOG_FILENAME = "race-events.json"
-DEFAULT_COST_LIMIT = 300 # 200
+DEFAULT_COST_LIMIT = 100 # 200
 DEFAULT_INITIAL_STEPS = 100
 DEFAULT_MORE_STEPS =  10
-DEFAULT_MAX_LAPS = 2
-DEFAULT_LAP_LENGTH = 528
+DEFAULT_MAX_LAPS = 1
+DEFAULT_LAP_LENGTH = 355
 
 DEFAULT_PK_OF_PUNCTURE = {
     "knobbly":   3,
@@ -128,17 +128,18 @@ def get_pretty_position(n):
         return "SECOND PLACE"
     elif n == 3:
         return "THIRD PLACE"
-    last_digit = n % 10
-    if n == 11 or n == 12:
+    if n in [11, 12, 13]:
         suffix = "th"
-    if last_digit == 1:
-        suffix = "st"
-    elif last_digit == 2:
-        suffix = "nd"
-    elif last_digit == 3:
-        suffix = "rd"
     else:
-        suffix = "th"
+        last_digit = n % 10
+        if last_digit == 1:
+            suffix = "st"
+        elif last_digit == 2:
+            suffix = "nd"
+        elif last_digit == 3:
+            suffix = "rd"
+        else:
+            suffix = "th"
     return f"{n}{suffix} place"
 
 class EventType(Enum):
@@ -271,7 +272,7 @@ class RacingBuggy(BuggySpecs):
                         self.d += score_from_dice("1d6+10")
                         self.hamster_booster -= 1
                         msg = f"employs hamster boost ({self.hamster_booster} left)"
-                    # FIXME reduced mass
+                    # TODO reduced mass
                 else: # have run out of power
                     self.power_units = 0
                     if self.is_on_aux: # no auxiliary power left, race over for this one
@@ -287,7 +288,18 @@ class RacingBuggy(BuggySpecs):
                         self.is_on_aux = True
                         msg = f"is out of {pwr} power so switches to auxillary ({self.aux_power_type})"
             else: # non-consumable power source
-                self.advance(pwr)
+                if self.power_units > 0:
+                    self.advance(pwr)
+                else:
+                    self.power_units = 0
+                    if self.is_on_aux: # no auxiliary power left, race over for this one
+                        if not self.is_parked:
+                            msg = "is out of auxillary power"
+                        self.is_parked = True
+                    elif self.aux_power_type == "none": # didn't pack any auxilliary
+                        if not self.is_parked:
+                            msg = "is out of power (and has no auxillary power)"
+                        self.is_parked = True
         else:
             pass # power is none
         return msg
@@ -365,7 +377,7 @@ def load_csv(csv_filename=None):
 def run_race(buggies_entered):
     events = [] # into here goes one array for each step
     events_this_step = []
-    result_position = 0
+    next_finisher_position = 1
     finishers_this_step = 0
 
     def racelog(**kwargs):
@@ -463,7 +475,7 @@ def run_race(buggies_entered):
 
         while steps < max_steps:
             events_this_step = []
-            result_position += finishers_this_step # 2 buggies tie, next one is 3rd
+            next_finisher_position += finishers_this_step # 2 buggies tie, next one is 3rd
             finishers_this_step = 0
             steps += 1
             print(f"------------------------ step {steps} ------------------------")
@@ -514,11 +526,9 @@ def run_race(buggies_entered):
                         #          calculate damage of attack
                     if max_laps and buggy.d // lap_length >= max_laps:
                         buggy.is_parked = True
-                        if finishers_this_step == 0:
-                            result_position += 1
-                        buggy.position = result_position
-                        position_str = get_pretty_position(result_position)
                         finishers_this_step += 1
+                        buggy.position = next_finisher_position
+                        position_str = get_pretty_position(next_finisher_position)
                         finishers.append(buggy)
                         if finishers_this_step > 1:
                             position_str = f"tied {position_str}"
@@ -560,8 +570,8 @@ def run_race(buggies_entered):
             reverse=True
         )
         for buggy in non_finishers:
-            buggy.position = result_position
-            result_position += 1
+            buggy.position = next_finisher_position
+            next_finisher_position += 1
 
     print(f"[ ] see race log in {logfilename}")
     results = {

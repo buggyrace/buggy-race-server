@@ -303,7 +303,9 @@ function start_replay(){
   leading_buggy_before = null;
   leading_buggy = null;
   is_paused = false;
-  report_event("race starts");
+  if (step_count == 0){
+    report_event("race starts");
+  }
   do_step();
 }
 

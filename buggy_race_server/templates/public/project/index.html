@@ -116,7 +116,7 @@
         <!-- "deadline-container" is magic: js enhanced -->
         <div id="deadline-container" class="alert alert-danger">
             <span style="display:inline-block;margin-right:1em;">{{ submit_deadline_day}} {{ submit_deadline | replace("T", " ") }}</span>
-            <!-- <span id="deadline-countdown" style="display:inline-block" data-deadline="[[ submit_deadline ]]"></span> -->
+            <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submit_deadline }}"></span>
         </div>
         <p>
           That's the submission we'll be assessing (and running) to see how you got on

@@ -78,6 +78,12 @@ def handle_uploaded_json(form, user, is_api=False):
             if not is_api:
               flash("\"{}\" was ignored because it didn't look right".format(key), "warning")
           else:
+            # check lengths:
+            if max_str_len := Buggy.STRING_COL_LENGTH.get(key):
+                if len(s) > max_str_len:
+                  s = s[:max_str_len]
+                  if not is_api:
+                    flash(f"\"{key}\" was truncated to {max_str_len} characters", "warning")
             clean_buggy_data[key] = s
       else:
         if not is_api:

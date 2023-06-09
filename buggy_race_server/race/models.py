@@ -20,7 +20,6 @@ from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import servertime_str
 
-
 class Race(SurrogatePK, Model):
     """A race."""
 
@@ -44,7 +43,7 @@ class Race(SurrogatePK, Model):
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)
-    buggies_csv_url = Column(db.String(255), unique=True, nullable=True)
+    buggies_csv_url = Column(db.String(255), unique=False, nullable=True)
     race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
     track_image_url = Column(db.String(255), unique=False, nullable=True)

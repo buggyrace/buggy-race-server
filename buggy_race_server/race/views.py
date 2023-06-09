@@ -20,7 +20,7 @@ from flask import (
 from flask_login import current_user, login_required
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
-from buggy_race_server.race.models import Race, RaceResult
+from buggy_race_server.race.models import Race, RaceResult, Racetrack
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
@@ -313,4 +313,14 @@ def replay_race(race_id):
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
         result_log_url=result_log_url,
+    )
+
+@blueprint.route("/tracks")
+def show_tracks():
+    racetracks =  Racetrack.query.order_by(
+          Racetrack.title.asc(),
+        ).all()
+    return render_template(
+        "races/tracks.html",
+        racetracks=racetracks
     )

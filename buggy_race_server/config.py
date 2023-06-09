@@ -60,6 +60,14 @@ class ConfigSettingNames(Enum):
     # Path where published HTML (task list and tech notes) is written
     _PUBLISHED_PATH = auto()
 
+    # Path where static race assets (race player, etc) are found
+    _RACE_ASSETS_PATH = auto()
+
+    # Path where static racetrack assets (background images and path SVGs)
+    # are found — might be a subdir of _RACE_ASSETS_PATH, but doesn't have
+    # to be so, this is an entirely separate path
+    _RACE_ASSETS_RACETRACK_PATH = auto()
+
     # Setup status is used to track progress (and ultimately completion)
     # of the setup process when the app is first installed
     _SETUP_STATUS = auto()
@@ -322,6 +330,8 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
+        ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
+        ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",

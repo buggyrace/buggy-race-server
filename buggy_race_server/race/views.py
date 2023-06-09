@@ -27,7 +27,6 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
-    servertime_str,
     staff_only,
     join_to_project_root,
 )
@@ -268,21 +267,32 @@ def show_race_results(race_id):
         results_nonfinishers=results_nonfinishers,
     )
 
-# temporary /assets/ filename while developing/experimenting in beta
+# race assets:
+# Serving statically because it's more robust than trying to
+# figure out how to exclude these from webpack, and even then it's
+# too complex in the event of changes: keep it simple.
+# Want it standalone because it's handy to be able to dev/run it
+# in isolation outwith the race server, at least for now.
+
+def _serve_race_asset_file(*args):
+    full_filename = join_to_project_root(*args)
+    if not os.path.exists(full_filename):
+        # don't send full error page, as responses generally aren't
+        # being seen by human user, but as a component on a page
+        return make_response("Race resource not found", 404)
+    return send_file(full_filename)
+
+@blueprint.route("/assets/tracks/<filename>")
+def serve_racetrack_asset(filename):
+    return _serve_race_asset_file(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name],
+        filename
+    )
+
 @blueprint.route("/assets/<filename>")
 def serve_race_player_asset(filename):
-    """ Serving statically because it's more robust than trying to
-        figure out how to exclude this from webpack, and even then it's
-        too complex in the event of changes: keep it simple.
-        Want it standalone because it's handy to be able to dev/run it
-        in isolation outwith the race server, at least for now."""
-    full_filename = join_to_project_root(
-        "buggy_race_server", "templates", "races", "assets", filename
-    )
-    if not os.path.exists(full_filename):
-        abort(404)
-    return send_file(full_filename)
-  
+    return _serve_race_asset_file(filename)
+
 @blueprint.route("/<race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()

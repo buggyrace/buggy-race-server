@@ -1562,6 +1562,8 @@ def show_system_info():
     config_settings_to_display = sorted([
       ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+      ConfigSettingNames._RACE_ASSETS_PATH.name,
+      ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
       ConfigSettingNames._PUBLISHED_PATH.name,
       ConfigSettingNames._SETUP_STATUS.name,
       ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,

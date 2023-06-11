@@ -580,3 +580,71 @@ $(function() {
     }
   })
 });
+
+$(function() {
+  // code for the race-picker... needs jQuery to dismiss bootstrap modal :-(
+  const TRACK_PICKER_MODAL = document.getElementById("track-picker-modal");
+  if (TRACK_PICKER_MODAL) {
+    // this means we're in the new/edit race page, so a bunch of assumptions
+    // about what is in the DOM are made
+    const $TRACK_PICKER_MODAL = $("#track-picker-modal"); // needed to dismiss, sigh
+    const $CONFIRM_MODAL = $("#confirm-modal");
+    const CONFIRM_MSG = document.getElementById("confirm-msg");
+    const INSERT_CONFIRM_BTN = document.getElementById("confirm-track-insert");
+    const RACE_SUBMIT_BTN = document.getElementById("race-submit-btn");
+    const REMINDER_BTN_TXT  = document.getElementById("reminder-btn-text");
+    const TRACK_CARDS = document.querySelectorAll(".card.racetrack");
+    const TRACK_EDIT_VIEW_BTNS = document.getElementsByClassName("track-view-edit-btns");
+    const TRACK_PICKER_BTN_ROW = document.getElementById("track-picker-btn-row");
+    const TRACK_PICKER_CONTROLS = document.getElementsByClassName("track-picker-control");
+
+    const RACE_TRACK_INPUTS = {
+      "track_image_url": document.querySelector('input[name="track_image_url"]'),
+      "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
+      "lap_length": document.querySelector('input[name="lap_length"]')
+    }
+
+    var selected_card = null;
+
+    // suppress "normal" HTML actions on the racetrack cards
+    for (let el of TRACK_EDIT_VIEW_BTNS){
+      el.classList.add("hidden");
+    }
+
+    for (let card of TRACK_CARDS){
+      card.classList.add("race-clickable");
+      card.addEventListener(
+        "click",
+        function(e){
+          e.preventDefault();
+          selected_card = card;
+          CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
+          REMINDER_BTN_TXT.innerText = RACE_SUBMIT_BTN.value;
+          // non-trivial to dismiss bootstrap modal without jQuery :-(
+          $TRACK_PICKER_MODAL.modal("hide");
+          $CONFIRM_MODAL.modal("show");
+        }
+      )
+    }
+
+    INSERT_CONFIRM_BTN.addEventListener(
+      "click",
+      function(){
+        if (selected_card){
+          RACE_TRACK_INPUTS["track_image_url"].value = selected_card.dataset.trackImageUrl;
+          RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
+          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;  
+        } else {
+          console.error("unexpected: no racetrack selected")
+        }
+      }
+    )
+
+    // setup done, finally reveal the interface
+    TRACK_PICKER_BTN_ROW.classList.remove("hidden");
+    for (let el of TRACK_PICKER_CONTROLS){
+      el.classList.remove("bg-white");
+      el.classList.add("alert-info");
+    }
+  }
+})

@@ -88,7 +88,7 @@ SETTING_PREFIX = "settings" # the name of settings subform
 
 def _is_from_dashboard():
   if ref := request.referrer:
-    return ref.endswith("/admin/") or ref.referrer.endswith("/admin")
+    return ref.endswith("/admin/") or ref.endswith("/admin")
   return False
 
 def _is_task_list_published():

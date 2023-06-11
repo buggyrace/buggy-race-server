@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Racetracks
+    </h1>
+  </div>
+  <div class="row my-2 border p-3">
+    {% include "admin/_racetracks.html" %}
+  </div>
+  <div class="row">
+    <div class="col btn-collection">
+      <a href="{{ url_for('race.new_track') }}" class="btn btn-admin btn-outline-secondary btn-jump">Add new racetrack</a>
+    </div>
+  </div>
+  {% if is_showing_example_racetracks %}
+    <div class="row my-4">
+      <div class="col-md-6 p-3">
+        There are some example racetracks already on this server. If you
+        don't see them here, you can automatically add them.
+      </div>
+      <div class="col-md-6 p-3">
+        <form action="{{ url_for('race.autofill_tracks') }}" method="POST">
+          {{ form.csrf_token }}
+          <button class="btn btn-primary">Add missing racetracks</button>
+        </form>
+      </div> 
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+

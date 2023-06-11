@@ -1,0 +1,34 @@
+
+{% for track in racetracks %}
+  <div class="col-md-3 col-sm-4 col-6">
+    <!-- add race-clickable with JS to make these selectable-->
+    <div class="card racetrack border-secondary"
+      data-title="{{ track.title }}"
+      data-track-image-url="{{ track.track_image_url }}"
+      data-track-svg-url="{{ track.track_svg_url }}"
+      data-lap-length="{{ track.lap_length }}"
+    >
+      <img src="{{track.track_image_url}}" class="card-img-top" alt="racetrack">
+      <div class="card-body">
+        <h5 class="card-title">{{ track.title }}</h5>
+        <p class="card-text">
+          Lap:
+          {% if track.lap_length is none %}
+            <em>—</em>
+          {% else %}
+            <code>{{ track.lap_length }}</code>
+          {% endif %}
+          {{ track.desc }}
+        </p>
+        <p class="btn-collection track-view-edit-btns">
+          <a href="{{ url_for('race.view_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">View</a>
+          <a href="{{ url_for('race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">Edit</a>
+        </p>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="col">
+    <p>No racetracks available.</p>
+  </div>
+{% endfor %}

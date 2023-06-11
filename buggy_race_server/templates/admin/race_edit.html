@@ -69,7 +69,8 @@
           <div class="col-sm-5">
             <p>
               The start of the race is effectively the <strong>deadline for
-              uploading buggy JSON</strong>. This isn't enforced automatically.
+              students to upload buggy JSON</strong>. This isn't enforced
+              automatically.
             </p>
             <p><em>Default:</em> 2 minutes to midnight, tomorrow</p>
           </div>
@@ -89,6 +90,64 @@
             </p>
             <p>
               <em>Default:</em> {{ default_race_cost_limit }}
+            </p>
+          </div>
+        </div>
+        <div id="track-picker-btn-row" class="row alert-info py-2 m-1 track-picker-control hidden">
+          <div class="col-sm-3">
+          </div>
+          <div class="col-sm-4">
+            <button  id="track-picker-btn" type="button" class="btn btn-primary"
+              data-toggle="modal" data-target="#track-picker-modal">
+              Select a racetrack
+            </button>
+          </div>
+          <div class="col-sm-5">
+            You can select a racetrack to automatically insert its URLs and
+            lap-length data into the race.
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.track_image_url.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.track_image_url(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              URL for the racetrack image (2:1 aspect ratio background image,
+              typically JPEG or PNG).
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.track_svg_url.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.track_svg_url(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              URL for the SVG file containing the racetrack path described
+              as the single <code>&lt;path&gt;</code> element within it.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.lap_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.lap_length(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Length of one lap. Specifically, this is the length of the path
+              in the SVG file you nominate for the track. If you don't know
+              this value already, you can see it by viewing the racetrack in
+              the racetrack gallery.
             </p>
           </div>
         </div>
@@ -134,6 +193,19 @@
           </div>
         </div>
         {% if race %}
+          <div class="row bg-white py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.result_log_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.result_log_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for the JSON file containing the race results (if any).
+              </p>
+            </div>
+          </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
               Results meta-data
@@ -164,47 +236,6 @@
           </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
-              {{ form.result_log_url.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.result_log_url(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                URL for the JSON file containing the race results (if any).
-              </p>
-            </div>
-          </div>
-          <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-3">
-              {{ form.track_image_url.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.track_image_url(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                URL for the racetrack image (2:1 aspect ratio background image,
-                typically JPEG or PNG).
-              </p>
-            </div>
-          </div>
-          <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-3">
-              {{ form.track_svg_url.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.track_svg_url(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                URL for the SVG file containing the racetrack path described
-                as the single <code>&lt;path&gt;</code> element within it.
-              </p>
-            </div>
-          </div>
-          <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-3">
               {{ form.max_laps.label }}
             </div>
             <div class="col-sm-4">
@@ -216,7 +247,6 @@
               </p>
             </div>
           </div>
-
           <div class="row alert-warning py-2 m-1">
             <div class="col-sm-3">
               {{ form.buggies_csv_url.label }}
@@ -252,9 +282,9 @@
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-7 py-2">
             {% if race %}
-              <input class="btn btn-primary" type="submit" value="Submit race">
+              <input id="race-submit-btn" class="btn btn-primary" type="submit" value="Submit race">
             {% else %}
-              <input class="btn btn-danger" type="submit" value="Add new race">
+              <input  id="race-submit-btn" class="btn btn-danger" type="submit" value="Add new race">
             {% endif %}
           </div>
           <div class="col-sm-5 py-2">
@@ -270,7 +300,7 @@
 
   {% if race %}
     <div class="row">
-      <div class="col-lg-8 my-5">
+      <div class="col my-5">
         <p>
           You can delete this race — be careful, you can't undo this.
         </p>
@@ -279,10 +309,8 @@
             action="{{ url_for('race.delete_race', race_id=race.id)}}" role="form">
             {{ delete_form.csrf_token }}
             <div class="row">
-              <div class="col-md-3 p-3">
+              <div class="col-md-6 p-3">
                 {{ delete_form.is_confirmed.label }}
-              </div>
-              <div class="col-md-3 p-3">
                 <select id="is_confirmed" name="is_confirmed" class="form-control">
                   <option selected value="">No</option>
                   <option value="">I think so</option>
@@ -300,6 +328,56 @@
   {% endif %}
 
 </div>
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-xl" id="track-picker-modal" tabindex="-1" aria-labelledby="track-picker-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="track-picker-modal-label">Select a racetrack</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="row p-3">
+        {% include "admin/_racetracks.html" %}
+      </div>
+      <div class="modal-footer" style="justify-content:space-between">
+        <button type="button" class="btn btn-outline-danger" data-dismiss="modal" id="cancel-btn">Cancel</button>
+        <a href="{{ url_for('race.show_tracks') }}" target="_blank" id="btn-to-user-texts" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade bd-example-modal-md" id="confirm-modal" tabindex="-1" aria-labelledby="confirm-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="track-picker-modal-label">Confirm data</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="row p-3">
+        <div class="col">
+          <p id="confirm-msg">
+            Insert URLs and lap length into race?
+          </p>
+          <p>
+            Remember you'll still need to click 
+            <strong id="reminder-btn-text">Submit race</strong>
+            to save these changes!
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between">
+        <button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+        <button id="confirm-track-insert" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 

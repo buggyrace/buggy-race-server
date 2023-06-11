@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timezone
 import os
 import re
+from sqlalchemy import insert
 from flask import (
     abort,
     Blueprint,
@@ -18,8 +19,9 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
+from buggy_race_server.admin.forms import GeneralSubmitForm, SubmitWithConfirmForm
 from buggy_race_server.database import db
-from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
+from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm, RacetrackForm
 from buggy_race_server.race.models import Race, RaceResult, Racetrack
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
@@ -79,6 +81,9 @@ def edit_race(race_id=None):
                   cost_limit=form.cost_limit.data,
                   start_at=form.start_at.data,
                   is_visible=form.is_visible.data,
+                  track_image_url=form.track_image_url.data,
+                  track_svg_url=form.track_svg_url.data,
+                  lap_length=form.lap_length.data,
                 )
                 if race.start_at.date() < datetime.now(timezone.utc).date():
                     success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
@@ -97,6 +102,7 @@ def edit_race(race_id=None):
                 race.race_log_url = form.race_log_url.data
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data
+                race.lap_length = form.lap_length.data
                 race.max_laps = form.max_laps.data
                 race.save()
                 pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
@@ -110,10 +116,14 @@ def edit_race(race_id=None):
             else:
                 flash(f"Did not create new race", "danger")
             flash_errors(form)
+    racetracks = Racetrack.query.order_by(
+          Racetrack.title.asc(),
+        ).all()
     return render_template(
         "admin/race_edit.html",
         form=form,
         race=race,
+        racetracks=racetracks,
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
@@ -231,7 +241,7 @@ def delete_race(race_id):
             race.delete()
             flash("OK, deleted race", "success")
     else:
-      flash("Error: incorrect button wiring, nothing deleted", "danger")
+        flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for('race.list_races'))
 
 @blueprint.route("/<race_id>/result")
@@ -315,12 +325,170 @@ def replay_race(race_id):
         result_log_url=result_log_url,
     )
 
+@blueprint.route("/tracks/autofill", methods=['GET', 'POST'])
+@login_required
+@admin_only
+def autofill_tracks():
+    """ Reads the server-side track assets and adds them to the database if
+    they are not already there. Specifically, it scans the track assets
+    dir, matching the image and SVG files together (so consistent naming
+    in those files is important) — this avoids explicit lists in config."""
+    racetracks = Racetrack.query.order_by(
+          Racetrack.title.asc(),
+        ).all()
+    tracks_by_img_url = {
+        track.track_image_url: track for track in racetracks
+    }
+    TRACK_IMAGE_FILE_RE = re.compile(r"^racetrack-(\d+)\.(jpg|png)$")
+    TRACK_PATH_FILE_RE = re.compile(r"^racetrack-(\d+)(?:-\w+)?-?(\d+)?.svg$")
+    track_dir = join_to_project_root(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name]
+    )
+    img_filenames_by_number = {}
+    dir_filenames = os.listdir(track_dir)
+    for filename in dir_filenames:
+        if m := re.match(TRACK_IMAGE_FILE_RE, filename):
+            url = Racetrack.get_local_url_for_asset(filename)
+            if url not in tracks_by_img_url:
+                img_filenames_by_number[f"{ m.group(1) }"] = {
+                    "track_image_url": Racetrack.get_local_url_for_asset(filename)
+                }
+    if img_filenames_by_number:
+        for filename in dir_filenames:
+            if m := re.match(TRACK_PATH_FILE_RE, filename):
+                if proto_track := img_filenames_by_number.get(m.group(1)):
+                    proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(filename)
+                    if lap_length := m.group(2):
+                        proto_track['lap_length'] = lap_length
+    if request.method == "POST":
+        new_tracks = [ ]
+        if img_filenames_by_number:
+            for number in img_filenames_by_number:
+                proto_track = img_filenames_by_number[number]
+                if proto_track.get('track_svg_url'):
+                    new_tracks.append(
+                        {
+                            "title": f"Racetrack {number}",
+                            "desc": "",
+                            "track_image_url": proto_track["track_image_url"],
+                            "track_svg_url": proto_track["track_svg_url"],
+                            "lap_length": proto_track.get("lap_length") # may be none
+                        }
+                    )
+                    flash(f"Added racetrack {number} to database", "success")
+        if new_tracks:
+            db.session.execute(insert(Racetrack.__table__), new_tracks)
+            db.session.commit()
+            racetracks = Racetrack.query.order_by(Racetrack.title.asc(),).all()
+        else:
+            flash("No new racetracks found to add", "warning")
+    return render_template(
+        "admin/racetracks.html",
+        racetracks=racetracks,
+        form=GeneralSubmitForm(),
+    )
+
+
 @blueprint.route("/tracks")
+@login_required
+@admin_only
 def show_tracks():
-    racetracks =  Racetrack.query.order_by(
+    racetracks = Racetrack.query.order_by(
           Racetrack.title.asc(),
         ).all()
     return render_template(
-        "races/tracks.html",
-        racetracks=racetracks
+        "admin/racetracks.html",
+        racetracks=racetracks,
+        form=GeneralSubmitForm(), # for autofill
+        is_showing_example_racetracks=current_app.config[ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name],
+    )
+
+@blueprint.route("tracls/<track_id>")
+@login_required
+@admin_only
+def view_track(track_id):
+    track = Racetrack.get_by_id(track_id) if track_id else None
+    if track is None:
+        flash("No such racetrack", "danger")
+        abort(404)
+    return render_template(
+        "admin/racetrack_view.html",
+        track=track
+    )
+
+@blueprint.route("tracls/<track_id>/delete", methods=["POST"])
+@login_required
+@admin_only
+def delete_track(track_id):
+    track = Racetrack.get_by_id(track_id)
+    if track is None:
+        flash("Error: coudldn't find racetrack to delete", "danger")
+    else:
+        form = SubmitWithConfirmForm(request.form)
+        if form.validate_on_submit():
+            if not form.is_confirmed.data:
+                flash("Did not delete track (you didn't confirm it)", "danger")
+                return redirect(url_for('race.edit_track', track_id=track_id))
+            track.delete()
+            flash("OK, deleted racetrack", "success")
+        else:
+            flash("Error: incorrect button wiring, nothing deleted", "danger")
+            return redirect(url_for('race.list_races'))
+
+    return redirect(url_for('race.show_tracks'))
+
+@blueprint.route("tracks/new", methods=["GET", "POST"])
+@login_required
+@admin_only
+def new_track():
+    return edit_track(None)
+
+@blueprint.route("tracks/<track_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_only
+def edit_track(track_id):
+    if track_id is None:
+        track = None
+        delete_form = None
+    else:
+        track = Racetrack.get_by_id(track_id) if track_id else None
+        if track is None:
+            flash("No such racetrack", "danger")
+            abort(404)
+        delete_form = SubmitWithConfirmForm()
+    form = RacetrackForm(request.form, obj=track)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            if track is None:
+                track = Racetrack.create(
+                  title=form.title.data.strip(),
+                  desc=form.desc.data.strip(),
+                  track_image_url=form.track_image_url.data.strip(),
+                  track_svg_url=form.track_svg_url.data.strip(),
+                  lap_length=form.lap_length.data
+                )
+                success_msg = f"OK, created new racetrack"
+            else:
+                track.title = form.title.data.strip()
+                track.desc = form.desc.data.strip()
+                track.track_image_url=form.track_image_url.data.strip()
+                track.track_svg_url=form.track_svg_url.data.strip()
+                track.lap_length=form.lap_length.data
+                track.save()
+                pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
+                success_msg = f"OK, updated {pretty_title}" 
+            flash(success_msg, "success")
+            return redirect(url_for("race.show_tracks"))
+        else:
+            if track:
+                pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
+                flash(f"Did not update {pretty_title}", "danger")
+            else:
+                flash(f"Did not create new racetrack", "danger")
+            flash_errors(form)
+    return render_template(
+        "admin/racetrack_edit.html",
+        delete_form=delete_form,
+        form=form,
+        track=track,
     )

@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<style>
+#race-canvas {
+  position:relative;
+  border:1px solid #666;
+  background: rgb(115,114,114);
+  background-image: radial-gradient(circle, rgba(115,114,114,1) 0%, rgba(10,10,10,1) 150%);
+  background-image: url('{{ track.track_image_url }}');
+  background-size:cover;
+  aspect-ratio: 2 / 1;
+  border-radius:0.3rem;
+  box-shadow: 0.3rem 0.3rem 0.3rem 0.1rem rgba(0,0,0,0.33);
+  margin:1rem;
+  padding:0;
+  overflow:hidden; /* otherwise SVG pushes div a bit wider */
+  flex-shrink: 0;
+}
+</style>
+
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      {% if track.title %}
+       {{ track.title }}
+      {% else %} 
+        Untitled racetrack
+      {% endif %}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover">
+        <tr>
+          <td>
+            Description
+          </td>
+          <td>
+            {% if track.desc is none or track.desc == ""%}
+              <em class="empty-setting">none</em>
+            {% else %}
+              {{ track.desc }}
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            URL of racetrack image
+          </td>
+          <td>
+            {% if track.track_image_url is none or track.track_image_url == "" %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.track_image_url }}</code>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            URL of path SVG
+          </td>
+          <td>
+            {% if track.track_svg_url is none or track.track_svg_url == "" %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.track_svg_url }}</code>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Lap length
+          </td>
+          <td>
+            {% if track.lap_lengh is none %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.lap_length }}</code>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  {% if track.track_svg_url %}
+    <div class="row mt-3">
+      <div class="col">
+        <p id="svg-report" class="p-3"></p>
+      </div>
+    </div>
+  {% endif %}
+  <div class="row">
+    <div class="col">
+      <div id="race-canvas">
+        <svg id="racetrack-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" text-rendering="geometricPrecision" shape-rendering="geometricPrecision"></svg>
+      </div>
+    </div>
+  </div>
+  {% if track.track_svg_url %}
+    <!-- SVG helper requires JavaScript, which will remove the "hidden" -->
+    <div id="svg-helper" class="row">
+      <div class="col">
+        <div class="alert alert-info">
+          <h2 class="alert-title">Path (from SVG)</h2>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <p>
+                  Calculated lap length is <code id="path-lap-length">?</code>
+                  <button id="btn-copy-lap-length" class="hidden btn btn-primary">Copy</button>
+                </p>
+              </div>
+              <div class="col-md-6 text-right">
+                <div id="svg-btns" class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="options" id="btn-hide-path" autocomplete="off" value="" checked>Hide
+                  </label>
+                  <label class="btn btn-secondary active">
+                    <input type="radio" name="options" autocomplete="off" value="white">Show
+                  </label>
+                  <label class="btn btn-outline-secondary btn-white" style="color:black">
+                    <input type="radio" name="options" autocomplete="off" value="black"> Show
+                  </label>
+                  <label class="btn btn-danger">
+                    <input type="radio" name="options"  autocomplete="off" value="red"> Show
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      //--------------------------------------------------------------------
+      const PATH_SVG_URL = "{{ track.track_svg_url }}";
+      //--------------------------------------------------------------------
+      const SVG_REPORT = document.getElementById("svg-report");
+      const COPY_BTN = document.getElementById("btn-copy-lap-length");
+      const RACETRACK_SVG = document.getElementById("racetrack-svg");
+      const RACETRACK_PATH_ID = "race-path";
+      const SVG_HELPER = document.getElementById("svg-helper");
+
+      function say(msg, is_ok){
+        SVG_REPORT.innerText = msg;;
+        SVG_REPORT.classList.add(is_ok? "alert-success" : "alert-danger");
+      }
+
+      // get the SVG
+      fetch(PATH_SVG_URL).then((response) => {
+        if (! response.ok){
+            throw new Error(`Failed to fetch the SVG: ${response.status}`);
+        }
+        return response.text()
+      }).then((svg_source) => {
+        is_ok = true;
+        try {
+          var parser = new DOMParser();
+          downloaded_svg = parser.parseFromString(svg_source, "image/svg+xml");
+        } catch (error) {
+          is_ok = false;
+          say("Fetched SVG OK, but failed to parse the data inside it", is_ok)
+        }
+        if (is_ok){
+          let svg_tag = downloaded_svg.getElementsByTagName('svg');
+          for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
+            try {
+              let val = svg_tag[0].attributes[attrib_name].value;
+              if (val != undefined) {
+                RACETRACK_SVG.setAttribute(attrib_name, val);
+              }
+            } catch (error) {
+              console.log("failed to find " + attrib_name, error); // probably not fatal, so carry on
+            }
+          }
+          let paths = downloaded_svg.getElementsByTagName("path");
+          if (paths.length != 1) {
+            is_ok = false;
+            if (paths.length) {
+              say("Error in racetrack (expected single path in SVG, found " + paths.length + ")", is_ok);
+            } else {
+              say("Error in racetrack (expected single path in SVG, found none — check it's a valid SVG file)", is_ok);
+            }
+          } else {
+            SVG_HELPER.classList.remove("hidden");
+            let racetrack_path = paths[0];
+            racetrack_path.setAttribute("id", RACETRACK_PATH_ID);
+            racetrack_path.setAttribute("stroke-width", 0);
+            RACETRACK_SVG.append(racetrack_path);
+            for (let label of document.querySelectorAll("#svg-btns label")){
+              console.log("adding event listent to ", label);
+              let for_input = label.firstElementChild;
+              label.addEventListener(
+                "click",
+                function(e){
+                  e.preventDefault();
+                  let stroke_color = label.firstElementChild.value;
+                  let width = stroke_color? 1 : 0;
+                  racetrack_path.setAttribute("stroke-width", width);
+                  racetrack_path.setAttribute("stroke", stroke_color || "none");
+                }
+              )
+            }
+            say("OK, got SVG from URL and loaded the path", is_ok);
+            let lap_length = Math.round(racetrack_path.getTotalLength());
+            document.getElementById("path-lap-length").innerText = lap_length;
+
+          }
+        }
+      });
+    </script>
+  {% else %}
+    <div class="row">
+      <div class="col p-3">
+        <div class="alert alert-warning">
+          No SVG path available: you'll need to supply an SVG path before you can use this racetrack.
+        </div>
+      </div>
+    </div>
+  {% endif %}  
+  <div class="row">
+    <div class="col btn-collection">
+      <a href="{{ url_for('race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-outline-secondary btn-jump">Edit this racetrack</a>
+      <a href="{{ url_for('race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

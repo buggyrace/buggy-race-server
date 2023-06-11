@@ -61,6 +61,10 @@ class RaceForm(FlaskForm):
         "Number of laps",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
+    lap_length = IntegerField(
+        "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
@@ -112,3 +116,21 @@ class RaceResultsForm(FlaskForm):
 
     def validate(self):
         return super(RaceResultsForm, self).validate()
+
+class RacetrackForm(FlaskForm):
+    title = StringField(
+        "Title", validators=[Optional(), Length(max=80)]
+    )
+    desc = TextAreaField(
+        "Description", validators=[Optional(), Length(max=255)]
+    )
+    track_image_url = StringField(
+        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+    )
+    track_svg_url = StringField(
+        "URL of path SVG", validators=[Optional(), Length(max=255)]
+    )
+    lap_length = IntegerField(
+        "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )

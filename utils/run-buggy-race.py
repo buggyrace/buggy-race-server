@@ -583,7 +583,6 @@ def run_race(buggies_entered):
       "track_image_url": "________",
       "track_svg_url": "________",
       "race_log_url": "________",
-      "buggies_csv_url": "________",
       "raced_at": "________",
       "league": "",
       "start_at": "_________",

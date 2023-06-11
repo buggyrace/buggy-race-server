@@ -98,7 +98,6 @@ def edit_race(race_id=None):
                 race.is_result_visible = form.is_result_visible.data
                 race.results_uploaded_at = form.results_uploaded_at.data
                 race.result_log_url = form.result_log_url.data
-                race.buggies_csv_url = form.buggies_csv_url.data
                 race.race_log_url = form.race_log_url.data
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data

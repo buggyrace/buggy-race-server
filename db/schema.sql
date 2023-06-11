@@ -201,7 +201,6 @@ CREATE TABLE public.races (
     buggies_entered integer NOT NULL,
     buggies_started integer NOT NULL,
     buggies_finished integer NOT NULL,
-    buggies_csv_url character varying(255),
     race_log_url character varying(255),
     is_result_visible boolean NOT NULL
 );
@@ -508,14 +507,6 @@ ALTER TABLE ONLY public.announcements
 
 ALTER TABLE ONLY public.buggies
     ADD CONSTRAINT buggies_pkey PRIMARY KEY (id);
-
-
---
--- Name: races races_buggies_csv_url_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.races
-    ADD CONSTRAINT races_buggies_csv_url_key UNIQUE (buggies_csv_url);
 
 
 --

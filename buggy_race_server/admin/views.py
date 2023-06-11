@@ -573,7 +573,6 @@ def list_users(data_format=None, want_detail=True):
         edit_method=edit_method,
     )
 
-
 @blueprint.route("/users/register", methods=["GET", "POST"], strict_slashes=False)
 @blueprint.route("/users/register/<data_format>", methods=["POST"])
 @login_required
@@ -966,7 +965,6 @@ def show_buggy(username):
    # note that show_buggy_by_user checks the admin status of the requestor
    return show_buggy_by_user(username=username)
 
-
 @blueprint.route("/download/buggies/csv")
 @login_required
 @staff_only
@@ -1197,6 +1195,7 @@ def add_example_announcement():
     return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/tech-notes/publish", methods=["POST", "GET"])
+@login_required
 @admin_only
 def tech_notes_publish():
     if request.method == "GET":
@@ -1658,6 +1657,19 @@ def pre_registration_csv_utility():
         users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
     )
 
+@blueprint.route("race/replay")
+@login_required
+@staff_only
+def staff_race_replayer():
+    """ race replayer for staff testing that isn't linked to datatabase races:
+    this will try to load whatever URL is passed into the ?race= query var.
+    This isn't suitable for replaying races because only staff can access it."""
+    return render_template(
+        "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        result_log_url="{{}}" # force JavaScript into believing it's standalone
+    )
+
 @blueprint.route("/config-docs-helper")
 @login_required
 @admin_only
@@ -1683,15 +1695,15 @@ def config_docs_helper():
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     )
 
-@blueprint.route("race/replay")
+@blueprint.route("/routes")
 @login_required
-@staff_only
-def staff_race_replayer():
-    """ race replayer for staff testing that isn't linked to datatabase races:
-    this will try to load whatever URL is passed into the ?race= query var.
-    This isn't suitable for replaying races because only staff can access it."""
+@admin_only
+def get_blueprint_urls():
+    """ undocumented helper method for dumping all the Blueprint URLs """
+    routes = [str(p) for p in current_app.url_map.iter_rules()]
+    title = f"Blueprint routes ({len(routes)})"
     return render_template(
-        "races/player.html",
-        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        result_log_url="{{}}" # force JavaScript into believing it's standalone
+        "admin/system.html",
+        title=title,
+        system_str="\n".join(sorted(routes))
     )

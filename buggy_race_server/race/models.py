@@ -8,7 +8,7 @@ from sqlalchemy import delete, insert
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
-from flask import current_app
+from flask import current_app, url_for
 from buggy_race_server.database import (
     Column,
     Model,
@@ -19,6 +19,49 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import servertime_str
+
+class Racetrack(SurrogatePK, Model):
+
+    def is_local(self):
+        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        return (
+            self.track_image_url is not None
+            and
+            self.track_svg_url is not None
+            and
+            self.track_image_url.startswith(server_url)
+            and
+            self.track_svg_url.startswith(server_url)
+        )
+
+    @staticmethod
+    def get_local_url_for_asset(filename):
+        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        path_url = url_for("race.serve_racetrack_asset", filename=filename)
+        return f"{server_url}/{path_url}"
+
+
+    """ Racetrack used to populate race-construction pages
+    There's no foreign key relationship with Race beacuse Racetracks
+    are really just furnishing URLs to the interface, and it's the
+    URLs which are going into the race records. They key relationship
+    here is that the SVG and image (JPG) URLs are linked by being the
+    same track.
+    Note URL combinations could be unique, but individual URLs don't
+    need to be. But not enforced here for now.
+    """
+    __tablename__ = "racetracks"
+    id = Column(db.Integer, primary_key=True)
+    title = Column(db.String(80), unique=False, nullable=False, default="")
+    desc = Column(db.Text(), unique=False, nullable=False, default="")
+    track_image_url = Column(db.String(255), unique=False, nullable=True)
+    track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    lap_length = Column(db.Integer, nullable=True)
+
+    def __init__(self, **kwargs):
+        """Create instance."""
+        db.Model.__init__(self, **kwargs)
+
 
 class Race(SurrogatePK, Model):
     """A race."""
@@ -49,6 +92,7 @@ class Race(SurrogatePK, Model):
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
     max_laps = db.Column(db.Integer(),  nullable=True)
+    lap_length = Column(db.Integer, nullable=True)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
 
@@ -279,10 +323,11 @@ class Race(SurrogatePK, Model):
             "result_log_url": self.result_log_url,
             "title": self.title,
             "description": self.desc,
-            "max_laps": 0,
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
+            "lap_length": self.lap_length,
             "race_log_url": self.race_log_url,
+            "max_laps": 0,
             "raced_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
                 self.start_at
@@ -306,7 +351,7 @@ class Race(SurrogatePK, Model):
             ],
             "version": "1.0"
         }
-        return json.dumps(results_dict, indent=None, separators=(',\n', ': '))
+        return json.dumps(results_dict, indent=1, separators=(',', ': '))
 
 class RaceResult(SurrogatePK, Model):
 

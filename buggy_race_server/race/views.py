@@ -206,8 +206,9 @@ def upload_results(race_id):
 @blueprint.route("/<race_id>/download-results", methods=["GET"])
 @login_required
 @admin_only
-def download_results(race_id):
-    """ produces the results file suitable for replaying:
+def download_race_json(race_id):
+    """ produces the race file suitable for both downloading prior
+    to running a race, and uploading with the results:
     This is useful because the URLs (especially of the result file)
     might have been added/become known _after_ the race was run and
     the (oringinal) results file was created.
@@ -216,7 +217,7 @@ def download_results(race_id):
     if race is None:
         flash("Error: coudldn't find race", "danger")
         abort(404)
-    #  = = = = = =  FIXME download results JSON not implemented yet = = = = = = 
+
     filename = get_download_filename(f"race-{race.slug}-results.json", want_datestamp=False)
     output = make_response(race.get_results_json())
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"

@@ -217,13 +217,11 @@ def download_race_json(race_id):
     if race is None:
         flash("Error: coudldn't find race", "danger")
         abort(404)
-
     filename = get_download_filename(f"race-{race.slug}-results.json", want_datestamp=False)
     output = make_response(race.get_results_json())
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     output.headers["Content-type"] = "application/json"
     return output
-
 
 @blueprint.route("/<race_id>/delete", methods=["POST"])
 @login_required
@@ -388,7 +386,6 @@ def autofill_tracks():
         form=GeneralSubmitForm(),
     )
 
-
 @blueprint.route("/tracks")
 @login_required
 @admin_only
@@ -403,7 +400,7 @@ def show_tracks():
         is_showing_example_racetracks=current_app.config[ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name],
     )
 
-@blueprint.route("tracls/<track_id>")
+@blueprint.route("tracks/<track_id>")
 @login_required
 @admin_only
 def view_track(track_id):
@@ -416,7 +413,7 @@ def view_track(track_id):
         track=track
     )
 
-@blueprint.route("tracls/<track_id>/delete", methods=["POST"])
+@blueprint.route("tracks/<track_id>/delete", methods=["POST"])
 @login_required
 @admin_only
 def delete_track(track_id):

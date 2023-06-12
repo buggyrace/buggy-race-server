@@ -62,6 +62,31 @@ def serve_racetrack_asset(filename):
 def serve_race_player_asset(filename):
     return _serve_race_asset_file(filename)
 
+@blueprint.route("/", strict_slashes=False)
+def show_public_races():
+    """Race announcement page."""
+    next_race=Race.query.filter(
+        Race.is_visible==True,
+        Race.start_at > datetime.now(timezone.utc)
+      ).order_by(Race.start_at.asc()).first()
+    races = db.session.query(Race).join(RaceResult).filter(
+            Race.is_visible==True,
+            Race.start_at < datetime.now(timezone.utc),
+            RaceResult.race_position > 0,
+            RaceResult.race_position <= 3,
+        ).order_by(Race.start_at.desc()).all()
+    results = [ race.results for race in races ]
+    flag_color_css_defs = get_flag_color_css_defs(
+        [result for sublist in results for result in sublist]
+    )
+    return render_template(
+        "races/index.html",
+        flag_color_css_defs=flag_color_css_defs,
+        next_race=next_race,
+        races=races,
+        replay_anchor=Race.get_replay_anchor(),
+    )
+
 @blueprint.route("/<race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()

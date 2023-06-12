@@ -152,32 +152,8 @@ def about():
     return response
 
 @blueprint.route("/race", strict_slashes=False)
-def announce_races():
-    """Race announcement page."""
-    next_race=Race.query.filter(
-        Race.is_visible==True,
-        Race.start_at > datetime.now(timezone.utc)
-      ).order_by(Race.start_at.asc()).first()
-
-    races = db.session.query(Race).join(RaceResult).filter(
-            Race.is_visible==True,
-            Race.start_at < datetime.now(timezone.utc),
-            RaceResult.race_position > 0,
-            RaceResult.race_position <= 3,
-        ).order_by(Race.start_at.desc()).all()
-
-    results = [ race.results for race in races ]
-    flag_color_css_defs = get_flag_color_css_defs(
-        [result for sublist in results for result in sublist]
-    )
-
-    return render_template(
-        "public/race.html",
-        next_race=next_race,
-        races=races,
-        replay_anchor=Race.get_replay_anchor(),
-        flag_color_css_defs=flag_color_css_defs,
-    )
+def redirect_to_races_page():
+    return redirect(url_for('race.show_public_races'))
 
 def _send_tech_notes_assets(type, path):
     try:

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Admin views/controllers."""
+"""Admin views/controllers
+   (except for races/racetracks — those are in admin/views_races.py)
+"""
 import csv
 import io  # for CSV dump
 import random  # for API tests
@@ -9,8 +11,6 @@ from collections import defaultdict
 import markdown
 import re
 import subprocess
-
-from sqlalchemy.inspection import inspect
 
 from flask import (
     abort,
@@ -46,7 +46,14 @@ from buggy_race_server.admin.forms import (
     SubmitWithConfirmForm,
     TaskForm,
 )
-from buggy_race_server.admin.models import Announcement, AnnouncementType, TaskText, Setting, SocialSetting, Task
+from buggy_race_server.admin.models import (
+    Announcement,
+    AnnouncementType,
+    TaskText,
+    Setting,
+    SocialSetting,
+    Task
+)
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
@@ -55,6 +62,7 @@ from buggy_race_server.extensions import csrf, bcrypt
 from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
+    admin_only,
     flash_errors,
     get_day_of_week,
     get_download_filename,
@@ -66,15 +74,14 @@ from buggy_race_server.utils import (
     load_settings_from_db,
     load_tasks_into_db,
     prettify_form_field_name,
-    publish_tasks_as_issues_csv,
     publish_task_list,
+    publish_tasks_as_issues_csv,
     publish_tech_notes,
     refresh_global_announcements,
+    servertime_str,
     set_and_save_config_setting,
     staff_only,
-    admin_only,
     stringify_datetime,
-    servertime_str,
 )
 
 blueprint = Blueprint(
@@ -87,9 +94,9 @@ blueprint = Blueprint(
 SETTING_PREFIX = "settings" # the name of settings subform
 
 def _is_from_dashboard():
-  if ref := request.referrer:
-    return ref.endswith("/admin/") or ref.endswith("/admin")
-  return False
+    if ref := request.referrer:
+        return ref.endswith("/admin/") or ref.endswith("/admin")
+    return False
 
 def _is_task_list_published():
     task_list_fname = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
@@ -109,7 +116,6 @@ def _is_tech_notes_index_published():
             "index.html"
         )
     )
-
 
 def _save_read_del_csv(csv_file):
     lines = None
@@ -132,93 +138,93 @@ def _save_read_del_csv(csv_file):
     return (lines, err_msgs)
 
 def _update_settings_in_db(form):
-  """ Used by setup and settings: returns boolean success.
-      Check the form has validated OK *before* calling this.
-  """
-  settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-  config_data_insert = []
-  config_data_update = []
-  qty_settings_changed = 0
-  has_changed_secret_key = False
-  is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
-  is_update_ok = True # optimistic
-  for setting_form in form.settings.data:
-    name = setting_form.get('name').upper() # force uppercase for config keys
-    value = setting_form.get('value').strip()
-    if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
-        value = bcrypt.generate_password_hash(value).decode('utf8')
-    is_changed_value = False
-    if name in settings_as_dict:
-      if settings_as_dict[name] != value:
-          if ConfigSettings.TYPES.get(name) in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
-            changed_msg = f"Changed {name} to a new value"
-          else:
-            pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
-            pretty_new = ConfigSettings.prettify(name, value)
-            changed_msg = f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\""
-          flash(changed_msg, "info")
-          config_data_update.append({
-            "name": name,
-            "value": value
-          })
-          is_changed_value = True
-    else:
-        # config not in settings table: unexpected but roll with it: INSERT
+    """ Used by setup and settings: returns boolean success.
+        Check the form has validated OK *before* calling this.
+    """
+    settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+    config_data_insert = []
+    config_data_update = []
+    qty_settings_changed = 0
+    has_changed_secret_key = False
+    is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
+    is_update_ok = True # optimistic
+    for setting_form in form.settings.data:
+        name = setting_form.get('name').upper() # force uppercase for config keys
+        value = setting_form.get('value').strip()
         if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
-          changed_msg = f"Setting {name}\""
+            value = bcrypt.generate_password_hash(value).decode('utf8')
+        is_changed_value = False
+        if name in settings_as_dict:
+            if settings_as_dict[name] != value:
+                if ConfigSettings.TYPES.get(name) in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
+                    changed_msg = f"Changed {name} to a new value"
+                else:
+                    pretty_old = ConfigSettings.prettify(name, settings_as_dict[name])
+                    pretty_new = ConfigSettings.prettify(name, value)
+                    changed_msg = f"Changed {name} from \"{pretty_old}\" to \"{pretty_new}\""
+                flash(changed_msg, "info")
+                config_data_update.append({
+                    "name": name,
+                    "value": value
+                })
+                is_changed_value = True
         else:
-          changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
-        flash(changed_msg, "info")
-        config_data_insert.append({
-          "id": name,
-          "value": value
-        })
-        is_changed_value = True
-    if is_changed_value:
-        qty_settings_changed += 1
-        has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY.name
-  if qty_settings_changed:
-    settings_table = Setting.__table__
-    if config_data_update:
-        try:
-          result = db.session.execute(
-            update(settings_table)
-              .where(settings_table.c.id == bindparam("name"))
-              .values(value=bindparam("value")),
-              config_data_update
-          )
-          db.session.commit()
-        except Exception as e:
-            flash(str(e), "danger")
-            is_update_ok = False
-    if config_data_insert:
-        try:
-          result = db.session.execute(
-              insert(settings_table),
-              config_data_insert
-          )
-          db.session.commit()
-        except Exception as e:
-            flash(str(e), "danger")
-            is_update_ok = False
-    # we've changed config, try to update config too
-    load_settings_from_db(current_app)
-    if has_changed_secret_key:
-      # this is problematic: because the existing token will now fail
-      # as well as any existing sessions probably
-      # so this isn't really recommended
-      csrf.init_app(current_app)
-    if (
-      not is_in_setup_mode
-      and current_app.config[ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name]
-    ):
-      flash(
-        "When you've finished changing settings, "
-        "it's a good idea to restart the server", "info"
-      )
-  else:
-      flash("OK, no settings were changed", "info")
-  return is_update_ok
+            # config not in settings table: unexpected but roll with it: INSERT
+            if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
+                changed_msg = f"Setting {name}\""
+            else:
+                changed_msg = f"Setting {name} to \"{ConfigSettings.prettify(name, value)}\""
+            flash(changed_msg, "info")
+            config_data_insert.append({
+                "id": name,
+                "value": value
+            })
+            is_changed_value = True
+        if is_changed_value:
+            qty_settings_changed += 1
+            has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY.name
+    if qty_settings_changed:
+        settings_table = Setting.__table__
+        if config_data_update:
+            try:
+              result = db.session.execute(
+                update(settings_table)
+                  .where(settings_table.c.id == bindparam("name"))
+                  .values(value=bindparam("value")),
+                  config_data_update
+              )
+              db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+                is_update_ok = False
+        if config_data_insert:
+            try:
+              result = db.session.execute(
+                  insert(settings_table),
+                  config_data_insert
+              )
+              db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+                is_update_ok = False
+        # we've changed config, try to update config too
+        load_settings_from_db(current_app)
+        if has_changed_secret_key:
+            # this is problematic: because the existing token will now fail
+            # as well as any existing sessions probably
+            # so this isn't really recommended
+            csrf.init_app(current_app)
+        if (
+          not is_in_setup_mode
+          and current_app.config[ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name]
+        ):
+            flash(
+              "When you've finished changing settings, "
+              "it's a good idea to restart the server", "info"
+            )
+    else:
+        flash("OK, no settings were changed", "info")
+    return is_update_ok
 
 def _user_summary(username_list):
     if len(username_list) == 1:
@@ -231,9 +237,9 @@ def _csv_tidy_string(row, fieldname, want_lower=False):
   # e.g. if the row wasn't long enough
   s = row[fieldname] if fieldname in row else None
   if s is not None:
-    s = str(s).strip()
-    if want_lower:
-      s = s.lower()
+      s = str(s).strip()
+      if want_lower:
+          s = s.lower()
   return s
 
 def _flash_errors(form):
@@ -243,26 +249,33 @@ def _flash_errors(form):
   #     for field in setting_error:
   #       pass 
   for fieldName, errorMessages in form.errors.items():
-    for err_msg in errorMessages:
-      if isinstance(err_msg, dict):
-        for field in err_msg: # field is always "value"
-          flash(f"{err_msg[field][0]}", "danger")
-      else:
-        flash(f"{prettify_form_field_name(fieldName)}: {err_msg}", "danger")
+      for err_msg in errorMessages:
+          if isinstance(err_msg, dict):
+              for field in err_msg: # field is always "value"
+                flash(f"{err_msg[field][0]}", "danger")
+          else:
+              flash(
+                f"{prettify_form_field_name(fieldName)}: {err_msg}",
+                "danger"
+              )
 
 def setup_summary():
     """ If setup is complete, this summarises the current config and db state,
     and unlike the dashboard has some helpful suggestions as to what to do next."""
-    if not current_user or not current_user.is_authenticated or not current_user.is_administrator:
-       abort(403)
+    if (
+      not current_user
+      or not current_user.is_authenticated
+      or not current_user.is_administrator
+    ):
+        abort(403)
     if ConfigSettingNames._SETUP_STATUS.name in session:
-       del session[ConfigSettingNames._SETUP_STATUS.name]
+        del session[ConfigSettingNames._SETUP_STATUS.name]
     user_fields_dict = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
     pretty_user_fields = ".".join(
-       User.tidy_fieldnames(
-         [
-           fieldname for fieldname in user_fields_dict
-           if user_fields_dict[fieldname]
+      User.tidy_fieldnames(
+        [
+          fieldname for fieldname in user_fields_dict
+          if user_fields_dict[fieldname]
         ]
       )
     )
@@ -279,170 +292,175 @@ def setup_summary():
         else:
             qty_announcements_global += 1
     buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name])
     return render_template(
-       "admin/setup_summary.html",
-       api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]),
-       buggy_editor_repo_owner=buggy_editor_repo_owner,
-       buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
-       institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
-       institution_home_url=institution_home_url,
-       institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
-       is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
-       is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
-       is_report=bool(report_type),
-       is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
-       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
-       is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
-       is_task_list_published=_is_task_list_published(),
-       is_tech_notes_index_published=_is_tech_notes_index_published(),
-       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
-       is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-       is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
-       pretty_institution_home_url=re.sub(r"^https?://", "", institution_home_url),
-       pretty_user_fields=pretty_user_fields,
-       project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-       project_phase_min_target=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
-       qty_announcements_global=qty_announcements_global,
-       qty_announcements_login=qty_announcements_login,
-       qty_announcements_tagline=qty_announcements_tagline,
-       qty_students=User.query.filter_by(is_active=True, is_student=True).count(),
-       qty_tasks=Task.query.filter_by(is_enabled=True).count(),
-       qty_users=User.query.filter_by(is_active=True).count(),
-       report_type=report_type,
-       server_time=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime('%Y-%m-%d %H:%M:%S %Z (%z)'),
-       submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
-       submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
-       task_list_published_at=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
-       tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
-       tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
-       tech_notes_published_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
-       workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
+      "admin/setup_summary.html",
+      api_secret_ttl_pretty=api_secret_ttl_pretty,
+      buggy_editor_repo_owner=buggy_editor_repo_owner,
+      buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
+      institution_home_url=institution_home_url,
+      institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+      is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
+      is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
+      is_report=bool(report_type),
+      is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+      is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
+      is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+      is_task_list_published=_is_task_list_published(),
+      is_tech_notes_index_published=_is_tech_notes_index_published(),
+      is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+      is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+      is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
+      pretty_institution_home_url=re.sub(r"^https?://", "", institution_home_url),
+      pretty_user_fields=pretty_user_fields,
+      project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+      project_phase_min_target=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
+      qty_announcements_global=qty_announcements_global,
+      qty_announcements_login=qty_announcements_login,
+      qty_announcements_tagline=qty_announcements_tagline,
+      qty_students=User.query.filter_by(is_active=True, is_student=True).count(),
+      qty_tasks=Task.query.filter_by(is_enabled=True).count(),
+      qty_users=User.query.filter_by(is_active=True).count(),
+      report_type=report_type,
+      server_time=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime('%Y-%m-%d %H:%M:%S %Z (%z)'),
+      submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+      submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+      task_list_published_at=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+      tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
+      tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
+      tech_notes_published_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+      workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
     )
 
 @blueprint.route("/setup", methods=["GET", "POST"], strict_slashes=False)
 def setup():
-  # always get setup status from database during setup:
-  setup_status = load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name)
-  if not setup_status:
-    return setup_summary()
-  try:
-    setup_status_from_session = int(session.get(ConfigSettingNames._SETUP_STATUS.name) or 0)
-  except ValueError():
-    setup_status_from_session = 0
-  if setup_status_from_session:
-    if setup_status < setup_status_from_session:
-      flash("Unexpected session bump: clearing your session status", "warning")
-      del session[ConfigSettingNames._SETUP_STATUS.name]
-  if setup_status > setup_status_from_session + 1:
-      flash("Cannot continue setup in this session (maybe someone else is already setting up?)", "warning")
-      abort(403)
-  qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
-  if setup_status >= qty_setup_steps:
-    setup_status = 0
-    set_and_save_config_setting(
-      current_app,
-      ConfigSettingNames._SETUP_STATUS.name,
-      setup_status
+    # always get setup status from database during setup:
+    setup_status = load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name)
+    if not setup_status:
+        return setup_summary()
+    try:
+        setup_status_from_session = int(session.get(ConfigSettingNames._SETUP_STATUS.name) or 0)
+    except ValueError():
+        setup_status_from_session = 0
+    if setup_status_from_session:
+        if setup_status < setup_status_from_session:
+            flash("Unexpected session bump: clearing your session status", "warning")
+            del session[ConfigSettingNames._SETUP_STATUS.name]
+    if setup_status > setup_status_from_session + 1:
+        flash("Cannot continue setup in this session (maybe someone else is already setting up?)", "warning")
+        abort(403)
+    qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
+    if setup_status >= qty_setup_steps:
+        setup_status = 0
+        set_and_save_config_setting(
+          current_app,
+          ConfigSettingNames._SETUP_STATUS.name,
+          setup_status
+        )
+        flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
+        return setup_summary()
+    if setup_status == 1:
+        form = SetupAuthForm(request.form)
+        # here we grant this session (effectively, this user) setup status
+        session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
+    else:
+        # after initial setup (auth), user must be logged in
+        if current_user.is_anonymous or not current_user.is_administrator:
+            admins = ", ".join([u.username for u in User.query.filter_by(access_level=User.ADMINISTRATOR)])
+            flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
+            if not current_user.is_anonymous:
+                logout_user()
+            return redirect( url_for('public.login'))
+        form = SetupSettingForm(request.form)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            if setup_status == 1: # this updating auth and creating a new admin user
+                set_and_save_config_setting(
+                  current_app,
+                  ConfigSettingNames.AUTHORISATION_CODE.name,
+                  bcrypt.generate_password_hash(form.new_auth_code.data).decode('utf8')
+                )
+                new_admin_username = form.admin_username.data.strip().lower()
+                if admin_user := User.query.filter_by(username=new_admin_username).first():
+                    # if this user is not an admin, need to promote them:
+                    if admin_user.access_level != User.ADMINISTRATOR:
+                        admin_user.access_level=User.ADMINISTRATOR
+                        admin_user.save()
+                        flash(f"Promoted user {new_admin_username} to administrator")
+                    admin_user.set_password(form.admin_password.data)
+                    flash(f"Updated existing user {new_admin_username}'s password", "warning")
+                else:
+                    admin_user = User.create(
+                        username=new_admin_username,
+                        password=form.admin_password.data,
+                        access_level=User.ADMINISTRATOR,
+                        comment=f"First admin user, created during setup :-)",
+                    )
+                    flash(f"Created new admin user \"{new_admin_username}\"", "info")
+                admin_user.is_active = True
+                admin_user.is_student = False
+                admin_user.save()
+                setup_status += 1
+                set_and_save_config_setting(
+                    current_app,
+                    ConfigSettingNames._SETUP_STATUS.name,
+                    setup_status
+                )
+                login_user(admin_user)
+                admin_user.logged_in_at = datetime.now(timezone.utc)
+                admin_user.save()
+                flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
+            else: # handle a regular settings update, which may also be part of setup
+                if _update_settings_in_db(form):
+                  setup_status += 1
+                  set_and_save_config_setting(
+                      current_app,
+                      ConfigSettingNames._SETUP_STATUS.name,
+                      setup_status
+                  )
+                  # here we grant this session setup status
+                  session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
+                else:
+                    # something wasn't OK, so don't save and move on
+                    # (the errors will have been explicitly flashed)
+                    pass
+        else:
+            _flash_errors(form)
+    group_name = ConfigSettings.SETUP_GROUPS[setup_status-1]
+    settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+    html_descriptions = { 
+        setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
+        for setting in ConfigSettings.DESCRIPTIONS
+    }
+    social_settings = SocialSetting.get_socials_from_config(
+        settings_as_dict, want_all=True
     )
-    flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
-    return setup_summary()
-  if setup_status == 1:
-    form = SetupAuthForm(request.form)
-    # here we grant this session (effectively, this user) setup status
-    session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
-  else:
-    # after initial setup (auth), user must be logged in
-    if current_user.is_anonymous or not current_user.is_administrator:
-      admins = ", ".join([u.username for u in User.query.filter_by(access_level=User.ADMINISTRATOR)])
-      flash(f"Setup is not complete: you must log in as an admin user ({admins}) to continue", "warning")
-      if not current_user.is_anonymous:
-        logout_user()
-      return redirect( url_for('public.login'))
-    form = SetupSettingForm(request.form)
-  if request.method == "POST":
-      if form.validate_on_submit():
-        if setup_status == 1: # this updating auth and creating a new admin user
-          set_and_save_config_setting(
-            current_app,
-            ConfigSettingNames.AUTHORISATION_CODE.name,
-            bcrypt.generate_password_hash(form.new_auth_code.data).decode('utf8')
-          )
-          new_admin_username = form.admin_username.data.strip().lower()
-          if admin_user := User.query.filter_by(username=new_admin_username).first():
-              # if this user is not an admin, need to promote them:
-              if admin_user.access_level != User.ADMINISTRATOR:
-                  admin_user.access_level=User.ADMINISTRATOR
-                  admin_user.save()
-                  flash(f"Promoted user {new_admin_username} to administrator")
-              admin_user.set_password(form.admin_password.data)
-              flash(f"Updated existing user {new_admin_username}'s password", "warning")
-          else:
-            admin_user = User.create(
-              username=new_admin_username,
-              password=form.admin_password.data,
-              access_level=User.ADMINISTRATOR,
-              comment=f"First admin user, created during setup :-)",
-            )
-            flash(f"Created new admin user \"{new_admin_username}\"", "info")
-          admin_user.is_active = True
-          admin_user.is_student = False
-          admin_user.save()
-          setup_status += 1
-          set_and_save_config_setting(
-            current_app,
-            ConfigSettingNames._SETUP_STATUS.name,
-            setup_status
-          )
-          login_user(admin_user)
-          admin_user.logged_in_at = datetime.now(timezone.utc)
-          admin_user.save()
-          flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
-        else: # handle a regular settings update, which may also be part of setup
-          if _update_settings_in_db(form):
-            setup_status += 1
-            set_and_save_config_setting(
-              current_app,
-              ConfigSettingNames._SETUP_STATUS.name,
-              setup_status
-            )
-            # here we grant this session setup status
-            session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
-          else:
-            # something wasn't OK, so don't save and move on
-            # (the errors will have been explicitly flashed)
-            pass
-      else:
-        _flash_errors(form)
-
-  group_name = ConfigSettings.SETUP_GROUPS[setup_status-1]
-  settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-  html_descriptions = { 
-    setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
-    for setting in ConfigSettings.DESCRIPTIONS
-  }
-  social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
-  pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
-  return render_template(
-    "admin/setup.html",
-    setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
-    #group=ConfigSettings.GROUPS[group_name],
-    setup_status=setup_status,
-    qty_setup_steps=qty_setup_steps,
-    form=form,
-    group_name=group_name,
-    pretty_group_name_dict=pretty_group_name_dict,
-    SETTING_PREFIX=SETTING_PREFIX,
-    groups=ConfigSettings.GROUPS,
-    sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
-    settings=settings_as_dict,
-    social_settings=social_settings,
-    type_of_settings=ConfigSettings.TYPES,
+    pretty_group_name_dict = { 
+        name:ConfigSettings.pretty_group_name(name)
+        for name in ConfigSettings.GROUPS
+    }
     pretty_default_settings={
-      name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
-      for name in ConfigSettings.DEFAULTS
-    },
-    html_descriptions=html_descriptions,
-    env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
+        for name in ConfigSettings.DEFAULTS
+    }
+    return render_template(
+        "admin/setup.html",
+        env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        form=form,
+        group_name=group_name,
+        groups=ConfigSettings.GROUPS,
+        html_descriptions=html_descriptions,
+        pretty_default_settings=pretty_default_settings,
+        pretty_group_name_dict=pretty_group_name_dict,
+        qty_setup_steps=qty_setup_steps,
+        SETTING_PREFIX=SETTING_PREFIX,
+        settings=settings_as_dict,
+        setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
+        setup_status=setup_status,
+        social_settings=social_settings,
+        sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+        type_of_settings=ConfigSettings.TYPES,
   )
 
 @blueprint.route("/", strict_slashes=False)
@@ -469,53 +487,53 @@ def admin():
     qty_texts_by_task = defaultdict(int)
     qty_texts = 0
     if is_storing_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
-      # TODO counting all texts, not only those of enrolled active students
-      texts = TaskText.query.all()
-      qty_texts = len(texts)
-      for text in texts:
-         if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
-            qty_texts_by_task[tasks_by_id[text.task_id]] += 1
+        # TODO counting all texts, not only those of enrolled active students
+        texts = TaskText.query.all()
+        qty_texts = len(texts)
+        for text in texts:
+            if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
+                qty_texts_by_task[tasks_by_id[text.task_id]] += 1
     submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
-      "admin/dashboard.html",
-      staff_users=staff_users,
-      is_storing_texts=is_storing_texts,
-      is_task_list_published=_is_task_list_published(),
-      is_tech_notes_index_published=_is_tech_notes_index_published(),
-      other_users=other_users,
-      purge_form = GeneralSubmitForm(),
-      qty_staff_users=len(staff_users),
-      qty_buggies=len(buggies),
-      qty_texts_by_task=qty_texts_by_task,
-      qty_texts=qty_texts,
-      qty_other_users=len(other_users),
-      qty_students_active=len(students_active),
-      qty_students_logged_in_this_week=len(students_logged_in_this_week),
-      qty_students_logged_in_today=len(students_logged_in_today),
-      qty_students_never_logged_in=len(students_never_logged_in),
-      qty_students=len(students),
-      qty_tasks=qty_tasks,
-      qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
-      qty_uploads_week=len(students_uploaded_this_week),
-      qty_users_deactivated=len(users_deactivated),
-      qty_users=len(users),
-      students_active = students_active,
-      students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
-      students_logged_in_today=students_logged_in_today,
-      students_never_logged_in=students_never_logged_in,
-      submission_deadline=submission_deadline,
-      submit_deadline_day=get_day_of_week(submission_deadline),
-      tasks=tasks,
-      tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
-      unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
-      users_deactivated=users_deactivated,
-      is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
-      notes_generated_timestamp=servertime_str(
-        current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
-        current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
-      ),
-      task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
-      form=GeneralSubmitForm(), # for publish submit buttons
+        "admin/dashboard.html",
+        form=GeneralSubmitForm(), # for publish submit buttons
+        is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+        is_storing_texts=is_storing_texts,
+        is_task_list_published=_is_task_list_published(),
+        is_tech_notes_index_published=_is_tech_notes_index_published(),
+        notes_generated_timestamp=servertime_str(
+          current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+          current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+        ),
+        other_users=other_users,
+        purge_form = GeneralSubmitForm(),
+        qty_buggies=len(buggies),
+        qty_other_users=len(other_users),
+        qty_staff_users=len(staff_users),
+        qty_students_active=len(students_active),
+        qty_students_logged_in_this_week=len(students_logged_in_this_week),
+        qty_students_logged_in_today=len(students_logged_in_today),
+        qty_students_never_logged_in=len(students_never_logged_in),
+        qty_students=len(students),
+        qty_tasks=qty_tasks,
+        qty_texts_by_task=qty_texts_by_task,
+        qty_texts=qty_texts,
+        qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
+        qty_uploads_week=len(students_uploaded_this_week),
+        qty_users_deactivated=len(users_deactivated),
+        qty_users=len(users),
+        staff_users=staff_users,
+        students_active = students_active,
+        students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
+        students_logged_in_today=students_logged_in_today,
+        students_never_logged_in=students_never_logged_in,
+        submission_deadline=submission_deadline,
+        submit_deadline_day=get_day_of_week(submission_deadline),
+        tasks=tasks,
+        task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+        tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+        unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
+        users_deactivated=users_deactivated,
     )
 
 @blueprint.route("/users", strict_slashes=False)
@@ -531,47 +549,47 @@ def list_users(data_format=None, want_detail=True):
     admin_usernames = [user.username for user in users if user.is_administrator]
     qty_admins = len(admin_usernames)
     if data_format == "csv": # note: CSV is only students
-      si = io.StringIO()
-      cw = csv.writer(si)
-      # To get the column names, use the current_user (admin) even though
-      # we're not going to save the data (there might not be any students)
-      cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
-      for s in students:
-        cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
-      filename = get_download_filename("users.csv", want_datestamp=True)
-      output = make_response(si.getvalue())
-      output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-      output.headers["Content-type"] = "text/csv"
-      return output
+        si = io.StringIO()
+        cw = csv.writer(si)
+        # To get the column names, use the current_user (admin) even though
+        # we're not going to save the data (there might not be any students)
+        cw.writerow(current_user.get_fields_as_dict_for_csv().keys())
+        for s in students:
+            cw.writerow(list(s.get_fields_as_dict_for_csv().values()))
+        filename = get_download_filename("users.csv", want_datestamp=True)
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        output.headers["Content-type"] = "text/csv"
+        return output
     else:
-      # TODO want_detail shows all users (otherwise it's only students)
-      current_user_can_edit = current_user.is_administrator
-      edit_method = "admin.edit_user"
-      if (
-          current_user.is_teaching_assistant and
-          current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
-      ):
-          current_user_can_edit = True
-          edit_method = "admin.edit_user_comment"
-      return render_template("admin/users.html",
-        want_detail = want_detail,
-        editor_repo_name = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-        users=users,
-        admin_usernames=admin_usernames,
-        qty_admins=qty_admins,
-        qty_teaching_assistants=qty_teaching_assistants,
-        qty_students = len(students),
-        qty_students_logged_in = len([s for s in students if s.logged_in_at]),
-        qty_students_enabled = len([s for s in students if s.is_active]),
-        qty_students_github = len([s for s in students if s.github_username]),
-        qty_students_uploaded_json = len([s for s in students if len(s.latest_json)>1]),
-        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
-        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-        ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
-        is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
-        current_user_can_edit=current_user_can_edit,
-        edit_method=edit_method,
-    )
+        # TODO want_detail shows all users (otherwise it's only students)
+        current_user_can_edit = current_user.is_administrator
+        edit_method = "admin.edit_user"
+        if (
+            current_user.is_teaching_assistant and
+            current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name]
+        ):
+            current_user_can_edit = True
+            edit_method = "admin.edit_user_comment"
+        return render_template("admin/users.html",
+            admin_usernames=admin_usernames,
+            current_user_can_edit=current_user_can_edit,
+            edit_method=edit_method,
+            editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+            ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
+            ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+            ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+            is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+            qty_admins=qty_admins,
+            qty_students_enabled=len([s for s in students if s.is_active]),
+            qty_students_github=len([s for s in students if s.github_username]),
+            qty_students_logged_in=len([s for s in students if s.logged_in_at]),
+            qty_students_uploaded_json=len([s for s in students if len(s.latest_json)>1]),
+            qty_students=len(students),
+            qty_teaching_assistants=qty_teaching_assistants,
+            users=users,
+            want_detail=want_detail,
+        )
 
 @blueprint.route("/users/register", methods=["GET", "POST"], strict_slashes=False)
 @blueprint.route("/users/register/<data_format>", methods=["POST"])
@@ -602,81 +620,81 @@ def bulk_register(data_format=None):
         else:
             lines = form.userdata.data.splitlines()
         if len(lines):
-          lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
+            lines[0] = ",".join(User.tidy_fieldnames(lines[0].split(",")))
         reader = csv.DictReader(lines, delimiter=',')
         qty_users = 0
         line_no = 0
         problem_lines = []
         clean_user_data = []
         if len(lines) < 2:
-          err_msgs.append("Need CSV with a header row, then at least one line of data")
+            err_msgs.append("Need CSV with a header row, then at least one line of data")
         elif missing := User.get_missing_fieldnames(reader.fieldnames):
-          err_msgs.append(f"CSV header row is missing some required fields: {', '.join(missing)}")
+            err_msgs.append(f"CSV header row is missing some required fields: {', '.join(missing)}")
         else:
-          usernames = []
-          for row in reader:
-            line_no += 1
-            username = row['username'].strip().lower() if 'username' in row else None
-            if username is not None:
-              usernames.append(username)
-            new_user = User(
-              username=username,
-              ext_id=row['ext_id'].strip() if 'ext_id' in row else None,
-              ext_username=row['ext_username'].strip().lower() if 'ext_username' in row else None,
-              email=_csv_tidy_string(row, 'email', want_lower=True),
-              password=_csv_tidy_string(row, 'password', want_lower=False),
-              first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
-              last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
-              created_at=datetime.now(timezone.utc),
-              is_active=True,
-              is_student=True,
-              access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit
-              latest_json="",
-              comment=_csv_tidy_string(row, 'comment', want_lower=False),
-              is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
-            )
-            #current_app.logger.info("{}, pw:{}".format(username, password))
-            if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
-              qty_users += 1
-              clean_user_data.append(new_user.get_fields_as_dict_for_insert())
+            usernames = []
+            for row in reader:
+                line_no += 1
+                username = row['username'].strip().lower() if 'username' in row else None
+                if username is not None:
+                    usernames.append(username)
+                new_user = User(
+                    username=username,
+                    ext_id=row['ext_id'].strip() if 'ext_id' in row else None,
+                    ext_username=row['ext_username'].strip().lower() if 'ext_username' in row else None,
+                    email=_csv_tidy_string(row, 'email', want_lower=True),
+                    password=_csv_tidy_string(row, 'password', want_lower=False),
+                    first_name=_csv_tidy_string(row, 'first_name', want_lower=False),
+                    last_name=_csv_tidy_string(row, 'last_name', want_lower=False),
+                    created_at=datetime.now(timezone.utc),
+                    is_active=True,
+                    is_student=True,
+                    access_level=User.NO_STAFF_ROLE, # to convert to staff, must edit
+                    latest_json="",
+                    comment=_csv_tidy_string(row, 'comment', want_lower=False),
+                    is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
+                )
+                #current_app.logger.info("{}, pw:{}".format(username, password))
+                if new_user.password and len(new_user.password) >= 4: # passwords longer than 4
+                    qty_users += 1
+                    clean_user_data.append(new_user.get_fields_as_dict_for_insert())
+                else:
+                    problem_lines.append(line_no)
+            if len(problem_lines) > 0:
+                pl = "s" if len(problem_lines)>1 else ""
+                line_nos = ", ".join(map(str,problem_lines))
+                err_msgs.append(f"Bulk registration aborted with {len(problem_lines)} problem{pl}: see line{pl}: {line_nos}")
             else:
-              problem_lines.append(line_no)
-          if len(problem_lines) > 0:
-            pl = "s" if len(problem_lines)>1 else ""
-            line_nos = ", ".join(map(str,problem_lines))
-            err_msgs.append(f"Bulk registration aborted with {len(problem_lines)} problem{pl}: see line{pl}: {line_nos}")
-          else:
-            try:
-              result = db.session.execute(
-                  insert(User.__table__),
-                  clean_user_data
-              )
-              db.session.commit()
-            except Exception as e:
-                # risky but frustratingly no easy way to get the specific database
-                # error as it's coming back from the connection: e.g.,
-                # (mysql.connector.errors.IntegrityError) 1062 (23000): Duplicate entry 'aaaa' for key 'username'
-                ex_str = str(e).split("\n")[0] # mySQL sends the SQL back too after a newline: don't want
-                # for JSON, users are being updated one user(name) at a time
-                bad_username = f"\"{usernames[0]}\": " if len(usernames) == 1 else ""
-                err_msgs.append(f"{bad_username}{ex_str}")
-            if not is_json:
-                flash(f"Bulk registered {qty_users} users", "warning")
+              try:
+                result = db.session.execute(
+                    insert(User.__table__),
+                    clean_user_data
+                )
+                db.session.commit()
+              except Exception as e:
+                  # risky but frustratingly no easy way to get the specific database
+                  # error as it's coming back from the connection: e.g.,
+                  # (mysql.connector.errors.IntegrityError) 1062 (23000): Duplicate entry 'aaaa' for key 'username'
+                  ex_str = str(e).split("\n")[0] # mySQL sends the SQL back too after a newline: don't want
+                  # for JSON, users are being updated one user(name) at a time
+                  bad_username = f"\"{usernames[0]}\": " if len(usernames) == 1 else ""
+                  err_msgs.append(f"{bad_username}{ex_str}")
+              if not is_json:
+                   flash(f"Bulk registered {qty_users} users", "warning")
         if delete_path:
             try:
                 os.unlink(delete_path)
             except os.error as e:
                 err_msgs.append(f"Problem deleting uploaded file: {e}")
         if is_json:
-          if err_msgs:
-            payload = {
-              'status': "error",
-              'error': err_msgs[0],
-              'errors': err_msgs
-            }
-          else:
-            payload = {"status": "OK"}
-          return jsonify(payload)
+            if err_msgs:
+                payload = {
+                  'status': "error",
+                  'error': err_msgs[0],
+                  'errors': err_msgs
+                }
+            else:
+                payload = {"status": "OK"}
+            return jsonify(payload)
         else:
             for err_msg in err_msgs:
                 flash(err_msg, "danger")
@@ -684,124 +702,124 @@ def bulk_register(data_format=None):
         if is_json:
           errors = []
           for err_key in form.errors:
-            errors.append(form.errors[err_key])
+              errors.append(form.errors[err_key])
           return jsonify({
-            "status": "error",
-            "error": errors[0],
-            "errors": errors
+              "status": "error",
+              "error": errors[0],
+              "errors": errors
           })
         else:
-          flash_errors(form)
+            flash_errors(form)
     csv_fieldnames = ['username', 'password'] + ConfigSettings.users_additional_fieldnames(current_app)
     return render_template(
         "admin/users_register.html",
-        form=form,
+        csv_fieldnames=f"{csv_fieldnames} {current_app.config}",
         example_csv_data = [
-          ",".join(csv_fieldnames),
-          ",".join(User.get_example_data("ada", csv_fieldnames)),
-          ",".join(User.get_example_data("chaz", csv_fieldnames)),
+            ",".join(csv_fieldnames),
+            ",".join(User.get_example_data("ada", csv_fieldnames)),
+            ",".join(User.get_example_data("chaz", csv_fieldnames)),
         ],
-        csv_fieldnames=f"{csv_fieldnames} {current_app.config}"
+        form=form,
     )
 
 @blueprint.route("/user/<user_id>", methods=['GET'])
 @login_required
 @staff_only
 def show_user(user_id):
-  if str(user_id).isdigit():
-    user = User.get_by_id(int(user_id))
-  else:
-    user = User.query.filter_by(username=user_id).first()
-  if user is None:
-    abort(404)
-  texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
-  return  render_template(
-      "admin/user.html",
-      user=user,
-       api_form=ApiKeyForm(),
-      is_own_text=user.id == current_user.id,
-      tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
-      texts_by_task_id=texts_by_task_id,
-      qty_texts=len(texts_by_task_id),
-      ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
-      ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-      ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
-      is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
-  )
+    if str(user_id).isdigit():
+        user = User.get_by_id(int(user_id))
+    else:
+        user = User.query.filter_by(username=user_id).first()
+    if user is None:
+        abort(404)
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    return  render_template(
+        "admin/user.html",
+        user=user,
+        api_form=ApiKeyForm(),
+        is_own_text=user.id == current_user.id,
+        tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
+        texts_by_task_id=texts_by_task_id,
+        qty_texts=len(texts_by_task_id),
+        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+        is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+    )
 
 def manage_user(user_id):
   is_registering_new_user = user_id is None
   if is_registering_new_user:
-    user = None
-    action_url=url_for('admin.new_user')
-    form=RegisterForm(request.form)
+      user = None
+      action_url=url_for('admin.new_user')
+      form=RegisterForm(request.form)
   else:
-    if str(user_id).isdigit():
-      user = User.get_by_id(int(user_id))
-    else:
-      user = User.query.filter_by(username=user_id).first()
-    if user is None:
-      flash("No such user", "info")
-      abort(404)
-    action_url=url_for('admin.edit_user', user_id=user.id)
-    form = UserForm(request.form, obj=user, app=current_app)
+      if str(user_id).isdigit():
+          user = User.get_by_id(int(user_id))
+      else:
+          user = User.query.filter_by(username=user_id).first()
+      if user is None:
+          flash("No such user", "info")
+          abort(404)
+      action_url=url_for('admin.edit_user', user_id=user.id)
+      form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
-    if form.validate_on_submit():
-      username = form.username.data.lower()
-      if is_registering_new_user:
-         user = User(
-            username=username,
-            password=form.password.data,
-          )
-      user.username = username # validation catches non-unique usernames
-      user.comment = form.comment.data
-      user.is_student = form.is_student.data
-      user.is_active = form.is_active.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
-          user.first_name = form.first_name.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
-          user.last_name = form.last_name.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
-          user.email = form.email.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
-          user.ext_username = form.ext_username.data
-      if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name]:
-          user.ext_id = form.ext_id.data
-      if not is_registering_new_user:
-          if form.access_level.data > user.access_level:
-              flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
-          elif form.access_level.data < user.access_level:
-              flash(f"Demoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
-      user.access_level = form.access_level.data
-      user.is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
-      user.save()
-      if is_registering_new_user:
-         success_msg = f"OK, registered new user {user.pretty_username}"
+      if form.validate_on_submit():
+          username = form.username.data.lower()
+          if is_registering_new_user:
+              user = User(
+                  username=username,
+                  password=form.password.data,
+                )
+          user.username = username # validation catches non-unique usernames
+          user.comment = form.comment.data
+          user.is_student = form.is_student.data
+          user.is_active = form.is_active.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
+              user.first_name = form.first_name.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
+              user.last_name = form.last_name.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
+              user.email = form.email.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
+              user.ext_username = form.ext_username.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name]:
+              user.ext_id = form.ext_id.data
+          if not is_registering_new_user:
+              if form.access_level.data > user.access_level:
+                  flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
+              elif form.access_level.data < user.access_level:
+                  flash(f"Demoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
+          user.access_level = form.access_level.data
+          user.is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
+          user.save()
+          if is_registering_new_user:
+              success_msg = f"OK, registered new user {user.pretty_username}"
+          else:
+              success_msg = f"OK, updated user {user.pretty_username}"
+          if current_user.is_anonymous or not current_user.is_administrator:
+              return_url = url_for("public.login")
+          else:
+              return_url = url_for("admin.list_users")
+          flash(success_msg, "success")
+          return redirect(return_url)
       else:
-        success_msg = f"OK, updated user {user.pretty_username}"
-      if current_user.is_anonymous or not current_user.is_administrator:
-         return_url = url_for("public.login")
-      else:
-         return_url = url_for("admin.list_users")
-      flash(success_msg, "success")
-      return redirect(return_url)
-    else:
-      flash_errors(form)
-      if is_registering_new_user:
-        flash("Did not register new user", "danger")
-      else:
-        flash(f"Did not update user {user.pretty_username}", "danger")
+        flash_errors(form)
+        if is_registering_new_user:
+            flash("Did not register new user", "danger")
+        else:
+            flash(f"Did not update user {user.pretty_username}", "danger")
   return render_template(
-    "admin/user_edit.html",
-    action_url=action_url,
-    example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
-    ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
-    ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
-    ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-    form=form,
-    is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
-    is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
-    user=user,
+      "admin/user_edit.html",
+      action_url=action_url,
+      example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
+      ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
+      ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+      ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+      form=form,
+      is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
+      is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
+      user=user,
   )
 
 # user_id may be username or id
@@ -810,11 +828,11 @@ def manage_user(user_id):
 @admin_only
 def delete_github_details(user_id):
     if str(user_id).isdigit():
-      user = User.get_by_id(int(user_id))
+        user = User.get_by_id(int(user_id))
     else:
-      user = User.query.filter_by(username=user_id).first()
+        user = User.query.filter_by(username=user_id).first()
     if user is None:
-      abort(404)
+        abort(404)
     form = SubmitWithConfirmForm(request.form)
     if form.validate_on_submit():
         if (user.github_username is None and user.github_access_token is None):
@@ -899,69 +917,76 @@ def edit_user(user_id):
 @login_required
 @staff_only
 def api_keys():
-    users = User.query.all()
-    users = sorted(users, key=lambda user: (user.is_staff, user.username))
+    users = sorted(
+      User.query.all(), key=lambda user: (user.is_staff, user.username)
+    )
     form = ApiKeyForm(request.form)
     if request.method == "POST":
-      want_api_key_generated = None
-      if form.submit_generate_keys.data:
-        want_api_key_generated = True
-      elif form.submit_clear_keys.data:
-        want_api_key_generated = False
-      if want_api_key_generated is None:
-        flash("Did not change any API keys: error in form (missing submit action)", "danger")
-      else:
-        valid_usernames = [user.username for user in users]
-        bad_usernames = []
-        good_usernames = []
-        for username in form.usernames.data:
-          if username in valid_usernames:
-            good_usernames.append(username)
-          else:
-            bad_usernames.append(username)
-        if bad_usernames:
-          flash(f"Error: unrecognised users:{', '.join(bad_usernames)}", "danger")
-        if good_usernames:
-          changed_usernames = []
-          unchanged_usernames = []
-          for username in good_usernames:
-            user = User.query.filter_by(username=username).first()
-            old_key = user.api_key
-            user.generate_api_key(want_api_key_generated)
-            if user.api_key == old_key:
-              unchanged_usernames.append(username)
-            else:
-              user.save()
-              changed_usernames.append(username)
-          if unchanged_usernames:
-            flash(f"API key was the same as before so nothing changed for {_user_summary(unchanged_usernames)}.", "warning")
-          if changed_usernames:
-            if want_api_key_generated:
-              flash(f"OK, generated new API key for {_user_summary(changed_usernames)}.", "success")
-            else:
-              flash(f"OK, cleared API key for {_user_summary(changed_usernames)}.", "success")
+        want_api_key_generated = None
+        if form.submit_generate_keys.data:
+            want_api_key_generated = True
+        elif form.submit_clear_keys.data:
+            want_api_key_generated = False
+        if want_api_key_generated is None:
+            flash("Did not change any API keys: error in form (missing submit action)", "danger")
         else:
-            flash(f"Did not change any API keys: no users selected", "warning")
+            valid_usernames = [user.username for user in users]
+            bad_usernames = []
+            good_usernames = []
+            for username in form.usernames.data:
+                if username in valid_usernames:
+                    good_usernames.append(username)
+                else:
+                    bad_usernames.append(username)
+            if bad_usernames:
+                flash(f"Error: unrecognised users:{', '.join(bad_usernames)}", "danger")
+            if good_usernames:
+                changed_usernames = []
+                unchanged_usernames = []
+                for username in good_usernames:
+                    user = User.query.filter_by(username=username).first()
+                    old_key = user.api_key
+                    user.generate_api_key(want_api_key_generated)
+                    if user.api_key == old_key:
+                        unchanged_usernames.append(username)
+                    else:
+                        user.save()
+                        changed_usernames.append(username)
+                if unchanged_usernames:
+                    flash(f"API key was the same as before so nothing changed for {_user_summary(unchanged_usernames)}.", "warning")
+                if changed_usernames:
+                    if want_api_key_generated:
+                        flash(f"OK, generated new API key for {_user_summary(changed_usernames)}.", "success")
+                    else:
+                        flash(f"OK, cleared API key for {_user_summary(changed_usernames)}.", "success")
+            else:
+                flash(f"Did not change any API keys: no users selected", "warning")
     form.usernames.choices = [u.username for u in users]
+    api_secret_ttl_pretty=get_pretty_approx_duration(
+        current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]
+    )
     return render_template(
        "admin/api_key.html",
+       api_secret_ttl_pretty=api_secret_ttl_pretty,
+       api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
        form=form,
-       api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]),
        is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
        is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
        users=users,
-       api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
     )
 
 @blueprint.route("/api-test", methods=["GET"], strict_slashes=False)
 @login_required
 @staff_only
 def api_test():
-    return render_template("admin/api_test.html", random_qty_wheels=random.randint(1,100))
+    return render_template(
+        "admin/api_test.html",
+        random_qty_wheels=random.randint(1,100)
+    )
 
 @blueprint.route("/buggies/<username>")
 def show_buggy(username):
-   """ Using the show_buggy code from Buggy, as that's common for non-admin too"""
+   """ Using the show_buggy code from Buggy: it's common for non-admin too"""
    # note that show_buggy_by_user checks the admin status of the requestor
    return show_buggy_by_user(username=username)
 
@@ -1006,40 +1031,41 @@ def settings(group_name=None):
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
     social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
-      # group_name = form['group'].data
-      if form.validate_on_submit():
-        _update_settings_in_db(form)
-        # inefficient, but update to reflect changes
-        settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-        social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
-      else:
-        _flash_errors(form)
+        # group_name = form['group'].data
+        if form.validate_on_submit():
+            _update_settings_in_db(form)
+            # inefficient, but update to reflect changes
+            settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+            social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+        else:
+            _flash_errors(form)
     html_descriptions = { 
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
     task_count = Task.query.filter_by(is_enabled=True).count()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
-    return render_template(
-      "admin/settings.html",
-      form=form,
-      group_name=group_name,
-      pretty_group_name_dict=pretty_group_name_dict,
-      SETTING_PREFIX=SETTING_PREFIX,
-      groups=ConfigSettings.GROUPS,
-      sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
-      settings=settings_as_dict,
-      social_settings=social_settings,
-      type_of_settings=ConfigSettings.TYPES,
-      pretty_default_settings={
+    pretty_default_settings={
         name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
         for name in ConfigSettings.DEFAULTS
-      },
-      html_descriptions=html_descriptions,
-      env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
-      tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
-      is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
-      is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+    },
+    return render_template(
+        "admin/settings.html",
+        env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        form=form,
+        group_name=group_name,
+        groups=ConfigSettings.GROUPS,
+        html_descriptions=html_descriptions,
+        is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
+        is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+        pretty_default_settings=pretty_default_settings,
+        pretty_group_name_dict=pretty_group_name_dict,
+        SETTING_PREFIX=SETTING_PREFIX,
+        settings=settings_as_dict,
+        social_settings=social_settings,
+        sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+        tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+        type_of_settings=ConfigSettings.TYPES,
     )
 
 @blueprint.route("/announcements/no-html", strict_slashes=False)
@@ -1055,19 +1081,21 @@ def list_announcements(is_html_enabled=True):
     # only using the form for the CSRF token at this point
     form = AnnouncementActionForm(request.form)
     announcements = sorted(
-      Announcement.query.all(),
-      key=lambda announcement: (announcement.type, announcement.text)
+        Announcement.query.all(),
+        key=lambda announcement: (announcement.type, announcement.text)
     )
     has_example_already = bool(
-       [ann for ann in announcements if ann.text == Announcement.EXAMPLE_ANNOUNCEMENT]
+        [
+            ann for ann in announcements
+            if ann.text == Announcement.EXAMPLE_ANNOUNCEMENT
+        ]
     )
-    is_html_suppressed = True
     return render_template(
-      "admin/announcements.html",
-      announcements=announcements,
-      form=form,
-      example_form=None if has_example_already else GeneralSubmitForm(),
-      is_html_enabled=is_html_enabled
+        "admin/announcements.html",
+        announcements=announcements,
+        example_form=None if has_example_already else GeneralSubmitForm(),
+        form=form,
+        is_html_enabled=is_html_enabled
     )
 
 @blueprint.route("/announcements/<int:announcement_id>/no-html", methods=["GET"])
@@ -1085,48 +1113,48 @@ def edit_announcement(announcement_id=None):
     is_visible = False
     is_html =  False
     if announcement_id:
-      announcement = Announcement.query.filter_by(id=announcement_id).first()
-      if announcement is None:
-        flash(f"No such announcement", "danger")
-        return redirect(url_for("admin.list_announcements"))
+        announcement = Announcement.query.filter_by(id=announcement_id).first()
+        if announcement is None:
+            flash(f"No such announcement", "danger")
+            return redirect(url_for("admin.list_announcements"))
     form = AnnouncementForm(request.form, obj=announcement)
     delete_form = AnnouncementActionForm()
     if request.method == "GET":
-      if announcement:
-        is_html=announcement.is_html
-        is_visible=announcement.is_visible
+        if announcement:
+            is_html=announcement.is_html
+            is_visible=announcement.is_visible
     if request.method == "POST":
-      if form.validate_on_submit():
-        if announcement is not None:
-            announcement.text = form.text.data
-            announcement.type = form.type.data
-            announcement.is_visible = form.is_visible.data
-            announcement.is_html = form.is_html.data
-            announcement.save()
-            flash("OK, updated announcement", "success")
-            refresh_global_announcements(current_app)
-            return redirect(url_for("admin.list_announcements"))
+        if form.validate_on_submit():
+            if announcement is not None:
+                announcement.text = form.text.data
+                announcement.type = form.type.data
+                announcement.is_visible = form.is_visible.data
+                announcement.is_html = form.is_html.data
+                announcement.save()
+                flash("OK, updated announcement", "success")
+                refresh_global_announcements(current_app)
+                return redirect(url_for("admin.list_announcements"))
+            else:
+                Announcement.create(
+                    text=form.text.data,
+                    type=form.type.data,
+                    is_html=form.is_html.data,
+                    is_visible=False, # don't allow immediate publication: see it first
+                )
+                flash(f"Announcement created (but not displayed yet)", "success")
+                return redirect(url_for("admin.list_announcements"))
         else:
-          Announcement.create(
-              text=form.text.data,
-              type=form.type.data,
-              is_html=form.is_html.data,
-              is_visible=False, # don't allow immediate publication: see it first
-          )
-          flash(f"Announcement created (but not displayed yet)", "success")
-          return redirect(url_for("admin.list_announcements"))
-      else:
-          flash("Did not create an announcement!", "danger")
-          flash_errors(form)
+            flash("Did not create an announcement!", "danger")
+            flash_errors(form)
     return render_template(
-      "admin/announcement_edit.html", 
-      form=form, 
-      id=announcement_id,
-      is_html=is_html,
-      is_visible=is_visible,
-      announcement=announcement,
-      type_option_groups=Announcement.TYPE_OPTION_GROUPS,
-      delete_form=delete_form,
+        "admin/announcement_edit.html", 
+        form=form, 
+        id=announcement_id,
+        is_html=is_html,
+        is_visible=is_visible,
+        announcement=announcement,
+        type_option_groups=Announcement.TYPE_OPTION_GROUPS,
+        delete_form=delete_form,
     )
 
 @blueprint.route("/announcements/<int:announcement_id>/publish", methods=["POST"])
@@ -1136,28 +1164,28 @@ def publish_announcement(announcement_id):
     form = AnnouncementActionForm(request.form)
     want_to_publish = None
     if form.submit_hide.data:
-      want_to_publish = False
+        want_to_publish = False
     elif form.submit_publish.data:
-      want_to_publish = True
+        want_to_publish = True
     if want_to_publish is None:
-      flash("Error: couldn't decide to publish or not", "danger")
+        flash("Error: couldn't decide to publish or not", "danger")
     else:
-      announcement = Announcement.query.filter_by(id=announcement_id).first()
-      if announcement is None:
-        flash("Error: coudldn't find announcement", "danger")
-      else:
-        announcement.is_visible = want_to_publish
-        announcement.save()
-        if want_to_publish:
-          flash("OK, published an announcement", "success")
+        announcement = Announcement.query.filter_by(id=announcement_id).first()
+        if announcement is None:
+            flash("Error: coudldn't find announcement", "danger")
         else:
-          flash("OK, hid an announcement", "success")
-        refresh_global_announcements(current_app)
+            announcement.is_visible = want_to_publish
+            announcement.save()
+            if want_to_publish:
+                flash("OK, published an announcement", "success")
+            else:
+                flash("OK, hid an announcement", "success")
+            refresh_global_announcements(current_app)
     announcements=Announcement.query.all()
     return render_template(
-      "admin/announcements.html",
-      announcements=announcements,
-      form=form
+        "admin/announcements.html",
+        announcements=announcements,
+        form=form
     )
 
 @blueprint.route("/announcements/<int:announcement_id>/delete", methods=["POST"])
@@ -1166,15 +1194,15 @@ def publish_announcement(announcement_id):
 def delete_announcement(announcement_id=None):
     form = AnnouncementActionForm(request.form)
     if form.submit_delete.data:
-      announcement = Announcement.query.filter_by(id=announcement_id).first()
-      if announcement is None:
-        flash("Error: coudldn't find announcement to delete", "danger")
-      else:
-        announcement.delete()
-        flash("OK, deleted announcement", "success")
-        refresh_global_announcements(current_app)
+        announcement = Announcement.query.filter_by(id=announcement_id).first()
+        if announcement is None:
+            flash("Error: coudldn't find announcement to delete", "danger")
+        else:
+            announcement.delete()
+            flash("OK, deleted announcement", "success")
+            refresh_global_announcements(current_app)
     else:
-      flash("Error: incorrect button wiring, nothing deleted", "danger")
+        flash("Error: incorrect button wiring, nothing deleted", "danger")
     return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/announcements/new/example", methods=["POST"])
@@ -1183,15 +1211,15 @@ def delete_announcement(announcement_id=None):
 def add_example_announcement():
     form = GeneralSubmitForm(request.form)
     if form.validate_on_submit():
-      Announcement.create(
-        type="special",
-        text=Announcement.EXAMPLE_ANNOUNCEMENT,
-        is_html=True,
-        is_visible=False,
-      )
-      flash("OK, inserted an example announcement", "success")
+        Announcement.create(
+            type="special",
+            text=Announcement.EXAMPLE_ANNOUNCEMENT,
+            is_html=True,
+            is_visible=False,
+        )
+        flash("OK, inserted an example announcement", "success")
     else:
-      flash("Problem with example announcement submit", "warning")
+        flash("Problem with example announcement submit", "warning")
     return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/tech-notes/publish", methods=["POST", "GET"])
@@ -1210,37 +1238,37 @@ def tech_notes_admin():
   error_msg = None
   form = GeneralSubmitForm(request.form) # no auth required
   if request.method == "POST":
-    if form.validate_on_submit():
-      try:
-        output_msg = publish_tech_notes(current_app)
-      except Exception as e:
-        error_msg = f"Error: {e}"
-        flash(error_msg, "danger")
+      if form.validate_on_submit():
+          try:
+              output_msg = publish_tech_notes(current_app)
+          except Exception as e:
+              error_msg = f"Error: {e}"
+              flash(error_msg, "danger")
+          else:
+              flash(output_msg, "info")
+              flash("Re-generated tech notes (static web pages) OK", "success")
+              if _is_from_dashboard():
+                  return redirect(url_for('admin.admin'))
       else:
-        flash(output_msg, "info")
-        flash("Re-generated tech notes (static web pages) OK", "success")
-        if _is_from_dashboard():
-            return redirect(url_for('admin.admin'))
-    else:
-      flash_errors(form)
+          flash_errors(form)
   return render_template(
     "admin/tech_notes.html",
     form=FlaskForm(request.form), # nothing except CSRF token
-    key_settings=[
-      ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
-      ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
-      ConfigSettingNames.PROJECT_CODE.name,
-      ConfigSettingNames.SOCIAL_0_NAME.name,
-      ConfigSettingNames.SOCIAL_1_NAME.name,
-      ConfigSettingNames.SOCIAL_2_NAME.name,
-      ConfigSettingNames.SOCIAL_3_NAME.name,
-    ],
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
-    tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
+    key_settings=[
+        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+        ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
+        ConfigSettingNames.PROJECT_CODE.name,
+        ConfigSettingNames.SOCIAL_0_NAME.name,
+        ConfigSettingNames.SOCIAL_1_NAME.name,
+        ConfigSettingNames.SOCIAL_2_NAME.name,
+        ConfigSettingNames.SOCIAL_3_NAME.name,
+    ],
     notes_generated_timestamp=servertime_str(
-      current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
-      current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
+        current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+        current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
     ),
+    tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
   )
 
 @blueprint.route("/tasks/publish", methods=["POST"])
@@ -1317,8 +1345,8 @@ def tasks_admin():
         else:
             flash_errors(form)
     tasks = Task.query.order_by(
-      Task.phase.asc(),
-      Task.sort_position.asc()
+        Task.phase.asc(),
+        Task.sort_position.asc()
     ).all()
     qty_disabled_tasks = len([task for task in tasks if not task.is_enabled])
     if not want_all:
@@ -1332,23 +1360,23 @@ def tasks_admin():
         example_task_url = None
     return render_template(
         "admin/tasks.html",
+        auto_republish_config_name=ConfigSettingNames.IS_STATIC_CONTENT_AUTOGENERATED.name,
+        example_task_url=example_task_url,
+        example_task=example_task,
         form=form,
-        is_showing_all_tasks=want_all,
         is_fresh_update=is_fresh_update,
         is_injecting_github_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
-        tasks=tasks,
-        qty_tasks=qty_tasks,
-        qty_disabled_tasks=qty_disabled_tasks,
-        tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
+        is_showing_all_tasks=want_all,
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
           ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
           ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
         ],
-        example_task=example_task,
-        example_task_url=example_task_url,
+        qty_disabled_tasks=qty_disabled_tasks,
+        qty_tasks=qty_tasks,
         task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
-        auto_republish_config_name=ConfigSettingNames.IS_STATIC_CONTENT_AUTOGENERATED.name,
+        tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
+        tasks=tasks,
     )
 
 @blueprint.route("/download/tasks/<type>/<format>", methods=["GET", "POST"])
@@ -1377,8 +1405,8 @@ def download_tasks(type=None, format=None):
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=False)
     elif type == CURRENT:
         tasks = Task.query.filter_by(is_enabled=True).order_by(
-          Task.phase.asc(),
-          Task.sort_position.asc()
+            Task.phase.asc(),
+            Task.sort_position.asc()
         ).all()
         if format == FORMAT_CSV:
             payload = get_tasks_as_issues_csv(
@@ -1390,8 +1418,8 @@ def download_tasks(type=None, format=None):
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=True)
     return Response(
         payload,
+        headers={"Content-disposition": f"attachment; filename=\"{filename}\""},
         mimetype="text/plain",
-        headers={"Content-disposition": f"attachment; filename=\"{filename}\""}
     )
 
 @blueprint.route("/tasks/<task_id>/edit", methods=["GET", "POST"])
@@ -1438,7 +1466,7 @@ def edit_task(task_id=None):
     return render_template(
       "admin/task_edit.html",
       form=form,
-      task=task
+      task=task,
     )
 
 @blueprint.route("/json/latest-json/<user_id>", methods=["GET"])
@@ -1456,7 +1484,7 @@ def get_uploaded_json_for_user(user_id):
           "uploaded_at": stringify_datetime(user.uploaded_at),
         }
   else:
-     status = 403
+      status = 403
   response = make_response(jsonify(payload), status)
   response.headers["Content-type"] = "application/json"
   return response
@@ -1465,21 +1493,21 @@ def get_uploaded_json_for_user(user_id):
 def get_text_for_user_task(text_id):
   payload = ""
   if current_user and current_user.is_authenticated and current_user.is_staff:
-    text = TaskText.get_by_id(text_id)
-    if text is None:
-      status = 404
-    else:
-      status = 200
-      payload = {
-          "id": text.id,
-          "created_at": stringify_datetime(text.created_at),
-          "modified_at": stringify_datetime(text.modified_at),
-          "user_id": text.user_id,
-          "task_id": text.task_id,
-          "text": text.text,
-        }
+      text = TaskText.get_by_id(text_id)
+      if text is None:
+          status = 404
+      else:
+          status = 200
+          payload = {
+              "id": text.id,
+              "created_at": stringify_datetime(text.created_at),
+              "modified_at": stringify_datetime(text.modified_at),
+              "user_id": text.user_id,
+              "task_id": text.task_id,
+              "text": text.text,
+            }
   else:
-     status = 403
+      status = 403
   response = make_response(jsonify(payload), status)
   response.headers["Content-type"] = "application/json"
   return response
@@ -1508,10 +1536,10 @@ def task_texts():
            buggies_by_username[usernames_by_id[buggy.user_id]] = buggy
     return render_template(
        "admin/task_texts.html",
+       buggies_by_username=buggies_by_username,
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
-       buggies_by_username=buggies_by_username
     )
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
@@ -1594,10 +1622,10 @@ def show_system_info():
     return render_template(
         "admin/system_info.html",
         config_settings_to_display=config_settings_to_display,
-        git_status=git_status,
-        redacted_database_url=redacted_database_url,
         env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        git_status=git_status,
+        redacted_database_url=redacted_database_url,
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )
@@ -1647,9 +1675,9 @@ def pre_registration_csv_utility():
     return render_template(
         "admin/pre_reg_csv_utility.html",
         csv_fieldnames=csv_fieldnames,
-        form=form,
         ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        form=form,
         users_have_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
         users_have_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
         users_have_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
@@ -1704,6 +1732,6 @@ def get_blueprint_urls():
     title = f"Blueprint routes ({len(routes)})"
     return render_template(
         "admin/system.html",
+        system_str="\n".join(sorted(routes)),
         title=title,
-        system_str="\n".join(sorted(routes))
     )

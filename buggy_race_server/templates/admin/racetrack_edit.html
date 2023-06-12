@@ -15,7 +15,7 @@
   <div class="row">
     <div class="col grey-wrapper p-2">
       <form id="track-form" class="form" method="POST"
-        action="{% if track %}{{ url_for('race.edit_track', track_id=track.id)}}{% else %}{{ url_for('race.new_track') }}{% endif %}"
+        action="{% if track %}{{ url_for('admin_race.edit_track', track_id=track.id)}}{% else %}{{ url_for('admin_race.new_track') }}{% endif %}"
         role="form">
         {{ form.csrf_token }}
         <div class="row bg-white py-2 m-1">
@@ -102,7 +102,7 @@
       <div class="col my-5">
         <div class="border border container">
           <form id="track-delete-form" class="form form-delete" method="POST"
-          action="{{ url_for('race.delete_track', track_id=track.id)}}" role="form">
+          action="{{ url_for('admin_race.delete_track', track_id=track.id)}}" role="form">
             {{ delete_form.csrf_token }}
             <div class="row">
               <div class="col-md-3 p-3">
@@ -124,7 +124,7 @@
   {% endif %}
   <div class="row">
     <div class="col btn-collection">
-      <a href="{{ url_for('race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+      <a href="{{ url_for('admin_race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
     </div>
   </div>
 </div>

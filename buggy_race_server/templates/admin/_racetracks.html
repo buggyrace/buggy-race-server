@@ -21,8 +21,8 @@
           {{ track.desc }}
         </p>
         <p class="btn-collection track-view-edit-btns">
-          <a href="{{ url_for('race.view_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">View</a>
-          <a href="{{ url_for('race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">Edit</a>
+          <a href="{{ url_for('admin_race.view_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">View</a>
+          <a href="{{ url_for('admin_race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">Edit</a>
         </p>
       </div>
     </div>

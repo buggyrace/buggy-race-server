@@ -18,7 +18,7 @@
         <div class="alert-info">
           <div class="row p-3">
             <div class="col-md-4">
-              <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
+              <a href="{{ url_for('admin_race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
             </div>
             <div class="col-md-8">
               To upload results, you'll need to have the <strong>results JSON
@@ -32,7 +32,7 @@
   <div class="row">
     <div class="col grey-wrapper p-2">
       <form id="RaceForm" class="form form-race" method="POST"
-        action="{% if race %}{{ url_for('race.edit_race', race_id=race.id)}}{% else %}{{ url_for('race.new_race') }}{% endif %}"
+        action="{% if race %}{{ url_for('admin_race.edit_race', race_id=race.id)}}{% else %}{{ url_for('admin_race.new_race') }}{% endif %}"
         role="form">
         {{ form.csrf_token }}
         {{ form.id() }}
@@ -292,7 +292,7 @@
         </p>
         <div class="border border container">
           <form id="RaceDeleteForm" class="form form-delete" method="POST"
-            action="{{ url_for('race.delete_race', race_id=race.id)}}" role="form">
+            action="{{ url_for('admin_race.delete_race', race_id=race.id)}}" role="form">
             {{ delete_form.csrf_token }}
             <div class="row">
               <div class="col-md-6 p-3">
@@ -330,7 +330,7 @@
       </div>
       <div class="modal-footer" style="justify-content:space-between">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal" id="cancel-btn">Cancel</button>
-        <a href="{{ url_for('race.show_tracks') }}" target="_blank" id="btn-to-user-texts" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+        <a href="{{ url_for('admin_race.show_tracks') }}" target="_blank" id="btn-to-user-texts" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
       </div>
     </div>
   </div>

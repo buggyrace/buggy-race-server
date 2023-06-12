@@ -221,8 +221,8 @@
   {% endif %}  
   <div class="row">
     <div class="col btn-collection">
-      <a href="{{ url_for('race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-outline-secondary btn-jump">Edit this racetrack</a>
-      <a href="{{ url_for('race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+      <a href="{{ url_for('admin_race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-outline-secondary btn-jump">Edit this racetrack</a>
+      <a href="{{ url_for('admin_race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
     </div>
   </div>
 </div>

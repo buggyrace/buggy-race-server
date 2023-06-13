@@ -1,0 +1,242 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      {{ race.title }}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-info">
+        <h2 class="alert-title">Race file downloads (JSON)</h2>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-7">
+              {% if has_results %}
+                <p>
+                  <strong>This race already has results</strong>
+                </p>
+                <p>
+                  These downloads will <strong>not</strong> include race
+                  <strong>events</strong>
+                  — they are generated when you run the race (offline) and are
+                  not stored here on the server.
+                </p>
+                <p>
+                  The results will be included.
+                </p>
+              {% else %}
+                <p>
+                  <strong>This race has no results (yet)</strong>.
+                </p>
+                <p>
+                  If you want to download the JSON file to <em>run a race</em>,
+                  include the buggies... unless you've already downloaded them
+                  separately.
+                </p>
+                <p>
+                  If you include buggies in the download, you are getting a snapshot
+                  of the buggies that are on the server <em>right now</em>.
+                </p>
+              {% endif %}
+            </div>
+            <div class="col-md-5 p-3">
+              <a class="btn btn-success btn-download m-3"
+                href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
+                >Download race file with buggies</a>
+              <a class="btn btn-danger btn-download m-3"
+                href="{{ url_for('admin_race.download_race_json_without_buggies', race_id=race.id) }}"
+                >Download race file without buggies</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover bg-white">
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}">Edit race</a>
+            </td>
+          </tr>
+          <tr>
+            <td>Title</td>
+            <td>
+              {% if race.title is none or race.title == "" %}
+                <em class="empty-setting">Untitled race</em>
+              {% else %}
+                <strong>{{ race.title }}</strong>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Description</td>
+            <td>
+              {% if race.desc is none or race.desc == "" %}
+                <em class="empty-setting">none</em>
+              {% else %}
+                {{ race.desc }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Starts at</td>
+            <td>
+              {% if race.start_at %}
+                {{ race.start_at }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Cost limit</td>
+            <td>
+              {% if race.cost_limit is number %}
+                {{ race.cost_limit }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Is visible?</td>
+            <td class="bool-{{ race.is_visible | lower }}">
+              {% if race.is_visible %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Are results visible?</td>
+            <td class="bool-{{ race.is_result_visible | lower }}">
+              {% if race.is_result_visible %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>URL of image</td>
+            <td>
+              {% if race.track_image_url is none or race.track_image_url == "" %}
+                <em class="empty-setting">none</em>
+              {% else %}
+                <code>{{ race.track_image_url }}</code>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>URL of path SVG</td>
+            <td>
+              {% if race.track_svg_url is none or race.track_svg_url == "" %}
+                <em class="empty-setting">none</em>
+              {% else %}
+                <code>{{ race.track_svg_url }}</code>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Lap length</td>
+            <td>
+              {% if race.lap_length is number %}
+                {{ race.lap_length }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% include "admin/_racetrack_svg.html" %}
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover bg-white">
+        <thead>
+          <tr>
+            <th colspan="2">Results</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>URL of race file (JSON)</td>
+            <td>
+              {% if race.result_log_url is none or race.result_log_url == "" %}
+                <em class="empty-setting">none</em>
+              {% else %}
+                <code>{{ race.result_log_url }}</code>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Results uploaded at</td>
+            <td>
+              {% if race.uploaded_at %}
+                <code>{{ race.uploaded_at }}</code>
+              {% else %}
+                <em class="empty-setting">never</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Number of laps</td>
+            <td>
+              {% if race.max_laps is number %}
+                {{ race.max_laps }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Buggies entered</td>
+            <td>
+              {% if race.buggies_entered is number %}
+                {{ race.buggies_entered }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Buggies started</td>
+            <td>
+              {% if race.buggies_started is number %}
+                {{ race.buggies_started }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Buggies finished</td>
+            <td>
+              {% if race.buggies_finished is number %}
+                {{ race.buggies_finished }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>URL of events log (JSON)</td>
+            <td>
+              {% if race.race_log_url is none or race.race_log_url == "" %}
+                <em class="empty-setting">none</em>
+              {% else %}
+                <code>{{ race.race_log_url }}</code>
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% include "races/_results.html" %}
+</div>
+
+
+{% endblock %}
+

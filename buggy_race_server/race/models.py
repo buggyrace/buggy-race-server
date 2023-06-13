@@ -301,12 +301,22 @@ class Race(SurrogatePK, Model):
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 
-    def get_results_json(self):
+    def get_race_data_json(self, want_buggies=False):
         all_results = db.session.query(
-            RaceResult, User).outerjoin(User).filter(
-                RaceResult.race_id==self.id
-            ).order_by(RaceResult.race_position.asc()).all()
-        results_dict = {
+            RaceResult, User
+        ).outerjoin(User).filter(
+            RaceResult.race_id==self.id
+        ).order_by(RaceResult.race_position.asc()).all()
+        buggies = []
+        if want_buggies:
+            buggies = db.session.query(
+                Buggy, User
+            ).outerjoin(Buggy).filter(
+                Buggy.user_id==User.id,
+                User.is_active==True,
+                User.is_student==True,
+            ).order_by(User.username.asc()).all()
+        race_data_dict = {
             "result_log_url": self.result_log_url,
             "title": self.title,
             "description": self.desc,
@@ -320,6 +330,9 @@ class Race(SurrogatePK, Model):
                 self.start_at
             ),
             "league": self.league,
+            "buggies": [
+                buggy.get_dict(user=user) for (buggy, user) in buggies
+            ],
             "buggies_entered": self.buggies_entered,
             "buggies_started": self.buggies_started,
             "buggies_finished": self.buggies_finished,
@@ -337,7 +350,7 @@ class Race(SurrogatePK, Model):
             ],
             "version": "1.0"
         }
-        return json.dumps(results_dict, indent=1, separators=(',', ': '))
+        return json.dumps(race_data_dict, indent=1, separators=(',', ': '))
 
 class RaceResult(SurrogatePK, Model):
 

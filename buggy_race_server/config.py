@@ -127,6 +127,7 @@ class ConfigSettingNames(Enum):
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
+    IS_RACE_FILE_TIMESTAMPED = auto()
     IS_RACE_VISIBLE_BY_DEFAULT = auto()
     IS_REDIRECT_HTTP_TO_HTTPS_FORCED = auto()
     IS_SHOWING_EXAMPLE_RACETRACKS = auto()
@@ -266,6 +267,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name,
+        ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name,
       ),
       ConfigGroupNames.SERVER.name: (
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -376,6 +378,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
+        ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name: 0,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: 0,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: 0,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: 1,
@@ -485,6 +488,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: ConfigTypes.BOOLEAN,
@@ -737,6 +741,11 @@ class ConfigSettings:
           to the registration page, and create a new (admin) user. You'll also
           need to know the auth code (which can also be set via ENV if
           it's been lost).""",
+
+        ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name:
+          """Do you want a date/timestamp in the filename downloaded race files?
+          This is probably only useful if you intend to run more than one
+          race a day.""",
 
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name:
           """Should a race be public as soon as you create it? If you choose

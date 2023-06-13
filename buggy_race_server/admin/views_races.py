@@ -28,13 +28,14 @@ from buggy_race_server.admin.forms import (
 
 from buggy_race_server.config import ConfigSettingNames
 from buggy_race_server.database import db
-from buggy_race_server.race.models import Race, Racetrack
+from buggy_race_server.race.models import Race, Racetrack, RaceResult
 from buggy_race_server.race.forms import (
     RaceDeleteForm,
     RaceForm,
     RaceResultsForm,
     RacetrackForm,
 )
+from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
     flash_errors,
@@ -49,6 +50,28 @@ blueprint = Blueprint(
     url_prefix="/admin/races",
     static_folder="../static"
 )
+
+def _download_race_json(race_id, want_buggies=False):
+    """ produces the race file suitable for both downloading prior
+    to running a race, and uploading with the results:
+    This is useful because the URLs (especially of the result file)
+    might have been added/become known _after_ the race was run and
+    the (oringinal) results file was created.
+    """
+    race = Race.get_by_id(race_id)
+    if race is None:
+        flash("Error: coudldn't find race", "danger")
+        abort(404)
+    filename = get_download_filename(
+        f"race-{race.slug}.json",
+        want_datestamp=current_app.config[ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name]
+    )
+    output = make_response(
+        race.get_race_data_json(want_buggies=want_buggies)
+    )
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    output.headers["Content-type"] = "application/json"
+    return output
 
 @blueprint.route("/", strict_slashes=False)
 @login_required
@@ -69,6 +92,25 @@ def list_races():
 @login_required
 def new_race():
     return edit_race(None)
+
+@blueprint.route("/<race_id>", methods=["GET"])
+@login_required
+@staff_only
+def view_race(race_id):
+    race = Race.query.filter_by(id=race_id).first_or_404() 
+    results = db.session.query(
+        RaceResult, User).outerjoin(User).filter(
+            RaceResult.race_id==race.id
+        ).order_by(RaceResult.race_position.asc()).all()
+
+    return render_template(
+        "admin/race.html",
+        has_results=bool(len(results)),
+        race=race,
+        results=results,
+        track_image_url=race.track_image_url, # separated for SVG include file
+        track_svg_url=race.track_svg_url, # separated for SVG include file
+    )
 
 @blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
 @login_required
@@ -214,26 +256,18 @@ def upload_results(race_id):
         default_racetrack_path_svg=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name],
     )
 
-@blueprint.route("/<race_id>/download-results", methods=["GET"])
+@blueprint.route("/<race_id>/download-race-file/with-buggies", methods=["GET"])
 @login_required
 @admin_only
-def download_race_json(race_id):
-    """ produces the race file suitable for both downloading prior
-    to running a race, and uploading with the results:
-    This is useful because the URLs (especially of the result file)
-    might have been added/become known _after_ the race was run and
-    the (oringinal) results file was created.
-    """
-    race = Race.get_by_id(race_id)
-    if race is None:
-        flash("Error: coudldn't find race", "danger")
-        abort(404)
-    filename = get_download_filename(f"race-{race.slug}-results.json", want_datestamp=False)
-    output = make_response(race.get_results_json())
-    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-    output.headers["Content-type"] = "application/json"
-    return output
+def download_race_json_with_buggies(race_id):
+    return _download_race_json(race_id, want_buggies=True)
 
+@blueprint.route("/<race_id>/download-race-file", methods=["GET"])
+@login_required
+@admin_only
+def download_race_json_without_buggies(race_id):
+    return _download_race_json(race_id, want_buggies=False)
+ 
 @blueprint.route("/<race_id>/delete", methods=["POST"])
 @login_required
 @admin_only
@@ -340,7 +374,9 @@ def view_track(track_id):
         abort(404)
     return render_template(
         "admin/racetrack_view.html",
-        track=track
+        track=track,
+        track_img_url=track.track_img_url, # separated for SVG include file
+        track_svg_url=track.track_svg_url, # separated for SVG include file
     )
 
 @blueprint.route("tracks/<track_id>/delete", methods=["POST"])

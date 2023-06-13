@@ -1048,7 +1048,7 @@ def settings(group_name=None):
     pretty_default_settings={
         name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
         for name in ConfigSettings.DEFAULTS
-    },
+    }
     return render_template(
         "admin/settings.html",
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],

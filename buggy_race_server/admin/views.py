@@ -440,10 +440,6 @@ def setup():
         name:ConfigSettings.pretty_group_name(name)
         for name in ConfigSettings.GROUPS
     }
-    pretty_default_settings={
-        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
-        for name in ConfigSettings.DEFAULTS
-    }
     return render_template(
         "admin/setup.html",
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
@@ -451,7 +447,7 @@ def setup():
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,
-        pretty_default_settings=pretty_default_settings,
+        pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
         qty_setup_steps=qty_setup_steps,
         SETTING_PREFIX=SETTING_PREFIX,
@@ -1045,10 +1041,6 @@ def settings(group_name=None):
     }
     task_count = Task.query.filter_by(is_enabled=True).count()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
-    pretty_default_settings={
-        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
-        for name in ConfigSettings.DEFAULTS
-    }
     return render_template(
         "admin/settings.html",
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
@@ -1058,7 +1050,7 @@ def settings(group_name=None):
         html_descriptions=html_descriptions,
         is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
         is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
-        pretty_default_settings=pretty_default_settings,
+        pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
@@ -1704,10 +1696,7 @@ def staff_race_replayer():
 def config_docs_helper():
     """ undocumented helper method for dumping config setting markdown for www site"""
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
-    pretty_default_settings={
-        name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
-        for name in ConfigSettings.DEFAULTS
-    }
+    pretty_default_settings=ConfigSettings.get_pretty_defaults()
     return render_template(
         "admin/config_docs_helper.html",
         descriptions={

@@ -1194,6 +1194,13 @@ class ConfigSettings:
       return value
 
     @staticmethod
+    def get_pretty_defaults():
+        return {
+            name: ConfigSettings.prettify(name, ConfigSettings.DEFAULTS[name])
+            for name in ConfigSettings.DEFAULTS
+        }
+
+    @staticmethod
     def pretty_group_name(name):
        """ Because Tom complained about the Github/GitHub case """
        if name == "GITHUB":

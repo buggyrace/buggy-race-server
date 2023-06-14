@@ -23,7 +23,7 @@
     <div class="col-md-6 mb-3">
       <div class="border container">
         <form id="RaceResultsForm" method="POST"
-          action="{{ url_for('admin_race.upload_results', race_id=race.id) }}"
+          action="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}"
           enctype="multipart/form-data" role="form">
           {{ form.csrf_token }}
           <div class="row">

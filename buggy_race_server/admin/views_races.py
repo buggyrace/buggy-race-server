@@ -62,9 +62,15 @@ def _download_race_json(race_id, want_buggies=False):
     if race is None:
         flash("Error: coudldn't find race", "danger")
         abort(404)
+    race_filename_base = f"race-{race.slug}"
+    if current_app.config[ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name]:
+        if race.start_at:
+            race_filename_base += race.start_at.strftime('-%Y-%m-%d-%H-%M-start')
+        else:
+            race_filename_base += "-start-unknown"
     filename = get_download_filename(
-        f"race-{race.slug}.json",
-        want_datestamp=current_app.config[ConfigSettingNames.IS_RACE_FILE_TIMESTAMPED.name]
+        f"{race_filename_base}.json",
+        want_datestamp=current_app.config[ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name]
     )
     output = make_response(
         race.get_race_data_json(want_buggies=want_buggies)
@@ -184,7 +190,7 @@ def edit_race(race_id=None):
 @blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])
 @login_required
 @admin_only
-def upload_results(race_id):
+def upload_race_file(race_id):
     race = Race.get_by_id(race_id)
     if race is None:
         flash("Error: coudldn't find race", "danger")

@@ -138,7 +138,6 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
     def get_dict(self, user):
         """ Used when creating the race file JSON """
         return {
-            # note: id is not saved here
             "username": user.username if user else None,
             "algo": self.algo,
             "antibiotic": self.antibiotic,
@@ -154,12 +153,15 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
             "flag_color": self.flag_color,
             "flag_pattern": self.flag_pattern,
             "hamster_booster": self.hamster_booster,
+            "id": self.id,
             "insulated": self.insulated,
             "mass": self.mass,
             "power_type": self.power_type,
             "power_units": self.power_units,
+            "qty_attacks": self.qty_attacks,
             "qty_tyres": self.qty_tyres,
             "qty_wheels": self.qty_wheels,
+            "total_cost": self.total_cost,
             "tyres": self.tyres,
             "user_id": self.user_id,
         }

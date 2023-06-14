@@ -106,9 +106,12 @@ class Race(SurrogatePK, Model):
 
     @property
     def slug(self):
-        s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
-        s = re.sub(r"(^-+|-+$)", "", s)
-        s = re.sub(r"--+", "-", s)
+        if self.title:
+            s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
+            s = re.sub(r"(^-+|-+$)", "", s)
+            s = re.sub(r"--+", "-", s)
+        else:
+            s = "untitled"
         return f"{self.id}-{s}"
 
     @property
@@ -171,19 +174,28 @@ class Race(SurrogatePK, Model):
                 f"Already got a race with the same URL for {' and '.join(dup_fields)}"
             )
         warnings = []
-        if self.title != results_data.get("race_title"):
-            warnings.append("JSON data you uploaded has wrong race title for this race")
+        uploaded_title = results_data.get("race_title")
+        if (self.title or uploaded_title) and self.title != uploaded_title:
+            warnings.append(
+                f"JSON data you uploaded has wrong race title for this race?"
+                f" Expected \"{self.title}\", uploaded \"{uploaded_title}\""
+            )
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)
         total_buggies_finished = int(results_data.get("buggies_finished") or 0)
         valid_violation_names = [ rn.value for rn in RuleNames]
-        buggy_results = results_data.get("results")
+        if buggy_results := results_data.get("buggies"):
+            if buggy_results[0] and buggy_results[0].get('race_position') is None:
+                buggy_results = []
+                warnings.append("Buggies found in race file, but no results (race positions are missing: was this file output from a race?)")
+        elif buggy_results := results_data.get("results"): # old format of file used "results"
+            warnings.append("Results found but in an out-of-date format (can still use them... for now)")
+        if not buggy_results:
+            warnings.append(f"No results found inside uploaded JSON data")
+            buggy_results = []
         qty_buggies_entered = 0
         qty_buggies_started = 0
         qty_buggies_finished = 0
-        if not buggy_results: # might be correct... if there really were no buggies
-            warnings.append(f"No results found inside uploaded JSON data")
-            buggy_results = []
         user_values = User.query.with_entities(User.id, User.username).all()
         username_by_id = { uv[0]: uv[1] for uv in user_values }
         user_id_by_username = { uv[1]: uv[0] for uv in user_values }
@@ -325,7 +337,7 @@ class Race(SurrogatePK, Model):
             "lap_length": self.lap_length,
             "race_log_url": self.race_log_url,
             "max_laps": 0,
-            "raced_at": servertime_str(
+            "start_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
                 self.start_at
             ),

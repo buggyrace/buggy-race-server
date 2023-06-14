@@ -35,6 +35,8 @@ from enum import Enum
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
 from buggy_race_server.lib.race_specs import BuggySpecs
 
+DEFAULT_RACE_FILENAME_JSON = 'race.json'
+
 DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-07-FOURTH-RACE-STUDENTS.csv' # 'buggies.csv'
 DEFAULT_RACE_FILENAME = 'race.log'
 DEFAULT_RESULTS_FILENAME = 'race-results.json'
@@ -314,6 +316,14 @@ class RacingBuggy(BuggySpecs):
     def set_rule_violations(self, cost_limit):
         self.violations = self.get_rule_violations(cost_limit)
 
+    @staticmethod
+    def get_json_list_of_buggies(buggies):
+        return [buggy.result_data()
+            for buggy in sorted(
+                buggies,
+                key=lambda buggy: (buggy.position, buggy.total_cost, buggy.username)
+            )
+        ]
 
 class RaceEvent():
     def __init__(self, buggy=None, delta=None, event_type=None, msg=None):
@@ -335,7 +345,56 @@ class RaceEvent():
         if self.string is not None: sparse_dict["s"] = self.string
         return spacer + json.dumps(sparse_dict, indent=2).replace("\n", "\n"+spacer)
 
+    def to_dict(self):
+        sparse_dict = {}
+        if self.buggy is not None: sparse_dict["b"] = self.buggy.username
+        if self.delta is not None: sparse_dict["d"] = self.delta
+        if self.event_type is not None: sparse_dict["e"] = self.event_type
+        if self.string is not None: sparse_dict["s"] = self.string
+        return sparse_dict
+
+    @staticmethod
+    def get_list_of_events(list_of_events):
+        return [
+            event.to_dict() for event in list_of_events
+        ]
+
 # ---------------------------------------------------------------------
+
+def load_race_file(json_filename=None):
+    race_data = {}
+    if not json_filename:
+        json_filename = str(input(f"[?] Filename of buggy race data in JSON: [{DEFAULT_RACE_FILENAME_JSON}] ")).strip()
+    if json_filename == "":
+        print(f"[ ] defaulting to {DEFAULT_RACE_FILENAME_JSON}")
+        json_filename = DEFAULT_RACE_FILENAME_JSON
+    if not os.path.isfile(json_filename):
+        raise FileNotFoundError(f"can't find JSON file containing race data ({json_filename}) ")
+    try:
+        with open(json_filename, "r") as read_file:
+            race_data = json.load(read_file)
+    except UnicodeDecodeError as e:
+        print("[!] Encoding error (maybe that wasn't a good JSON file?)")
+        quit()
+    except json.decoder.JSONDecodeError as e:
+        print("[!] Failed to parse JSON data:\n    {e}")
+        quit()
+    buggy_data = race_data["buggies"]
+    race_data["buggies"] = []
+    print("[ ] Processing: ", end="")
+    for i, buggy_data in enumerate(buggy_data):
+        for k in BuggySpecs.DEFAULTS:
+            if k not in buggy_data:
+               raise ValueError(f"column/key \"{k}\" is missing from CSV (buggy {i})")
+            if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
+                buggy_data[k] = None
+            if type(BuggySpecs.DEFAULTS[k]) == bool:
+                print(f"{k} is boolean! ({buggy_data[k]})")
+                if type(buggy_data[k]) != bool:
+                    buggy_data[k] = buggy_data[k].lower() == "true"
+        race_data["buggies"].append(RacingBuggy(buggy_data))
+        print(".", end="", flush=True)
+    return race_data
 
 def load_csv(csv_filename=None):
     if csv_filename is None or csv_filename == '':
@@ -374,7 +433,8 @@ def load_csv(csv_filename=None):
     print(" OK")
     return buggies
 
-def run_race(buggies_entered):
+def run_race(race_data):
+    buggies_entered = race_data["buggies"]
     events = [] # into here goes one array for each step
     events_this_step = []
     next_finisher_position = 1
@@ -463,6 +523,7 @@ def run_race(buggies_entered):
     for b in buggies:
         logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
     logfile.write("#\n")
+    finishers = []
     if len(buggies) == 0:
         logfile.write("# race abandoned: no buggies available to run\n")
         print("[!] race abandoned because nobody entered it")
@@ -471,7 +532,6 @@ def run_race(buggies_entered):
         print("[ ] GO!")
         steps = 0
         max_steps = DEFAULT_INITIAL_STEPS 
-        finishers = []
 
         while steps < max_steps:
             events_this_step = []
@@ -574,28 +634,32 @@ def run_race(buggies_entered):
             next_finisher_position += 1
 
     print(f"[ ] see race log in {logfilename}")
+
+    # for events_in_step in events:
+    #     json_events.append(
+    #         "    [\n"
+    #         + ",\n".join([ev.to_json() for ev in events_in_step])
+    #         + "\n    ]"
+    #     )
+
     results = {
-      "result_log_url": "________",
-      "title": "________",
-      "description": "________",
+ 
+      "result_log_url": race_data["result_log_url"],
+      "title": race_data["title"],
+      "description": race_data["description"],
       "cost_limit": cost_limit,
       "max_laps": max_laps,
-      "track_image_url": "________",
-      "track_svg_url": "________",
-      "race_log_url": "________",
-      "raced_at": "________",
-      "league": "",
-      "start_at": "_________",
+      "track_image_url": race_data["track_image_url"],
+      "track_svg_url": race_data["track_svg_url"],
+      "race_log_url": race_data["race_log_url"],
+      "league": race_data["league"],
+      "start_at": race_data["start_at"],
       "raced_at": race_start_at,
       "buggies_entered": len(buggies_entered),
       "buggies_started": len(buggies),
       "buggies_finished": len(finishers),
-      "results": [buggy.result_data() for buggy in
-                    sorted(
-                        buggies_entered,
-                        key=lambda buggy: (buggy.position, buggy.total_cost, buggy.username)
-                    )
-                 ],
+      "buggies": RacingBuggy.get_json_list_of_buggies(buggies_entered),
+      "events": [RaceEvent.get_list_of_events(events_in_step) for events_in_step in events],
       "version": "1.0"
     }
     jsonfilename = DEFAULT_RESULTS_FILENAME
@@ -606,23 +670,14 @@ def run_race(buggies_entered):
     print(f"[ ] wrote to {jsonfilename}, ready to upload")
     print(f"[.] bye")
 
-    json_strings = []
-    for events_in_step in events:
-        json_strings.append(
-            "    [\n"
-            + ",\n".join([ev.to_json() for ev in events_in_step])
-            + "\n    ]"
-        )
-
-
-    jsonfilename = DEFAULT_EVENT_LOG_FILENAME
-    print(f"[ ] opening events JSON file {jsonfilename}... ")
-    jsonfile = open(jsonfilename, "w")
-    print('{\n "events": [', file=jsonfile)
-    print(",\n".join(json_strings), file=jsonfile)
-    print('  ]\n}', file=jsonfile)
-    jsonfile.close()
-    print(f"[ ] wrote to {jsonfilename}, ready to upload")
+    # jsonfilename = DEFAULT_EVENT_LOG_FILENAME
+    # print(f"[ ] opening events JSON file {jsonfilename}... ")
+    # jsonfile = open(jsonfilename, "w")
+    # print('{\n "events": [', file=jsonfile)
+    # print(",\n".join(json_strings), file=jsonfile)
+    # print('  ]\n}', file=jsonfile)
+    # jsonfile.close()
+    # print(f"[ ] wrote to {jsonfilename}, ready to upload")
 
     print(f"[.] bye")
 
@@ -630,13 +685,21 @@ def main():
     print("[ ] Ready to race!")
     buggies = None
     try:
-        buggies = load_csv()
+        race_data = load_race_file()
     except FileNotFoundError as e:
         print(f"\n[!] File not found: {e}")
-    except ValueError as e:
-        print(f"\n[!] Problem in CSV: {e}")
-
-    run_race(buggies)
+    if not race_data.get("buggies"):
+        print("[ ] Race file does not contain buggies: will try to read them from a CSV instead")
+        try:
+            buggies = load_csv()
+        except FileNotFoundError as e:
+            print(f"\n[!] File not found: {e}")
+            quit()
+        except ValueError as e:
+            print(f"\n[!] Problem in CSV: {e}")
+            quit()
+        race_data["buggies"] = buggies
+    run_race(race_data)
 
 if __name__ == "__main__":
     main()

@@ -375,7 +375,7 @@ def view_track(track_id):
     return render_template(
         "admin/racetrack_view.html",
         track=track,
-        track_img_url=track.track_img_url, # separated for SVG include file
+        track_image_url=track.track_image_url, # separated for SVG include file
         track_svg_url=track.track_svg_url, # separated for SVG include file
     )
 

@@ -656,6 +656,9 @@ td .cell-title {
   -webkit-mask: none;
   mask:none;
 }
+td .flag + .flag {
+  margin-top:0.5rem;
+}
 .alert-tech-notes {
   color:white;
   background:#1e1e1e;

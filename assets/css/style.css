@@ -555,8 +555,10 @@ pre.task-text {
   border-top: 1px solid #555555;
   border-left: none;
 }
-.bg-yellow {
+.bg-yellow { /* only used on interface form */
   background-color: #ffff00;
+  border-top:2px dashed black; 
+  border-bottom:2px dashed black; 
   color: black;
 }
 

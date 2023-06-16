@@ -8,7 +8,7 @@ from sqlalchemy import delete, insert
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
-from flask import current_app
+from flask import current_app, url_for
 from buggy_race_server.database import (
     Column,
     Model,
@@ -19,6 +19,48 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import servertime_str
+
+class Racetrack(SurrogatePK, Model):
+
+    def is_local(self):
+        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        return (
+            self.track_image_url is not None
+            and
+            self.track_svg_url is not None
+            and
+            self.track_image_url.startswith(server_url)
+            and
+            self.track_svg_url.startswith(server_url)
+        )
+
+    @staticmethod
+    def get_local_url_for_asset(filename):
+        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        path_url = url_for("race.serve_racetrack_asset", filename=filename)
+        return f"{server_url}/{path_url}"
+
+
+    """ Racetrack used to populate race-construction pages
+    There's no foreign key relationship with Race beacuse Racetracks
+    are really just furnishing URLs to the interface, and it's the
+    URLs which are going into the race records. They key relationship
+    here is that the SVG and image (JPG) URLs are linked by being the
+    same track.
+    Note URL combinations could be unique, but individual URLs don't
+    need to be. But not enforced here for now.
+    """
+    __tablename__ = "racetracks"
+    id = Column(db.Integer, primary_key=True)
+    title = Column(db.String(80), unique=False, nullable=False, default="")
+    desc = Column(db.Text(), unique=False, nullable=False, default="")
+    track_image_url = Column(db.String(255), unique=False, nullable=True)
+    track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    lap_length = Column(db.Integer, nullable=True)
+
+    def __init__(self, **kwargs):
+        """Create instance."""
+        db.Model.__init__(self, **kwargs)
 
 
 class Race(SurrogatePK, Model):
@@ -44,14 +86,15 @@ class Race(SurrogatePK, Model):
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)
-    buggies_csv_url = Column(db.String(255), unique=True, nullable=True)
     race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
     max_laps = db.Column(db.Integer(),  nullable=True)
+    lap_length = Column(db.Integer, nullable=True)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
+    racefile = db.relationship('RaceFile', backref='race', cascade="all, delete")
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -64,14 +107,17 @@ class Race(SurrogatePK, Model):
 
     @property
     def slug(self):
-        s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
-        s = re.sub(r"(^-+|-+$)", "", s)
-        s = re.sub(r"--+", "-", s)
+        if self.title:
+            s = re.sub(r"[^a-z0-9]+", "-", self.title.strip().lower())
+            s = re.sub(r"(^-+|-+$)", "", s)
+            s = re.sub(r"--+", "-", s)
+        else:
+            s = "untitled"
         return f"{self.id}-{s}"
 
     @property
     def has_urls(self):
-        return bool (self.result_log_url or self.buggies_csv_url or self.race_log_url)
+        return bool (self.result_log_url or self.race_log_url)
 
     @property
     def start_at_servertime(self):
@@ -96,23 +142,20 @@ class Race(SurrogatePK, Model):
         return anchor
 
     @staticmethod
-    def get_duplicate_urls(race_id, result_log_url, buggies_csv_url, race_log_url):
+    def get_duplicate_urls(race_id, result_log_url, race_log_url):
         """ Returns list of fields with duplicate (non-unique) URLs for a race"""
         dup_fields = {}
         race_id = race_id or 0
-        if result_log_url or buggies_csv_url or race_log_url:
+        if result_log_url or race_log_url:
             if races := Race.query.filter(
                   Race.id!=race_id).filter(
                   (Race.result_log_url==result_log_url) |
-                  (Race.buggies_csv_url==buggies_csv_url) |
                   (Race.race_log_url==race_log_url)
                 ).all():
                 dup_fields = {}
                 for race in races:
                     if result_log_url and race.result_log_url == result_log_url:
                         dup_fields["result_log_url"] = True
-                    if buggies_csv_url and race.buggies_csv_url == buggies_csv_url:
-                        dup_fields["buggies_csv_url"] = True
                     if race_log_url and race.race_log_url == race_log_url:
                         dup_fields["race_log_url"] = True
         return dup_fields.keys()
@@ -125,27 +168,35 @@ class Race(SurrogatePK, Model):
                 # if JSON data contains a race ID, it must match
                 raise ValueError(f"Results data you uploaded has wrong race ID ({results_data.get('race_id')}) for this race ({self.id})")
         result_log_url = results_data.get("result_log_url")
-        buggies_csv_url = results_data.get("buggies_csv_url")
         race_log_url = results_data.get("race_log_url")
-        dup_fields = Race.get_duplicate_urls(self.id, result_log_url, buggies_csv_url, race_log_url)
+        dup_fields = Race.get_duplicate_urls(self.id, result_log_url, race_log_url)
         if dup_fields:
             raise ValueError(
                 f"Already got a race with the same URL for {' and '.join(dup_fields)}"
             )
         warnings = []
-        if self.title != results_data.get("race_title"):
-            warnings.append("JSON data you uploaded has wrong race title for this race")
+        uploaded_title = results_data.get("race_title")
+        if (self.title or uploaded_title) and self.title != uploaded_title:
+            warnings.append(
+                f"JSON data you uploaded has wrong race title for this race?"
+                f" Expected \"{self.title}\", uploaded \"{uploaded_title}\""
+            )
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)
         total_buggies_finished = int(results_data.get("buggies_finished") or 0)
         valid_violation_names = [ rn.value for rn in RuleNames]
-        buggy_results = results_data.get("results")
+        if buggy_results := results_data.get("buggies"):
+            if buggy_results[0] and buggy_results[0].get('race_position') is None:
+                buggy_results = []
+                warnings.append("Buggies found in race file, but no results (race positions are missing: was this file output from a race?)")
+        elif buggy_results := results_data.get("results"): # old format of file used "results"
+            warnings.append("Results found but in an out-of-date format (can still use them... for now)")
+        if not buggy_results:
+            warnings.append(f"No results found inside uploaded JSON data")
+            buggy_results = []
         qty_buggies_entered = 0
         qty_buggies_started = 0
         qty_buggies_finished = 0
-        if not buggy_results: # might be correct... if there really were no buggies
-            warnings.append(f"No results found inside uploaded JSON data")
-            buggy_results = []
         user_values = User.query.with_entities(User.id, User.username).all()
         username_by_id = { uv[0]: uv[1] for uv in user_values }
         user_id_by_username = { uv[1]: uv[0] for uv in user_values }
@@ -252,14 +303,6 @@ class Race(SurrogatePK, Model):
                         warnings.append("Did not overwrite race result log URL")
                 else:
                     self.result_log_url = results_data.get("result_log_url")
-            if results_data.get("buggies_csv_url"):
-                if self.buggies_csv_url:
-                    if is_overwriting_urls:
-                        self.buggies_csv_url = results_data.get("buggies_csv_url")
-                    else:
-                        warnings.append("Did not overwrite buggies CSV URL")
-                else:
-                    self.buggies_csv_url = results_data.get("buggies_csv_url")
             if results_data.get("race_log_url"):
                 if self.race_log_url:
                     if is_overwriting_urls:
@@ -271,25 +314,38 @@ class Race(SurrogatePK, Model):
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 
-    def get_results_json(self):
+    def get_race_data_json(self, want_buggies=False):
         all_results = db.session.query(
-            RaceResult, User).outerjoin(User).filter(
-                RaceResult.race_id==self.id
-            ).order_by(RaceResult.race_position.asc()).all()
-        results_dict = {
+            RaceResult, User
+        ).outerjoin(User).filter(
+            RaceResult.race_id==self.id
+        ).order_by(RaceResult.race_position.asc()).all()
+        buggies = []
+        if want_buggies:
+            buggies = db.session.query(
+                Buggy, User
+            ).outerjoin(Buggy).filter(
+                Buggy.user_id==User.id,
+                User.is_active==True,
+                User.is_student==True,
+            ).order_by(User.username.asc()).all()
+        race_data_dict = {
             "result_log_url": self.result_log_url,
             "title": self.title,
             "description": self.desc,
-            "max_laps": 0,
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
+            "lap_length": self.lap_length,
             "race_log_url": self.race_log_url,
-            "raced_at": servertime_str(
+            "max_laps": 0,
+            "start_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
                 self.start_at
             ),
             "league": self.league,
-            "buggies_csv_url": self.buggies_csv_url,
+            "buggies": [
+                buggy.get_dict(user=user) for (buggy, user) in buggies
+            ],
             "buggies_entered": self.buggies_entered,
             "buggies_started": self.buggies_started,
             "buggies_finished": self.buggies_finished,
@@ -307,7 +363,22 @@ class Race(SurrogatePK, Model):
             ],
             "version": "1.0"
         }
-        return json.dumps(results_dict, indent=None, separators=(',\n', ': '))
+        return json.dumps(race_data_dict, indent=1, separators=(',', ': '))
+
+
+    def store_race_file(self, race_file_contents):
+        """ check IS_STORING_RACE_FILES_IN_DB before using race files """
+        if type(race_file_contents) != str:
+            race_file_contents = json.dumps(race_file_contents)
+        race_file_db = RaceFile.query.filter_by(race_id=self.id).first()
+        if race_file_db is None:
+            race_file_db = RaceFile.create(
+                race_id=self.id,
+                contents=race_file_contents
+            )
+        else:
+            race_file_db.contents = race_file_contents
+        race_file_db.save()
 
 class RaceResult(SurrogatePK, Model):
 
@@ -315,7 +386,7 @@ class RaceResult(SurrogatePK, Model):
     Note that this links to the user not the buggy, because buggy records are
     not constant: they can and will change between races (if you need to find
     the details of buggie at the time they were entered in a race, follow that
-    race's buggies_csv_url).
+    race's JSON file).
     """
     __tablename__ = "results"
     id = db.Column(db.Integer, primary_key=True)
@@ -327,3 +398,25 @@ class RaceResult(SurrogatePK, Model):
     cost = db.Column(db.Integer, nullable=True)
     race_position = db.Column(db.Integer, nullable=False, default=0)
     violations_str = db.Column(db.String(255), nullable=True)
+
+class RaceFile(SurrogatePK, Model):
+    """A "race file" that holds everything needed to replay a race (some
+    of which — such a full buggy specs — is not currently used once the
+    race has been run (but a better replayer could, in future, exploit)).
+    The race file is in reality a JSON file produced by downloading a race
+    from the server, and then updated by the process of running a race.
+    Storing these in the database is a convenience that avoids handling
+    uploaded files: see IS_STORING_RACE_FILES_IN_DB if you don't want to
+    use this mechanism (and instead host them elsewhere, e.g., on GitHub
+    pages). The URL for the race file (whether it's on this server or
+    external) is in race.result_log_url (formerly call the result log
+    file, but refactored to be the more general "race file").
+    These are _not_ stored as a column in the race model to avoid
+    ORM inefficiency in case these files are large — it's very likely this
+    would work fine as a column in the Race table, but breaking it out
+    here maybe allows future efficiency investigation.
+    """
+    __tablename__ = "racefiles"
+    id = db.Column(db.Integer, primary_key=True) # not used in practice?
+    race_id = db.Column(db.Integer, db.ForeignKey('races.id'), nullable=False)
+    contents = db.Column(db.Text(), unique=False, nullable=False, default="")

@@ -7,6 +7,7 @@ x-build-args: &build_args
 x-default-volumes: &default_volumes
   volumes:
     - app_data:/app
+    - published:/app/published
     - node-modules:/app/node_modules
 
 services:
@@ -49,7 +50,8 @@ services:
       - db
 
 volumes:
-  node-modules:
   app_data:
+  published:
+  node-modules:
   db_data:
     driver: local

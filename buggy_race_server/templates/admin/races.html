@@ -39,14 +39,10 @@
           <tr class="race-visible-{{ race.is_visible }}">
             {% if current_user.is_administrator %}
               <td class="btn-collection">
-                <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.edit_race', race_id=race.id) }}">Edit</a>
+                <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin_race.view_race', race_id=race.id) }}">Details</a>
                 {% if race.result_log_url %}
                   <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}{{ replay_anchor }}">Replay</a>
                 {% endif %}
-                {% if race.results_uploaded_at %}
-                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-download" href="{{ url_for('race.download_results', race_id=race.id) }}">Download&nbsp;results</a>
-                {% endif %}
-                
               </td>
             {% endif %}
             <td class="bool-{{ race.is_visible | lower }}">
@@ -67,12 +63,7 @@
               {{ race.start_at | servertime }}
             </td>
             <td>
-              <div class="cell-title">
-                {% if race.title %}<strong>{{ race.title }}</strong>{% else %}<em>Untitled</em>{% endif %}
-              </div>
-              {% if race.desc %}
-                <div class="my-2 race-desc">{{ race.desc }}</div>
-              {% endif %}
+              {% if race.title %}<strong>{{ race.title }}</strong>{% else %}<em>Untitled</em>{% endif %}
             </td>
             <td class="text-right">
               {{ race.cost_limit }}
@@ -89,7 +80,7 @@
               </td>
             {% else %}
               <td colspan="3" class="text-right">
-                <a href="{{ url_for('race.upload_results', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">Upload results</a>
+                <a href="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">Upload results</a>
               </td>
             {% endif %}
           </tr>
@@ -101,7 +92,8 @@
     <div class="row">
       <div class="col my-3">
         <p class="btn-collection">
-          <a href="{{ url_for('race.new_race')}}" class="btn btn-outline-secondary btn-admin btn-jump">Add new race</a>
+          <a href="{{ url_for('admin_race.new_race')}}" class="btn btn-outline-secondary btn-admin btn-jump">Add new race</a>
+          <a href="{{ url_for('admin_race.show_tracks')}}" class="btn btn-outline-secondary btn-admin btn-jump">View racetracks</a>
         </p>
       </div>
     </div>

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      {{ title or "System"}}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <pre class="border p-3">{{ system_str }}</pre>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

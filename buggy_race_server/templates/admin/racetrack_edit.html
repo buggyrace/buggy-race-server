@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      {% if track %}
+        Edit
+      {% else %}
+        New
+      {% endif %}
+      Racetrack
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col grey-wrapper p-2">
+      <form id="track-form" class="form" method="POST"
+        action="{% if track %}{{ url_for('admin_race.edit_track', track_id=track.id)}}{% else %}{{ url_for('admin_race.new_track') }}{% endif %}"
+        role="form">
+        {{ form.csrf_token }}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.title.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.title(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            Title is used to distinguish this racetrack.
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.desc.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.desc(class_="form-control mr-sm-1" )}}
+          </div>
+          <div class="col-sm-5">
+            The description is only seen by staff, in the admin.
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.track_image_url.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.track_image_url(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Fully-qualified URL for a 2:1 background image for the racetrack.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.track_svg_url.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.track_svg_url(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Fully-qualified URL for an SVG file that contains a <code>path</code>
+              tag which the race-player will use to determine the path for buggies to
+              follow. Use a viewport of 200&times;100 to keep units consistent with the
+              existing tracks. See the racetracks on this server for examples.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.lap_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.lap_length(class_="form-control mr-sm-1", type="number") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The length of the path in the SVG. This must match the calculated
+              length of the <code>path</code> in the SVG found at
+              the URL provided above.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-7 py-2">
+            {% if track %}
+              <input class="btn btn-primary" type="submit" value="Submit racetrack">
+            {% else %}
+              <input class="btn btn-danger" type="submit" value="Add new racetrack">
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if track %}
+    <div class="row">
+      <div class="col my-5">
+        <div class="border border container">
+          <form id="track-delete-form" class="form form-delete" method="POST"
+          action="{{ url_for('admin_race.delete_track', track_id=track.id)}}" role="form">
+            {{ delete_form.csrf_token }}
+            <div class="row">
+              <div class="col-md-3 p-3">
+                {{ delete_form.is_confirmed.label }}
+                <select id="is_confirmed" name="is_confirmed" class="form-control">
+                  <option selected value="">No</option>
+                  <option value="">I think so</option>
+                  <option value="y">Yes</option>
+                </select>  
+              </div>
+              <div class="col-md-6 p-3">
+                <input type="submit" class="btn btn-danger" value="Delete racetrack"/>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <div class="row">
+    <div class="col btn-collection">
+      <a href="{{ url_for('admin_race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

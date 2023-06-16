@@ -34,9 +34,14 @@ def handle_uploaded_json(form, user, is_api=False):
         flash("No data was accepted", "info")
         return redirect(url_for("user.submit_buggy_data"))
     clean_buggy_data = {}
-    too = ""
+    word_too = ""
+    is_multi_buggy_suspected = type(dirty_buggy_data) == list
     for key in dirty_buggy_data:
-      if key == 'id': # user's buggy's id becomes buggy_id here
+      key_type = type(key)
+      if key_type != str:
+          flash(f"Make sure your buggy JSON only contains keys which are strings: ignoring {key_type}", "warning")
+          is_multi_buggy_suspected = is_multi_buggy_suspected or key_type in (dict, list)
+      elif key == 'id': # user's buggy's id becomes buggy_id here
           try:
             clean_buggy_data['buggy_id'] = int(dirty_buggy_data[key])
           except ValueError:
@@ -87,8 +92,10 @@ def handle_uploaded_json(form, user, is_api=False):
             clean_buggy_data[key] = s
       else:
         if not is_api:
-          flash("Unrecognised setting \"{}\" was ignored {}".format(key, too), "warning")
-          too = "too"
+          flash("Unrecognised setting \"{}\" was ignored {}".format(key, word_too), "warning")
+          word_too = "too"
+    if is_multi_buggy_suspected:
+        flash("Maybe you tried to upload more than one buggy? You can only upload a single JSON object here!", "danger")
     qty_defaults = 0
     for field_name in Buggy.DEFAULTS:
       if field_name not in clean_buggy_data:
@@ -104,13 +111,13 @@ def handle_uploaded_json(form, user, is_api=False):
     if users_buggy is None:
       Buggy.create(user_id = user.id, **clean_buggy_data)
       if not is_api:
-        flash("JSON buggy data saved OK", "success")
+        flash("JSON data for your racing buggy saved OK", "success")
     else:
       for field_name in clean_buggy_data:
         setattr(users_buggy, field_name, clean_buggy_data[field_name])
       users_buggy.save()
       if not is_api:
-        flash("JSON buggy data updated OK", "success")
+        flash("JSON data for your racing buggy updated OK", "success")
     if is_api:
       return {"ok": "buggy updated OK"}
     else:

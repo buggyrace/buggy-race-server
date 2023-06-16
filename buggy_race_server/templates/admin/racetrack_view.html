@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      {% if track.title %}
+       {{ track.title }}
+      {% else %} 
+        <em class="empty-setting">Untitled racetrack</em>
+      {% endif %}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped table-bordered table-hover">
+        <tr>
+          <td>
+            Description
+          </td>
+          <td>
+            {% if track.desc is none or track.desc == ""%}
+              <em class="empty-setting">none</em>
+            {% else %}
+              {{ track.desc }}
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            URL of racetrack image
+          </td>
+          <td>
+            {% if track.track_image_url is none or track.track_image_url == "" %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.track_image_url }}</code>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            URL of path SVG
+          </td>
+          <td>
+            {% if track.track_svg_url is none or track.track_svg_url == "" %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.track_svg_url }}</code>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Lap length
+          </td>
+          <td>
+            {% if track.lap_lengh is none %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.lap_length }}</code>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  {% include "admin/_racetrack_svg.html" %}
+  <div class="row">
+    <div class="col btn-collection">
+      <a href="{{ url_for('admin_race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-outline-secondary btn-jump">Edit this racetrack</a>
+      <a href="{{ url_for('admin_race.show_tracks') }}" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

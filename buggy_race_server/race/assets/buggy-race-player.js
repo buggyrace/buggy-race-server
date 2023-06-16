@@ -223,11 +223,15 @@ function report_event(text, buggy_id){
 
 function set_up_race(){
   report("preparing race", CSS_SYSTEM);
-  if (race_json.title) {
-    RACE_INFO.title = race_json.title;
-  }
+  RACE_INFO.title = race_json.title || "Untitled race";
   RACE_INFO.description = race_json.description || "";
-  
+  RACE_INFO.events = race_json.events || [];
+  if (RACE_INFO.events.length > 0) {
+    RACE_INFO.qty_steps = RACE_INFO.events.length;
+  } else {
+    report("race didn't start: no events to replay", CSS_ALERT)
+  }
+
   let svg_tag = racetrack_svg.getElementsByTagName('svg');
   for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
     try {
@@ -259,7 +263,8 @@ function set_up_race(){
   RACETRACK_DATA.path = racetrack_path;
   RACETRACK_CANVAS.style.backgroundImage = "url(" + race_json.track_image_url + ")";
   RACE_INFO.qty_buggies = 0;
-  for (let buggy of race_json.results) {
+  let legacyproof_buggies = race_json.buggies || race_json.results; // deprecated: used to be "results"
+  for (let buggy of legacyproof_buggies) {
     if (buggy.race_position >= 0){
       svg_buggies[BUGGY_ID_PREFIX + buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
       RACE_INFO.qty_buggies += 1;
@@ -655,47 +660,29 @@ window.onresize = on_resize;
         throw new Error(`HTTP error: ${response.status} fetching race JSON`);
       }
       return response.json();
-    }).then((json_data) => {
+    })
+    .then((json_data) => {
       race_json = json_data;
       if (! race_json.track_svg_url) {
         throw new Error("there's no racetrack SVG URL in the race JSON")
       }
-      if (! race_json.race_log_url) {
-        throw new Error("there's no race log URL in the race JSON")
-      }
       report("loading resources", CSS_SYSTEM);
-      fetch(race_json.race_log_url).then((response) => {
+      return fetch(race_json.track_svg_url).then((response) => {
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status} fetching race log JSON`);
+          throw new Error(`HTTP error: ${response.status} fetching track SVG`);
         }
-        return response.json();
-      }).then((json_events_data) => {
-        RACE_INFO.events = json_events_data['events'] || [];
-        if (RACE_INFO.events.length > 0) {
-          RACE_INFO.qty_steps = RACE_INFO.events.length;
-        } else if (IS_RANDOMISED_FOR_DEV) {
-          RACE_INFO.qty_steps = MAX_STEPS;
-        } else {
-          console.log("unexpected: no events to play");
-        }
-        fetch(race_json.track_svg_url).then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status} fetching track SVG`);
-          }
-          return response.text();
-        }).then((svg_src) => {
-          try {
-            var parser = new DOMParser();
-            racetrack_svg = parser.parseFromString(svg_src, "image/svg+xml");
-          } catch (error) {
-            throw new Error("failed to parse SVG data")
-          }
-          set_up_race();
-          setTimeout(function(){
-            reset_replay();
-          }, PAUSE_BEFORE_PLAY_ENABLE);
-        })
+        return response.text();
       })
+    })
+    .then((svg_src) => {
+      try {
+        var parser = new DOMParser();
+        racetrack_svg = parser.parseFromString(svg_src, "image/svg+xml");
+      } catch (error) {
+        throw new Error("failed to parse SVG data")
+      }
+      set_up_race();
+      setTimeout(function(){reset_replay()}, PAUSE_BEFORE_PLAY_ENABLE);
     })
     .catch((error) => {report(`cannot load race - ${error}`, CSS_ALERT)})
   }

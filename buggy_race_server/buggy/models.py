@@ -7,7 +7,7 @@ from sqlalchemy import event
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.user.models import User
 from buggy_race_server.lib.race_specs import BuggySpecs
-
+from buggy_race_server.utils import stringify_datetime
 
 class Buggy(SurrogatePK, Model, BuggySpecs):
     """A buggy ready to race."""
@@ -134,6 +134,37 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
     def calculate_totals(self):
         self.calculate_total_cost()
         self.calculate_mass()
+
+    def get_dict(self, user):
+        """ Used when creating the race file JSON """
+        return {
+            "username": user.username if user else None,
+            "algo": self.algo,
+            "antibiotic": self.antibiotic,
+            "armour": self.armour,
+            "attack": self.attack,
+            "aux_power_type": self.aux_power_type,
+            "aux_power_units": self.aux_power_units,
+            "banging": self.banging,
+            "buggy_id": self.buggy_id,
+            "created_at": stringify_datetime(self.created_at, want_secs=False),
+            "fireproof": self.fireproof,
+            "flag_color_secondary": self.flag_color_secondary,
+            "flag_color": self.flag_color,
+            "flag_pattern": self.flag_pattern,
+            "hamster_booster": self.hamster_booster,
+            "id": self.id,
+            "insulated": self.insulated,
+            "mass": self.mass,
+            "power_type": self.power_type,
+            "power_units": self.power_units,
+            "qty_attacks": self.qty_attacks,
+            "qty_tyres": self.qty_tyres,
+            "qty_wheels": self.qty_wheels,
+            "total_cost": self.total_cost,
+            "tyres": self.tyres,
+            "user_id": self.user_id,
+        }
 
     @staticmethod
     def get_all_buggies_with_usernames(want_inactive_users=False, want_students_only=True):

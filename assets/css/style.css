@@ -555,8 +555,10 @@ pre.task-text {
   border-top: 1px solid #555555;
   border-left: none;
 }
-.bg-yellow {
+.bg-yellow { /* only used on interface form */
   background-color: #ffff00;
+  border-top:2px dashed black; 
+  border-bottom:2px dashed black; 
   color: black;
 }
 
@@ -654,6 +656,9 @@ td .cell-title {
   -webkit-mask: none;
   mask:none;
 }
+td .flag + .flag {
+  margin-top:0.5rem;
+}
 .alert-tech-notes {
   color:white;
   background:#1e1e1e;
@@ -738,4 +743,30 @@ img.roadent-portrait:hover{
 
 body.race-player main {
   background-color:transparent;
+}
+
+.card.racetrack  {
+  margin: 0.5rem 0;
+}
+.card.racetrack img {
+  min-width:100%;
+  aspect-ratio:2;
+}
+.card.racetrack h5 {
+  margin: 0;
+  padding:0;
+  font-size:100%;
+}
+.card.racetrack .card-body {
+  padding:0.5rem 0.5rem 0.5rem 0.5rem;
+}
+.card.racetrack .card-body p {
+  margin: 0.25rem 0;
+}
+.card.race-clickable {
+  transition: background-color 0.5s;
+}
+.card.race-clickable:hover {
+  cursor:pointer;
+  background-color: #dddddd;
 }

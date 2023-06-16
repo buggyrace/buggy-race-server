@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timezone
 import os
 import re
+from sqlalchemy import insert
 from flask import (
     abort,
     Blueprint,
@@ -18,16 +19,16 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
+from buggy_race_server.admin.forms import GeneralSubmitForm, SubmitWithConfirmForm
 from buggy_race_server.database import db
-from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm
-from buggy_race_server.race.models import Race, RaceResult
+from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm, RacetrackForm
+from buggy_race_server.race.models import Race, RaceResult, Racetrack, RaceFile
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
-    servertime_str,
     staff_only,
     join_to_project_root,
 )
@@ -35,216 +36,89 @@ from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 
 blueprint = Blueprint("race", __name__, url_prefix="/races", static_folder="../static")
 
+# race assets:
+# Serving statically because it's more robust than trying to
+# figure out how to exclude these from webpack, and even then it's
+# too complex in the event of changes: keep it simple.
+# Want it standalone because it's handy to be able to dev/run it
+# in isolation outwith the race server, at least for now.
+
+def _serve_race_asset_file(*args):
+    full_filename = join_to_project_root(*args)
+    if not os.path.exists(full_filename):
+        # don't send full error page, as responses generally aren't
+        # being seen by human user, but as a component on a page
+        return make_response("Race resource not found", 404)
+    return send_file(full_filename)
+
+@blueprint.route("/assets/tracks/<filename>")
+def serve_racetrack_asset(filename):
+    return _serve_race_asset_file(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name],
+        filename
+    )
+
+@blueprint.route("/assets/<filename>")
+def serve_race_player_asset(filename):
+    return _serve_race_asset_file(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_PATH.name],
+        filename
+    )
+
 @blueprint.route("/", strict_slashes=False)
-@login_required
-@staff_only
-def list_races():
-    """Admin list of all races."""
-    races = sorted(Race.query.all(), key=lambda race: (race.start_at))
-    form = RaceForm(request.form)
+def show_public_races():
+    """Race announcement page."""
+    next_race=Race.query.filter(
+        Race.is_visible==True,
+        Race.start_at > datetime.now(timezone.utc)
+      ).order_by(Race.start_at.asc()).first()
+    races = db.session.query(Race).join(RaceResult).filter(
+            Race.is_visible==True,
+            Race.start_at < datetime.now(timezone.utc),
+            RaceResult.race_position > 0,
+            RaceResult.race_position <= 3,
+        ).order_by(Race.start_at.desc()).all()
+    results = [ race.results for race in races ]
+    flag_color_css_defs = get_flag_color_css_defs(
+        [result for sublist in results for result in sublist]
+    )
     return render_template(
-        "admin/races.html",
+        "races/index.html",
+        flag_color_css_defs=flag_color_css_defs,
+        next_race=next_race,
         races=races,
-        form=form,
-        date_today=datetime.today().date(),
         replay_anchor=Race.get_replay_anchor(),
     )
 
-@blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
-@login_required
-def new_race():
-    return edit_race(None)
-
-@blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
-@login_required
-@admin_only
-def edit_race(race_id=None):
-    """Edit an existing race (differs from new race because may
-       have some results?)."""
-    if race_id is None:
-        race = None
-        delete_form = None
-    else:
-        race = Race.get_by_id(race_id) if race_id else None
-        if race is None:
-            flash("No such race", "danger")
-            abort(404)
-        delete_form = RaceDeleteForm(race_id=race_id)
-    form = RaceForm(request.form, obj=race)
-    if request.method == "POST":
-        if form.validate_on_submit():
-            if race is None:
-                race = Race.create(
-                  title=form.title.data.strip(),
-                  desc=form.desc.data.strip(),
-                  cost_limit=form.cost_limit.data,
-                  start_at=form.start_at.data,
-                  is_visible=form.is_visible.data,
-                )
-                if race.start_at.date() < datetime.now(timezone.utc).date():
-                    success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
-                else:
-                    success_msg = f"OK, created new race"
-            else:
-                race.title = form.title.data.strip()
-                race.desc = form.desc.data.strip()
-                race.start_at = form.start_at.data
-                race.cost_limit = form.cost_limit.data
-                race.is_visible = form.is_visible.data
-                race.is_result_visible = form.is_result_visible.data
-                race.results_uploaded_at = form.results_uploaded_at.data
-                race.result_log_url = form.result_log_url.data
-                race.buggies_csv_url = form.buggies_csv_url.data
-                race.race_log_url = form.race_log_url.data
-                race.track_image_url = form.track_image_url.data
-                race.track_svg_url = form.track_svg_url.data
-                race.max_laps = form.max_laps.data
-                race.save()
-                pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
-                success_msg = f"OK, updated {pretty_title}" 
-            flash(success_msg, "success")
-            return redirect(url_for("race.list_races"))
-        else:
-            if race:
-                pretty_race_title = f"race \"{race.title}\"" if race.title else "untitled race"
-                flash(f"Did not update {pretty_race_title}", "danger")
-            else:
-                flash(f"Did not create new race", "danger")
-            flash_errors(form)
+@blueprint.route("/<int:race_id>/replay")
+def replay_race(race_id):
+    race = Race.query.filter_by(id=race_id).first_or_404()
+    result_log_url = race.result_log_url
+    if result_log_url and not (re.match(r"^https?://", result_log_url)):
+        result_log_url = url_for(
+            "race.serve_race_player_asset",
+            filename=result_log_url
+        )
+    if not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("The results of this race are not available yet", "warning")
+            abort(403)
+    if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
+        anchor = Race.get_replay_anchor()
+        return redirect(f"{player_url}?race={result_log_url}{anchor}")
     return render_template(
-        "admin/race_edit.html",
-        form=form,
-        race=race,
-        default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
-        default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
-        delete_form=delete_form,
+        "races/player.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        result_log_url=result_log_url,
     )
 
-@blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])
-@login_required
-@admin_only
-def upload_results(race_id):
-    race = Race.get_by_id(race_id)
-    if race is None:
-        flash("Error: coudldn't find race", "danger")
-        abort(404)
-    form = RaceResultsForm(request.form)
-    if request.method == "POST":
-        if form.validate_on_submit():
-            is_ignoring_warnings = form.is_ignoring_warnings.data
-            is_overwriting_urls = form.is_overwriting_urls.data
-            # not robust, but pragmatically...
-            # we can anticipate only one admin uploading one race at a time
-            delete_path = None
-            if "results_json_file" in request.files:
-                json_file = request.files['results_json_file']
-                if json_file.filename:
-                    json_filename_with_path = os.path.join(
-                        current_app.config['UPLOAD_FOLDER'],
-                        f"results-{str(race_id).zfill(4)}.json"
-                    )
-                    json_file.save(json_filename_with_path)
-                    try:
-                        with open(json_filename_with_path, "r") as read_file:
-                            result_data = json.load(read_file)
-                    except UnicodeDecodeError as e:
-                        flash("Encoding error (maybe that wasn't a good JSON file you uploaded?)", "warning")
-                    except json.decoder.JSONDecodeError as e:
-                        flash("Failed to parse JSON data", "danger")
-                        flash(str(e), "warning")
-                        flash("No data was accepted", "info")
-                    if result_data:
-                        try:
-                            warnings = race.load_race_results(
-                                result_data,
-                                is_ignoring_warnings=is_ignoring_warnings,
-                                is_overwriting_urls=is_overwriting_urls
-                            )
-                        except ValueError as e:
-                            flash(f"Failed to load race results: {e}", "danger")
-                        else:
-                            for warning in warnings:
-                                flash(warning, "warning")
-                            if not warnings or is_ignoring_warnings:
-                                flash("OK, updated race results", "success")
-                            else:
-                                if len(warnings) == 1:
-                                    msg = "Did not upload race results because there was a warning"
-                                else:
-                                    msg = "Did not upload race results because there were warnings"
-                                flash(msg, "danger")
-                    delete_path = json_filename_with_path
-                else:
-                    flash("NO json_file.filename", "info")
-            else:
-                flash("NO results_json_file was false", "info")
-            if delete_path:
-                try:
-                    os.unlink(delete_path)
-                except os.error as e:
-                    # could sanitise this, but the diagnostic might be useful
-                    flash(f"Problem deleting uploaded file: {e}", "warning")
-        else:
-            flash_errors(form)
-            flash("Did not accept race results", "danger")
-    return render_template(
-        "admin/race_upload.html",
-        form=form,
-        race=race,
-        default_racetrack_image=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name],
-        default_racetrack_path_svg=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name],
-    )
-
-@blueprint.route("/<race_id>/download-results", methods=["GET"])
-@login_required
-@admin_only
-def download_results(race_id):
-    """ produces the results file suitable for replaying:
-    This is useful because the URLs (especially of the result file)
-    might have been added/become known _after_ the race was run and
-    the (oringinal) results file was created.
-    """
-    race = Race.get_by_id(race_id)
-    if race is None:
-        flash("Error: coudldn't find race", "danger")
-        abort(404)
-    #  = = = = = =  FIXME download results JSON not implemented yet = = = = = = 
-    filename = get_download_filename(f"race-{race.slug}-results.json", want_datestamp=False)
-    output = make_response(race.get_results_json())
-    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-    output.headers["Content-type"] = "application/json"
-    return output
-
-
-@blueprint.route("/<race_id>/delete", methods=["POST"])
-@login_required
-@admin_only
-def delete_race(race_id):
-    form = RaceDeleteForm(request.form)
-    if form.validate_on_submit():
-        if not form.is_confirmed.data:
-            flash("Did not delete race (you didn't confirm it)", "danger")
-            return redirect(url_for('race.edit_race', race_id=race_id))
-        race = Race.get_by_id(race_id)
-        if race is None:
-            flash("Error: coudldn't find race to delete", "danger")
-        else:
-            race.delete()
-            flash("OK, deleted race", "success")
-    else:
-      flash("Error: incorrect button wiring, nothing deleted", "danger")
-    return redirect(url_for('race.list_races'))
-
-@blueprint.route("/<race_id>/result")
+@blueprint.route("/<int:race_id>/result")
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
- 
     all_results = db.session.query(
         RaceResult, User).outerjoin(User).filter(
             RaceResult.race_id==race.id
-        ).order_by(RaceResult.race_position.asc()).all()
- 
-    # all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
+        ).order_by(RaceResult.race_position.asc()).all() 
     results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
     results_nonfinishers = [(res, user) for (res, user) in all_results if res.race_position == 0 ]
     results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
@@ -268,39 +142,15 @@ def show_race_results(race_id):
         results_nonfinishers=results_nonfinishers,
     )
 
-# temporary /assets/ filename while developing/experimenting in beta
-@blueprint.route("/assets/<filename>")
-def serve_race_player_asset(filename):
-    """ Serving statically because it's more robust than trying to
-        figure out how to exclude this from webpack, and even then it's
-        too complex in the event of changes: keep it simple.
-        Want it standalone because it's handy to be able to dev/run it
-        in isolation outwith the race server, at least for now."""
-    full_filename = join_to_project_root(
-        "buggy_race_server", "templates", "races", "assets", filename
-    )
-    if not os.path.exists(full_filename):
-        abort(404)
-    return send_file(full_filename)
-  
-@blueprint.route("/<race_id>/replay")
-def replay_race(race_id):
+@blueprint.route("/<int:race_id>/race-file.json")
+@blueprint.route("/<int:race_id>/race-file")
+def serve_race_file(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
-    result_log_url = race.result_log_url
-    if result_log_url and not (re.match(r"^https?://", result_log_url)):
-        result_log_url = url_for(
-            "race.serve_race_player_asset",
-            filename=result_log_url
-        )
     if not (race.is_visible and race.is_result_visible):
         if current_user.is_anonymous or not current_user.is_staff:
-            flash("The results of this race are not available yet", "warning")
+            flash("Race file not available yet", "danger")
             abort(403)
-    if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
-        anchor = Race.get_replay_anchor()
-        return redirect(f"{player_url}?race={result_log_url}{anchor}")
-    return render_template(
-        "races/player.html",
-        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        result_log_url=result_log_url,
-    )
+    racefile = RaceFile.query.filter_by(race_id=race_id).first_or_404()
+    json_response = make_response(racefile.contents)
+    json_response.headers["Content-type"] = "application/json"
+    return json_response

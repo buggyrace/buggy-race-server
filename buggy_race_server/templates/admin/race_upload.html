@@ -23,7 +23,7 @@
     <div class="col-md-6 mb-3">
       <div class="border container">
         <form id="RaceResultsForm" method="POST"
-          action="{{ url_for('race.upload_results', race_id=race.id) }}"
+          action="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}"
           enctype="multipart/form-data" role="form">
           {{ form.csrf_token }}
           <div class="row">
@@ -44,8 +44,8 @@
             </div>
             <div class="col-sm-8 p-3">
               <select name="is_ignoring_warnings" class="form-control">
-                <option value="">No</option>
-                <option value="1" selected>Yes</option>
+                <option value="" selected>No</option>
+                <option value="1">Yes</option>
               </select>
             </div>
           </div>
@@ -112,21 +112,6 @@
                   The URL of the results file, that is, <em>the JSON file you are uploading</em>
                   <br>
                   <em>This URL is necessary for replaying the race.</em>
-                </p>
-              </td>
-            </tr>
-          {% endif %}
-          {% if race.buggies_csv_url %}
-            <tr>
-              <td><code>buggies_csv_url</code></td>
-              <td>
-                <p>
-                  <a href="{{ race.buggies_csv_url }}">{{ race.buggies_csv_url }}</a>
-                </p>
-                <p>
-                  The URL of the CSV file containing the buggies used to run the race.
-                  <br>
-                  <em>This URL is currently not used.</em>
                 </p>
               </td>
             </tr>

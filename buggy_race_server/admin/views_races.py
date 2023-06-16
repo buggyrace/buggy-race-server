@@ -40,6 +40,7 @@ from buggy_race_server.utils import (
     admin_only,
     flash_errors,
     get_download_filename,
+    get_flag_color_css_defs,
     join_to_project_root,
     staff_only,
 )
@@ -104,16 +105,30 @@ def new_race():
 @staff_only
 def view_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404() 
-    results = db.session.query(
+    all_results = db.session.query(
         RaceResult, User).outerjoin(User).filter(
             RaceResult.race_id==race.id
-        ).order_by(RaceResult.race_position.asc()).all()
-
+        ).order_by(RaceResult.race_position.asc()).all() 
+    results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
+    results_nonfinishers = [(res, user) for (res, user) in all_results if res.race_position == 0 ]
+    results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
+    is_tied = {}
+    prev_pos = 0
+    for (res, _) in results_finishers:
+        if res.race_position == prev_pos:
+            is_tied[prev_pos] = "="
+        prev_pos = res.race_position
+    flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     return render_template(
         "admin/race.html",
-        has_results=bool(len(results)),
+        flag_color_css_defs=flag_color_css_defs,
+        has_results=bool(len(all_results)),
+        is_tied=is_tied,
         race=race,
-        results=results,
+        results_disqualified=results_disqualified,
+        results_finishers=results_finishers,
+        results_nonfinishers=results_nonfinishers,
+        results=all_results,
         track_image_url=race.track_image_url, # separated for SVG include file
         track_svg_url=race.track_svg_url, # separated for SVG include file
     )
@@ -196,6 +211,7 @@ def upload_race_file(race_id):
         flash("Error: coudldn't find race", "danger")
         abort(404)
     form = RaceResultsForm(request.form)
+    want_redirect_to_race = False
     if request.method == "POST":
         if form.validate_on_submit():
             is_ignoring_warnings = form.is_ignoring_warnings.data
@@ -234,6 +250,16 @@ def upload_race_file(race_id):
                                 flash(warning, "warning")
                             if not warnings or is_ignoring_warnings:
                                 flash("OK, updated race results", "success")
+                                if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
+                                    race.store_race_file(result_data)
+                                    url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
+                                        + url_for("race.serve_race_file", race_id=race.id)
+                                    race.result_log_url = url
+                                    race.save()
+                                    flash(f"Stored race file on this server for use in replay (at {url})", "success")
+                                    if not (race.is_visible and race.is_result_visible):
+                                        flash(f"Note: this file isn't visible to students yet: edit race to change that", "warning")
+                                want_redirect_to_race = True
                             else:
                                 if len(warnings) == 1:
                                     msg = "Did not upload race results because there was a warning"
@@ -254,6 +280,8 @@ def upload_race_file(race_id):
         else:
             flash_errors(form)
             flash("Did not accept race results", "danger")
+    if want_redirect_to_race:
+        return redirect(url_for("admin_race.view_race", race_id=race.id))
     return render_template(
         "admin/race_upload.html",
         form=form,

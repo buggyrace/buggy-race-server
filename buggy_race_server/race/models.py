@@ -94,6 +94,7 @@ class Race(SurrogatePK, Model):
     lap_length = Column(db.Integer, nullable=True)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
+    racefile = db.relationship('RaceFile', backref='race', cascade="all, delete")
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -364,6 +365,21 @@ class Race(SurrogatePK, Model):
         }
         return json.dumps(race_data_dict, indent=1, separators=(',', ': '))
 
+
+    def store_race_file(self, race_file_contents):
+        """ check IS_STORING_RACE_FILES_IN_DB before using race files """
+        if type(race_file_contents) != str:
+            race_file_contents = json.dumps(race_file_contents)
+        race_file_db = RaceFile.query.filter_by(race_id=self.id).first()
+        if race_file_db is None:
+            race_file_db = RaceFile.create(
+                race_id=self.id,
+                contents=race_file_contents
+            )
+        else:
+            race_file_db.contents = race_file_contents
+        race_file_db.save()
+
 class RaceResult(SurrogatePK, Model):
 
     """A buggy's race result 
@@ -382,3 +398,25 @@ class RaceResult(SurrogatePK, Model):
     cost = db.Column(db.Integer, nullable=True)
     race_position = db.Column(db.Integer, nullable=False, default=0)
     violations_str = db.Column(db.String(255), nullable=True)
+
+class RaceFile(SurrogatePK, Model):
+    """A "race file" that holds everything needed to replay a race (some
+    of which — such a full buggy specs — is not currently used once the
+    race has been run (but a better replayer could, in future, exploit)).
+    The race file is in reality a JSON file produced by downloading a race
+    from the server, and then updated by the process of running a race.
+    Storing these in the database is a convenience that avoids handling
+    uploaded files: see IS_STORING_RACE_FILES_IN_DB if you don't want to
+    use this mechanism (and instead host them elsewhere, e.g., on GitHub
+    pages). The URL for the race file (whether it's on this server or
+    external) is in race.result_log_url (formerly call the result log
+    file, but refactored to be the more general "race file").
+    These are _not_ stored as a column in the race model to avoid
+    ORM inefficiency in case these files are large — it's very likely this
+    would work fine as a column in the Race table, but breaking it out
+    here maybe allows future efficiency investigation.
+    """
+    __tablename__ = "racefiles"
+    id = db.Column(db.Integer, primary_key=True) # not used in practice?
+    race_id = db.Column(db.Integer, db.ForeignKey('races.id'), nullable=False)
+    contents = db.Column(db.Text(), unique=False, nullable=False, default="")

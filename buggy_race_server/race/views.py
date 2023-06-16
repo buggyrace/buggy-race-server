@@ -22,7 +22,7 @@ from flask_login import current_user, login_required
 from buggy_race_server.admin.forms import GeneralSubmitForm, SubmitWithConfirmForm
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm, RacetrackForm
-from buggy_race_server.race.models import Race, RaceResult, Racetrack
+from buggy_race_server.race.models import Race, RaceResult, Racetrack, RaceFile
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
@@ -60,7 +60,10 @@ def serve_racetrack_asset(filename):
 
 @blueprint.route("/assets/<filename>")
 def serve_race_player_asset(filename):
-    return _serve_race_asset_file(filename)
+    return _serve_race_asset_file(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_PATH.name],
+        filename
+    )
 
 @blueprint.route("/", strict_slashes=False)
 def show_public_races():
@@ -87,7 +90,7 @@ def show_public_races():
         replay_anchor=Race.get_replay_anchor(),
     )
 
-@blueprint.route("/<race_id>/replay")
+@blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
     result_log_url = race.result_log_url
@@ -109,16 +112,13 @@ def replay_race(race_id):
         result_log_url=result_log_url,
     )
 
-@blueprint.route("/<race_id>/result")
+@blueprint.route("/<int:race_id>/result")
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
- 
     all_results = db.session.query(
         RaceResult, User).outerjoin(User).filter(
             RaceResult.race_id==race.id
-        ).order_by(RaceResult.race_position.asc()).all()
- 
-    # all_results = RaceResult.query.filter_by(race_id=race_id).order_by(RaceResult.race_position.asc())
+        ).order_by(RaceResult.race_position.asc()).all() 
     results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
     results_nonfinishers = [(res, user) for (res, user) in all_results if res.race_position == 0 ]
     results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
@@ -141,3 +141,16 @@ def show_race_results(race_id):
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
     )
+
+@blueprint.route("/<int:race_id>/race-file.json")
+@blueprint.route("/<int:race_id>/race-file")
+def serve_race_file(race_id):
+    race = Race.query.filter_by(id=race_id).first_or_404()
+    if not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("Race file not available yet", "danger")
+            abort(403)
+    racefile = RaceFile.query.filter_by(race_id=race_id).first_or_404()
+    json_response = make_response(racefile.contents)
+    json_response.headers["Content-type"] = "application/json"
+    return json_response

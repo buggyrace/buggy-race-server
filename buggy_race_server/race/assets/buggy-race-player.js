@@ -684,6 +684,9 @@ window.onresize = on_resize;
       set_up_race();
       setTimeout(function(){reset_replay()}, PAUSE_BEFORE_PLAY_ENABLE);
     })
-    .catch((error) => {report(`cannot load race - ${error}`, CSS_ALERT)})
+    .catch((error) => {
+      report(`cannot load race - ${error}`, CSS_ALERT);
+      TIME_INDICATOR.innerText = "NO-RACE";
+    });
   }
 })();

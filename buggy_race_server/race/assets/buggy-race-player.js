@@ -263,8 +263,8 @@ function set_up_race(){
   RACETRACK_DATA.path = racetrack_path;
   RACETRACK_CANVAS.style.backgroundImage = "url(" + race_json.track_image_url + ")";
   RACE_INFO.qty_buggies = 0;
-  let buggies = race_json.buggies || race_json.results; // deprecated: used to be "results"
-  for (let buggy of race_json.buggies) {
+  let legacyproof_buggies = race_json.buggies || race_json.results; // deprecated: used to be "results"
+  for (let buggy of legacyproof_buggies) {
     if (buggy.race_position >= 0){
       svg_buggies[BUGGY_ID_PREFIX + buggy[BUGGY_ID_SOURCE]] = create_svg_buggy(buggy);
       RACE_INFO.qty_buggies += 1;

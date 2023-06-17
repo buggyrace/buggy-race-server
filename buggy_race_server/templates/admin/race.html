@@ -10,47 +10,124 @@
   <div class="row">
     <div class="col">
       <div class="alert alert-info">
-        <h2 class="alert-title">Race file downloads (JSON)</h2>
+        <h2 class="alert-title">Race file (JSON)</h2>
         <div class="container">
           <div class="row">
             <div class="col-md-7">
               {% if has_results %}
                 <p>
-                  <strong>This race already has results</strong>
-                </p>
-                <p>
-                  These downloads will <strong>not</strong> include race
-                  <strong>events</strong>
-                  — they are generated when you run the race (offline) and are
-                  not stored here on the server.
-                </p>
-                <p>
-                  The results will be included.
+                  <strong>This race already has results.</strong>
+                  <br>
+                  {% if race.result_log_url %}
+                    {% if race_file_is_local %}
+                      A race file for this race has been uploaded to
+                      this server.
+                    {% else %}
+                      A race file for this race has been uploaded to
+                      an external location.
+                    {% endif %}
+                  {% else %}
+                    Either the race file hasn't been published,
+                    or you haven't added its URL yet.
+                  {% endif %}
                 </p>
               {% else %}
                 <p>
                   <strong>This race has no results (yet)</strong>.
                 </p>
                 <p>
-                  If you want to download the JSON file to <em>run a race</em>,
-                  include the buggies... unless you've already downloaded them
-                  separately.
-                </p>
-                <p>
-                  If you include buggies in the download, you are getting a snapshot
-                  of the buggies that are on the server <em>right now</em>.
+                  The race file is the input you need to run a race
+                  offline. Running the race produces a new race file,
+                  containing the results and events, which you can
+                  then upload.
                 </p>
               {% endif %}
             </div>
-            <div class="col-md-5 p-3">
-              <a class="btn btn-success btn-download m-3"
-                href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
-                >Download race file with buggies</a>
-              <a class="btn btn-danger btn-download m-3"
-                href="{{ url_for('admin_race.download_race_json_without_buggies', race_id=race.id) }}"
-                >Download race file without buggies</a>
+            <div class="col-md-5 p-3 btn-collection">
+
+              {% if race.result_log_url %}
+                <a class="btn btn-primary btn-download mb-3"
+                href="{{ race.result_log_url }}"
+                >Get race file (with results)</a>
+              {% endif %}
+              {% if not has_results %}
+                <a class="btn btn-primary btn-download mb-3"
+                  href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
+                  >Download race file with (current) buggies</a>
+              {% endif %}
+              <button id="show-options-btn" class="hidden btn btn-outline-secondary btn-white mb-3">Show more download options</button>
             </div>
           </div>
+          <div class="row optional-section">
+            <div class="col-md-7">
+              <p>
+                <em>Including buggies</em><br>
+                If you include buggies in the download, you are getting a snapshot
+                of the buggies that are on the server <em>right now</em>. You can
+                choose to download the race file without buggies if you've already
+                saved the buggies for this race separately.
+              </p>
+              {% if has_results %}
+                <p>
+                  <em>Including events</em><br>
+                  The events that happened in the race are used in to animate the
+                  replay.
+                  {% if race.result_log_url %}
+                    If they are not in the race file you uploaded earlier, they
+                    are not available here on the server (they are generated offline,
+                    when you run the race, and written into the race file you then
+                    upload).
+                  {% else %}
+                    These do not exist for this race yet (generate them by running
+                    the race offline, and uploading the race file it produces).
+                  {% endif %}
+                </p>
+              {% endif %}
+            </div>
+            <div class="col-md-5">
+              {% if has_results %}
+                <a class="btn btn-danger btn-download mb-3"
+                  href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
+                  >Download race file
+                  <strong>without events</strong>
+                  and with (current) buggies</a>
+              {% endif %}
+              <a class="btn btn-danger btn-download"
+                href="{{ url_for('admin_race.download_race_json_without_buggies', race_id=race.id) }}"
+                >Download race file
+                {% if has_results %}
+                  <strong>without events</strong> and
+                {% endif %}
+                without buggies</a>
+            </div>
+          </div>
+          <script>
+            const OPTION_BTN_TEXT = {
+              false: "Show more download options",
+              true: "Hide download options"
+            }
+            const OPTION_BTN = document.getElementById("show-options-btn");
+            const OPTIONAL_DIVS = document.getElementsByClassName("optional-section");
+            for (let optional_div of OPTIONAL_DIVS){
+              optional_div.classList.add("hidden");
+            }
+            OPTION_BTN.classList.remove("hidden");
+            OPTION_BTN.addEventListener(
+              "click",
+              function(e){
+                e.preventDefault();
+                let is_showing = OPTION_BTN.innerText == OPTION_BTN_TEXT[true];
+                OPTION_BTN.innerText = OPTION_BTN_TEXT[! is_showing];
+                for (let optional_div of OPTIONAL_DIVS){
+                  if (is_showing){
+                    optional_div.classList.add("hidden");
+                  } else {
+                    optional_div.classList.remove("hidden");
+                  }
+                }
+              }
+            )
+          </script>
         </div>
       </div>
     </div>
@@ -60,8 +137,11 @@
       <table class="table table-striped table-bordered table-hover bg-white">
         <tbody>
           <tr>
-            <td colspan="2">
+            <td colspan="2" class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}">Edit race</a>
+              {% if race.result_log_url %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}">Replay</a>
+              {% endif %}
             </td>
           </tr>
           <tr>

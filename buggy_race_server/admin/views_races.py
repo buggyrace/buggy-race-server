@@ -73,11 +73,11 @@ def _download_race_json(race_id, want_buggies=False):
         f"{race_filename_base}.json",
         want_datestamp=current_app.config[ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name]
     )
-    output = make_response(
-        race.get_race_data_json(want_buggies=want_buggies)
-    )
+    json_data = race.get_race_data_json(want_buggies=want_buggies)
+    output = make_response(json_data, 200)
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     output.headers["Content-type"] = "application/json"
+    output.headers["Content-length"] = len(json_data)
     return output
 
 @blueprint.route("/", strict_slashes=False)
@@ -119,10 +119,17 @@ def view_race(race_id):
             is_tied[prev_pos] = "="
         prev_pos = res.race_position
     flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
+    race_file_is_local=bool(
+        race.result_log_url and
+        race.result_log_url.startswith(
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        )
+    )
     return render_template(
         "admin/race.html",
         flag_color_css_defs=flag_color_css_defs,
         has_results=bool(len(all_results)),
+        race_file_is_local=race_file_is_local,
         is_tied=is_tied,
         race=race,
         results_disqualified=results_disqualified,

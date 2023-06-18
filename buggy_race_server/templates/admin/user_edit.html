@@ -337,7 +337,7 @@
       <div class="col btn-collection my-3">
         {% if user %}
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}</a>
-          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
         {% endif %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
       </div>

@@ -170,10 +170,11 @@ def setup_course_repository():
 
     return redirect(url_for('user.settings'))
 
+@blueprint.route("/password/<username>", methods=['GET'], strict_slashes=False)
 @blueprint.route("/password", methods=['GET','POST'], strict_slashes=False)
 @login_required
 @active_user_required
-def change_password():
+def change_password(username=None):
     """Change user's password (staff may be able to change another user's password)."""
     warn_if_insecure()
     form = ChangePasswordForm(request.form)
@@ -223,10 +224,11 @@ def change_password():
     else:
         admin_usernames = [user.username for user in users if user.is_staff]
     form.username.choices = sorted([user.username for user in users])
-    form.username.data = form.username.data or current_user.username
+    form.username.data = form.username.data or username or current_user.username
     return render_template(
         "user/password.html",
         form=form,
+        username=username,
         is_auth_needed_for_all=False, # because it's conditional on admin statuses
         admin_usernames_str=",".join(admin_usernames),
     )

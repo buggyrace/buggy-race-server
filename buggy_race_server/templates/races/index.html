@@ -109,18 +109,24 @@
                     {% for res in race.results if res.race_position == 1 %}
                       <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
                        ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
+                    {% else %}
+                      <div class="flag no-buggy"></div>
                     {% endfor %}
                   </td>
                   <td>
                     {% for res in race.results if res.race_position == 2 %}
                       <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
                         ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
+                    {% else %}
+                      <div class="flag no-buggy"></div>
                     {% endfor %}
                   </td>
                   <td>
                     {% for res in race.results if res.race_position == 3 %}
                       <div class="flag {{ flag_color_css_defs[res.flag_color_secondary][0] }}"
                         ><div class="flag-{{ res.flag_pattern }} {{ flag_color_css_defs[res.flag_color][0] }}">&nbsp;</div></div>
+                    {% else %}
+                      <div class="flag no-buggy"></div>
                     {% endfor %}
                   </td>
                 {% else %}

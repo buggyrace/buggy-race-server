@@ -8,7 +8,7 @@
     </h1>
   </div>
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
       <p>
         Use this page to test the API (staff accounts only).
         <br>
@@ -21,6 +21,25 @@
         <br>
         You'll get raw JSON back as the response.
       </p>
+    </div>
+    <div class="col-md-6">
+      <div class="border p-3">
+        <div class="row">
+          <div class="col">
+            API credentials for 
+            <code>{{ current_user.username }}</code>
+          </div>
+          <div class="col btn-collection">
+            {% include "admin/_api_key_form_user.html" %}
+            <a id="btn-to-own-secret" href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-white btn-jump my-2">Set API secret</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row mt-3">
+    <div class="col-md-8 col-lg-6">
       <div class="alert alert-danger">
         The example JSON only contains a <strong>random number of wheels</strong>:
         remember that any values missing from the JSON in a successful API post
@@ -57,7 +76,7 @@
                 <code>key:</code>
               </td>
               <td>
-                <input type="text" name="key" value="{{ current_user.api_key }}" class="form-control mr-sm-1"/>
+                <input type="text" name="key" value="{{ current_user.api_key or '' }}" class="form-control mr-sm-1"/>
               </td>
             </tr>
             <tr>
@@ -66,7 +85,6 @@
               </td>
               <td>
                 <input type="text" name="secret" value="{{ current_user.api_secret or '' }}"  class="form-control mr-sm-1"/>
-                <a id="btn-to-own-secret" href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-white btn-jump my-2">Set API secret</a>
               </td>
             </tr>
             <tr>

@@ -266,15 +266,7 @@
               {% endif %}
             </div>
             <div class="col-sm-5 p-3">
-              <form id="api-key-form" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
-                {{ form.csrf_token }}
-                <input type="hidden" name="usernames" value="{{ user.username}}"/>
-                {% if user.api_key %}
-                  <button class="btn btn-danger" name="submit_clear_keys" value="Clear API keys">Clear API key</button>
-                {% else %}
-                  <button class="btn btn-primary" name="submit_generate_keys" value="Generate API keys">Generate API key</button>
-                {% endif %}
-              </form>
+              {% include "admin._api_key_form_user.html" %}
             </div>
           </div>
         </div>

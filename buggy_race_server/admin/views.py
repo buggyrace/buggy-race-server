@@ -977,7 +977,9 @@ def api_keys():
 def api_test():
     return render_template(
         "admin/api_test.html",
-        random_qty_wheels=random.randint(1,100)
+        form=GeneralSubmitForm(), # for generate/clear key
+        random_qty_wheels=random.randint(1,100),
+        user=current_user, # for generate/clear key
     )
 
 @blueprint.route("/user/<user_id>/buggy")

@@ -211,7 +211,7 @@
       <div class="border">
         <div class="alert-secondary p-3 ">
           <strong class="mr-3">Buggy JSON:</strong>
-          <a href="{{ url_for('admin.show_buggy', username=user.username) }}" class="btn btn-outline-secondary btn-white btn-jump">View&nbsp;buggy</a>
+          <a href="{{ url_for('admin.show_buggy', user_id=user.username) }}" class="btn btn-outline-secondary btn-white btn-jump">View&nbsp;buggy</a>
         </div>
         {% if user.latest_json %}
           <pre class="p-3 ml-2 mb-4 mt-3 mr-3 task-text ">{{ user.latest_json }}</pre>

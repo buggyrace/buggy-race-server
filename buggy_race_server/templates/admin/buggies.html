@@ -56,8 +56,8 @@
         <tbody>
           {% for b in buggies %}
           <tr>
-            <td><a class="btn btn-sm btn-outline-secondary btn-jump btn-white" href="{{ url_for('admin.show_buggy', username=b.username) }}">Buggy</a></td>
-            <td>  {{ b.pretty_username }} </td>
+            <td><a class="btn btn-sm btn-outline-secondary btn-jump btn-white" href="{{ url_for('admin.show_buggy', user_id=b.username) }}">Buggy</a></td>
+            <td> <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=b.user_id) }}">{{ b.pretty_username }}</a> </td>
             <td>  {{ b.total_cost }} </td>
             <td>  {{ b.mass }} </td>
             <td>  {{ b.buggy_id }} </td>

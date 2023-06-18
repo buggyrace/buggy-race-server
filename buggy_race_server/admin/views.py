@@ -980,11 +980,16 @@ def api_test():
         random_qty_wheels=random.randint(1,100)
     )
 
-@blueprint.route("/buggies/<username>")
-def show_buggy(username):
-   """ Using the show_buggy code from Buggy: it's common for non-admin too"""
-   # note that show_buggy_by_user checks the admin status of the requestor
-   return show_buggy_by_user(username=username)
+@blueprint.route("/user/<user_id>/buggy")
+def show_buggy(user_id):
+    """ Using the show_buggy code from Buggy: it's common for non-admin too"""
+    # note that show_buggy_by_user checks the admin status of the requestor
+    if str(user_id).isdigit():
+        user = User.query.filter_by(id=int(user_id)).first_or_404()
+        username = user.username
+    else:
+        username = user_id
+    return show_buggy_by_user(username=username)
 
 @blueprint.route("/download/buggies/csv")
 @login_required

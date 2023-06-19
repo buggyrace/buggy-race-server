@@ -12,7 +12,7 @@
       <p>
         Use this page to test the API (staff accounts only).
         <br>
-        {% if current_user.is_admin %}
+        {% if current_user.is_staff %}
           <strong>Be careful:</strong> successful requests update
           buggy data: so maybe only test with your own username?
         {% else %}
@@ -63,7 +63,7 @@
                 <code>user:</code>
               </td>
               <td>
-                {% if current_user.is_admin %}
+                {% if current_user.is_staff %}
                   <input type="text" id="user" name="user" value="{{ current_user.username }}" class="form-control mr-sm-1"/>
                 {% else %}
                   <input type="hidden" is="user" name="user" value="{{ current_user.username }}"/>

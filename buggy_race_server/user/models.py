@@ -149,7 +149,7 @@ class User(UserMixin, SurrogatePK, Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'is_active': self.is_active,
-            'is_admin': self.is_admin,
+            'is_admin': self.is_admin, # TODO not used?
             'latest_json': self.latest_json,
             'is_student': self.is_student,
             'comment': self.comment,

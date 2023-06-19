@@ -156,10 +156,8 @@
   {% endif %}
   {% if is_own_buggy %}
     <div class="row">
-      <div class="col">
-        <p class="btn-collection">
-          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'user.submit_buggy_data' ) }}">Submit buggy JSON</a>
-        </p>
+      <div class="col btn-collection">
+        <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'user.submit_buggy_data' ) }}">Submit buggy JSON</a>
       </div>
     </div>
   {% endif %}
@@ -172,6 +170,36 @@
       </p>
     </div>
   </div>
+  {% endif %}
+  {% if delete_form %}
+  <div class="row">
+    <div class="col-md-8 mt-5">
+      <div class="border border container">
+        <form id="track-delete-form" class="form form-delete" method="POST"
+          action="{{ delete_form_action }}" role="form">
+          {{ delete_form.csrf_token }}
+          <div class="row">
+            <div class="col p-3">
+              Instead of changing its specification, you can delete this buggy.
+              Deleting a buggy does not remove it from appearances in races
+              that have already been run.
+            </div>
+          </div>
+          <div class="row">
+          <div class="col-sm-6">
+            Are you sure?
+            <select id="is_confirmed" name="is_confirmed" class="form-control">
+              <option selected value="">No</option>
+              <option value="">I think so</option>
+              <option value="y">Yes</option>
+            </select>  
+          </div>
+          <div class="col-sm-6 my-3">
+            <input type="submit" class="btn btn-danger" value="Delete buggy"/>
+          </div>
+        </form>
+      </div>
+    </div>
   {% endif %}
 </div>
 {% endblock %}

@@ -56,6 +56,7 @@ from buggy_race_server.admin.models import (
 )
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
+from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
@@ -992,6 +993,19 @@ def show_buggy(user_id):
     else:
         username = user_id
     return show_buggy_by_user(username=username)
+
+@blueprint.route("/user/<user_id>/buggy/delete", methods=["POST"])
+@login_required
+@admin_only
+def delete_buggy(user_id):
+    # note that delete_buggy_by_user checks the admin status of the requestor
+    if str(user_id).isdigit():
+        user = User.query.filter_by(id=int(user_id)).first_or_404()
+        username = user.username
+    else:
+        username = user_id
+    return delete_buggy_by_user(username=username)
+
 
 @blueprint.route("/download/buggies/csv")
 @login_required

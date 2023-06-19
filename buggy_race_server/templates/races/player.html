@@ -318,7 +318,7 @@ button.disabled, button.btn-play.disabled, button.btn-pause.disabled {
 <script src="{{ url_for('race.serve_race_player_asset', filename='gsap.min.js') }}"></script>
 <script>
 //================================================//
-  const RACE_RESULTS_JSON_URL = "{{ result_log_url }}";
+  const RACE_RESULTS_JSON_URL = "{{ race_file_url }}";
   const USER_TRACKING_ID = "{{ current_user.username }}";
 //================================================//
 </script>  

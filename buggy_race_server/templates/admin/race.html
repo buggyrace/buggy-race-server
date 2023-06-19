@@ -18,7 +18,7 @@
                 <p>
                   <strong>This race already has results.</strong>
                   <br>
-                  {% if race.result_log_url %}
+                  {% if race.race_file_url %}
                     {% if race_file_is_local %}
                       A race file for this race has been uploaded to
                       this server.
@@ -45,9 +45,9 @@
             </div>
             <div class="col-md-5 p-3 btn-collection">
 
-              {% if race.result_log_url %}
+              {% if race.race_file_url %}
                 <a class="btn btn-primary btn-download mb-3"
-                href="{{ race.result_log_url }}"
+                href="{{ race.race_file_url }}"
                 >Get race file (with results)</a>
               {% endif %}
               {% if not has_results %}
@@ -72,7 +72,7 @@
                   <em>Including events</em><br>
                   The events that happened in the race are used in to animate the
                   replay.
-                  {% if race.result_log_url %}
+                  {% if race.race_file_url %}
                     If they are not in the race file you uploaded earlier, they
                     are not available here on the server (they are generated offline,
                     when you run the race, and written into the race file you then
@@ -139,7 +139,7 @@
           <tr>
             <td colspan="2" class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}">Edit race</a>
-              {% if race.result_log_url %}
+              {% if race.race_file_url %}
                 <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}">Replay</a>
               {% endif %}
             </td>
@@ -243,10 +243,10 @@
           <tr>
             <td>URL of race file (JSON)</td>
             <td>
-              {% if race.result_log_url is none or race.result_log_url == "" %}
+              {% if race.race_file_url is none or race.race_file_url == "" %}
                 <em class="empty-setting">none</em>
               {% else %}
-                <code>{{ race.result_log_url }}</code>
+                <code>{{ race.race_file_url }}</code>
               {% endif %}
             </td>
           </tr>

@@ -101,12 +101,12 @@
               Current URLs for this race <span class="font-weight-normal">(before you upload results JSON)</span>
             </th>
           </tr>
-          {% if race.result_log_url %}
+          {% if race.race_file_url %}
             <tr>
-              <td><code>result_log_url</code></td>
+              <td><code>race_file_url</code></td>
               <td>
                 <p>
-                  <a href="{{ race.result_log_url }}">{{ race.result_log_url }}</a>
+                  <a href="{{ race.race_file_url }}">{{ race.race_file_url }}</a>
                 </p>
                 <p>
                   The URL of the results file, that is, <em>the JSON file you are uploading</em>

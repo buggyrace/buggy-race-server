@@ -80,7 +80,7 @@ class Race(SurrogatePK, Model):
     start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
     is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name]))
-    result_log_url = Column(db.String(255), unique=True, nullable=True)
+    race_file_url = Column(db.String(255), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
     results_uploaded_at = Column(db.DateTime, nullable=True)
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
@@ -117,7 +117,7 @@ class Race(SurrogatePK, Model):
 
     @property
     def has_urls(self):
-        return bool (self.result_log_url or self.race_log_url)
+        return bool (self.race_file_url or self.race_log_url)
 
     @property
     def start_at_servertime(self):
@@ -142,20 +142,20 @@ class Race(SurrogatePK, Model):
         return anchor
 
     @staticmethod
-    def get_duplicate_urls(race_id, result_log_url, race_log_url):
+    def get_duplicate_urls(race_id, race_file_url, race_log_url):
         """ Returns list of fields with duplicate (non-unique) URLs for a race"""
         dup_fields = {}
         race_id = race_id or 0
-        if result_log_url or race_log_url:
+        if race_file_url or race_log_url:
             if races := Race.query.filter(
                   Race.id!=race_id).filter(
-                  (Race.result_log_url==result_log_url) |
+                  (Race.race_file_url==race_file_url) |
                   (Race.race_log_url==race_log_url)
                 ).all():
                 dup_fields = {}
                 for race in races:
-                    if result_log_url and race.result_log_url == result_log_url:
-                        dup_fields["result_log_url"] = True
+                    if race_file_url and race.race_file_url == race_file_url:
+                        dup_fields["race_file_url"] = True
                     if race_log_url and race.race_log_url == race_log_url:
                         dup_fields["race_log_url"] = True
         return dup_fields.keys()
@@ -167,9 +167,9 @@ class Race(SurrogatePK, Model):
             if str(self.id) != race_id:
                 # if JSON data contains a race ID, it must match
                 raise ValueError(f"Results data you uploaded has wrong race ID ({results_data.get('race_id')}) for this race ({self.id})")
-        result_log_url = results_data.get("result_log_url")
+        race_file_url = results_data.get("race_file_url")
         race_log_url = results_data.get("race_log_url")
-        dup_fields = Race.get_duplicate_urls(self.id, result_log_url, race_log_url)
+        dup_fields = Race.get_duplicate_urls(self.id, race_file_url, race_log_url)
         if dup_fields:
             raise ValueError(
                 f"Already got a race with the same URL for {' and '.join(dup_fields)}"
@@ -295,14 +295,14 @@ class Race(SurrogatePK, Model):
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
-            if results_data.get("result_log_url"):
-                if self.result_log_url:
+            if results_data.get("race_file_url"):
+                if self.race_file_url:
                     if is_overwriting_urls:
-                        self.result_log_url = results_data.get("result_log_url")
+                        self.race_file_url = results_data.get("race_file_url")
                     else:
                         warnings.append("Did not overwrite race result log URL")
                 else:
-                    self.result_log_url = results_data.get("result_log_url")
+                    self.race_file_url = results_data.get("race_file_url")
             if results_data.get("race_log_url"):
                 if self.race_log_url:
                     if is_overwriting_urls:
@@ -330,7 +330,7 @@ class Race(SurrogatePK, Model):
                 User.is_student==True,
             ).order_by(User.username.asc()).all()
         race_data_dict = {
-            "result_log_url": self.result_log_url,
+            "race_file_url": self.race_file_url,
             "title": self.title,
             "description": self.desc,
             "track_image_url": self.track_image_url,
@@ -409,7 +409,7 @@ class RaceFile(SurrogatePK, Model):
     uploaded files: see IS_STORING_RACE_FILES_IN_DB if you don't want to
     use this mechanism (and instead host them elsewhere, e.g., on GitHub
     pages). The URL for the race file (whether it's on this server or
-    external) is in race.result_log_url (formerly call the result log
+    external) is in race.race_file_url (formerly call the result log
     file, but refactored to be the more general "race file").
     These are _not_ stored as a column in the race model to avoid
     ORM inefficiency in case these files are large — it's very likely this

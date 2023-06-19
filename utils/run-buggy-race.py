@@ -644,7 +644,7 @@ def run_race(race_data):
 
     results = {
  
-      "result_log_url": race_data["result_log_url"],
+      "race_file_url": race_data["race_file_url"],
       "title": race_data["title"],
       "description": race_data["description"],
       "cost_limit": cost_limit,

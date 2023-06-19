@@ -1708,7 +1708,7 @@ def staff_race_replayer():
     return render_template(
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        result_log_url="{{}}" # force JavaScript into believing it's standalone
+        race_file_url="{{}}" # force JavaScript into believing it's standalone
     )
 
 @blueprint.route("/config-docs-helper")

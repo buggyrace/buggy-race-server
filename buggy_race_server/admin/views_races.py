@@ -120,8 +120,8 @@ def view_race(race_id):
         prev_pos = res.race_position
     flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     race_file_is_local=bool(
-        race.result_log_url and
-        race.result_log_url.startswith(
+        race.race_file_url and
+        race.race_file_url.startswith(
             current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
         )
     )
@@ -181,7 +181,7 @@ def edit_race(race_id=None):
                 race.is_visible = form.is_visible.data
                 race.is_result_visible = form.is_result_visible.data
                 race.results_uploaded_at = form.results_uploaded_at.data
-                race.result_log_url = form.result_log_url.data
+                race.race_file_url = form.race_file_url.data
                 race.race_log_url = form.race_log_url.data
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data
@@ -261,7 +261,7 @@ def upload_race_file(race_id):
                                     race.store_race_file(result_data)
                                     url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
                                         + url_for("race.serve_race_file", race_id=race.id)
-                                    race.result_log_url = url
+                                    race.race_file_url = url
                                     race.save()
                                     flash(f"Stored race file on this server for use in replay (at {url})", "success")
                                     if not (race.is_visible and race.is_result_visible):

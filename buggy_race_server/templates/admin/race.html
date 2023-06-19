@@ -300,16 +300,6 @@
               {% endif %}
             </td>
           </tr>
-          <tr>
-            <td>URL of events log (JSON)</td>
-            <td>
-              {% if race.race_log_url is none or race.race_log_url == "" %}
-                <em class="empty-setting">none</em>
-              {% else %}
-                <code>{{ race.race_log_url }}</code>
-              {% endif %}
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>

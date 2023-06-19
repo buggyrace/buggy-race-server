@@ -651,7 +651,6 @@ def run_race(race_data):
       "max_laps": max_laps,
       "track_image_url": race_data["track_image_url"],
       "track_svg_url": race_data["track_svg_url"],
-      "race_log_url": race_data["race_log_url"],
       "league": race_data["league"],
       "start_at": race_data["start_at"],
       "raced_at": race_start_at,

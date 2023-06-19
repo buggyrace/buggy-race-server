@@ -86,7 +86,6 @@ class Race(SurrogatePK, Model):
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)
-    race_log_url = Column(db.String(255), unique=True, nullable=True)
     is_result_visible = db.Column(db.Boolean(), nullable=False, default=False)
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
@@ -117,7 +116,7 @@ class Race(SurrogatePK, Model):
 
     @property
     def has_urls(self):
-        return bool (self.race_file_url or self.race_log_url)
+        return bool (self.race_file_url)
 
     @property
     def start_at_servertime(self):
@@ -142,22 +141,18 @@ class Race(SurrogatePK, Model):
         return anchor
 
     @staticmethod
-    def get_duplicate_urls(race_id, race_file_url, race_log_url):
+    def get_duplicate_urls(race_id, race_file_url):
         """ Returns list of fields with duplicate (non-unique) URLs for a race"""
         dup_fields = {}
         race_id = race_id or 0
-        if race_file_url or race_log_url:
+        if race_file_url:
             if races := Race.query.filter(
-                  Race.id!=race_id).filter(
-                  (Race.race_file_url==race_file_url) |
-                  (Race.race_log_url==race_log_url)
-                ).all():
+                  Race.id!=race_id
+                ).filter(Race.race_file_url==race_file_url).all():
                 dup_fields = {}
                 for race in races:
                     if race_file_url and race.race_file_url == race_file_url:
                         dup_fields["race_file_url"] = True
-                    if race_log_url and race.race_log_url == race_log_url:
-                        dup_fields["race_log_url"] = True
         return dup_fields.keys()
 
 
@@ -168,8 +163,7 @@ class Race(SurrogatePK, Model):
                 # if JSON data contains a race ID, it must match
                 raise ValueError(f"Results data you uploaded has wrong race ID ({results_data.get('race_id')}) for this race ({self.id})")
         race_file_url = results_data.get("race_file_url")
-        race_log_url = results_data.get("race_log_url")
-        dup_fields = Race.get_duplicate_urls(self.id, race_file_url, race_log_url)
+        dup_fields = Race.get_duplicate_urls(self.id, race_file_url)
         if dup_fields:
             raise ValueError(
                 f"Already got a race with the same URL for {' and '.join(dup_fields)}"
@@ -303,14 +297,6 @@ class Race(SurrogatePK, Model):
                         warnings.append("Did not overwrite race result log URL")
                 else:
                     self.race_file_url = results_data.get("race_file_url")
-            if results_data.get("race_log_url"):
-                if self.race_log_url:
-                    if is_overwriting_urls:
-                        self.race_log_url = results_data.get("race_log_url")
-                    else:
-                        warnings.append("Did not overwrite race events log URL")
-                else:
-                    self.race_log_url = results_data.get("race_log_url")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 
@@ -336,7 +322,6 @@ class Race(SurrogatePK, Model):
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
             "lap_length": self.lap_length,
-            "race_log_url": self.race_log_url,
             "max_laps": 0,
             "start_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],

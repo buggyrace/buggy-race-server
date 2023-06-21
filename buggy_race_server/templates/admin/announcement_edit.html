@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin:
+  {% if announcement %} edit {% else %} new {% endif %}
+  announcement
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">

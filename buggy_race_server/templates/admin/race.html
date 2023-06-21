@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin: {{ race.title or "untitled race" }}
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3">
-      {{ race.title }}
+      {{ race.title or "Untitled race" }}
     </h1>
   </div>
   <div class="row">

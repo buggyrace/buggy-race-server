@@ -1,4 +1,12 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin:
+  {% if user %}
+    edit user {{ user.pretty_username }}
+  {% else %}
+    new user
+  {% endif %}
+{% endblock %}
 {% block content %}
 {% if is_current_user_administrator %}
   {%include "admin/_nav.html" %}

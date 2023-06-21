@@ -304,7 +304,7 @@ $(function() {
       let username = this.getAttribute("data-username");
       const hyphen_regex = /_/g;
       let pretty_username = username.replace(hyphen_regex, "-");
-      $json_modal_title.text(pretty_username + "’s buggy JSON");
+      $json_modal_title.text(pretty_username + "'s buggy JSON");
       $json_payload.text(USER_BUGGY_JSON[username]);
       $json_modal.modal('show')
     };

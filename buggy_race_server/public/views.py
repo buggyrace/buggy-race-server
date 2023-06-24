@@ -359,6 +359,9 @@ def download_editor_zip():
         current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
     )
     if not path.exists(zipfile):
-        flash("Editor zip file not available (maybe admin needs to publish it?)")
+        flash(
+            "Editor zip file not available (either you can't download it from"
+            " this server, or admin has not published it yet)",
+            "danger")
         abort(404)
     return send_file(zipfile)

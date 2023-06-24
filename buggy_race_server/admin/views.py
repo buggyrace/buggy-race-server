@@ -24,6 +24,7 @@ from flask import (
     render_template,
     request,
     Response,
+    send_file,
     session,
     url_for,
 )
@@ -1800,6 +1801,25 @@ def publish_editor_zip():
         buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
         editor_python_filename=editor_python_filename,
     )
+
+@blueprint.route("/buggy-editor/download", strict_slashes=False)
+@login_required
+@staff_only
+def download_editor_zip_for_admin():
+    """ Special case to allow admin to download published editor zipfile even
+    if settings prevent students having access: this sends if the file exists,
+    regardless of settings, potentially useful for _making_ the zip to then
+    distribute elsewhere."""
+    zipfile = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    )
+    if not os.path.exists(zipfile):
+        flash("Editor zip file not available (has not been published)", "danger")
+        abort(404)
+    return send_file(zipfile)
+
 
 @blueprint.route("/pre-reg-csv-utility", strict_slashes=False, methods=["GET", "POST"])
 @login_required

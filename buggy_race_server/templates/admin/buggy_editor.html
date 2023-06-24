@@ -37,29 +37,40 @@
           <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>
         </p>
       </div>
-      {% if not buggy_editor_zipfile_url %}
-        <div class="col-md-6">
-          {% if is_editor_zipfile_published %}
-            <div class="alert alert-success">
-              <h2 class="alert-title">Zipfile is published</h2>
+      <div class="col-md-6">
+        {% if is_editor_zipfile_published %}
+          <div class="alert {% if not buggy_editor_zipfile_url %}alert-success{% else %}alert-warning{% endif %}">
+            <h2 class="alert-title">Zipfile is published</h2>
+            <p>
+              The zipfile was published at {{ editor_zip_generated_datetime }}.
+            </p>
+            {% if buggy_editor_zipfile_url %}
               <p>
-                The zipfile was published at {{ editor_zip_generated_datetime }}.
+                Students <strong>cannot download it</strong> from here because
+                you've specified a URL that overrides the default on this server.
               </p>
+            {% else %}
               <p>
-                Students can download it from <a href="{{ url_for('public.download_editor_zip') }}">{{ url_for("public.download_editor_zip") }}</a>
+                Students can download it from
+                <a href="{{ url_for('public.download_editor_zip') }}">{{ url_for("public.download_editor_zip") }}</a>
+                (this is the <em><strong>Source code</strong>/Get the code</em> link on the server's
+                <a href="{{ url_for('public.home') }}">home&nbsp;page</a>).
               </p>
-            </div>
-          {% else %}
-            <div class="alert alert-danger">
-              <h2 class="alert-title">Zipfile is not yet published</h2>
-              <p>
-                The zipfile has not been published and is not
-                yet available for students to download.
-              </p>
-            </div>
+            {% endif %}
+            <p class="btn-collection">
+              <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.download_editor_zip_for_admin')}}">Download zipfile (staff only)</a>
+            </p>
+          </div>
+        {% else %}
+          <div class="alert alert-danger">
+            <h2 class="alert-title">Zipfile is not yet published</h2>
+            <p>
+              The zipfile has not been published and is not
+              yet available for students to download.
+            </p>
+          </div>
         {% endif %}
-        </div>
-      {% endif %}
+      </div>
     </div>
   {% else %}
     <div class="row">
@@ -134,12 +145,17 @@
         Check that the advice it's giving makes sense to your students, based
         on the way you're planning on running the project.
       </p>
-      <p>
-        If you're serving the buggy editor source code as a zipfile
-        <strong>from this race server</strong>, you can customise
-        the <code>{{ readme_filename }}</code> before you publish it
-        (this page is just an example).
-      </p>
+      {% if is_editor_zipfile_published %}
+        <div class="alert alert-warning">
+          <h2 class="alert-title">Contents may differ</h2>
+          <p>
+            When you published the zipfile, you customised its README
+            text. The text shown here is the suggested example — you
+            may have edited the contents of <code>{{ readme_filename }}</code>,
+            which is now inside the zipfile, differently.
+          </p>    
+        </div>
+      {% endif %}
     </div>
   </div>
   <div class="row">

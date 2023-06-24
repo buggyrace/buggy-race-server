@@ -306,7 +306,7 @@ class PublishEditorSourceForm(FlaskForm):
     readme_contents = TextAreaField(
         f"README contents", validators=[DataRequired()]
     )
-    is_updating_app_py = BooleanField("Update server URL in app?")
+    is_updating_app_py = BooleanField("Update server URL in Python source?")
 
     def __init__(self, *args, **kwargs):
         super(PublishEditorSourceForm, self).__init__(*args, **kwargs)

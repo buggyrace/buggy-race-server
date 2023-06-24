@@ -516,6 +516,9 @@ def admin():
         is_storing_texts=is_storing_texts,
         is_task_list_published=_is_task_list_published(),
         is_tech_notes_index_published=_is_tech_notes_index_published(),
+        is_editor_zipfile_published=_is_editor_zipfile_published(),
+        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+        buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
         notes_generated_timestamp=servertime_str(
           current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
           current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]

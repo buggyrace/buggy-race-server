@@ -59,14 +59,26 @@
             {% endif %}
             <p class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.download_editor_zip_for_admin')}}">Download zipfile (staff only)</a>
+              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
             </p>
           </div>
         {% else %}
-          <div class="alert alert-danger">
+          <div class="alert {% if buggy_editor_zipfile_url %}alert-warning{% else %}alert-danger{% endif %}">
             <h2 class="alert-title">Zipfile is not yet published</h2>
-            <p>
-              The zipfile has not been published and is not
-              yet available for students to download.
+            {% if buggy_editor_zipfile_url %}
+              <p>
+                Even if you do publish it, students <strong>will not be able to
+                download it</strong> from here because you've specified a URL
+                that overrides the default on this server.
+              </p>
+            {% else %}
+              <p>
+                The zipfile has not been published and is not
+                available for students to download.
+              </p>
+            {% endif %}
+            <p class="btn-collection">
+              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
             </p>
           </div>
         {% endif %}

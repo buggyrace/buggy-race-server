@@ -23,29 +23,62 @@
       </p>
     </div>
   </div>
-  <form action="{{ url_for('admin.publish_editor_zip') }}" method="POST">
-    {{ form.csrf_token }}
-    <div class="row">
-      <div class="col p-3">
-        {{ form.readme_contents.label() }}
-        {{ form.readme_contents(class="form-control mr-sm-1", rows=qty_lines_in_readme) }}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col p-3">
-        {{ form.is_updating_app_py.label() }}
-        <select name="is_updating_app_py" class="form-control">
-          <option value="">No</option>
-          <option value="1" selected>Yes</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col p-3 btn-collection">
-        <button class="btn btn-primary">Create zip file and publish</button>
-      </div>
-    </div>
-  </form>
+  <div class="row">
+    <div class="col">
+      <form action="{{ url_for('admin.publish_editor_zip') }}" method="POST">
+        {{ form.csrf_token }}
+        <div class="container border">
+          <div class="row">
+            <div class="col p-3" id="readme-col">
+              {{ form.readme_contents.label() }}
+              {{ form.readme_contents(id="readme-input", class="form-control mr-sm-1", rows=qty_lines_in_readme) }}
+            </div>      
+          </div>
+          <div class="row">
+            <div class="col p-3">
+              {{ form.is_updating_app_py.label() }}
+              <select name="is_updating_app_py" class="form-control">
+                <option value="">No</option>
+                <option value="1" selected>Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col p-3 btn-collection">
+              <button class="btn btn-primary">Create zip file and publish</button>
+            </div>
+          </div>
+        </div>
+      </form>
+      {% if qty_lines_in_readme > 16 %}
+        <script>
+          const QTY_LINES_IN_README = Math.round("{{ qty_lines_in_readme }}");
+          const REASONABLE_QTY_LINES = 6;
+          const EXPAND_TEXT = "Expand input";
+          const SHRINK_TEXT = "Shrink input";
+          const readme_input = document.getElementById("readme-input");
+          readme_input.setAttribute("rows", REASONABLE_QTY_LINES);
+          const readme_size_btn = document.createElement("button");
+          readme_size_btn.classList.add("btn", "btn-outline-secondary", "btn-sm", "float-right", "m-2");
+          readme_size_btn.innerText="Expand input";
+          readme_size_btn.addEventListener("click", function(e){
+            e.preventDefault();
+            let text, qty_rows; // 
+            if (readme_size_btn.innerText == EXPAND_TEXT) {
+              text = SHRINK_TEXT;
+              qty_rows = QTY_LINES_IN_README
+            } else  {
+              text = EXPAND_TEXT;
+              qty_rows = REASONABLE_QTY_LINES
+            }
+            readme_size_btn.innerText = text;
+            readme_input.setAttribute("rows", qty_rows);
+          })
+          document.getElementById("readme-col").prepend(readme_size_btn);
+        </script>
+      {% endif %}
+    </div>  
+  </div>
 </div>
 {% endblock %}
 

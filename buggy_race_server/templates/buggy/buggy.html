@@ -175,7 +175,7 @@
   {% if delete_form %}
   <div class="row">
     <div class="col-md-8 mt-5">
-      <div class="border border container">
+      <div class="border container">
         <form id="track-delete-form" class="form form-delete" method="POST"
           action="{{ delete_form_action }}" role="form">
           {{ delete_form.csrf_token }}
@@ -187,16 +187,17 @@
             </div>
           </div>
           <div class="row">
-          <div class="col-sm-6">
-            Are you sure?
-            <select id="is_confirmed" name="is_confirmed" class="form-control">
-              <option selected value="">No</option>
-              <option value="">I think so</option>
-              <option value="y">Yes</option>
-            </select>  
-          </div>
-          <div class="col-sm-6 my-3">
-            <input type="submit" class="btn btn-danger" value="Delete buggy"/>
+            <div class="col-xs-6 p-3">
+              Are you sure?
+              <select id="is_confirmed" name="is_confirmed" class="form-control">
+                <option selected value="">No</option>
+                <option value="">I think so</option>
+                <option value="y">Yes</option>
+              </select>  
+            </div>
+            <div class="col-xs-6 p-3 bottom">
+              <input type="submit" class="btn btn-danger" value="Delete buggy"/>
+            </div>
           </div>
         </form>
       </div>

@@ -8,68 +8,123 @@
       Buggy Editor (the students' repo)
     </h1>
   </div>
-  <div class="row">
-    <div class="col-md-6">
-      {% if is_default_repo_owner  %}
-        <div class="alert alert-danger">
-          <p>
-            This race server is currently configured to
-            use the default buggy editor, owned by
-            <code>buggyrace</code>.
-          </p>
-          <p>
-            You <em>can</em> run like this, but it's probably
-            better to use a customised fork instead.
-          </p>
+  {% if not is_using_github %}
+    <div class="row">
+      <div class="col-md-6">
+        <div class="alert alert-info">
+          <h2 class="alert-title">Not using GitHub</h2>
+          {% if buggy_editor_zipfile_url %}
+            <p>
+              Your students can download the editor source code
+              from <code><a href="{{ buggy_editor_zipfile_url }}">{{ buggy_editor_zipfile_url }}</a></code>
+            </p>
+          {% else %}
+            <p>
+              Your students can download the editor source as a
+              zip file from this server.
+            </p>
+            <p class="btn-collection">
+              <a class="btn btn-outline-secondary btn-admin btn-jump"
+              href="{{ url_for('admin.publish_editor_zip') }}">Publish editor zipfile</a>
+            </p>
+          {% endif %}
         </div>
-      {% else %}
-        <div class="alert alert-success">
-          <p>
-            This race server is currently configured to
-            use a fork of the buggy editor, owned by
-            <code>{{ buggy_editor_repo_owner }}</code>.  
-          </p>
+        <p>
+          You can change this behaviour with the "GitHub" config
+          settings.
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>
+        </p>
+      </div>
+      {% if not buggy_editor_zipfile_url %}
+        <div class="col-md-6">
+          {% if is_editor_zipfile_published %}
+            <div class="alert alert-success">
+              <h2 class="alert-title">Zipfile is published</h2>
+              <p>
+                The zipfile was published at {{ editor_zip_generated_datetime }}.
+              </p>
+              <p>
+                Students can download it from <a href="{{ url_for('public.download_editor_zip') }}">{{ url_for("public.download_editor_zip") }}</a>
+              </p>
+            </div>
+          {% else %}
+            <div class="alert alert-danger">
+              <h2 class="alert-title">Zipfile is not yet published</h2>
+              <p>
+                The zipfile has not been published and is not
+                yet available for students to download.
+              </p>
+            </div>
+        {% endif %}
         </div>
       {% endif %}
-      <div class="alert alert-info">
-        <p>
-          This is the source code repo that your students will
-          be downloading:
-        </p>
-        <p>
-          <code>{{ buggy_editor_github_url }}</code>
-        </p>
-        </p>
-        <p class="btn-collection">
-          <a href="{{ buggy_editor_github_url }}" class="btn btn-outline-primary btn-jump btn-white">Buggy editor repo on GitHub</a>
-        </p>  
+    </div>
+  {% else %}
+    <div class="row">
+      <div class="col-md-6">
+        {% if is_default_repo_owner  %}
+          <div class="alert alert-danger">
+            <p>
+              This race server is currently configured to
+              use the default buggy editor, owned by
+              <code>buggyrace</code>.
+            </p>
+            <p>
+              You <em>can</em> run like this, but it's probably
+              better to use a customised fork instead.
+            </p>
+          </div>
+        {% else %}
+          <div class="alert alert-success">
+            <p>
+              This race server is currently configured to
+              use a fork of the buggy editor, owned by
+              <code>{{ buggy_editor_repo_owner }}</code>.  
+            </p>
+          </div>
+        {% endif %}
+        <div class="alert alert-info">
+          <p>
+            This is the source code repo that your students will
+            be downloading:
+          </p>
+          <p>
+            <code>{{ buggy_editor_github_url }}</code>
+          </p>
+          </p>
+          <p class="btn-collection">
+            <a href="{{ buggy_editor_github_url }}" class="btn btn-outline-primary btn-jump btn-white">Buggy editor repo on GitHub</a>
+          </p>  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="alert alert-warning">
+          <h2 class="alert-title">Customising the editor repo</h2>
+          <p>
+            {% if is_default_repo_owner  %}
+              You should probably fork that repo into your own GitHub account
+              (or one belonging to {{ institution_short_name or institution_name or 'your institution'}}).
+            {% endif %}
+            Before your project starts, you should customise the <code>{{ readme_filename }}</code>
+            with the example text below (or something like it), and commit the changes.
+            Finally make sure the server's config settings are pointing at
+            your customised repo.
+          </p>
+          <p class="btn-collection">
+            <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
+          </p>
+        </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="alert alert-warning">
-        <h2 class="alert-title">Customising the editor repo</h2>
-        <p>
-          {% if is_default_repo_owner  %}
-            You should probably fork that repo into your own GitHub account
-            (or one belonging to {{ institution_short_name or institution_name or 'your institution'}}).
-          {% endif %}
-          Before your project starts, you should customise the <code>README</code>
-          with the example text below (or something like it), and commit the changes.
-          Finally make sure the server's config settings are pointing at
-          your customised repo.
-        </p>
-        <p class="btn-collection">
-          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
-        </p>
-      </div>
-    </div>
-  </div>
+  {% endif %}
   <div class="row">
     <div class="col-md-8 my-3">
-      <h2>An example README.md</h2>
+      <h2>An example {{ readme_filename }}</h2>
       <p>
-        The default <code>README.md</code> in the buggy editor repo owned by <code>buggyrace</code>
-        is, by necessity, not customised. For example, ideally its README should
+        The default <code>{{ readme_filename }}</code> in the buggy editor repo owned by <code>buggyrace</code>
+        is, by necessity, not customised. For example, ideally its {{ readme_filename }} should
         include a link back to <em>this</em> race server (<code>{{ buggy_race_server_url }}</code>).
       </p>
       <p>
@@ -79,179 +134,18 @@
         Check that the advice it's giving makes sense to your students, based
         on the way you're planning on running the project.
       </p>
+      <p>
+        If you're serving the buggy editor source code as a zipfile
+        <strong>from this race server</strong>, you can customise
+        the <code>{{ readme_filename }}</code> before you publish it
+        (this page is just an example).
+      </p>
     </div>
   </div>
   <div class="row">
     <div class="col copy-to-clipboard" data-target="example-editor-readme">
 <pre id="example-editor-readme" class="p-3 task-text">
-{{ editor_title }}
-{{ '=' * (editor_title | length) }}
-
-> This is the "buggy editor" component of the Buggy Racing project
-
-
-Overview
---------
-
-This is the skeleton of an application for editing a racing buggy.
-
-It runs as a webserver so you can edit the configuration of a buggy in your
-browser. The editor can then generate the data, in JSON format, that you need
-in order to enter races on the [race server]({{ buggy_race_server_url }}).
-
-The application is written in Python3 using the
-[Flask](https://palletsprojects.com/p/flask/) micro-framework.
-
-> It's also written in a way which you can and should fix! You should be able
-> to get it up and running (with SQLite) without needing to change the code...
-> but from that point on you'll need to change pretty much everything to make
-> it better. 
-
-* [Technical & project information]({{ buggy_race_server_url }}{{ url_for('public.serve_project_page', page='index') }})
-
-
-Installation & set-up
----------------------
-
-Getting the editor running on your own machine differs depending on which
-operating system you're using. The principles are the same, but the way to
-execute them is slightly different.
-
-{% if task_0_get_name %}
-**The first task is [{{ task_0_get_name }}: get the source code]({{ buggy_race_server_url }}{{ url_for('public.show_single_task', task_id=task_0_get_name) }})**
-{% endif %}
-Start by logging into the [race server]({{ buggy_race_server_url }}).
-{% if is_using_github_api_to_fork %}
-If you follow the instructions there, it will automatically _fork_ the repo
-into your own GitHub account for you. Then clone that fork from your GitHub
-account onto your own machine.
-{% endif %}
-
-> If you don't have access to your own machine, it's possible to use
-> [repli.it](https://replit.com) or [pythonanywhere](https://www.pythonanywhere.com) instead.
-
-
-### Prerequisites
-
-You must have Python3 installed:
-
-* [Python 3](https://www.python.org) for programming
-
-It's best if you have Git installed too:
-
-* [Git](https://git-scm.com) for version control
-
-> If you don't/can't install git, you _can_ download the source code manually
-> but we recommend you don't do it that way.
-
-If Python or git are not already installed on your machine, see the
-downloads/installation instructions on their respective websites.
-
-
-### Installation
-
-Before you can run the buggy editor webserver you need to install some
-Python modules.
-
-> **About virtual environments**
->
-> Any software project depends on specific versions of tools (for example,
-> Python 3.8) and their associated libraries. You need these to be installed
-> before you can use them.  Instead of installing them on your whole machine
-> (which might be a problem if other projects need different versions of the
-> same libraries) it's best to create a virtual environment just for this
-> project, and work inside that.
->
-> However, if you're totally new to programming, the extra complication of
-> using a virtual environment probably isn't worth it (yet). But if you want
-> to find out more, see the 
-> [tech notes]({{ buggy_race_server_url}}{{ url_for('public.serve_tech_notes', path='index') }}).
-
-Use the `cd` command to change to the directory that you got from either
-cloning or unzipping the source code (it will probably be called something
-like `{{ buggy_editor_repo_name  }}`).
-
-Use pip — which should have been installed as a side-effect of installing
-Python — to load the required modules (including Flask, the webserver
-framework). The file `requirements.txt` tells pip what modules are needed.
-
-    pip install -r requirements.txt
-
-Finally, set up the database:
-
-    python3 init_db.py
-
-This creates an SQLite database in a file called `database.db`.
-
-There's no configuration file to edit (yet). You're ready to go!
-
-> If `pip` or `python3` don't work for you: ask for help! The details differ
-> depending on what operating system you're using and how you installed
-> Python.
-
-
-Running the server
-------------------
-
-Once the source code is on your machine, the dependencies are installed, and
-the database initialised, you can run the Buggy Editor.
-
-If you're not already in the project's directory, `cd` into it.
-
-> If you're using a virtual environment, remember to activate it now.
-
-Run the application with:
-
-    python3 app.py
-
-The webserver is running on port 5000 (that's the default for Flask apps). If
-you make a request for a web page, it will reply with one!
-
-Go to [http://localhost:5000](http://localhost:5000) in your web browser.
-You haven't specified which file you want, so you'll get the `/` route, which
-(you can see this by looking in `app.py`) invokes the `index.html` template.
-
-You can see the webserver's activity in the terminal, and the result of its
-action in the browser.
-
-
-### Shutting down the server
-
-When you want to stop the program running, in the terminal where the webserver
-is running, press Control-C. This interrupts the server and halts the execution
-of the program. (If you go to [http://localhost:5000](http://localhost:5000) in
-your web browser now, you'll see a message saying you can't connect to the
-server — because you've killed it: it's no longer there).
-
-> If you were running in a virtual environment, you can deactivate it by
-> issuing the command `deactivate`.
-
-You're done!
-
-
-### Extra detail: setting `FLASK_ENV`
-
-It's best if you run in Flask's _development environment_. To do that, set the 
-environment variable `FLASK_ENV` before you run `appy.py` to `development`.
-Once you've done this, it's good for the rest of the session.
-
-On Windows cmd/Powershell do:
-
-    $env:FLASK_ENV = 'development'
-
-On Linux or Mac:
-
-    export FLASK_ENV=development
-
-{% if task_3_env_name %}
-When you get to task [{{ task_3_env_name }}]({{ buggy_race_server_url }}{{ url_for('public.show_single_task', task_id=task_3_env_name) }})
-you'll investigate other ways of doing this.
-{% endif %}
-
----
-
-{% if institution_short_name %}*{{ institution_short_name }}*{% endif %}
-{% if project_code %}*{{ project_code }}*{% endif %}
+{% include "admin/_buggy_editor_readme.txt" %}
 </pre>
       </div>
     </div>

@@ -6,6 +6,9 @@ race.log
 published/tech_notes/
 published/_task_list.html
 published/*issues.csv
+published/editor/buggy-race-editor.zip
+published/editor/buggy-race-editor/*
+
 tech_notes/pelicanconflive.py
 
 **/__pycache__/

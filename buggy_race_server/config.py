@@ -34,6 +34,15 @@ MANUAL_LATEST_VERSION_IN_SOURCE = "v1.0.7"
 #
 # ----------------------------------------------------------------------------
 
+# If you update the files in editor_source, update this to record which commit
+# (presumably on main branch) of the repo it was from (you need to track this
+# manually because we're _not_ using Git submodules)
+# This is from https://github.com/buggyrace/buggy-race-editor/
+#
+MANUAL_EDITOR_COMMIT = "45c3936fd24ab854fce9adafa11ba5fcbc1616ff"
+#
+# ----------------------------------------------------------------------------
+
 class ConfigSettingNames(Enum):
 
     def _generate_next_value_(name, start, count, last_values):
@@ -51,14 +60,45 @@ class ConfigSettingNames(Enum):
     # Settings prefixed by _ are implied/managed entirely in code, so should
     # not be set by user (so: are not edited (or seen) in admin/settings
 
+    # The commit hash for the snapshot of the editor files in this repo
+    # (see note re: MANUAL_EDITOR_COMMIT above, which this is set to)
+    _BUGGY_EDITOR_SOURCE_COMMIT = auto()
+
+    # The URL of the buggyrace github repo for the editor — note this is the
+    # one we use, not the forked one that the admins may be using — used to
+    # link to the source from which the editor files included in this server
+    # repo originated.
+    _BUGGY_EDITOR_ORIGIN_GITHUB_URL = auto()
+
+    # The name of the main python file (app.py) in the origin repo that
+    # contains the (harcoded) race server URL
+    _EDITOR_PYTHON_FILENAME = auto()
+
     # Name of the CSV file into which tasks-as-issues (for GitHub) are put
     _BUGGY_EDITOR_ISSUES_FILE = auto()
 
     # Current announcements are cached to avoid database reads on every hit
     _CURRENT_ANNOUNCEMENTS = auto()
 
-    # Path where published HTML (task list and tech notes) is written
+    # Path where published HTML (task list and tech notes) and zip is written
     _PUBLISHED_PATH = auto()
+
+    # Directory containing editor code (this itself contains a directory
+    # that contains the files to be zipped: _EDITOR_REPO_DIR_NAME
+    _EDITOR_INPUT_DIR = auto()
+  
+    # Directory, within published path, where buggy editor output is written
+    # before (and after) zipping it up
+    _EDITOR_OUTPUT_DIR = auto()
+
+    # Name of directory that contains the actual files (contents from repo)
+    # of the buggy editor — used as a container dir in both the source and
+    # the output directory paths
+    _EDITOR_REPO_DIR_NAME = auto()
+
+    # The README in the buggy editor should be customised: this is the name
+    # of the README file in the repo (it's a markdown file)
+    _EDITOR_README_FILENAME = auto()
 
     # Path where static race assets (race player, etc) are found
     _RACE_ASSETS_PATH = auto()
@@ -76,6 +116,7 @@ class ConfigSettingNames(Enum):
     _TASK_LIST_GENERATED_DATETIME = auto()
     _TASKS_LOADED_DATETIME = auto()
     _TECH_NOTES_GENERATED_DATETIME = auto()
+    _EDITOR_ZIP_GENERATED_DATETIME = auto()
 
     # Filename of the generated task list (effectively static content)
     _TASK_LIST_HTML_FILENAME = auto()
@@ -102,6 +143,8 @@ class ConfigSettingNames(Enum):
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
+    BUGGY_EDITOR_DOWNLOAD_URL = auto()
+    BUGGY_EDITOR_ZIPFILE_NAME = auto()
     BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
@@ -145,6 +188,7 @@ class ConfigSettingNames(Enum):
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
+    IS_USING_GITHUB = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
@@ -235,6 +279,9 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
       ),
       ConfigGroupNames.GITHUB.name: (
+        ConfigSettingNames.IS_USING_GITHUB.name,
+        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
@@ -338,7 +385,15 @@ class ConfigSettings:
     # in the DEFAULTS (it's used during setup to populate the database)
 
     DEFAULTS = {
+        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
+        ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
+        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
+        ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
+        ConfigSettingNames._EDITOR_OUTPUT_DIR.name: "editor",
+        ConfigSettingNames._EDITOR_README_FILENAME.name: "README.md",
+        ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: "buggy-race-editor",
+        ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
@@ -358,6 +413,8 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
+        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
@@ -402,6 +459,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
+        ConfigSettingNames.IS_USING_GITHUB.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
@@ -454,7 +512,14 @@ class ConfigSettings:
     # database. By default they are strings, but it's best to be explicit.
 
     TYPES = {
+        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_OUTPUT_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_README_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
@@ -472,6 +537,8 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
@@ -515,6 +582,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_GITHUB.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
@@ -596,6 +664,19 @@ class ConfigSettings:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           You don't need to change this unless you've forked your own custom
           version of the repo.""",
+
+        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
+          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), and
+          want to use the default buggy editor source code served from this
+          server, what is the name of the zip file?""",
+
+        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
+          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), your
+          students can download the buggy editor zipfile from this server. If
+          you prefer to provide your own copy instead, provide a URL to your
+          own instructions or zipfile instead. This setting is ignored if
+          `IS_USING_GITHUB` is `Yes`.
+          """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
@@ -887,6 +968,14 @@ class ConfigSettings:
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
+
+        ConfigSettingNames.IS_USING_GITHUB.name:
+          """Are you using GitHub to distribute the source code for the
+          buggy editor to students? If you choose `Yes` there is still quite a
+          lot of flexibility as to how it's implemented (from simply downloading
+          from GitHub to automatically forking it into their GitHub account).
+          If you choose `No`, the students can download a zip file from this
+          server (or you can override this with your own copy).""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
           """If students must work with the buggy editor in their own GitHub

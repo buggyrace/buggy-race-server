@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>Buggy</h1>
+
+  <table>
+    <tr>
+      <td>ID:</td> <td> {{ buggy['id'] }} </td>
+    </tr>
+    <tr>
+      <td>Wheels:</td> <td> {{ buggy['qty_wheels'] }} </td>
+    </tr>
+  </table>
+
+  <p>
+    <a href="/" class="button">home</a>
+  </p>
+
+{% endblock %}

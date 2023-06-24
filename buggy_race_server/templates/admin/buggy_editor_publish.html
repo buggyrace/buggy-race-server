@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: publish buggy editor {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Publish the Buggy Editor
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
+      <p>
+        The editor files will be zipped up together with this custom
+        <code>{{ readme_filename }}</code>. You can also update the
+        harcoded server url in {{ editor_python_filename }} so the
+        students' editors link back to <em>this</em> race server.
+      </p>
+      <p>
+        The files are a fixed snapshot from the editor repo, taken
+        from this commit:
+        <a href="{{ buggy_editor_origin_github_url }}/commit/{{ editor_source_commit }}">{{ editor_source_commit[:9] }}</a>.
+      </p>
+    </div>
+  </div>
+  <form action="{{ url_for('admin.publish_editor_zip') }}" method="POST">
+    {{ form.csrf_token }}
+    <div class="row">
+      <div class="col p-3">
+        {{ form.readme_contents.label() }}
+        {{ form.readme_contents(class="form-control mr-sm-1", rows=qty_lines_in_readme) }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col p-3">
+        {{ form.is_updating_app_py.label() }}
+        <select name="is_updating_app_py" class="form-control">
+          <option value="">No</option>
+          <option value="1" selected>Yes</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col p-3 btn-collection">
+        <button class="btn btn-primary">Create zip file and publish</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

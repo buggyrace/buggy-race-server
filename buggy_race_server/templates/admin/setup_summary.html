@@ -175,7 +175,8 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div class="alert alert-warning">
+      {% if is_using_github %}
+        <div class="alert alert-warning">
         <h2 class="alert-title">GitHub &amp; editor repo</h2>
         <p>
           <code><a href="{{ buggy_editor_github_url }}">{{ buggy_editor_github_url }}</a></code>
@@ -215,8 +216,41 @@
         <p class="btn-collection">
           <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
         </p>
+        </div>
+      {% else %}
+        <div class="alert {% if not (buggy_editor_download_url or is_editor_zipfile_published) %}alert-danger{% else %}alert-warning{% endif %}">
+          <h2 class="alert-title">Not using GitHub</h2>
+          {% if buggy_editor_download_url %}
+            <p>
+              Students download the source code for their buggy editor
+              from <code><a href="{{ buggy_editor_download_url }}">{{ buggy_editor_download_url }}</a></code>
+            </p>
+            <p class="btn-collection">
+              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_buggy_editor_info')}}">Buggy editor</a>
+            </p>
+          {% else %}
+            <p>
+              Students download the source code for their buggy editor as
+              a zip file from this server.
+              {% if not is_editor_zipfile_published %}
+                <strong>The zipfile has not been published yet</strong>.
+              {% else %}
+                The zipfile was published on {{ editor_zip_generated_datetime }}
+              {% endif %}
+            </p>
+            <p class="btn-collection">
+              {% if not is_editor_zipfile_published %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
+              {% endif %}
+              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_buggy_editor_info')}}">Buggy editor</a>
+            </p>
+          {% endif %}
+          <p class="btn-collection">
+            <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>
+          </p>
+          </div>
+      {% endif %}
       </div>
-    </div>
   </div>
   <div class="row">
     <div class="col-md-6">

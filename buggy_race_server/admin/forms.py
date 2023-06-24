@@ -302,6 +302,18 @@ class TaskTextDeleteForm(FlaskForm):
     def validate(self):
         return super(TaskTextDeleteForm, self).validate()
 
+class PublishEditorSourceForm(FlaskForm):
+    readme_contents = TextAreaField(
+        f"README contents", validators=[DataRequired()]
+    )
+    is_updating_app_py = BooleanField("Update server URL in app?")
+
+    def __init__(self, *args, **kwargs):
+        super(PublishEditorSourceForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(PublishEditorSourceForm, self).validate()
+
 class SubmitWithConfirmForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")
   

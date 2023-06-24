@@ -50,11 +50,17 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
+    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
+    else:
+        editor_url = url_for("public.download_editor_zip")
     return render_template(
         "public/home.html",
         social_site_links=SocialSetting.get_socials_from_config(current_app.config),
         local_announcement_type=AnnouncementType.TAGLINE.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        editor_url=editor_url,
+
     )
 
 @blueprint.route("/logout", strict_slashes=False)
@@ -340,3 +346,19 @@ def serve_tech_notes(path=None):
     except FileNotFoundError as e:
         abort(404)
 
+@blueprint.route("/editor/download", strict_slashes=False)
+def download_editor_zip():
+    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+        flash("Cannot download editor source files from this race server", "warning")
+        abort(404)
+    if zip_url := current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name]:
+        return redirect(zip_url)
+    zipfile = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    )
+    if not path.exists(zipfile):
+        flash("Editor zip file not available (maybe admin needs to publish it?)")
+        abort(404)
+    return send_file(zipfile)

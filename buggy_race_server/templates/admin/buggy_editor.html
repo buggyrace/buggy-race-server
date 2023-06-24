@@ -61,6 +61,24 @@
               <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.download_editor_zip_for_admin')}}">Download zipfile (staff only)</a>
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
             </p>
+            <form action="{{ url_for('admin.delete_buggy_editor_zip') }}" method="POST">
+              <div class="container border">
+                {{ delete_form.csrf_token }}
+                <div class="row">
+                  <div class="col-xs-6 p-3">
+                    {{ delete_form.is_confirmed.label }}
+                    <select id="is_confirmed" name="is_confirmed" class="form-control">
+                      <option selected value="">No</option>
+                      <option value="">I think so</option>
+                      <option value="y">Yes</option>
+                    </select>  
+                  </div>
+                  <div class="col-xs-6 p-3 bottom">
+                    <button class="btn btn-danger">Delete zipfile</button>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
         {% else %}
           <div class="alert {% if buggy_editor_zipfile_url %}alert-warning{% else %}alert-danger{% endif %}">

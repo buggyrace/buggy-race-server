@@ -1698,7 +1698,33 @@ def show_buggy_editor_info():
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
+      delete_form=SubmitWithConfirmForm()
    )
+
+@blueprint.route("/buggy-editor/delete", strict_slashes=False, methods=["POST"])
+@login_required
+@admin_only
+def delete_buggy_editor_zip():
+    form = SubmitWithConfirmForm(request.form)
+    if form.validate_on_submit():
+        if form.is_confirmed.data:
+            zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            target_zipfile = join_to_project_root(
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+                zipfilename
+            )
+            try:
+                os.unlink(target_zipfile)
+            except os.error as e:
+                flash(f"Problem deleting \"{zipfilename}\": {e}", "danger")
+            else:
+                flash(f"OK, deleted \"{zipfilename}\"", "success")
+        else:
+            flash("Did not delete zipfile because you did not explicitly confirm it", "danger")
+    else:
+        flash("Wiring error, can't delete", "danger")
+    return redirect(url_for("admin.show_buggy_editor_info"))
 
 @blueprint.route("/buggy-editor/publish", methods=['GET', 'POST'])
 @login_required
@@ -1728,7 +1754,8 @@ def publish_editor_zip():
         if target_zipfile.endswith(".zip"):
             target_zipfile = target_zipfile[0:-len(".zip")]
         target_zipfile = join_to_project_root(
-            "published", "editor",
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
             target_zipfile
         )
         try:

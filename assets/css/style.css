@@ -336,6 +336,10 @@ footer .footer-nav {
 .table-striped tbody tr:nth-of-type(odd).staff{ background-color: #f0e0aa; }
 .table-striped tbody tr:nth-of-type(odd).staff:hover{ background-color: #eddca6; }
 
+.bottom { /* for droppinging flex items (delete button) in flex containers */
+  align-self: end;
+}
+
 .buggy-warn{
   padding:0.5em 0.5em;
   background-color: red;

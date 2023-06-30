@@ -41,7 +41,7 @@ There are three repos:
   "tech notes").
 
 * [buggy-race-editor](https://github.com/buggyrace/buggy-race-editor)  
-  Contains the skeleton Flask web app that runs the Racing Buggy editor that
+  Contains the skeleton Flask web app that runs the Buggy editor that
   every student is given, and which they must develop according to the tasks.
 
 * [buggy-race-about](https://github.com/buggyrace/buggy-race-about)  

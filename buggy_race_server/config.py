@@ -1006,7 +1006,7 @@ class ConfigSettings:
           (for example, when we ran it at Royal Holloway, it was CS1999).
           See also `PROJECT_SLUG` which is how this code may appear in
           filenames of any downloaded files, if you need it to be different.
-          The full name of the project is \"the `PROJECT_CODE` Racing Buggy
+          The full name of the project is \"the `PROJECT_CODE` Buggy Racing
           project\", so if you don't have or need a course code, it's fine
           to leave it blank.""",
 

@@ -162,8 +162,7 @@
               <div class="row">
                 <div class="col">
                   <p>
-                    You have forked the Racing Buggy Editor repo into your
-                    GitHub account.
+                    You have forked the Buggy Editor repo into your GitHub account.
                   </p>
                   <p class="btn-collection">
                     <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your GitHub repo</a>
@@ -190,7 +189,7 @@
                 <div class="col">
                   <div class="alert alert-primary">
                     <p>
-                      You can now <em>fork</em> the Racing Buggy Editor repo.
+                      You can now <em>fork</em> the Buggy Editor repo.
                       This will copy all the files you need into your own
                       GitHub account
                       (<strong>{{ current_user.github_username }}</strong>).
@@ -200,7 +199,7 @@
                     <div class="my-3">
                       <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                        <button type="submit" class="btn btn-primary btn-jump">Fork Racing Buggy Editor repo</button>
+                        <button type="submit" class="btn btn-primary btn-jump">Fork Buggy Editor repo</button>
                       </form>
                     </div>
                     <p>
@@ -215,7 +214,7 @@
               <div class="col">
                 <p>
                   If you connect your GitHub account to this buggy racing
-                  server, we'll fork the Racing Buggy Editor repo into your
+                  server, we'll fork the Buggy Editor repo into your
                   own account and then add the project tasks (as GitHub
                   "issues").
                 </p>

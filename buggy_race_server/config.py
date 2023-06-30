@@ -712,7 +712,7 @@ class ConfigSettings:
          """,
 
         ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name:
-         """The default path — described as a <path> element within the
+         """The default path — described as a `path` element within the
          SVG file found at this URL — for racetracks used in the race replayer).
          """,
 

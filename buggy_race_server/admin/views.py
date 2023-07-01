@@ -1884,14 +1884,15 @@ def pre_registration_csv_utility():
         users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
     )
 
-@blueprint.route("race/replay/standalone")
+@blueprint.route("race/replay/stripped-down")
 @login_required
 @staff_only
-def staff_race_replayer_standalone():
+def stripped_down_race_replayer():
     return render_template(
-        "races/player_without_nav.html",
+        "races/player_stripped_down.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        race_file_url="{{}}" # force JavaScript into believing it's standalone
+        current_user_username="nobody!", # ensure no username match with "!"
+        race_file_url="{{}}", # force JavaScript into believing it's standalone
     )
 
 @blueprint.route("race/replay")
@@ -1900,10 +1901,12 @@ def staff_race_replayer_standalone():
 def staff_race_replayer():
     """ race replayer for staff testing that isn't linked to datatabase races:
     this will try to load whatever URL is passed into the ?race= query var.
-    This isn't suitable for replaying races because only staff can access it."""
+    This isn't suitable for replaying races for students because only staff can
+     access it — but can be handy for testing new race files."""
     return render_template(
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        current_user_username=current_user.username,
         race_file_url="{{}}" # force JavaScript into believing it's standalone
     )
 

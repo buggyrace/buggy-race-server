@@ -315,7 +315,7 @@
   <script>
   //================================================//
     const RACE_RESULTS_JSON_URL = "{{ race_file_url }}";
-    const USER_TRACKING_ID = "{{ current_user.username }}";
+    const USER_TRACKING_ID = "{{ current_user_username }}";
   //================================================//
   </script>  
   <script src="{{ url_for('race.serve_race_player_asset', filename='buggy-race-player.js') }}?cachebuster={{ cachebuster }}"></script>

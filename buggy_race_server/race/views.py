@@ -106,8 +106,13 @@ def replay_race(race_id):
     if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
         anchor = Race.get_replay_anchor()
         return redirect(f"{player_url}?race={race_file_url}{anchor}")
+    if current_user.is_anonymous:
+        current_user_username = "nobody!" # ensure no username match with "!"
+    else:
+        current_user_username = current_user.username
     return render_template(
         "races/player.html",
+        current_user_username=current_user_username,
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
         race_file_url=race_file_url,
     )

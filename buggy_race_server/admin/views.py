@@ -1884,6 +1884,16 @@ def pre_registration_csv_utility():
         users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
     )
 
+@blueprint.route("race/replay/standalone")
+@login_required
+@staff_only
+def staff_race_replayer_standalone():
+    return render_template(
+        "races/player_without_nav.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        race_file_url="{{}}" # force JavaScript into believing it's standalone
+    )
+
 @blueprint.route("race/replay")
 @login_required
 @staff_only

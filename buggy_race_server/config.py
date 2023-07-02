@@ -1306,10 +1306,12 @@ class ConfigSettings:
     # config key for cachebuster: a number expected to be different each run
     CACHEBUSTER_KEY = "_CACHEBUSTER"
 
-    # config key for forcing the database URI's password to be rewritten
-    # as a query variable (which is not stored in the database: must be read
+    # config keys for forcing the database URI's password to be rewritten
+    # and adding sslmode=require
+    # as a query variables (which are not stored in the database: must be read
     # from the environment, because it happens before db connection is made)
     REWRITING_DB_URI_PASSWORD_KEY = "IS_REWRITING_DB_URI_PW_AS_QUERY"
+    DB_URI_SSL_MODE_REQUIRED_KEY = "IS_DB_URI_SSL_MODE_REQUIRED"
 
     @staticmethod
     def is_valid_name(name):
@@ -1490,7 +1492,7 @@ class ConfigFromEnv():
       # Some shenanigans here because since upgrading Flask, we've seen
       # access only working if the password is passed as a query variable
       # on the end of the database URI, which isn't how heroku presents it
-      
+
       is_rewriting_db_uri_pw_as_query = env.bool(
           ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
           False
@@ -1498,6 +1500,15 @@ class ConfigFromEnv():
       self.__setattr__(
         ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
         is_rewriting_db_uri_pw_as_query
+      )
+
+      is_db_uri_ssl_mode_required_key = env.bool(
+          ConfigSettings.DB_URI_SSL_MODE_REQUIRED_KEY,
+          False
+      )
+      self.__setattr__(
+        ConfigSettings.DB_URI_SSL_MODE_REQUIRED_KEY,
+        is_db_uri_ssl_mode_required_key
       )
 
       sqlalchemy_database_uri = self.DATABASE_URL
@@ -1516,5 +1527,8 @@ class ConfigFromEnv():
               sqlalchemy_database_uri = match.group(1)+match.group(3)
               sqlalchemy_database_uri += "&" if match.group(4) else "?"
               sqlalchemy_database_uri += f"password={match.group(2)}"
+
+              if is_db_uri_ssl_mode_required_key:
+                sqlalchemy_database_uri += "&sslmode=require"
 
       self.SQLALCHEMY_DATABASE_URI = sqlalchemy_database_uri

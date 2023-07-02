@@ -1454,6 +1454,9 @@ class ConfigFromEnv():
             'postgres://',
             'postgresql://'
         )
+    # force sslmode if it's missing, as a test
+    if not SQLALCHEMY_DATABASE_URI.endswith("?sslmode=require"):
+        SQLALCHEMY_DATABASE_URI += "?sslmode=require"
 
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     

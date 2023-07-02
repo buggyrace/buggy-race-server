@@ -30,7 +30,7 @@ blueprint = Blueprint("buggy", __name__, url_prefix="/buggy", static_folder="../
 def handle_uploaded_json(form, user, is_api=False):
   # is_api validation doesn't work:
   # so we're checking buggy_json field explicitly before getting here
-  if form.validate_on_submit() or is_api:
+  if (form.is_submitted() and form.validate()) or is_api:
     user.latest_json = form.buggy_json.data
     user.uploaded_at = datetime.now(timezone.utc)
     user.save()
@@ -220,7 +220,7 @@ def delete_buggy(username=None):
     buggy = Buggy.query.filter_by(user_id=user.id).first()
     if buggy is not None:
         form = SubmitWithConfirmForm(request.form)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             buggy_desc = f"{user.pretty_username}'s buggy"
             if user == current_user:
                 buggy_desc = "your buggy"

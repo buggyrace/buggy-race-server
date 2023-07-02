@@ -393,7 +393,7 @@ def setup():
             return redirect( url_for('public.login'))
         form = SetupSettingForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if setup_status == 1: # this updating auth and creating a new admin user
                 set_and_save_config_setting(
                   current_app,
@@ -618,7 +618,7 @@ def bulk_register(data_format=None):
     is_json = data_format == "json"
     err_msgs = []
     form = BulkRegisterForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         delete_path = None
         lines = []
         if "csv_file" in request.files:
@@ -782,7 +782,7 @@ def manage_user(user_id):
       action_url=url_for('admin.edit_user', user_id=user.id)
       form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
-      if form.validate_on_submit():
+      if form.is_submitted() and form.validate():
           username = form.username.data.lower()
           if is_registering_new_user:
               user = User(
@@ -852,7 +852,7 @@ def delete_github_details(user_id):
     if user is None:
         abort(404)
     form = SubmitWithConfirmForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if (user.github_username is None and user.github_access_token is None):
             flash("Nothing changed: user's GitHub details were already removed", "warning")
         elif not form.is_confirmed.data:
@@ -908,7 +908,7 @@ def edit_user_comment(user_id):
         abort(404)
     form = UserCommentForm(request.form, obj=user)
     if request.method=="POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             user.comment = form.comment.data.strip()
             user.save()
             flash(f"OK, updated comment on user {user.pretty_username}", "success")
@@ -1070,7 +1070,7 @@ def settings(group_name=None):
     social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
         # group_name = form['group'].data
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             _update_settings_in_db(form)
             # inefficient, but update to reflect changes
             settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
@@ -1158,7 +1158,7 @@ def edit_announcement(announcement_id=None):
             is_html=announcement.is_html
             is_visible=announcement.is_visible
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if announcement is not None:
                 announcement.text = form.text.data
                 announcement.type = form.type.data
@@ -1244,7 +1244,7 @@ def delete_announcement(announcement_id=None):
 @admin_only
 def add_example_announcement():
     form = GeneralSubmitForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         Announcement.create(
             type="special",
             text=Announcement.EXAMPLE_ANNOUNCEMENT,
@@ -1272,7 +1272,7 @@ def tech_notes_admin():
   error_msg = None
   form = GeneralSubmitForm(request.form) # no auth required
   if request.method == "POST":
-      if form.validate_on_submit():
+      if form.is_submitted() and form.validate():
           try:
               output_msg = publish_tech_notes(current_app)
           except Exception as e:
@@ -1310,7 +1310,7 @@ def tech_notes_admin():
 @admin_only
 def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         # render the template and save it as _task_list.html
         try:
             publish_task_list(current_app)
@@ -1342,7 +1342,7 @@ def tasks_admin():
     is_fresh_update = False
     want_all = request.path.endswith("all")
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if want_overwrite := form.is_confirmed.data:
                 # TODO ensure path no affected by cwd elsewhere
                 md_filename_with_path = "project/tasks.md"
@@ -1476,7 +1476,7 @@ def edit_task(task_id=None):
       # en/disabling them (effectively deleting them).
     form = TaskForm(request.form, obj=task)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             task.phase = form.phase.data
             task.name = form.name.data
             task.title = form.title.data
@@ -1706,7 +1706,7 @@ def show_buggy_editor_info():
 @admin_only
 def delete_buggy_editor_zip():
     form = SubmitWithConfirmForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if form.is_confirmed.data:
             zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
             target_zipfile = join_to_project_root(
@@ -1861,7 +1861,7 @@ def pre_registration_csv_utility():
         # this is just a boomerang upload-to-download call: sending the CSV data
         # that was generated by the javascript in the browser, so we can use the
         # server-side ability to set set Content-disposition headers (!)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             csv_data = form.data.data
             filename = get_download_filename("students.csv", want_datestamp=True)
             output = make_response(csv_data)

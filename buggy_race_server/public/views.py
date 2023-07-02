@@ -77,7 +77,7 @@ def login():
     warn_if_insecure()
     form = LoginForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             login_user(form.user)
             form.user.logged_in_at = datetime.now(timezone.utc)
             form.user.save()

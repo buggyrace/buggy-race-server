@@ -157,7 +157,7 @@ def edit_race(race_id=None):
         delete_form = RaceDeleteForm(race_id=race_id)
     form = RaceForm(request.form, obj=race)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if race is None:
                 race = Race.create(
                   title=form.title.data.strip(),
@@ -219,7 +219,7 @@ def upload_race_file(race_id):
     form = RaceResultsForm(request.form)
     want_redirect_to_race = False
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             is_ignoring_warnings = form.is_ignoring_warnings.data
             is_overwriting_urls = form.is_overwriting_urls.data
             # not robust, but pragmatically...
@@ -313,7 +313,7 @@ def download_race_json_without_buggies(race_id):
 @admin_only
 def delete_race(race_id):
     form = RaceDeleteForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if not form.is_confirmed.data:
             flash("Did not delete race (you didn't confirm it)", "danger")
             return redirect(url_for('admin_race.edit_race', race_id=race_id))
@@ -428,7 +428,7 @@ def delete_track(track_id):
         flash("Error: coudldn't find racetrack to delete", "danger")
     else:
         form = SubmitWithConfirmForm(request.form)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if not form.is_confirmed.data:
                 flash("Did not delete track (you didn't confirm it)", "danger")
                 return redirect(url_for('admin_race.edit_track', track_id=track_id))
@@ -461,7 +461,7 @@ def edit_track(track_id):
         delete_form = SubmitWithConfirmForm()
     form = RacetrackForm(request.form, obj=track)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if track is None:
                 track = Racetrack.create(
                   title=form.title.data.strip(),

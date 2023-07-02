@@ -179,7 +179,7 @@ def change_password(username=None):
     warn_if_insecure()
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             username = form.username.data
             username = username.lower().strip() if username else current_user.username
             is_allowed = False
@@ -256,7 +256,7 @@ def set_api_secret():
     is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
     is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name]
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if current_user.api_secret == form.api_secret.data:
                 flash(f"Warning! Your API secret was not set: must be different from the last one.", "danger")
             else:
@@ -332,7 +332,7 @@ def delete_task_text():
         flash("Task texts are not enabled on this project", "warning")
         abort(404)
     form = TaskTextDeleteForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if not form.is_confirmed.data:
             flash("Did not delete task text (you didn't confirm it)", "danger")
         else:
@@ -390,7 +390,7 @@ def task_text(task_fullname):
         if form.user_id.data != str(current_user.id):
             flash("Mismatched user in request", "danger")
             abort(400)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             tasktext.text = form.text.data
             if not is_new_text:
                 tasktext.modified_at = datetime.now(timezone.utc)

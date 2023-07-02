@@ -1311,7 +1311,7 @@ class ConfigSettings:
     # as a query variables (which are not stored in the database: must be read
     # from the environment, because it happens before db connection is made)
     REWRITING_DB_URI_PASSWORD_KEY = "IS_REWRITING_DB_URI_PW_AS_QUERY"
-    DB_URI_SSL_MODE_REQUIRED_KEY = "IS_DB_URI_SSL_MODE_REQUIRED"
+    FORCED_DB_URI_SSL_MODE_KEY = "FORCED_DB_URI_SSL_MODE"
 
     @staticmethod
     def is_valid_name(name):
@@ -1502,13 +1502,13 @@ class ConfigFromEnv():
         is_rewriting_db_uri_pw_as_query
       )
 
-      is_db_uri_ssl_mode_required_key = env.bool(
-          ConfigSettings.DB_URI_SSL_MODE_REQUIRED_KEY,
-          False
+      forced_db_uri_ssl_mode_key = env.str(
+          ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY,
+          ""
       )
       self.__setattr__(
-        ConfigSettings.DB_URI_SSL_MODE_REQUIRED_KEY,
-        is_db_uri_ssl_mode_required_key
+        ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY,
+        forced_db_uri_ssl_mode_key
       )
 
       sqlalchemy_database_uri = self.DATABASE_URL
@@ -1528,7 +1528,7 @@ class ConfigFromEnv():
               sqlalchemy_database_uri += "&" if match.group(4) else "?"
               sqlalchemy_database_uri += f"password={match.group(2)}"
 
-              if is_db_uri_ssl_mode_required_key:
-                sqlalchemy_database_uri += "&sslmode=require"
+              if forced_db_uri_ssl_mode_key:
+                sqlalchemy_database_uri += f"&sslmode={forced_db_uri_ssl_mode_key}"
 
       self.SQLALCHEMY_DATABASE_URI = sqlalchemy_database_uri

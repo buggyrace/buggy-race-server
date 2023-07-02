@@ -1608,10 +1608,16 @@ def show_system_info():
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
     database_url = current_app.config.get("DATABASE_URL")
     redacted_database_url = "(unavailable)"
+    DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
     if current_app.config.get("DATABASE_URL"):
-        DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
         if match := re.match(DATABASE_RE, database_url):
             redacted_database_url = f"{match[1]}******{match[2]}"
+    alchemy_database_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    redacted_alchemy_database_url = "(unavailable)"
+    if current_app.config.get("DATABASE_URL"):
+        if match := re.match(DATABASE_RE, alchemy_database_url):
+            redacted_alchemy_database_url = f"{match[1]}******{match[2]}"
+
     try:
         result = subprocess.run(
           "git rev-parse --short HEAD; git branch --show-current",
@@ -1664,6 +1670,7 @@ def show_system_info():
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         git_status=git_status,
         redacted_database_url=redacted_database_url,
+        redacted_alchemy_database_url=redacted_alchemy_database_url,
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )

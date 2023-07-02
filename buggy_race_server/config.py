@@ -1454,9 +1454,12 @@ class ConfigFromEnv():
             'postgres://',
             'postgresql://'
         )
-    # force sslmode if it's missing, as a test
-    if not SQLALCHEMY_DATABASE_URI.endswith("?sslmode=require"):
-        SQLALCHEMY_DATABASE_URI += "?sslmode=require"
+        # since this looks like Heroku, add sslmode too:
+        # set FORCE_SSLMODE_ON_POSTGRES to 0 if you don't want this,
+        # which may be the case on localhost connections
+        if env.bool("FORCE_SSLMODE_ON_POSTGRES", default=True):
+            if not SQLALCHEMY_DATABASE_URI.endswith("?sslmode=require"):
+                SQLALCHEMY_DATABASE_URI += "?sslmode=require"
 
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     

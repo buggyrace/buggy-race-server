@@ -87,6 +87,10 @@
             <td><code style="word-break: break-all;">{{ redacted_database_url }}</code></td>
           </tr>
           <tr>
+            <td><code>SQLALCHEMY_DATABASE_URI</code><br>(redacted)</td>
+            <td><code style="word-break: break-all;">{{ redacted_alchemy_database_url }}</code></td>
+          </tr>
+          <tr>
             <td>Extra config (found&nbsp;in&nbsp;database):</td>
             {% if unexpected_config_settings %}
               <td class="alert-danger">

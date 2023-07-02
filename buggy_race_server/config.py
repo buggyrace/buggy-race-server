@@ -1429,7 +1429,8 @@ class ConfigFromEnv():
     # some (not-buggy-race-specific) config _only_ comes from the ENV
     FLASK_APP = env.str("FLASK_APP", default="autoapp.py")
     FLASK_ENV = env.str("FLASK_ENV", default="production")
-    FLASK_DEBUG = DEBUG = FLASK_ENV == "development"
+    DEBUG = FLASK_ENV == "development"
+    FLASK_DEBUG = DEBUG
 
     UPLOAD_FOLDER = "buggy_race_server/uploads"
 
@@ -1444,7 +1445,16 @@ class ConfigFromEnv():
     # In production, set to a higher number, like 31556926
     SEND_FILE_MAX_AGE_DEFAULT = env.int("SEND_FILE_MAX_AGE_DEFAULT", default=43200)
 
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL = env.str("DATABASE_URL")
+    DATABASE_URL = env.str("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    if SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
+        # Heroku produces database URL with postrgess:// prefix, but
+        # SQLAlchemy needs postgresql:// ... so fix it up
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
+            'postgres://',
+            'postgresql://'
+        )
+
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     
     # handily makes all downloaded JSON pretty:

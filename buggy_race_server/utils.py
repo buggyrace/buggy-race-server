@@ -188,6 +188,20 @@ def stringify_datetime(dt, want_secs=True):
             pass
     return date_str 
 
+def redact_password_in_database_url(database_url):
+    """ Used when displaying database URL/URI in web interface.
+    Not rigorous, but the URLs expected are pretty standard
+    """
+    redacted_database_url = "(unavailable)"
+    DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
+    DATABASE_RE_WITH_PARAM = re.compile(r"^(.*\?.*password=)[^&]+(&.*)?")
+    if current_app.config.get("DATABASE_URL"):
+        if match := re.match(DATABASE_RE, database_url):
+            redacted_database_url = f"{match[1]}******{match[2]}"
+        elif match := re.match(DATABASE_RE_WITH_PARAM, database_url):
+            redacted_database_url = f"{match[1]}******{match[2] or ''}"
+    return redacted_database_url
+
 def prettify_form_field_name(name):
   """ for flash error messages (e.g., 'authorisation_code' become 'Authorisation Code') """
   return name.replace("_", " ").title()

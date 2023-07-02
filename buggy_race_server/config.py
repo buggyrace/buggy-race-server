@@ -22,6 +22,7 @@ from enum import Enum, auto
 from environs import Env
 from random import randint
 from os import path
+import re
 from buggy_race_server.extensions import bcrypt
 import pytz # timezones
 from time import time
@@ -1305,6 +1306,11 @@ class ConfigSettings:
     # config key for cachebuster: a number expected to be different each run
     CACHEBUSTER_KEY = "_CACHEBUSTER"
 
+    # config key for forcing the database URI's password to be rewritten
+    # as a query variable (which is not stored in the database: must be read
+    # from the environment, because it happens before db connection is made)
+    REWRITING_DB_URI_PASSWORD_KEY = "IS_REWRITING_DB_URI_PW_AS_QUERY"
+
     @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
@@ -1446,20 +1452,6 @@ class ConfigFromEnv():
     SEND_FILE_MAX_AGE_DEFAULT = env.int("SEND_FILE_MAX_AGE_DEFAULT", default=43200)
 
     DATABASE_URL = env.str("DATABASE_URL")
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
-    if SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
-        # Heroku produces database URL with postrgess:// prefix, but
-        # SQLAlchemy needs postgresql:// ... so fix it up
-        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
-            'postgres://',
-            'postgresql://'
-        )
-        # since this looks like Heroku, add sslmode too:
-        # set FORCE_SSLMODE_ON_POSTGRES to 0 if you don't want this,
-        # which may be the case on localhost connections
-        if env.bool("FORCE_SSLMODE_ON_POSTGRES", default=True):
-            if not SQLALCHEMY_DATABASE_URI.endswith("?sslmode=require"):
-                SQLALCHEMY_DATABASE_URI += "?sslmode=require"
 
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     
@@ -1494,3 +1486,35 @@ class ConfigFromEnv():
               env_setting_overrides.append(name)
       self.__setattr__(ConfigSettings.ENV_SETTING_OVERRIDES_KEY, env_setting_overrides)
       self.__setattr__(ConfigSettings.CACHEBUSTER_KEY, int(time()))
+
+      # Some shenanigans here because since upgrading Flask, we've seen
+      # access only working if the password is passed as a query variable
+      # on the end of the database URI, which isn't how heroku presents it
+      
+      is_rewriting_db_uri_pw_as_query = env.bool(
+          ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
+          False
+      )
+      self.__setattr__(
+        ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
+        is_rewriting_db_uri_pw_as_query
+      )
+
+      sqlalchemy_database_uri = self.DATABASE_URL
+      if sqlalchemy_database_uri.startswith('postgres://'):
+          # Heroku produces database URL with postrgess:// prefix, but
+          # SQLAlchemy needs postgresql:// ... so fix it up
+          sqlalchemy_database_uri = sqlalchemy_database_uri.replace(
+              'postgres://',
+              'postgresql://'
+          )
+
+      if is_rewriting_db_uri_pw_as_query:
+          DATABASE_RE = re.compile(r"^([^:]+:[^:]+):([^@]+.)(@\w+[^?]+)(\?.*)?")
+          # 1=method+user, 2=password, 3=host, 4=query params (if any)
+          if match := re.match(DATABASE_RE, sqlalchemy_database_uri):
+              sqlalchemy_database_uri = match.group(1)+match.group(3)
+              sqlalchemy_database_uri += "&" if match.group(4) else "?"
+              sqlalchemy_database_uri += f"password={match.group(2)}"
+
+      self.SQLALCHEMY_DATABASE_URI = sqlalchemy_database_uri

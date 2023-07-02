@@ -81,6 +81,7 @@ from buggy_race_server.utils import (
     publish_task_list,
     publish_tasks_as_issues_csv,
     publish_tech_notes,
+    redact_password_in_database_url,
     refresh_global_announcements,
     servertime_str,
     set_and_save_config_setting,
@@ -1606,18 +1607,10 @@ def purge_unexpected_config_setting(setting_name):
 @admin_only
 def show_system_info():
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
-    database_url = current_app.config.get("DATABASE_URL")
-    redacted_database_url = "(unavailable)"
-    DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
-    if current_app.config.get("DATABASE_URL"):
-        if match := re.match(DATABASE_RE, database_url):
-            redacted_database_url = f"{match[1]}******{match[2]}"
-    alchemy_database_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
-    redacted_alchemy_database_url = "(unavailable)"
-    if current_app.config.get("DATABASE_URL"):
-        if match := re.match(DATABASE_RE, alchemy_database_url):
-            redacted_alchemy_database_url = f"{match[1]}******{match[2]}"
-
+    db_url = current_app.config.get("DATABASE_URL")
+    redacted_db_url = redact_password_in_database_url(db_url)
+    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    redacted_alchemy_db_url = redact_password_in_database_url(alchemy_db_url)
     try:
         result = subprocess.run(
           "git rev-parse --short HEAD; git branch --show-current",
@@ -1669,8 +1662,10 @@ def show_system_info():
         env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         git_status=git_status,
-        redacted_database_url=redacted_database_url,
-        redacted_alchemy_database_url=redacted_alchemy_database_url,
+        is_db_uri_password_as_query_key=ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
+        is_db_uri_password_as_query=current_app.config[ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY],
+        redacted_database_url=redacted_db_url,
+        redacted_alchemy_database_url=redacted_alchemy_db_url,
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )

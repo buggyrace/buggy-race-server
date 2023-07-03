@@ -1528,7 +1528,13 @@ class ConfigFromEnv():
               sqlalchemy_database_uri += "&" if match.group(4) else "?"
               sqlalchemy_database_uri += f"password={match.group(2)}"
 
-              if forced_db_uri_ssl_mode_key:
-                sqlalchemy_database_uri += f"&sslmode={forced_db_uri_ssl_mode_key}"
+      # forcing sslmode (probably to "require") by adding it as a query param
+      if forced_db_uri_ssl_mode_key:
+          # TODO presupposes no '?' in password
+          if "?" not in sqlalchemy_database_uri:
+              sqlalchemy_database_uri += "?"
+          else:
+              sqlalchemy_database_uri += "&"
+          sqlalchemy_database_uri += f"sslmode={forced_db_uri_ssl_mode_key}"
 
       self.SQLALCHEMY_DATABASE_URI = sqlalchemy_database_uri

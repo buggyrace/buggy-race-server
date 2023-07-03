@@ -644,19 +644,22 @@ class ConfigSettings:
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start
-          the project. This is a public repo and unless you've forked
-          it to make a custom one, you probably don't need to change
-          this.""",
+          the project. This will usually be the URL to your customised,
+          forked repo. If `IS_USING_GITHUB` is `No`, this setting is
+          ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
           """This should match the name in the `BUGGY_EDITOR_GITHUB_URL`
-          and is used in some of the GitHub API calls: if you haven't
-          changed the repo URL then you won't need to change this.""",
+          and is used in some of the GitHub API calls: if you've forked
+          the repo and not changed its name, you won't need to change this.
+          If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
-          You don't need to change this unless you've forked your own custom
-          version of the repo.""",
+          If you've forked the repo (and customised it), change this to your
+          GitHub username. It should match the username that appears
+          in `BUGGY_EDITOR_GITHUB_URL`.
+          If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
           """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), and
@@ -693,7 +696,7 @@ class ConfigSettings:
         timezone (according to Python's `pytz` module), it will revert to UTC.""",
 
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
-          """Full ("base") URL of this server.""",
+          """Full ("base") URL of this server (should not include a trailing slash).""",
 
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
           """The default time-to-live for a users' API secret, in seconds
@@ -741,7 +744,7 @@ class ConfigSettings:
 
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name:
           """A string that exactly matches the client secret stored on the
-          GitHub app that the server uses tofork the buggy editor repo into
+          GitHub app that the server uses to fork the buggy editor repo into
           a student's own GitHub account.""",
 
         ConfigSettingNames.INSTITUTION_FULL_NAME.name:
@@ -1417,7 +1420,7 @@ class ConfigFromEnv():
     _SETUP_STATUS = env.str(str(ConfigSettingNames._SETUP_STATUS), default=None)
 
     # some (not-buggy-race-specific) config _only_ comes from the ENV
-    FLASK_APP = env.str("FLASK_APP", default="autoapp.py")
+    FLASK_APP = env.str("FLASK_APP", default="buggy_race_server/app.py")
     FLASK_ENV = env.str("FLASK_ENV", default="production")
     DEBUG = FLASK_ENV == "development"
     FLASK_DEBUG = DEBUG

@@ -151,8 +151,6 @@ class ConfigSettingNames(Enum):
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
     API_SECRET_TIME_TO_LIVE = auto()
-    DEFAULT_RACETRACK_IMAGE = auto()
-    DEFAULT_RACETRACK_PATH_SVG = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EXT_ID_NAME = auto()
@@ -312,8 +310,6 @@ class ConfigSettings:
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name,
-        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name,
-        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name,
@@ -421,8 +417,6 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
-        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name: "",
-        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name: "",
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -545,8 +539,6 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
-        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name: ConfigTypes.URL,
-        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name: ConfigTypes.URL,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
@@ -706,16 +698,6 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
           """The default time-to-live for a users' API secret, in seconds
           (for example, 3600 seconds = 1 hour).""",
-
-        ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name:
-         """URL of the default background image (2:1 aspect ratio JPG or PNG
-         for racetracks used in the race replayer).
-         """,
-
-        ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name:
-         """The default path — described as a `path` element within the
-         SVG file found at this URL — for racetracks used in the race replayer).
-         """,
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshold for buggies: you can always

@@ -36,11 +36,10 @@ That's it: now any python modules you install are local to this project; you
 won't be messing with other Python projects on your machine, and they won't be
 tampering with this one.
 
-Install the Python modules the project requires, using pip. The file `dev.txt`
-lists those requirements in a format pip can read:
+Install the Python modules the project requires, using pip:
 
 ```bash
-pip install -r requirements/dev.txt
+pip install -r requirements.txt
 ```
 
 You *must* set some configuration settings before you can run, and these are
@@ -111,30 +110,6 @@ those specific to your institution (e.g., the name of the school or
 department, the code for this project if it's part of a syllabus, and
 how you want to run the project — for example, whether your require
 students to take notes and submit a report as part of their project).
-
----
-
-## Static website: the tech notes
-
-There is a effectively a sub-site of pages called "tech notes" with explanatory
-text specific to some aspects of the project, and a couple of early tasks. These
-are statically generated HTML pages. By default they are served as part of
-the buggy race server. We don't provide a mechanism for editing these through
-the race server's web interface. If you're comfortable with forking the 
-project and editing these files, you can customise them in place. However,
-it's also possible to host these files entirely separately. If you do this,
-put the URL of your alternate site in the config setting `TECH_NOTES_EXTERNAL_URL`.
-
-The tech notes are generated using [Pelican](https://getpelican.com), which
-is a Python-based static site generator. The tech notes are in the `tech-notes/`
-directory in the root of the repo — see `tech-notes/content` for the source files
-and assets.
-
-If you are hosting the tech notes yourself, you can stick with Pelican or
-switch to another mechanism — for example, Jekyll works nicely with GitHub
-pages. We used Pelican because it's in Python. See
-`tech_notes/TECH_NOTES_README.md` for more information if you're thinking
-of customising/generating them yourself.
 
 ---
 

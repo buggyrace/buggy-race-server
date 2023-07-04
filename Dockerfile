@@ -34,14 +34,14 @@ RUN npm install
 # ================================= DEVELOPMENT =================================
 # NOTE: We don't need this as of right now but it could be useful in the future.
 FROM base AS development
-RUN pip install --user -r requirements/dev.txt
+RUN pip install --user -r requirements.txt
 EXPOSE 443
 CMD [ "npm", "start" ]
 
 
 # ================================= PRODUCTION =================================
 FROM base AS production
-RUN pip install --user -r requirements/prod.txt
+RUN pip install --user -r requirements.txt
 EXPOSE 443
 #CMD [ "gunicorn", "buggy_race_server.app:app", "-b", "0.0.0.0:5000", "-w", "1", "--timeout 60" ]
 CMD [ "npm", "start" ]

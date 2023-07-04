@@ -39,6 +39,14 @@
               {% endif %}
             </td>
           </tr>
+          {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
+            <tr>
+              <td>Demo user?</td>
+              <td {% if user.is_demo_user %}class="alert-warning"{% endif %}>
+                {% if user.is_demo_user %} Yes {% else %} No {% endif %}
+              </td>
+            </tr>
+          {% endif %}
           <tr>
             <td>Student?</td>
             <td {% if user.is_student %}class="alert-success"{% else %}class="alert-danger"{% endif %}>
@@ -51,14 +59,6 @@
               {% if user.is_active %} Yes {% else %} No {% endif %}
             </td>
           </tr>
-          {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
-            <tr>
-              <td>Demo user?</td>
-              <td {% if user.is_demo_user %}class="alert-warning"{% endif %}>
-                {% if user.is_demo_user %} Yes {% else %} No {% endif %}
-              </td>
-            </tr>
-          {% endif %}
           {% if config['USERS_HAVE_FIRST_NAME'] %}
             <tr>
               <td>

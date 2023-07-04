@@ -638,28 +638,27 @@ class ConfigSettings:
     DESCRIPTIONS = {
 
         ConfigSettingNames.AUTHORISATION_CODE.name:
-          """The authorisation code is needed to make any changes to config
-          or other-user data, including registering students.
-          See also `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
+          """The authorisation code is needed to make any changes to config or
+          other-user data, including registering students. See also
+          `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
-          """URL to the 'buggy editor' code the students need to start
-          the project. This will usually be the URL to your customised,
-          forked repo. If `IS_USING_GITHUB` is `No`, this setting is
-          ignored.""",
+          """URL to the 'buggy editor' code the students need to start the
+          project. This will usually be the URL to your customised, forked
+          repo. If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
-          """This should match the name in the `BUGGY_EDITOR_GITHUB_URL`
-          and is used in some of the GitHub API calls: if you've forked
-          the repo and not changed its name, you won't need to change this.
-          If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
+          """This should match the name in the `BUGGY_EDITOR_GITHUB_URL` and is
+          used in some of the GitHub API calls: if you've forked the repo and
+          not changed its name, you won't need to change this. If
+          `IS_USING_GITHUB` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           If you've forked the repo (and customised it), change this to your
-          GitHub username. It should match the username that appears
-          in `BUGGY_EDITOR_GITHUB_URL`.
-          If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
+          GitHub username. It should match the username that appears in
+          `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_GITHUB` is `No`, this setting
+          is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
           """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), and
@@ -668,39 +667,39 @@ class ConfigSettings:
 
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
           """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), your
-          students can download the buggy editor zipfile from this server. If
-          you prefer to provide your own copy instead, provide a URL to your
-          own instructions or zipfile instead. This setting is ignored if
-          `IS_USING_GITHUB` is `Yes`.
-          """,
+          students can download the buggy editor zipfile directly from this
+          server. If you prefer to provide your own copy instead, provide a URL
+          to your own instructions or zipfile instead. This setting is ignored
+          if `IS_USING_GITHUB` is `Yes`. """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
           player page has a header (which the default player on this server
-          does), this scrolls that out of the way. If you don't prefix
-          this with `#`, it will automatically be added.""",
+          does), this scrolls that out of the way. If you don't prefix this
+          with `#`, it will automatically be added.""",
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name:
         """If you want to override the default race player and host your own,
         specify it here and races will link to that instead (passing the
-        'results file' URL as a query variable called `race`). Do this if
-        you want or need to run this as a standalone service (e.g., hosted on
-        GitHubPages and potentially totally customised). If you don't specify
-        a URL, races will use the race player on this server.""",
+        'results file' URL as a query variable called `race`). Do this if you
+        want or need to run this as a standalone service (e.g., hosted on
+        GitHubPages and potentially totally customised). If you don't specify a
+        URL, races will use the race player on this server.""",
 
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name:
         """The timezone the race server is running in (that's almost certainly
-        the timezone you or your classes are in). In the database, all timezones
-        are stored in UTC, but should be converted to this on the way between
-        the server and your (and your students') screens. If this is an invalid
-        timezone (according to Python's `pytz` module), it will revert to UTC.""",
+        the timezone you or your classes are in). In the database, all
+        timezones are stored in UTC, but should be converted to this on the way
+        between the server and your (and your students') screens. If this is an
+        invalid timezone (according to Python), it will revert to UTC.""",
 
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name:
-          """Full ("base") URL of this server (should not include a trailing slash).""",
+          """Full ("base") URL of this server (do not include a trailing
+          slash).""",
 
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
-          """The default time-to-live for a users' API secret, in seconds
-          (for example, 3600 seconds = 1 hour).""",
+          """The default time-to-live for a users' API secret, in seconds (for
+          example, 3600 seconds = 1 hour).""",
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshold for buggies: you can always
@@ -711,32 +710,33 @@ class ConfigSettings:
           can nominate the league that new races are in here. It's common to
           run the race server without using leagues, so if you're not sure,
           leave this blank.""",
+          # note: leagues not implemented yet: this isn't shown because
+          #       the config setting is excluded from the "Race" group
 
         ConfigSettingNames.EXT_ID_EXAMPLE.name:
-          """If users have an external ID, provide an example of what it
-          might look like. This setting is ignored if `USERS_HAVE_EXT_ID` is
-          `No`.""",
+          """If users have an external ID, provide an example of what it might
+          look like. This setting is ignored if `USERS_HAVE_EXT_ID` is `No`.""",
 
         ConfigSettingNames.EXT_ID_NAME.name:
           """If user have an external ID, what is it called? For example:
-          "Student number", "Moodle ID", "Blackboard ID", "Canvas ID".
-          This setting is ignored if `USERS_HAVE_EXT_ID` is `No`.""",
+          "Student number", "Moodle ID", "Blackboard ID", "Canvas ID". This
+          setting is ignored if `USERS_HAVE_EXT_ID` is `No`.""",
 
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
-          """If users have an external username, provide an example
-          format (e.g., `abcd123` or `ada@example.org`). Note that this
-          only serves as a placeholder suggestion when inputting — it's
-          not used to validate or force the format of inputs. This setting
-          is ignored if `USERS_HAVE_EXT_USERENAME` is `No`.""",
+          """If users have an external username, provide an example format
+          (e.g., `abcd123` or `ada@example.org`). Note that this only serves as
+          a placeholder suggestion when inputting — it's not used to validate
+          or force the format of inputs. This setting is ignored if
+          `USERS_HAVE_EXT_USERENAME` is `No`.""",
 
         ConfigSettingNames.EXT_USERNAME_NAME.name:
           """If users have an external username, what is it called? For
-          example: "College username". This is to clearly differentiate
-          the race server username (which students use to log into this race
-          server) from this external one (which they pressumably use to access
-          other course systems). Keep it short, because it's used on buttons
-          in the admin. This setting is ignored if `USERS_HAVE_EXT_USERENAME`
-          is `No`.""",
+          example: "College username". This is to clearly differentiate the
+          race server username (which students use to log into this race
+          server) from this external one (which they presumably use to access
+          other course systems). Keep it short, because it's used on buttons in
+          the admin. This setting is ignored if `USERS_HAVE_EXT_USERENAME` is
+          `No`.""",
 
         ConfigSettingNames.GITHUB_CLIENT_ID.name:
           """The GitHub client ID for the GitHub app that the server uses to
@@ -744,89 +744,88 @@ class ConfigSettings:
 
         ConfigSettingNames.GITHUB_CLIENT_SECRET.name:
           """A string that exactly matches the client secret stored on the
-          GitHub app that the server uses to fork the buggy editor repo into
-          a student's own GitHub account.""",
+          GitHub app that the server uses to fork the buggy editor repo into a
+          student's own GitHub account. You only need this if
+          `IS_USING_GITHUB_API_TO_FORK` is `Yes`.""",
 
         ConfigSettingNames.INSTITUTION_FULL_NAME.name:
           """Full name for your institution, college, or school.""",
 
         ConfigSettingNames.INSTITUTION_HOME_URL.name:
-          """Full URL for the home page of your institution: used as a link
-          on the racing server's home page.""",
+          """Full URL for the home page of your institution: used as a link on
+          the race server's home page.""",
 
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
-          """Short name or abbreviation for your institution, college,
-          or school.""",
+          """Short name or abbreviation for your institution, college, or
+          school.""",
 
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name:
           """Choose `Yes` if all the config settings' values should be
-          available when publishing tech notes. This setting is only
-          relevant if you're customising the tech notes and/or publishing
-          them externally. If `No`, only (sensible) selected config
-          settings will be available as subtitutions in the tech notes'
-          markdown. See the Pelican config file(s) for details.""",
+          available when publishing tech notes. This setting is only relevant
+          if you're customising the tech notes and/or publishing them
+          externally. If `No`, only (sensible) selected config settings will be
+          available as substitutions in the tech notes' markdown. See the
+          Pelican config file(s) for details.""",
 
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name:
-          """Is the API secret _always_ a one-time password? If it is,
-          it won't work after the first success (and needs to be reset).
-          This does not affect the time-to-live of the secret. The default
-          settings of this and `IS_STUDENT_API_OTP_ALLOWED` (`No` and
-          `Yes` respectively) mean OTPs are not used except where students
-          enable them on their own accounts.
-          """,
+          """Is the API secret _always_ a one-time password? If it is, it won't
+          work after the first success (and needs to be reset). This does not
+          affect the time-to-live of the secret. The default settings of this
+          and `IS_STUDENT_API_OTP_ALLOWED` (`No` and `Yes` respectively) mean
+          OTPs are not used except where students enable them on their own
+          accounts.""",
 
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name:
-          """Can a student delete their buggy? If not, the buggy exists
-          once they've uploaded JSON data for it, and remains until changed
-          by subsequent uploads (which is encouraged). This setting only
-          controls whether students should be able to delete their own
-          buggies (admins always can). If in doubt, choose `No`.""",
+          """Can a student delete their buggy? If not, the buggy exists once
+          they've uploaded JSON data for it, and remains until changed by
+          subsequent uploads (which is encouraged). This setting only controls
+          whether students should be able to delete their own buggies (admins
+          always can). If in doubt, choose `No`.""",
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
-          """The tech notes are static pages, rendered on a dark background
-          (to clearly distinguish from the race server's pages). If you
-          choose `Yes`, this option adds a small button to the bottom
-          right-hand corner of each page that toggles the style between the
-          dark style, and a simulation of a classic page created with LaTeX,
-          the excellent typesetting system beloved of academics. Because the
-          tech notes are static content, this CSS toggle is implemented in
-          JavaScript. This feature is an in-joke that only need be engaged if
-          you are feeling playful, or if there are academics in your
-          institution who might be horrified by the prospect of reading text
-          in a san-serif font on anything other than white paper.""",
+          """The tech notes are static pages, rendered on a dark background (to
+          clearly distinguish from the race server's pages). If you choose
+          `Yes`, this option adds a small button to the bottom right-hand
+          corner of each page that toggles the style between the dark style,
+          and a simulation of a classic page created with LaTeX, the excellent
+          typesetting system beloved of academics. Because the tech notes are
+          static content, this CSS toggle is implemented in JavaScript. This
+          feature is an in-joke that only need be engaged if you are feeling
+          playful, or if there are academics in your institution who might be
+          horrified by the prospect of reading text in on anything other than
+          crisp white paper in Computer Modern font.""",
 
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:
-          """Choose `Yes` if you need Windows newlines at the end of each
-          line of the task issues CSV file (you probably don't need to
-          change this).""", # NB: possibly needed for GitHub API?
+          """Choose `Yes` if you need Windows newlines at the end of each line
+          of the task issues CSV file (you probably don't need to change
+          this).""", # NB: possibly needed for GitHub API?
 
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
           title case? For example, choose `Yes` if the usernames you're using
-          are really students' names. Login is always case insensitive, so this
-          only affects how usernames are displayed, not what users need to
+          are effectively students' names. Login is always case insensitive, so
+          this only affects how usernames are displayed, not what users need to
           type.""",
 
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name:
-          """Typically, students are expected to submit their
-          projects as a zip file containing the buggy editor web
-          app (including a report/poster, if you've enabled it).
-          The project page will display general information about
-          those files (e.g., they should have the student's name
-          just in case your submission process doesn't capture
-          that: you end up with a lot of zip files with the same
-          name otherwise). Use this setting to display or hide
-          this general information on the "project" page.
-          """,
+          """Typically, students are expected to submit their projects as a zip
+          file containing the buggy editor web app (including a report/poster,
+          if you've enabled it). The project page will display general
+          information about those files (e.g., they should have the student's
+          name just in case your submission process doesn't capture that: you
+          end up with a lot of zip files with the same name otherwise). Use
+          this setting to display or hide this general information on the
+          "project" page. If set to `Yes`, remember to check that the text that
+          appears on the project page does indeed make sense to students.""",
 
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name:
           """Normally, only a logged-in administrator who knows the
           `AUTHORISATION_CODE` can register new users. But if you accidentally
           end up unable to log in (deleted/demoted user, forgotten password)
-          set this to `Yes` (or `1`) in the ENV to allow **emergency access**
-          to the registration page, and create a new (admin) user. You'll also
-          need to know the auth code (which can also be set via ENV if
-          it's been lost).""",
+          set this to `Yes` (or `1`) as an environment variable to allow
+          **emergency access** to the registration page, and create a new
+          (admin) user. You'll also need to know the auth code (which can also
+          be set via an environment variable if it's been lost).""",
 
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name:
           """Do you want the race start (date+time) to appear in the filename
@@ -844,11 +843,11 @@ class ConfigSettings:
 
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name:
           """Should the webserver itself force HTTPS? **Be careful**: this
-          setting will not be helpful if your hosting environment manages
-          this for you (that is, only set this to `Yes` if you are certain
-          HTTPS requests arrive directly to the app: if you have a process
-          that's handling requests and connecting with this app locally over
-          HTTP, forcing redirects with this setting may prevent _any_ requests
+          setting will not be helpful if your hosting environment manages this
+          for you (that is, only set this to `Yes` if you are certain HTTPS
+          requests arrive directly to the app: if you have a process that's
+          handling requests and connecting with this app locally over HTTP,
+          forcing redirects with this setting may prevent _any_ requests
           getting through). HTTPS is mandatory for GitHub's OAuth
           authentication, or if you're holding any personal information on
           students... but _this setting does not implement HTTPS_ — it only
@@ -858,7 +857,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name:
           """Do you want the server to suggest you restart it after changing
           any config settings? Our experience is that normally changing config
-          doesn't require a restart _but_ in case your implementation would
+          does not require a restart _but_ in case your implementation would
           benefit from this, you can switch the suggestions on.""",
 
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name:
@@ -870,69 +869,69 @@ class ConfigSettings:
 
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name:
           """It can be helpful for students to have a summary of the workflow
-          process. If you set `IS_SHOWING_PROJECT_WORKFLOW` to `Yes` then
-          the server will show either the default workflow page, or an external
-          one if you specify `PROJECT_WORKFLOW_URL`.
-          """,
+          process. If you set `IS_SHOWING_PROJECT_WORKFLOW` to `Yes` then the
+          server will show either the default workflow page, or an external one
+          if you specify `PROJECT_WORKFLOW_URL`. If you do choose to display
+          the workflow page, when it's published take a moment to read it to
+          confirm it matches what you expect your students to do.""",
 
         ConfigSettingNames.IS_STATIC_CONTENT_AUTOGENERATED.name:
           """The task list and tech notes do not get updated when you change
           config (or edit tasks): it's better to adopt the discipline of
-          manually publishing both whenever you change config (which usally
-          only happens  before project has started). If
+          manually publishing both whenever you change config (which usually
+          only happens before project has started). If
           `IS_STATIC_CONTENT_AUTOGENERATED` is set, the race server will
-          automatically republish the task list and the tech notes whenever
-          it reboots. This might have an impact on the server's performance,
-          and it's currently somewhat experimental. Only switch this on if
-          you are experiencing problems with the build.""",
+          automatically republish the task list and the tech notes whenever it
+          reboots. This might have an impact on the server's performance, and
+          it's currently somewhat experimental. Only switch this on if you are
+          experiencing problems with the build.""",
 
         ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name:
-          """When you upload race files (primarily for replaying races), do
-          you want to store them here on the race server, in the database?
-          If you don't, you'll need to publish them online somewhere which
-          has a friendly CORS policy (GitHub pages works fine), and make sure
-          you store the URL correctly when you update the race. If you're
-          running an especially large project or little server, there may be
-          efficiency benefits in _not_ using the database.
-          """,
+          """When you upload race files (primarily for replaying races), do you
+          want to store them here on the race server, in the database? If you
+          don't, you'll need to publish them online somewhere which has a
+          friendly CORS policy (GitHub pages works fine), and make sure you
+          store the URL correctly when you update the race. If you're running
+          an especially large project or little server, there may be efficiency
+          benefits in _not_ using the database, but otherwise it's simplest to
+          to choose `Yes`. """,
 
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name:
           """Do you want students to be able to record text on this server
-          reporting they approached/did each task? If you're running
-          the project with a report (see `PROJECT_REPORT_TYPE`), then this
-          allows students to save notes here as they go along, which in
-          turn gives you some visibility of their progress (which is why we
-          implemented it). If you choose `No`, this feature will be hidden.
-          Note that you _can_ choose `Yes`, letting students store task texts,
-          even if the project doesn't require a report.""",
+          reporting they approached/did each task? If you're running the
+          project with a report (see `PROJECT_REPORT_TYPE`), then this allows
+          students to save notes here as they go along, which in turn gives you
+          some visibility of their progress (which is why we implemented it).
+          If you choose `No`, this feature will be hidden. Note that you _can_
+          choose `Yes`, letting students store task texts, even if the project
+          doesn't require a report.""",
 
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name:
-          """Can individual students choose to set their own API secret to
-          be different from the default one-time-password behaviour you've
-          set with `IS_API_SECRET_ONE_TIME_PW`? For example, it's a little
-          simpler for students to get the API working if it's not an OTP —
-          but by setting this to `Yes` they can opt in or out.""",
+          """Can individual students choose to set their own API secret to be
+          different from the default one-time-password behaviour you've set
+          with `IS_API_SECRET_ONE_TIME_PW`? For example, it's a little simpler
+          for students to get the API working if it's not an OTP — but by
+          setting this to `Yes` they can opt in or out.""",
 
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name:
-          """Should students fork the buggy editor repo into their
-          own GitHub repo? Choose `No` if your students are not
-          using GitHub. If you choose `Yes`, make sure you've set
-          `IS_USING_GITHUB_API_TO_FORK` if you want this to be automated
-          via the race server. This setting is ignored if `IS_USING_GITHUB`
-          is `No`.""",
+          """Should students fork the buggy editor repo into their own GitHub
+          repo? Choose `No` if your students are not using GitHub. If you
+          choose `Yes`, make sure you've set `IS_USING_GITHUB_API_TO_FORK` if
+          you want this to be automated via the race server. This setting only
+          affects whether mentions of GitHub should be removed in instructions
+          on the server, and is ignored if `IS_USING_GITHUB` is `No`.""",
         
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
-          """Teaching Assistants cannot edit user data. Do you want TAs
-          to be able to add or edit comments left by staff?""",
+          """Teaching Assistants cannot edit user data. But do you want TAs to
+          be able to add or edit comments left by staff?""",
 
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name:
-          """Administrators can change other users' passwords. Choose `Yes`
-          if you want Teaching Assistants to also be able to do this. Note
-          that students who forget their passwords cannot reset them, and will
-          need to ask a staff member to do it — so enabling TAs might be
-          helpful. Changing a student's password does not require the auth
-          code, and TAs can only change _students'_ passwords (not other
-          staff passwords).""",
+          """Administrators can change other users' passwords. Choose `Yes` if
+          you want Teaching Assistants to also be able to do this. Note that
+          students who forget their passwords cannot reset them, and will need
+          to ask a staff member to do it — so enabling TAs might be helpful.
+          Changing a student's password does not require the auth code, and TAs
+          can only change _students'_ passwords (not other staff passwords).""",
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
           """By default, task URLs go direct to the server (e.g.,
@@ -943,133 +942,123 @@ class ConfigSettings:
           to the anchor tag.""",
 
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name:
-          """The admin interface normally lets you publish the tech
-          notes, but if you're hosting them externally this might be
-          confusing (because it certainly won't be changing your external
-          site). However, there are circumstances where you want to be able
-          to publish them here too, depending on how you're managing their
-          creation. This setting doesn't affect the display of tech notes
-          (see `TECH_NOTES_EXTERNAL_URL`), only whether the interface
-          for publishing them is shown.""",
+          """The admin interface normally lets you publish the tech notes, but
+          if you're hosting them externally this might be confusing (because it
+          certainly won't be changing your external site). However, there are
+          circumstances where you want to be able to publish them here too,
+          depending on how you're managing their creation. This setting doesn't
+          affect the display of tech notes (see `TECH_NOTES_EXTERNAL_URL`),
+          only whether the interface for publishing them is shown.""",
 
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
 
         ConfigSettingNames.IS_USING_GITHUB.name:
-          """Are you using GitHub to distribute the source code for the
-          buggy editor to students? If you choose `Yes` there is still quite a
-          lot of flexibility as to how it's implemented (from simply downloading
-          from GitHub to automatically forking it into their GitHub account).
-          If you choose `No`, the students can download a zip file from this
-          server (or you can override this with your own copy).""",
+          """Are you using GitHub to distribute the source code for the buggy
+          editor to students? If you choose `Yes` there is still quite a lot of
+          flexibility as to how it's implemented (from simply downloading from
+          GitHub to automatically forking it into their GitHub account). If you
+          choose `No`, the students can download a zip file from this server
+          (or you can override this with your own copy).""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
           """If students must work with the buggy editor in their own GitHub
           repo, the race server can help by automatically forking it for them,
           using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
-          `GITHUB_CLIENT_SECRET` for this to work (and `IS_STUDENT_USING_GITHUB_REPO`.
-          must be `Yes`).""",
+          `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_GITHUB` and
+          `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`).""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
-          """If you have set the race server to use GitHub's API to fork the buggy
-          editor repo into each student's account, it will also also inject the tasks
-          as GitHub issues into their repo unless you prevent it here.
-          This setting is ignored if `IS_USING_GITHUB_API_TO_FORK` is set to `No`.
-          """,
+          """If you have set the race server to use GitHub's API to fork the
+          buggy editor repo into each student's account, it will also also
+          inject the tasks as GitHub issues into their repo unless you prevent
+          it here. This setting is ignored unless both `IS_USING_GITHUB` and
+          `IS_USING_GITHUB_API_TO_FORK` are both set to `Yes`. """,
 
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
           """If your students will be using a remote server (see:
-          `PROJECT_REMOTE_SERVER_NAME`) and are running VS Code over
-          a remote session, the race server can produce a VS Code
-          workspace file to facilitate cloning the repo onto that
-          server and subequently acccess it through VS Code. This
-          is quite a specific setup: if you're not sure, you almost
-          certainly do not want this.
-          """,
+          `PROJECT_REMOTE_SERVER_NAME`) and are running VS Code over a remote
+          session, the race server can produce a VS Code workspace file to
+          facilitate cloning the repo onto that server and subsequently access
+          it through VS Code. This is quite a specific setup: if you're not
+          sure, you almost certainly do not want this. """,
 
         ConfigSettingNames.PROJECT_CODE.name:
-          """If this project is known by a course or module code, use it
-          (for example, when we ran it at Royal Holloway, it was CS1999).
-          See also `PROJECT_SLUG` which is how this code may appear in
-          filenames of any downloaded files, if you need it to be different.
-          The full name of the project is \"the `PROJECT_CODE` Buggy Racing
-          project\", so if you don't have or need a course code, it's fine
-          to leave it blank.""",
+          """If this project is known by a course or module code, use it (for
+          example, when we ran it at Royal Holloway, it was CS1999). See also
+          `PROJECT_SLUG` which is how this code may appear in filenames of any
+          downloaded files, if you need it to be different. The full name of
+          the project is \"the `PROJECT_CODE` Buggy Racing project\", so if you
+          don't have or need a course code, it's fine to leave it blank.""",
 
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
-          """This is the minimum phase you'd expect an inexperienced
-          programmer who's fully engaged in the project to have completed
-          before running out of time. The default of 3 is based on our
-          experience of running a 6-week project (several times) with
-          students with only one term's prior experience of Python, and
-          takes into account that task 3-MULTI is (deliberately) more
-          involved than most students realise. This expectation is displayed
-          to students (for example on the task list page). If you don't
-          want this, set it to zero to remove the recommendation entirely.""",
+          """This is the minimum phase you'd expect an inexperienced programmer
+          who's fully engaged in the project to have completed before running
+          out of time. The default of 3 is based on our experience of running a
+          6-week project (several times) with students with only one term's
+          prior experience of Python, and takes into account that task 3-MULTI
+          is (deliberately) more involved than most students realise. This
+          expectation is displayed to students (for example on the task list
+          page). If you don't want this, set it to zero to remove the
+          recommendation entirely.""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
-          """If students are going to develop on a remote server,
-          what is its address? This is used with their
-          external username (or just username, if they haven't
-          got one): for example enter `linux.example.ac.uk` so
-          student Ada can log in via `ada@linux.example.ac.uk`.
-          If you're not using a remote project server, leave this
-          blank (see also `PROJECT_REMOTE_SERVER_NAME`).""",
+          """If students are going to develop on a remote server, what is its
+          address? This is used with their external username (or just username,
+          if they haven't got one): for example enter `linux.example.ac.uk` so
+          student Ada can log in via `ada@linux.example.ac.uk`. If you're not
+          using a remote project server, leave this blank (see also
+          `PROJECT_REMOTE_SERVER_NAME`).""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name:
-          """If students are going to develop on a remote server,
-          what is its (human-facing) name? This is used to help
-          students identify the server they are logging into (e.g,
-          "the CompSci department's Unix server").
-          Leave this blank if your students are all working on their
-          own machines (i.e., not a single teaching server with login
-          accounts, python, and personalised HTTP ports).""",
+          """If students are going to develop on a remote server, what is its
+          (human-facing) name? This is used to help students identify the
+          server they are logging into (e.g, "the CompSci department's Unix
+          server"). Leave this blank if your students are all working on their
+          own machines (i.e., not a single teaching server with login accounts,
+          python, and personalised HTTP ports).""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name:
           """If students are going to develop on a remote server, what is the
-          URL then need to hit in their browser to see their app? Presumably
-          it will have a custom port on the end too. If you're not using a
-          remote project server, leave this blank.""",
+          URL then need to hit in their browser to see their app? Presumably it
+          will have a custom port on the end too. If you're not using a remote
+          project server, leave this blank.""",
 
         ConfigSettingNames.PROJECT_REPORT_TYPE.name:
-          """If you require students to include a report of how
-          they tackled the tasks, indicate that here ("report"
-          or "poster" are just different names for the same thing,
-          due to an historic anomaly). The report takes the form
-          of an additional webpage in the student's buggy editor
-          webserver. If you choose `No report`, all mentions will
-          be removed: see also the `IS_STORING_STUDENT_TASK_TEXTS`
-          setting in the **Tasks** group of settings. """,
+          """If you require students to include a report of how they tackled
+          the tasks, indicate that here ("report" or "poster" are just
+          different names for the same thing, due to an historic anomaly). The
+          report takes the form of an additional webpage in the student's buggy
+          editor webserver. If you choose `No report`, all mentions will be
+          removed: see also the `IS_STORING_STUDENT_TASK_TEXTS` setting in the
+          **Tasks** group of settings. """,
 
         ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears — as a prefix — in any
           filenames that are downloaded from the server. This is a kindness to
-          help disambiguate files in your Downloads folder. If you leave this blank,
-          it will default to using an automatic sluggified version of your project
-          code, if any. Note that there are some places where students can download
-          files (e.g., tabulated specification data) too, so it's not just admin
-          staff who will see it.""",
+          help disambiguate files in your Downloads folder. If you leave this
+          blank, it will default to using an automatic "slugged" version of
+          your project code, if any. Note that there are some places where
+          students can download files (e.g., tabulated specification data) too,
+          so it's not just admin staff who will see it.""",
 
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name:
-          """If you require all students to submit their projects
-          on a specific deadline, set it here. This is displayed
-          prominently (if the project is enabled) on the project
-          page, but isn't currently used by the server for anything
-          else. Avoid using 00:00 as a time because it confuses
-          students — 23:59 is clearer (and 16:00 is healthier).
-          Leave blank if you don't want to display a deadline at all
-          (remember you can also use Announcements).""",
+          """If you require all students to submit their projects on a specific
+          deadline, set it here. This is displayed prominently (if the project
+          is enabled) on the project page, but isn't currently used by the
+          server for anything else. Avoid using 00:00 as a time because it
+          confuses students — 23:59 is clearer (and 16:00 is healthier). Leave
+          blank if you don't want to display a deadline at all (remember you
+          can also use Announcements).""",
 
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name:
-          """Provide a link to either the web page where you'll
-          be accepting submissions (presumably zip files) or
-          else a page containing clear instructions for the
-          students to follow. The buggy race server does
-          not handle submissions itself. By default, no submission
-          information is provided (because it's very dependent
-          on each institution), which means no link is displayed:
-          so you must supply one yourself.""",
+          """Provide a link to either the web page where you'll be accepting
+          submissions (presumably zip files) or else a page containing clear
+          instructions for the students to follow. The buggy race server does
+          not handle submissions itself. By default, no submission information
+          is provided (because it's very dependent on each institution), which
+          means no link is displayed: so you must supply one yourself.""",
 
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
           """You can replace the default workflow page with a redirection to
@@ -1078,19 +1067,19 @@ class ConfigSettings:
           setting is ignored if `IS_SHOWING_PROJECT_WORKFLOW` is `No`.""",
 
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name:
-          """Normally the suggested filename for submissions (the students'
-          zip file) is their username + `.zip`. But if you prefer your
-          students to use an external username or ID, you can suggest it here.
-          If you pick a type that users don't have, it will fall back to
-          `username` (because all users have one). This setting is ignored if
+          """Normally the suggested filename for submissions (the students' zip
+          file) is their username + `.zip`. But if you prefer your students to
+          use an external username or ID, you can suggest it here. If you pick
+          a type that users don't have, it will fall back to `username`
+          (because all users have one). This setting is ignored if
           `IS_PROJECT_ZIP_INFO_DISPLAYED` is `No`.""",
 
         ConfigSettingNames.SECRET_KEY.name:
-          """A secret used by the webserver in cookies, etc. This should be unique
-          for your server: the default value shown here was randomised on installation,
-          so you usually don't need to change it. Note that changing it will
-          almost certainly break existing sessions. For cleanest results, reboot
-          the server as soon as you've changed it).""",
+          """A secret used by the webserver in cookies, etc. This should be
+          unique for your server: the default value shown here was randomised
+          on installation, so you usually don't need to change it. Note that
+          changing it will almost certainly break existing sessions. For
+          cleanest results, reboot the server as soon as you've changed it).""",
 
         ConfigSettingNames.SOCIAL_0_NAME.name:
           """Name (shown on button)""",
@@ -1118,46 +1107,42 @@ class ConfigSettings:
           """Full URL to external site/resource""",
 
         ConfigSettingNames.SUPERBASICS_URL.name:
-          """There are a few places (for example in the workflow
-          page and the tech notes) that link to a "superbasics" site
-          which explains basic concepts for students. You can use the
-          default, but you can also fork it and customise it, in which
-          case put its URL here. Note that the links are to specific
-          paths within the superbasics, which are added to this base
-          URL.""",
+          """There are a few places (for example in the workflow page and the
+          tech notes) that link to a "superbasics" site which explains basic
+          concepts for students. You can use the default, but you can also fork
+          it and customise it, in which case put its URL here. Note that the
+          links are to specific paths within the superbasics, which are added
+          to this base URL, so if you host your own version be cautious about
+          changing existing paths within it.""",
 
         ConfigSettingNames.TASK_NAME_FOR_API.name:
-          """The name of the task that require use of the
-          upload API. If set, this is shown as a helpful link in the
-          explanotary text on the student's API settings page.
-          If you set this to be empty, no link is shown. You can provide
-          mulitple task names by separating them with commas. If you
-          haven't customised the task list, you don't need to change
-          this.""",
+          """The name of the task that require use of the upload API. If set,
+          this is shown as a helpful link in the explanatory text on the
+          student's API settings page. If you set this to be empty, no link is
+          shown. You can provide multiple task names by separating them with
+          commas. If you haven't customised the task list, you don't need to
+          change this.""",
 
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name:
-          """The name of the task for setting environment variables. If
-          you haven't customised the task list, you don't need to change
-          this.
-          """,
+          """The name of the task for setting environment variables. If you
+          haven't customised the task list, you don't need to change this. """,
 
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name:
-          """The name of the task for getting the source code. If you
-          haven't customised the task list, you don't need to change
-          this.""",
+          """The name of the task for getting the source code. If you haven't
+          customised the task list, you don't need to change this.""",
 
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name:
-          """The name of the task that requires use of validation.
-         If set, this is shown as a helpful link in the
-          explanotary text on the reports page. If you haven't customised
-          the task list, you don't need to change this.""",
+          """The name of the task that requires use of validation. If set, this
+          is shown as a helpful link in the explanatory text on the reports
+          page. If you haven't customised the task list, you don't need to
+          change this.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
-          """Full URL to the tech notes pages if they are *not* being hosted
-          on this server. If you've customised them and have published them
+          """Full URL to the tech notes pages if they are *not* being hosted on
+          this server. If you've customised them and have published them
           somewhere else (for example, hosted on GitHub pages), then put the
-          URL here. By default, tech notes are hosted on the race
-          server, so you can leave this blank.""",
+          URL here. By default, tech notes are hosted on the race server, so
+          you can leave this blank.""",
 
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name:
           """The period (in seconds) over which each logged-in user's activity
@@ -1169,68 +1154,68 @@ class ConfigSettings:
 
         ConfigSettingNames.USERNAME_EXAMPLE.name:
           """A placeholder string used in the login form. This can be
-          especially helpful if students use a different username for
-          accessing other college systems. You can set this to be blank.
-          """,
+          especially helpful if students use a different username for accessing
+          other college systems. You can set this to be blank.""",
 
         ConfigSettingNames.USERS_HAVE_EXT_ID.name:
-          """Do users have an ID from an external system? This might be
-          useful if you want to match students with their existing ID on
-          another system like Moodle, Blackboard or Canvas. You don't need
-          this unless it's a useful way of identifying a student. If you do
-          set this to `Yes`, you should also set `EXT_ID_NAME` to describe
-          what it is.""",
+          """Do users have an ID from an external system? This might be useful
+          if you want to match students with their existing ID on another
+          system like Moodle, Blackboard or Canvas. You don't need this unless
+          it's a useful way of identifying a student. If you do set this to
+          `Yes`, you should also set `EXT_ID_NAME` to describe what it is.""",
 
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name:
           """Do users have an external username or account that's specific to
-          your organsiation or institution? You might not need this, or you
-          might already be using it as the username — in which case
-          choose `No`. Note: the race server does **not** use this for
-          authentication (i.e., there is no OAuth implementation). However,
-          if your users need to log into a remote server for development
-          _and_ you are using VS Code workspace files, you will need this to
-          be `Yes` — unless you're simply using those external usernames as
-          the students' race server usernames when you register them.""",
+          your organisation or institution? You might not need this, or you
+          might already be using it as the username — in which case choose
+          `No`. Note: the race server does **not** use this for authentication
+          (i.e., there is no OAuth implementation). However, if your users need
+          to log into a remote server for development _and_ you are using VS
+          Code workspace files, you will need this to be `Yes` — unless you're
+          simply using those external usernames as the students' race server
+          usernames when you register them.""",
 
         ConfigSettingNames.USERS_HAVE_EMAIL.name:
           """Do users need email addresses? The server doesn't send emails so
-          you don't need this field unless it's a useful way of identifying
-          a student.""",
+          you don't need this field unless it's a useful way of identifying a
+          student.""",
 
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name:
-          """Do users need to have a first name? You might be using each student's
-          first name as the username, in which case you don't need this.""",
+          """Do users need to have a first name? You might be using each
+          student's first name as the username, in which case you don't need
+          this.""",
 
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name:
-          """Do users need to have a last name? If you can already identify your
-          students from the other fields, you might not need this.""",
+          """Do users need to have a last name? If you can already identify
+          your students from the other fields, you might not need this.""",
 
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
       ConfigGroupNames.AUTH.name:
-        """You must complete the setup. It takes around 5–10 minutes, and
-        you may be able to leave most settings to their defaults (and you
-        can change most things later, if you need to).""",
+        """You must complete the setup. It takes around 5–10 minutes, and you
+        may be able to leave most settings to their defaults (and you can
+        change most things later, if you need to).""",
 
       ConfigGroupNames.GITHUB.name:
-        """Setup the GitHub details here. If you're injecting issues
-        into student's own repos, you must provide valid GitHub
-        CLIENT details which may be specific to your installation.""",
+        """Setup the GitHub details here. If you're injecting issues into
+        student's own repos, you must provide valid GitHub client details which
+        may be specific to your installation. If you are not using Git or
+        GitHub, the first three settings are used (that is, don't be fooled by
+        the "GitHub" name of this group!).""",
 
       ConfigGroupNames.ORG.name:
         """Provide general details about your institution/organisation.""",
 
       ConfigGroupNames.PROJECT.name:
-        """These settings control aspects of the what the students
-        need to do (for example: are they only coding, or do you
-        want them to add a report/poster page to their buggy editor
-        too?). If you or your department is running a remote server
-        on which students will be doing their Python, enter its
-        details here (there's extra set-up required on that remote
-        server too — see the docs). It's fine to run the project
-        without a remote server: it just means students work on
-        individial machines.""",
+        """These settings control aspects of the what the students need to do
+        (for example: are they only coding, or do you want them to add a
+        report/poster page to their buggy editor too?). If you or your
+        department is running a remote server on which students will be doing
+        their Python, enter its details here (there's extra set-up required on
+        that remote server too — see the docs). It's fine to run the project
+        without a remote server: it just means students work on individual
+        machines.""",
 
       ConfigGroupNames.RACES.name:
         """Race settings can all be left to default (you can change them
@@ -1238,45 +1223,43 @@ class ConfigSettings:
 
       ConfigGroupNames.SERVER.name:
         """These settings control the behaviour of the server. The
-        BUGGY_RACE_SERVER_URL setting is important; the others can
-        usually be left to their default values.""",
+        BUGGY_RACE_SERVER_URL setting is critically important, whereas you may
+        find you can accept the defaults for most or all of the others here.""",
 
       ConfigGroupNames.SOCIAL.name:
         """These are used to add links to your institution's social or
-        educational accounts. If you run support sites like Moodle
-        or Discord or Teams for this project, add them here.""",
+        educational accounts. If you run support sites like Moodle or Discord
+        or Teams for this project, add them here.""",
 
       ConfigGroupNames.TASKS.name:
-        """The work the students must do to develop their buggy editor
-        is divided into named tasks. Tasks are grouped into phases
-        (for example phase 0 is all about getting and running the basic
-        code). The default project has 26 tasks, but you can change
-        any and all of this once you've completed this config setup.
-        The tasks are published as a task list that itself depends on
-        other config settings, so you'll need to publish the task
-        list once you've finished — or if you change any settings in
-        the future.""",
+        """The work the students must do to develop their buggy editor is
+        divided into named tasks. Tasks are grouped into phases (for example
+        phase 0 is all about getting and running the basic code). The default
+        project has around 26 tasks, but you can change any and all of this
+        once you've completed this config setup. The tasks are published as a
+        task list that itself depends on other config settings, so you'll need
+        to publish the task list once you've finished — or if you change any
+        settings in the future.""",
 
       ConfigGroupNames.TECH_NOTES.name:
-        """The tech notes are static webpages with supporting or
-        explanatory material specific to the project, and even some
-        tasks. You cannot customise them on this server (i.e.,
-        through this web interface) but you can host them externally
-        (e.g., on your own course website or GitHub pages), in which
-        case set the external URL here. For details on how to extract
-        the tech notes for self-publication, see separate docs. Like
-        the task list, the tech notes depend on other config settings,
-        so you need to publish them once you've finished — or if you
-        change any settings in the future""",
+        """The tech notes are static webpages with supporting or explanatory
+        material specific to the project, and even some tasks. You cannot
+        customise them on this server (i.e., through this web interface) but
+        you can host them externally (e.g., on your own course website or
+        GitHub pages), in which case set the external URL here. For details on
+        how to extract the tech notes for self-publication, see separate docs.
+        Like the task list, the tech notes depend on other config settings, so
+        you need to publish them once you've finished — or if you change any
+        settings in the future""",
 
       ConfigGroupNames.USERS.name:
         """Every student will need a username. These settings define what
-        fields you want to store IN ADDITION to that username. You do
-        not need to have any additional fields (we recommend you only
-        add them if you really need to, for example, if the usernames
-        aren't already the students' first names, maybe add a first
-        name so you can recognise who they are). Only admin users see
-        these additional fields — they aren't made public.""",
+        fields you want to store IN ADDITION to that username. You do not need
+        to have any additional fields (we recommend you only add them if you
+        really need to, for example, if the usernames aren't already the
+        students' first names, maybe add a first name so you can recognise who
+        they are). Only admin users see these additional fields — they aren't
+        made public.""",
     }
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key

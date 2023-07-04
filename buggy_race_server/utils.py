@@ -394,8 +394,8 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
 
 def parse_task_markdown(task_source_filename):
     SECTION_NAMES = [
-      name for name in Task.__table__.columns._data.keys()
-      if name.endswith("_text")
+      col.name for col in Task.__table__.columns
+      if col.name.endswith("_text")
     ]
     H1_PHASE_NAME_RE = re.compile(r"^#\s+(.*)")
     PHASE_NAME_RE = re.compile(r"(\d)-(\w+)")

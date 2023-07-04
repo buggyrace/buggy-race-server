@@ -103,6 +103,7 @@ class User(UserMixin, SurrogatePK, Model):
     is_api_secret_otp = Column(db.Boolean, nullable=False, default=False)
     api_key = Column(db.String(30), nullable=True)
     comment = Column(db.Text(), default=False)
+    is_demo_user = Column(db.Boolean(), default=False)
 
     def __init__(self, username, ext_username=None, email=None, password=None, **kwargs):
         """Create instance."""

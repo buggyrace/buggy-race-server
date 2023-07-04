@@ -18,7 +18,11 @@
         <p>
           All {{ users|length }} users in the system.
           {{ qty_students}} are students (&Sopf;),
-          {{ qty_admins }} are admins (&starf;),
+          {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
+            {{ qty_admins }} are admins (&starf;, d=demo),
+          {% else %}
+            {{ qty_admins }} are admins (&starf;),
+          {% endif %}
           {{ qty_teaching_assistants }} teaching assistants (&star;).
         </p>
       </div>
@@ -125,7 +129,7 @@
                 </td>
               {% endif %}
               <td style="width:1em">
-                <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
+                <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% if current_user.is_administrator and not current_user.is_demo_user and u.is_demo_user %}d{%endif %}{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
               </td>
               <td class="u-username">
                 <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>

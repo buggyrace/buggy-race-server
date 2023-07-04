@@ -598,6 +598,7 @@ def list_users(data_format=None, want_detail=True):
             ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
             ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+            is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
             qty_admins=qty_admins,
             qty_students_enabled=len([s for s in students if s.is_active]),
@@ -756,6 +757,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
         texts_by_task_id=texts_by_task_id,
@@ -794,6 +796,7 @@ def manage_user(user_id):
           user.comment = form.comment.data
           user.is_student = form.is_student.data
           user.is_active = form.is_active.data
+          user.is_demo_user = form.is_demo_user.data if form.is_demo_user is not None else False
           if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
               user.first_name = form.first_name.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
@@ -837,6 +840,7 @@ def manage_user(user_id):
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       form=form,
       is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
+      is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       user=user,
   )
@@ -1622,6 +1626,7 @@ def show_system_info():
     config_settings_to_display = sorted([
       ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+      ConfigSettingNames._IS_DEMO_SERVER.name,
       ConfigSettingNames._EDITOR_INPUT_DIR.name,
       ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
       ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,

@@ -134,7 +134,14 @@ class ConfigSettingNames(Enum):
     _TECH_NOTES_PAGES_DIR = auto()
     _TECH_NOTES_PATH = auto()
 
+    # set to MANUAL_LATEST_VERSION_IN_SOURCE in the init method (see below)
     _VERSION_IN_SOURCE = auto()
+
+    # if this is a (the?) demo server, set this true
+    # This isn't being offered as an admin/web setting because it's really
+    # only for buggyrace.net nerds and don't want to encourage confusion
+    # with people trying to run a real server
+    _IS_DEMO_SERVER = auto()
 
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
@@ -391,6 +398,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_README_FILENAME.name: "README.md",
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: "buggy-race-editor",
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
+        ConfigSettingNames._IS_DEMO_SERVER.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
@@ -515,6 +523,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_README_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
+        ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,

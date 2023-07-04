@@ -184,6 +184,24 @@
           </div>
         </div>
 
+        {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
+          <div class="row alert-warning py-2 m-1">
+            <div class="col-sm-3">
+              {{form.is_demo_user.label}}
+            </div>
+            <div class="col-sm-4">
+              <select name="is_demo_user" class="form-control mr-sm-1">
+                <option value="" {% if user and not user.is_demo_user %}selected{% endif %}>No</option>
+                <option value="Yes" {% if not user or user.is_demo_user %}selected{% endif %}>Yes</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              Demo users who are also administrators can access all pages but have
+              some limitations on what they can submit (so demo server doesn't
+              get accidentally broken).
+            </div>
+          </div>
+        {% endif %}
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{form.comment.label}}

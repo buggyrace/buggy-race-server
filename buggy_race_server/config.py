@@ -791,7 +791,7 @@ class ConfigSettings:
           the excellent typesetting system beloved of academics. Because the
           tech notes are static content, this CSS toggle is implemented in
           JavaScript. This feature is an in-joke that only need be engaged if
-          you are fee feeling playful, or if there are academics in your
+          you are feeling playful, or if there are academics in your
           institution who might be horrified by the prospect of reading text
           in a san-serif font on anything other than white paper.""",
 
@@ -918,7 +918,8 @@ class ConfigSettings:
           own GitHub repo? Choose `No` if your students are not
           using GitHub. If you choose `Yes`, make sure you've set
           `IS_USING_GITHUB_API_TO_FORK` if you want this to be automated
-          via the race server.""",
+          via the race server. This setting is ignored if `IS_USING_GITHUB`
+          is `No`.""",
         
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
           """Teaching Assistants cannot edit user data. Do you want TAs

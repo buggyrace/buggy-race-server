@@ -28,10 +28,13 @@ from wtforms.validators import (
     ValidationError, 
 )
 
-from buggy_race_server.admin.models import AnnouncementType
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames, ConfigTypes
+from buggy_race_server.config import (
+    AnnouncementTypes,
+    ConfigSettings,
+    ConfigSettingNames,
+    ConfigTypes
+)
 from buggy_race_server.utils import is_authorised
-
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -83,7 +86,7 @@ class AnnouncementForm(FlaskForm):
     type = SelectField(
       'Type',
       validators=[DataRequired()],
-      choices=[(t.value,t.value) for t in AnnouncementType]
+      choices=[(t.value,t.value) for t in AnnouncementTypes]
     )
     is_visible = BooleanField("Display now?")
     is_html = BooleanField("Allow HTML?")

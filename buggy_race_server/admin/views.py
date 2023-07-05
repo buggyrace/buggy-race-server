@@ -51,7 +51,6 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import (
     Announcement,
-    AnnouncementType,
     TaskText,
     Setting,
     SocialSetting,
@@ -60,7 +59,12 @@ from buggy_race_server.admin.models import (
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
+from buggy_race_server.config import (
+    AnnouncementTypes,
+    ConfigSettingNames,
+    ConfigSettings,
+    ConfigTypes
+)
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
 from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
@@ -299,9 +303,9 @@ def setup_summary():
     qty_announcements_login = 0
     qty_announcements_tagline = 0
     for ann in current_app.config['CURRENT_ANNOUNCEMENTS']:
-        if ann.type == AnnouncementType.LOGIN.value:
+        if ann.type == AnnouncementTypes.LOGIN.value:
             qty_announcements_login += 1
-        elif ann.type == AnnouncementType.TAGLINE.value:
+        elif ann.type == AnnouncementTypes.TAGLINE.value:
             qty_announcements_tagline += 1
         else:
             qty_announcements_global += 1
@@ -1660,6 +1664,7 @@ def show_system_info():
       "SEND_FILE_MAX_AGE_DEFAULT",
       "SQLALCHEMY_TRACK_MODIFICATIONS",
       "UPLOAD_FOLDER",
+      "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
     ])
     return render_template(
         "admin/system_info.html",

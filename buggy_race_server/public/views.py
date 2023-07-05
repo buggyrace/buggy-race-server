@@ -20,8 +20,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from buggy_race_server.database import db
-from buggy_race_server.admin.models import AnnouncementType
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
@@ -57,7 +56,7 @@ def home():
     return render_template(
         "public/home.html",
         social_site_links=SocialSetting.get_socials_from_config(current_app.config),
-        local_announcement_type=AnnouncementType.TAGLINE.value,
+        local_announcement_type=AnnouncementTypes.TAGLINE.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         editor_url=editor_url,
 
@@ -104,7 +103,7 @@ def login():
             current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
             or (not current_user.is_anonymous and current_user.is_administrator)
         ),
-        local_announcement_type=AnnouncementType.LOGIN.value,
+        local_announcement_type=AnnouncementTypes.LOGIN.value,
         username_example=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     )
 
@@ -151,6 +150,7 @@ def about():
         render_template(
             "public/about.html",
             form=form,
+            local_announcement_type=AnnouncementTypes.ABOUT.value,
             version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
         )
     )

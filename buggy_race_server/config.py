@@ -24,6 +24,7 @@ from random import randint
 from os import path
 import re
 from buggy_race_server.extensions import bcrypt
+
 import pytz # timezones
 from time import time
 
@@ -1396,6 +1397,34 @@ class ConfigSettings:
         return [ field for field in is_enabled_dict if is_enabled_dict[field] ]
 
 
+class AnnouncementTypes(Enum):
+    """ Control what announcements are supported, and where they go """
+    ABOUT = 'about'
+    DANGER = 'danger'
+    GET_EDITOR = 'get-editor'
+    INFO = 'info'
+    LOGIN = 'login'
+    SPECIAL = 'special'
+    TAGLINE = 'tagline'
+    WARNING = 'warning'
+
+    @staticmethod
+    def get_top_of_page_types():
+        return [
+          AnnouncementTypes.DANGER.value,
+          AnnouncementTypes.INFO.value,
+          AnnouncementTypes.SPECIAL.value,
+          AnnouncementTypes.WARNING.value,
+        ]
+
+    @staticmethod
+    def get_local_types():
+        return [
+            ann_type.value for ann_type in AnnouncementTypes
+            if ann_type.value not in AnnouncementTypes.get_top_of_page_types()
+        ]
+
+
 ##################################################################
 
 env = Env()
@@ -1411,6 +1440,9 @@ class ConfigFromEnv():
     # 1 - force change of auth code, get admin username and password
     # 2+ - subsquent settings (broken down into groups)
     _SETUP_STATUS = env.str(str(ConfigSettingNames._SETUP_STATUS), default=None)
+
+    # announcement constant, used in layout template
+    _ANNOUNCEMENT_TOP_OF_PAGE_TYPES = AnnouncementTypes.get_top_of_page_types()
 
     # some (not-buggy-race-specific) config _only_ comes from the ENV
     FLASK_APP = env.str("FLASK_APP", default="buggy_race_server/app.py")

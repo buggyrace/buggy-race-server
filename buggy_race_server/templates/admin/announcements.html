@@ -40,7 +40,15 @@
                   class="btn btn-outline-secondary btn-admin btn-jump">Edit</a>
                 {% endif %}
               </td>
-              <td>{{announcement.type}}</td>
+              <td>
+                {% if announcement.type == 'special' %}
+                  <span class="bg-yellow p-1">{{announcement.type}}</span>
+                {% elif announcement.type in config['_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'] %}
+                  <span class="alert-{{ announcement.type }} p-1">{{announcement.type}}</span>
+                {% else %}
+                  {{announcement.type}}
+                {% endif %}
+              </td>
               <td>
                 {% if is_html_enabled and announcement.is_html %}
                   {{announcement.text|safe}}

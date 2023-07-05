@@ -8,7 +8,7 @@ import re
 import markdown
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 
 class SocialSetting():
   """A Social media link: note this is not a Flask/ORM model
@@ -67,14 +67,6 @@ class Setting(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
 
-class AnnouncementType(Enum):
-    DANGER = 'danger'
-    GET_EDITOR = 'get-editor'
-    INFO = 'info'
-    LOGIN = 'login'
-    SPECIAL = 'special'
-    TAGLINE = 'tagline'
-    WARNING = 'warning'
 
 class Announcement(SurrogatePK, Model):
 
@@ -84,17 +76,8 @@ class Announcement(SurrogatePK, Model):
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
 
     TYPE_OPTION_GROUPS = {
-       "Shown at top of all pages:": [
-            AnnouncementType.DANGER.value,
-            AnnouncementType.INFO.value,
-            AnnouncementType.SPECIAL.value,
-            AnnouncementType.WARNING.value,
-        ],
-        "Shown within specific page:": [
-            AnnouncementType.LOGIN.value,
-            AnnouncementType.TAGLINE.value,
-            AnnouncementType.GET_EDITOR.value,
-        ]
+        "Shown at top of all pages:": AnnouncementTypes.get_top_of_page_types(),
+        "Shown within specific page:": AnnouncementTypes.get_local_types(),
     }
 
     """An announcement to display on top of all pages."""

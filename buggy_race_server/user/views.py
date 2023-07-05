@@ -23,9 +23,9 @@ from functools import wraps
 from wtforms import ValidationError
 
 from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
-from buggy_race_server.admin.models import TaskText, Task, AnnouncementType
+from buggy_race_server.admin.models import TaskText, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
@@ -98,7 +98,7 @@ def settings():
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
         project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
-        local_announcement_type=AnnouncementType.GET_EDITOR.value,
+        local_announcement_type=AnnouncementTypes.GET_EDITOR.value,
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)

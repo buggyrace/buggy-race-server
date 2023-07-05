@@ -80,25 +80,29 @@ def submit_buggy_data():
 @active_user_required
 def settings():
     form = ChangePasswordForm()
+    is_using_github = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+    )
     return render_template(
         "user/settings.html",
-        user=current_user,
-        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
-        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
-        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
-        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
-        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
         ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         form=form,
+        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
+        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         is_secure=True, # TODO investigate when this can be false
-        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        is_using_github=is_using_github,
         is_using_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
-        project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
-        project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
         local_announcement_type=AnnouncementTypes.GET_EDITOR.value,
+        project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
+        project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
+        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        user=current_user,
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)

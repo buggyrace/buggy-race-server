@@ -1,5 +1,5 @@
 # ==================================== BASE ====================================
-ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.8}
+ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.9}
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster AS base
 
 RUN apt-get update
@@ -16,7 +16,7 @@ RUN apt-get install -y \
 COPY db/init.sql /docker-entrypoint-initdb.d/
 
 WORKDIR /app
-COPY requirements requirements
+COPY requirements.txt requirements.txt
 
 COPY . .
 

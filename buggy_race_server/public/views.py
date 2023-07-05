@@ -53,13 +53,18 @@ def home():
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
     else:
         editor_url = url_for("public.download_editor_zip")
+    is_using_github = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        or
+        current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name]
+    )
     return render_template(
         "public/home.html",
-        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
-        local_announcement_type=AnnouncementTypes.TAGLINE.value,
-        is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         editor_url=editor_url,
-
+        is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        is_using_github=is_using_github,
+        local_announcement_type=AnnouncementTypes.TAGLINE.value,
+        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
     )
 
 @blueprint.route("/logout", strict_slashes=False)

@@ -309,6 +309,7 @@ footer .footer-nav {
 .icon-github:before { content: "\eab0"; }
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
+.icon-embed2:before { content: "\ea80"; }
 
 .nav-link .icon-cog {color:#dddd00}
 .nav-link .icon-cog:hover {color:#ffff00}

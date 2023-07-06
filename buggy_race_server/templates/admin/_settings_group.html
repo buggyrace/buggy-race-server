@@ -56,3 +56,38 @@
     </div>
   {% endfor %}
 {% endif %}
+{% if group == 'SERVER' %}
+  <script>
+    var FIXME;
+    const NAME_REGEX = /^(settings-\d+-)name$/;
+    for (let hidden_input of document.querySelectorAll('input[type="hidden"]')){
+      if (hidden_input.name) {
+        let match = hidden_input.name.match(NAME_REGEX);
+        if (match && hidden_input.value==="BUGGY_RACE_SERVER_URL") {
+          let value_input_name = match[1] + "value";
+          let parent_div = hidden_input.parentNode;
+          let value_input = parent_div.querySelector('input[name="' + value_input_name + '"');
+          if (value_input){
+            let current_url = value_input.value;
+            let page_url = window.location.protocol + "//" + window.location.host;
+            // If the url the browser is seeing (page_url) does not match the
+            // setting for server URL, offer a button to fix it, because if
+            // it's running on www.example.com, then that's probably what this
+            // setting should be. It's potentially the only setting that cannot
+            // be left as its default value, so nudge the administrator.
+            if (current_url.indexOf(page_url) != 0) {
+              let new_button = document.createElement("button");
+              new_button.classList.add("btn", "btn-admin", "btn-outline-danger", "my-2");
+              new_button.innerText="Change to " + page_url;
+              new_button.addEventListener("click", function(e){
+                e.preventDefault();
+                value_input.value = page_url;
+              })
+              parent_div.append(new_button);
+            }
+          }
+        }
+      }
+    }
+  </script>
+{% endif %}

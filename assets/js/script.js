@@ -517,32 +517,42 @@ $(function() {
         ajax_url = JSON_BUGGY_URL + user_id;
         title_str = username + "'s uploaded JSON";
         thru_button_str = username + "'s buggy";
+      } else if ($button.data("comment")) {
+        title_str = "Comment on " + username;
+        modal_text_body.innerText = $button.data("comment");
       } else {
         ajax_url = JSON_TEXT_URL + text_id;
         title_str = username + "'s text for " + taskname;
         thru_button_str = username + "'s texts";
       }
       modal_title.innerText = title_str;
-      $.ajax(ajax_url, {dataType: "json"})
-        .done(function(json_data) {
-          modal_text_body.classList.add("task-text");
-          modal_text_body.classList.remove("alert-danger");
-          modal_text_body.innerText=json_data.text;
-          if (json_data.uploaded_at){
-            modal_timestamp.innerHTML="<em>Uploaded:</em>: " + json_data.uploaded_at;
-          } else if (json_data.modified_at){
-            modal_timestamp.innerHTML="<em>Updated:</em>: " + json_data.modified_at;
-          } else if (json_data.created_at){
-            modal_timestamp.innerHTML="<em>Created:</em>: " + json_data.created_at;
-          }
+      if (ajax_url) {
+        $.ajax(ajax_url, {dataType: "json"})
+          .done(function(json_data) {
+            modal_text_body.classList.add("task-text");
+            modal_text_body.classList.remove("alert-danger");
+            modal_text_body.innerText=json_data.text;
+            if (json_data.uploaded_at){
+              modal_timestamp.innerHTML="<em>Uploaded:</em>: " + json_data.uploaded_at;
+            } else if (json_data.modified_at){
+              modal_timestamp.innerHTML="<em>Updated:</em>: " + json_data.modified_at;
+            } else if (json_data.created_at){
+              modal_timestamp.innerHTML="<em>Created:</em>: " + json_data.created_at;
+            }
+          })
+        .fail(function(response) {
+          modal_text_body.classList.add("alert-danger");
+          modal_text_body.classList.remove("task-text");
+          modal_text_body.innerText="Error: " + response.status + " " + response.statusText
         })
-      .fail(function(response) {
-        modal_text_body.classList.add("alert-danger");
-        modal_text_body.classList.remove("task-text");
-        modal_text_body.innerText="Error: " + response.status + " " + response.statusText
-      })
-      modal_user_button.innerHTML = thru_button_str;
-      modal_user_button.setAttribute("href", $button.attr("href"));
+      }
+      if (thru_button_str) {
+        modal_user_button.classList.remove("hidden")
+        modal_user_button.innerHTML = thru_button_str;
+        modal_user_button.setAttribute("href", $button.attr("href"));
+      } else {
+        modal_user_button.classList.add("hidden");
+      }
     });
   }
 

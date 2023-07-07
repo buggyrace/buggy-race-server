@@ -230,8 +230,9 @@ class SubmitWithAuthForm(FlaskForm):
 class GenerateTasksForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
     is_confirmed = BooleanField("You cannot undo this. Are you sure?")
+    distrib_method = StringField("Distribution method", [Optional()])
     markdown_file =FileField(
-      "Upload a markdown file describing the tasks (or leave blank to load the default tasks)",
+      "Upload a markdown file describing the tasks",
       [Optional()]
     )
 

@@ -110,6 +110,10 @@ class ConfigSettingNames(Enum):
     # to be so, this is an entirely separate path
     _RACE_ASSETS_RACETRACK_PATH = auto()
 
+    # dir where the default tasks are found, and the file name within it
+    _PROJECT_TASKS_DIR_NAME = auto()
+    _PROJECT_TASKS_FILENAME = auto()
+
     # Setup status is used to track progress (and ultimately completion)
     # of the setup process when the app is first installed
     _SETUP_STATUS = auto()
@@ -401,6 +405,8 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
+        ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
+        ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
         ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
@@ -526,6 +532,8 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
+        ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,

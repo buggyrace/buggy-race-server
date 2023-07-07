@@ -15,10 +15,18 @@
         <div class="alert alert-warning my-3">
           <strong>There are no tasks in the project</strong>
           <br>
-          You need to <strong>Load new tasks into database</strong> (red button, below):
+          You need to <strong>Load new tasks into database</strong> (red
+          button, below):
           <ul>
-            <li>If you don't upload a file, the server will use the default project tasks (which is OK!)</li>
-            <li>Otherwise, if you want to use your own tasks, download the markdown describing them, edit it, and upload that</li>
+            <li>
+              If you don't upload a file, the server will use the built-in
+              default project tasks (which is OK!).
+            </li>
+            <li>
+              Otherwise, if you want to use your own tasks, choose
+              <strong>Download tasks as Markdown</strong>, edit it,
+              and upload that.
+            </li>
           </ul>
         </div>
       </div>
@@ -53,14 +61,14 @@
         server.
       {% else %}
         The config setting <code>{{ auto_republish_config_name }}</code>
-        is not set (which is normal), so if you change any tasks <em>or
-        config settings that it contains</em>, you should republish it
-        here.
+        is not set (which is fine — it's OK to do this manually), so if
+        you change any tasks <em>or config settings that it contains</em>,
+        you should republish it here.
       {% endif %}
       {% if is_injecting_github_issues %}
         Publishing the task list also refreshes the CSV file used when
-        when <strong>injecting tasks as GitHub issues</strong> into
-        students' GitHub accounts.
+        <strong>injecting tasks as GitHub issues</strong> into students'
+        GitHub accounts.
       {% endif %}
     </div>
   </div>
@@ -92,7 +100,7 @@
           </thead>
           <tbody>
             {% for task in tasks %}
-              <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %} %}>
+              <tr {% if not task.phase % 2 %}class="table-secondary"{% endif %}>
                 <td>
                   <a href="{{ url_for('admin.edit_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-admin">Edit</a>
                 </td>
@@ -120,6 +128,98 @@
     </div>
   </div>
   <div class="row">
+    <div class="col">
+      <div class="container border mb-2">
+        <div class="row py-3">
+          <div class="col">
+            {% if tasks_loaded_at %}
+              Tasks loaded into&nbsp;database: {{ tasks_loaded_at | servertime }}
+            {% else %}
+              Missing timestamp
+              (maybe no tasks have been loaded&nbsp;yet)
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% if tasks %}
+        <div class="alert alert-danger">
+          <strong>
+            Loading tasks now will delete all existing tasks!
+          </strong>
+        </div>
+      {% endif %}
+      <form method="POST" action="{{ url_for('admin.tasks_admin') }}" enctype="multipart/form-data" role="form">
+        {{ form.csrf_token }}
+        <div class="container alert-warning border border-warning my-3 p-0">
+          <h2 class="alert-title m-0">Use in-built defaults</h2>
+          <div class="row">
+            <div class="col">
+              <div class="p-3">
+                <label for="distrib_method" class="d-block">
+                  How are you distributing the buggy editor source code?
+                  <br>
+                  (This affects tasks 0-GET and 0-RUN).
+                </label>
+                <select name="distrib_method" class="form-control">
+                  {% for method in distrib_methods %}
+                    <option value="{{ method.value }}">{{ method.desc }}</option>
+                  {% endfor %}
+                </select>
+                <p class="my-2">
+                  Be careful: the distribution method you choose must
+                  match the config settings you've chosen.
+                </p>
+              </div>
+          </div>
+          </div>
+          <h2 class="alert-title m-0">...or upload your own customised file</h2>
+          <div class="row">
+            <div class="col">
+              <div class="p-3">
+                {{ form.markdown_file.label(class="d-block") }}
+                {{ form.markdown_file() }}
+                <p class="mt-2">
+                    &uarr; leave blank to load the default tasks
+                </p>
+              </div>
+            </div>
+          </div>
+          {% if tasks %}
+            <div class="row">
+              <div class="col p-3">
+                {{ form.is_confirmed.label(class="mx-3") }}
+                <div class="col-sm-8">
+                  <select id="is_confirmed" name="is_confirmed" class="form-control">
+                    <option selected value="">No</option>
+                    <option value="">I think so</option>
+                    <option value="y">Yes</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <input type="hidden" name="is_confirmed" value="y"/>
+          {% endif %}
+          <div class="row">
+            <div class="col">
+              <div class="container bg-warning">
+                <div class="p-3">
+                  {{ form.auth_code.label(class="") }}
+                  {{ form.auth_code(class_="mx-0 form-control") }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col p-3">
+              <input type="submit" value="Load tasks into database" class="btn btn-danger m-3"/>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-md-6">
       <p>
         Loading the tasks <strong>deletes all existing tasks</strong>
@@ -136,10 +236,18 @@
         to see the markdown syntax: <code>#</code> (<code>h1</code>)
         for phase-name, <code>##</code>  (<code>h2</code>) for title,
         and so on). Then upload your edited file to load the tasks.
-        If you've edited any of the current tasks, the markdown file
-        will not be the same as the default file.
       </p>
-      <p class="btn-collection my-4">
+      <p>
+        <em>Current</em> tasks include any edits you have made to the tasks
+        since installation. <em>Default</em> tasks are the "factory reset"
+        version and assume the default distribution method (which is 
+        <em>downloading a zipfile from this server</em>). If you want to force
+        a different distribution method, first load the default tasks with
+        that choice, and then download the <em>current</em> tasks.
+      </p>
+    </div>
+    <div class="col-md-6">
+      <p class="btn-collection mb-4">
         <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
         class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>current</strong>
         tasks as Markdown</a>
@@ -147,72 +255,7 @@
         class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>default</strong>
         tasks as Markdown</a>
       </p>
-      <p>
-        <em>Current</em> tasks include any edits you have made to the tasks
-        since installation. <em>Default</em> tasks are the "factory reset"
-        version.
-      </p>
       {%include "admin/_task_markdown_aside.html" %}
-    </div>
-    <div class="col-md-6">
-      <div class="alert-danger container border border-danger">
-        <form method="POST" action="{{ url_for('admin.tasks_admin') }}"
-          enctype="multipart/form-data" role="form">
-          {{ form.csrf_token }}
-          <div class="row py-3">
-            <div class="col">
-              {% if tasks_loaded_at %}
-                Tasks loaded into&nbsp;database: {{ tasks_loaded_at | servertime }}
-              {% else %}
-                Missing timestamp
-                (maybe no tasks have been loaded&nbsp;yet)
-              {% endif %}
-            </div>
-          </div>
-          {% if tasks %}
-            <div class="row px-3">
-              <div class="col border border-danger text-center p-3">
-                <strong>
-                  This will delete all existing tasks!
-                </strong>
-              </div>
-            </div>
-          {% endif %}
-          <div class="row mt-3">
-            <div class="col-sm-4">
-              {{ form.is_confirmed.label }}
-            </div>
-            <div class="col-sm-8">
-              <select id="is_confirmed" name="is_confirmed" class="form-control">
-                <option selected value="">No</option>
-                <option value="">I think so</option>
-                <option value="y">Yes</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-4">
-              {{ form.markdown_file.label }}
-            </div>
-            <div class="col-sm-8">
-              {{ form.markdown_file() }}
-            </div>
-          </div>
-          <div class="row bg-warning p-3">
-            <div class="col-sm-4">
-              {{ form.auth_code.label }}
-            </div>
-            <div class="col-sm-8">
-              {{ form.auth_code(class_="form-control mr-sm-1") }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="col p-3">
-              <input type="submit" value="Load new tasks into database" class="btn btn-danger"/>
-            </div>
-          </div>
-        </form>
-      </div>
     </div>
   </div>
   <div class="row my-4">
@@ -235,7 +278,9 @@
         <em>current</em> list is calculated on-the-fly here if you need it
         <em>before</em> you've published it.
       </p>
-      <p class="btn-collection my-4">
+    </div>
+    <div class="col-md-6">
+      <p class="btn-collection mb-4">
         <a href="{{ url_for('public.tasks_as_issues_csv') }}"
         class="btn btn-outline-secondary btn-white btn-download">Download published issues CSV</a>
         <a href="{{ url_for('admin.download_tasks', type='current', format='csv') }}"

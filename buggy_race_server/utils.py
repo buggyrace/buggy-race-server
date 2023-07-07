@@ -7,8 +7,8 @@ from flask import abort, flash, request, redirect, Markup, url_for, current_app,
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
-from buggy_race_server.admin.models import Announcement, Setting, Task
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings
+from buggy_race_server.admin.models import Announcement, DistribMethods, Setting, Task
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
@@ -253,6 +253,55 @@ def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
         ]
       )
     return str(issues_str)
+
+def _get_phase_0_md_filename_by_method(method_name):
+    MARKDOWN_FILENAME_RE = re.compile(r"^(.*)(\.\w+)") # tasks.md
+    if matches := re.match(
+        MARKDOWN_FILENAME_RE,
+        current_app.config[ConfigSettingNames._PROJECT_TASKS_FILENAME.name]
+    ):
+        return f"{matches.group(1)}-{method_name}{matches.group(2)}"
+    else:
+        raise FileNotFoundError("bad distribution method name")
+
+def create_default_task_markdown_file(distrib_method):
+    """ Make markdown file containing default tasks but with
+    phase 0 custimised according to settings. Saves the file in
+    the upload directory, and returns the path to it."""
+
+    if distrib_method not in [method.value for method in DistribMethods]:
+        # unrecognised distrib method? snap to the default (ZIP)
+        distrib_method = DistribMethods.get_default_value()
+    try:
+        phase_0_tasks_filename = _get_phase_0_md_filename_by_method(distrib_method)
+        phase_0_tasks_filename_with_path = join_to_project_root(
+            current_app.config[ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name],
+            phase_0_tasks_filename
+        )
+        with open(phase_0_tasks_filename_with_path, "r") as tasks_md:
+              py_body = tasks_md.read()
+
+        md_filename_with_path = join_to_project_root(
+            current_app.config[ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name],
+            current_app.config[ConfigSettingNames._PROJECT_TASKS_FILENAME.name]
+        )
+        with open(md_filename_with_path, "r") as tasks_md:
+            py_body += tasks_md.read()
+
+        md_filename_with_path = join_to_project_root(
+            current_app.config['UPLOAD_FOLDER'],
+            current_app.config[ConfigSettingNames._PROJECT_TASKS_FILENAME.name]
+        )
+        with open(md_filename_with_path, "w") as tasks_md:
+            tasks_md.write(py_body)
+    except FileNotFoundError:
+        flash(f"Missing task file in the pit stop:", "danger")
+        abort(500)
+    except IOError:
+        flash(f"Problem with task file in the pit stop", "danger")
+        abort(500)
+    return md_filename_with_path
+
 
 def publish_tech_notes(app=current_app):
     """ Runs pelican to generate the tech notes.

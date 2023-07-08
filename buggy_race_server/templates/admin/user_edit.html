@@ -202,7 +202,10 @@
               {{form.is_active.label}}
             </div>
             <div class="col-sm-4 ">
-              {{form.is_active(class_="form-control", checked=user.is_active)}}
+              <select name="is_active" class="form-control mr-sm-1">
+                <option value="" {% if user and not user.is_active %}selected{% endif %}>No</option>
+                <option value="Yes" {% if not user or user.is_active %}selected{% endif %}>Yes</option>
+              </select>
             </div>
             <div class="col-sm-5">
               Users that are not active cannot log in, and are effectively suspended.

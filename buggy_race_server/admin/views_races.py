@@ -172,6 +172,7 @@ def edit_race(race_id=None):
                   track_svg_url=form.track_svg_url.data,
                   lap_length=form.lap_length.data,
                   max_laps=form.max_laps.data,
+                  is_dnf_position=form.is_dnf_position.data,
                 )
                 if race.start_at.date() < datetime.now(timezone.utc).date():
                     success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
@@ -190,6 +191,7 @@ def edit_race(race_id=None):
                 race.track_svg_url = form.track_svg_url.data
                 race.lap_length = form.lap_length.data
                 race.max_laps = form.max_laps.data
+                race.is_dnf_position = form.is_dnf_position.data
                 race.save()
                 pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
                 success_msg = f"OK, updated {pretty_title}" 
@@ -208,6 +210,7 @@ def edit_race(race_id=None):
         race=race,
         racetracks=Racetrack.query.order_by(Racetrack.title.asc(),).all(),
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
+        default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
     )

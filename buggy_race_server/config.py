@@ -177,6 +177,7 @@ class ConfigSettingNames(Enum):
     IS_ALL_CONFIG_IN_TECH_NOTES = auto()
     IS_API_SECRET_ONE_TIME_PW = auto()
     IS_BUGGY_DELETE_ALLOWED = auto()
+    IS_DNF_POSITION_DEFAULT = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
@@ -323,6 +324,7 @@ class ConfigSettings:
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
+        ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name,
@@ -447,6 +449,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: 0,
+        ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
@@ -571,6 +574,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
@@ -799,6 +803,18 @@ class ConfigSettings:
           subsequent uploads (which is encouraged). This setting only controls
           whether students should be able to delete their own buggies (admins
           always can). If in doubt, choose `No`.""",
+
+        ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name:
+          """Is a **Did not Finish** race result still given an ordinal
+          position (based on how far the buggy _did_ travel before it
+          stopped)? It's common in motorsport to not grant a position to a
+          racer who did not complete the necessary number of laps... but in
+          buggy racing, buggies can more easily run out of fuel, especially
+          early in the project when nobody knows how much petrol or how many
+          hamsters you need to get round a track. So choose `Yes` if you want
+          to avoid demoralising students for mishaps during races. This is
+          the default for your project and you can override it on a
+          race-by-race basis.""",
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
           """The tech notes are static pages, rendered on a dark background (to

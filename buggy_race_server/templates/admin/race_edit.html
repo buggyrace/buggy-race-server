@@ -170,6 +170,32 @@
             </p>
           </div>
         </div>
+
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.is_dnf_position.label }}
+          </div>
+          <div class="col-sm-4">
+            <select id="is_dnf_position" name="is_dnf_position" class="form-control">
+              <option value="" {% if (not race and not default_is_dnf_position) or not race.is_dnf_position %} selected="selected" {% endif %}>No</option>
+              <option value="1" {% if (not race and default_is_dnf_position) or race.is_dnf_position %} selected="selected" {% endif %}>Yes</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Are buggies who do not finish all the laps given a position?
+              If so, how far they got (distance travelled) is used to calculate
+              their position relative to other buggies.
+            </p>
+            <p>
+              <em>Default:</em> <code>{% if default_is_dnf_position %}Yes{% else %}No{% endif %}</code>
+            </p>
+          </div>
+        </div>
+
+
+
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.is_visible.label }}
@@ -186,7 +212,7 @@
               the students cannot see it.
             </p>
             <p>
-              <em>Default:</em> {{ default_is_race_visible }}
+              <em>Default:</em> <code>{% if default_is_race_visible %}Yes{% else %}No{% endif %}</code>
             </p>
           </div>
         </div>

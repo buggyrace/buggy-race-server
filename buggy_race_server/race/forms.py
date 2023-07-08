@@ -59,7 +59,8 @@ class RaceForm(FlaskForm):
         "Lap length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
-
+    is_dnf_position = BooleanField("Is Did-Not-Finish a position?")
+    
     def __init__(self, *args, **kwargs):
         """Create instance."""
         super(RaceForm, self).__init__(*args, **kwargs)

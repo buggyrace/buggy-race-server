@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.0+dev"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.0"
 #
 # ----------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.0+dev"
 # manually because we're _not_ using Git submodules)
 # This is from https://github.com/buggyrace/buggy-race-editor/
 #
-MANUAL_EDITOR_COMMIT = "45c3936fd24ab854fce9adafa11ba5fcbc1616ff"
+MANUAL_EDITOR_COMMIT = "b8c9bc7fa90bcc34074b5b5b800878fca9c5d697"
 #
 # ----------------------------------------------------------------------------
 

@@ -91,7 +91,8 @@ class Race(SurrogatePK, Model):
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
     max_laps = db.Column(db.Integer(),  nullable=True)
     lap_length = Column(db.Integer, nullable=True)
-    is_dnf_position = Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name]))
+    is_dnf_position = Column(db.Boolean(), nullable=False, default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name]))
+    is_abandoned = Column(db.Boolean(), nullable=False, default=False)
 
     results = db.relationship('RaceResult', backref='race', cascade="all, delete")
     racefile = db.relationship('RaceFile', backref='race', cascade="all, delete")

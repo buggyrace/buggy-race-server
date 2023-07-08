@@ -1,8 +1,8 @@
 """v2.0.0 database
 
-Revision ID: 93a4af24a902
+Revision ID: 34e97cafd34d
 Revises: 
-Create Date: 2023-07-08 17:52:06.025416
+Create Date: 2023-07-08 18:56:14.571315
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '93a4af24a902'
+revision = '34e97cafd34d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,7 +46,8 @@ def upgrade():
     sa.Column('track_svg_url', sa.String(length=255), nullable=True),
     sa.Column('max_laps', sa.Integer(), nullable=True),
     sa.Column('lap_length', sa.Integer(), nullable=True),
-    sa.Column('is_dnf_position', sa.Boolean(), nullable=True),
+    sa.Column('is_dnf_position', sa.Boolean(), nullable=False),
+    sa.Column('is_abandoned', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('race_file_url')
     )

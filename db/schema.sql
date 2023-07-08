@@ -1,25 +1,25 @@
---- ===========================================================================
---- This file is a manual PostgreSQL database schema dump
----
---- ...so you if you can't run the Flask/alembic migrations you can still
---- manually create the database. (You may have problems later on — if there
---- are new migrations released after you've installed — if you do this!)
----
---- Snapshot of migrations directory when this was schema.sql was created:
----      93a4af24a902_v2_0_0_database.py
----
---- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
----
----      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
----
---- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
----
----  * DATABASE_URL may be like postgres://username:pw@host:port/name
----  * --schema-only for stucture not data
----  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
----
---- ...then add a helpful comment like this and drop it in as schema.sql :-)
---- ===========================================================================
+---- ===========================================================================
+---- This file is a manual PostgreSQL database schema dump
+----
+---- ...so you if you can't run the Flask/alembic migrations you can still
+---- manually create the database. (You may have problems later on — if there
+---- are new migrations released after you've installed — if you do this!)
+----
+---- Snapshot of migrations directory when this was schema.sql was created:
+----      34e97cafd34d_v2_0_0_database.py
+----
+---- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
+----
+----      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
+----
+---- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
+----
+----  * DATABASE_URL may be like postgres://username:pw@host:port/name
+----  * --schema-only for stucture not data
+----  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
+----
+---- ...then add a helpful comment like this and drop it in as schema.sql :-)
+---- ===========================================================================
 
 --
 -- PostgreSQL database dump
@@ -193,7 +193,8 @@ CREATE TABLE public.races (
     track_svg_url character varying(255),
     max_laps integer,
     lap_length integer,
-    is_dnf_position boolean
+    is_dnf_position boolean NOT NULL,
+    is_abandoned boolean NOT NULL
 );
 
 

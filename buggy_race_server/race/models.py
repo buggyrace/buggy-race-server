@@ -175,6 +175,9 @@ class Race(SurrogatePK, Model):
                 f"JSON data you uploaded has wrong race title for this race: "
                 f" expected \"{self.title}\", uploaded \"{uploaded_title}\""
             )
+        max_laps = results_data.get("max_laps")
+        if max_laps != self.max_laps and self.max_laps:
+            warnings.append(f"number of laps (\"max_laps\") in race result is {max_laps}, race was for {self.max_laps}")
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)
         total_buggies_finished = int(results_data.get("buggies_finished") or 0)
@@ -283,12 +286,14 @@ class Race(SurrogatePK, Model):
         if not warnings or is_ignoring_warnings:
             db.session.execute(delete(RaceResult).where(RaceResult.race_id==self.id))
             if results:
-                # TODO: not having results is problematic — see issue #129
                 db.session.execute(insert(RaceResult).values(results))
+            else: # TODO: not having results is problematic — see issue #129
+                pass 
             self.results_uploaded_at = datetime.now(timezone.utc)
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
+            self.max_laps = max_laps
             if results_data.get("race_file_url"):
                 if self.race_file_url:
                     if is_overwriting_urls:
@@ -322,7 +327,7 @@ class Race(SurrogatePK, Model):
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
             "lap_length": self.lap_length,
-            "max_laps": 0,
+            "max_laps": self.max_laps,
             "start_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
                 self.start_at
@@ -383,6 +388,7 @@ class RaceResult(SurrogatePK, Model):
     cost = db.Column(db.Integer, nullable=True)
     race_position = db.Column(db.Integer, nullable=False, default=0)
     violations_str = db.Column(db.String(255), nullable=True)
+
 
 class RaceFile(SurrogatePK, Model):
     """A "race file" that holds everything needed to replay a race (some

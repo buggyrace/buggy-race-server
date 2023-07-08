@@ -168,12 +168,12 @@
             </td>
           </tr>
           <tr>
-            <td>Starts at</td>
+            <td>Start time</td>
             <td>
               {% if race.start_at %}
-                {{ race.start_at }}
+                {{ race.start_at | servertime }}
               {% else %}
-                <em class="empty-setting">none</em>
+                <em class="empty-setting">not set</em>
               {% endif %}
             </td>
           </tr>
@@ -256,8 +256,8 @@
           <tr>
             <td>Results uploaded at</td>
             <td>
-              {% if race.uploaded_at %}
-                <code>{{ race.uploaded_at }}</code>
+              {% if race.results_uploaded_at %}
+                <code>{{ race.results_uploaded_at | servertime }}</code>
               {% else %}
                 <em class="empty-setting">never</em>
               {% endif %}

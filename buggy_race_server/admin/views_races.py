@@ -97,6 +97,7 @@ def list_races():
 
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
 @login_required
+@staff_only
 def new_race():
     return edit_race(None)
 
@@ -130,13 +131,14 @@ def view_race(race_id):
         flag_color_css_defs=flag_color_css_defs,
         has_results=bool(len(all_results)),
         race_file_is_local=race_file_is_local,
+        is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
         is_tied=is_tied,
         race=race,
         results_disqualified=results_disqualified,
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
         results=all_results,
-        track_image_url=race.track_image_url, # separated for SVG include file
+        track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
     )
 
@@ -165,9 +167,11 @@ def edit_race(race_id=None):
                   cost_limit=form.cost_limit.data,
                   start_at=form.start_at.data,
                   is_visible=form.is_visible.data,
+                  is_result_visible=form.is_result_visible.data,
                   track_image_url=form.track_image_url.data,
                   track_svg_url=form.track_svg_url.data,
                   lap_length=form.lap_length.data,
+                  max_laps=form.max_laps.data,
                 )
                 if race.start_at.date() < datetime.now(timezone.utc).date():
                     success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
@@ -237,7 +241,11 @@ def upload_race_file(race_id):
                         with open(json_filename_with_path, "r") as read_file:
                             result_data = json.load(read_file)
                     except UnicodeDecodeError as e:
-                        flash("Encoding error (maybe that wasn't a good JSON file you uploaded?)", "warning")
+                        flash(
+                            "Encoding error (maybe that wasn't a JSON file you uploaded, "
+                            "or it contains unexpected characters?)",
+                            "warning"
+                        )
                     except json.decoder.JSONDecodeError as e:
                         flash("Failed to parse JSON data", "danger")
                         flash(str(e), "warning")
@@ -255,16 +263,22 @@ def upload_race_file(race_id):
                             for warning in warnings:
                                 flash(warning, "warning")
                             if not warnings or is_ignoring_warnings:
-                                flash("OK, updated race results", "success")
                                 if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
                                     race.store_race_file(result_data)
                                     url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
                                         + url_for("race.serve_race_file", race_id=race.id)
                                     race.race_file_url = url
-                                    race.save()
                                     flash(f"Stored race file on this server for use in replay (at {url})", "success")
-                                    if not (race.is_visible and race.is_result_visible):
-                                        flash(f"Note: this file isn't visible to students yet: edit race to change that", "warning")
+                                race.results_uploaded_at = datetime.now(timezone.utc) 
+                                race.save()
+                                flash("OK, updated race results", "success")
+                                flash(f"FIXME race.results_uploaded_at={race.results_uploaded_at}", "info")
+                                if not (race.is_visible and race.is_result_visible):
+                                    flash(
+                                        "Note: this file isn't visible to students yet: "
+                                        "edit race to change that",
+                                        "info"
+                                    )
                                 want_redirect_to_race = True
                             else:
                                 if len(warnings) == 1:
@@ -274,9 +288,9 @@ def upload_race_file(race_id):
                                 flash(msg, "danger")
                     delete_path = json_filename_with_path
                 else:
-                    flash("NO json_file.filename", "info")
+                    flash("Missing JSON race file filename", "info")
             else:
-                flash("NO results_json_file was false", "info")
+                flash("Missing race file (no JSON found)", "info")
             if delete_path:
                 try:
                     os.unlink(delete_path)

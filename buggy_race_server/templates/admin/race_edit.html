@@ -157,6 +157,21 @@
         </div>
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
+            {{ form.max_laps.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.max_laps(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Over how many laps or the racetrack is this race to be run?
+              If you're not sure you can set this when you upload the
+              results.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
             {{ form.is_visible.label }}
           </div>
           <div class="col-sm-4">
@@ -235,19 +250,6 @@
             <div class="col-sm-5">
               <p>
                 Timestamp when results were uploaded.
-              </p>
-            </div>
-          </div>
-          <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-3">
-              {{ form.max_laps.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.max_laps(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                Number of laps to complete the race.
               </p>
             </div>
           </div>

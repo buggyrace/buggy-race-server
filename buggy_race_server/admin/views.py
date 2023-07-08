@@ -596,6 +596,11 @@ def list_users(data_format=None, want_detail=True):
         ):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
+        is_showing_github_column = (
+            current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+            and
+            current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+        )
         return render_template("admin/users.html",
             admin_usernames=admin_usernames,
             current_user_can_edit=current_user_can_edit,
@@ -606,6 +611,7 @@ def list_users(data_format=None, want_detail=True):
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+            is_showing_github_column=is_showing_github_column,
             qty_admins=qty_admins,
             qty_students_enabled=len([s for s in students if s.is_active]),
             qty_students_github=len([s for s in students if s.github_username]),

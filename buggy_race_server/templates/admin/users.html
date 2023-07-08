@@ -48,7 +48,9 @@
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Last&nbsp;activity</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+        {% if is_showing_github_column %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+        {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">Uploaded</button>
       </div>
     </div>
@@ -82,7 +84,9 @@
             <th  class="u-is-active">Active?</th>
           {% endif %}
           <th class="u-login-at">Last activity at</th>
-          <th class="u-github">GitHub (&rarr; repo)</th>
+          {% if is_showing_github_column %}
+            <th class="u-github">GitHub (&rarr; repo)</th>
+          {% endif %}
           <th colspan="2" class="u-uploaded">JSON uploaded</th>
         </tr>
       </thead>
@@ -179,13 +183,15 @@
                   <em class="empty-setting">none</em>
                 {% endif %}
               </td>
-              <td class="u-github">  
-                {% if u.github_username %}
-                  <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
-                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
-                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
-                {% endif %}
-              </td>
+              {% if is_showing_github_column %}
+                <td class="u-github">  
+                  {% if u.github_username %}
+                    <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
+                    <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                    class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
+                  {% endif %}
+                </td>
+              {% endif %}
               <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
                   <a href="{{ url_for('admin.show_buggy', user_id=u.username) }}"

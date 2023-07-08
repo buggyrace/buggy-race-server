@@ -35,10 +35,9 @@ class Racetrack(SurrogatePK, Model):
         )
 
     @staticmethod
-    def get_local_url_for_asset(filename):
-        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    def get_local_url_for_asset(server_url, filename):
         path_url = url_for("race.serve_racetrack_asset", filename=filename)
-        return f"{server_url}/{path_url}"
+        return f"{server_url}{path_url}"
 
 
     """ Racetrack used to populate race-construction pages

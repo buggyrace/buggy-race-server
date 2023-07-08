@@ -460,7 +460,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
-        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 0,
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name: 0,

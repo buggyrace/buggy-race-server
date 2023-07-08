@@ -148,6 +148,13 @@ class ConfigSettingNames(Enum):
     # with people trying to run a real server
     _IS_DEMO_SERVER = auto()
 
+    # URL to the documentation for the buggy race project — specifically
+    # the default is (risky?) linking to the /docs path within it
+    # This is not exposed in the admin interface because (unlike the
+    # student-facing texts like tech notes and tasks), we don't
+    # anticipate the server docs being customised.
+    _BUGGY_RACE_DOCS_URL = auto()
+
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
@@ -399,6 +406,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
         ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
+        ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: "https://www.buggyrace.net/docs",
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
         ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: "editor",
@@ -527,6 +535,7 @@ class ConfigSettings:
     TYPES = {
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: ConfigTypes.URL,
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: ConfigTypes.STRING,

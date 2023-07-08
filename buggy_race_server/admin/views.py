@@ -1700,6 +1700,7 @@ def show_system_info():
     config_settings_to_display = sorted([
       ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+      ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
       ConfigSettingNames._IS_DEMO_SERVER.name,
       ConfigSettingNames._EDITOR_INPUT_DIR.name,
       ConfigSettingNames._EDITOR_OUTPUT_DIR.name,

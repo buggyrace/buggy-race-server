@@ -169,11 +169,11 @@ class Race(SurrogatePK, Model):
                 f"Already got a race with the same URL for {' and '.join(dup_fields)}"
             )
         warnings = []
-        uploaded_title = results_data.get("race_title")
+        uploaded_title = results_data.get("title")
         if (self.title or uploaded_title) and self.title != uploaded_title:
             warnings.append(
-                f"JSON data you uploaded has wrong race title for this race?"
-                f" Expected \"{self.title}\", uploaded \"{uploaded_title}\""
+                f"JSON data you uploaded has wrong race title for this race: "
+                f" expected \"{self.title}\", uploaded \"{uploaded_title}\""
             )
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)

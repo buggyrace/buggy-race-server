@@ -5,6 +5,7 @@ Werkzeug==2.3.6
 
 # Database
 Flask-SQLAlchemy==3.0.5
+mysql-connector-python==8.0.33
 psycopg2-binary==2.9.6
 SQLAlchemy==2.0.17
 
@@ -37,5 +38,6 @@ Flask-DebugToolbar==0.13.1
 # Environment variable parsing
 environs==9.5.0
 
+# Static content
 Markdown>=3.4.3
 pelican>=4.8.0

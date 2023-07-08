@@ -5,27 +5,47 @@
 <div class="container pb-5">
   <div class="row">
     <h1 class="col my-3">
-      Buggies
+      Buggies 
+      {% if want_students_only %}
+        (students only)
+      {% else %}
+        (students and staff)
+      {% endif %}
     </h1>
   </div>
-  {% if current_user.is_administrator %}
-    <div class="row">
-      <div class="col">
-        <p class="btn-collection">
-          <a class="btn btn-outline-secondary btn-admin btn-download"
-          href="{{ url_for('admin.download_buggies') }}">Download buggies CSV</a>
-        </p>  
-        <p>
-          All students' buggies ({{ buggies|length }}).
-        </p>  
-      </div>
+  <div class="row">
+    <div class="col">
+      <p class="btn-collection">
+        {% if want_students_only %}
+          {% if  buggies %}
+            <a class="btn btn-outline-secondary btn-admin btn-download"
+              href="{{ url_for('admin.download_buggies') }}">Download these buggies as CSV</a>
+          {% endif %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump"
+            href="{{ url_for('admin.list_buggies_all') }}">Show buggies including staff</a>  
+        {% else %}
+          {% if  buggies %}
+            <a class="btn btn-outline-secondary btn-admin btn-download"
+              href="{{ url_for('admin.download_buggies_all') }}">Download these buggies as CSV</a>
+          {% endif %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump"
+            href="{{ url_for('admin.list_buggies') }}">Only show student buggies</a>
+        {% endif %}
+      </p>
+      <p>
+        {% if buggies | length == 1 %}
+          Showing a single buggy.
+        {% else %}
+          Showing {{ buggies|length }} buggies.
+        {% endif %}
+      </p>  
     </div>
-  {% endif %}
+  </div>
   {% if not buggies %}
     <div class="row">
       <div class="col">
         <div class="alert alert-warning">
-          No buggies to show (no active students have uploaded JSON describing their buggies yet).
+          No buggies to show (no active users have uploaded JSON describing their buggies yet?).
         </div>
       </div>
     </div>
@@ -55,10 +75,10 @@
           </tr>
         </thead>
         <tbody>
-          {% for b in buggies %}
+          {% for (b, u) in buggies %}
           <tr>
-            <td><a class="btn btn-sm btn-outline-secondary btn-jump btn-white" href="{{ url_for('admin.show_buggy', user_id=b.username) }}">Buggy</a></td>
-            <td> <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=b.user_id) }}">{{ b.pretty_username }}</a> </td>
+            <td><a class="btn btn-sm btn-outline-secondary btn-jump btn-white" href="{{ url_for('admin.show_buggy', user_id=u.username) }}">Buggy</a></td>
+            <td> <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=b.user_id) }}">{{ u.pretty_username }}</a> </td>
             <td>  {{ b.total_cost }} </td>
             <td>  {{ b.mass }} </td>
             <td>  {{ b.buggy_id }} </td>

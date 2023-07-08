@@ -1039,35 +1039,57 @@ def delete_buggy(user_id):
     return delete_buggy_by_user(username=username)
 
 
+@blueprint.route("/download/buggies/csv/all")
+@login_required
+@staff_only
+def download_buggies_all():
+    return download_buggies(want_students_only=False)
+
 @blueprint.route("/download/buggies/csv")
 @login_required
 @staff_only
-def download_buggies():
+def download_buggies(want_students_only=True):
     """Download buggies as CSV (only format supported at the moment)"""
-    buggies = Buggy.get_all_buggies_with_usernames()
+    buggies_with_users = Buggy.get_all_buggies_with_users(want_students_only=want_students_only)
     si = io.StringIO()
     cw = csv.writer(si)
     col_names = [col.name for col in Buggy.__mapper__.columns]
     col_names.insert(1, 'username')
     cw.writerow(col_names)
-    [cw.writerow([getattr(b, col) for col in col_names]) for b in buggies]
+    for (b, u) in buggies_with_users:
+        cw.writerow(
+            [
+                u.username if col == 'username' else getattr(b, col)
+                for col in col_names
+            ]
+        )
     filename = get_download_filename("buggies.csv", want_datestamp=True)
     output = make_response(si.getvalue())
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     output.headers["Content-type"] = "text/csv"
     return output
 
+
+@blueprint.route("/buggies/all", strict_slashes=False)
+@login_required
+@staff_only
+def list_buggies_all():
+    return list_buggies(want_students_only=False)
+
 @blueprint.route("/buggies", strict_slashes=False)
 @login_required
 @staff_only
-def list_buggies(data_format=None):
+def list_buggies(want_students_only=True):
     """Admin buggy list."""
-    buggies=Buggy.get_all_buggies_with_usernames()
-    flag_color_css_defs = get_flag_color_css_defs(buggies)
+    buggies_and_users=Buggy.get_all_buggies_with_users(want_students_only=want_students_only)
+    flag_color_css_defs = get_flag_color_css_defs(
+        [buggy for (buggy, _) in buggies_and_users]
+    )
     return render_template(
         "admin/buggies.html",
-        buggies=buggies,
-        flag_color_css_defs=flag_color_css_defs
+        buggies=buggies_and_users,
+        flag_color_css_defs=flag_color_css_defs,
+        want_students_only=want_students_only
     )
 
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])

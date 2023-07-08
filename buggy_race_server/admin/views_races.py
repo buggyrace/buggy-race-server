@@ -363,19 +363,18 @@ def autofill_tracks():
     )
     img_filenames_by_number = {}
     dir_filenames = os.listdir(track_dir)
-    server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
     for filename in dir_filenames:
         if m := re.match(TRACK_IMAGE_FILE_RE, filename):
-            url = Racetrack.get_local_url_for_asset(server_url, filename)
+            url = Racetrack.get_local_url_for_asset(filename)
             if url not in tracks_by_img_url:
                 img_filenames_by_number[f"{ m.group(1) }"] = {
-                    "track_image_url": Racetrack.get_local_url_for_asset(server_url, filename)
+                    "track_image_url": Racetrack.get_local_url_for_asset(filename)
                 }
     if img_filenames_by_number:
         for filename in dir_filenames:
             if m := re.match(TRACK_PATH_FILE_RE, filename):
                 if proto_track := img_filenames_by_number.get(m.group(1)):
-                    proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(server_url, filename)
+                    proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(filename)
                     if lap_length := m.group(2):
                         proto_track['lap_length'] = lap_length
     if request.method == "POST":

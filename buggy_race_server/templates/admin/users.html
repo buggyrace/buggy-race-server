@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Admin: users {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -17,7 +18,11 @@
         <p>
           All {{ users|length }} users in the system.
           {{ qty_students}} are students (&Sopf;),
-          {{ qty_admins }} are admins (&starf;),
+          {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
+            {{ qty_admins }} are admins (&starf;, d=demo),
+          {% else %}
+            {{ qty_admins }} are admins (&starf;),
+          {% endif %}
           {{ qty_teaching_assistants }} teaching assistants (&star;).
         </p>
       </div>
@@ -43,7 +48,9 @@
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Last&nbsp;activity</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+        {% if is_showing_github_column %}
+          <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+        {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">Uploaded</button>
       </div>
     </div>
@@ -77,7 +84,9 @@
             <th  class="u-is-active">Active?</th>
           {% endif %}
           <th class="u-login-at">Last activity at</th>
-          <th class="u-github">GitHub (&rarr; repo)</th>
+          {% if is_showing_github_column %}
+            <th class="u-github">GitHub (&rarr; repo)</th>
+          {% endif %}
           <th colspan="2" class="u-uploaded">JSON uploaded</th>
         </tr>
       </thead>
@@ -124,14 +133,15 @@
                 </td>
               {% endif %}
               <td style="width:1em">
-                <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
+                <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% if current_user.is_administrator and not current_user.is_demo_user and u.is_demo_user %}d{%endif %}{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
               </td>
               <td class="u-username">
                 <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
                 {% if u.comment %}
                  <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right" href="#"
                    data-comment="{{ u.comment|replace('"', '\\"')|replace("\\n", "\\n") }}"
-                   onclick='alert(this.dataset.comment.replace(/\\\"/g,"\""))'
+                   data-toggle="modal" data-target="#texts-modal"
+                   data-un="{{ u.pretty_username }}"
                  >&#x2731;</a>
                 {% endif %}
               </td>
@@ -173,26 +183,25 @@
                   <em class="empty-setting">none</em>
                 {% endif %}
               </td>
-              <td class="u-github">  
-                {% if u.github_username %}
-                  <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
-                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
-                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
-                {% endif %}
-              </td>
+              {% if is_showing_github_column %}
+                <td class="u-github">  
+                  {% if u.github_username %}
+                    <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
+                    <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                    class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
+                  {% endif %}
+                </td>
+              {% endif %}
               <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
-                  <span  data-username='{{ u.username  | replace("-","_") }}' class="json-btn icon-wrench p-2">
-                   {{ u.latest_json|length }}
-                  </span>
+                  <a href="{{ url_for('admin.show_buggy', user_id=u.username) }}"
+                    class="btn btn-outline-secondary btn-admin icon-wrench ml-1"
+                    data-toggle="modal" data-target="#texts-modal"
+                    data-buggy="1" data-un="{{ u.pretty_username}}" data-uid="{{ u.id }}"
+                  > {{ u.latest_json|length }}</a>
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}
-                <!-- not showing buggy link
-                <a class="show-comment btn btn-outline-secondary btn-admin btn-sm btn-jump p-1 ml-1 float-right"
-                  href="{{ url_for('admin.show_buggy', username=u.username) }}"
-                  ></a>
-                -->
               </td>
               <td  class="u-uploaded">
                 {% if u.uploaded_at %}
@@ -250,6 +259,27 @@
     _note: "code in script.js runs if USER_BUGGY_JSON is found"
   };
 </script>
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="texts-modal" tabindex="-1" aria-labelledby="texts-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="texts-modal-label"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div>
+        <pre id="modal-text-body" class="m-3 p-2 task-text"></pre>
+        <p id="modal-timestamp" class="mx-3 my-1 font-weight-light"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="btn-to-user-texts" class="btn btn-outline-secondary btn-jump">User's texts</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 

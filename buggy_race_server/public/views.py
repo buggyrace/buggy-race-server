@@ -20,8 +20,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from buggy_race_server.database import db
-from buggy_race_server.admin.models import AnnouncementType
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
@@ -50,11 +49,22 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
+    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
+    else:
+        editor_url = url_for("public.download_editor_zip")
+    is_using_github = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        or
+        current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name]
+    )
     return render_template(
         "public/home.html",
-        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
-        local_announcement_type=AnnouncementType.TAGLINE.value,
+        editor_url=editor_url,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        is_using_github=is_using_github,
+        local_announcement_type=AnnouncementTypes.TAGLINE.value,
+        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
     )
 
 @blueprint.route("/logout", strict_slashes=False)
@@ -71,7 +81,7 @@ def login():
     warn_if_insecure()
     form = LoginForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             login_user(form.user)
             form.user.logged_in_at = datetime.now(timezone.utc)
             form.user.save()
@@ -98,7 +108,7 @@ def login():
             current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
             or (not current_user.is_anonymous and current_user.is_administrator)
         ),
-        local_announcement_type=AnnouncementType.LOGIN.value,
+        local_announcement_type=AnnouncementTypes.LOGIN.value,
         username_example=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     )
 
@@ -145,6 +155,7 @@ def about():
         render_template(
             "public/about.html",
             form=form,
+            local_announcement_type=AnnouncementTypes.ABOUT.value,
             version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
         )
     )
@@ -340,3 +351,22 @@ def serve_tech_notes(path=None):
     except FileNotFoundError as e:
         abort(404)
 
+@blueprint.route("/editor/download", strict_slashes=False)
+def download_editor_zip():
+    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+        flash("Cannot download editor source files from this race server", "warning")
+        abort(404)
+    if zip_url := current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name]:
+        return redirect(zip_url)
+    zipfile = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    )
+    if not path.exists(zipfile):
+        flash(
+            "Editor zip file not available (either you can't download it from"
+            " this server, or admin has not published it yet)",
+            "danger")
+        abort(404)
+    return send_file(zipfile)

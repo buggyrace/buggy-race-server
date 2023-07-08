@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Race result {{ race.title }} {% endblock %}
 {% block content %}
 <div class="container pb-3">
   <div class="row">
@@ -17,7 +18,7 @@
               {{ race.desc|safe }}
             </div>
           {% endif %}
-          {% if race.result_log_url %}
+          {% if race.race_file_url %}
             <div class="m-3">
               <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}{{ replay_anchor }}">Replay</a>
             </div>
@@ -54,6 +55,7 @@
 
 {% include "races/_results.html" %}
 
+</div>
 
 {% endblock %}
 

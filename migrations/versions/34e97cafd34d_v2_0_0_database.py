@@ -1,8 +1,8 @@
-"""v0.3 buggy database
+"""v2.0.0 database
 
-Revision ID: 500f64923fd2
+Revision ID: 34e97cafd34d
 Revises: 
-Create Date: 2023-04-01 12:39:46.178798
+Create Date: 2023-07-08 18:56:14.571315
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '500f64923fd2'
+revision = '34e97cafd34d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,19 +35,30 @@ def upgrade():
     sa.Column('start_at', sa.DateTime(), nullable=False),
     sa.Column('cost_limit', sa.Integer(), nullable=True),
     sa.Column('is_visible', sa.Boolean(), nullable=True),
-    sa.Column('result_log_url', sa.String(length=255), nullable=True),
+    sa.Column('race_file_url', sa.String(length=255), nullable=True),
     sa.Column('league', sa.String(length=32), nullable=True),
     sa.Column('results_uploaded_at', sa.DateTime(), nullable=True),
     sa.Column('buggies_entered', sa.Integer(), nullable=False),
     sa.Column('buggies_started', sa.Integer(), nullable=False),
     sa.Column('buggies_finished', sa.Integer(), nullable=False),
-    sa.Column('buggies_csv_url', sa.String(length=255), nullable=True),
-    sa.Column('race_log_url', sa.String(length=255), nullable=True),
     sa.Column('is_result_visible', sa.Boolean(), nullable=False),
+    sa.Column('track_image_url', sa.String(length=255), nullable=True),
+    sa.Column('track_svg_url', sa.String(length=255), nullable=True),
+    sa.Column('max_laps', sa.Integer(), nullable=True),
+    sa.Column('lap_length', sa.Integer(), nullable=True),
+    sa.Column('is_dnf_position', sa.Boolean(), nullable=False),
+    sa.Column('is_abandoned', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('buggies_csv_url'),
-    sa.UniqueConstraint('race_log_url'),
-    sa.UniqueConstraint('result_log_url')
+    sa.UniqueConstraint('race_file_url')
+    )
+    op.create_table('racetracks',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=80), nullable=False),
+    sa.Column('desc', sa.Text(), nullable=False),
+    sa.Column('track_image_url', sa.String(length=255), nullable=True),
+    sa.Column('track_svg_url', sa.String(length=255), nullable=True),
+    sa.Column('lap_length', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('settings',
     sa.Column('id', sa.String(length=64), nullable=False),
@@ -70,9 +81,9 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('ext_username', sa.String(length=80), nullable=True),
+    sa.Column('ext_id', sa.String(length=80), nullable=True),
     sa.Column('email', sa.String(length=80), nullable=True),
     sa.Column('password', sa.LargeBinary(length=128), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -93,8 +104,11 @@ def upgrade():
     sa.Column('is_api_secret_otp', sa.Boolean(), nullable=False),
     sa.Column('api_key', sa.String(length=30), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
+    sa.Column('is_demo_user', sa.Boolean(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('ext_id'),
     sa.UniqueConstraint('ext_username'),
     sa.UniqueConstraint('username')
     )
@@ -127,6 +141,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('racefiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('race_id', sa.Integer(), nullable=False),
+    sa.Column('contents', sa.Text(), nullable=False),
+    sa.ForeignKeyConstraint(['race_id'], ['races.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('results',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('race_id', sa.Integer(), nullable=False),
@@ -142,9 +163,9 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('roles',
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=80), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
@@ -168,10 +189,12 @@ def downgrade():
     op.drop_table('tasktexts')
     op.drop_table('roles')
     op.drop_table('results')
+    op.drop_table('racefiles')
     op.drop_table('buggies')
     op.drop_table('users')
     op.drop_table('tasks')
     op.drop_table('settings')
+    op.drop_table('racetracks')
     op.drop_table('races')
     op.drop_table('announcements')
     # ### end Alembic commands ###

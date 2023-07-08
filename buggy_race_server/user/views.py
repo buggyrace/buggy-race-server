@@ -23,9 +23,9 @@ from functools import wraps
 from wtforms import ValidationError
 
 from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
-from buggy_race_server.admin.models import TaskText, Task, AnnouncementType
+from buggy_race_server.admin.models import TaskText, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
@@ -80,25 +80,29 @@ def submit_buggy_data():
 @active_user_required
 def settings():
     form = ChangePasswordForm()
+    is_using_github = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+    )
     return render_template(
         "user/settings.html",
-        user=current_user,
-        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
-        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
-        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
-        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
-        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
         ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         form=form,
+        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
+        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         is_secure=True, # TODO investigate when this can be false
-        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+        is_using_github=is_using_github,
         is_using_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
         is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
-        project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
+        local_announcement_type=AnnouncementTypes.GET_EDITOR.value,
         project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
-        local_announcement_type=AnnouncementType.GET_EDITOR.value,
+        project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
+        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        user=current_user,
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)
@@ -170,15 +174,16 @@ def setup_course_repository():
 
     return redirect(url_for('user.settings'))
 
+@blueprint.route("/password/<username>", methods=['GET'], strict_slashes=False)
 @blueprint.route("/password", methods=['GET','POST'], strict_slashes=False)
 @login_required
 @active_user_required
-def change_password():
+def change_password(username=None):
     """Change user's password (staff may be able to change another user's password)."""
     warn_if_insecure()
     form = ChangePasswordForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             username = form.username.data
             username = username.lower().strip() if username else current_user.username
             is_allowed = False
@@ -223,10 +228,11 @@ def change_password():
     else:
         admin_usernames = [user.username for user in users if user.is_staff]
     form.username.choices = sorted([user.username for user in users])
-    form.username.data = form.username.data or current_user.username
+    form.username.data = form.username.data or username or current_user.username
     return render_template(
         "user/password.html",
         form=form,
+        username=username,
         is_auth_needed_for_all=False, # because it's conditional on admin statuses
         admin_usernames_str=",".join(admin_usernames),
     )
@@ -254,7 +260,7 @@ def set_api_secret():
     is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name]
     is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name]
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if current_user.api_secret == form.api_secret.data:
                 flash(f"Warning! Your API secret was not set: must be different from the last one.", "danger")
             else:
@@ -330,7 +336,7 @@ def delete_task_text():
         flash("Task texts are not enabled on this project", "warning")
         abort(404)
     form = TaskTextDeleteForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if not form.is_confirmed.data:
             flash("Did not delete task text (you didn't confirm it)", "danger")
         else:
@@ -388,7 +394,7 @@ def task_text(task_fullname):
         if form.user_id.data != str(current_user.id):
             flash("Mismatched user in request", "danger")
             abort(400)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             tasktext.text = form.text.data
             if not is_new_text:
                 tasktext.modified_at = datetime.now(timezone.utc)

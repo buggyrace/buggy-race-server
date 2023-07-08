@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Task texts for {{ current_user.pretty_username }}  {% endblock %}
 {% block content %}
 <div class="container pb-5">
   <div class="row">
@@ -86,7 +87,7 @@
                   <option value="y">Yes</option>
                 </select>  
               </div>
-              <div class="col-md-6 p-3">
+              <div class="col-md-6 p-3 bottom">
                 <input type="submit" class="btn btn-danger" value="Delete text"/>
               </div>
             </div>

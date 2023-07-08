@@ -28,6 +28,7 @@ class UserForm(FlaskForm):
     last_name = StringField("Last name")
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active?")
+    is_demo_user = BooleanField("Is demo user?")
     comment = TextAreaField("Comment", validators=[Optional(), Length(max=1024)])
     access_level = IntegerField("Staff role", validators=[Optional()])
     auth_code = PasswordField("Authorisation code",  [is_authorised])
@@ -49,13 +50,13 @@ class UserForm(FlaskForm):
             raise ValidationError(f"{prettify_form_field_name(name)} is too long (at most {max} characters)")
 
     def validate_ext_username(self, field):
-        value = field.data.strip()
+        value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 
     def validate_email(self, field):
-        value = field.data.strip()
+        value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=80)
             if not '@' in value:
@@ -63,13 +64,13 @@ class UserForm(FlaskForm):
         return value
 
     def validate_first_name(self, field):
-        value = field.data.strip()
+        value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value
 
     def validate_last_name(self, field):
-        value = field.data.strip()
+        value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
             UserForm.check_length(field.name, value, min=3, max=32)
         return value

@@ -93,11 +93,11 @@ def show_public_races():
 @blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
-    result_log_url = race.result_log_url
-    if result_log_url and not (re.match(r"^https?://", result_log_url)):
-        result_log_url = url_for(
+    race_file_url = race.race_file_url
+    if race_file_url and not (re.match(r"^https?://", race_file_url)):
+        race_file_url = url_for(
             "race.serve_race_player_asset",
-            filename=result_log_url
+            filename=race_file_url
         )
     if not (race.is_visible and race.is_result_visible):
         if current_user.is_anonymous or not current_user.is_staff:
@@ -105,11 +105,16 @@ def replay_race(race_id):
             abort(403)
     if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
         anchor = Race.get_replay_anchor()
-        return redirect(f"{player_url}?race={result_log_url}{anchor}")
+        return redirect(f"{player_url}?race={race_file_url}{anchor}")
+    if current_user.is_anonymous:
+        current_user_username = "nobody!" # ensure no username match with "!"
+    else:
+        current_user_username = current_user.username
     return render_template(
         "races/player.html",
+        current_user_username=current_user_username,
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        result_log_url=result_log_url,
+        race_file_url=race_file_url,
     )
 
 @blueprint.route("/<int:race_id>/result")

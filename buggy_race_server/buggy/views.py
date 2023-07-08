@@ -4,9 +4,20 @@ import json
 import string
 from datetime import datetime, timezone
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for, abort
+from flask import (
+  abort,
+  Blueprint,
+  current_app,
+  flash,
+  redirect,
+  render_template,
+  request,
+  url_for,
+)
 from flask_login import current_user, login_required
 
+from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.admin.forms import SubmitWithConfirmForm
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.user.models import User
@@ -19,7 +30,7 @@ blueprint = Blueprint("buggy", __name__, url_prefix="/buggy", static_folder="../
 def handle_uploaded_json(form, user, is_api=False):
   # is_api validation doesn't work:
   # so we're checking buggy_json field explicitly before getting here
-  if form.validate_on_submit() or is_api:
+  if (form.is_submitted() and form.validate()) or is_api:
     user.latest_json = form.buggy_json.data
     user.uploaded_at = datetime.now(timezone.utc)
     user.save()
@@ -124,7 +135,7 @@ def handle_uploaded_json(form, user, is_api=False):
       if user == current_user:
         return redirect(url_for("buggy.show_own_buggy"))
       else:
-        return redirect(url_for("admin.show_buggy", username=user.username))
+        return redirect(url_for("admin.show_buggy", user_id=user.username))
   else:
       flash_errors(form)
   if is_api:
@@ -164,10 +175,68 @@ def show_buggy(username=None):
     else:
         is_plain_flag = buggy.flag_pattern == 'plain'
     flag_color_css_defs = get_flag_color_css_defs([buggy])
-    return render_template("buggy/buggy.html",
-        is_own_buggy=user==current_user,
-        user=user,
+    if buggy and (
+      current_app.config[ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name]
+      or current_user.is_administrator
+    ):
+      delete_form = SubmitWithConfirmForm()
+      if user == current_user:
+          delete_form_action = url_for("buggy.delete_own_buggy")
+      else:
+          delete_form_action = url_for("admin.delete_buggy", user_id=user.id)
+    else:
+      delete_form = None
+      delete_form_action = None
+    return render_template(
+        "buggy/buggy.html",
         buggy=buggy,
-        is_plain_flag=is_plain_flag,
+        delete_form=delete_form,
+        delete_form_action=delete_form_action,
         flag_color_css_defs=flag_color_css_defs,
+        is_own_buggy=user==current_user,
+        is_plain_flag=is_plain_flag,
+        user=user,
     )
+
+@blueprint.route("/delete", methods=["POST"], strict_slashes=False)
+@login_required
+@active_user_required
+def delete_own_buggy():
+  return delete_buggy(username=current_user.username)
+
+
+def delete_buggy(username=None):
+    """Inspection of buggy for given user: used by admin and user"""
+    if username is None or username == current_user.username:
+        user = current_user
+        username = user.username
+    else:
+        if not current_user.is_administrator:
+          abort(403)
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            flash(f"Cannot delete buggy: no such user \"{username}\"", "danger")
+            abort(404)
+    buggy = Buggy.query.filter_by(user_id=user.id).first()
+    if buggy is not None:
+        form = SubmitWithConfirmForm(request.form)
+        if form.is_submitted() and form.validate():
+            buggy_desc = f"{user.pretty_username}'s buggy"
+            if user == current_user:
+                buggy_desc = "your buggy"
+            if not form.is_confirmed.data:
+                flash(
+                    f"Did not not delete {buggy_desc}"
+                    " because you did not explicity confirm it",
+                    "danger"
+                )
+            else:
+                buggy.delete()
+                flash(f"OK, deleted {buggy_desc}", "success")
+        else:
+            flash("Problem with form: did not delete", "warning")
+    if user == current_user:
+        return redirect(url_for("buggy.show_own_buggy"))
+    else:
+        return redirect(url_for("admin.show_buggy", user_id=user.username))
+

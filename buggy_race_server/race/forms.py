@@ -42,11 +42,8 @@ class RaceForm(FlaskForm):
         format='%Y-%m-%dT%H:%M', # note: T is important!
         validators=[Optional()]
     )
-    result_log_url = StringField(
+    race_file_url = StringField(
         "URL of results JSON", validators=[Optional(), Length(max=255)]
-    )
-    race_log_url = StringField(
-        "URL of race event log", validators=[Optional(), Length(max=255)]
     )
     track_image_url = StringField(
         "URL of racetrack image", validators=[Optional(), Length(max=255)]
@@ -62,7 +59,8 @@ class RaceForm(FlaskForm):
         "Lap length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
-
+    is_dnf_position = BooleanField("Is Did-Not-Finish a position?")
+    
     def __init__(self, *args, **kwargs):
         """Create instance."""
         super(RaceForm, self).__init__(*args, **kwargs)
@@ -81,12 +79,10 @@ class RaceForm(FlaskForm):
             self.start_at.errors.append("Already got a race starting at this time")
             is_valid = False
         dup_fields = Race.get_duplicate_urls(
-            self.id.data, self.result_log_url.data, self.race_log_url.data)
+            self.id.data, self.race_file_url.data)
         if dup_fields:
-            if "result_log_url" in dup_fields:
-                self.result_log_url.errors.append(f"Already got a race with that result log URL (must be unique)")
-            if "race_log_url" in dup_fields:
-                self.result_log_url.errors.append(f"Already got a race with that race log URL (must be unique)")
+            if "race_file_url" in dup_fields:
+                self.race_file_url.errors.append(f"Already got a race with that result log URL (must be unique)")
             is_valid = False
         return is_valid
 

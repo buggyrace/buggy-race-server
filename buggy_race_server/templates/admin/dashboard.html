@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Admin: dashboard {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -33,13 +34,6 @@
       </div>
     </div>
   {% endif %}
-  {% if not students_active %}
-    <div class="alert alert-warning">
-      <h2 class="alert-title">There are no active enrolled students</h2>
-      You can <a href="{{ url_for('admin.bulk_register', data_format=None )}}">register users</a>
-      from a CSV file — see the example format on that page.
-    </div>
-  {% endif %}
   {% if not external_tech_notes_url and is_publishing_enabled %}
     {% if not (is_tech_notes_index_published and tech_notes_generated_at) %}
       <div class="alert alert-danger">
@@ -62,6 +56,22 @@
         </div>
       </div>
     {% endif %}
+  {% endif %}
+  {% if not is_using_github %}
+    {% if not buggy_editor_download_url and not is_editor_zipfile_published %}
+      <div class="alert alert-danger">
+        <h2 class="alert-title">Editor source zipfile has not been published yet</h2>
+        Go to <a href="{{ url_for('admin.show_buggy_editor_info')}}">Buggy Editor config</a>
+        for more information and link to customise and publish the zipfile.
+      </div>
+    {% endif %}
+  {% endif %}
+  {% if not students_active %}
+    <div class="alert alert-warning">
+      <h2 class="alert-title">There are no active enrolled students</h2>
+      You can <a href="{{ url_for('admin.bulk_register', data_format=None )}}">register users</a>
+      from a CSV file — see the example format on that page.
+    </div>
   {% endif %}
   <div class="row">
     <div class="col-sm-6">

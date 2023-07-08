@@ -1,5 +1,6 @@
 
 {% extends "layout.html" %}
+{% block page_title %} {{config['INSTITUTION_SHORT_NAME']}} Buggy Race Server {% endblock %}
 {% block content %}
 <!-- Main jumbotron for a primary marketing message or call to action -->
 <div class="jumbotron">
@@ -54,17 +55,17 @@
         <p><a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page' ) }}">Go to project</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><span class="icon-github"></span> Source code</h2>
+        <h2><span class="{% if is_using_github %}icon-github{% else %}icon-embed2{% endif %}"></span> Source code</h2>
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver.
           {% if is_forking_github %}
             We'll automatically fork this into your GitHub account.
           {% else %}
-            We'll tell you how to make your own copy to work on.
+            We'll tell you how to get your own copy to work on.
           {% endif %}
         </p>
-        <p><a class="btn btn-outline-secondary btn-jump" href="{{ config['BUGGY_EDITOR_GITHUB_URL'] }}">See the code</a></p>
+        <p><a class="btn btn-outline-secondary btn-jump" href="{{ editor_url }}">Get the code</a></p>
       </div>
       <div class="col-lg-4">
         {% if social_site_links %}

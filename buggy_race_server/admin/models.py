@@ -3,12 +3,12 @@
 
 from collections import defaultdict
 from datetime import datetime
-from enum import Enum
+from enum import Enum, auto
 import re
 import markdown
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 
 class SocialSetting():
   """A Social media link: note this is not a Flask/ORM model
@@ -67,14 +67,6 @@ class Setting(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
 
-class AnnouncementType(Enum):
-    DANGER = 'danger'
-    GET_EDITOR = 'get-editor'
-    INFO = 'info'
-    LOGIN = 'login'
-    SPECIAL = 'special'
-    TAGLINE = 'tagline'
-    WARNING = 'warning'
 
 class Announcement(SurrogatePK, Model):
 
@@ -84,17 +76,8 @@ class Announcement(SurrogatePK, Model):
     EXAMPLE_ANNOUNCEMENT = "<strong>BUGGY RACING IS CURRENTLY SUSPENDED</strong><br>pending the start of the new racing season"
 
     TYPE_OPTION_GROUPS = {
-       "Shown at top of all pages:": [
-            AnnouncementType.DANGER.value,
-            AnnouncementType.INFO.value,
-            AnnouncementType.SPECIAL.value,
-            AnnouncementType.WARNING.value,
-        ],
-        "Shown within specific page:": [
-            AnnouncementType.LOGIN.value,
-            AnnouncementType.TAGLINE.value,
-            AnnouncementType.GET_EDITOR.value,
-        ]
+        "Shown at top of all pages:": AnnouncementTypes.get_top_of_page_types(),
+        "Shown within specific page:": AnnouncementTypes.get_local_types(),
     }
 
     """An announcement to display on top of all pages."""
@@ -114,6 +97,42 @@ class Announcement(SurrogatePK, Model):
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<Announcement({self.id!r} text:{self.text[0:16]}...)>"
+
+class DistribMethods(Enum):
+    """ Summary of the methods that can be used to distribute the buggy
+        editor source code to the students. Mainly affects generation
+        of task list."""
+
+    def _generate_next_value_(name, start, count, last_values):
+        """ ConfigSettingNames values are lower case strings of their names.
+            These turn up in project/tasks-zip.md, tasks-page.md etc
+        """
+        return name.lower()
+
+    ZIP = auto() 
+    PAGE = auto()
+    REPO = auto()
+    FORK = auto()
+    AUTOFORK = auto()
+    VSREMOTE = auto()
+
+    @property
+    def desc(self):
+        return {
+            DistribMethods.ZIP: "Students download a zipfile from race server (the default)",
+            DistribMethods.PAGE: "Students get the source code from a custom page you set up elsewhere",
+            DistribMethods.REPO: "Students get the source code from your repo",
+            DistribMethods.FORK: "Students manually fork your repo into their own account",
+            DistribMethods.AUTOFORK: "Server forks your repo into students' GitHub accounts",
+            DistribMethods.VSREMOTE: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
+        }.get(self)
+
+    @staticmethod
+    def get_default_value():
+        """ the default distribution method should match the consquence
+        of accepting the default config settings: the server provides
+        the "built-in" copy of the buggy editor."""
+        return DistribMethods.ZIP.value
 
 
 class Task(SurrogatePK, Model):

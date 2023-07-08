@@ -1,4 +1,7 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin: {{ group_name or "" }} config settings
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">

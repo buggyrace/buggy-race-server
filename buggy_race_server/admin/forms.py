@@ -28,10 +28,13 @@ from wtforms.validators import (
     ValidationError, 
 )
 
-from buggy_race_server.admin.models import AnnouncementType
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames, ConfigTypes
+from buggy_race_server.config import (
+    AnnouncementTypes,
+    ConfigSettings,
+    ConfigSettingNames,
+    ConfigTypes
+)
 from buggy_race_server.utils import is_authorised
-
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
@@ -83,7 +86,7 @@ class AnnouncementForm(FlaskForm):
     type = SelectField(
       'Type',
       validators=[DataRequired()],
-      choices=[(t.value,t.value) for t in AnnouncementType]
+      choices=[(t.value,t.value) for t in AnnouncementTypes]
     )
     is_visible = BooleanField("Display now?")
     is_html = BooleanField("Allow HTML?")
@@ -227,8 +230,9 @@ class SubmitWithAuthForm(FlaskForm):
 class GenerateTasksForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
     is_confirmed = BooleanField("You cannot undo this. Are you sure?")
+    distrib_method = StringField("Distribution method", [Optional()])
     markdown_file =FileField(
-      "Upload a markdown file describing the tasks (or leave blank to load the default tasks)",
+      "Upload a markdown file describing the tasks",
       [Optional()]
     )
 
@@ -301,6 +305,18 @@ class TaskTextDeleteForm(FlaskForm):
   
     def validate(self):
         return super(TaskTextDeleteForm, self).validate()
+
+class PublishEditorSourceForm(FlaskForm):
+    readme_contents = TextAreaField(
+        f"README contents", validators=[DataRequired()]
+    )
+    is_updating_app_py = BooleanField("Update server URL in Python source?")
+
+    def __init__(self, *args, **kwargs):
+        super(PublishEditorSourceForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(PublishEditorSourceForm, self).validate()
 
 class SubmitWithConfirmForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")

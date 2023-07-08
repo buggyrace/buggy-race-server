@@ -644,14 +644,13 @@ def run_race(race_data):
 
     results = {
  
-      "result_log_url": race_data["result_log_url"],
+      "race_file_url": race_data["race_file_url"],
       "title": race_data["title"],
       "description": race_data["description"],
       "cost_limit": cost_limit,
       "max_laps": max_laps,
       "track_image_url": race_data["track_image_url"],
       "track_svg_url": race_data["track_svg_url"],
-      "race_log_url": race_data["race_log_url"],
       "league": race_data["league"],
       "start_at": race_data["start_at"],
       "raced_at": race_start_at,

@@ -43,7 +43,7 @@ def create_app():
     app = Flask(__name__.split(".")[0])
 
     app.config.from_object(config.ConfigFromEnv())
-        
+
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)

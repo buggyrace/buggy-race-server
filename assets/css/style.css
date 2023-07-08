@@ -309,6 +309,7 @@ footer .footer-nav {
 .icon-github:before { content: "\eab0"; }
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
+.icon-embed2:before { content: "\ea80"; }
 
 .nav-link .icon-cog {color:#dddd00}
 .nav-link .icon-cog:hover {color:#ffff00}
@@ -335,6 +336,10 @@ footer .footer-nav {
 .table-striped tbody tr.staff:hover{ background-color: #f6f0cb; }
 .table-striped tbody tr:nth-of-type(odd).staff{ background-color: #f0e0aa; }
 .table-striped tbody tr:nth-of-type(odd).staff:hover{ background-color: #eddca6; }
+
+.bottom { /* for droppinging flex items (delete button) in flex containers */
+  align-self: end;
+}
 
 .buggy-warn{
   padding:0.5em 0.5em;
@@ -622,6 +627,9 @@ td .cell-title {
   width:3em;
   aspect-ratio:1.3;
   border:1px solid #cccccc;
+}
+.flag.no-buggy {
+  border:1px dashed #aaaaaa;
 }
 .flag-sm {
   width:2em;

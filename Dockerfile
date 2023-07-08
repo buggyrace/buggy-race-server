@@ -1,5 +1,5 @@
 # ==================================== BASE ====================================
-ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.8}
+ARG INSTALL_PYTHON_VERSION=${INSTALL_PYTHON_VERSION:-3.9}
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster AS base
 
 RUN apt-get update
@@ -16,7 +16,7 @@ RUN apt-get install -y \
 COPY db/init.sql /docker-entrypoint-initdb.d/
 
 WORKDIR /app
-COPY requirements requirements
+COPY requirements.txt requirements.txt
 
 COPY . .
 
@@ -34,14 +34,14 @@ RUN npm install
 # ================================= DEVELOPMENT =================================
 # NOTE: We don't need this as of right now but it could be useful in the future.
 FROM base AS development
-RUN pip install --user -r requirements/dev.txt
+RUN pip install --user -r requirements.txt
 EXPOSE 443
 CMD [ "npm", "start" ]
 
 
 # ================================= PRODUCTION =================================
 FROM base AS production
-RUN pip install --user -r requirements/prod.txt
+RUN pip install --user -r requirements.txt
 EXPOSE 443
 #CMD [ "gunicorn", "buggy_race_server.app:app", "-b", "0.0.0.0:5000", "-w", "1", "--timeout 60" ]
 CMD [ "npm", "start" ]

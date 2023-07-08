@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Admin: sysinfo {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -29,10 +30,16 @@
         <a href="{{ url_for('admin.settings') }}">config settings</a>
         pages. If you set them as environment variables (maybe using
         <code>.env</code>, or exporting them as settings), the race
-        server will pick them up when it restarts. The first entry,
-        <code>{{ env_overrides_key }}</code>, shows all settings whose
-        values were set with this mechanism when the server was last
-        started.
+        server will pick them up when it restarts. There are a few
+        exceptions: a handful of settings here are <em>never</em> set
+        that way (effectively, those are hardcoded constants that are
+        exposed here for debugging purposes).
+      </p>
+      <p>
+        The first entry, <code>{{ env_overrides_key }}</code>, shows
+        all settings whose values were set as enviroment variables
+        <em>when the server was last started</em> (they <em>might</em>
+        have been changed since, via the admin config pages).
       </p>
     </div>
   </div>
@@ -72,7 +79,7 @@
   </div>
   <div class="row">
     <div class="col my-3">
-      <h2>Database</h2>
+      <h2>Database config settings</h2>
       <table class="table table-striped table-bordered table-hover table-responsive-md bg-white">
         <thead>
           <tr>
@@ -82,8 +89,20 @@
         </thead>
         <tbody>
           <tr>
+            <td><code>{{ is_db_uri_password_as_query_key }}</code></td>
+            <td><code>{{ is_db_uri_password_as_query }}</code></td>
+          </tr>
+          <tr>
+            <td><code>{{ forced_db_uri_ssl_mode_key }}</code></td>
+            <td><code>{{ forced_db_uri_ssl_mode }}</code></td>
+          </tr>
+          <tr>
             <td><code>DATABASE_URL</code><br>(redacted)</td>
             <td><code style="word-break: break-all;">{{ redacted_database_url }}</code></td>
+          </tr>
+          <tr>
+            <td><code>SQLALCHEMY_DATABASE_URI</code><br>(redacted)</td>
+            <td><code style="word-break: break-all;">{{ redacted_alchemy_database_url }}</code></td>
           </tr>
           <tr>
             <td>Extra config (found&nbsp;in&nbsp;database):</td>

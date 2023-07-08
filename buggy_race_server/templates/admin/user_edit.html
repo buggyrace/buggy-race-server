@@ -1,4 +1,12 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin:
+  {% if user %}
+    edit user {{ user.pretty_username }}
+  {% else %}
+    new user
+  {% endif %}
+{% endblock %}
 {% block content %}
 {% if is_current_user_administrator %}
   {%include "admin/_nav.html" %}
@@ -194,7 +202,10 @@
               {{form.is_active.label}}
             </div>
             <div class="col-sm-4 ">
-              {{form.is_active(class_="form-control", checked=user.is_active)}}
+              <select name="is_active" class="form-control mr-sm-1">
+                <option value="" {% if user and not user.is_active %}selected{% endif %}>No</option>
+                <option value="Yes" {% if not user or user.is_active %}selected{% endif %}>Yes</option>
+              </select>
             </div>
             <div class="col-sm-5">
               Users that are not active cannot log in, and are effectively suspended.
@@ -225,6 +236,25 @@
           </div>
         </div>
 
+        {% if is_demo_server and current_user.is_administrator and not current_user.is_demo_user %}
+          <div class="row alert-warning py-2 m-1">
+            <div class="col-sm-3">
+              {{form.is_demo_user.label}}
+            </div>
+            <div class="col-sm-4">
+              <select name="is_demo_user" class="form-control mr-sm-1">
+                <option value="" {% if user and not user.is_demo_user %}selected{% endif %}>No</option>
+                <option value="Yes" {% if not user or user.is_demo_user %}selected{% endif %}>Yes</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              Demo users who are also administrators can access all pages but have
+              some limitations on what they can submit (so demo server doesn't
+              get accidentally broken).
+            </div>
+          </div>
+        {% endif %}
+
         <div class="row bg-warning py-2 m-1">
           <div class="col-sm-3">
             {{form.auth_code.label}}
@@ -250,7 +280,7 @@
       </div>
     </form>
   </div>
-  {% if current_user.is_staff %} 
+  {% if current_user.is_staff and user %}
     <div class="row">
       <div class="col p-2 mx-3">
         <div class="border container">
@@ -266,15 +296,7 @@
               {% endif %}
             </div>
             <div class="col-sm-5 p-3">
-              <form id="api-key-form" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
-                {{ form.csrf_token }}
-                <input type="hidden" name="usernames" value="{{ user.username}}"/>
-                {% if user.api_key %}
-                  <button class="btn btn-danger" name="submit_clear_keys" value="Clear API keys">Clear API key</button>
-                {% else %}
-                  <button class="btn btn-primary" name="submit_generate_keys" value="Generate API keys">Generate API key</button>
-                {% endif %}
-              </form>
+              {% include "admin/_api_key_form_user.html" %}
             </div>
           </div>
         </div>
@@ -322,7 +344,7 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col p-3">
+                    <div class="col p-3 bottom">
                       <input type="submit" class="btn btn-danger" value="Delete GitHub details"/>
                     </div>
                   </div>
@@ -337,7 +359,7 @@
       <div class="col btn-collection my-3">
         {% if user %}
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}</a>
-          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change {{ user.pretty_username}}'s password</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
         {% endif %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
       </div>

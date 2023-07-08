@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Admin: task texts {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -41,7 +42,7 @@
             </td>
             <td class="status">
               {% if buggies_by_username[student.username] or student.latest_json %}
-                <a href="{{ url_for('admin.show_buggy', username=student.username) }}"
+                <a href="{{ url_for('admin.show_buggy', user_id=student.username) }}"
                 class="{% if buggies_by_username[student.username] %}bg-success{% else %}bg-warning{% endif %} text-center p-2"
                 data-toggle="modal" data-target="#texts-modal"
                 data-buggy="1"

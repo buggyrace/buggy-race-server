@@ -1,4 +1,8 @@
 {% extends "layout.html" %}
+{% block page_title %} 
+  Admin:
+  {% if race %} edit {% else %} new {% endif %} race
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -153,6 +157,47 @@
         </div>
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
+            {{ form.max_laps.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.max_laps(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Over how many laps or the racetrack is this race to be run?
+              If you're not sure you can set this when you upload the
+              results.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.is_dnf_position.label }}
+          </div>
+          <div class="col-sm-4">
+            <select id="is_dnf_position" name="is_dnf_position" class="form-control">
+              <option value="" {% if (not race and not default_is_dnf_position) or not race.is_dnf_position %} selected="selected" {% endif %}>No</option>
+              <option value="1" {% if (not race and default_is_dnf_position) or race.is_dnf_position %} selected="selected" {% endif %}>Yes</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Are buggies who do not finish all the laps given a position?
+              If so, how far they got (distance travelled) is used to calculate
+              their position relative to other buggies.
+            </p>
+            <p>
+              <em>Default:</em> <code>{% if default_is_dnf_position %}Yes{% else %}No{% endif %}</code>
+            </p>
+          </div>
+        </div>
+
+
+
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
             {{ form.is_visible.label }}
           </div>
           <div class="col-sm-4">
@@ -167,7 +212,7 @@
               the students cannot see it.
             </p>
             <p>
-              <em>Default:</em> {{ default_is_race_visible }}
+              <em>Default:</em> <code>{% if default_is_race_visible %}Yes{% else %}No{% endif %}</code>
             </p>
           </div>
         </div>
@@ -195,10 +240,10 @@
         {% if race %}
           <div class="row bg-white py-2 m-1 ">
             <div class="col-sm-3">
-              {{ form.result_log_url.label }}
+              {{ form.race_file_url.label }}
             </div>
             <div class="col-sm-4">
-              {{ form.result_log_url(class_="form-control mr-sm-1") }}
+              {{ form.race_file_url(class_="form-control mr-sm-1") }}
             </div>
             <div class="col-sm-5">
               <p>
@@ -231,34 +276,6 @@
             <div class="col-sm-5">
               <p>
                 Timestamp when results were uploaded.
-              </p>
-            </div>
-          </div>
-          <div class="row alert-warning py-2 m-1 ">
-            <div class="col-sm-3">
-              {{ form.max_laps.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.max_laps(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                Number of laps to complete the race.
-              </p>
-            </div>
-          </div>
-
-          <div class="row alert-warning py-2 m-1">
-            <div class="col-sm-3">
-              {{ form.race_log_url.label }}
-            </div>
-            <div class="col-sm-4">
-              {{ form.race_log_url(class_="form-control mr-sm-1") }}
-            </div>
-            <div class="col-sm-5">
-              <p>
-                URL for race log that records the detailed events within the
-                race — these are the events that the race player replays.
               </p>
             </div>
           </div>
@@ -303,7 +320,7 @@
                   <option value="y">Yes</option>
                 </select>  
               </div>
-              <div class="col-md-6 p-3">
+              <div class="col-md-6 p-3 bottom">
                 <input type="submit" class="btn btn-danger" value="Delete race"/>
               </div>
             </div>

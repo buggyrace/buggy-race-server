@@ -73,11 +73,11 @@ def _download_race_json(race_id, want_buggies=False):
         f"{race_filename_base}.json",
         want_datestamp=current_app.config[ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name]
     )
-    output = make_response(
-        race.get_race_data_json(want_buggies=want_buggies)
-    )
+    json_data = race.get_race_data_json(want_buggies=want_buggies)
+    output = make_response(json_data, 200)
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     output.headers["Content-type"] = "application/json"
+    output.headers["Content-length"] = len(json_data)
     return output
 
 @blueprint.route("/", strict_slashes=False)
@@ -97,6 +97,7 @@ def list_races():
 
 @blueprint.route("/new", methods=["GET", "POST"], strict_slashes=False)
 @login_required
+@staff_only
 def new_race():
     return edit_race(None)
 
@@ -119,17 +120,25 @@ def view_race(race_id):
             is_tied[prev_pos] = "="
         prev_pos = res.race_position
     flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
+    race_file_is_local=bool(
+        race.race_file_url and
+        race.race_file_url.startswith(
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+        )
+    )
     return render_template(
         "admin/race.html",
         flag_color_css_defs=flag_color_css_defs,
         has_results=bool(len(all_results)),
+        race_file_is_local=race_file_is_local,
+        is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],
         is_tied=is_tied,
         race=race,
         results_disqualified=results_disqualified,
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
         results=all_results,
-        track_image_url=race.track_image_url, # separated for SVG include file
+        track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
     )
 
@@ -150,7 +159,7 @@ def edit_race(race_id=None):
         delete_form = RaceDeleteForm(race_id=race_id)
     form = RaceForm(request.form, obj=race)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if race is None:
                 race = Race.create(
                   title=form.title.data.strip(),
@@ -158,9 +167,12 @@ def edit_race(race_id=None):
                   cost_limit=form.cost_limit.data,
                   start_at=form.start_at.data,
                   is_visible=form.is_visible.data,
+                  is_result_visible=form.is_result_visible.data,
                   track_image_url=form.track_image_url.data,
                   track_svg_url=form.track_svg_url.data,
                   lap_length=form.lap_length.data,
+                  max_laps=form.max_laps.data,
+                  is_dnf_position=form.is_dnf_position.data,
                 )
                 if race.start_at.date() < datetime.now(timezone.utc).date():
                     success_msg = f"OK, created new race... even though it is in the past ({race.start_at.date()})"
@@ -174,12 +186,12 @@ def edit_race(race_id=None):
                 race.is_visible = form.is_visible.data
                 race.is_result_visible = form.is_result_visible.data
                 race.results_uploaded_at = form.results_uploaded_at.data
-                race.result_log_url = form.result_log_url.data
-                race.race_log_url = form.race_log_url.data
+                race.race_file_url = form.race_file_url.data
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data
                 race.lap_length = form.lap_length.data
                 race.max_laps = form.max_laps.data
+                race.is_dnf_position = form.is_dnf_position.data
                 race.save()
                 pretty_title =  f"\"{race.title}\"" if race.title else "untitled race"
                 success_msg = f"OK, updated {pretty_title}" 
@@ -198,6 +210,7 @@ def edit_race(race_id=None):
         race=race,
         racetracks=Racetrack.query.order_by(Racetrack.title.asc(),).all(),
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
+        default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
     )
@@ -213,7 +226,7 @@ def upload_race_file(race_id):
     form = RaceResultsForm(request.form)
     want_redirect_to_race = False
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             is_ignoring_warnings = form.is_ignoring_warnings.data
             is_overwriting_urls = form.is_overwriting_urls.data
             # not robust, but pragmatically...
@@ -231,7 +244,11 @@ def upload_race_file(race_id):
                         with open(json_filename_with_path, "r") as read_file:
                             result_data = json.load(read_file)
                     except UnicodeDecodeError as e:
-                        flash("Encoding error (maybe that wasn't a good JSON file you uploaded?)", "warning")
+                        flash(
+                            "Encoding error (maybe that wasn't a JSON file you uploaded, "
+                            "or it contains unexpected characters?)",
+                            "warning"
+                        )
                     except json.decoder.JSONDecodeError as e:
                         flash("Failed to parse JSON data", "danger")
                         flash(str(e), "warning")
@@ -249,16 +266,22 @@ def upload_race_file(race_id):
                             for warning in warnings:
                                 flash(warning, "warning")
                             if not warnings or is_ignoring_warnings:
-                                flash("OK, updated race results", "success")
                                 if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
                                     race.store_race_file(result_data)
                                     url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
                                         + url_for("race.serve_race_file", race_id=race.id)
-                                    race.result_log_url = url
-                                    race.save()
+                                    race.race_file_url = url
                                     flash(f"Stored race file on this server for use in replay (at {url})", "success")
-                                    if not (race.is_visible and race.is_result_visible):
-                                        flash(f"Note: this file isn't visible to students yet: edit race to change that", "warning")
+                                race.results_uploaded_at = datetime.now(timezone.utc) 
+                                race.save()
+                                flash("OK, updated race results", "success")
+                                flash(f"FIXME race.results_uploaded_at={race.results_uploaded_at}", "info")
+                                if not (race.is_visible and race.is_result_visible):
+                                    flash(
+                                        "Note: this file isn't visible to students yet: "
+                                        "edit race to change that",
+                                        "info"
+                                    )
                                 want_redirect_to_race = True
                             else:
                                 if len(warnings) == 1:
@@ -268,9 +291,9 @@ def upload_race_file(race_id):
                                 flash(msg, "danger")
                     delete_path = json_filename_with_path
                 else:
-                    flash("NO json_file.filename", "info")
+                    flash("Missing JSON race file filename", "info")
             else:
-                flash("NO results_json_file was false", "info")
+                flash("Missing race file (no JSON found)", "info")
             if delete_path:
                 try:
                     os.unlink(delete_path)
@@ -286,8 +309,6 @@ def upload_race_file(race_id):
         "admin/race_upload.html",
         form=form,
         race=race,
-        default_racetrack_image=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_IMAGE.name],
-        default_racetrack_path_svg=current_app.config[ConfigSettingNames.DEFAULT_RACETRACK_PATH_SVG.name],
     )
 
 @blueprint.route("/<race_id>/download-race-file/with-buggies", methods=["GET"])
@@ -307,7 +328,7 @@ def download_race_json_without_buggies(race_id):
 @admin_only
 def delete_race(race_id):
     form = RaceDeleteForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if not form.is_confirmed.data:
             flash("Did not delete race (you didn't confirm it)", "danger")
             return redirect(url_for('admin_race.edit_race', race_id=race_id))
@@ -422,7 +443,7 @@ def delete_track(track_id):
         flash("Error: coudldn't find racetrack to delete", "danger")
     else:
         form = SubmitWithConfirmForm(request.form)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if not form.is_confirmed.data:
                 flash("Did not delete track (you didn't confirm it)", "danger")
                 return redirect(url_for('admin_race.edit_track', track_id=track_id))
@@ -455,7 +476,7 @@ def edit_track(track_id):
         delete_form = SubmitWithConfirmForm()
     form = RacetrackForm(request.form, obj=track)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if track is None:
                 track = Racetrack.create(
                   title=form.title.data.strip(),

@@ -5,6 +5,7 @@
 import csv
 import io  # for CSV dump
 import random  # for API tests
+import shutil # for publishing the editor
 from datetime import datetime, timedelta, timezone
 import os
 from collections import defaultdict
@@ -23,6 +24,7 @@ from flask import (
     render_template,
     request,
     Response,
+    send_file,
     session,
     url_for,
 )
@@ -39,6 +41,7 @@ from buggy_race_server.admin.forms import (
     BulkRegisterForm,
     GeneralSubmitForm,
     GenerateTasksForm,
+    PublishEditorSourceForm,
     SettingForm,
     SetupAuthForm,
     SetupSettingForm,
@@ -48,7 +51,7 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import (
     Announcement,
-    AnnouncementType,
+    DistribMethods,
     TaskText,
     Setting,
     SocialSetting,
@@ -56,13 +59,20 @@ from buggy_race_server.admin.models import (
 )
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
+from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
+from buggy_race_server.config import (
+    AnnouncementTypes,
+    ConfigSettingNames,
+    ConfigSettings,
+    ConfigTypes
+)
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
 from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
+    create_default_task_markdown_file,
     flash_errors,
     get_day_of_week,
     get_download_filename,
@@ -77,6 +87,7 @@ from buggy_race_server.utils import (
     publish_task_list,
     publish_tasks_as_issues_csv,
     publish_tech_notes,
+    redact_password_in_database_url,
     refresh_global_announcements,
     servertime_str,
     set_and_save_config_setting,
@@ -114,6 +125,15 @@ def _is_tech_notes_index_published():
             current_app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
             current_app.config[ConfigSettingNames._TECH_NOTES_PAGES_DIR.name],
             "index.html"
+        )
+    )
+
+def _is_editor_zipfile_published():
+    return os.path.exists(
+        join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+            current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
         )
     )
 
@@ -285,9 +305,9 @@ def setup_summary():
     qty_announcements_login = 0
     qty_announcements_tagline = 0
     for ann in current_app.config['CURRENT_ANNOUNCEMENTS']:
-        if ann.type == AnnouncementType.LOGIN.value:
+        if ann.type == AnnouncementTypes.LOGIN.value:
             qty_announcements_login += 1
-        elif ann.type == AnnouncementType.TAGLINE.value:
+        elif ann.type == AnnouncementTypes.TAGLINE.value:
             qty_announcements_tagline += 1
         else:
             qty_announcements_global += 1
@@ -295,6 +315,12 @@ def setup_summary():
     api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name])
     return render_template(
       "admin/setup_summary.html",
+      is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      is_editor_zipfile_published=_is_editor_zipfile_published(),
+      editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
+      buggy_editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
+      buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
       api_secret_ttl_pretty=api_secret_ttl_pretty,
       buggy_editor_repo_owner=buggy_editor_repo_owner,
       buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
@@ -374,7 +400,7 @@ def setup():
             return redirect( url_for('public.login'))
         form = SetupSettingForm(request.form)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if setup_status == 1: # this updating auth and creating a new admin user
                 set_and_save_config_setting(
                   current_app,
@@ -497,6 +523,9 @@ def admin():
         is_storing_texts=is_storing_texts,
         is_task_list_published=_is_task_list_published(),
         is_tech_notes_index_published=_is_tech_notes_index_published(),
+        is_editor_zipfile_published=_is_editor_zipfile_published(),
+        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+        buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
         notes_generated_timestamp=servertime_str(
           current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
           current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
@@ -567,6 +596,11 @@ def list_users(data_format=None, want_detail=True):
         ):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
+        is_showing_github_column = (
+            current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+            and
+            current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+        )
         return render_template("admin/users.html",
             admin_usernames=admin_usernames,
             current_user_can_edit=current_user_can_edit,
@@ -575,7 +609,9 @@ def list_users(data_format=None, want_detail=True):
             ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
             ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+            is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+            is_showing_github_column=is_showing_github_column,
             qty_admins=qty_admins,
             qty_students_enabled=len([s for s in students if s.is_active]),
             qty_students_github=len([s for s in students if s.github_username]),
@@ -596,7 +632,7 @@ def bulk_register(data_format=None):
     is_json = data_format == "json"
     err_msgs = []
     form = BulkRegisterForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         delete_path = None
         lines = []
         if "csv_file" in request.files:
@@ -733,6 +769,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
         texts_by_task_id=texts_by_task_id,
@@ -760,7 +797,7 @@ def manage_user(user_id):
       action_url=url_for('admin.edit_user', user_id=user.id)
       form = UserForm(request.form, obj=user, app=current_app)
   if request.method == "POST":
-      if form.validate_on_submit():
+      if form.is_submitted() and form.validate():
           username = form.username.data.lower()
           if is_registering_new_user:
               user = User(
@@ -771,6 +808,7 @@ def manage_user(user_id):
           user.comment = form.comment.data
           user.is_student = form.is_student.data
           user.is_active = form.is_active.data
+          user.is_demo_user = form.is_demo_user.data if form.is_demo_user is not None else False
           if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
               user.first_name = form.first_name.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
@@ -814,6 +852,7 @@ def manage_user(user_id):
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       form=form,
       is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
+      is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       user=user,
   )
@@ -830,7 +869,7 @@ def delete_github_details(user_id):
     if user is None:
         abort(404)
     form = SubmitWithConfirmForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         if (user.github_username is None and user.github_access_token is None):
             flash("Nothing changed: user's GitHub details were already removed", "warning")
         elif not form.is_confirmed.data:
@@ -886,7 +925,7 @@ def edit_user_comment(user_id):
         abort(404)
     form = UserCommentForm(request.form, obj=user)
     if request.method=="POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             user.comment = form.comment.data.strip()
             user.save()
             flash(f"OK, updated comment on user {user.pretty_username}", "success")
@@ -977,44 +1016,86 @@ def api_keys():
 def api_test():
     return render_template(
         "admin/api_test.html",
-        random_qty_wheels=random.randint(1,100)
+        form=GeneralSubmitForm(), # for generate/clear key
+        random_qty_wheels=random.randint(1,100),
+        user=current_user, # for generate/clear key
     )
 
-@blueprint.route("/buggies/<username>")
-def show_buggy(username):
-   """ Using the show_buggy code from Buggy: it's common for non-admin too"""
-   # note that show_buggy_by_user checks the admin status of the requestor
-   return show_buggy_by_user(username=username)
+@blueprint.route("/user/<user_id>/buggy")
+def show_buggy(user_id):
+    """ Using the show_buggy code from Buggy: it's common for non-admin too"""
+    # note that show_buggy_by_user checks the admin status of the requestor
+    if str(user_id).isdigit():
+        user = User.query.filter_by(id=int(user_id)).first_or_404()
+        username = user.username
+    else:
+        username = user_id
+    return show_buggy_by_user(username=username)
+
+@blueprint.route("/user/<user_id>/buggy/delete", methods=["POST"])
+@login_required
+@admin_only
+def delete_buggy(user_id):
+    # note that delete_buggy_by_user checks the admin status of the requestor
+    if str(user_id).isdigit():
+        user = User.query.filter_by(id=int(user_id)).first_or_404()
+        username = user.username
+    else:
+        username = user_id
+    return delete_buggy_by_user(username=username)
+
+
+@blueprint.route("/download/buggies/csv/all")
+@login_required
+@staff_only
+def download_buggies_all():
+    return download_buggies(want_students_only=False)
 
 @blueprint.route("/download/buggies/csv")
 @login_required
 @staff_only
-def download_buggies():
+def download_buggies(want_students_only=True):
     """Download buggies as CSV (only format supported at the moment)"""
-    buggies = Buggy.get_all_buggies_with_usernames()
+    buggies_with_users = Buggy.get_all_buggies_with_users(want_students_only=want_students_only)
     si = io.StringIO()
     cw = csv.writer(si)
     col_names = [col.name for col in Buggy.__mapper__.columns]
     col_names.insert(1, 'username')
     cw.writerow(col_names)
-    [cw.writerow([getattr(b, col) for col in col_names]) for b in buggies]
+    for (b, u) in buggies_with_users:
+        cw.writerow(
+            [
+                u.username if col == 'username' else getattr(b, col)
+                for col in col_names
+            ]
+        )
     filename = get_download_filename("buggies.csv", want_datestamp=True)
     output = make_response(si.getvalue())
     output.headers["Content-Disposition"] = f"attachment; filename={filename}"
     output.headers["Content-type"] = "text/csv"
     return output
 
+
+@blueprint.route("/buggies/all", strict_slashes=False)
+@login_required
+@staff_only
+def list_buggies_all():
+    return list_buggies(want_students_only=False)
+
 @blueprint.route("/buggies", strict_slashes=False)
 @login_required
 @staff_only
-def list_buggies(data_format=None):
+def list_buggies(want_students_only=True):
     """Admin buggy list."""
-    buggies=Buggy.get_all_buggies_with_usernames()
-    flag_color_css_defs = get_flag_color_css_defs(buggies)
+    buggies_and_users=Buggy.get_all_buggies_with_users(want_students_only=want_students_only)
+    flag_color_css_defs = get_flag_color_css_defs(
+        [buggy for (buggy, _) in buggies_and_users]
+    )
     return render_template(
         "admin/buggies.html",
-        buggies=buggies,
-        flag_color_css_defs=flag_color_css_defs
+        buggies=buggies_and_users,
+        flag_color_css_defs=flag_color_css_defs,
+        want_students_only=want_students_only
     )
 
 @blueprint.route("/settings/<group_name>", methods=['GET','POST'])
@@ -1028,7 +1109,7 @@ def settings(group_name=None):
     social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
         # group_name = form['group'].data
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             _update_settings_in_db(form)
             # inefficient, but update to reflect changes
             settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
@@ -1116,7 +1197,7 @@ def edit_announcement(announcement_id=None):
             is_html=announcement.is_html
             is_visible=announcement.is_visible
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if announcement is not None:
                 announcement.text = form.text.data
                 announcement.type = form.type.data
@@ -1202,7 +1283,7 @@ def delete_announcement(announcement_id=None):
 @admin_only
 def add_example_announcement():
     form = GeneralSubmitForm(request.form)
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         Announcement.create(
             type="special",
             text=Announcement.EXAMPLE_ANNOUNCEMENT,
@@ -1230,7 +1311,7 @@ def tech_notes_admin():
   error_msg = None
   form = GeneralSubmitForm(request.form) # no auth required
   if request.method == "POST":
-      if form.validate_on_submit():
+      if form.is_submitted() and form.validate():
           try:
               output_msg = publish_tech_notes(current_app)
           except Exception as e:
@@ -1268,7 +1349,7 @@ def tech_notes_admin():
 @admin_only
 def tasks_generate():
     form = GeneralSubmitForm(request.form) # no auth required
-    if form.validate_on_submit():
+    if form.is_submitted() and form.validate():
         # render the template and save it as _task_list.html
         try:
             publish_task_list(current_app)
@@ -1300,13 +1381,15 @@ def tasks_admin():
     is_fresh_update = False
     want_all = request.path.endswith("all")
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             if want_overwrite := form.is_confirmed.data:
-                # TODO ensure path no affected by cwd elsewhere
-                md_filename_with_path = "project/tasks.md"
+                md_filename_with_path = join_to_project_root(
+                    current_app.config[ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name],
+                    current_app.config[ConfigSettingNames._PROJECT_TASKS_FILENAME.name]
+                )
                 delete_path = None
                 pretty_source = "default tasks"
-                if "markdown_file" in request.files:
+                if "markdown_file" in request.files and request.files['markdown_file']:
                     md_file = request.files['markdown_file']
                     if md_file.filename:
                         md_filename_with_path = os.path.join(
@@ -1316,13 +1399,38 @@ def tasks_admin():
                         md_file.save(md_filename_with_path)
                         delete_path = md_filename_with_path
                         pretty_source = "uploaded tasks"
+                    else:
+                        flash(f"Uploaded file seems empty", "danger")
+                        abort(500)
+                else:
+                    # using default tasks (because no file was uploaded)
+                    try:
+                        distrib_method = DistribMethods(form.distrib_method.data)
+                    except ValueError: # unrecognised method name from form
+                        distrib_method = None
+
+                    # this creates a combo file from defaults _as if it has been uploaded_
+                    md_filename_with_path=create_default_task_markdown_file(
+                        distrib_method.value if distrib_method else None
+                    )
+                    if distrib_method:
+                        pretty_source += f" (with distribution method: \"{distrib_method.desc}\")"
+                    delete_path = md_filename_with_path
                 try:
                     qty_tasks_added = load_tasks_into_db(
                         join_to_project_root(md_filename_with_path),
                         app=current_app,
                         want_overwrite=want_overwrite,
                     )
-                    flash(f"OK, put {qty_tasks_added} {pretty_source} into the database", "success")
+                    flash(
+                        f"OK, put {qty_tasks_added} {pretty_source} into the database",
+                        "success"
+                    )
+                    flash(
+                        "Remember to publish the task list now! "
+                        "...unless you're going to edit any tasks first",
+                        "info"
+                    )
                     is_fresh_update = True
                 except Exception as e:
                     flash(f"Error parsing/adding tasks: {e}", "danger")
@@ -1350,14 +1458,20 @@ def tasks_admin():
     else:
         example_task = None
         example_task_url = None
+    is_injecting_github_issues = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+        and
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name]
+    )
     return render_template(
         "admin/tasks.html",
         auto_republish_config_name=ConfigSettingNames.IS_STATIC_CONTENT_AUTOGENERATED.name,
+        distrib_methods=DistribMethods,
         example_task_url=example_task_url,
         example_task=example_task,
         form=form,
         is_fresh_update=is_fresh_update,
-        is_injecting_github_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
+        is_injecting_github_issues=is_injecting_github_issues,
         is_showing_all_tasks=want_all,
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -1391,9 +1505,16 @@ def download_tasks(type=None, format=None):
         if format == FORMAT_CSV:
             flash(f"Cannot download default issues in CSV format", "danger")
             abort(404)
-        infile = open("project/tasks.md")
+        default_task_md_file=create_default_task_markdown_file(
+            DistribMethods.get_default_value()
+        )
+        infile = open(default_task_md_file)
         payload = "".join(infile.readlines())
         infile.close()
+        try:
+            os.unlink(default_task_md_file)
+        except os.error as e:
+            pass # failure to delete is untidy but not important
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=False)
     elif type == CURRENT:
         tasks = Task.query.filter_by(is_enabled=True).order_by(
@@ -1434,7 +1555,7 @@ def edit_task(task_id=None):
       # en/disabling them (effectively deleting them).
     form = TaskForm(request.form, obj=task)
     if request.method == "POST":
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             task.phase = form.phase.data
             task.name = form.name.data
             task.title = form.title.data
@@ -1564,12 +1685,10 @@ def purge_unexpected_config_setting(setting_name):
 @admin_only
 def show_system_info():
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
-    database_url = current_app.config.get("DATABASE_URL")
-    redacted_database_url = "(unavailable)"
-    if current_app.config.get("DATABASE_URL"):
-        DATABASE_RE = re.compile(r"^([^:]+:[^:]+:).*(@\w+.*)")
-        if match := re.match(DATABASE_RE, database_url):
-            redacted_database_url = f"{match[1]}******{match[2]}"
+    db_url = current_app.config.get("DATABASE_URL")
+    redacted_db_url = redact_password_in_database_url(db_url)
+    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    redacted_alchemy_db_url = redact_password_in_database_url(alchemy_db_url)
     try:
         result = subprocess.run(
           "git rev-parse --short HEAD; git branch --show-current",
@@ -1581,6 +1700,12 @@ def show_system_info():
     config_settings_to_display = sorted([
       ConfigSettings.CACHEBUSTER_KEY,
       ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+      ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
+      ConfigSettingNames._IS_DEMO_SERVER.name,
+      ConfigSettingNames._EDITOR_INPUT_DIR.name,
+      ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
+      ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,
+      ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
       ConfigSettingNames._RACE_ASSETS_PATH.name,
       ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
       ConfigSettingNames._PUBLISHED_PATH.name,
@@ -1610,6 +1735,7 @@ def show_system_info():
       "SEND_FILE_MAX_AGE_DEFAULT",
       "SQLALCHEMY_TRACK_MODIFICATIONS",
       "UPLOAD_FOLDER",
+      "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
     ])
     return render_template(
         "admin/system_info.html",
@@ -1617,32 +1743,198 @@ def show_system_info():
         env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         git_status=git_status,
-        redacted_database_url=redacted_database_url,
+        forced_db_uri_ssl_mode_key=ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY,
+        forced_db_uri_ssl_mode=current_app.config[ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY],
+        is_db_uri_password_as_query_key=ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY,
+        is_db_uri_password_as_query=current_app.config[ConfigSettings.REWRITING_DB_URI_PASSWORD_KEY],
+        redacted_database_url=redacted_db_url,
+        redacted_alchemy_database_url=redacted_alchemy_db_url,
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )
+
+def _get_buggy_editor_kwargs():
+    project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+    buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    return {
+      "buggy_editor_github_url": current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      "buggy_editor_repo_name": current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+      "buggy_editor_repo_owner": buggy_editor_repo_owner,
+      "buggy_race_server_url": current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+      "editor_title": f"{project_code} Racing Buggy editor".strip(),
+      "buggy_editor_zipfile_url": current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "institution_name": current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
+      "institution_short_name": current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+      "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
+      "is_using_github": current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      "is_using_github_api_to_fork": current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+      "project_code": project_code,
+      "task_0_get_name": current_app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
+      "task_3_env_name": current_app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
+    }
 
 @blueprint.route("/buggy-editor", strict_slashes=False, methods=["GET"])
 @login_required
 @admin_only
 def show_buggy_editor_info():
-    project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name]
-    buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
     return render_template(
       "admin/buggy_editor.html",
-      buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
-      buggy_editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-      buggy_editor_repo_owner=buggy_editor_repo_owner,
-      buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-      editor_title=f"{project_code} Racing Buggy editor".strip(),
-      institution_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
-      institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
-      is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
-      is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-      project_code=project_code,
-      task_0_get_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
-      task_3_env_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
+      **_get_buggy_editor_kwargs(),
+      is_editor_zipfile_published=_is_editor_zipfile_published(),
+      editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
+      readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
+      delete_form=SubmitWithConfirmForm()
    )
+
+@blueprint.route("/buggy-editor/delete", strict_slashes=False, methods=["POST"])
+@login_required
+@admin_only
+def delete_buggy_editor_zip():
+    form = SubmitWithConfirmForm(request.form)
+    if form.is_submitted() and form.validate():
+        if form.is_confirmed.data:
+            zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            target_zipfile = join_to_project_root(
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+                zipfilename
+            )
+            try:
+                os.unlink(target_zipfile)
+            except os.error as e:
+                flash(f"Problem deleting \"{zipfilename}\": {e}", "danger")
+            else:
+                flash(f"OK, deleted \"{zipfilename}\"", "success")
+        else:
+            flash("Did not delete zipfile because you did not explicitly confirm it", "danger")
+    else:
+        flash("Wiring error, can't delete", "danger")
+    return redirect(url_for("admin.show_buggy_editor_info"))
+
+@blueprint.route("/buggy-editor/publish", methods=['GET', 'POST'])
+@login_required
+@admin_only
+def publish_editor_zip():
+    readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
+    editor_python_filename=current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
+    form = PublishEditorSourceForm(request.form)
+    if request.method == "POST":
+        readme_contents = form.readme_contents.data
+        qty_lines_in_readme=readme_contents.count("\n")
+        # copy the editor in pubished/editor
+        # replace contents of README.md with form.readme_contents.data
+        # zip it up
+        is_ok = True
+        is_updating_app_py = form.is_updating_app_py.data
+        editor_src_dir = join_to_project_root(
+            current_app.config[ConfigSettingNames._EDITOR_INPUT_DIR.name],
+            current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name],
+        )
+        editor_target_dir = join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+            current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name]
+        )
+        target_zipfile = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+        if target_zipfile.endswith(".zip"):
+            target_zipfile = target_zipfile[0:-len(".zip")]
+        target_zipfile = join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+            target_zipfile
+        )
+        try:
+            shutil.copytree(editor_src_dir, editor_target_dir, dirs_exist_ok=True)
+        except IOError as e:
+            flash(f"Error copying editor files: {e}", "danger")
+            is_ok = False
+        if is_ok:
+            readme_file = join_to_project_root(
+                editor_target_dir,
+                readme_filename
+            )
+            if not os.path.exists(readme_file):
+                flash(f"Failed to locate {readme_filename} ", "danger")
+                is_ok = False
+        if is_ok:
+            try:
+                with open(readme_file, "w") as new_readme:
+                    new_readme.write(readme_contents)
+            except IOError as e:
+                flash(f"Failed to write {readme_filename}: {e}", "danger")
+                is_ok = False
+            else:
+                flash(f"Wrote {qty_lines_in_readme} lines into {readme_filename}", "info")
+        if is_ok:
+            py_file = join_to_project_root(
+                editor_target_dir,
+                editor_python_filename
+            )
+            server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+            try:
+                with open(py_file, "r") as old_py:
+                    py_body = old_py.read()
+                py_body=py_body.replace(
+                    "https://RACE-SERVER-URL",
+                    server_url
+                )
+                with open(py_file, "w") as new_py:
+                    new_py.write(py_body)
+            except IOError as e:
+                flash(f"Failed to open {editor_python_filename}: {e}", "danger")
+                is_ok = False
+            else:
+                flash(f"Set BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}", "info")
+        if is_ok:
+            try:
+                shutil.make_archive(target_zipfile, 'zip', editor_target_dir)
+            except Exception as e:
+                flash("Failed to zip: {e}", "danger")
+                is_ok = False
+            else:
+                set_and_save_config_setting(
+                    current_app,
+                    name=ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
+                    value=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+                )
+        if is_ok:
+            flash("OK, editor files now zipped up and published", "success")
+            return redirect(url_for("admin.show_buggy_editor_info"))
+    else:
+        readme_contents = render_template(
+            "admin/_buggy_editor_readme.txt",
+            **_get_buggy_editor_kwargs(),
+        )
+        form.readme_contents.data = readme_contents
+        qty_lines_in_readme=readme_contents.count("\n") + 1
+    return render_template(
+        "admin/buggy_editor_publish.html",
+        form=form,
+        qty_lines_in_readme=qty_lines_in_readme,
+        readme_filename=readme_filename,
+        editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
+        buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
+        editor_python_filename=editor_python_filename,
+    )
+
+@blueprint.route("/buggy-editor/download", strict_slashes=False)
+@login_required
+@staff_only
+def download_editor_zip_for_admin():
+    """ Special case to allow admin to download published editor zipfile even
+    if settings prevent students having access: this sends if the file exists,
+    regardless of settings, potentially useful for _making_ the zip to then
+    distribute elsewhere."""
+    zipfile = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    )
+    if not os.path.exists(zipfile):
+        flash("Editor zip file not available (has not been published)", "danger")
+        abort(404)
+    return send_file(zipfile)
+
 
 @blueprint.route("/pre-reg-csv-utility", strict_slashes=False, methods=["GET", "POST"])
 @login_required
@@ -1654,7 +1946,7 @@ def pre_registration_csv_utility():
         # this is just a boomerang upload-to-download call: sending the CSV data
         # that was generated by the javascript in the browser, so we can use the
         # server-side ability to set set Content-disposition headers (!)
-        if form.validate_on_submit():
+        if form.is_submitted() and form.validate():
             csv_data = form.data.data
             filename = get_download_filename("students.csv", want_datestamp=True)
             output = make_response(csv_data)
@@ -1677,17 +1969,30 @@ def pre_registration_csv_utility():
         users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
     )
 
+@blueprint.route("race/replay/stripped-down")
+@login_required
+@staff_only
+def stripped_down_race_replayer():
+    return render_template(
+        "races/player_stripped_down.html",
+        cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
+        current_user_username="nobody!", # ensure no username match with "!"
+        race_file_url="{{}}", # force JavaScript into believing it's standalone
+    )
+
 @blueprint.route("race/replay")
 @login_required
 @staff_only
 def staff_race_replayer():
     """ race replayer for staff testing that isn't linked to datatabase races:
     this will try to load whatever URL is passed into the ?race= query var.
-    This isn't suitable for replaying races because only staff can access it."""
+    This isn't suitable for replaying races for students because only staff can
+     access it — but can be handy for testing new race files."""
     return render_template(
         "races/player.html",
         cachebuster=current_app.config[ConfigSettings.CACHEBUSTER_KEY],
-        result_log_url="{{}}" # force JavaScript into believing it's standalone
+        current_user_username=current_user.username,
+        race_file_url="{{}}" # force JavaScript into believing it's standalone
     )
 
 @blueprint.route("/config-docs-helper")

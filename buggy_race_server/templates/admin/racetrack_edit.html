@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin:
+  {% if track %} edit {% else %} new {% endif %}
+  racetrack
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -105,7 +110,7 @@
           action="{{ url_for('admin_race.delete_track', track_id=track.id)}}" role="form">
             {{ delete_form.csrf_token }}
             <div class="row">
-              <div class="col-md-3 p-3">
+              <div class="col-xs-3 p-3">
                 {{ delete_form.is_confirmed.label }}
                 <select id="is_confirmed" name="is_confirmed" class="form-control">
                   <option selected value="">No</option>
@@ -113,7 +118,7 @@
                   <option value="y">Yes</option>
                 </select>  
               </div>
-              <div class="col-md-6 p-3">
+              <div class="col-xs-6 p-3 bottom">
                 <input type="submit" class="btn btn-danger" value="Delete racetrack"/>
               </div>
             </div>

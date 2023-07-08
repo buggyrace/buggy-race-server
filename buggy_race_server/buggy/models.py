@@ -167,27 +167,17 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
         }
 
     @staticmethod
-    def get_all_buggies_with_usernames(want_inactive_users=False, want_students_only=True):
-        # TODO shockingly building my own join because somehow the SQLAlchemy
-        # TODO relationship isn't putting User into the buggy. Don't look
-        # TODO Used db.session with .joins and everything. Sigh.
-        users_by_id = dict()
-        # if want_inactive_users:
-        #    print("* not implemented — buggies only for active users")
-        # if want_students_only:
-        #     users = User.query.filter_by(is_active=True, is_student=True).all()
-        # else:
-        #     users = User.query.filter_by(is_active=True).all()
-        # TODO workaround (REVERTING) for issue #157
-        users = User.query.all()
-        for user in users:
-            users_by_id[user.id] = user
-        buggies = Buggy.query.all()
-        for b in buggies:
-          if user := users_by_id.get(b.user_id):
-            b.username = user.username
-            b.pretty_username = user.pretty_username
-        return buggies
+    def get_all_buggies_with_users(want_students_only=True):
+        query = db.session.query(
+            Buggy, User
+        ).outerjoin(User).filter(
+            Buggy.user_id==User.id
+        ).filter(
+            User.is_active==True
+        ).order_by(User.username.asc())
+        if want_students_only:  
+            query = query.filter(User.is_student==True)
+        return query.all()
 
 @event.listens_for(Buggy, 'before_update')
 def receive_before_update(mapper, connection, target):

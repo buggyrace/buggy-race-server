@@ -1,41 +1,32 @@
--- ===========================================================================
--- This file is a manual PostgreSQL database schema dump
---
--- ...so you if you can't run the Flask/alembic migrations you can still
--- manually create the database. (You may have problems later on — if there
--- are new migrations released after you've installed — if you do this!)
---
--- Snapshot of migrations directory when this was schema.sql was created:
---     500f64923fd2_v0_3_buggy_database.py
---     a38ed3aabb7a_add_external_id_to_user.py
---
---
--- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
--- 
---     pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
---
--- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
---
---   * DATABASE_URL may be like postgres://username:pw@host/name
---   * --schema-only for stucture not data
---   * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
---
--- ...then add a helpful comment like this and drop it in as schema.sql :-)
--- ===========================================================================
---
--- removed these entries from heroku dump, because they have local username:
--- Name: SCHEMA heroku_ext; Type: ACL; Schema: -; Owner: -
--- Name: LANGUAGE plpgsql; Type: ACL; Schema: -; Owner: -
-
-
-
+---- ===========================================================================
+---- This file is a manual PostgreSQL database schema dump
+----
+---- ...so you if you can't run the Flask/alembic migrations you can still
+---- manually create the database. (You may have problems later on — if there
+---- are new migrations released after you've installed — if you do this!)
+----
+---- Snapshot of migrations directory when this was schema.sql was created:
+----      34e97cafd34d_v2_0_0_database.py
+----
+---- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
+----
+----      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
+----
+---- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
+----
+----  * DATABASE_URL may be like postgres://username:pw@host:port/name
+----  * --schema-only for stucture not data
+----  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
+----
+---- ...then add a helpful comment like this and drop it in as schema.sql :-)
+---- ===========================================================================
 
 --
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.7 (Ubuntu 14.7-1.pgdg20.04+1)
--- Dumped by pg_dump version 15.2 (Ubuntu 15.2-1.pgdg22.04+1)
+-- Dumped from database version 15.1
+-- Dumped by pg_dump version 15.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -47,41 +38,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
---
--- Name: heroku_ext; Type: SCHEMA; Schema: -; Owner: -
---
-
-CREATE SCHEMA heroku_ext;
-
-
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON SCHEMA public IS '';
-
-
---
--- Name: pg_stat_statements; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA heroku_ext;
-
-
---
--- Name: EXTENSION pg_stat_statements; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION pg_stat_statements IS 'track planning and execution statistics of all SQL statements executed';
-
 
 SET default_tablespace = '';
 
@@ -184,6 +140,37 @@ ALTER SEQUENCE public.buggies_id_seq OWNED BY public.buggies.id;
 
 
 --
+-- Name: racefiles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.racefiles (
+    id integer NOT NULL,
+    race_id integer NOT NULL,
+    contents text NOT NULL
+);
+
+
+--
+-- Name: racefiles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.racefiles_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: racefiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.racefiles_id_seq OWNED BY public.racefiles.id;
+
+
+--
 -- Name: races; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -195,14 +182,19 @@ CREATE TABLE public.races (
     start_at timestamp without time zone NOT NULL,
     cost_limit integer,
     is_visible boolean,
-    result_log_url character varying(255),
+    race_file_url character varying(255),
     league character varying(32),
     results_uploaded_at timestamp without time zone,
     buggies_entered integer NOT NULL,
     buggies_started integer NOT NULL,
     buggies_finished integer NOT NULL,
-    race_log_url character varying(255),
-    is_result_visible boolean NOT NULL
+    is_result_visible boolean NOT NULL,
+    track_image_url character varying(255),
+    track_svg_url character varying(255),
+    max_laps integer,
+    lap_length integer,
+    is_dnf_position boolean NOT NULL,
+    is_abandoned boolean NOT NULL
 );
 
 
@@ -224,6 +216,40 @@ CREATE SEQUENCE public.races_id_seq
 --
 
 ALTER SEQUENCE public.races_id_seq OWNED BY public.races.id;
+
+
+--
+-- Name: racetracks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.racetracks (
+    id integer NOT NULL,
+    title character varying(80) NOT NULL,
+    "desc" text NOT NULL,
+    track_image_url character varying(255),
+    track_svg_url character varying(255),
+    lap_length integer
+);
+
+
+--
+-- Name: racetracks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.racetracks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: racetracks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.racetracks_id_seq OWNED BY public.racetracks.id;
 
 
 --
@@ -268,9 +294,9 @@ ALTER SEQUENCE public.results_id_seq OWNED BY public.results.id;
 --
 
 CREATE TABLE public.roles (
-    id integer NOT NULL,
     name character varying(80) NOT NULL,
-    user_id integer
+    user_id integer,
+    id integer NOT NULL
 );
 
 
@@ -382,9 +408,9 @@ ALTER SEQUENCE public.tasktexts_id_seq OWNED BY public.tasktexts.id;
 --
 
 CREATE TABLE public.users (
-    id integer NOT NULL,
     username character varying(80) NOT NULL,
     ext_username character varying(80),
+    ext_id character varying(80),
     email character varying(80),
     password bytea,
     created_at timestamp without time zone NOT NULL,
@@ -405,7 +431,8 @@ CREATE TABLE public.users (
     is_api_secret_otp boolean NOT NULL,
     api_key character varying(30),
     comment text,
-    ext_id character varying(80)
+    is_demo_user boolean,
+    id integer NOT NULL
 );
 
 
@@ -444,10 +471,24 @@ ALTER TABLE ONLY public.buggies ALTER COLUMN id SET DEFAULT nextval('public.bugg
 
 
 --
+-- Name: racefiles id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.racefiles ALTER COLUMN id SET DEFAULT nextval('public.racefiles_id_seq'::regclass);
+
+
+--
 -- Name: races id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.races ALTER COLUMN id SET DEFAULT nextval('public.races_id_seq'::regclass);
+
+
+--
+-- Name: racetracks id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.racetracks ALTER COLUMN id SET DEFAULT nextval('public.racetracks_id_seq'::regclass);
 
 
 --
@@ -510,6 +551,14 @@ ALTER TABLE ONLY public.buggies
 
 
 --
+-- Name: racefiles racefiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.racefiles
+    ADD CONSTRAINT racefiles_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: races races_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -518,19 +567,19 @@ ALTER TABLE ONLY public.races
 
 
 --
--- Name: races races_race_log_url_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: races races_race_file_url_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.races
-    ADD CONSTRAINT races_race_log_url_key UNIQUE (race_log_url);
+    ADD CONSTRAINT races_race_file_url_key UNIQUE (race_file_url);
 
 
 --
--- Name: races races_result_log_url_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: racetracks racetracks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.races
-    ADD CONSTRAINT races_result_log_url_key UNIQUE (result_log_url);
+ALTER TABLE ONLY public.racetracks
+    ADD CONSTRAINT racetracks_pkey PRIMARY KEY (id);
 
 
 --
@@ -630,6 +679,14 @@ ALTER TABLE ONLY public.buggies
 
 
 --
+-- Name: racefiles racefiles_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.racefiles
+    ADD CONSTRAINT racefiles_race_id_fkey FOREIGN KEY (race_id) REFERENCES public.races(id);
+
+
+--
 -- Name: results results_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -667,7 +724,6 @@ ALTER TABLE ONLY public.tasktexts
 
 ALTER TABLE ONLY public.tasktexts
     ADD CONSTRAINT tasktexts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
-
 
 
 --

@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block page_title %} Admin: upload race results {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -101,31 +102,15 @@
               Current URLs for this race <span class="font-weight-normal">(before you upload results JSON)</span>
             </th>
           </tr>
-          {% if race.result_log_url %}
+          {% if race.race_file_url %}
             <tr>
-              <td><code>result_log_url</code></td>
+              <td><code>race_file_url</code></td>
               <td>
                 <p>
-                  <a href="{{ race.result_log_url }}">{{ race.result_log_url }}</a>
+                  <a href="{{ race.race_file_url }}">{{ race.race_file_url }}</a>
                 </p>
                 <p>
                   The URL of the results file, that is, <em>the JSON file you are uploading</em>
-                  <br>
-                  <em>This URL is necessary for replaying the race.</em>
-                </p>
-              </td>
-            </tr>
-          {% endif %}
-          {% if race.race_log_url %}
-            <tr>
-              <td><code>race_log_url</code></td>
-              <td>
-                <p>
-                  <a href="{{ race.race_log_url }}">{{ race.race_log_url }}</a>
-                </p>
-                <p>
-                  The URL of the <strong>event log</strong> (step-by-step description
-                  of what happened, in JSON format).
                   <br>
                   <em>This URL is necessary for replaying the race.</em>
                 </p>
@@ -137,17 +122,12 @@
               <td><code>track_image_url</code></td>
               <td>
                 <p>
-                  <a href="{{ race.race_log_url }}">{{ race.race_log_url }}</a>
+                  <a href="{{ race.track_image_url }}">{{ race.track_image_url }}</a>
                 </p>
                 <p>
                   URL for the racetrack image (2:1 aspect ratio background image, typically JPEG or PNG).
                   <br>
                   <em>This URL is necessary for replaying the race.</em>
-                  <br>
-                  {% if default_racetrack_image %}
-                    There is a default value for this:
-                    <code><a href="{{ default_racetrack_image }}">{{ default_racetrack_image }}</a></code>
-                  {% endif %}
                 </p>
               </td>
             </tr>
@@ -164,11 +144,6 @@
                   <code>&lt;path&gt;</code> element within it.
                   <br>
                   <em>This URL is necessary for replaying the race.</em>
-                  <br>
-                  {% if default_racetrack_path_svg %}
-                    There is a default value for this:
-                    <code><a href="{{ default_racetrack_path_svg }}">{{ default_racetrack_path_svg }}</a></code>
-                  {% endif %}
                 </p>
               </td>
             </tr>

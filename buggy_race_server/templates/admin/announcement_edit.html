@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
+{% block page_title %}
+  Admin:
+  {% if announcement %} edit {% else %} new {% endif %}
+  announcement
+{% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
@@ -92,6 +97,13 @@
         <tr>
           <th>Announcement</th>
           <th>Where does it appear?</th>
+        </tr>
+        <tr>
+          <td><code>about</code></td>
+          <td>
+            <a href="{{ url_for('public.about') }}">About</a> page,
+            below the title and subtitle.
+          </td>
         </tr>
         <tr>
           <td><code>get-editor</code></td>

@@ -3,6 +3,7 @@
 import logging
 import sys
 from datetime import datetime, timezone
+from os import path
 
 #import traceback # for debug/dev work
 
@@ -18,6 +19,7 @@ from buggy_race_server.utils import (
     save_config_env_overrides_to_db,
     load_settings_from_db,
     servertime_str,
+    join_to_project_root,
 )
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -85,15 +87,36 @@ def create_app():
         server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
 
         with app.test_request_context(server_url):
-            print(f"* publishing task list (for {server_url})", flush=True)
-            publish_task_list(app)
-            print(f"* published task list", flush=True)
-            publish_tasks_as_issues_csv(app)
-            print(f"* published task issues CSV", flush=True)
 
-            print(f"* publishing tech notes (for {server_url})", flush=True)
-            publish_tech_notes(app)
-            print(f"* published tech notes", flush=True)
+            if  app.config.get(ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name):
+                generated_task_file = join_to_project_root(
+                    app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                    app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+                )
+                if not path.exists(generated_task_file):
+                    print(f"* publishing task list (for {server_url})", flush=True)
+                    publish_task_list(app)
+                    print(f"* published task list", flush=True)
+
+                generated_issue_file = join_to_project_root(
+                    app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                    app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+                )
+                if not path.exists(generated_issue_file):
+                    publish_tasks_as_issues_csv(app)
+                    print(f"* published task issues CSV", flush=True)
+
+            if  app.config.get(ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name):
+                tech_notes_sample_file = join_to_project_root(
+                    app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                    app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
+                    app.config[ConfigSettingNames._TECH_NOTES_PAGES_DIR.name],
+                    "index.html"
+                )
+                if not path.exists(tech_notes_sample_file):
+                    print(f"* publishing tech notes (for {server_url})", flush=True)
+                    publish_tech_notes(app)
+                    print(f"* published tech notes", flush=True)
 
     @app.before_request
     def force_setup_on_new_installs():

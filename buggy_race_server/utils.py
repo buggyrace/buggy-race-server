@@ -540,10 +540,9 @@ def publish_task_list(app=current_app):
         created_at=datetime.now(app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]),
         is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
     )
-    task_list_filename = app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
     generated_task_file = join_to_project_root(
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-        task_list_filename
+        app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
     )
     task_list_html_file = open(generated_task_file, "w")
     task_list_html_file.write(html)

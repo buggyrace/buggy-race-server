@@ -10,6 +10,25 @@ import markdown
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
 
+class DbFile(SurrogatePK, Model):
+
+    RACE_FILE_TYPE = "racefile"
+    README_TYPE = "readme"
+
+    """Using database to store text files (write once, read many)
+    to overcome some limitations of ephemeral file systems (like Heroku).
+    Originally was just race files, but turned out to be useful for
+    remembering the editor zipfile's README when regenerating content
+    on restart.
+    """
+    __tablename__ = "db_files"
+    id = db.Column(db.Integer, primary_key=True) # not used in practice?
+    type = db.Column(db.String(8), unique=False, nullable=False)
+    name = db.Column(db.String(64), unique=False, nullable=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('races.id'), nullable=True)
+    contents = db.Column(db.Text(), unique=False, nullable=False, default="")
+
+
 class SocialSetting():
   """A Social media link: note this is not a Flask/ORM model
      SOCIAL_n_NAME, SOCIAL_n_URL, SOCIAL_n_TEXT

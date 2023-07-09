@@ -20,9 +20,10 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from buggy_race_server.admin.forms import GeneralSubmitForm, SubmitWithConfirmForm
+from buggy_race_server.admin.models import DbFile
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm, RacetrackForm
-from buggy_race_server.race.models import Race, RaceResult, Racetrack, RaceFile
+from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
@@ -155,7 +156,7 @@ def serve_race_file(race_id):
         if current_user.is_anonymous or not current_user.is_staff:
             flash("Race file not available yet", "danger")
             abort(403)
-    racefile = RaceFile.query.filter_by(race_id=race_id).first_or_404()
+    racefile = DbFile.query.filter_by(item_id=race_id).first_or_404()
     json_response = make_response(racefile.contents)
     json_response.headers["Content-type"] = "application/json"
     return json_response

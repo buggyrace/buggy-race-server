@@ -1,8 +1,8 @@
-"""v2.0.0 database
+"""v2.0.0 with db_files
 
-Revision ID: 34e97cafd34d
+Revision ID: cb8d854af019
 Revises: 
-Create Date: 2023-07-08 18:56:14.571315
+Create Date: 2023-07-09 13:21:29.571453
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '34e97cafd34d'
+revision = 'cb8d854af019'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -141,11 +141,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('racefiles',
+    op.create_table('db_files',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('race_id', sa.Integer(), nullable=False),
+    sa.Column('type', sa.String(length=8), nullable=False),
+    sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('item_id', sa.Integer(), nullable=True),
     sa.Column('contents', sa.Text(), nullable=False),
-    sa.ForeignKeyConstraint(['race_id'], ['races.id'], ),
+    sa.ForeignKeyConstraint(['item_id'], ['races.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('results',
@@ -189,7 +191,7 @@ def downgrade():
     op.drop_table('tasktexts')
     op.drop_table('roles')
     op.drop_table('results')
-    op.drop_table('racefiles')
+    op.drop_table('db_files')
     op.drop_table('buggies')
     op.drop_table('users')
     op.drop_table('tasks')

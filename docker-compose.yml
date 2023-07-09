@@ -11,16 +11,11 @@ x-default-volumes: &default_volumes
     - node-modules:/app/node_modules
 
 services:
-  db:
+  buggy-race-db:
     image: postgres:latest
     restart: always
     env_file:
       - .env
-    environment:
-      - POSTGRES_USER=superuser
-      # TODO: Auto-generate this
-      - POSTGRES_PASSWORD=changeme
-      - POSTGRES_DB=buggy_race
     ports:
       - '5432:5432'
     volumes:
@@ -28,7 +23,7 @@ services:
       - ./db:/docker-entrypoint-initdb.d/
 
 
-  buggy-server:
+  buggy-race-server:
     build:
       context: .
       target: production
@@ -39,15 +34,11 @@ services:
       - '443:5000'
     env_file:
       - .env
-    environment:
-      FLASK_ENV: production
-      LOG_LEVEL: info
-      GUNICORN_WORKERS: 1
     <<: *default_volumes
     depends_on:
-      - db
+      - buggy-race-db
     links:
-      - db
+      - buggy-race-db
 
 volumes:
   app_data:

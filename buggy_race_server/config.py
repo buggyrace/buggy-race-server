@@ -476,7 +476,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name: 1,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: 1,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 1,
+        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,

@@ -275,7 +275,6 @@ def upload_race_file(race_id):
                                 race.results_uploaded_at = datetime.now(timezone.utc) 
                                 race.save()
                                 flash("OK, updated race results", "success")
-                                flash(f"FIXME race.results_uploaded_at={race.results_uploaded_at}", "info")
                                 if not (race.is_visible and race.is_result_visible):
                                     flash(
                                         "Note: this file isn't visible to students yet: "

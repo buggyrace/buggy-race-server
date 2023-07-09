@@ -687,6 +687,7 @@ def main():
         race_data = load_race_file()
     except FileNotFoundError as e:
         print(f"\n[!] File not found: {e}")
+        exit()
     if not race_data.get("buggies"):
         print("[ ] Race file does not contain buggies: will try to read them from a CSV instead")
         try:

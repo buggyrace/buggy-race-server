@@ -7,8 +7,10 @@ from flask import abort, flash, request, redirect, Markup, url_for, current_app,
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings
-from buggy_race_server.admin.models import Announcement, DistribMethods, Setting, Task
+import shutil # for publishing the editor
+
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
+from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
@@ -145,6 +147,9 @@ def set_and_save_config_setting(app, name, value):
 
     ConfigSettings.set_config_value(app, name, value)
 
+    if app.config.get(name) is not None:
+        if ConfigSettings.DEFAULTS[name] == ConfigTypes.BOOLEAN:
+            value = 1 if value else 0
     setting = db.session.query(Setting).filter_by(id=name).first()
     settings_table = Setting.__table__
     if setting is None: # not already in db? then make it
@@ -653,3 +658,98 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
   if want_datetime:
       return utc_datetime
   return utc_datetime.strftime("%Y-%m-%d %H:%M")
+
+def _get_buggy_editor_kwargs(app):
+    project_code=app.config[ConfigSettingNames.PROJECT_CODE.name]
+    buggy_editor_repo_owner=app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    return {
+      "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
+      "buggy_editor_repo_owner": app,
+      "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+      "editor_title": f"{project_code} Racing Buggy editor".strip(),
+      "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "institution_name": app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
+      "institution_short_name": app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
+      "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
+      "is_using_github": app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      "is_using_github_api_to_fork": app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
+      "project_code": project_code,
+      "task_0_get_name": app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
+      "task_3_env_name": app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
+    }
+
+def create_editor_zipfile(readme_contents, app=current_app):
+    """ creates a zip from from the buggy editor source code that is hardcopied
+    into this server repo — will use the readme_contents passed in, but if there
+    are none, will try to use the README contents stored in DbFiles, and if that
+    comes up blank, then read it from the disk.
+    """
+    readme_filename = app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
+    editor_python_filename=app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
+    is_writing_server_url_in_editor = app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
+
+    if readme_contents is None: 
+        # try to load readme_contents from database
+        readme_db_file = DbFile.query.filter_by(
+            type=DbFile.README_TYPE
+        ).first() # don't care about item_id: there is only ever one
+        if readme_db_file:
+            readme_contents = readme_db_file.contents
+        if not readme_contents: # fall back to the zip file
+            readme_contents = render_template(
+                "admin/_buggy_editor_readme.txt",
+                **_get_buggy_editor_kwargs(app),
+            )
+
+    # copy the editor in pubished/editor
+    # replace contents of README.md with readme_contents
+    # zip it up
+
+    editor_src_dir = join_to_project_root(
+        current_app.config[ConfigSettingNames._EDITOR_INPUT_DIR.name],
+        current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name],
+    )
+    editor_target_dir = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name]
+    )
+    target_zipfile = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    if target_zipfile.endswith(".zip"):
+        target_zipfile = target_zipfile[0:-len(".zip")]
+    target_zipfile = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+        target_zipfile
+    )
+    try:
+        shutil.copytree(editor_src_dir, editor_target_dir, dirs_exist_ok=True)
+    except IOError as e:
+        raise IOError("Error copying editor files: {e}")        
+    readme_file = join_to_project_root(editor_target_dir, readme_filename)
+    if not os.path.exists(readme_file):
+        raise FileNotFoundError(f"Failed to locate {readme_filename}")
+    try:
+        with open(readme_file, "w") as new_readme:
+            new_readme.write(readme_contents)
+    except IOError as e:
+        raise IOError(f"Failed to write {readme_filename}: {e}")
+    py_file = join_to_project_root(
+        editor_target_dir,
+        editor_python_filename
+    )
+    server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    try:
+        with open(py_file, "r") as old_py:
+            py_body = old_py.read()
+        if is_writing_server_url_in_editor:
+            py_body=py_body.replace("https://RACE-SERVER-URL", server_url)
+        with open(py_file, "w") as new_py:
+            new_py.write(py_body)
+    except IOError as e:
+        raise IOError(f"Failed to update {editor_python_filename}: {e}")
+    try:
+        shutil.make_archive(target_zipfile, 'zip', editor_target_dir)
+    except Exception as e:
+        raise IOError("Failed to zip: {e}")

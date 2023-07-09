@@ -185,6 +185,7 @@ class ConfigSettingNames(Enum):
     IS_API_SECRET_ONE_TIME_PW = auto()
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
+    IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
@@ -301,6 +302,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
@@ -484,6 +486,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
@@ -610,6 +613,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
@@ -1026,6 +1030,14 @@ class ConfigSettings:
           facilitate cloning the repo onto that server and subsequently access
           it through VS Code. This is quite a specific setup: if you're not
           sure, you almost certainly do not want this. """,
+
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name:
+          """If you publish the buggy editor app on this server, should the
+          `BUGGY_RACE_SERVER_URL` be written into `app.py`? This setting
+          won't be used if you don't generate the zipfile on this server
+          (for example, if `IS_USING_GITHUB` is `Yes`) but remember you or
+          your students do need to change it inside the buggy editor source
+          code eventually.""",
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it (for

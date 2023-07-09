@@ -156,7 +156,10 @@ def serve_race_file(race_id):
         if current_user.is_anonymous or not current_user.is_staff:
             flash("Race file not available yet", "danger")
             abort(403)
-    racefile = DbFile.query.filter_by(item_id=race_id).first_or_404()
+    racefile = DbFile.query.filter_by(
+        type=DbFile.RACE_FILE_TYPE,
+        item_id=race_id
+    ).first_or_404()
     json_response = make_response(racefile.contents)
     json_response.headers["Content-type"] = "application/json"
     return json_response

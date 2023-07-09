@@ -5,7 +5,6 @@
 import csv
 import io  # for CSV dump
 import random  # for API tests
-import shutil # for publishing the editor
 from datetime import datetime, timedelta, timezone
 import os
 from collections import defaultdict
@@ -51,6 +50,7 @@ from buggy_race_server.admin.forms import (
 )
 from buggy_race_server.admin.models import (
     Announcement,
+    DbFile,
     DistribMethods,
     TaskText,
     Setting,
@@ -71,8 +71,10 @@ from buggy_race_server.extensions import csrf, bcrypt
 from buggy_race_server.user.forms import UserForm, RegisterForm, UserCommentForm
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
+    _get_buggy_editor_kwargs,
     admin_only,
     create_default_task_markdown_file,
+    create_editor_zipfile,
     flash_errors,
     get_day_of_week,
     get_download_filename,
@@ -1753,25 +1755,6 @@ def show_system_info():
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
     )
 
-def _get_buggy_editor_kwargs():
-    project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name]
-    buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
-    return {
-      "buggy_editor_github_url": current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
-      "buggy_editor_repo_name": current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-      "buggy_editor_repo_owner": buggy_editor_repo_owner,
-      "buggy_race_server_url": current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-      "editor_title": f"{project_code} Racing Buggy editor".strip(),
-      "buggy_editor_zipfile_url": current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
-      "institution_name": current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
-      "institution_short_name": current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
-      "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
-      "is_using_github": current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
-      "is_using_github_api_to_fork": current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-      "project_code": project_code,
-      "task_0_get_name": current_app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
-      "task_3_env_name": current_app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
-    }
 
 @blueprint.route("/buggy-editor", strict_slashes=False, methods=["GET"])
 @login_required
@@ -1779,7 +1762,7 @@ def _get_buggy_editor_kwargs():
 def show_buggy_editor_info():
     return render_template(
       "admin/buggy_editor.html",
-      **_get_buggy_editor_kwargs(),
+      **_get_buggy_editor_kwargs(current_app),
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
@@ -1816,100 +1799,64 @@ def delete_buggy_editor_zip():
 @admin_only
 def publish_editor_zip():
     readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
-    editor_python_filename=current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
+    editor_python_filename = current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
+    is_writing_server_url_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
     form = PublishEditorSourceForm(request.form)
     if request.method == "POST":
         readme_contents = form.readme_contents.data
-        qty_lines_in_readme=readme_contents.count("\n")
-        # copy the editor in pubished/editor
-        # replace contents of README.md with form.readme_contents.data
-        # zip it up
-        is_ok = True
-        is_updating_app_py = form.is_updating_app_py.data
-        editor_src_dir = join_to_project_root(
-            current_app.config[ConfigSettingNames._EDITOR_INPUT_DIR.name],
-            current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name],
+        is_writing_server_url_in_editor = form.is_writing_server_url_in_editor.data
+        # save setting as config (so autogeneration can reproduce it)
+        # this is also about to be used by the create_editor_zipfile()
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
+            value=1 if is_writing_server_url_in_editor else 0
         )
-        editor_target_dir = join_to_project_root(
-            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-            current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name]
-        )
-        target_zipfile = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
-        if target_zipfile.endswith(".zip"):
-            target_zipfile = target_zipfile[0:-len(".zip")]
-        target_zipfile = join_to_project_root(
-            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-            current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-            target_zipfile
-        )
+        current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name] = is_writing_server_url_in_editor
         try:
-            shutil.copytree(editor_src_dir, editor_target_dir, dirs_exist_ok=True)
-        except IOError as e:
-            flash(f"Error copying editor files: {e}", "danger")
-            is_ok = False
-        if is_ok:
-            readme_file = join_to_project_root(
-                editor_target_dir,
-                readme_filename
-            )
-            if not os.path.exists(readme_file):
-                flash(f"Failed to locate {readme_filename} ", "danger")
-                is_ok = False
-        if is_ok:
-            try:
-                with open(readme_file, "w") as new_readme:
-                    new_readme.write(readme_contents)
-            except IOError as e:
-                flash(f"Failed to write {readme_filename}: {e}", "danger")
-                is_ok = False
-            else:
-                flash(f"Wrote {qty_lines_in_readme} lines into {readme_filename}", "info")
-        if is_ok:
-            py_file = join_to_project_root(
-                editor_target_dir,
-                editor_python_filename
-            )
-            server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
-            try:
-                with open(py_file, "r") as old_py:
-                    py_body = old_py.read()
-                py_body=py_body.replace(
-                    "https://RACE-SERVER-URL",
-                    server_url
-                )
-                with open(py_file, "w") as new_py:
-                    new_py.write(py_body)
-            except IOError as e:
-                flash(f"Failed to open {editor_python_filename}: {e}", "danger")
-                is_ok = False
-            else:
-                flash(f"Set BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}", "info")
-        if is_ok:
-            try:
-                shutil.make_archive(target_zipfile, 'zip', editor_target_dir)
-            except Exception as e:
-                flash("Failed to zip: {e}", "danger")
-                is_ok = False
-            else:
-                set_and_save_config_setting(
-                    current_app,
-                    name=ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
-                    value=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-                )
-        if is_ok:
-            flash("OK, editor files now zipped up and published", "success")
+            create_editor_zipfile(readme_contents, app=current_app)
+        except (FileNotFoundError, IOError) as e:
+            flash("Failed to save zip file: {e}", "danger")
             return redirect(url_for("admin.show_buggy_editor_info"))
+
+        # save this README in database so auto-generation can reproduce it
+        readme_db_file = DbFile.query.filter_by(
+            type=DbFile.README_TYPE
+        ).first() # don't care about item_id: there is only ever one
+        if readme_db_file is None:
+            readme_db_file = DbFile.create(type=DbFile.README_TYPE)
+        readme_db_file.contents = readme_contents
+        readme_db_file.save()
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
+            value=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        )
+
+        if is_writing_server_url_in_editor:
+            server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+            flash(
+                f"Set BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
+                "info"
+            )
+        qty_lines_in_readme = readme_contents.count("\n")
+        flash(
+            f"Wrote {qty_lines_in_readme} lines into {readme_filename}",
+            "info"
+        )
+        flash("OK, editor files now zipped up and published", "success")
+        return redirect(url_for("admin.show_buggy_editor_info"))
     else:
         readme_contents = render_template(
             "admin/_buggy_editor_readme.txt",
-            **_get_buggy_editor_kwargs(),
+            **_get_buggy_editor_kwargs(current_app),
         )
         form.readme_contents.data = readme_contents
         qty_lines_in_readme=readme_contents.count("\n") + 1
     return render_template(
         "admin/buggy_editor_publish.html",
         form=form,
+        is_writing_server_url_in_editor=is_writing_server_url_in_editor,
         qty_lines_in_readme=qty_lines_in_readme,
         readme_filename=readme_filename,
         editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],

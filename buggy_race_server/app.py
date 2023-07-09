@@ -12,6 +12,7 @@ from flask_login import current_user
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
 from buggy_race_server.utils import (
+    create_editor_zipfile,
     refresh_global_announcements,
     publish_tasks_as_issues_csv,
     publish_task_list,
@@ -88,7 +89,7 @@ def create_app():
 
         with app.test_request_context(server_url):
 
-            if  app.config.get(ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name):
+            if app.config.get(ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name):
                 generated_task_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
@@ -106,7 +107,7 @@ def create_app():
                     publish_tasks_as_issues_csv(app)
                     print(f"* published task issues CSV", flush=True)
 
-            if  app.config.get(ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name):
+            if app.config.get(ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name):
                 tech_notes_sample_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name],
@@ -117,6 +118,20 @@ def create_app():
                     print(f"* publishing tech notes (for {server_url})", flush=True)
                     publish_tech_notes(app)
                     print(f"* published tech notes", flush=True)
+
+            if (
+                app.config.get(ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name)
+                and not app.config.get(ConfigSettingNames.IS_USING_GITHUB.name)
+            ):
+                target_zipfile = join_to_project_root(
+                    app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                    app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
+                    app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+                )
+                if not path.exists(target_zipfile):
+                    print(f"* publishing buggy editor zipfile", flush=True)
+                    create_editor_zipfile(None, app=app)
+                    print(f"* published buggy editor zipfile", flush=True)
 
     @app.before_request
     def force_setup_on_new_installs():

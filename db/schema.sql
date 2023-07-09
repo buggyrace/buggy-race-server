@@ -1,25 +1,25 @@
----- ===========================================================================
----- This file is a manual PostgreSQL database schema dump
-----
----- ...so you if you can't run the Flask/alembic migrations you can still
----- manually create the database. (You may have problems later on — if there
----- are new migrations released after you've installed — if you do this!)
-----
----- Snapshot of migrations directory when this was schema.sql was created:
-----      34e97cafd34d_v2_0_0_database.py
-----
----- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
-----
-----      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
-----
----- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
-----
-----  * DATABASE_URL may be like postgres://username:pw@host:port/name
-----  * --schema-only for stucture not data
-----  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
-----
----- ...then add a helpful comment like this and drop it in as schema.sql :-)
----- ===========================================================================
+----- ===========================================================================
+----- This file is a manual PostgreSQL database schema dump
+-----
+----- ...so you if you can't run the Flask/alembic migrations you can still
+----- manually create the database. (You may have problems later on — if there
+----- are new migrations released after you've installed — if you do this!)
+-----
+----- Snapshot of migrations directory when this was schema.sql was created:
+-----      cb8d854af019_v2_0_1_with_db_files.py
+-----
+----- Devs! Please keep this up-to-date after migrations (e.g., from heroku):
+-----
+-----      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
+-----
+----- (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
+-----
+-----  * DATABASE_URL may be like postgres://username:pw@host:port/name
+-----  * --schema-only for stucture not data
+-----  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
+-----
+----- ...then add a helpful comment like this and drop it in as schema.sql :-)
+----- ===========================================================================
 
 --
 -- PostgreSQL database dump
@@ -140,21 +140,23 @@ ALTER SEQUENCE public.buggies_id_seq OWNED BY public.buggies.id;
 
 
 --
--- Name: racefiles; Type: TABLE; Schema: public; Owner: -
+-- Name: db_files; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.racefiles (
+CREATE TABLE public.db_files (
     id integer NOT NULL,
-    race_id integer NOT NULL,
+    type character varying(8) NOT NULL,
+    name character varying(64),
+    item_id integer,
     contents text NOT NULL
 );
 
 
 --
--- Name: racefiles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: db_files_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.racefiles_id_seq
+CREATE SEQUENCE public.db_files_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -164,10 +166,10 @@ CREATE SEQUENCE public.racefiles_id_seq
 
 
 --
--- Name: racefiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: db_files_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.racefiles_id_seq OWNED BY public.racefiles.id;
+ALTER SEQUENCE public.db_files_id_seq OWNED BY public.db_files.id;
 
 
 --
@@ -471,10 +473,10 @@ ALTER TABLE ONLY public.buggies ALTER COLUMN id SET DEFAULT nextval('public.bugg
 
 
 --
--- Name: racefiles id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: db_files id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.racefiles ALTER COLUMN id SET DEFAULT nextval('public.racefiles_id_seq'::regclass);
+ALTER TABLE ONLY public.db_files ALTER COLUMN id SET DEFAULT nextval('public.db_files_id_seq'::regclass);
 
 
 --
@@ -551,11 +553,11 @@ ALTER TABLE ONLY public.buggies
 
 
 --
--- Name: racefiles racefiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: db_files db_files_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.racefiles
-    ADD CONSTRAINT racefiles_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.db_files
+    ADD CONSTRAINT db_files_pkey PRIMARY KEY (id);
 
 
 --
@@ -679,11 +681,11 @@ ALTER TABLE ONLY public.buggies
 
 
 --
--- Name: racefiles racefiles_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: db_files db_files_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.racefiles
-    ADD CONSTRAINT racefiles_race_id_fkey FOREIGN KEY (race_id) REFERENCES public.races(id);
+ALTER TABLE ONLY public.db_files
+    ADD CONSTRAINT db_files_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.races(id);
 
 
 --

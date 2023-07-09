@@ -36,10 +36,10 @@
           </div>
           <div class="row">
             <div class="col p-3">
-              {{ form.is_updating_app_py.label() }}
-              <select name="is_updating_app_py" class="form-control">
-                <option value="">No</option>
-                <option value="1" selected>Yes</option>
+              {{ form.is_writing_server_url_in_editor.label() }}
+              <select name="is_writing_server_url_in_editor" class="form-control">
+                <option value="" {% if not is_writing_server_url_in_editor %}selected{% endif %}>No</option>
+                <option value="1" {% if is_writing_server_url_in_editor %}selected{% endif %}>Yes</option>
               </select>
             </div>
           </div>

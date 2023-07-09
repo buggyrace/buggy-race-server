@@ -125,17 +125,32 @@ We had different ways of doing this, but you could try:
 
     npm start
 
-will try to run both webpack and the flask app.
+will try to run both webpack and the flask app: however note that this will
+run webpack (once) and launch the webserver on a secure connection — if you're
+running on localhost check you're hitting **secure `localhost`**
+([https://localhost:5000](https://localhost:5000)) because `http` and
+`0.0.0.0` won't work.
 
-> _D:_ I run things differently: I have webpack running separately on a watch
-> in another terminal with:
->
->     npm run webpack-watch
->
-> And then I launch the app itself explicitly with:
->
->    gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1 --timeout 60
->
+> Note there is a 15 second delay before the web server kicks in: this is to
+> allow the database migrations to run before the app runs when starting up
+> in steups like Heroku and Docker (this matters because the app looks in the
+> database for config when it launches).
+
+But as you're trying to run the app as a developer, you might want to run
+things separately:
+
+* `npm run webpack-watch`  
+  run webpack and have it listen for changes.
+
+* `npm run flask-server-dev`
+  to run flask webserver without the  15 second delay and without SSL
+  — then you can hit [http://localhost:5000](http://localhost:5000)
+
+
+If you want to run the webserver directly, the command that npm is
+launching (you can see this in `package.json`) is:
+
+    gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1
 
 
 ### Common new install error: static files give 403

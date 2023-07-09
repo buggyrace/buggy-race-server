@@ -33,7 +33,6 @@ from buggy_race_server.utils import (
     active_user_required,
     join_to_project_root,
     flash_errors,
-    flash_suggest_if_not_yet_githubbed,
     get_download_filename,
     get_pretty_approx_duration,
     is_authorised,
@@ -69,10 +68,26 @@ def register_new_user():
 @flash_explanation_if_unauth("You must log in before you can upload data for your buggy ")
 @login_required
 @active_user_required
-@flash_suggest_if_not_yet_githubbed
 def submit_buggy_data():
-  """Submit the JSON for the buggy."""
-  return render_template("user/submit_buggy_data.html", form = BuggyJsonForm(request.form))
+    """Submit the JSON for the buggy."""
+    if (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        and
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK]
+        and
+        not current_user.is_github_connected()
+    ):
+        flash(
+            Markup(
+                "You haven't connected to GitHub yet. "
+                f"<a href='{url_for('user.settings')}'>Do it now!</a>"
+            ),
+            "danger"
+        )
+    return render_template(
+        "user/submit_buggy_data.html",
+        form=BuggyJsonForm(request.form)
+    )
 
 @blueprint.route("/settings", strict_slashes=False)
 @flash_explanation_if_unauth("You must log in before you can access your settings")

@@ -31,14 +31,6 @@ def join_to_project_root(*args, app=current_app):
        with optional path too. App available in case this is ever
        needed from (e.g.) utils running outwith a web request."""
     return os.path.join(*[os.path.dirname(current_app.root_path), *args])
-  
-def flash_suggest_if_not_yet_githubbed(function):
-  @wraps(function)
-  def wrapper():
-    if current_user and not current_user.is_github_connected():
-      flash(Markup(f"You haven't connected to GitHub yet. <a href='{url_for('user.settings')}'>Do it now!</a>"), "danger")
-    return function()
-  return wrapper
 
 def is_authorised(form, field):
   """ check the auth code — required for some admin activities (mainly user registration)"""

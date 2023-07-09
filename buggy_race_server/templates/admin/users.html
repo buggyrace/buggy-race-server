@@ -118,7 +118,9 @@
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
             {% endif %}
             <td class="u-login-at">{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
-            <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
+            {% if is_showing_github_column %}
+              <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
+            {% endif %}
             <td colspan="2" class="u-uploaded">{{ qty_students_uploaded_json }} ({{ "%d" | format(100 * qty_students_uploaded_json/qty_students) }}%)</td>
           {% else %}
             <td colspan="9">No users enrolled as students</td>

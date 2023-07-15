@@ -460,17 +460,12 @@ $(function() {
     if (authcode_box){
       const current_username = authcode_box.dataset.username;
       const admin_usernames_str = authcode_box.dataset.admins;
-      const is_auth_needed_for_all = !! authcode_box.dataset.is_auth_needed_for_all;
       const admins = admin_usernames_str? admin_usernames_str.split(",") : [];
       const username_input = document.getElementById('username');
       function is_auth_needed(){
         return (
           (username_input.value != current_username)
-          && (
-            is_auth_needed_for_all
-            ||
-            admins.includes(username_input.value)
-          )
+          && admins.includes(username_input.value)
         )
       }
 

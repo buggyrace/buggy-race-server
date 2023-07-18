@@ -167,7 +167,6 @@ class BuggySpecs:
                 if self.banging:
                     cost += BuggySpecs.SPECIAL_ITEMS['banging'][C]
             except (TypeError, KeyError) as e:
-                raise e
                 cost = None
             self.total_cost = cost
 

@@ -108,34 +108,45 @@ def handle_uploaded_json(form, user, is_api=False):
     if is_multi_buggy_suspected:
         flash("Maybe you tried to upload more than one buggy? You can only upload a single JSON object here!", "danger")
     qty_defaults = 0
+    qty_explicits = 0
     for field_name in Buggy.DEFAULTS:
-      if field_name not in clean_buggy_data:
-        clean_buggy_data[field_name] = Buggy.DEFAULTS[field_name]
-        qty_defaults+=1
-    if qty_defaults > 0:
-      if not is_api:
-        (s, was) = ("s", "were") if qty_defaults > 1 else ("", "was")
-        flash("{} setting{} {} not specified and got default value{} instead".format(qty_defaults, s, was, s), "info")
-    if 'buggy_id' not in clean_buggy_data:
-      clean_buggy_data['buggy_id'] = 1 # TODO not sure
-    users_buggy = Buggy.query.filter_by(user_id=user.id).first()
-    if users_buggy is None:
-      Buggy.create(user_id = user.id, **clean_buggy_data)
-      if not is_api:
-        flash("JSON data for your racing buggy saved OK", "success")
-    else:
-      for field_name in clean_buggy_data:
-        setattr(users_buggy, field_name, clean_buggy_data[field_name])
-      users_buggy.save()
-      if not is_api:
-        flash("JSON data for your racing buggy updated OK", "success")
-    if is_api:
-      return {"ok": "buggy updated OK"}
-    else:
-      if user == current_user:
-        return redirect(url_for("buggy.show_own_buggy"))
+      if field_name in clean_buggy_data:
+        qty_explicits += 1
       else:
-        return redirect(url_for("admin.show_buggy", user_id=user.username))
+        clean_buggy_data[field_name] = Buggy.DEFAULTS[field_name]
+        qty_defaults += 1
+    if qty_explicits == 0:
+        msg = "Nothing to change: no buggy settings were found in the uploaded data"
+        if is_api:
+            return {"error": msg}
+        flash(msg, "danger")
+    else:
+        (s, was) = ("s", "were") if qty_explicits > 1 else ("", "was")
+        flash(f"{qty_explicits} setting{s} {was} specified", "info")
+        if qty_defaults > 0:
+          if not is_api:
+            (s, was) = ("s", "were") if qty_defaults > 1 else ("", "was")
+            flash(f"{qty_defaults} setting{s} {was} not specified and got default value{s} instead", "info")
+        if 'buggy_id' not in clean_buggy_data:
+          clean_buggy_data['buggy_id'] = 1 # TODO not sure
+        users_buggy = Buggy.query.filter_by(user_id=user.id).first()
+        if users_buggy is None:
+          Buggy.create(user_id = user.id, **clean_buggy_data)
+          if not is_api:
+            flash("JSON data for your racing buggy saved OK", "success")
+        else:
+          for field_name in clean_buggy_data:
+            setattr(users_buggy, field_name, clean_buggy_data[field_name])
+          users_buggy.save()
+          if not is_api:
+            flash("JSON data for your racing buggy updated OK", "success")
+        if is_api:
+          return {"ok": "buggy updated OK"}
+        else:
+          if user == current_user:
+            return redirect(url_for("buggy.show_own_buggy"))
+          else:
+            return redirect(url_for("admin.show_buggy", user_id=user.username))
   else:
       flash_errors(form)
   if is_api:

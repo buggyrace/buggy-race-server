@@ -2,14 +2,14 @@
 {% block page_title %} Admin: announcements {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       Announcements
     </h1>
   </div>
   <div class="row">
-    <div class="col pb-2 text-right">
+    <div class="col pb-2">
       {% if is_html_enabled %}
         <a href="{{ url_for('admin.list_announcements_without_html') }}" class="btn btn-sm btn-outline-primary">Suppress HTML in list</a>
       {% else %}
@@ -91,6 +91,11 @@
           </p>
         </form>
       {% endif %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Announcements", "/running/announcements") }}
     </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
 {% block page_title %} Admin: user {{ user.pretty_username }} {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       User {{ user.pretty_username }}
@@ -252,6 +252,11 @@
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
       {% endif %}
       <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("User management", "/running/user-management") }}
     </div>
   </div>
 </div>

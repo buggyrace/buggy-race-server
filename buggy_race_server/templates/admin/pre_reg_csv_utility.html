@@ -2,7 +2,7 @@
 {% block page_title %} Admin: pre-reg CSV utility {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       Pre-registration CSV utility
@@ -123,6 +123,11 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("CSV utility", "/registering-users/spreadsheet#helpful-utility-for-creating-the-csv-file") }}
     </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
 {% block page_title %} Admin: publish buggy editor {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       Publish the Buggy Editor
@@ -78,6 +78,12 @@
         </script>
       {% endif %}
     </div>  
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right btn-collection">
+      {{ macros.docs_btn("Buggy editor", "/buggy-editor") }}
+      {{ macros.docs_btn("Customising the editor", "/buggy-editor/customising") }}
+    </div>
   </div>
 </div>
 {% endblock %}

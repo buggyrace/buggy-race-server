@@ -2,7 +2,7 @@
 {% block page_title %} Admin: API test {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       API test
@@ -120,6 +120,11 @@
       <p class="mt-4">
         Note: you can only set your <em>own</em> API secret.
       </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("API", "/running/api") }}
     </div>
   </div>
 </div>

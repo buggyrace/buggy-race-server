@@ -3,10 +3,12 @@
 {% block content %}
 {%include "admin/_nav.html" %}
 <div class="container pb-5">
-  <div class="row">
-    <h1 class="col my-3">
-      Students' task texts
-    </h1>
+  <div class="row my-3">
+    <div class="col-sm-9">
+      <h1>
+        Students' task texts
+      </h1>
+    </div>
   </div>
   <div class="row">
     <div class="col">
@@ -72,6 +74,11 @@
         {% endfor %}  
       </tbody>
     </table>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Task texts", "/teaching/progress#task-texts-for-the-report") }}
+    </div>
   </div>
 </div>
 

@@ -2,16 +2,18 @@
 {% block page_title %} Admin: buggies {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
-    <h1 class="col my-3">
-      Buggies 
-      {% if want_students_only %}
-        (students only)
-      {% else %}
-        (students and staff)
-      {% endif %}
-    </h1>
+    <div class="col my-3">
+      <h1>
+        Buggies 
+        {% if want_students_only %}
+          (students only)
+        {% else %}
+          (students and staff)
+        {% endif %}
+      </h1>  
+    </div>
   </div>
   <div class="row">
     <div class="col">
@@ -104,6 +106,11 @@
       </table>
     </div>
   {% endif %}
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Viewing buggies", "/running/buggies") }}
+    </div>
+  </div>
 </div>
 {% endblock %}
 

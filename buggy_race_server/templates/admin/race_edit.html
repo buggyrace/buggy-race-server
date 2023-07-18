@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       {% if race %}
@@ -29,6 +29,7 @@
               file</strong> that is produced when you run the race using the
               (offline) run-buggy-race utliity.
             </div>
+          </div>
         </div>
       </div>
     </div>
@@ -170,8 +171,6 @@
             </p>
           </div>
         </div>
-
-
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.is_dnf_position.label }}
@@ -193,9 +192,6 @@
             </p>
           </div>
         </div>
-
-
-
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.is_visible.label }}
@@ -303,7 +299,7 @@
 
   {% if race %}
     <div class="row">
-      <div class="col my-5">
+      <div class="col-md-6 my-5">
         <p>
           You can delete this race — be careful, you can't undo this.
         </p>
@@ -329,7 +325,16 @@
       </div>
     </div>
   {% endif %}
-
+  <div class="row">
+    <div class="col my-3 text-right btn-collection">
+      {{ macros.docs_btn("Races", "/races/") }}
+      {% if race %}
+        {{ macros.docs_btn("Editing races", "/races/editing") }}
+      {% else %}
+        {{ macros.docs_btn("Creating races", "/races/creating") }}
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -380,7 +385,6 @@
     </div>
   </div>
 </div>
-
 
 {% endblock %}
 

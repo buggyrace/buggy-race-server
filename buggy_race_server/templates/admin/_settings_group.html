@@ -1,5 +1,11 @@
 <div class="row">
   <div class="col">
+    {{ macros.docs_btn(
+        pretty_group_name_dict[group],
+        "/customising/" + group | lower | replace('_', '-'),
+        "float-right"
+      ) 
+    }}
     <h3 class="p-2">{{ pretty_group_name_dict[group] }} settings</h3>
   </div>
 </div>

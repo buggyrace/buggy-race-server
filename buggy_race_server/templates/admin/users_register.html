@@ -2,11 +2,11 @@
 {% block page_title %} Admin: register students {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
-    <h1 class="col my-3">
-      Register new students
-    </h1>
+    <div class="col my-3">
+      <h1 class="">Register new students</h1>
+    </div>
   </div>
   <div class="row">
     <div class="col-md-7">
@@ -110,7 +110,7 @@
       </div>
     </form>
   </div>
-  <div class="row my-4">
+  <div class="row mt-4">
     <div class="col">
       <p>
         Alternatively you can register users individually:
@@ -118,6 +118,11 @@
       <p class="btn-collection">
         <a href="{{ url_for('admin.new_user') }}" class="btn btn-outline-secondary btn-admin btn-jump">Register user</a>
       </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Registering students", "/registering-users/spreadsheet") }}
     </div>
   </div>
 </div>

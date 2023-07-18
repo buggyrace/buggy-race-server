@@ -13,13 +13,15 @@
 {% endif %}
 <div class="container pb-5">
   <div class="row">
-    <h1 class="col my-3">
-      {% if user %}
-        Edit user {{ user.pretty_username }}
-      {% else %}
-        Register new user
-      {% endif %}
+    <div class="col">
+      <h1 class="my-3">
+        {% if user %}
+          Edit user {{ user.pretty_username }}
+        {% else %}
+          Register new user
+        {% endif %}
       </h1>
+    </div>
   </div>
 
   {% if not user and is_registration_allowed %}
@@ -362,6 +364,13 @@
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
         {% endif %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+      </div>
+    </div>
+  {% endif %}
+  {% if current_user and not current_user.is_anonymous and current_user.is_administrator %}
+    <div class="row">
+      <div class="col my-3 text-right">
+        {{ macros.docs_btn("Single user", "/registering-users/single") }}
       </div>
     </div>
   {% endif %}

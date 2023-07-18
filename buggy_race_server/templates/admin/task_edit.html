@@ -2,7 +2,7 @@
 {% block page_title %} Admin: edit task {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       Edit task {{ task.fullname }}
@@ -115,6 +115,12 @@
   <div class="row">
     <div class="col my-3">
       <a href="{{ url_for('admin.tasks_admin') }}"} class="btn btn-outline-secondary btn-admin btn-jump">Admin tasks</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right btn-collection">
+      {{ macros.docs_btn("Creating tasks", "/customising/creating-tasks") }}
+      {{ macros.docs_btn("Task list", "/static-content/task-list") }}
     </div>
   </div>
 </div>

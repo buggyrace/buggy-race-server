@@ -6,7 +6,8 @@ import re
 
 from flask import current_app
 from flask_login import UserMixin
-from sqlalchemy import orm
+from sqlalchemy import orm, sql
+
 from socket import gaierror
 
 # get the config settings (without the app context):
@@ -84,7 +85,7 @@ class User(UserMixin, SurrogatePK, Model):
     email = Column(db.String(80), unique=True, nullable=True)
     #: The hashed password
     password = Column(db.LargeBinary(128), nullable=True)
-    created_at = Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(db.DateTime(timezone=True), default=sql.func.now())
     first_name = Column(db.String(30), nullable=True)
     last_name = Column(db.String(30), nullable=True)
     is_active = Column(db.Boolean(), default=True)
@@ -95,10 +96,10 @@ class User(UserMixin, SurrogatePK, Model):
     github_username = Column(db.Text(), nullable=True)
     github_access_token = Column(db.Text(), nullable=True)
     is_student = Column(db.Boolean(), default=True)
-    logged_in_at = Column(db.DateTime, nullable=True)
-    uploaded_at = Column(db.DateTime, nullable=True)
+    logged_in_at = Column(db.DateTime(timezone=True), nullable=True)
+    uploaded_at = Column(db.DateTime(timezone=True), nullable=True)
     api_secret =  Column(db.String(30), nullable=True)
-    api_secret_at = Column(db.DateTime, nullable=True)
+    api_secret_at = Column(db.DateTime(timezone=True), nullable=True)
     api_secret_count = Column(db.Integer, nullable=False, default=0)
     is_api_secret_otp = Column(db.Boolean, nullable=False, default=False)
     api_key = Column(db.String(30), nullable=True)

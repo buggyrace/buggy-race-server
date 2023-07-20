@@ -2,7 +2,7 @@
 {% block page_title %} Admin: dashboard {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">Admin dashboard</h1>
   </div>
@@ -309,13 +309,22 @@
   {% if current_user.is_administrator %}
     <div class="row">
       <div class="col mt-5">
-          <p class="btn-collection">
-            <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System info</a>
-          </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System info</a>
+          <a href="{{ url_for('admin.setup') }}" class="btn btn-outline-secondary btn-admin btn-jump">Setup summary</a>
         </p>
       </div>
     </div>
   {% endif %}
+
+  <div class="row">
+    <div class="col my-3 text-right btn-collection">
+      {{ macros.docs_btn("Full docs", "/") }}
+      {{ macros.docs_btn("Day-to-day running", "/running") }}
+      {{ macros.docs_btn("Dashboard", "/running/dashboard") }}
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 

@@ -2,7 +2,7 @@
 """Buggy model."""
 import datetime as datetime
 
-from sqlalchemy import event
+from sqlalchemy import event, sql
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.user.models import User
@@ -30,7 +30,7 @@ class Buggy(SurrogatePK, Model, BuggySpecs):
     __tablename__ = "buggies"
     id = db.Column(db.Integer, primary_key=True)
     created_at = Column(
-        db.DateTime, nullable=False, default=datetime.datetime.utcnow
+        db.DateTime(timezone=True), nullable=False, default=sql.func.now()
     )
     buggy_id = Column(db.Integer(), default=1) # TODO risky default?
     qty_wheels = Column(

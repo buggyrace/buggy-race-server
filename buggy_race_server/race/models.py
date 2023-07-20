@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import os
 import re
 import json
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, sql
 
 # get the config settings (without the app context):
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -77,13 +77,13 @@ class Race(SurrogatePK, Model):
     id = db.Column(db.Integer, primary_key=True)
     title = Column(db.String(80), unique=False, nullable=False, default="")
     desc = Column(db.Text(), unique=False, nullable=False, default="")
-    created_at = Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
-    start_at = Column(db.DateTime, nullable=False, default=get_default_race_time())
+    created_at = Column(db.DateTime(timezone=True), nullable=False, default=sql.func.now())
+    start_at = Column(db.DateTime(timezone=True), nullable=False, default=get_default_race_time())
     cost_limit = db.Column(db.Integer(), default=ConfigSettings.DEFAULTS[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name])
     is_visible = db.Column(db.Boolean(), default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name]))
     race_file_url = Column(db.String(255), unique=True, nullable=True)
     league = Column(db.String(32), unique=False, nullable=True, default="")
-    results_uploaded_at = Column(db.DateTime, nullable=True)
+    results_uploaded_at = Column(db.DateTime(timezone=True), nullable=True)
     buggies_entered = db.Column(db.Integer, nullable=False, default=0)
     buggies_started = db.Column(db.Integer, nullable=False, default=0)
     buggies_finished = db.Column(db.Integer, nullable=False, default=0)

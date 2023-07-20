@@ -748,6 +748,7 @@ def bulk_register(data_format=None):
     return render_template(
         "admin/users_register.html",
         csv_fieldnames=f"{csv_fieldnames} {current_app.config}",
+        docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         example_csv_data = [
             ",".join(csv_fieldnames),
             ",".join(User.get_example_data("ada", csv_fieldnames)),
@@ -1126,6 +1127,7 @@ def settings(group_name=None):
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     return render_template(
         "admin/settings.html",
+        docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
         group_name=group_name,

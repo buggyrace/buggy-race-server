@@ -1,25 +1,25 @@
------ ===========================================================================
------ This file is a manual PostgreSQL database schema dump
------
------ ...so you if you can't run the Flask/alembic migrations you can still
------ manually create the database. (You may have problems later on — if there
------ are new migrations released after you've installed — if you do this!)
------
------ Snapshot of migrations directory when this was schema.sql was created:
------      cb8d854af019_v2_0_1_with_db_files.py
------
------ Devs! Please keep this up-to-date after migrations (e.g., from heroku):
------
------      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
------
------ (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
------
------  * DATABASE_URL may be like postgres://username:pw@host:port/name
------  * --schema-only for stucture not data
------  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
------
------ ...then add a helpful comment like this and drop it in as schema.sql :-)
------ ===========================================================================
+------ ===========================================================================
+------ This file is a manual PostgreSQL database schema dump
+------
+------ ...so you if you can't run the Flask/alembic migrations you can still
+------ manually create the database. (You may have problems later on — if there
+------ are new migrations released after you've installed — if you do this!)
+------
+------ Snapshot of migrations directory when this schema.sql was created:
+------      8541b7aad85a_v2_0_2_with_timestamps.py
+------
+------ Devs! Please keep this up-to-date after migrations (e.g., from heroku):
+------
+------      pg_dump --schema-only --no-owner DATABASE_URL > schema.sql
+------
+------ (for heroku CLI, do "heroku run -a heroku-app-name 'command' > schema.sql")
+------
+------  * DATABASE_URL may be like postgres://username:pw@host:port/name
+------  * --schema-only for stucture not data
+------  * --no-owner to avoid Heroku usernames etc (this isn't for restore!)
+------
+------ ...then add a helpful comment like this and drop it in as schema.sql :-)
+------ ===========================================================================
 
 --
 -- PostgreSQL database dump
@@ -58,7 +58,7 @@ CREATE TABLE public.alembic_version (
 
 CREATE TABLE public.announcements (
     id integer NOT NULL,
-    created_at timestamp without time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
     text text NOT NULL,
     type character varying(32),
     is_visible boolean,
@@ -92,7 +92,7 @@ ALTER SEQUENCE public.announcements_id_seq OWNED BY public.announcements.id;
 
 CREATE TABLE public.buggies (
     id integer NOT NULL,
-    created_at timestamp without time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
     buggy_id integer,
     qty_wheels integer,
     flag_color character varying(32),
@@ -180,13 +180,13 @@ CREATE TABLE public.races (
     id integer NOT NULL,
     title character varying(80) NOT NULL,
     "desc" text NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    start_at timestamp without time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    start_at timestamp with time zone NOT NULL,
     cost_limit integer,
     is_visible boolean,
     race_file_url character varying(255),
     league character varying(32),
-    results_uploaded_at timestamp without time zone,
+    results_uploaded_at timestamp with time zone,
     buggies_entered integer NOT NULL,
     buggies_started integer NOT NULL,
     buggies_finished integer NOT NULL,
@@ -338,8 +338,8 @@ CREATE TABLE public.settings (
 
 CREATE TABLE public.tasks (
     id integer NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    modified_at timestamp without time zone,
+    created_at timestamp with time zone NOT NULL,
+    modified_at timestamp with time zone,
     phase integer NOT NULL,
     name character varying(16) NOT NULL,
     title character varying(80) NOT NULL,
@@ -377,8 +377,8 @@ ALTER SEQUENCE public.tasks_id_seq OWNED BY public.tasks.id;
 
 CREATE TABLE public.tasktexts (
     id integer NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    modified_at timestamp without time zone,
+    created_at timestamp with time zone NOT NULL,
+    modified_at timestamp with time zone,
     user_id integer NOT NULL,
     task_id integer NOT NULL,
     text text NOT NULL
@@ -415,7 +415,7 @@ CREATE TABLE public.users (
     ext_id character varying(80),
     email character varying(80),
     password bytea,
-    created_at timestamp without time zone NOT NULL,
+    created_at timestamp with time zone,
     first_name character varying(30),
     last_name character varying(30),
     is_active boolean,
@@ -425,10 +425,10 @@ CREATE TABLE public.users (
     github_username text,
     github_access_token text,
     is_student boolean,
-    logged_in_at timestamp without time zone,
-    uploaded_at timestamp without time zone,
+    logged_in_at timestamp with time zone,
+    uploaded_at timestamp with time zone,
     api_secret character varying(30),
-    api_secret_at timestamp without time zone,
+    api_secret_at timestamp with time zone,
     api_secret_count integer NOT NULL,
     is_api_secret_otp boolean NOT NULL,
     api_key character varying(30),

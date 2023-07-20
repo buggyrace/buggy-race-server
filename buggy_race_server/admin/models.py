@@ -6,6 +6,7 @@ from datetime import datetime
 from enum import Enum, auto
 import re
 import markdown
+from sqlalchemy import sql
 
 from buggy_race_server.database import Column, Model, SurrogatePK, db
 from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
@@ -103,7 +104,7 @@ class Announcement(SurrogatePK, Model):
 
     __tablename__ = "announcements"
     id = db.Column(db.Integer, primary_key=True)
-    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(db.DateTime(timezone=True), nullable=False, default=sql.func.now())
     text = Column(db.Text(), unique=False, nullable=False, default="")
     type = Column(db.String(32), unique=False, nullable=True)
     is_visible = db.Column(db.Boolean(), default=False)
@@ -249,8 +250,8 @@ class Task(SurrogatePK, Model):
 
     __tablename__ = "tasks"
     id = db.Column(db.Integer, primary_key=True)
-    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    modified_at = Column(db.DateTime, nullable=True)
+    created_at = Column(db.DateTime(timezone=True), nullable=False, default=sql.func.now())
+    modified_at = Column(db.DateTime(timezone=True), nullable=True)
     phase = Column(db.Integer, nullable=False)
     name = Column(db.String(16), unique=False, nullable=False)
     title = Column(db.String(80), unique=False, nullable=False)
@@ -277,8 +278,8 @@ class TaskText(SurrogatePK, Model):
         }
 
     id = db.Column(db.Integer, primary_key=True)
-    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    modified_at = Column(db.DateTime, nullable=True)
+    created_at = Column(db.DateTime(timezone=True), nullable=False, default=sql.func.now())
+    modified_at = Column(db.DateTime(timezone=True), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
     text = Column(db.Text(), unique=False, nullable=False, default="")

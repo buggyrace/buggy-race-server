@@ -2,7 +2,7 @@
 {% block page_title %} Admin: buggy editor {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
     <h1 class="col my-3">
       Buggy Editor (the students' repo)
@@ -193,7 +193,11 @@
 <pre id="example-editor-readme" class="p-3 task-text">
 {% include "admin/_buggy_editor_readme.txt" %}
 </pre>
-      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Buggy editor", "/buggy-editor") }}
     </div>
   </div>
 </div>

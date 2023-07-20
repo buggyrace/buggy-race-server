@@ -284,7 +284,7 @@ footer .footer-nav {
   font-display: block;
 }
 
-[class^="icon-"], [class*=" icon-"] {
+[class^="icon-"], [class*=" icon-"], .btn-docs:after {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: never;
@@ -310,6 +310,10 @@ footer .footer-nav {
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
 .icon-embed2:before { content: "\ea80"; }
+.icon-info:before {
+  content: "\ea0c";
+  padding-right:0.2rem; /* used in buttons only? */
+}
 
 .nav-link .icon-cog {color:#dddd00}
 .nav-link .icon-cog:hover {color:#ffff00}
@@ -409,6 +413,9 @@ input#auth_code,
 .btn-admin.btn-outline-danger:hover,
 .btn-outline-secondary.btn-admin:hover { color:black; }
 
+.btn-admin:hover {
+  background-color: #ffc107;
+}
 /* add triangle pointers to buttons */
 .btn-jump::after {
   content: "\0025B9"; /* &rtri; */
@@ -421,6 +428,24 @@ input#auth_code,
 .btn-up::after {
   content: "\0025B3"; /* udtri; */
   padding-left:0.33rem;
+}
+.btn-docs {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border: 1px solid #0c5460;
+  text-align: center;
+  vertical-align: middle;
+}
+.btn-docs:after {
+  content: "\ea0c";
+  padding-left:0.4rem;
+  font-size:1.4rem;
+  vertical-align: middle;
+}
+.btn-docs:hover {
+  color: #ffffff;
+  background-color: #0c5460;
+  border: 1px solid #ffffff;
 }
 
 p.btn-collection {

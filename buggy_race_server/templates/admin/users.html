@@ -2,15 +2,17 @@
 {% block page_title %} Admin: users {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
-<div class="container pb-5">
+<div class="container pb-2">
   <div class="row">
-    <h1 class="col my-3">
-      {%if want_detail %}
-         All Users
-      {% else %}
-         Students
-      {% endif %}
-    </h1>
+    <div class="col my-3">
+      <h1>
+        {%if want_detail %}
+           All Users
+        {% else %}
+           Students
+        {% endif %}
+      </h1>
+    </div>
   </div>
   {%if want_detail %}
     <div class="row">
@@ -232,6 +234,11 @@
       </div>
     </div>
   {% endif %}
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("User management", "/running/user-management") }}
+    </div>
+  </div>
 </div>
 <div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">

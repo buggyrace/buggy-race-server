@@ -211,6 +211,20 @@ scheme, you get this cryptic error:
 Oops.
 
 
+### How to dump data from postgres running on Heroku
+
+There's more than one way of doing this but the convenience of the Heroku CLI
+makes this handy: _within_ psql you can issue a local command with `\!`.
+
+You might need to force the pg_dump version to match Heroku's PostgreSQL version
+but I got round that with an explicit (versioned) path in the command: for example
+this dumps _just the data_ (handy for reloading the demo site?):
+
+    \! /Library/PostgreSQL/15/bin/pg_dump --column-inserts --data-only DATABASE_NAME > example.sql
+
+The options `--column-inserts` `--data-only` force this to be a data-inserting-only
+SQL file. You can also use `--table=users` for example.
+
 ### How to add animated diagrams to the Tech Notes (202)
 
 > There are currently two: in _webserver_ and _flask-webserver_:
@@ -279,7 +293,7 @@ The server has an unlinked `/admin/routes` page that dumps them out for you.
 
 We're using icons from the free icomoon pack (thanks icomoon!)
 
-There are currently 11 icons in the custom incomoon font. Here's the manual
+There are currently 12 icons in the custom incomoon font. Here's the manual
 process you need to follow if you need to add a new one:
 
 Go to [icomoon.io/app](https://icomoon.io/app/) and select all the icons you

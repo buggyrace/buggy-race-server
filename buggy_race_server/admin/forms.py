@@ -327,6 +327,21 @@ class SubmitWithConfirmForm(FlaskForm):
     def validate(self):
         return super(SubmitWithConfirmForm, self).validate()
 
+class SubmitWithConfirmAndAuthForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+
+    def validate_is_confirmed(self, value):
+      if not self.is_confirmed.data:
+          raise ValidationError(f"You did not explicitly confirm your action")
+      return self.is_confirmed.data
+
+    def __init__(self, *args, **kwargs):
+        super(SubmitWithConfirmAndAuthForm, self).__init__(*args, **kwargs)
+  
+    def validate(self):
+        return super(SubmitWithConfirmAndAuthForm, self).validate()
+
 class GeneralSubmitForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):

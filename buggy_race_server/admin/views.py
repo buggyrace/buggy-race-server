@@ -46,6 +46,7 @@ from buggy_race_server.admin.forms import (
     SetupSettingForm,
     SimpleStringForm,
     SubmitWithConfirmForm,
+    SubmitWithConfirmAndAuthForm,
     TaskForm,
 )
 from buggy_race_server.admin.models import (
@@ -943,6 +944,27 @@ def edit_user_comment(user_id):
       is_ta_edit_comment_enabled=current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name],
       is_ta_password_change_enabled=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
     )
+
+# user_id may be username or id
+@blueprint.route("/user/<user_id>/delete", methods=['POST'])
+@login_required
+@admin_only
+def delete_user(user_id):
+    if str(user_id).isdigit():
+        user = User.get_by_id(int(user_id))
+    else:
+        user = User.query.filter_by(username=user_id).first()
+    if user is None:
+        flash("No such user", "info")
+        abort(404)
+    form = SubmitWithConfirmAndAuthForm(request.form)
+    if form.is_submitted() and form.validate():
+        flash(f"OK, deleted user {user.pretty_username}", "success")
+        return redirect(url_for("admin.list_users"))
+    else:
+        _flash_errors(form)
+    flash(f"Did not delete user {user.pretty_username}", "warning")
+    return redirect(url_for("admin.edit_user", user_id=user.id))
 
 # user_id may be username or id
 @blueprint.route("/user/<user_id>/edit", methods=['GET','POST'])

@@ -357,8 +357,68 @@
         </div>
       </div>
     {% endif %}
+    {% if current_user.is_administrator and user %}
+      <div class="row my-3">
+        <div class="col p-2 mx-3">
+          <div id="delete-form" class="border border-danger container alert-danger">
+            {% if user.is_active %}
+              <div class="row">
+                <div class="col-sm-7 p-3">
+                  Instead of deleting {{ user.pretty_username }},
+                  consider marking them inactive instead.
+                  If you set <strong><em>is&nbsp;Active?</em></strong>
+                  to <code>No</code> they won't be able to log into the
+                  server, and their data won't appear on pages amongst
+                  other, active users.
+                </div>
+              </div>
+            {% endif %}
+            <form id="delete_user_form" method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" role="form">
+              {{ form.csrf_token }}
+              <div class="row">
+                <input type="hidden" name="user_id" value="user.id"/>
+                <div class="col-sm-3 p-3">
+                  <label for="is_confirmed">Really delete {{ user.pretty_username }}?</label>
+                </div>
+                <div class="col-sm-4 p-3">
+                  <select id="is_confirmed" name="is_confirmed" class="form-control">
+                    <option selected value="">No</option>
+                    <option value="">I think so</option>
+                    <option value="y">Yes</option>
+                  </select>  
+                </div>
+                <div class="col-sm-5 p-3">
+                  Deleting {{ user.pretty_username or "the user"}} will also delete
+                   related records including their task texts and racing buggy.<br>
+                  Their position in historic race results will not be affected.
+                </div>
+              </div>
+              <div class="row bg-warning py-2">
+                <div class="col-sm-3">
+                  {{form.auth_code.label}}
+                </div>
+                <div class="col-sm-4">
+                  {{form.auth_code(class_="form-control mr-sm-1")}}
+                </div>
+                <div class="col-sm-5">
+                    You must provide a valid authorisation code to
+                    delete a user.
+                    <br>
+                    <strong>You cannot undo this.</strong>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-3 p-3">
+                  <input type="submit" class="btn btn-danger" value="Delete user {{ user.pretty_username }}"/>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
     <div class="row">
-      <div class="col btn-collection my-3">
+      <div id="btn-list-for-user" class="col btn-collection my-3">
         {% if user %}
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}</a>
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
@@ -366,11 +426,31 @@
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
       </div>
     </div>
+    {% if current_user.is_administrator and user %}
+      <script>
+        const BUTTON_LIST = document.getElementById("btn-list-for-user");
+        const DELETE_FORM = document.getElementById("delete-form");
+        DELETE_FORM.classList.add("hidden");
+        const reveal_del_btn = document.createElement("button");
+        reveal_del_btn.classList.add("btn", "btn-outline-danger", "my-2");
+        reveal_del_btn.innerText="Show delete form";
+        reveal_del_btn.addEventListener("click", function(e){
+          e.preventDefault();
+          e.target.classList.add("hidden");
+          DELETE_FORM.classList.remove("hidden");
+        })
+        BUTTON_LIST.append(reveal_del_btn);
+      </script>
+    {% endif %}
   {% endif %}
   {% if current_user and not current_user.is_anonymous and current_user.is_administrator %}
     <div class="row">
       <div class="col my-3 text-right">
-        {{ macros.docs_btn("Single user", "/registering-users/single") }}
+        {% if user %}
+          {{ macros.docs_btn("User management", "/running/user-management") }}
+        {% else %}
+          {{ macros.docs_btn("Single user", "/registering-users/single") }}
+        {% endif %}
       </div>
     </div>
   {% endif %}

@@ -91,7 +91,6 @@ class User(UserMixin, SurrogatePK, Model):
     is_active = Column(db.Boolean(), default=True)
     is_admin = Column(db.Boolean(), default=False)
     access_level = Column(db.Integer, nullable=False, default=0)
-    buggies = db.relationship("Buggy", backref="users", lazy=True)
     latest_json = Column(db.Text(), default="")
     github_username = Column(db.Text(), nullable=True)
     github_access_token = Column(db.Text(), nullable=True)
@@ -105,6 +104,8 @@ class User(UserMixin, SurrogatePK, Model):
     api_key = Column(db.String(30), nullable=True)
     comment = Column(db.Text(), default=False)
     is_demo_user = Column(db.Boolean(), default=False)
+    buggies = db.relationship("Buggy", backref="users", cascade="all, delete", lazy=True)
+    tasktexts = db.relationship('TaskText', backref='users', cascade="all, delete")
 
     def __init__(self, username, ext_username=None, email=None, password=None, **kwargs):
         """Create instance."""

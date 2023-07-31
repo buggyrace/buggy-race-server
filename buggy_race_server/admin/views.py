@@ -959,6 +959,7 @@ def delete_user(user_id):
         abort(404)
     form = SubmitWithConfirmAndAuthForm(request.form)
     if form.is_submitted() and form.validate():
+        user.delete()
         flash(f"OK, deleted user {user.pretty_username}", "success")
         return redirect(url_for("admin.list_users"))
     else:

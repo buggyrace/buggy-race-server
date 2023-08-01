@@ -43,6 +43,7 @@ def create_app():
     (either using .env or explicit exports/settings (e.g., via Heroku's dialogue))
     ...but access them through the Flask's app.config['KEY_NAME']
     """
+
     app = Flask(__name__.split(".")[0])
 
     app.config.from_object(config.ConfigFromEnv())
@@ -57,22 +58,32 @@ def create_app():
     csrf.exempt(app.blueprints['api'])
 
     # Flask's db migration needs to instantiate the app even though the
-    # database has not been initialised yet. We allow these things to
-    # fail as the first entrypoint is the db migration.
-    # TODO: would be better to _know_ it was OK to fail rather than assume
-    #       it's OK because it only needs the app for the migration.
+    # database has not been initialised yet. Here's a bodge that truncates
+    # the app initialisation if it's for Flask DB.
+    is_bypassing_db_config = None
+    if app.config.get(ConfigSettings.BYPASSING_DB_CONFIG_KEY) is not None:
+        is_bypassing_db_config = bool(
+            str(app.config[ConfigSettings.BYPASSING_DB_CONFIG_KEY])=="1"
+        )
+        print(f"[ ] {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is set: {is_bypassing_db_config}")
+    elif (
+        sys.argv[0].endswith("flask") and 
+        len(sys.argv) > 1 and sys.argv[1]=="db"
+    ):
+        is_bypassing_db_config = True
+        print(
+            f"[ ] flask db detected "
+            f"(and {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is not set)"
+        )
+    if is_bypassing_db_config:
+        print("[ ] bypassing database read (for config settings)")
+        return app
 
-    try:
-        with app.app_context():
-            save_config_env_overrides_to_db(app)
-            load_settings_from_db(app)
-            refresh_global_announcements(app)
-    except Exception as e:
-        # not being more specific about errors because the different databases
-        # throw different exceptions, alas
-        print(f"*** init error: {e}")
-        print("*** buggy racing sever init finishing early (OK to perform database ops now)")
-        return app # which is enough to allow migrations
+    # this will throw an exception if there's no database connection
+    with app.app_context():
+        save_config_env_overrides_to_db(app)
+        load_settings_from_db(app)
+        refresh_global_announcements(app)
 
     # must register any jinja filters before rendering any static content
     def get_servertime(utc_datetime):

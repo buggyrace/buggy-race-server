@@ -228,6 +228,13 @@ class User(UserMixin, SurrogatePK, Model):
         else:
             return 0
 
+    @property
+    def is_live_demo_user(self):
+        return (
+            self.is_demo_user and
+            current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name]
+        )
+
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<User({self.username!r})>"

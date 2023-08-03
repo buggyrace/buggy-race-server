@@ -1224,6 +1224,13 @@ def edit_announcement(announcement_id=None):
             is_html=announcement.is_html
             is_visible=announcement.is_visible
     if request.method == "POST":
+        if current_user.is_live_demo_user:
+            flash(
+                f"You did nothing wrong, but we don't let demo admin "
+                "users change announcements on the demo server (sorry)",
+                "danger"
+            )
+            return redirect(url_for("admin.list_announcements"))
         if form.is_submitted() and form.validate():
             if announcement is not None:
                 announcement.text = form.text.data
@@ -1294,6 +1301,13 @@ def publish_announcement(announcement_id):
 def delete_announcement(announcement_id=None):
     form = AnnouncementActionForm(request.form)
     if form.submit_delete.data:
+        if current_user.is_live_demo_user:
+            flash(
+                f"You did nothing wrong, but we don't let demo admin "
+                "users delete announcements on the demo server (sorry)",
+                "danger"
+            )
+            return redirect(url_for("admin.list_announcements"))
         announcement = Announcement.query.filter_by(id=announcement_id).first()
         if announcement is None:
             flash("Error: coudldn't find announcement to delete", "danger")
@@ -1311,6 +1325,13 @@ def delete_announcement(announcement_id=None):
 def add_example_announcement():
     form = GeneralSubmitForm(request.form)
     if form.is_submitted() and form.validate():
+        if current_user.is_live_demo_user:
+            flash(
+                f"You did nothing wrong, but we don't let demo admin "
+                "users create announcements on the demo server (sorry)",
+                "danger"
+            )
+            return redirect(url_for("admin.list_announcements"))
         Announcement.create(
             type="special",
             text=Announcement.EXAMPLE_ANNOUNCEMENT,
@@ -1800,6 +1821,13 @@ def show_buggy_editor_info():
 def delete_buggy_editor_zip():
     form = SubmitWithConfirmForm(request.form)
     if form.is_submitted() and form.validate():
+        if current_user.is_live_demo_user:
+            flash(
+                f"You did nothing wrong, but we don't let demo admin "
+                "users delete the buggy editor zipfile on the demo server (sorry)",
+                "danger"
+            )
+            return redirect(url_for("admin.show_buggy_editor_info"))
         if form.is_confirmed.data:
             zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
             target_zipfile = join_to_project_root(

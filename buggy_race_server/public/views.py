@@ -97,7 +97,10 @@ def login():
                 else:
                     flash("Not an admin user: can't do much until setup is complete", "warning")
             else:
-                redirect_url = request.args.get("next") or url_for("user.submit_buggy_data")
+                redirect_url = request.args.get("next") or (
+                    url_for("admin.admin") if current_user.is_staff
+                    else url_for("user.submit_buggy_data")
+                )
             return redirect(redirect_url)
         else:
             flash_errors(form)

@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.2"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.3"
 #
 # ----------------------------------------------------------------------------
 
@@ -1340,6 +1340,7 @@ class ConfigSettings:
     # from the environment, because it happens before db connection is made)
     REWRITING_DB_URI_PASSWORD_KEY = "IS_REWRITING_DB_URI_PW_AS_QUERY"
     FORCED_DB_URI_SSL_MODE_KEY = "FORCED_DB_URI_SSL_MODE"
+    BYPASSING_DB_CONFIG_KEY = "IS_BYPASSING_DB_CONFIG"
 
     @staticmethod
     def is_valid_name(name):
@@ -1565,9 +1566,18 @@ class ConfigFromEnv():
           ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY,
           ""
       )
+
       self.__setattr__(
         ConfigSettings.FORCED_DB_URI_SSL_MODE_KEY,
         forced_db_uri_ssl_mode_key
+      )
+
+      self.__setattr__(
+        ConfigSettings.BYPASSING_DB_CONFIG_KEY,
+        env.str(
+          ConfigSettings.BYPASSING_DB_CONFIG_KEY,
+          None
+        )
       )
 
       sqlalchemy_database_uri = self.DATABASE_URL

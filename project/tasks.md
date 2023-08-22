@@ -290,7 +290,7 @@ the total cost there.
   race server when you did [task 1-TEMPLATE](#task-1-template).
   How can that help you with this task?
 
-* You can hard-code the costs directly into your source code... this is OK,
+* You can hard code the costs directly into your source code... this is OK,
   but it can get tricky mixing data and code. What other ways are there to do
   this?
 
@@ -326,75 +326,104 @@ Add game rules to your validation.
 
 * If the game rules changed, what would you need to do to your program?
 
-
 # 3-ENV
 
 ## Switch between dev and production environments
 
 ### Problem
 
-Flask behaves differently when it is running in development ("dev") and
-production environments, which you can switch using environment variables. Get
-that working so you can do your coding in development mode, but work on your
-racing buggy in production mode.
+When you run your editor, it's _always_ in debug mode (because the keyword
+argument `debug=True` is being set when `app.run()` is called, at the
+bottom of `app.py`). But debug mode should only be enabled when you run
+your editor in a development environment.
 
 ### Solution
 
-Make sure the configuration is correct and you're using the environment
-variable `FLASK_ENV` correctly.
+Change your program to use the environment variable `FLASK_DEBUG` to switch
+debug mode on and off, instead of being hard-coded (i.e., explicitly set in
+the source code).
 
 ### Hints
 
+* There are two meanings of "environment" being used here: the general
+  environment ("development" where you are making changes to your program, and
+  "production" where you are using it), and the technical environment in which
+  the program runs... but they are related.
+
 * In practice the main advantage of switching between development and
-  production environments in Flask is that in the development environment
-  the webserver should "notice" changes to the files, so you don't need to
-  stop-and-start the webserver each time.
+  production environments in Flask is that in the development environment the
+  webserver should "notice" (and reload) changes to the files, so you don't
+  need to stop-and-start the webserver every time you make an edit. But it also
+  affects the way errors are displayed in the browser — Flask's debug mode will
+  show a stack trace and detailed diagnostic information, instead of a bare
+  [status-code 500](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500)
+  error page.
   
-* By default, development environment sets debug mode on too (but you can
-  control that in the `app.run()` call at the bottom of `app.py`)
-  
-* But you can also choose to have **different databases** — this means you can
-  test your code in development without risking damaging your best buggy data
-  in the production database. That is: you do your coding and hacking in your
-  dev environment, but switch to run in production environment when you just
-  want to edit your buggy.
+* This task is really introducing you to the important concept of
+  [environment variables](https://en.wikipedia.org/wiki/Environment_variable)
+  — these are settings that are part of the environment in which the program
+  runs instead of being inside the program. All general programming languages
+  provide a mechanism for accessing these from within the program's source
+  code. In Python, you should import the `os` module and use its `environ`
+  methods: see the [Python environ docs](https://docs.python.org/3/library/os.html#os.environ).
+
+* The environment variables are effectively presented to your program as a
+  dictionary of string values (be careful: even the ones that look like
+  numbers or Booleans are really strings, so you might need to cast them).
+  Although you can access environment variables directly by keys in `environ`
+  (such as `os.environ['FLASK_DEBUG']` for the environment variable
+  `FLASK_DEBUG`) it's usually better to use `os.getenv('FLASK_DEBUG')`. Why?
+
+* Environment variables are managed differently on different operating systems
+  (which makes sense, since it's those systems which control the environment in
+  which your program is running). So Windows and Unix/Mac set them differently
+  (see below).
+
+* You can also choose to have **different databases** depending on the
+  environment — this means you can test your code in development without
+  risking damaging your best buggy data in the production database. That is:
+  you do your coding and hacking in your dev environment, but switch to run in
+  production environment when you just want to edit your buggy.
 
 * If you want to implement switching between different databases, you'll need
   to change how the constant `DATABASE_FILE` is set in `init_db.py` and
   `app.py` (it can't simply be the same filename — instead you'll need to use a
-  conditional). _You don't need to do this database-switching for 3-ENV_, but
+  conditional). You don't need to do this database-switching for 3-ENV, but
   it's great if you do (because it's a very handy technique to know when you
   are a developer!).
 
-* Environment variables are managed differently on Windows and Unix/Mac
-  operating systems.
-
 * You probably need to use `set` (Windows) or `export` (Unix/Mac) — although on
   Unix/Mac you can also declare environment variables when you run the command:
-  `FLASK_ENV=development python3 app.py`.
+  `FLASK_DEBUG=True python3 app.py` (but... be careful about how you use that
+  value inside your program — is it a string or a Boolean value?)
 
-* Another way is to make a `.flaskenv` file and `pip install python-dotenv`.
-  What does that do?
+* Another way is to make a `.env` file and `pip install python-dotenv`. What
+  does that do?
 
 * The **three classic environments** are _development_, _staging_, and
   _production_ (you can think of _staging_ as _testing_).
 
-* It _is_ possible to switch the environment directly within Flask, but don't
-  do it that way: this task (3-ENV) is so you understand that environment
-  variables exist _outside_ your program.
+* Setting `debug=True` in the source code is just one example of how some
+  settings should not be hard-coded. Other classic examples, for programs
+  in general, are configuration settings and passwords. This is really about
+  understanding what is the same and what is different when you run different
+  _instances_ of your program. This is especially important when you think
+  about how source code is shared, and what should (and should not) go into
+  version control.
 
-* Strictly speaking, Flask's "environment" is _technically_ a little more
-  specific than the "environment" in "environment variable" — but it's all
-  about the context _outside_ your app.
+* It's a good idea to document how the environment can be used to control the
+  behaviour of your program in the `README.md`
 
-* It's a good idea to document how to switch between environments in the
-  `README.md`
+* This can be quite a complicated topic, because configuration is a big deal
+  when you're writing programs for other people to run. See the Flask docs about
+  [configuring from environment variables](https://flask.palletsprojects.com/en/2.3.x/config/#configuring-from-environment-variables) to see what's possible.
 
-* This task might not result in much code, because it's really about _how_ you
-  manage your development environment. Make a note of what you did, because
-  you can describe this in your [poster](%BUGGY_RACE_SERVER_URL%/project/poster).
-
-
+* This task might not result in much new Python, because it's really about _how_
+  you manage your development environment. Make a note of what you did, because you
+  can describe this in your
+  [%PROJECT_REPORT_TYPE%](%BUGGY_RACE_SERVER_URL%/project/%PROJECT_REPORT_TYPE%).
+  In fact it's possible that the only change you make to `app.py` is to _delete_
+  some code...
 
 
 # 3-AUTOFILL

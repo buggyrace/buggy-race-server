@@ -19,24 +19,25 @@ Here's the existing code. Not all of it is relevant, but that's part of the
 skill of learning to read code. 
 
 ```python
-elif request.method == 'POST':
-  msg=""
-  qty_wheels = request.form['qty_wheels']
-  try:
-    with sql.connect(DATABASE_FILE) as con:
-      cur = con.cursor()
-      cur.execute(
-          "UPDATE buggies set qty_wheels=? WHERE id=?",
-          (qty_wheels, DEFAULT_BUGGY_ID)
-      )
-      con.commit()
-      msg = "Record successfully saved"
-  except:
-    con.rollback()
-    msg = "error in update operation"
-  finally:
-    con.close()
-    return render_template("updated.html", msg = msg)
+elif request.method == "POST":
+    message = ""
+    qty_wheels = request.form["qty_wheels"]
+    try:
+        with sql.connect(DATABASE_FILE) as db_connection:
+            cur = db_connection.cursor()
+            cur.execute(
+                "UPDATE buggies set qty_wheels=? WHERE id=?",
+                (qty_wheels, DEFAULT_BUGGY_ID)
+            )
+            db_connection.commit()
+    except sql.OperationalError as e:
+        message = f"Error in update operation: {e}"
+        db_connection.rollback()
+    else:
+        message = "Record successfully saved"
+    finally:
+        db_connection.close()
+    return render_template("updated.html", msg=message)
 ```
 
 ## First, understand the existing code

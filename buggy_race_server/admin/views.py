@@ -1988,6 +1988,13 @@ def config_dump_as_dotenv():
                 ConfigSettings.get_extra_names_for_config_dump()
                 +
                 list(ConfigSettings.DEFAULTS.keys())
+                +
+                [
+                    'IS_REWRITING_DB_URI_PW_AS_QUERY',
+                    'FORCED_DB_URI_SSL_MODE',
+                    'DATABASE_URL',
+                    'SQLALCHEMY_DATABASE_URI'
+                ]
             )
         )
     ])
@@ -2003,10 +2010,13 @@ def config_dump_as_dotenv():
     ]
     for config_key in config_keys:
         if current_app.config.get(config_key) is not None:
-            value = current_app.config.get(config_key)
             if config_key in EXCLUDE_FROM_DUMP:
                 continue # explicitly skip unwanted entries
-            if config_key in ConfigSettings.TYPES:
+            value = current_app.config.get(config_key)
+            if config_key in ['DATABASE_URL', 'SQLALCHEMY_DATABASE_URI']:
+                db_url = current_app.config.get(config_key)
+                value = redact_password_in_database_url(db_url)
+            elif config_key in ConfigSettings.TYPES:
                 type = ConfigSettings.TYPES[config_key]
                 if type in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
                     continue # don't include passwords, etc

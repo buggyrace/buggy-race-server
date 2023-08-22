@@ -41,6 +41,15 @@
         <em>when the server was last started</em> (they <em>might</em>
         have been changed since, via the admin config pages).
       </p>
+      <p>
+        You can download a snapshot of the current config in a format
+        suitable for use as a <code>.env</code> file (some settings,
+        including those with sensitive values, are excluded).
+      </p>
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.config_dump_as_dotenv') }}"
+          class="btn btn-download btn-outline-primary">Download config snapshot</a>
+      </p>
     </div>
   </div>
   <div class="row">

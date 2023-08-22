@@ -1768,49 +1768,9 @@ def show_system_info():
         git_status = result.stdout
     except (ValueError, subprocess.CalledProcessError) as e:
         git_status = "[Unavailable]"
-    config_settings_to_display = sorted([
-      ConfigSettings.CACHEBUSTER_KEY,
-      ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
-      ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
-      ConfigSettingNames._IS_DEMO_SERVER.name,
-      ConfigSettingNames._EDITOR_INPUT_DIR.name,
-      ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
-      ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,
-      ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
-      ConfigSettingNames._RACE_ASSETS_PATH.name,
-      ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
-      ConfigSettingNames._PUBLISHED_PATH.name,
-      ConfigSettingNames._SETUP_STATUS.name,
-      ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
-      ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
-      ConfigSettingNames._TASKS_LOADED_DATETIME.name,
-      ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,
-      ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name,
-      ConfigSettingNames._TECH_NOTES_CONFIG_PATH.name,
-      ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name,
-      ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name,
-      ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
-      ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name,
-      ConfigSettingNames._TECH_NOTES_PAGES_DIR.name,
-      ConfigSettingNames._TECH_NOTES_PATH.name,
-      "BCRYPT_LOG_ROUNDS",
-      "CACHE_TYPE",
-      "DEBUG_TB_ENABLED",
-      "DEBUG_TB_INTERCEPT_REDIRECTS",
-      "FLASK_APP",
-      "FLASK_DEBUG",
-      "FLASK_ENV",
-      "GUNICORN_WORKERS",
-      "JSONIFY_PRETTYPRINT_REGULAR",
-      "LOG_LEVEL",
-      "SEND_FILE_MAX_AGE_DEFAULT",
-      "SQLALCHEMY_TRACK_MODIFICATIONS",
-      "UPLOAD_FOLDER",
-      "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
-    ])
     return render_template(
         "admin/system_info.html",
-        config_settings_to_display=config_settings_to_display,
+        config_settings_to_display=sorted(ConfigSettings.get_extra_names_for_config_dump()),
         env_overrides_key=ConfigSettings.ENV_SETTING_OVERRIDES_KEY,
         env_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         git_status=git_status,
@@ -2039,6 +1999,54 @@ def config_docs_helper():
         pretty_group_name_dict=pretty_group_name_dict,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     )
+
+@blueprint.route("/config/dump")
+@login_required
+@admin_only
+def config_dump_as_dotenv():
+    config_keys = sorted([
+        k for k in
+        list(
+            set(
+                ConfigSettings.get_extra_names_for_config_dump()
+                +
+                list(ConfigSettings.DEFAULTS.keys())
+            )
+        )
+    ])
+    # not useful when loading a new buggy racing server:
+    EXCLUDE_FROM_DUMP = [
+        'FLASK_DEBUG', 
+        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'
+    ]
+    config_text_lines = [
+        "# config dump (suitable as .env?) of buggy race server "
+        f"{current_app.config.get(ConfigSettingNames.BUGGY_RACE_SERVER_URL.name)}",
+        ""
+    ]
+    for config_key in config_keys:
+        if current_app.config.get(config_key) is not None:
+            value = current_app.config.get(config_key)
+            if config_key in EXCLUDE_FROM_DUMP:
+                continue # explicitly skip unwanted entries
+            if config_key in ConfigSettings.TYPES:
+                type = ConfigSettings.TYPES[config_key]
+                if type in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
+                    continue # don't include passwords, etc
+                if type == ConfigTypes.BOOLEAN:
+                    value = 1 if current_app.config.get(config_key) else 0
+            elif config_key.startswith("IS_"): # clunky boolean catcher
+                value = 1 if current_app.config.get(config_key) else 0
+            config_text_lines.append(
+                f"{config_key}={value}"
+            )
+    filename = get_download_filename("buggy-dotenv.txt", want_datestamp=True) 
+    return Response(
+        "\n".join(config_text_lines),
+        headers={"Content-disposition": f"attachment; filename=\"{filename}\""},
+        mimetype="text/plain",
+    )
+
 
 @blueprint.route("/routes")
 @login_required

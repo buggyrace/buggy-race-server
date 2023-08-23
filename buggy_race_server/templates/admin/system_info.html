@@ -47,6 +47,7 @@
         including those with sensitive values, are excluded).
       </p>
       <p class="btn-collection">
+        {{ macros.docs_btn("Config snapshot", "/customising/env#saving-a-config-snapshot-for-env", "float-right") }}
         <a href="{{ url_for('admin.config_dump_as_dotenv') }}"
           class="btn btn-download btn-outline-primary">Download config snapshot</a>
       </p>

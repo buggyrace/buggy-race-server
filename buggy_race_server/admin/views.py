@@ -77,6 +77,7 @@ from buggy_race_server.utils import (
     publish_task_list,
     publish_tasks_as_issues_csv,
     publish_tech_notes,
+    redact_password_in_database_url,
     refresh_global_announcements,
     servertime_str,
     set_and_save_config_setting,
@@ -1711,6 +1712,65 @@ def config_docs_helper():
         pretty_group_name_dict=pretty_group_name_dict,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
     )
+
+
+@blueprint.route("/config/dump")
+@login_required
+@admin_only
+def config_dump_as_dotenv():
+    config_keys = sorted([
+        k for k in
+        list(
+            set(
+                ConfigSettings.get_extra_names_for_config_dump()
+                +
+                list(ConfigSettings.DEFAULTS.keys())
+                +
+                [
+                    'IS_REWRITING_DB_URI_PW_AS_QUERY',
+                    'FORCED_DB_URI_SSL_MODE',
+                    'DATABASE_URL',
+                    'SQLALCHEMY_DATABASE_URI'
+                ]
+            )
+        )
+    ])
+    # not useful when loading a new buggy racing server:
+    EXCLUDE_FROM_DUMP = [
+        'FLASK_DEBUG', 
+        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'
+    ]
+    config_text_lines = [
+        "# config dump (suitable as .env?) of buggy race server "
+        f"{current_app.config.get(ConfigSettingNames.BUGGY_RACE_SERVER_URL.name)}",
+        ""
+    ]
+    for config_key in config_keys:
+        if current_app.config.get(config_key) is not None:
+            if config_key in EXCLUDE_FROM_DUMP:
+                continue # explicitly skip unwanted entries
+            value = current_app.config.get(config_key)
+            if config_key in ['DATABASE_URL', 'SQLALCHEMY_DATABASE_URI']:
+                db_url = current_app.config.get(config_key)
+                value = redact_password_in_database_url(db_url)
+            elif config_key in ConfigSettings.TYPES:
+                type = ConfigSettings.TYPES[config_key]
+                if type in [ConfigTypes.PASSWORD, ConfigTypes.SENSITIVE_STRING]:
+                    continue # don't include passwords, etc
+                if type == ConfigTypes.BOOLEAN:
+                    value = 1 if current_app.config.get(config_key) else 0
+            elif config_key.startswith("IS_"): # clunky boolean catcher
+                value = 1 if current_app.config.get(config_key) else 0
+            config_text_lines.append(
+                f"{config_key}={value}"
+            )
+    filename = get_download_filename("buggy-dotenv.txt", want_datestamp=True) 
+    return Response(
+        "\n".join(config_text_lines),
+        headers={"Content-disposition": f"attachment; filename=\"{filename}\""},
+        mimetype="text/plain",
+    )
+
 
 @blueprint.route("/routes")
 @login_required

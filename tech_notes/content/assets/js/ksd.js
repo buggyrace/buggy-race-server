@@ -34,6 +34,7 @@ if (! window.KsDiagram) {
     
     const CLASS_KSD       = KSD,
           CLASS_BTN_BLOCK = PREFIX + "btn-block",
+          CLASS_CAPTION_DIV=PREFIX + "caption-div",
           CLASS_CAPTION   = PREFIX + "caption",
           CLASS_CAPTIONS  = PREFIX + "captions",
           CLASS_DISABLED  = PREFIX + "disabled",
@@ -161,7 +162,7 @@ if (! window.KsDiagram) {
         div_buttons: null, // set below, once labels are ready
         div_captions: document.createElement("div") // populated below
       };
-      diagram._ksd.div_captions.classList.add(KSD);
+      diagram._ksd.div_captions.classList.add(CLASS_KSD, CLASS_CAPTION_DIV);
       
       let custom_labels = {};
       let custom_labels_str = container.getAttribute(ATTRIB_BTN_LABELS);

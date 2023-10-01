@@ -54,15 +54,15 @@ The first request is the for the webpage `cat.html`.
     padding:1rem;
     text-align:center;
   }
-  .example {
+  .diagram {
     padding-top:0.25rem;
     background-color:#fefefe;
     color:black;
   }
-  .example p a, .example li a {
+  .diagram p a, .diagram li a {
     color: blue;
   }
-  .example p a:hover, .example li a:hover {
+  .diagram p a:hover, .diagram li a:hover {
     border-bottom:1px solid blue;
   }
   .ksd-btn-block {
@@ -102,9 +102,64 @@ The first request is the for the webpage `cat.html`.
   .ksd-hidden {
     display: none;
   }
+
+  .diagram.js-fullwidth {
+    margin: 2em 0;
+  }
+  @media (orientation: landscape) {
+    .diagram.js-fullwidth {
+      display: grid;
+      grid-template-columns: 50vw 50vw;
+      grid-template-rows: auto;
+      grid-template-areas: 
+        "buttons captions"
+        "diagram captions";
+    }
+    .diagram.js-fullwidth .ksd-btn-block {
+      grid-column-start: buttons-start;
+      grid-column-end: buttons-end;
+      grid-row-start: buttons-start;
+      grid-row-end: buttons-end;
+    }
+    .diagram.js-fullwidth svg.ksd {
+      width:50vw;
+      max-height:90vh;
+      grid-column-start: diagram-start;
+      grid-column-end: diagram-end;
+      grid-row-start: diagram-start;
+      grid-row-end: diagram-end;
+    }
+    .diagram.js-fullwidth .ksd-caption-div {
+      margin:-3px 0 0 0; /* 3px bodge */
+      border-top:none;
+      background-color:#ddd;
+      grid-column-start: captions;
+      grid-column-end: captions;
+      grid-row-start: captions;
+      grid-row-end: captions;
+    }
+  }
+  @media (orientation: portrait) {
+    .diagram.js-fullwidth {
+    }
+    .diagram.js-fullwidth .ksd-btn-block {
+    }
+    .diagram.js-fullwidth svg.ksd {
+      max-height:50vh;
+    }
+    .diagram.js-fullwidth .ksd-caption-div {
+      max-height:50vh;
+      background-color:#ddd;
+      margin:0 auto;
+    }
+  }
+  .diagram.js-fullwidth .ksd-captions {
+    border-top:none;
+  }
+
 </style>
   
-<div class="example">
+<div class="diagram want-fullwidth">
   
 <script>/* KeyshapeJS v1.1.0 (c) 2018-2019 Pixofield Ltd | pixofield.com/keyshapejs/mit-license */
 window.KeyshapeJS=function(){function t(a){return"undefined"!==typeof a}function x(a,b){return a&&0==a.indexOf(b)}function H(a){if(!isFinite(a))throw Error("Non-finite value");}function R(a){if(14>=a)return 16;var b=S[a];b||(b=t(ca[a])?0|(a.toLowerCase().indexOf("color")==a.length-5?48:0):1);return b}function K(a){return 0<=a?Math.pow(a,1/3):-Math.pow(-a,1/3)}function da(a,b,c,d){if(0==a)return 0==b?b=-d/c:(a=Math.sqrt(c*c-4*b*d),d=(-c+a)/(2*b),0<=d&&1>=d?b=d:(d=(-c-a)/(2*b),b=0<=d&&1>=d?d:0)),b;
@@ -245,4 +300,25 @@ this static example in two important ways.
 
 
 <script src="{static}/assets/js/ksd.js"></script>
+<script>
+  /*
+    The diagram is neatly within #main_content, so force negative left
+    margin to align with the viewport. Doing this with JS because without
+    JS the diagram isn't interactive, so it won't matter.
+  */
+  const full_screen_diagrams = document.getElementsByClassName("want-fullwidth");
+  const main_content_block = document.getElementById("main_content");
+  if (full_screen_diagrams.length > 0) {
+      function make_diagrams_viewport_width(){
+          for (let diagram of full_screen_diagrams){
+              diagram.classList.add("js-fullwidth");
+              diagram.style.setProperty("margin-left", "-" + main_content_block.offsetLeft + "px");
+              diagram.style.setProperty("width", "100vw"); 
+              diagram.style.setProperty("max-height", "100vh"); 
+          }
+      }
+      window.onresize = make_diagrams_viewport_width;
+      make_diagrams_viewport_width();
+  }
+</script>
 

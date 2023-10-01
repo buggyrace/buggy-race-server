@@ -96,8 +96,6 @@ files](webserver). In the buggy racing project, the application is Flask. Flask
 uses the **route** to determine which method in `app.py` to run — that method
 returns an HTTP response, which (in this example) is an HTML page.
 
-
-
 <style>
   .ksd-no-js {
     color:white;
@@ -105,15 +103,15 @@ returns an HTTP response, which (in this example) is an HTML page.
     padding:1rem;
     text-align:center;
   }
-  .example {
+  .diagram {
     padding-top:0.25rem;
     background-color:#fefefe;
     color:black;
   }
-  .example p a, .example li a {
+  .diagram p a, .diagram li a {
     color: blue;
   }
-  .example p a:hover, .example li a:hover {
+  .diagram p a:hover, .diagram li a:hover {
     border-bottom:1px solid blue;
   }
   .ksd-btn-block {
@@ -144,19 +142,72 @@ returns an HTTP response, which (in this example) is an HTML page.
   .ksd button.ksd-stop.ksd-stopping,
   .ksd button.ksd-stop.ksd-stopping:hover { background-color: #ff0000; color: #fff;}
 
-  .ksd-captions { 
+  .ksd-captions {
     min-height:6rem;
     border-top:1px solid #ccc;
     padding-bottom: 1em;
   }
-  .ksd-captions p, .ksd-captions li {padding: 1.5em;}
+  .ksd-captions p, .ksd-captions li {padding: 1em;}
   .ksd-hidden {
     display: none;
   }
 
+  .diagram.js-fullwidth {
+    margin: 2em 0;
+  }
+  @media (orientation: landscape) {
+    .diagram.js-fullwidth {
+      display: grid;
+      grid-template-columns: 50vw 50vw;
+      grid-template-rows: auto;
+      grid-template-areas: 
+        "buttons captions"
+        "diagram captions";
+    }
+    .diagram.js-fullwidth .ksd-btn-block {
+      grid-column-start: buttons-start;
+      grid-column-end: buttons-end;
+      grid-row-start: buttons-start;
+      grid-row-end: buttons-end;
+    }
+    .diagram.js-fullwidth svg.ksd {
+      width:50vw;
+      max-height:90vh;
+      grid-column-start: diagram-start;
+      grid-column-end: diagram-end;
+      grid-row-start: diagram-start;
+      grid-row-end: diagram-end;
+    }
+    .diagram.js-fullwidth .ksd-caption-div {
+      margin:-3px 0 0 0; /* 3px bodge */
+      border-top:none;
+      background-color:#ddd;
+      grid-column-start: captions;
+      grid-column-end: captions;
+      grid-row-start: captions;
+      grid-row-end: captions;
+    }
+  }
+  @media (orientation: portrait) {
+    .diagram.js-fullwidth {
+    }
+    .diagram.js-fullwidth .ksd-btn-block {
+    }
+    .diagram.js-fullwidth svg.ksd {
+      max-height:50vh;
+    }
+    .diagram.js-fullwidth .ksd-caption-div {
+      max-height:50vh;
+      background-color:#ddd;
+      margin:0 auto;
+    }
+  }
+  .diagram.js-fullwidth .ksd-captions {
+    border-top:none;
+  }
 </style>
   
-<div class="example">
+<div class="diagram want-fullwidth">
 <script>
 /*
  KeyshapeJS v1.2.0 (c) 2018-2021 Pixofield Ltd | pixofield.com/keyshapejs/mit-license */
@@ -305,4 +356,25 @@ interacting with, and know how to write code that uses all these components
 efficiently.
 
 <script src="{static}/assets/js/ksd.js"></script>
+<script>
+  /*
+    The diagram is neatly within #main_content, so force negative left
+    margin to align with the viewport. Doing this with JS because without
+    JS the diagram isn't interactive, so it won't matter.
+  */
+  const full_screen_diagrams = document.getElementsByClassName("want-fullwidth");
+  const main_content_block = document.getElementById("main_content");
+  if (full_screen_diagrams.length > 0) {
+      function make_diagrams_viewport_width(){
+          for (let diagram of full_screen_diagrams){
+              diagram.classList.add("js-fullwidth");
+              diagram.style.setProperty("margin-left", "-" + main_content_block.offsetLeft + "px");
+              diagram.style.setProperty("width", "100vw"); 
+              diagram.style.setProperty("max-height", "100vh"); 
+          }
+      }
+      window.onresize = make_diagrams_viewport_width;
+      make_diagrams_viewport_width();
+  }
+</script>
 

@@ -93,11 +93,12 @@ def save_config_env_overrides_to_db(app):
       the app then loads the entire config — including defaults — back from
       the database. This mechanism allows ENV overriding of bad/broken config.
     """
-    for name in app.config.get(ConfigSettings.ENV_SETTING_OVERRIDES_KEY):
-        value = app.config.get(name) # expecting a value here
-        if value is not None:
-            set_and_save_config_setting(app, name, value)
-            print(f"* written {name} config setting (from ENV) into database", flush=True)
+    if not str(app.config.get(ConfigSettings.BYPASSING_DB_CONFIG_KEY))=="1":
+        for name in app.config.get(ConfigSettings.ENV_SETTING_OVERRIDES_KEY):
+            value = app.config.get(name) # expecting a value here
+            if value is not None:
+                set_and_save_config_setting(app, name, value)
+                print(f"* written {name} config setting (from ENV) into database", flush=True)
 
 def load_settings_from_db(app):
     """ Read settings from db and set the app's config appropriately.

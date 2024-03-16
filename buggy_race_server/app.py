@@ -21,6 +21,7 @@ from buggy_race_server.utils import (
     load_settings_from_db,
     servertime_str,
     join_to_project_root,
+    has_settings_table,
 )
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -60,27 +61,26 @@ def create_app():
     # Flask's db migration needs to instantiate the app even though the
     # database has not been initialised yet. Here's a bodge that truncates
     # the app initialisation if it's for Flask DB.
-    is_bypassing_db_config = None
-    if app.config.get(ConfigSettings.BYPASSING_DB_CONFIG_KEY) is not None:
-        is_bypassing_db_config = bool(
-            str(app.config[ConfigSettings.BYPASSING_DB_CONFIG_KEY])=="1"
-        )
-        print(f"[ ] {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is set: {is_bypassing_db_config}")
-    elif (
-        sys.argv[0].endswith("flask") and 
-        len(sys.argv) > 1 and sys.argv[1]=="db"
-    ):
-        is_bypassing_db_config = True
-        print(
-            f"[ ] flask db detected "
-            f"(and {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is not set)"
-        )
-    if is_bypassing_db_config:
-        print("[ ] bypassing database read (for config settings)")
-        return app
-
+    
     # this will throw an exception if there's no database connection
     with app.app_context():
+        if has_settings_table():
+            print("[ ] settings/config table exists in database")
+        else:
+            print("[!] no settings/config table found: database isn't populated")
+            # this is catastrophic *unless* this is a Flask db operation...
+            # ...in which case it's trying to populate it, return 
+            if (
+                sys.argv[0].endswith("flask") and 
+                len(sys.argv) > 1 and sys.argv[1]=="db"
+            ):
+                print("[ ] but that's probably OK because this is a flask db operation")
+            # finish now, before trying to manipulate config in database
+            # this provides an app the flask db can work with, but it's not
+            # ready for running as the race server: issue a warning
+            print("WARNING: app had unpopulated database when created", file=sys.stderr)
+            return app 
+
         save_config_env_overrides_to_db(app)
         load_settings_from_db(app)
         refresh_global_announcements(app)

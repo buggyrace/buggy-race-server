@@ -86,6 +86,10 @@ def active_user_required(function):
         return function(*args, **kwargs)
     return wrapper
 
+def has_settings_table():
+    engine = db.create_engine(current_app.config.get("DATABASE_URL"))
+    return db.inspect(engine).has_table(Setting.__table__.name)
+
 def save_config_env_overrides_to_db(app):
     """ Saves each config setting that's in the app config into the database.
       This is specifically used when the app starts up, to save any settings

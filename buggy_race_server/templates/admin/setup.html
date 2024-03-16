@@ -31,13 +31,24 @@
             </div>
             <div class="col-sm-5">
               {% set name = "AUTHORISATION_CODE" %}
-              {% include "admin/_env_setting_override.html" %}
               <p>
                 You must provide the current authorisation code to commmence setup.
-                Depending on how your race server has been installed, this will
-                either be what you've set in your server environment or the default
-                that's shown in the documentation.
               </p>
+              {% if name in env_setting_overrides %}
+                {# special case, so not invoking _env_setting_override.html #}
+                <div class="alert-danger p-2 mb-2">
+                  <strong>The auth code has been declared as an environment variable</strong>:
+                  remember to remove that declaration when you finish setup. Otherwise
+                  the new value (that you're about to set below&nbsp;&darr;) will be
+                  overwritten back to <em>this</em> value when you next restart the server,
+                  because ENV declarations are automatically written into the database
+                  when the server starts.
+                </div>
+              {% else %}
+                You haven't explicitly set an authorisation code in your server
+                environemnt so you'll need to use the default that's shown in the
+                documentation.
+              {% endif %}
             </div>
           </div>
           <div class="row bg-white py-2 m-1">

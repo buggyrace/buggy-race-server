@@ -2,6 +2,21 @@
 {% extends "layout.html" %}
 {% block page_title %}Server error{% endblock %}
 {% block content %}
+{# special case for 500: show the init error like a flash message #}
+{% if config['INIT_ERROR_MESSAGE'] %}
+<div id="flash-msgs">
+  <div class="my-3">
+      <div class="row alert alert-danger my-2" style="margin:0 -0.25rem 0 -0.25rem;">
+        <div class="container">
+          <a class="close" title="Close" href="#" data-dismiss="alert">×</a>
+          <em>There was an error at start-up:</em>
+          <br>
+          {{ config['INIT_ERROR_MESSAGE'] }}
+        </div>
+      </div>
+  </div>
+</div>
+{% endif %}
 <div class="jumbotron text-center">
   <h1 class="display-4">500</h1>
   <p>

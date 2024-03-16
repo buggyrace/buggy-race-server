@@ -3,6 +3,7 @@
 import logging
 import sys
 from datetime import datetime, timezone
+from sqlalchemy.exc import OperationalError
 from os import path
 
 #import traceback # for debug/dev work
@@ -59,31 +60,35 @@ def create_app():
     csrf.exempt(app.blueprints['api'])
 
     # Flask's db migration needs to instantiate the app even though the
-    # database has not been initialised yet. Here's a bodge that truncates
-    # the app initialisation if it's for Flask DB.
-    
-    # this will throw an exception if there's no database connection
-    with app.app_context():
-        if has_settings_table():
-            print("[ ] settings/config table exists in database")
-        else:
-            print("[!] no settings/config table found: database isn't populated")
-            # this is catastrophic *unless* this is a Flask db operation...
-            # ...in which case it's trying to populate it, return 
-            if (
-                sys.argv[0].endswith("flask") and 
-                len(sys.argv) > 1 and sys.argv[1]=="db"
-            ):
-                print("[ ] but that's probably OK because this is a flask db operation")
-            # finish now, before trying to manipulate config in database
-            # this provides an app the flask db can work with, but it's not
-            # ready for running as the race server: issue a warning
-            print("WARNING: app had unpopulated database when created", file=sys.stderr)
-            return app 
+    # database has not been initialised yet.
 
-        save_config_env_overrides_to_db(app)
-        load_settings_from_db(app)
-        refresh_global_announcements(app)
+    with app.app_context():
+        try:
+            if has_settings_table():
+                print("[ ] settings/config table exists in database")
+            else:
+                print("[!] no settings/config table found: database isn't populated")
+                # this is catastrophic *unless* this is a Flask db operation...
+                # ...in which case it's trying to populate it, return 
+                if (
+                    sys.argv[0].endswith("flask") and 
+                    len(sys.argv) > 1 and sys.argv[1]=="db"
+                ):
+                    print("[ ] but that's probably OK because this is a flask db operation")
+                # finish now, before trying to manipulate config in database
+                # this provides an app the flask db can work with, but it's not
+                # ready for running as the race server: issue a warning
+                print("[!] WARNING: app had unpopulated database when created", file=sys.stderr)
+                return app 
+
+            save_config_env_overrides_to_db(app)
+            load_settings_from_db(app)
+            refresh_global_announcements(app)
+
+        except OperationalError as e:
+            print(f"[!] ERROR: database problem: {e}", file=sys.stderr)
+            app.config['INIT_ERROR_MESSAGE'] = """Database problem — probably
+              a failure to connect: check DATABASE_URL and error logs"""
 
     # must register any jinja filters before rendering any static content
     def get_servertime(utc_datetime):

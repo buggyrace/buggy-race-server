@@ -1735,7 +1735,7 @@ def show_system_info():
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
     db_url = current_app.config.get("DATABASE_URL")
     redacted_db_url = redact_password_in_database_url(db_url)
-    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    alchemy_db_url = current_app.config.get(ConfigSettings.SQLALCHEMY_DATABASE_URI_KEY)
     redacted_alchemy_db_url = redact_password_in_database_url(alchemy_db_url)
     try:
         result = subprocess.run(

@@ -86,9 +86,16 @@ def active_user_required(function):
         return function(*args, **kwargs)
     return wrapper
 
+# returns True is the settings table (where config is stored) exists
+# ...this is a useful check because if it doesn't the server can't run
+# but the app needs to be able to initialise without it if it's being
+# spun up as part of the initial flask db upgrade (i.e., when creating
+# the database). It's a chicken-and-egg situation because, normally,
+# the app initialisation reads settings from the database — any settings
+# declared in the environment are saved to that settings table.
 def has_settings_table():
-    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
-    engine = db.create_engine(alchemy_db_url)
+    db_uri = current_app.config.get(ConfigSettings.SQLALCHEMY_DATABASE_URI_KEY)
+    engine = db.create_engine(db_uri)
     return db.inspect(engine).has_table(Setting.__table__.name)
 
 def save_config_env_overrides_to_db(app):

@@ -1342,6 +1342,11 @@ class ConfigSettings:
     FORCED_DB_URI_SSL_MODE_KEY = "FORCED_DB_URI_SSL_MODE"
     BYPASSING_DB_CONFIG_KEY = "IS_BYPASSING_DB_CONFIG"
 
+    # SQLAlchemy database URL may differ from the "source" DATABASE_URL
+    # because (for example) Heroku's DATABASE_URL's Postgres protocol
+    # name is different from what SQLAlchemy needs
+    SQLALCHEMY_DATABASE_URI_KEY = "SQLALCHEMY_DATABASE_URI"
+
     @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
@@ -1606,4 +1611,7 @@ class ConfigFromEnv():
               sqlalchemy_database_uri += "&"
           sqlalchemy_database_uri += f"sslmode={forced_db_uri_ssl_mode_key}"
 
-      self.SQLALCHEMY_DATABASE_URI = sqlalchemy_database_uri
+      self.__setattr__(
+        ConfigSettings.SQLALCHEMY_DATABASE_URI_KEY,
+        sqlalchemy_database_uri
+      )

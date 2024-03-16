@@ -87,7 +87,8 @@ def active_user_required(function):
     return wrapper
 
 def has_settings_table():
-    engine = db.create_engine(current_app.config.get("DATABASE_URL"))
+    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    engine = db.create_engine(alchemy_db_url)
     return db.inspect(engine).has_table(Setting.__table__.name)
 
 def save_config_env_overrides_to_db(app):

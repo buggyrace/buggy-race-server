@@ -38,11 +38,11 @@
                 {# special case, so not invoking _env_setting_override.html #}
                 <div class="alert-danger p-2 mb-2">
                   <strong>The auth code has been declared as an environment variable</strong>:
-                  remember to remove that declaration when you finish setup. Otherwise
+                  remember to remove that declaration when you finish setup. If you don't,
                   the new value (that you're about to set below&nbsp;&darr;) will be
-                  overwritten back to <em>this</em> value when you next restart the server,
-                  because ENV declarations are automatically written into the database
-                  when the server starts.
+                  overwritten with <em>this</em> old value when you next restart the server...
+                  because ENV declarations always have priority, and are automatically
+                  (over)written into the database when the server starts.
                 </div>
               {% else %}
                 You haven't explicitly set an authorisation code in your server
@@ -73,6 +73,14 @@
                 colleagues) but can choose not to share the authorisation code
                 with them.
               </p>
+              {% if name in env_setting_overrides %}
+                <p>
+                  Unlike the current ENV setting, the auth code you set will be
+                  stored as a hash (not in plaintext), which is another reason
+                  why you should delete that declaration from your environment
+                  now you've finished with it.
+                </p>
+              {% endif %}
             </div>
           </div>
           <div class="row bg-white py-2 m-1">
@@ -100,6 +108,9 @@
               <p class="alert-danger p-2 mt-2">
                 This should not be the same as the authorisation code you're
                 also setting at this stage. 
+              </p>
+              <p>
+                All passwords are stored on the server as hashes.
               </p>
             </div>
           </div>

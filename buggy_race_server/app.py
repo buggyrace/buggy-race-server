@@ -65,29 +65,28 @@ def create_app():
     with app.app_context():
         try:
             if has_settings_table():
-                print("[ ] settings/config table exists in database")
+                print("[ ] OK: settings/config table exists in database")
+                save_config_env_overrides_to_db(app)
+                load_settings_from_db(app)
+                refresh_global_announcements(app)
             else:
-                print("[!] no settings/config table found: database isn't populated")
+                print("[!] WARNING: missing settings/config table: " +
+                  "app had unpopulated database when created", file=sys.stderr)
                 # this is catastrophic *unless* this is a Flask db operation...
                 # ...in which case it's trying to populate it, return 
                 if (
                     sys.argv[0].endswith("flask") and 
                     len(sys.argv) > 1 and sys.argv[1]=="db"
                 ):
-                    print("[ ] but that's probably OK because this is a flask db operation")
-                # finish now, before trying to manipulate config in database
-                # this provides an app the flask db can work with, but it's not
-                # ready for running as the race server: issue a warning
-                print("[!] WARNING: app had unpopulated database when created", file=sys.stderr)
-                return app 
-
-            save_config_env_overrides_to_db(app)
-            load_settings_from_db(app)
-            refresh_global_announcements(app)
+                    print("[ ] but that's probably OK because this is a flask db operation", file=sys.stderr)
+                # set initi config message in case this continues to run as
+                # a webserver (if this was a flask migration, it won't be)
+                app.config['INIT_ERROR_MESSAGE'] = """Warning: app had unpopulated database (missing table): 
+                  need to run migrations first, or schema.sql?"""
 
         except OperationalError as e:
             print(f"[!] ERROR: database problem: {e}", file=sys.stderr)
-            app.config['INIT_ERROR_MESSAGE'] = """Database problem — probably
+            app.config['INIT_ERROR_MESSAGE'] = """Database error — probably
               a failure to connect: check DATABASE_URL and error logs"""
 
     # must register any jinja filters before rendering any static content

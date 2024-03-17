@@ -46,7 +46,7 @@
                 </div>
               {% else %}
                 You haven't explicitly set an authorisation code in your server
-                environemnt so you'll need to use the default that's shown in the
+                environment so you'll need to use the default that's shown in the
                 documentation.
               {% endif %}
             </div>
@@ -75,10 +75,9 @@
               </p>
               {% if name in env_setting_overrides %}
                 <p>
-                  Unlike the current ENV setting, the auth code you set will be
-                  stored as a hash (not in plaintext), which is another reason
-                  why you should delete that declaration from your environment
-                  now you've finished with it.
+                  All passwords (including the auth code) are stored in the database
+                  as hashes, which is another reason why you should delete that old
+                  plaintext declaration from your environment once you've finished with it.
                 </p>
               {% endif %}
             </div>
@@ -108,9 +107,6 @@
               <p class="alert-danger p-2 mt-2">
                 This should not be the same as the authorisation code you're
                 also setting at this stage. 
-              </p>
-              <p>
-                All passwords are stored on the server as hashes.
               </p>
             </div>
           </div>

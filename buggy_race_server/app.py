@@ -65,7 +65,8 @@ def create_app():
     with app.app_context():
         try:
             if has_settings_table():
-                print("[ ] OK: settings/config table exists in database")
+                # settings/config table exists in database so migrations
+                # have probably been applied, and everything is OK
                 save_config_env_overrides_to_db(app)
                 load_settings_from_db(app)
                 refresh_global_announcements(app)
@@ -85,7 +86,7 @@ def create_app():
                   need to run migrations first, or schema.sql?"""
 
         except OperationalError as e:
-            print(f"[!] ERROR: database problem: {e}", file=sys.stderr)
+            print(f"* ERROR: database problem: {e}", file=sys.stderr)
             app.config['INIT_ERROR_MESSAGE'] = """Database error — probably
               a failure to connect: check DATABASE_URL and error logs"""
 

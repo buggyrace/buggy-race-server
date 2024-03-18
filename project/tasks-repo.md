@@ -19,9 +19,13 @@ need to get your own copy of it to a place where you can edit it and run it.
 
 * **If you are using Git**: you need to do `git clone` to get a copy of those
   files onto your own machine, and to do that you'll need to copy one of the
-  URLs (either starting with `httpsL` or `git:`). The difference between the
-  two is just (at this stage) about how Git connects to the repo, and might
-  not make any difference if the repo is public. 
+  URLs (either starting with `https:` or `git:`) — you choose between them by
+  clicking on HTTPS or SSH tab. The difference between the two is just (at this
+  stage) about how Git connects to the repo, and might not make any difference
+  if the repo is public. 
+
+* **If you are not using Git**: you can download the ZIP file instead. If you do
+  that you won't have any version control information when you unizp the files.
 
 ### Hints
 

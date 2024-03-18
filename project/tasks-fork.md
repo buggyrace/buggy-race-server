@@ -13,23 +13,38 @@ need to get your own copy of it to a place where you can edit it and run it.
   create one and log in.
 
 * Go to the [GitHub repo of the buggy editor](%BUGGY_EDITOR_GITHUB_URL%).
+  You can't make changes to this repo, but you can make your own copy of
+  it on GitHub by _forking_ it into your own account.
 
-* Click on 
+* Click on the **Fork** button (near the top right — you'll only see it if
+  you are logged into GitHub). This will clone a copy of the repo into your own
+  GitHub account. 
+  
+* Go back to your own GitHub account in the browser, and you'll see the forked
+  copy of the repo is now there: navigate to it by clicking on the title.
 
+* Click on the green **Code** button to get the code:
 
 * **If you are using Git**: you need to do `git clone` to get a copy of those
   files onto your own machine, and to do that you'll need to copy one of the
-  URLs (either starting with `httpsL` or `git:`). The difference between the
+  URLs (either starting with `https:` or `git:`). The difference between the
   two is just (at this stage) about how Git connects to the repo, and might
-  not make any difference if the repo is public. 
+  not make any difference if the repo is public. Click on either HTTPS or SSH
+  and copy the command shown in that tab. You'll need to use this URL as
+  the argument to the `git clone` command on the command line of your own
+  machine.
+
+* **If you are not using Git**: you can download the ZIP file instead. If you
+  do that you won't have any version control information when you unizp the
+  files.
 
 ### Hints
 
-* If you clone the repo, remember that you won't be able to push any changes
-  back up (because you don't have write permission on that repo). If you
-  want to be able to do that (it's handy for backing up, sharing code, and
-  using GitHub issues and other tools), you should *fork* the repo into
-  your own GitHub account first, and then `git clone` from that.
+* If you clone the repo from GitHub, remember that you will only be able to push
+  any changes back up if you have write permission on that repo. That's why
+  you forked the original repo into your own GitHub account first. If you clone
+  directly from the original repo, you won't be able to push any changes back
+  up.
 
 * If you download a zip, make sure you unzip the files into a directory
   that is in a suitable place and you'll be able to find.

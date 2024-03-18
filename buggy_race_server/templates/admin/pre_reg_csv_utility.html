@@ -154,6 +154,8 @@ const dp_nouns = ["png", "qbt", "zbhfr", "chccl", "ryrcunag", "yvba",
   "tvenssr", "purrgnu", "ulran", "bfgevpu", "tnmryyr", "vzcnyn", "qentba",
   "wnthne", "yrbcneq", "fybgu", "neznqvyyb", "gncve", "yrzhe", "zrrexng"];
 const DUMMY_COL_NAME = "_empty";
+const EMPTY_CSV_LINE_REGEX = /^(\s|,)*$/;
+
 function rot13(str){
   return str.replace(
     /[a-z]/gi,
@@ -486,6 +488,16 @@ function construct_download_csv(){
 
 } // -----------------------------------------------------------------
 
+function strip_empty_lines(dirty_lines){
+  let populated_lines = [];
+  for (let line of dirty_lines){
+    if (! line.match(EMPTY_CSV_LINE_REGEX)) {
+      populated_lines.push(line);
+    }
+  }
+  return populated_lines
+}
+
 function clear_display(){
    // clear display after a CSV file is uploaded, forcing the
    // show options button to be pressed to display it: this is because
@@ -502,7 +514,7 @@ function clear_display(){
 csv_file_primary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
-        csv_primary_rows = GetCsvFile.result.split("\n");
+        csv_primary_rows = strip_empty_lines(GetCsvFile.result.split("\n"));
         clear_display();
         join_col_index = find_join_col_index();
     }
@@ -512,7 +524,7 @@ csv_file_primary.addEventListener("change", function(){
 csv_file_secondary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
-        csv_secondary_rows = GetCsvFile.result.split("\n");
+        csv_secondary_rows = strip_empty_lines(GetCsvFile.result.split("\n"));
         clear_display();
         join_col_index = find_join_col_index();
     }

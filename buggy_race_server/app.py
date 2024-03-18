@@ -3,6 +3,7 @@
 import logging
 import sys
 from datetime import datetime, timezone
+from sqlalchemy.exc import OperationalError
 from os import path
 
 #import traceback # for debug/dev work
@@ -21,6 +22,7 @@ from buggy_race_server.utils import (
     load_settings_from_db,
     servertime_str,
     join_to_project_root,
+    has_settings_table,
 )
 from buggy_race_server.admin.models import Announcement
 from buggy_race_server.config import ConfigSettings, ConfigSettingNames
@@ -58,32 +60,35 @@ def create_app():
     csrf.exempt(app.blueprints['api'])
 
     # Flask's db migration needs to instantiate the app even though the
-    # database has not been initialised yet. Here's a bodge that truncates
-    # the app initialisation if it's for Flask DB.
-    is_bypassing_db_config = None
-    if app.config.get(ConfigSettings.BYPASSING_DB_CONFIG_KEY) is not None:
-        is_bypassing_db_config = bool(
-            str(app.config[ConfigSettings.BYPASSING_DB_CONFIG_KEY])=="1"
-        )
-        print(f"[ ] {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is set: {is_bypassing_db_config}")
-    elif (
-        sys.argv[0].endswith("flask") and 
-        len(sys.argv) > 1 and sys.argv[1]=="db"
-    ):
-        is_bypassing_db_config = True
-        print(
-            f"[ ] flask db detected "
-            f"(and {ConfigSettings.BYPASSING_DB_CONFIG_KEY} is not set)"
-        )
-    if is_bypassing_db_config:
-        print("[ ] bypassing database read (for config settings)")
-        return app
+    # database has not been initialised yet.
 
-    # this will throw an exception if there's no database connection
     with app.app_context():
-        save_config_env_overrides_to_db(app)
-        load_settings_from_db(app)
-        refresh_global_announcements(app)
+        try:
+            if has_settings_table():
+                # settings/config table exists in database so migrations
+                # have probably been applied, and everything is OK
+                save_config_env_overrides_to_db(app)
+                load_settings_from_db(app)
+                refresh_global_announcements(app)
+            else:
+                print("[!] WARNING: missing settings/config table: " +
+                  "app had unpopulated database when created", file=sys.stderr)
+                # this is catastrophic *unless* this is a Flask db operation...
+                # ...in which case it's trying to populate it, return 
+                if (
+                    sys.argv[0].endswith("flask") and 
+                    len(sys.argv) > 1 and sys.argv[1]=="db"
+                ):
+                    print("[ ] but that's probably OK because this is a flask db operation", file=sys.stderr)
+                # set initi config message in case this continues to run as
+                # a webserver (if this was a flask migration, it won't be)
+                app.config['INIT_ERROR_MESSAGE'] = """Warning: app had unpopulated database (missing table): 
+                  need to run migrations first, or schema.sql?"""
+
+        except OperationalError as e:
+            print(f"* ERROR: database problem: {e}", file=sys.stderr)
+            app.config['INIT_ERROR_MESSAGE'] = """Database error — probably
+              a failure to connect: check DATABASE_URL and error logs"""
 
     # must register any jinja filters before rendering any static content
     def get_servertime(utc_datetime):

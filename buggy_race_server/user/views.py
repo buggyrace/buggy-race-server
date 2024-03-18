@@ -73,7 +73,7 @@ def submit_buggy_data():
     if (
         current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
         and
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK]
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
         and
         not current_user.is_github_connected()
     ):

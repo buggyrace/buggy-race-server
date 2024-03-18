@@ -86,6 +86,18 @@ def active_user_required(function):
         return function(*args, **kwargs)
     return wrapper
 
+# returns True is the settings table (where config is stored) exists
+# ...this is a useful check because if it doesn't the server can't run
+# but the app needs to be able to initialise without it if it's being
+# spun up as part of the initial flask db upgrade (i.e., when creating
+# the database). It's a chicken-and-egg situation because, normally,
+# the app initialisation reads settings from the database — any settings
+# declared in the environment are saved to that settings table.
+def has_settings_table():
+    db_uri = current_app.config.get(ConfigSettings.SQLALCHEMY_DATABASE_URI_KEY)
+    engine = db.create_engine(db_uri)
+    return db.inspect(engine).has_table(Setting.__table__.name)
+
 def save_config_env_overrides_to_db(app):
     """ Saves each config setting that's in the app config into the database.
       This is specifically used when the app starts up, to save any settings
@@ -93,11 +105,12 @@ def save_config_env_overrides_to_db(app):
       the app then loads the entire config — including defaults — back from
       the database. This mechanism allows ENV overriding of bad/broken config.
     """
-    for name in app.config.get(ConfigSettings.ENV_SETTING_OVERRIDES_KEY):
-        value = app.config.get(name) # expecting a value here
-        if value is not None:
-            set_and_save_config_setting(app, name, value)
-            print(f"* written {name} config setting (from ENV) into database", flush=True)
+    if not str(app.config.get(ConfigSettings.BYPASSING_DB_CONFIG_KEY))=="1":
+        for name in app.config.get(ConfigSettings.ENV_SETTING_OVERRIDES_KEY):
+            value = app.config.get(name) # expecting a value here
+            if value is not None:
+                set_and_save_config_setting(app, name, value)
+                print(f"* written {name} config setting (from ENV) into database", flush=True)
 
 def load_settings_from_db(app):
     """ Read settings from db and set the app's config appropriately.

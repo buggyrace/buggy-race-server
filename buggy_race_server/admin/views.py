@@ -380,15 +380,6 @@ def setup():
         flash("Cannot continue setup in this session (maybe someone else is already setting up?)", "warning")
         abort(403)
     qty_setup_steps = len(ConfigSettings.SETUP_GROUPS)
-    if setup_status >= qty_setup_steps:
-        setup_status = 0
-        set_and_save_config_setting(
-          current_app,
-          ConfigSettingNames._SETUP_STATUS.name,
-          setup_status
-        )
-        flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
-        return setup_summary()
     if setup_status == 1:
         form = SetupAuthForm(request.form)
         # here we grant this session (effectively, this user) setup status
@@ -456,6 +447,15 @@ def setup():
                     pass
         else:
             _flash_errors(form)
+    if setup_status > qty_setup_steps:
+        setup_status = 0
+        set_and_save_config_setting(
+          current_app,
+          ConfigSettingNames._SETUP_STATUS.name,
+          setup_status
+        )
+        flash("Setup complete: you can now publish tech notes, add/edit tasks, and register users", "success")
+        return setup_summary()
     group_name = ConfigSettings.SETUP_GROUPS[setup_status-1]
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
     html_descriptions = { 
@@ -1735,7 +1735,7 @@ def show_system_info():
     # mysql+mysqlconnector://beholder:XXXXX@localhost:8889/buggydev
     db_url = current_app.config.get("DATABASE_URL")
     redacted_db_url = redact_password_in_database_url(db_url)
-    alchemy_db_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
+    alchemy_db_url = current_app.config.get(ConfigSettings.SQLALCHEMY_DATABASE_URI_KEY)
     redacted_alchemy_db_url = redact_password_in_database_url(alchemy_db_url)
     try:
         result = subprocess.run(

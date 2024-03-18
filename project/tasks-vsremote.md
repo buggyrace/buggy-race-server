@@ -26,31 +26,29 @@ to happen:
 * Download your *VSCode workspace configuration file* by clicking in the
   corresponding button. Store it somewhere safe.
 * Open it with VSCode. It might complain that some plugins and packages are
-  missing. **Do not despair**, VSCode will kindly offer to install everything
-  that is necessary.
+  missing — if so, confirm at the prompt to let VSCode install the missing
+  packages.
 * You will be asked to input your college password a couple of times. Just type
   it every time it is requested. Wait for a bit.
 
 
-After VSCodes finishes connecting you to our *teaching server*, it will be time
-to get the code from Github, to your personal home directory in the server.
-Do not worry, we have also automated this for you. To get a copy of your buggy
-race editor repo to the server, do:
+When VSCode has finished connecting you to our *teaching server*, you need to
+clone the repo from GitHub into your personal home directory on the server:
 
-* go to the *terminal* tab in VSCode, located in the top panel. Then, click on
+* go to the *terminal* tab in VSCode, located in the top panel. Click on
   *run task* and a list of tasks will appear. Choose the one starting with
   `git clone https://github.com/` and wait.
 * The previous step *cloned* your **remote Github repository** to a **local
-  version** which, in this case, lives in the teaching server!
-* If you click on *Open file* and you look in your *home directory*, you should
+  version** which, in this case, lives in the teaching server.
+* If you click on *Open file* and you look in your *home directory*, you will
   find a folder with a name `%BUGGY_EDITOR_REPO_NAME%`.
 * Open that folder and compare its contents against those in the remote repo you
-  previously forked, they are the same!
+  previously forked: they are the same, because it's a clone of that repo.
 * You might get asked for your college password a couple of times in the above
   step, this is normal.
 * If the `%BUGGY_EDITOR_REPO_NAME%` folder **is not** in your home directory,
   then probably something went wrong. Try to reproduce the above steps once
-  more.
+  more, or ask for help.
 
 
 ### Hints
@@ -164,10 +162,6 @@ browser at.
 > different from our teaching server. To do that, you need to copy the files up
 > onto that remote machine and configure it to run up there. That's not part of
 > _this_ project, but if you are already familiar with remote webservers, you're
-> welcome to give that a go. For example, you may be able to install on
-> [heroku](https://heroku.com), which is a free hosting service. The advantage
-> is you (or anyone online) can reach this from any browser, not just one on
-> your own machine. Heads up: you'll probably need to set up a production
-> database that isn't SQLite.
+> welcome to give that a go. 
 >
 > Hosting **is not part of this project** — work on localhost please.

@@ -229,7 +229,11 @@ class SubmitWithAuthForm(FlaskForm):
 
 class GenerateTasksForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
-    is_confirmed = BooleanField("You cannot undo this. Are you sure?")
+    # the confirmation is only requested if there are existing tasks
+    is_confirmed = BooleanField(
+      """All tasks on the server will be deleted and replaced by these new ones.
+      You cannot undo this. Are you sure?"""
+    )
     distrib_method = StringField("Distribution method", [Optional()])
     markdown_file =FileField(
       "Upload a markdown file describing the tasks",

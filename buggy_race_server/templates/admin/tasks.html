@@ -144,43 +144,52 @@
       {% if tasks %}
         <div class="alert alert-danger">
           <strong>
-            Loading tasks now will delete all existing tasks!
+            Loading tasks now will delete all existing tasks! See notes below&nbsp;&darr;
           </strong>
         </div>
       {% endif %}
       <form method="POST" action="{{ url_for('admin.tasks_admin') }}" enctype="multipart/form-data" role="form">
         {{ form.csrf_token }}
         <div class="container alert-warning border border-warning my-3 p-0">
-          <h2 class="alert-title m-0">Use in-built defaults</h2>
-          <div class="row">
-            <div class="col">
-              <div class="p-3">
-                <label for="distrib_method" class="d-block">
-                  How are you distributing the buggy editor source code?
-                  <br>
-                  (This affects tasks 0-GET and 0-RUN).
-                </label>
-                <select name="distrib_method" class="form-control">
-                  {% for method in distrib_methods %}
-                    <option value="{{ method.value }}">{{ method.desc }}</option>
-                  {% endfor %}
-                </select>
-                <p class="my-2">
-                  Be careful: the distribution method you choose must
-                  match the config settings you've chosen.
-                </p>
+          <div class="tabs">
+            <div class="tab">
+              <input type="radio" class="tab-itself" id="tab-1" name="tab-group-1" checked>
+              <label for="tab-1" class="tab-itself">Use defaults</label>
+              <div class="tab-content">
+                <h4>Use built-in default tasks</h4>
+                <div class="float-right">
+                  {{ macros.docs_btn("Distributing the source code", "/buggy-editor/distributing-the-code") }}
+                </div>
+                <div class="p-3">
+                  <label for="distrib_method" class="d-block">
+                    How are you distributing the buggy editor source code?
+                    <br>
+                    (This affects tasks 0-GET and 0-RUN).
+                  </label>
+                  <select name="distrib_method" class="form-control">
+                    {% for method in distrib_methods %}
+                      <option value="{{ method.value }}">{{ method.desc }}</option>
+                    {% endfor %}
+                  </select>
+                  <p class="my-2">
+                    Be careful: the distribution method you choose must
+                    match the config settings you've already set.
+                  </p>
+                </div>
               </div>
-          </div>
-          </div>
-          <h2 class="alert-title m-0">...or upload your own customised file</h2>
-          <div class="row">
-            <div class="col">
-              <div class="p-3">
-                {{ form.markdown_file.label(class="d-block") }}
-                {{ form.markdown_file() }}
-                <p class="mt-2">
-                    &uarr; leave blank to load the default tasks
-                </p>
+            </div>
+            <div class="tab">
+              <input type="radio" class="tab-itself" id="tab-2" name="tab-group-1">
+              <label for="tab-2" class="tab-itself">Upload custom markdown</label>
+              <div class="tab-content">
+                <h4>Upload your own customised file containing all tasks</h4>
+                <div class="p-3">
+                  {{ form.markdown_file.label(class="d-block") }}
+                  {{ form.markdown_file() }}
+                  <p class="mt-2">
+                     If you don't have such a file yet, download it (see notes and buttons below&nbsp;&darr;)
+                  </p>
+                </div>
               </div>
             </div>
           </div>

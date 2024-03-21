@@ -839,7 +839,7 @@ class ConfigSettings:
           static content, this CSS toggle is implemented in JavaScript. This
           feature is an in-joke that only need be engaged if you are feeling
           playful, or if there are academics in your institution who might be
-          horrified by the prospect of reading text in on anything other than
+          horrified by the prospect of reading text on anything other than
           crisp white paper in Computer Modern font.""",
 
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:

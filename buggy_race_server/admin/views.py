@@ -1513,7 +1513,10 @@ def tasks_load():
 @admin_only
 def tasks_admin():
     form = GeneralSubmitForm(request.form) # just for csrf on publish button
-    is_fresh_update = False
+    tasks_loaded_at = current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name]
+    tasks_published_at = current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name]
+    is_fresh_update = tasks_loaded_at and tasks_published_at and \
+                      (tasks_published_at < tasks_loaded_at)
     want_all = request.path.endswith("all")
     tasks = Task.query.order_by(
         Task.phase.asc(),

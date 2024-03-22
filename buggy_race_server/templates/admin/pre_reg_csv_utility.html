@@ -153,6 +153,9 @@ const dp_nouns = ["png", "qbt", "zbhfr", "chccl", "ryrcunag", "yvba",
   "zbfdhvgb", "fcvqre", "jbez", "pnzry", "mroen", "euvab", "uvccb",
   "tvenssr", "purrgnu", "ulran", "bfgevpu", "tnmryyr", "vzcnyn", "qentba",
   "wnthne", "yrbcneq", "fybgu", "neznqvyyb", "gncve", "yrzhe", "zrrexng"];
+const DUMMY_COL_NAME = "_empty";
+const EMPTY_CSV_LINE_REGEX = /^(\s|,)*$/;
+
 function rot13(str){
   return str.replace(
     /[a-z]/gi,
@@ -226,8 +229,18 @@ function populate_select_inputs(){
   select_container.classList.add("hidden");
   let primary_cols = csv_primary_rows.length? comma_split(csv_primary_rows[0]) : [];
   let secondary_cols = csv_secondary_rows.length? comma_split(csv_secondary_rows[0]) : [];
-  if (primary_cols.length < 2) {
-    display_error("Source CSV file must have at least two columns (or maybe that's not really a CSV file?)");
+  if (primary_cols.length == 1) {
+    // special case: uploaded just a column of names, want to add password
+    // this is a bit of a bodge, and means any text file is mistaken for CSV
+    // but is probably more helpful than not
+    primary_cols.push(DUMMY_COL_NAME);
+    csv_primary_rows[0] += "," + DUMMY_COL_NAME;
+    for (let i=1; i < csv_primary_rows.length; i++){
+      csv_primary_rows[i] += ","; // add empty column
+    }
+  }
+  if (primary_cols.length < 2) { // used to be 2, but it may be useful to upload names only
+    display_error("Source CSV file must have at least one column (or maybe that's not really a CSV file?)");
     return
   }
   if (csv_secondary_rows.length > 0 && secondary_cols.length < 2) {
@@ -260,6 +273,9 @@ function populate_select_inputs(){
       opt_group.setAttribute("label", "From source CSV:");
       select.appendChild(opt_group);
       for (let source_col of primary_cols) {
+        if (source_col === DUMMY_COL_NAME) {
+          continue;
+        }
         opt = document.createElement("option");
         opt.innerText = source_col;
         opt.setAttribute("value", "1:"+source_col)
@@ -472,6 +488,16 @@ function construct_download_csv(){
 
 } // -----------------------------------------------------------------
 
+function strip_empty_lines(dirty_lines){
+  let populated_lines = [];
+  for (let line of dirty_lines){
+    if (! line.match(EMPTY_CSV_LINE_REGEX)) {
+      populated_lines.push(line);
+    }
+  }
+  return populated_lines
+}
+
 function clear_display(){
    // clear display after a CSV file is uploaded, forcing the
    // show options button to be pressed to display it: this is because
@@ -488,7 +514,7 @@ function clear_display(){
 csv_file_primary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
-        csv_primary_rows = GetCsvFile.result.split("\n");
+        csv_primary_rows = strip_empty_lines(GetCsvFile.result.split("\n"));
         clear_display();
         join_col_index = find_join_col_index();
     }
@@ -498,7 +524,7 @@ csv_file_primary.addEventListener("change", function(){
 csv_file_secondary.addEventListener("change", function(){
     let GetCsvFile = new FileReader();
     GetCsvFile .onload=function(){
-        csv_secondary_rows = GetCsvFile.result.split("\n");
+        csv_secondary_rows = strip_empty_lines(GetCsvFile.result.split("\n"));
         clear_display();
         join_col_index = find_join_col_index();
     }

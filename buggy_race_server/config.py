@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.4"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.41"
 #
 # ----------------------------------------------------------------------------
 
@@ -839,7 +839,7 @@ class ConfigSettings:
           static content, this CSS toggle is implemented in JavaScript. This
           feature is an in-joke that only need be engaged if you are feeling
           playful, or if there are academics in your institution who might be
-          horrified by the prospect of reading text in on anything other than
+          horrified by the prospect of reading text on anything other than
           crisp white paper in Computer Modern font.""",
 
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name:
@@ -1451,6 +1451,48 @@ class ConfigSettings:
         is_enabled_dict = ConfigSettings.users_additional_fieldnames_is_enabled_dict(app)
         return [ field for field in is_enabled_dict if is_enabled_dict[field] ]
 
+    @staticmethod
+    def get_extra_names_for_config_dump():
+      return [
+        ConfigSettings.CACHEBUSTER_KEY,
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+        ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
+        ConfigSettingNames._IS_DEMO_SERVER.name,
+        ConfigSettingNames._EDITOR_INPUT_DIR.name,
+        ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
+        ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,
+        ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
+        ConfigSettingNames._RACE_ASSETS_PATH.name,
+        ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
+        ConfigSettingNames._PUBLISHED_PATH.name,
+        ConfigSettingNames._SETUP_STATUS.name,
+        ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
+        ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
+        ConfigSettingNames._TASKS_LOADED_DATETIME.name,
+        ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,
+        ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name,
+        ConfigSettingNames._TECH_NOTES_CONFIG_PATH.name,
+        ConfigSettingNames._TECH_NOTES_CONFIG_PUBLISH_NAME.name,
+        ConfigSettingNames._TECH_NOTES_CONTENT_DIR.name,
+        ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name,
+        ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name,
+        ConfigSettingNames._TECH_NOTES_PAGES_DIR.name,
+        ConfigSettingNames._TECH_NOTES_PATH.name,
+        "BCRYPT_LOG_ROUNDS",
+        "CACHE_TYPE",
+        "DEBUG_TB_ENABLED",
+        "DEBUG_TB_INTERCEPT_REDIRECTS",
+        "FLASK_APP",
+        "FLASK_DEBUG",
+        "FLASK_ENV",
+        "GUNICORN_WORKERS",
+        "JSONIFY_PRETTYPRINT_REGULAR",
+        "LOG_LEVEL",
+        "SEND_FILE_MAX_AGE_DEFAULT",
+        "SQLALCHEMY_TRACK_MODIFICATIONS",
+        "UPLOAD_FOLDER",
+        "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
+      ]
 
 class AnnouncementTypes(Enum):
     """ Control what announcements are supported, and where they go """

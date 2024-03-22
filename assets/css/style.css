@@ -803,3 +803,54 @@ body.race-player main {
   cursor:pointer;
   background-color: #dddddd;
 }
+
+
+.tabs {
+  /* background-color:white; */
+  position: relative;   
+  min-height: 18rem; /* This part sucks: because absolute positioning */
+  clear: both;
+  margin: 1rem;
+}
+.tabs .tab {
+  float: left;
+}
+.tabs .tab label.tab-itself {
+  height:3rem;
+  min-height:3rem;
+  background: #eee; 
+  padding: 10px; 
+  border: 1px solid #ccc; 
+  margin: 0 1rem -2px 0; 
+  position: relative;
+  left: 1px; 
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.tabs .tab .tab-itself[type=radio] {
+  display: none;
+}
+.tabs .tab-content {
+  position: absolute;
+  top: 2.9rem; /* just under 3rem, to overlap tab-itself borders */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem;
+  border: 1px solid #ccc; 
+  background-color:#ffffff;
+  visibility: hidden;
+}
+.tabs [type=radio]:checked ~ label.tab-itself {
+  background-color: #ffffff;
+  border-bottom:1px solid #ffffff;
+  z-index: 2;
+  visibility: visible;
+}
+.tabs [type=radio]:checked ~ label.tab-itself ~ .tab-content {
+  z-index: 1;
+  visibility: visible;
+}
+.tab-content h4 {
+  margin-left: 1rem;
+}

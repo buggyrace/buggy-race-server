@@ -14,24 +14,13 @@
       <div class="col">
         <div class="alert alert-warning my-3">
           <strong>There are no tasks in the project</strong>
-          <br>
-          You need to <strong>Load new tasks into database</strong> (red
-          button, below):
-          <ul>
-            <li>
-              If you don't upload a file, the server will use the built-in
-              default project tasks (which is OK!).
-            </li>
-            <li>
-              Otherwise, if you want to use your own tasks, choose
-              <strong>Download tasks as Markdown</strong>, edit it,
-              and upload that.
-            </li>
-          </ul>
         </div>
       </div>
     </div>
   {% endif %}
+  <p class="btn-collection">
+    <a href="{{ url_for('admin.tasks_load') }}" class="btn btn-outline-secondary btn-admin btn-jump">Load or bulk-edit tasks</a>
+  </p>
 
   <div class="row mb-3">
     <div class="col-md-6 mb-3">
@@ -122,142 +111,7 @@
       </div>
     </div>
   {% endif %}
-  <div class="row mt-5">
-    <div class="col">
-      <h2>Loading tasks</h2>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <div class="container border mb-2">
-        <div class="row py-3">
-          <div class="col">
-            {% if tasks_loaded_at %}
-              Tasks loaded into&nbsp;database: {{ tasks_loaded_at | servertime }}
-            {% else %}
-              Missing timestamp
-              (maybe no tasks have been loaded&nbsp;yet)
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      {% if tasks %}
-        <div class="alert alert-danger">
-          <strong>
-            Loading tasks now will delete all existing tasks!
-          </strong>
-        </div>
-      {% endif %}
-      <form method="POST" action="{{ url_for('admin.tasks_admin') }}" enctype="multipart/form-data" role="form">
-        {{ form.csrf_token }}
-        <div class="container alert-warning border border-warning my-3 p-0">
-          <h2 class="alert-title m-0">Use in-built defaults</h2>
-          <div class="row">
-            <div class="col">
-              <div class="p-3">
-                <label for="distrib_method" class="d-block">
-                  How are you distributing the buggy editor source code?
-                  <br>
-                  (This affects tasks 0-GET and 0-RUN).
-                </label>
-                <select name="distrib_method" class="form-control">
-                  {% for method in distrib_methods %}
-                    <option value="{{ method.value }}">{{ method.desc }}</option>
-                  {% endfor %}
-                </select>
-                <p class="my-2">
-                  Be careful: the distribution method you choose must
-                  match the config settings you've chosen.
-                </p>
-              </div>
-          </div>
-          </div>
-          <h2 class="alert-title m-0">...or upload your own customised file</h2>
-          <div class="row">
-            <div class="col">
-              <div class="p-3">
-                {{ form.markdown_file.label(class="d-block") }}
-                {{ form.markdown_file() }}
-                <p class="mt-2">
-                    &uarr; leave blank to load the default tasks
-                </p>
-              </div>
-            </div>
-          </div>
-          {% if tasks %}
-            <div class="row">
-              <div class="col p-3">
-                {{ form.is_confirmed.label(class="mx-3") }}
-                <div class="col-sm-8">
-                  <select id="is_confirmed" name="is_confirmed" class="form-control">
-                    <option selected value="">No</option>
-                    <option value="">I think so</option>
-                    <option value="y">Yes</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          {% else %}
-            <input type="hidden" name="is_confirmed" value="y"/>
-          {% endif %}
-          <div class="row">
-            <div class="col">
-              <div class="container bg-warning">
-                <div class="p-3">
-                  {{ form.auth_code.label(class="") }}
-                  {{ form.auth_code(class_="mx-0 form-control") }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col p-3">
-              <input type="submit" value="Load tasks into database" class="btn btn-danger m-3"/>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <p>
-        Loading the tasks <strong>deletes all existing tasks</strong>
-        from the database (including any edits you may have made), and
-        replaces them with the new ones.
-        Only do this if you are sure you want to: really, it only makes
-        sense to do this <strong>before the project has started</strong>.
-        After that, if you need to change tasks, you should edit them
-        (above, on this page) rather than generating them.
-      </p>
-      <p>
-        If you want to load your own customised tasks, download
-        the default tasks and edit them (look inside that file
-        to see the markdown syntax: <code>#</code> (<code>h1</code>)
-        for phase-name, <code>##</code>  (<code>h2</code>) for title,
-        and so on). Then upload your edited file to load the tasks.
-      </p>
-      <p>
-        <em>Current</em> tasks include any edits you have made to the tasks
-        since installation. <em>Default</em> tasks are the "factory reset"
-        version and assume the default distribution method (which is 
-        <em>downloading a zipfile from this server</em>). If you want to force
-        a different distribution method, first load the default tasks with
-        that choice, and then download the <em>current</em> tasks.
-      </p>
-    </div>
-    <div class="col-md-6">
-      <p class="btn-collection mb-4">
-        <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
-        class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>current</strong>
-        tasks as Markdown</a>
-        <a href="{{ url_for('admin.download_tasks', type='default', format='md') }}"
-        class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>default</strong>
-        tasks as Markdown</a>
-      </p>
-      {%include "admin/_task_markdown_aside.html" %}
-    </div>
-  </div>
+  
   <div class="row my-4">
     <div class="col">
       <h2>Task summary CSV (for issues) </h2>
@@ -284,7 +138,7 @@
         <a href="{{ url_for('public.tasks_as_issues_csv') }}"
         class="btn btn-outline-secondary btn-white btn-download">Download published issues CSV</a>
         <a href="{{ url_for('admin.download_tasks', type='current', format='csv') }}"
-        class="btn btn-outline-secondary btn-admin btn-download">Download <strong>current</strong>tasks as issues CSV</a>
+        class="btn btn-outline-secondary btn-admin btn-download">Download <strong>current</strong> tasks as issues CSV</a>
       </p>
       <p>
         Check that the config settings it uses (shown below) are correct,

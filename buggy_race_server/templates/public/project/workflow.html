@@ -151,13 +151,26 @@
           <a class="toclink" href="#sign-in-to-github">sign in to GitHub</a>
         </h3>
         <p>
-          You'll need to register a new account on
-          <a href="https://github.com">GitHub</a>
-          if you haven't already got one. Then, log into your GitHub account (it makes
-          the next step slightly easier if you're <em>already</em> logged in there).
+          If you haven't already got a GitHub account, you'll need to register
+          a new account on <a href="https://github.com">GitHub</a>.
+          <br>
+          Log into your GitHub account.
         </p>
       </li>
-      {% if is_using_github_api_to_fork %}
+      {% if not is_using_github_api_to_fork %}
+        <li>
+          <h3 id="manually-fork">
+            <a class="toclink" href="#manually-fork">fork the repo</a>
+          </h3>
+          <p>
+            (You must be logged into GitHub to do this).<br>
+            Go to the <a href="{{ buggy_editor_github_url }}">buggy editor repo</a>
+            and <em>fork</em> it into your account by clicking on the "fork" button
+            near the top right of the page. This makes your own copy of
+            the buggy editor repo in your own GitHub account.
+          </p>
+        </li>
+      {% else %}
         <li>
           <h3 id="connect-to-github">
             <a class="toclink" href="#connect-to-github">connect to GitHub</a>
@@ -202,6 +215,24 @@
             <a class="toclink" href="#clone-your-repo">clone your repo</a>
         </h3>
         <p>
+          Now clone <em>your</em> copy of the buggy editor repo (that's
+          the one you just forked into your own GitHub account) onto your
+          own machine, if you can. Find the repo in your own GitHub account
+          and click on the green <strong>Code</strong> button to get the URL
+          of the repo (it's either <code>https:</code> or <code>git@</code>
+          depending on what authentication you've got set up).
+        </p>
+        <p>
+          The basic way to do this is to <code>cd</code> to the directory where
+          you want to work, and do<br>
+          <code>git clone <em>&lt;URL&gt;</em></code>
+        </p>
+        <p>
+          If you can't get past this stage, ask for help!
+        </p>
+      </li>
+        <!--
+        <p>
           There are a number of ways to do this but the one we suggest is using VSCode
           (video:
           <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=62729d9b-9202-4686-90f6-ae8d002c0a88">0-GET VSCode</a>)
@@ -225,6 +256,7 @@
             installing python, pip and sqlite3 locally on your computer).
           </li>
         </ul>
+        -->
         <!--
           <p>
             If you're feeling up to the challenge of using git, we have some options for you!
@@ -246,7 +278,7 @@
         {# note this is very dependent on how the project is being run: should be a custom edit #}
         <p>
           Get your copy of the editor code. You can download it from GitHub but going to
-          <a href="buggy_editor_github_url">the buggy editor repo</a> and clicking on the
+          <a href="{{ buggy_editor_github_url }}">the buggy editor repo</a> and clicking on the
           green <strong>Code</strong> button:
         </p>
         <ul>
@@ -296,34 +328,18 @@
      IDE that takes care of this for you, it might not be important).
     </p>
    </li>
-   <li class="optional">
+   <li>
     <h3 id="got-python">
      <a class="toclink" href="#got-python">got Python?</a>
     </h3>
     <p>
      Check you've got Python3 installed on your machine and you know how to run it.
     </p>
-   </li>
-   <li class="optional">
-    <h3 id="load-the-modules">
-     <a class="toclink" href="#load-the-modules">load the modules</a>
-    </h3>
     <p>
-     Load the Python modules the Buggy Editor needs: this is what
-     <a href="https://pip.pypa.io/en/stable/installing/">pip</a>
-     does. The modules you need are listed in <code>requirements.txt</code>
-     so do <code>pip&nbsp;install&nbsp;-r&nbsp;requirements.txt</code>.
+      Doing <code>python3 --version</code> might be enough to confirm it's good to go
+      (it depends how it was installed on the machine you're working on).
     </p>
-    <p>
-     You can look inside<code>requirements.txt</code> of course (but don't
-     change it) — you won't be surprised to see Flask in there.
-    </p>
-    <p>
-     You only need to install the modules once. But it's safe to accidentally
-     pip install things twice: nothing bad happens, pip just tells you
-     "already satisfied".
-    </p>
-   </li>
+  </li>
    <li class="optional">
     <h3 id="create-virtual-env">
      <a class="toclink" href="#create-virtual-env">create virtual env</a>
@@ -348,6 +364,26 @@
      <a href="https://docs.python.org/3/library/venv.html">activate</a>
      it. There is an activate script/command in the <code>venv</code>
      directory you made: find it and run it (slightly different for Windows/Unix).
+    </p>
+   </li>
+   <li>
+    <h3 id="load-the-modules">
+     <a class="toclink" href="#load-the-modules">load the modules</a>
+    </h3>
+    <p>
+     Load the Python modules the Buggy Editor needs: this is what
+     <a href="https://pip.pypa.io/en/stable/installing/">pip</a>
+     does. The modules you need are listed in <code>requirements.txt</code>
+     so do <code>pip&nbsp;install&nbsp;-r&nbsp;requirements.txt</code>.
+    </p>
+    <p>
+     You can look inside<code>requirements.txt</code> of course (but don't
+     change it) — you won't be surprised to see Flask in there.
+    </p>
+    <p>
+     You only need to install the modules once. But it's safe to accidentally
+     pip install things twice: nothing bad happens, pip just tells you
+     "already satisfied".
     </p>
    </li>
    <li>

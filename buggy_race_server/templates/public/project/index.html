@@ -30,7 +30,7 @@
   </div>
   <div class="row">
     <div class="col-md-6">
-      <h2>Overview</h2>
+      <h2 id="overview"><a class="toclink" href="#overview">Overview</a></h2>
     </div>
   </div>
   <div class="row">
@@ -98,7 +98,7 @@
   {% if is_showing_project_workflow %}
     <div class="row">
       <div class="col-md-6 p-3">
-        <h2>Workflow</h2>
+        <h2 id="workflow"><a class="toclink" href="#workflow">Workflow</a></h2>
         <p>
           This is a practical project.
           Here's a breakdown of the workflow to help you approach
@@ -113,7 +113,9 @@
   {% if submit_deadline %}
     <div class="row">
       <div class="col-md-6 p-3 alert">
-        <h2>Submission deadline</h2>
+        <h2 id="submission-deadline">
+          <a class="toclink" href="#submission-deadline">Submission deadline</a>
+        </h2>
         <!-- "deadline-container" is magic: js enhanced -->
         <div id="deadline-container" class="alert alert-danger">
             <span style="display:inline-block;margin-right:1em;">{{ submit_deadline_day}} {{ submit_deadline | replace("T", " ") }}</span>
@@ -140,7 +142,9 @@
   {% if submission_link or is_zip_info_displayed %}
     <div class="row">
       <div class="col-md-12 p-3">
-        <h2>Submitting your project</h2>
+        <h2 id="submitting-your-project">
+          <a class="toclink" href="#submitting-your-project">Submitting your project</a>
+        </h2>
       </div>
       {% if submission_link %}
         <div class="col-md-6 p-3">
@@ -155,7 +159,9 @@
       
       {% if is_zip_info_displayed %}
         <div class="col-md-6 p-3">
-          <h3>About your zip file</h3>
+          <h3 id="about-your-zip-file">
+            <a class="toclink" href="#about-your-zip-file">About your zip file</a>
+          </h3>
           <p>
             Make a zip file that contains your webserver and submit that
             (it'll look a lot like your repo did when you cloned it: for

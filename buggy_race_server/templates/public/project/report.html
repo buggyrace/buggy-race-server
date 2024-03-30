@@ -11,7 +11,11 @@
   </div>
   <div class="row">
     <div class="col-lg-8">
-      <h2 id="about-the-{{ report_type | lower }}">About the "{{ report_type }}"</h2>
+      <h2 id="about-the-{{ report_type }}">
+        <a class="toclink"  href="#about-the-{{ report_type }}">
+          About the "{{ report_type }}"
+        </a>
+      </h2>
       <p>
         There are two parts of your project submission:
       </p>
@@ -31,11 +35,13 @@
       </ul>
 
       <h2 id="what-is-in-your-{{ report_type }}" class="mt-4">
+        <a class="toclink" aria-labelledby="what-is-in-your-{{ report_type }}" href="#what-is-in-your-{{ report_type }}">
         {% if report_type == "poster" %}
           What is on your poster?
         {% else %}
-          What is on your {{ report_type }}?
+          What is in your {{ report_type }}?
         {% endif %}
+        </a>
       </h2>
       <p>
         There are two parts: the top and the bottom (of the single web page):
@@ -46,7 +52,9 @@
       </ul>
 
       <h2 id="what-is-on-the-top-of-your-{{ report_type }}" class="mt-4">
-        What is on the top of your {{ report_type }}?
+        <a class="toclink" href="#what-is-on-the-top-of-your-{{ report_type }}">
+          What is on the top of your {{ report_type }}?
+        </a>
       </h2>
       <p>
         You've made a working (up to a point) buggy editor! Tell someone who
@@ -90,7 +98,9 @@
       </p>
 
       <h2 id="what-is-on-the-bottom-of-your-{{ report_type }}" class="mt-4">
-        What is on the bottom of your {{ report_type }}?
+        <a class="toclink" href="#what-is-on-the-bottom-of-your-{{ report_type }}">
+          What is on the bottom of your {{ report_type }}?
+        </a>
       </h2>
       <p>
         Underneath that we want to see a list of the tasks your attempted with
@@ -101,7 +111,9 @@
       </p>
       
       <h2 id="how-to-set-it-up" class="mt-4">
-        How to set it up
+        <a class="toclink" href="#how-to-set-it-up">
+          How to set it up
+        </a>
       </h2>
       <p>
         As you'll know by the time you set this up, there is more than one way
@@ -201,7 +213,9 @@ def {{ report_type }}():
   <div class="row">
     <div class="col-lg-8">
       <h2 id="add-some-text-for-every-task-you-attempted" class="mt-4">
-        Add some text for every task you attempted
+        <a class="toclink" href="#add-some-text-for-every-task-you-attempted">
+          Add some text for every task you attempted
+        </a>
       </h2>
       <p>
         We'll be looking at the code to see <em>what</em> you did, but in the
@@ -229,7 +243,9 @@ def {{ report_type }}():
       {% endif %}
       {% if is_storing_texts %}
         <h2 id="storing-texts-on-this-race-server" class="mt-4">
-          Storing texts on this race server
+          <a class="toclink" href="#storing-texts-on-this-race-server">
+            Storing texts on this race server
+          </a>
         </h2>
         <p>
           You can make notes as you go along, and download them as text or
@@ -248,7 +264,9 @@ def {{ report_type }}():
       {% endif %}
       
       <h2 id="helpful-html-to-copy-and-paste" class="mt-5">
-        Helpful HTML to copy-and-paste
+        <a class="toclink" href="#helpful-html-to-copy-and-paste">
+          Helpful HTML to copy-and-paste
+        </a>
       </h2>
       {% if is_storing_texts %}
         <div class="alert alert-danger border border-danger">

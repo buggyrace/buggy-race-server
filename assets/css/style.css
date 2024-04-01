@@ -637,6 +637,11 @@ h2.alert-title .subtitle {
 .alert-primary h2.alert-title { background-color: #b8daff; }
 .alert-secondary h2.alert-title { background-color: #d6d8db; }
 
+.alert-warning.bad-auth {
+  background-color: #ffc107;
+  color:#000000;
+}
+
 td .cell-title {
   margin: -0.75rem -0.75rem 0.2rem -0.75rem;;
   padding:0.5rem 0.75rem;

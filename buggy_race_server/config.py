@@ -77,7 +77,7 @@ class ConfigSettingNames(Enum):
     _EDITOR_PYTHON_FILENAME = auto()
 
     # Name of the CSV file into which tasks-as-issues (for GitHub) are put
-    _BUGGY_EDITOR_ISSUES_FILE = auto()
+    _BUGGY_EDITOR_ISSUES_CSV_FILE = auto()
 
     # Current announcements are cached to avoid database reads on every hit
     _CURRENT_ANNOUNCEMENTS = auto()
@@ -407,7 +407,7 @@ class ConfigSettings:
     DEFAULTS = {
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
         ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
-        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: "buggy-editor-issues.csv",
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: "buggy-editor-issues.csv",
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: "https://www.buggyrace.net/docs",
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
         ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
@@ -537,7 +537,7 @@ class ConfigSettings:
 
     TYPES = {
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
-        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: ConfigTypes.URL,
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
@@ -1455,7 +1455,7 @@ class ConfigSettings:
     def get_extra_names_for_config_dump():
       return [
         ConfigSettings.CACHEBUSTER_KEY,
-        ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name,
+        ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._EDITOR_INPUT_DIR.name,

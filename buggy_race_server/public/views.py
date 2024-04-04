@@ -186,7 +186,7 @@ def _send_tech_notes_assets(type, path):
 
 @blueprint.route("/project/tasks/issues.csv")
 def tasks_as_issues_csv():
-    local_filename = current_app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+    local_filename = current_app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
     try:
         response = make_response(
           send_file(

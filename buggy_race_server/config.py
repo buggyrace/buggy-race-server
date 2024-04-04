@@ -160,6 +160,7 @@ class ConfigSettingNames(Enum):
     # and a type.
     USER_ACTVITY_PERIOD_S = auto()
     AUTHORISATION_CODE = auto()
+    BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
     BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
@@ -391,6 +392,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
       ),  
       ConfigGroupNames.TECH_NOTES.name: (
@@ -434,6 +436,7 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: "pages",
         ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: "title, description",
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -562,6 +565,7 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
@@ -676,6 +680,17 @@ class ConfigSettings:
           """The authorisation code is needed to make any changes to config or
           other-user data, including registering students. See also
           `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
+
+        ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name:
+          """The header row that should appear in the task issues CSV file.
+          If you leave it empty, no header row will be included. You only need
+          to change this if you're using a specific mechanism to automatically
+          load issues into your chosen version control system and discover that
+          the default isn't working. Supply a comma-separated list of column
+          headings/titles (spaces after commas are stripped). If you're not
+          sure, accept the default (which works with the race server's
+          automatic injection into GitHub, as well as GitLab's CSV-to-issue
+          mechanism).""",
 
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start the

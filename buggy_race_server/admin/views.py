@@ -1598,6 +1598,7 @@ def download_tasks(type=None, format=None):
         if format == FORMAT_CSV:
             payload = get_tasks_as_issues_csv(
                 tasks,
+                current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
                 is_line_terminator_crlf=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
             )
         else:

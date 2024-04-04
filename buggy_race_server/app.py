@@ -117,7 +117,7 @@ def create_app():
 
                 generated_issue_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-                    app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+                    app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
                 )
                 if not path.exists(generated_issue_file):
                     publish_tasks_as_issues_csv(app)

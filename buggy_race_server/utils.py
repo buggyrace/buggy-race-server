@@ -235,7 +235,7 @@ def get_download_filename(filename, want_datestamp=False, timezone=timezone.utc)
   else:
     return filename
 
-def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
+def get_tasks_as_issues_csv(tasks, header_row="", is_line_terminator_crlf=False):
 
     class CsvString(object):
       def __init__(self):
@@ -249,6 +249,8 @@ def get_tasks_as_issues_csv(tasks, is_line_terminator_crlf=False):
     issues_str = CsvString()
     issue_writer = csv.writer(issues_str, lineterminator=line_terminator)
     any_newline = re.compile(r"\r?\n")
+    if header_row:
+      issue_writer.writerow(re.split(r',\s*', header_row))
     for task in tasks:
       issue_writer.writerow(
          # row is: * task name (with title)
@@ -574,13 +576,23 @@ def publish_task_list(app=current_app):
 def publish_tasks_as_issues_csv(app=current_app):
     generated_issuefile = join_to_project_root(
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-        app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_FILE.name]
+        app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
     )
+
+    is_line_terminator_crlf = app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
     csv = get_tasks_as_issues_csv(
       Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),
-      is_line_terminator_crlf=app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
+      header_row=app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
+      is_line_terminator_crlf=is_line_terminator_crlf
     )
+
+    line_terminator = "\r\n" if is_line_terminator_crlf else "\n"
     issue_csv_file = open(generated_issuefile, "w")
+    # print the header row if there is one
+    # if app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name]:
+    #     issue_csv_file.write(
+    #         app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name] + line_terminator
+    #     )
     issue_csv_file.write(csv)
     issue_csv_file.close()
 

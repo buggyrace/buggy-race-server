@@ -7,7 +7,7 @@ Notes to explain how to do (and understand) project tasks.
 
 ## Especially for phase 0
 
-For task [0-GET: Get the source code]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-get):
+For the task [0-GET: Get the source code]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-get):
 
 * [about forking (and cloning) the repo](forking-the-repo)
 

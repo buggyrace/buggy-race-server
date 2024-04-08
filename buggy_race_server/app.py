@@ -8,7 +8,7 @@ from os import path
 
 #import traceback # for debug/dev work
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, make_response, render_template, request, redirect, url_for, session
 from flask_login import current_user
 
 from buggy_race_server import admin, api, buggy, commands, config, oauth, public, race, user
@@ -228,9 +228,17 @@ def register_errorhandlers(app):
         """Render error template."""
         # If a HTTPException, pull the `code` attribute; default to 500
         error_code = getattr(error, "code", 500)
-        return render_template(f"{error_code}.html"), error_code
+        response = make_response(
+            render_template(f"{error_code}.html", error=error), error_code
+        )
+        # werkzeug.exceptions.MethodNotAllowed has a valid_methods list,
+        # but Flask doesn't add the Allow: header the HTTP spec says it should
+        # https://httpwg.org/specs/rfc9110.html#status.405
+        if error_code == 405 and error.valid_methods:
+            response.headers.set("Allow", ", ".join(error.valid_methods))
+        return response
 
-    for errcode in [400, 401, 403, 404, 500]:
+    for errcode in [400, 401, 403, 404, 405, 500]:
         app.errorhandler(errcode)(render_error)
     return None
 

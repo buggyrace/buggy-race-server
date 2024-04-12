@@ -585,7 +585,6 @@ $(function() {
     }
   })
 });
-
 $(function() {
   // code for the race-picker... needs jQuery to dismiss bootstrap modal :-(
   const TRACK_PICKER_MODAL = document.getElementById("track-picker-modal");
@@ -651,5 +650,18 @@ $(function() {
       el.classList.remove("bg-white");
       el.classList.add("alert-info");
     }
+  }
+})
+
+$(function() {
+  const $admin_more_btn = $("#admin-more-btn");
+  const $admin_management_btns = $("#admin-management-btns");
+  if ($admin_more_btn.length && $admin_management_btns.length) {
+    $admin_more_btn.on("click", function(e){
+      e.preventDefault();
+      $(this).addClass("disabled");
+      $admin_management_btns.slideDown();
+    })
+    $admin_more_btn.removeClass("hidden");
   }
 })

@@ -1,19 +1,31 @@
 <div class="container w-100">
   <div class="row">
-    <div class="btn-collection col p-1">
+    <div class="btn-collection col px-1 pt-1 pb-0">
       <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.admin')}}">Dashboard</a>
       <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
-      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_buggies')}}">Buggies</a>
-      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.list_races')}}">Races</a>
-      {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_announcements')}}">Announce</a>
-      {% endif %}
-      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.api_keys')}}">API keys</a>
       {% if config['IS_STORING_STUDENT_TASK_TEXTS'] %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.task_texts')}}">Texts</a>
       {% endif %}
-      {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.settings')}}">Config</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_buggies')}}">Buggies</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.list_races')}}">Races</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.setup') }}">Setup summary</a>
+      {% if request.path != url_for("admin.admin") %}
+        {# add this button but only reveal it with JS, i.e., if JS can reveal the buttons below #}
+        <a id="admin-more-btn" class="hidden btn btn-outline-secondary btn-admin hidden" href="#">&bull;&bull;&bull;</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div id="admin-management-btns" class="container w-100 {% if request.path != url_for('admin.admin') %}hidden{% endif %}">
+  <div class="row">
+    <div class="btn-collection col px-1 pt-0">
+      <a class="btn btn-outline-secondary btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.settings')}}">Config</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.list_announcements')}}">Announcements</a>
+      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.api_keys')}}">API keys</a>
+      <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}">Buggy editor</a>
+      <a class="btn {% if is_tasks_ok %}btn-outline-secondary{% else %}btn-outline-danger{% endif %} btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.tasks_admin')}}">Tasks</a>
+      {%if config['IS_TECH_NOTE_PUBLISHING_ENABLED'] %}
+        <a class="btn {% if tech_notes_timestamp %}btn-outline-secondary {% else %}btn-outline-danger{% endif %} btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
       {% endif %}
     </div>
   </div>

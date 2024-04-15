@@ -120,6 +120,7 @@ class ConfigSettingNames(Enum):
 
     # Timestamps that user never sets explicitly, but are stored as config
     _TASK_LIST_GENERATED_DATETIME = auto()
+    _TASKS_EDITED_DATETIME = auto()
     _TASKS_LOADED_DATETIME = auto()
     _TECH_NOTES_GENERATED_DATETIME = auto()
     _EDITOR_ZIP_GENERATED_DATETIME = auto()
@@ -426,6 +427,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name: "",
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: "pelicanconflive.py",
@@ -555,6 +557,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: ConfigTypes.STRING,
@@ -1483,6 +1486,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name,

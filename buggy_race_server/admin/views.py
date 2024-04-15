@@ -1648,6 +1648,11 @@ def edit_task(task_id=None):
                 else:
                   msg = f"When you delete a task like this, it won't disappear from the project until you regenerate the task list"
                 flash(msg, "info")
+            set_and_save_config_setting(
+                current_app,
+                ConfigSettingNames._TASKS_EDITED_DATETIME.name,
+                datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            )
             return redirect(url_for('admin.tasks_admin'))
         else:
             flash_errors(form)

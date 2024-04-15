@@ -451,6 +451,11 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
             ConfigSettingNames._TASKS_LOADED_DATETIME.name,
             datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         )
+        set_and_save_config_setting(
+            app,
+            ConfigSettingNames._TASKS_EDITED_DATETIME.name,
+            None
+        )
     return len(new_tasks)
 
 def parse_task_markdown(task_source_filename):

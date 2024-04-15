@@ -454,7 +454,7 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
         set_and_save_config_setting(
             app,
             ConfigSettingNames._TASKS_EDITED_DATETIME.name,
-            None
+            "" # reset (clear) edited timestamp
         )
     return len(new_tasks)
 
@@ -572,10 +572,11 @@ def publish_task_list(app=current_app):
     task_list_html_file = open(generated_task_file, "w")
     task_list_html_file.write(html)
     task_list_html_file.close()
+    # set timestamp to none if there are no tasks, for force buttons to be red/danger
     set_and_save_config_setting(
         app,
         name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
-        value=stringify_datetime(created_at),
+        value=stringify_datetime(created_at) if qty_tasks else "",
     )
 
 def publish_tasks_as_issues_csv(app=current_app):

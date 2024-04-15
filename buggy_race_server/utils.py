@@ -670,14 +670,18 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
       # insufficiently robust, but here we are:
       # timestamp comes in as a string (which is common in the code),
       # so parse it into a datetime now — may or may not have seconds
-      m = re.search(
+      if m := re.search(
         "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
-        utc_datetime_input).groups()
-      utc_datetime = datetime.strptime(
-        f"{m[0]}{m[1] or ':00'}", "%Y-%m-%d %H:%M:%S"
-      ).astimezone(timezone.utc)
+        utc_datetime_input
+      ):
+          m = m.groups()
+          utc_datetime = datetime.strptime(
+              f"{m[0]}{m[1] or ':00'}", "%Y-%m-%d %H:%M:%S"
+          ).astimezone(timezone.utc)
+      else:
+        return None
   else:
-    utc_datetime = utc_datetime_input
+      utc_datetime = utc_datetime_input
   utc_datetime = utc_datetime.astimezone(server_timezone)
   # Note: this is converting to the timezone... but not applying daylight saving
   if want_datetime:

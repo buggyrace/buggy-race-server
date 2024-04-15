@@ -655,12 +655,26 @@ $(function() {
 
 $(function() {
   const $admin_more_btn = $("#admin-more-btn");
+  const HTML_SHOW_EXTRA_NAV = "&bull;&bull;&bull;";
+  const HTML_HIDE_EXTRA_NAV = "&bull;&times;&bull;";
   const $admin_management_btns = $("#admin-management-btns");
+  console.log("FIXME");
   if ($admin_more_btn.length && $admin_management_btns.length) {
+    console.log("FIXME adding on click");
+    $admin_more_btn.data("want-more", "yes");
     $admin_more_btn.on("click", function(e){
       e.preventDefault();
-      $(this).addClass("disabled");
-      $admin_management_btns.slideDown();
+      if ($admin_more_btn.data("want-more") === "yes"){
+        console.log("FIXME show buttons");
+        $admin_management_btns.slideDown();
+        $admin_more_btn.html(HTML_HIDE_EXTRA_NAV);
+        $admin_more_btn.data("want-more", "no");
+      } else {
+        console.log("FIXME hide buttons");
+        $admin_management_btns.slideUp();
+        $admin_more_btn.html(HTML_SHOW_EXTRA_NAV);
+        $admin_more_btn.data("want-more", "yes");
+      }
     })
     $admin_more_btn.removeClass("hidden");
   }

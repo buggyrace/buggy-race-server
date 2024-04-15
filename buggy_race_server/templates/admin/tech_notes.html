@@ -35,7 +35,7 @@
               Last&nbsp;generated:
               {{ notes_generated_timestamp or "never/unknown" }}
             </p>
-            <input type="submit" value="Publish tech notes" class="btn btn-primary"/>
+            <input type="submit" value="Publish tech notes" class="btn {% if ns_admin.is_tech_notes_out_of_date %}btn-danger{% else %}btn-primary{% endif %}"/>
           </form>
         </div>
       </div>

@@ -1156,7 +1156,6 @@ def settings(group_name=None):
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,
-        is_tasks_ok=task_count and current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
         is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
@@ -1164,7 +1163,6 @@ def settings(group_name=None):
         settings=settings_as_dict,
         social_settings=social_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
-        tech_notes_timestamp=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
         type_of_settings=ConfigSettings.TYPES,
     )
 

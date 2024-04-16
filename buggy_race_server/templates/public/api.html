@@ -37,18 +37,18 @@
         credentials (a key and a secret) to determine if the requester is
         allowed to update the buggy.
       </p>
-      {% if buggy_race_server_url.startswith("http:") %}
-      <div class="alert alert-danger">
-        <h2 class="alert-title" id="https"><a class="toclink" href="#https">HTTPS</a></h2>
-        <p>
-          Note that the API uses 
-          <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security">Transport Layer Security</a>
-          (TLS) — you can tell because the endpoint URL starts with "<code>https://</code>". 
-          So although this specification refers to HTTP (<a href="https://en.wikipedia.org/wiki/HTTP">Hypertext Transfer Protocol</a>)
-          methods, the requests and responses are being transported over a secure layer.
-        </p>
-      </div>
-    {% endif %}
+      {% if buggy_race_server_url.startswith("https:") %}
+        <div class="alert alert-danger">
+          <h2 class="alert-title" id="https"><a class="toclink" href="#https">HTTPS</a></h2>
+          <p>
+            Note that the API uses 
+            <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security">Transport Layer Security</a>
+            (TLS) — you can tell because the endpoint URL starts with "<code>https://</code>". 
+            So although this specification refers to HTTP (<a href="https://en.wikipedia.org/wiki/HTTP">Hypertext Transfer Protocol</a>)
+            methods, the requests and responses are being transported over a secure layer.
+          </p>
+        </div>
+      {% endif %}
     </div>
   </div>
   <div class="row mt-4">

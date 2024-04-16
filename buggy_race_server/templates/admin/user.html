@@ -22,8 +22,11 @@
       <table class="table table-striped table-bordered table-hover bg-white">
         <tbody>
           <tr>
-            <td colspan="2">
+            <td colspan="2" class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
+              {% if current_user.is_administrator or is_password_change_by_any_staff %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
+              {% endif %}
             </td>
           </tr>
           <tr>

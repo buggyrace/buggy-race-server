@@ -156,6 +156,14 @@ class ConfigSettingNames(Enum):
     # anticipate the server docs being customised.
     _BUGGY_RACE_DOCS_URL = auto()
 
+    # There's a utility we use keep the documentation site up-to-date
+    # with the latest config settings from this source code, specifically
+    # for extracting the text descriptions from config.py (i.e., the horse's
+    # mouth) and pasting into the documentation site: it's harmless
+    # (because it's staff-access and read-only) but you can suppress it here
+    # to avoid confusion. Only maintainers need this, so it's off by default.
+    _IS_DOCS_HELPER_PAGE_ENABLED = auto()
+
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
@@ -421,6 +429,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: "buggy-race-editor",
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
@@ -554,6 +563,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
@@ -1486,6 +1496,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,
         ConfigSettingNames._EDITOR_INPUT_DIR.name,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,

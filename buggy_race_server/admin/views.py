@@ -1990,6 +1990,8 @@ def staff_race_replayer():
 @admin_only
 def config_docs_helper():
     """ undocumented helper method for dumping config setting markdown for www site"""
+    if not current_app.config[ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name]:
+        abort(404)
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     pretty_default_settings=ConfigSettings.get_pretty_defaults()
     return render_template(

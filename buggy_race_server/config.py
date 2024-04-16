@@ -207,6 +207,7 @@ class ConfigSettingNames(Enum):
     IS_STUDENT_USING_GITHUB_REPO = auto()
     IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
+    IS_TA_SET_API_KEY_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
@@ -328,6 +329,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_ID_EXAMPLE.name,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
       ),
       ConfigGroupNames.RACES.name: (
@@ -484,6 +486,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
@@ -613,6 +616,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
@@ -1001,6 +1005,12 @@ class ConfigSettings:
           cannot reset them, and will need to ask a staff member to do it — so
           enabling TAs might be helpful. Changing a student's password does not
           require the auth code.""",
+
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name:
+          """Do you want your Teaching Assistants to be able to set (or clear)
+          student's API keys? If you're using the default tasks, students don't
+          need these until they are in phase 4.
+          """,
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
           """By default, task URLs go direct to the server (e.g.,

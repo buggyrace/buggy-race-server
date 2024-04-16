@@ -187,7 +187,7 @@
               {% if user.api_key %}
                 <code>{{ user.api_key }}</code><br><br>
               {% endif %}
-              {% if current_user.is_staff %}
+              {% if current_user.is_administrator or (current_user.is_teaching_assistant and config['IS_TA_SET_API_KEY_ENABLED']) %}
                 <form id="api-key-form" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
                   {{ api_form.csrf_token }}
                   <input type="hidden" name="usernames" value="{{ user.username}}"/>

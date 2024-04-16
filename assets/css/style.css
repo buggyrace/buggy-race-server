@@ -859,3 +859,8 @@ body.race-player main {
 .tab-content h4 {
   margin-left: 1rem;
 }
+
+.keyword code {
+  overflow-wrap:normal;
+  white-space:nowrap;
+}

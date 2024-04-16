@@ -8,14 +8,28 @@
   </div>
   <div class="row">
     <div class="col-md-8">
-      This is an (undocumented) page for producing up-to-date config
-      details suitable for pasting (carefully) into the customisation
-      docs on the www site.
+      <p>
+        This is a (staff-access, read-only and mostly undocumented) page for
+        producing up-to-date config details suitable for pasting (carefully)
+        into the customisation documentation...
+      </p>
+      <p>
+        ...ultimately the markdown text below ends up here &rarr;
+        {{ macros.docs_btn("Customising & config", "/customising") }}
+      </p>
+      <p>
+        See this <a href="https://github.com/buggyrace/buggy-race-about/blob/main/utils/update-customising-with-current-config.py">Python script</a>
+        in the <code>utils/</code> directory of the documentation repo for details.
+      </p>
+      <p>
+        You can enable/disable access to <em>this</em> page on this server via the
+        environment/config setting  <code>_IS_DOCS_HELPER_PAGE_ENABLED</code>.
+      </p>
     </div>
   </div>
   <div class="row">
-    <div class="col">
-      <pre class="border border-secondary my-3 p-2">
+    <div class="col copy-to-clipboard" data-target="config-documentation-markdown">
+      <pre class="border border-secondary task-text p-3" id="config-documentation-markdown">
 {% for group_name in sorted_groupnames %}{% if group_name != "AUTH" %}
 ---------------------------------------------------------
 # {{ pretty_group_name_dict[group_name] }}

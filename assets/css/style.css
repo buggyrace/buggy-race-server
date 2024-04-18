@@ -300,6 +300,7 @@ footer .footer-nav {
 }
 
 .icon-book:before { content: "\e91f"; }
+.icon-bubble:before{ content: "\e96b"; }
 .icon-bubbles:before { content: "\e96c"; }
 .icon-clipboard:before { content: "\e9b8"; }
 .icon-cog:before { content: "\e994"; }

@@ -302,9 +302,10 @@ need (to see which ones we're using, look inside
 
 Select the icons you want and click on **Generate Font**. Be sure to include
 _all_ the icons we're already using unless you are deliberately removing them!
-The font files inside the zipfile can be copied into place in
-`buggy_race_server/assets/css/fonts/`. Look in that `icomoon.svg` file to get
-both the name and the character number for the new icon.
+(Also, note that you can use the iconmoon.io website's search bar to select
+the icons by name!) The font files inside the zipfile can be copied into place
+in `buggy_race_server/assets/css/fonts/`. Look in that `icomoon.svg` file to
+get both the name and the character number for the new icon.
 
 Then go to `buggy_race_server/assets/css/style.css` and add your new icon as
 an `icon-` class, like this:

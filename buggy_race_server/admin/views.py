@@ -847,6 +847,10 @@ def manage_user(user_id):
             flash("Did not register new user", "danger")
         else:
             flash(f"Did not update user {user.pretty_username}", "danger")
+  is_current_user_comment_editor = (not current_user.is_anonymous) and (
+        current_user.is_administrator or 
+        (current_user.is_teaching_assistant and current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name])
+  )
   return render_template(
       "admin/user_edit.html",
       action_url=action_url,
@@ -855,7 +859,7 @@ def manage_user(user_id):
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
       ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
       form=form,
-      is_current_user_administrator = (not current_user.is_anonymous) and current_user.is_administrator,
+      is_current_user_comment_editor=is_current_user_comment_editor,
       is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       user=user,
@@ -943,6 +947,7 @@ def edit_user_comment(user_id):
       form=form,
       is_ta_edit_comment_enabled=current_app.config[ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name],
       is_ta_password_change_enabled=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+      is_ta_set_api_key_enabled=current_app.config[ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name],
     )
 
 # user_id may be username or id

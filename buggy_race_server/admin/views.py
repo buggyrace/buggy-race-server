@@ -288,7 +288,7 @@ def setup_summary():
     if (
       not current_user
       or not current_user.is_authenticated
-      or not current_user.is_administrator
+      or not current_user.is_staff
     ):
         abort(403)
     if ConfigSettingNames._SETUP_STATUS.name in session:

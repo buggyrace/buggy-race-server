@@ -105,13 +105,14 @@
       <div class="row phase-tasks-{{phase}}" id="{{ task.anchor }}">
         <div class="col my-1">
           <div class="border border-secondary p-3 ml-4">
-            <p>Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong></p>
+            <p class="pb-3">Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong>
+              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump float-right">{{ task.fullname }}</a>
+            </p>
             {% if texts_by_task_id[task.id] %}
               <pre class="p-3 mb-4 mt-3 mr-3 task-text ">{{ texts_by_task_id[task.id].text }}</pre>
             {% endif %}
-            <p class="btn-collection">
-              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump">{{ task.fullname }}</a>
-              {% if is_own_text %}
+            {% if is_own_text %}
+              <p class="btn-collection">
                 <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">
                   {% if texts_by_task_id[task.id] %}
                     Edit text
@@ -119,8 +120,8 @@
                     Create text
                   {% endif %}
                 </a>
-              {% endif %}
-            </p>
+              </p>
+            {% endif %}
           </div>
         </div>
       </div>

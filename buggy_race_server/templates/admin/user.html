@@ -213,13 +213,13 @@
             <strong class="mr-3">Comment:</strong>
             <a href="{{ url_for('admin.edit_user_comment', user_id=user.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Edit&nbsp;comment</a>
         </div>
-        <p class="pt-3 px-3">
-          {% if user.comment %}
-            {{ user.comment }}
-          {% else %}
+        {% if user.comment %}
+          <pre class="m-3 p-2 task-text">{{ user.comment }}</pre>
+        {% else %}
+          <p class="pt-3 px-3">
             <em>No comment</em>
-          {% endif %}
-        </p>
+          </p>
+        {% endif %}
       </div>
       <div class="border">
         <div class="alert-secondary p-3 ">

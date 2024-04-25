@@ -10,7 +10,7 @@ from flask_login import current_user, logout_user
 import shutil # for publishing the editor
 
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
-from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task
+from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task, TaskText
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
@@ -437,6 +437,8 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     new_tasks = parse_task_markdown(task_source_filename)
     if Task.query.count():
         if want_overwrite:
+            # note: manually deleting all *texts* too
+            db.session.query(TaskText).delete()
             db.session.query(Task).delete()
             db.session.commit()
         else:

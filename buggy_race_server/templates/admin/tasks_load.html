@@ -54,6 +54,35 @@
       </div>
     </div>
   {% endif %}
+  {% if qty_texts > 0 %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-danger">
+          <h2 class="alert-title">Danger!
+            {% if qty_texts == 1 %}
+              There is one task text!
+            {% else %}
+               {{ qty_texts }} task texts exist!
+            {% endif %}
+          </h2>
+          <p>
+            The following users have made task texts: all their texts
+            <strong>will be deleted</strong> if you load new tasks now!
+          </p>
+          <p class="btn-collection">
+            {% for user in text_authors %}
+              <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=user.id) }}#task-texts">{{ user.pretty_username }}</a>
+            {% endfor %}  
+          </p>
+          <p>
+            This is unexpected because normally you load tasks at the start of
+            your project before any users (and especially students) have made
+            any texts.
+          </p>
+        </div>
+      </div>
+    </div>  
+  {% endif %}
   <div class="row">
     <div class="col">
       <form method="POST" action="{{ url_for('admin.tasks_load') }}" enctype="multipart/form-data" role="form">
@@ -101,10 +130,16 @@
               </div>
             </div>
           </div>
-          {% if tasks %}
+          {% if qty_tasks > 0 %}
             <div class="row">
               <div class="col p-3">
                 {{ form.is_confirmed.label(class="mx-3") }}
+                {% if qty_texts > 0 %}
+                  <p class="mt-0 mb-2 mx-3">
+                    <strong>Be careful!</strong> Because you're about to delete
+                    existing tasks, <em>all task texts will also be deleted!</em>
+                  </p>
+                {% endif %}
                 <div class="col-sm-8">
                   <select id="is_confirmed" name="is_confirmed" class="form-control">
                     <option selected value="">No</option>

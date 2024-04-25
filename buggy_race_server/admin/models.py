@@ -265,9 +265,19 @@ class Task(SurrogatePK, Model):
         """Create instance."""
         db.Model.__init__(self, **kwargs)
 
-
 class TaskText(SurrogatePK, Model):
     """text by student recording how they approached/did a task"""
+
+    @staticmethod
+    def get_all_task_text_authors():
+        from buggy_race_server.user.models import User
+        return User.query.join(TaskText, TaskText.user_id == User.id)
+
+        # return db.session.query(
+        #         TaskText, User
+        #     ).outerjoin(TaskText).filter(
+        #         TaskText.user_id==User.id
+        #     ).order_by(User.username.asc()).all()
 
     @staticmethod
     def get_dict_texts_by_task_id(user_id):

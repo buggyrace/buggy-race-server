@@ -87,7 +87,7 @@
           <tbody>
             {% for key in data[type] | sort %}
             <tr>
-              <td>
+              <td class="keyword">
                 <code>{{ key }}</code>
               </td>
               {% if data[type][sample_key]["cost"] is defined %}
@@ -133,7 +133,7 @@
             {% set is_number = value.isdigit() %}
             {% set is_bool = value == "False" or value == "True" or value == "None"%}
             <tr>
-              <td>
+              <td class="keyword">
                 <code>{{ key }}</code>
               </td>
               <td {%if is_number %}class="number"{% endif %}>

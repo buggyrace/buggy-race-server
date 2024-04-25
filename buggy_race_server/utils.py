@@ -10,7 +10,7 @@ from flask_login import current_user, logout_user
 import shutil # for publishing the editor
 
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
-from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task
+from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task, TaskText
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
@@ -437,6 +437,8 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
     new_tasks = parse_task_markdown(task_source_filename)
     if Task.query.count():
         if want_overwrite:
+            # note: manually deleting all *texts* too
+            db.session.query(TaskText).delete()
             db.session.query(Task).delete()
             db.session.commit()
         else:
@@ -450,6 +452,11 @@ def load_tasks_into_db(task_source_filename, app=None, want_overwrite=False):
             app,
             ConfigSettingNames._TASKS_LOADED_DATETIME.name,
             datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+        )
+        set_and_save_config_setting(
+            app,
+            ConfigSettingNames._TASKS_EDITED_DATETIME.name,
+            "" # reset (clear) edited timestamp
         )
     return len(new_tasks)
 
@@ -567,10 +574,11 @@ def publish_task_list(app=current_app):
     task_list_html_file = open(generated_task_file, "w")
     task_list_html_file.write(html)
     task_list_html_file.close()
+    # set timestamp to none if there are no tasks, for force buttons to be red/danger
     set_and_save_config_setting(
         app,
         name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
-        value=stringify_datetime(created_at),
+        value=stringify_datetime(created_at) if qty_tasks else "",
     )
 
 def publish_tasks_as_issues_csv(app=current_app):
@@ -670,14 +678,18 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
       # insufficiently robust, but here we are:
       # timestamp comes in as a string (which is common in the code),
       # so parse it into a datetime now — may or may not have seconds
-      m = re.search(
+      if m := re.search(
         "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
-        utc_datetime_input).groups()
-      utc_datetime = datetime.strptime(
-        f"{m[0]}{m[1] or ':00'}", "%Y-%m-%d %H:%M:%S"
-      ).astimezone(timezone.utc)
+        utc_datetime_input
+      ):
+          m = m.groups()
+          utc_datetime = datetime.strptime(
+              f"{m[0]}{m[1] or ':00'}", "%Y-%m-%d %H:%M:%S"
+          ).astimezone(timezone.utc)
+      else:
+        return None
   else:
-    utc_datetime = utc_datetime_input
+      utc_datetime = utc_datetime_input
   utc_datetime = utc_datetime.astimezone(server_timezone)
   # Note: this is converting to the timezone... but not applying daylight saving
   if want_datetime:

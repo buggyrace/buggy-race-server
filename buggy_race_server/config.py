@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.43"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.5"
 #
 # ----------------------------------------------------------------------------
 
@@ -120,6 +120,7 @@ class ConfigSettingNames(Enum):
 
     # Timestamps that user never sets explicitly, but are stored as config
     _TASK_LIST_GENERATED_DATETIME = auto()
+    _TASKS_EDITED_DATETIME = auto()
     _TASKS_LOADED_DATETIME = auto()
     _TECH_NOTES_GENERATED_DATETIME = auto()
     _EDITOR_ZIP_GENERATED_DATETIME = auto()
@@ -154,6 +155,14 @@ class ConfigSettingNames(Enum):
     # student-facing texts like tech notes and tasks), we don't
     # anticipate the server docs being customised.
     _BUGGY_RACE_DOCS_URL = auto()
+
+    # There's a utility we use keep the documentation site up-to-date
+    # with the latest config settings from this source code, specifically
+    # for extracting the text descriptions from config.py (i.e., the horse's
+    # mouth) and pasting into the documentation site: it's harmless
+    # (because it's staff-access and read-only) but you can suppress it here
+    # to avoid confusion. Only maintainers need this, so it's off by default.
+    _IS_DOCS_HELPER_PAGE_ENABLED = auto()
 
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
@@ -206,6 +215,7 @@ class ConfigSettingNames(Enum):
     IS_STUDENT_USING_GITHUB_REPO = auto()
     IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
+    IS_TA_SET_API_KEY_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
@@ -327,6 +337,7 @@ class ConfigSettings:
         ConfigSettingNames.EXT_ID_EXAMPLE.name,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
       ),
       ConfigGroupNames.RACES.name: (
@@ -418,6 +429,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: "buggy-race-editor",
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: 0,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
@@ -426,6 +438,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name: "",
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: "pelicanconflive.py",
@@ -482,6 +495,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
@@ -549,12 +563,14 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name: ConfigTypes.STRING,
@@ -610,6 +626,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
@@ -998,6 +1015,12 @@ class ConfigSettings:
           cannot reset them, and will need to ask a staff member to do it — so
           enabling TAs might be helpful. Changing a student's password does not
           require the auth code.""",
+
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name:
+          """Do you want your Teaching Assistants to be able to set (or clear)
+          student's API keys? If you're using the default tasks, students don't
+          need these until they are in phase 4.
+          """,
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
           """By default, task URLs go direct to the server (e.g.,
@@ -1473,6 +1496,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
+        ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,
         ConfigSettingNames._EDITOR_INPUT_DIR.name,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,
@@ -1483,6 +1507,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
+        ConfigSettingNames._TASKS_EDITED_DATETIME.name,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_LIVE_NAME.name,

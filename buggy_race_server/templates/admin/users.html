@@ -142,11 +142,12 @@
               <td class="u-username">
                 <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
                 {% if u.comment %}
+                 {% set user_comment = u.comment|replace('"', '\\"')|replace("\\n", "\\n") %}
                  <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right" href="#"
-                   data-comment="{{ u.comment|replace('"', '\\"')|replace("\\n", "\\n") }}"
+                   data-comment="{{ user_comment }}"
                    data-toggle="modal" data-target="#texts-modal"
                    data-un="{{ u.pretty_username }}"
-                 >&#x2731;</a>
+                 ><span class="icon-bubble"></span></a>
                 {% endif %}
               </td>
               {%if want_detail %}

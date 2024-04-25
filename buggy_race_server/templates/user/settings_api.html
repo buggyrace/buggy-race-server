@@ -19,6 +19,9 @@
       </p>
       <p class="btn-collection">
         <a href="{{ url_for('api.describe_api') }}" class="btn btn-outline-secondary btn-jump">API specification</a>
+        {% if current_user.is_staff %}
+          <a href="{{url_for('admin.api_test')}}" class="btn btn-outline-secondary btn-admin btn-jump">Test API</a>
+        {% endif %}
       </p>
     </div>
   </div>

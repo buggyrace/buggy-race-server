@@ -11,7 +11,7 @@
     <div class="col-md-6">
       <p>
         The race server API accepts JSON data for a single racing buggy
-        via HTTP POST and saves it in the database. It lets you to upload your
+        via HTTP POST and saves it in the database. It lets you upload your
         buggy data <em>programmatically</em>, instead of copying-and-pasting it
         into <a href="{{ url_for('user.submit_buggy_data') }}">the web form</a>.
       </p>
@@ -29,18 +29,31 @@
     </div>
     <div class="col-md-6">
       <p>
-        An important difference between using the API and web form — which is
-        also simply an HTTP POST request — is that you can only access the web
-        form during an authenticated session (that is, you must log in before
-        the server will let you get to it). The API uses explicit credentials
-        (a key and a secret) to determine if the requester is allowed to update
-        the buggy.
+        An important difference between using the API and
+        <a href="{{ url_for('user.submit_buggy_data') }}">the web form</a> —
+        which also generates an HTTP POST request — is that you can only access
+        the web form during an authenticated session (that is, you must log in
+        before the server will let you get to it). The API uses explicit
+        credentials (a key and a secret) to determine if the requester is
+        allowed to update the buggy.
       </p>
+      {% if buggy_race_server_url.startswith("https:") %}
+        <div class="alert alert-danger">
+          <h2 class="alert-title" id="https"><a class="toclink" href="#https">HTTPS</a></h2>
+          <p>
+            Note that the API uses 
+            <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security">Transport Layer Security</a>
+            (TLS) — you can tell because the endpoint URL starts with "<code>https://</code>". 
+            So although this specification refers to HTTP (<a href="https://en.wikipedia.org/wiki/HTTP">Hypertext Transfer Protocol</a>)
+            methods, the requests and responses are being transported over a secure layer.
+          </p>
+        </div>
+      {% endif %}
     </div>
   </div>
   <div class="row mt-4">
     <div class="col-md-6">
-      <h3>Request</h3>
+      <h3 id="request"><a class="toclink" href="#request">Request</a></h3>
       <p>
         The server accepts HTTP POST requests to this endpoint:
       </p>
@@ -91,7 +104,7 @@
       </table>
     </div>
     <div class="col-md-6">
-      <h3>Response</h3>
+      <h3 id="response"><a class="toclink" href="#response">Response</a></h3>
       <p>
         The server responds with a JSON payload (MIME type
         <code>application/json</code>).

@@ -36,7 +36,7 @@
             {% endif %}
           </p>
           <input type="submit" value="Publish task list"
-            class="btn {% if is_fresh_update %}btn-danger{% else %}btn-primary{% endif %}"/>
+            class="btn {% if ns_admin.is_task_list_out_of_date %}btn-danger{% else %}btn-primary{% endif %}"/>
         </form>
       </div>
     </div>

@@ -436,7 +436,7 @@ $(function() {
       let is_hidden = $tasks_box.find(".task-text").length == 0;
       this.dataset.text = this.innerText;
       this.dataset.is_hidden = is_hidden? "0" : "1";
-      this.classList.add("btn", "btn-outline-secondary", "btn-white");
+      this.classList.add("btn", "btn-outline-primary", "btn-white");
       this.addEventListener("click", toggle_task_display);
       this.dispatchEvent(new Event("click"));
     });
@@ -585,7 +585,6 @@ $(function() {
     }
   })
 });
-
 $(function() {
   // code for the race-picker... needs jQuery to dismiss bootstrap modal :-(
   const TRACK_PICKER_MODAL = document.getElementById("track-picker-modal");
@@ -651,5 +650,28 @@ $(function() {
       el.classList.remove("bg-white");
       el.classList.add("alert-info");
     }
+  }
+})
+
+$(function() {
+  const $admin_more_btn = $("#admin-more-btn");
+  const HTML_SHOW_EXTRA_NAV = "&bull;&bull;&bull;";
+  const HTML_HIDE_EXTRA_NAV = "&bull;&times;&bull;";
+  const $admin_management_btns = $("#admin-management-btns");
+  if ($admin_more_btn.length && $admin_management_btns.length) {
+    $admin_more_btn.data("want-more", "yes");
+    $admin_more_btn.on("click", function(e){
+      e.preventDefault();
+      if ($admin_more_btn.data("want-more") === "yes"){
+        $admin_management_btns.slideDown();
+        $admin_more_btn.html(HTML_HIDE_EXTRA_NAV);
+        $admin_more_btn.data("want-more", "no");
+      } else {
+        $admin_management_btns.slideUp();
+        $admin_more_btn.html(HTML_SHOW_EXTRA_NAV);
+        $admin_more_btn.data("want-more", "yes");
+      }
+    })
+    $admin_more_btn.removeClass("hidden");
   }
 })

@@ -2,11 +2,12 @@
 {% block page_title %} Admin: API keys {% endblock %}
 {% block content %}
 {%include "admin/_nav.html" %}
+{% set is_user_allowed_to_set_keys = current_user.is_administrator or (current_user.is_teaching_assistant and config['IS_TA_SET_API_KEY_ENABLED']) %}
 <div class="container pb-2">
   <div class="row">
     <div class="col my-3">
       <h1>
-        {% if current_user.is_administrator %}
+        {% if is_user_allowed_to_set_keys %}
           Generate or clear API keys
         {% else %}
           API keys
@@ -49,7 +50,7 @@
             {% for user in users %}
               <tr {% if user.is_staff %}class="staff" {% endif %}>
                 <td class="check">
-                  {% if current_user.is_administrator %}
+                  {% if is_user_allowed_to_set_keys %}
                     <input type="checkbox" name="usernames" id="user-{{ user.username }}" value="{{ user.username }}">
                     <label for="user-{{ user.username }}">{{ user.pretty_username }}</label>
                   {% else %}
@@ -71,7 +72,7 @@
         </table>
       </div>
     </div>
-    {% if current_user.is_administrator %}
+    {% if is_user_allowed_to_set_keys %}
       <div class="row">
         <div class="col">
           <p class="btn-collection">

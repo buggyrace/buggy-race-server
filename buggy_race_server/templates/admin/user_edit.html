@@ -8,7 +8,7 @@
   {% endif %}
 {% endblock %}
 {% block content %}
-{% if is_current_user_administrator %}
+{% if current_user.is_staff %}
   {%include "admin/_nav.html" %}
 {% endif %}
 <div class="container pb-5">
@@ -188,6 +188,7 @@
 
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
+            <span class="icon-bubble mr-1"></span>
             {{form.comment.label}}
           </div>
           <div class="col-sm-4">
@@ -305,7 +306,7 @@
       </div>
     </div>
   {% endif %}
-  {% if is_current_user_administrator %}
+  {% if current_user.is_staff %}
     {% if user and (user.github_username or user.github_access_token) %}
       <div class="row">
         <div class="col p-2 mx-3">

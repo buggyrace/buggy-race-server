@@ -22,8 +22,11 @@
       <table class="table table-striped table-bordered table-hover bg-white">
         <tbody>
           <tr>
-            <td colspan="2">
+            <td colspan="2" class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
+              {% if current_user.is_administrator or is_password_change_by_any_staff %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
+              {% endif %}
             </td>
           </tr>
           <tr>
@@ -187,7 +190,7 @@
               {% if user.api_key %}
                 <code>{{ user.api_key }}</code><br><br>
               {% endif %}
-              {% if current_user.is_staff %}
+              {% if current_user.is_administrator or (current_user.is_teaching_assistant and config['IS_TA_SET_API_KEY_ENABLED']) %}
                 <form id="api-key-form" method="POST" action="{{ url_for('admin.api_keys') }}" role="form">
                   {{ api_form.csrf_token }}
                   <input type="hidden" name="usernames" value="{{ user.username}}"/>
@@ -206,16 +209,17 @@
     <div class="col-md-6">
       <div class="border mb-3">
         <div class="alert-secondary p-3 ">
+            <span class="icon-bubble mr-1"></span>
             <strong class="mr-3">Comment:</strong>
             <a href="{{ url_for('admin.edit_user_comment', user_id=user.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Edit&nbsp;comment</a>
         </div>
-        <p class="pt-3 px-3">
-          {% if user.comment %}
-            {{ user.comment }}
-          {% else %}
+        {% if user.comment %}
+          <pre class="m-3 p-2 task-text">{{ user.comment }}</pre>
+        {% else %}
+          <p class="pt-3 px-3">
             <em>No comment</em>
-          {% endif %}
-        </p>
+          </p>
+        {% endif %}
       </div>
       <div class="border">
         <div class="alert-secondary p-3 ">
@@ -239,7 +243,7 @@
   </div>
   <div class="row">
     <div class="col my-3">
-      <h3>{{ user.pretty_username }}'s task texts</h3>
+      <h3 id="task-texts">{{ user.pretty_username }}'s task texts</h3>
     </div>
   </div>
   {% include "admin/_task_texts_for_user.html" %}

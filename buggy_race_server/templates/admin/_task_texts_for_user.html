@@ -39,24 +39,45 @@
       {% endfor %}
     </div>
   </div>
-  <div class="row">
-    <div class="col my-3">
-      {% if report_type %}
-        {% if is_own_text %}
-          <p>
-            You can download all your texts as a single text or HTML file, to copy-and-paste
-            into your {{ report_type }}.
-          </p>
-        {% endif %}
-      {% endif %}
-      <p class="btn-collection">
-        <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as&nbsp;HTML</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
-        <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %}">Download as plain&nbsp;text</a>
-      </p>
-    </div>
-  </div>
 {% endif %}
+
+<div class="row">
+  <div class="col my-2">
+    {% if report_type %}
+      {% if is_own_text %}
+        <p>
+          You can download all your texts as a single text or HTML file, to copy-and-paste
+          into your {{ report_type }}.
+          <br>
+          Not sure how? Follow
+          <a href="{{ url_for('public.serve_project_page', page='report') }}#how-to-set-it-up">these instructions</a>.
+        </p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% set is_empty = qty_texts == 0 %}
+<div class="row">
+  <div class="col my-2 {% if is_empty %}alert alert-danger{% endif %}">
+    {% if is_empty %}
+      <p>
+        {% if is_own_text %}
+          These download buttons are disabled because you haven't written any task
+          texts to download yet.
+        {% else %}
+          These download buttons are disabled because user {{ user.pretty_username }}
+          hasn't written any task texts to download yet.
+        {% endif %}
+      </p>
+    {% endif %}
+    <p class="btn-collection">
+      <a href="{{ url_for('user.download_texts', username=user.username, format='html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as&nbsp;HTML</a>
+      <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
+      <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as plain&nbsp;text</a>
+    </p>
+  </div>
+</div>
+
 {% for phase in tasks_by_phase %}
   <div class="row mt-4 mb-2">
     <div class="col">
@@ -84,13 +105,14 @@
       <div class="row phase-tasks-{{phase}}" id="{{ task.anchor }}">
         <div class="col my-1">
           <div class="border border-secondary p-3 ml-4">
-            <p>Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong></p>
+            <p class="pb-3">Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong>
+              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump float-right">{{ task.fullname }}</a>
+            </p>
             {% if texts_by_task_id[task.id] %}
               <pre class="p-3 mb-4 mt-3 mr-3 task-text ">{{ texts_by_task_id[task.id].text }}</pre>
             {% endif %}
-            <p class="btn-collection">
-              <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump">{{ task.fullname }}</a>
-              {% if is_own_text %}
+            {% if is_own_text %}
+              <p class="btn-collection">
                 <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">
                   {% if texts_by_task_id[task.id] %}
                     Edit text
@@ -98,8 +120,8 @@
                     Create text
                   {% endif %}
                 </a>
-              {% endif %}
-            </p>
+              </p>
+            {% endif %}
           </div>
         </div>
       </div>

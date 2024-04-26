@@ -1,5 +1,6 @@
 {% import "admin/macros.html" as macros %}
-
+{% set ns_admin = namespace(is_task_list_out_of_date = None) %}
+{% set ns_admin = namespace(is_tech_notes_out_of_date = None) %}
 <!DOCTYPE html>
 <html class="no-js" lang="en">
   <head>
@@ -52,7 +53,7 @@
           {% if messages %}
             <div class="my-3">
               {% for category, message in messages %}
-                <div class="row alert alert-{{ category }} my-2 {%if message.startswith('Authorisation code')%}bad-auth{% endif %}">
+                <div class="row alert alert-{{ category }} my-2 {%if message.startswith('Authorisation code') or message.startswith('Auth code')%}bad-auth{% endif %}">
                   <div class="container">
                     <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
                     {{ message }}

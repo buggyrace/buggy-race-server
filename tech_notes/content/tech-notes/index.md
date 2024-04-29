@@ -7,10 +7,6 @@ Notes to explain how to do (and understand) project tasks.
 
 ## Especially for phase 0
 
-For the task [0-GET: Get the source code]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-get):
-
-* [about forking (and cloning) the repo](forking-the-repo)
-
 For task [0-RUN]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-run):
 
 * [using localhost](localhost) (or: why isn't 0.0.0.0 working?)

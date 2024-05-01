@@ -1,3 +1,12 @@
+Title: using virtual environments
+
+
+# Using virtual environments
+
+* Task [0-RUN Get app running and view it in a browser]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-0-run)
+
+---
+
 If you have other Python projects installed which are dependent on specific library versions (i.e. have a `requirements.txt` file included), we recommend that you use a [Python virtual environment](https://www.dataquest.io/blog/a-complete-guide-to-python-virtual-environments/#what-are-python-virtual-environments) for installing the Buggy Editor dependencies to avoid any conficts. Instructions for installation are show below. 
 
 __Instructions for Unix (Mac) users__:

@@ -1281,22 +1281,22 @@ def edit_announcement(announcement_id=None):
 @admin_only
 def publish_announcement(announcement_id):
     form = AnnouncementActionForm(request.form)
-    want_to_publish = None
+    want_to_display = None
     if form.submit_hide.data:
-        want_to_publish = False
-    elif form.submit_publish.data:
-        want_to_publish = True
-    if want_to_publish is None:
-        flash("Error: couldn't decide to publish or not", "danger")
+        want_to_display = False
+    elif form.submit_display.data:
+        want_to_display = True
+    if want_to_display is None:
+        flash("Error: couldn't decide to display or not", "danger")
     else:
         announcement = Announcement.query.filter_by(id=announcement_id).first()
         if announcement is None:
             flash("Error: coudldn't find announcement", "danger")
         else:
-            announcement.is_visible = want_to_publish
+            announcement.is_visible = want_to_display
             announcement.save()
-            if want_to_publish:
-                flash("OK, published an announcement", "success")
+            if want_to_display:
+                flash("OK, unhid an announcement and displayed it", "success")
             else:
                 flash("OK, hid an announcement", "success")
             refresh_global_announcements(current_app)

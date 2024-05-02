@@ -63,6 +63,7 @@ from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
 from buggy_race_server.config import (
     AnnouncementTypes,
+    ConfigGroupNames,
     ConfigSettingNames,
     ConfigSettings,
     ConfigTypes
@@ -1151,13 +1152,21 @@ def settings(group_name=None):
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
-    task_count = Task.query.filter_by(is_enabled=True).count()
+    groups_by_setting = {}
+    for group in ConfigSettings.GROUPS:
+        # TODO: auth group needs to be promoted to a list (missing comma)
+        if group == ConfigGroupNames.AUTH.name:
+            groups_by_setting[ConfigSettingNames.AUTHORISATION_CODE.name] = group.lower()
+        else:
+            for setting in ConfigSettings.GROUPS[group]:
+                groups_by_setting[setting] = group.lower()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     return render_template(
         "admin/settings.html",
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
+        groups_by_setting=groups_by_setting,
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,

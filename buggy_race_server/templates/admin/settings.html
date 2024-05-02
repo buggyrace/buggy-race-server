@@ -25,6 +25,42 @@
       </p>
     </div>
   </div>
+  {% if not group_name %}
+    <!-- by default, if JS is enabled, don't show *all* the config forms — it's -->
+    <!-- probably not helpful: instead help them find the right group/form      -->
+    <div id="js-config-chooser-container" class="hidden">
+      <div class="row my-3">
+        <div class="col px-4">
+          <p>
+            To view or change config settings, click one of the groups above.
+          </p>
+        </div>
+      </div>
+      <div class="row my-5">
+        <div class="col px-4">
+          <div class="alert alert-warning">
+            <h2 class="alert-title">Find group by setting</h2>
+            <label for="config-chooser" style="display:block;">Select a config setting to jump to its group:</label>
+            <input type="text" id="config-chooser" name="config-chooser" list="settings-list" style="width:20rem"/>
+            <datalist id="settings-list">
+              {% for config_name in groups_by_setting | sort %}
+                <option value="{{ config_name }}" data-group="{{ groups_by_setting[config_name] }}"></option>
+              {% endfor %}
+            </datalist>
+          </div>
+        </div>
+        <div class="col px-4">
+          <div class="alert border-secondary p-4">
+            <p>
+              Show <em>all</em> settings forms on this single page.
+            </p>
+            <button id="show-all-btn" class="btn btn-outline-primary">Show all settings forms</button>
+          </div>
+        </div>
+      </div>
+    </div>
+ {% endif %}
+  <div id="outer-forms-container" style="outline:1ps dotted red">
   {% for group in sorted_groupnames %}
     {% if group_name == None or group_name == group | lower %}
       <div class="my-4 p-2 grey-wrapper" id="form-{{ group | lower }}">
@@ -86,11 +122,45 @@
       </div>
     {% endif %}
   {% endfor %}
+  </div>
   <div class="row">
     <div class="col my-3 text-right">
       {{ macros.docs_btn("Customising & config", "/customising") }}
     </div>
   </div>
+  {% if group_name %}
+    <div class="row">
+      <div class="col">
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings')}}" class="btn btn-admin btn-outline-secondary btn-jump">Config (all settings)</a>
+        </p>
+      </div>
+    </div>
+  {% endif %}
 </div>
+{% if not group_name %}
+  <script>
+    let config_chooser = document.getElementById("config-chooser");
+    if (config_chooser != null) {
+      let group_lookup = {};
+      const setting_list = document.getElementById("settings-list");
+      for (let opt of setting_list.querySelectorAll("option")) {
+        group_lookup[opt.value] = opt.dataset.group;
+      }
+      config_chooser.addEventListener("input", function(){
+        if (group_lookup[this.value]) {
+          document.location.href = "{{ url_for('admin.settings') }}/" + group_lookup[this.value];
+        }
+      });
+    }
+    let show_all_btn = document.getElementById("show-all-btn");
+    let form_container = document.getElementById("outer-forms-container");
+    form_container.classList.add("hidden");
+    show_all_btn.addEventListener("click", function(){
+      form_container.classList.remove("hidden");
+    });
+    document.getElementById("js-config-chooser-container").classList.remove("hidden");
+  </script>
+{% endif %}
 {% endblock %}
 

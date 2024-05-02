@@ -30,15 +30,19 @@
             </td>
           </tr>
           <tr>
-            <td>Admin?</td>
+            <td>Staff?</td>
             <td>
-              Yes:
-              {% if user.is_administrator %}
-                &starf; administrator
-              {% elif user.is_teaching_assistant %}
-                &star; teaching assistant
+              {% if user.is_staff %}
+                Yes:
+                {% if user.is_administrator %}
+                  &starf; administrator
+                {% elif user.is_teaching_assistant %}
+                  &star; teaching assistant
+                {% else %}
+                  <em>unknown</em>
+                {% endif %}
               {% else %}
-                <em>unknown</em>
+                No
               {% endif %}
             </td>
           </tr>

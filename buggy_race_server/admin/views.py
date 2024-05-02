@@ -63,6 +63,7 @@ from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
 from buggy_race_server.config import (
     AnnouncementTypes,
+    ConfigGroupNames,
     ConfigSettingNames,
     ConfigSettings,
     ConfigTypes
@@ -1151,13 +1152,21 @@ def settings(group_name=None):
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
-    task_count = Task.query.filter_by(is_enabled=True).count()
+    groups_by_setting = {}
+    for group in ConfigSettings.GROUPS:
+        # TODO: auth group needs to be promoted to a list (missing comma)
+        if group == ConfigGroupNames.AUTH.name:
+            groups_by_setting[ConfigSettingNames.AUTHORISATION_CODE.name] = group.lower()
+        else:
+            for setting in ConfigSettings.GROUPS[group]:
+                groups_by_setting[setting] = group.lower()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     return render_template(
         "admin/settings.html",
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
+        groups_by_setting=groups_by_setting,
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,
@@ -1272,22 +1281,22 @@ def edit_announcement(announcement_id=None):
 @admin_only
 def publish_announcement(announcement_id):
     form = AnnouncementActionForm(request.form)
-    want_to_publish = None
+    want_to_display = None
     if form.submit_hide.data:
-        want_to_publish = False
-    elif form.submit_publish.data:
-        want_to_publish = True
-    if want_to_publish is None:
-        flash("Error: couldn't decide to publish or not", "danger")
+        want_to_display = False
+    elif form.submit_display.data:
+        want_to_display = True
+    if want_to_display is None:
+        flash("Error: couldn't decide to display or not", "danger")
     else:
         announcement = Announcement.query.filter_by(id=announcement_id).first()
         if announcement is None:
             flash("Error: coudldn't find announcement", "danger")
         else:
-            announcement.is_visible = want_to_publish
+            announcement.is_visible = want_to_display
             announcement.save()
-            if want_to_publish:
-                flash("OK, published an announcement", "success")
+            if want_to_display:
+                flash("OK, unhid an announcement and displayed it", "success")
             else:
                 flash("OK, hid an announcement", "success")
             refresh_global_announcements(current_app)

@@ -140,6 +140,11 @@ textarea {
   padding:0.5em 1em 0.5em 2em;
   background:inherit;
 }
+.task .item code {
+  padding: 0.25rem;
+  background-color: rgba(227, 227, 227, 0.5);
+  border: 1px solid #999999;
+}
 .buggy-project .task .problem:before {
   content: "Problem";
   background-color: #eedddd;

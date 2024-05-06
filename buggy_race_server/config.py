@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.51"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.52"
 #
 # ----------------------------------------------------------------------------
 
@@ -163,6 +163,20 @@ class ConfigSettingNames(Enum):
     # (because it's staff-access and read-only) but you can suppress it here
     # to avoid confusion. Only maintainers need this, so it's off by default.
     _IS_DOCS_HELPER_PAGE_ENABLED = auto()
+
+    # Flask provides a request.is_secure test *but* there are some unusual
+    # hosting setups where that will never be satisified: either because
+    # the requests the app sees are internal and the TLS is being handled
+    # as an external wrapper, or (more pragmatic, and not for production)
+    # when doing dev work on localhost without wanting to set up certificates.
+    # Set this to false if you don't expect request.is_secure to be meaningful.
+    # This is an internal setting related to, but different from, the config
+    # setting IS_REDIRECT_HTTP_TO_HTTPS_FORCED. The default behaviour is that
+    # TLS is expected, so you can test with request.is_secure normally. This
+    # setting is provided so you can bypass it and treat *all* requests as
+    # secure even if they are not (i.e., you don't really care if requests are
+    # secure by the time the Flask app sees them):
+    _IS_REQUEST_TLS_EXPECTED = auto()
 
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
@@ -430,6 +444,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: 0,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: 1,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
@@ -564,6 +579,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
@@ -1497,6 +1513,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name,
         ConfigSettingNames._EDITOR_INPUT_DIR.name,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,

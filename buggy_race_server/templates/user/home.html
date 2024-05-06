@@ -1,0 +1,271 @@
+{% extends "layout.html" %}
+{% block page_title %} {{ current_user.pretty_username }} home {% endblock %}
+{% block content %}
+
+<div class="container pb-5">
+
+  <div class="row">
+    <h1 class="col my-3">
+      {{ current_user.pretty_username }} on the race server
+    </h1>
+  </div>
+
+  <div class="row">
+    {% if is_using_github %}
+      <div class="col-lg">
+        <div class="alert border-secondary">
+          <h2 class="alert-title">Your GitHub account</h2>
+          {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
+          {% if not is_secure %}
+            <div class="alert alert-danger">
+              <h2 class="alert-title">Warning: You are not using the secure race server!</h2>
+              <p>
+                Setting up your GitHub account won't work unless you're logged into
+                the secure server.
+              </p>
+              {% if server_url.startswith("https:") %}
+                <p>
+                  <a href="{{ server_url }}" class="btn btn-warning btn-jump">Switch to {{ server_url }}</a>
+                </p>
+              {% endif %}
+            </div>
+          {% else %}
+            {% if current_user.is_github_connected() %}
+              <div class="alert alert-warning">
+                This buggy racing account is connected to your GitHub account
+                (<strong>{{ current_user.github_username }}</strong>).
+              </div>
+              {% if current_user.has_course_repository() %}
+                <p>
+                  You have forked the Buggy Editor repo into your GitHub account.
+                </p>
+                <p class="btn-collection">
+                  <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-white btn-jump">Your GitHub repo</a>
+                </p>
+                {% if is_using_vs_workspace %}
+                  <div class="alert alert-info my-3">
+                    <h2 class="alert-title">VS Code workspace</h2>
+                    <p>
+                      This workspace file connections your Visual Studio Code application to
+                      your account on {{ project_remote_server_name or "the remote server" }}.
+                      Download your VScode workspace file and load it into VS Code.
+                      <!-- TODO ...and some instruction! -->
+                    </p>
+                    <p class="btn-collection">
+                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
+                    </p>
+                  </div>
+                {% endif %}
+                {% include "_local_announcement.html" %}
+              {% else %}
+                <div class="alert alert-primary">
+                  <p>
+                    You can now <em>fork</em> the Buggy Editor repo.
+                    This will copy all the files you need into your own
+                    GitHub account
+                    (<strong>{{ current_user.github_username }}</strong>).
+                    It will also add the project tasks as <em>issues</em>
+                    to that repo.
+                  </p>
+                  <div class="my-3">
+                    <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button type="submit" class="btn btn-primary btn-jump">Fork Buggy Editor repo</button>
+                    </form>
+                  </div>
+                  <p>
+                    Forking may take a few moments, so be patient when you click the button.
+                  </p>
+                </div>
+              {% endif %}
+            {% else %}
+              <p>
+                If you connect your GitHub account to this buggy racing
+                server, we'll fork the Buggy Editor repo into your
+                own account and then add the project tasks (as GitHub
+                "issues").
+              </p>
+              <p class="alert alert-danger">
+                To do this, this buggy racing server needs access to the 
+                <strong>repositories</strong> and <strong>personal user
+                data</strong> of your GitHub account. When you click on the
+                button below, GitHub will ask you to confirm that you know
+                this server needs such access.
+              </p>
+              <p>
+                If you don't have a GitHub account yet, you can create one
+                as part of the process when you click this button (although
+                it's simpler if you are already logged into GitHub before
+                you start).
+              </p>
+              <p class="my-3">
+                <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your GitHub account</a>
+              </p>
+              <p>
+                Afterwards, expect to receive an email from GitHub alerting
+                you that “a third-party OAuth application
+                ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
+                with repo and user scopes was recently authorized to access
+                your account.”
+              </p>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+    <div class="col-lg">
+      <div class="row">
+        <div class="col-md">
+          <div class="alert alert-info">
+            <h2 class="alert-title">Your race server account</h2>
+            <p class="btn-collection">
+              <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary btn-white btn-jump">Change password</a>
+              <a href="{{ url_for('user.set_api_secret') }}" class="btn btn-outline-secondary btn-white btn-jump">Set&nbsp;API&nbsp;secret</a>
+              {% if is_storing_student_task_texts %}
+                <a href="{{ url_for('user.list_task_texts') }}" class="btn btn-outline-secondary btn-white btn-jump">List&nbsp;your&nbsp;task&nbsp;texts</a>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        {# don't show user details if the _only_ details are: "you are a student" #}
+        {% 
+          if (not current_user.is_student or not current_user.is_active) or
+          (users_have_first_name or users_have_last_name or users_have_ext_username or users_have_ext_id or users_have_email)
+        %}
+          <div class="col-md">
+            <table class="col table table-striped table-bordered table-hover bg-white">
+              <tbody>
+                <tr>
+                  <td>Username</td>
+                  <td><code>{{ current_user.username }}</code></td>
+                </tr>
+                <tr>
+                  <td>Student?</td>
+                  <td class="{% if current_user.is_student %}alert-success{% endif %}">
+                    {% if current_user.is_student %}
+                      Yes
+                    {% else %}
+                      No
+                    {% endif %}
+                    </td>
+                </tr>
+                {% if current_user.is_staff %}
+                  <tr>
+                    <td>Staff?</td>
+                    <td>
+                      Yes:
+                      {% if current_user.is_administrator %}
+                        &starf; administrator
+                      {% elif current_user.is_teaching_assistant %}
+                        &star; teaching assistant
+                      {% else %}
+                        <em>unknown</em>
+                      {% endif %}
+                      <p class="btn-collection">
+                        <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin btn-jump"><span class="icon-cog"></span> Admin&nbsp;pages</a>
+                      </p>
+                    </td>
+                  </tr>
+                {% endif %}
+                {% if not current_user.is_active %}
+                  {# probably shouldn't/can't be logged in #}
+                  <tr>
+                    <td>Active?</td>
+                    <td class="alert-danger">No</td>
+                  </tr>
+                {% endif %}
+                {% if users_have_first_name or users_have_last_name %}
+                <tr>
+                  <td>
+                    {% if not users_have_first_name %}
+                      Last name
+                    {% else %}
+                      Name
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if current_user.full_name is none %}
+                      <em class="empty-setting">none</em>
+                    {% else %}
+                      {{ current_user.full_name }}
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+                {% if users_have_email %}
+                  <tr>
+                    <td>Email</td>
+                    <td>
+                      {% if current_user.email is none %}
+                        <em class="empty-setting">none</em>
+                      {% else %}
+                        {{ current_user.email }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endif %}
+                {% if users_have_ext_username %}
+                  <tr>
+                    <td>{{ ext_username_name }}</td>
+                    <td>
+                      {% if current_user.ext_username is none %}
+                        <em class="empty-setting">none</em>
+                      {% else %}
+                        {{ current_user.ext_username }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endif %}
+                {% if users_have_ext_id %}
+                  <tr>
+                    <td>{{ ext_id_name }}</td>
+                    <td>
+                      {% if current_user.ext_id is none %}
+                        <em class="empty-setting">none</em>
+                      {% else %}
+                        {{ current_user.ext_id }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-success">
+        <h2 class="alert-title">Buggy pitstop</h2>
+        <p class="btn-collection">
+          <a href="{{ url_for( 'user.submit_buggy_data' ) }}" class="btn btn-outline-secondary btn-white btn-jump"><span class="icon-wrench mr-2"></span>Upload&nbsp;JSON</a>
+          <a href="{{ url_for( 'buggy.show_own_buggy' ) }}" class="btn btn-outline-secondary btn-white btn-jump">View&nbsp;buggy</a>
+          <a href="{{ url_for( 'public.show_specs' ) }}" class="btn btn-outline-secondary btn-white btn-jump">Race&nbsp;specs</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert border-secondary">
+        <h2 class="alert-title">Project links</h2>
+        <p class="btn-collection">
+          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page' ) }}">About the project</a>
+          {% if is_showing_workflow %}
+            <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
+          {% endif %}
+          {% if submission_link %}
+            <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white btn-jump">Submission</a>
+          {% endif %}
+        </p>
+        {% include "public/project/_project_links.html" %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

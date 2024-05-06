@@ -54,6 +54,36 @@ def flash_explanation_if_unauth(msg):
         return decorated_function
     return decorator
 
+# 
+@blueprint.route("/home", strict_slashes=False)
+@flash_explanation_if_unauth("You must log in before you can access your home page and settings")
+@login_required
+@active_user_required
+def home_page():
+    form = ChangePasswordForm()
+    is_using_github = (
+        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
+    )
+    return render_template(
+        "user/home.html",
+        is_using_github=is_using_github,
+        form=form,
+        report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        is_showing_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+        is_storing_student_task_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
+        users_have_first_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
+        users_have_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
+        users_have_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
+        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
+        users_have_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        is_secure=request.is_secure or not current_app.config[ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name],
+    )
+
 @blueprint.route("/new")
 def register_new_user():
     if not current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]:
@@ -80,44 +110,13 @@ def submit_buggy_data():
         flash(
             Markup(
                 "You haven't connected to GitHub yet. "
-                f"<a href='{url_for('user.settings')}'>Do it now!</a>"
+                f"<a href='{url_for('user.home_page')}'>Do it now!</a>"
             ),
             "danger"
         )
     return render_template(
         "user/submit_buggy_data.html",
         form=BuggyJsonForm(request.form)
-    )
-
-@blueprint.route("/settings", strict_slashes=False)
-@flash_explanation_if_unauth("You must log in before you can access your settings")
-@login_required
-@active_user_required
-def settings():
-    form = ChangePasswordForm()
-    is_using_github = (
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
-        and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
-    )
-    return render_template(
-        "user/settings.html",
-        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
-        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-        form=form,
-        has_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
-        has_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
-        has_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
-        has_fist_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
-        has_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
-        is_secure=True, # TODO investigate when this can be false
-        is_using_github=is_using_github,
-        is_using_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_using_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
-        local_announcement_type=AnnouncementTypes.GET_EDITOR.value,
-        project_remote_server_address=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name],
-        project_remote_server_name=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name],
-        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        user=current_user,
     )
 
 @blueprint.route('/setup-course-repository', methods=['POST'], strict_slashes=False)
@@ -127,7 +126,7 @@ def setup_course_repository():
     """Create a new fork of the BUGGY_EDITOR_REPO if one doesn't already exist"""
     if current_user.has_course_repository():
         flash("Didn't try to fork: it looks like there's already a repo there", "danger")
-        return redirect(url_for('user.settings'))
+        return redirect(url_for('user.home_page'))
 
     # Forking is async so we assume we're successful and hope for the best!
     repo = current_user.github.post(
@@ -188,7 +187,7 @@ def setup_course_repository():
         ]
     ).start()
 
-    return redirect(url_for('user.settings'))
+    return redirect(url_for('user.home_page'))
 
 @blueprint.route("/password/<username>", methods=['GET'], strict_slashes=False)
 @blueprint.route("/password", methods=['GET','POST'], strict_slashes=False)
@@ -340,14 +339,14 @@ def download_vscode_workspace():
     remote_server_name = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name]
     if not (remote_server_address and remote_server_name):
         flash("Remote server has not been configured on the race server: cannot create VScode workspace file", "danger")
-        return redirect(url_for("user.settings"))
+        return redirect(url_for("user.home_page"))
     if not current_user.github_username:
         flash("No GitHub username (have you forked the repo yet?): cannot create VScode workspace file", "danger")
-        return redirect(url_for("user.settings"))
+        return redirect(url_for("user.home_page"))
     github_repo = current_user.course_repository
     if not github_repo:
         flash("Missing GitHub repo (have you forked the repo yet?): cannot create VScode workspace file", "danger")
-        return redirect(url_for("user.settings"))
+        return redirect(url_for("user.home_page"))
     filename = get_download_filename("buggy-editor.code-workspace")
     project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()
     response = Response(

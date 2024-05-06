@@ -128,6 +128,9 @@ textarea {
   margin:1em 1em 0.5em 2em;
   padding-bottom:0.5em;
 }
+.buggy-project .task .item blockquote {
+  margin-left: 3rem;
+}
 .buggy-project .task .hints ul li {
   margin: 0.5em 0;
 }
@@ -136,6 +139,11 @@ textarea {
   font-weight:bold;
   padding:0.5em 1em 0.5em 2em;
   background:inherit;
+}
+.task .item code {
+  padding: 0.25rem;
+  background-color: rgba(227, 227, 227, 0.5);
+  border: 1px solid #999999;
 }
 .buggy-project .task .problem:before {
   content: "Problem";

@@ -1,0 +1,43 @@
+{% set report_type = config['PROJECT_REPORT_TYPE'] %}
+<div class="row my-3">
+  <div class="col-md">
+    <div class="p-3 mb-2 alert-tasks">
+      <h2>Tasks</h2>
+      <p>
+        The project requires you to work on a racing buggy editor: it's a
+        Python Flask webserver you've been given, and which you develop in
+        <strong>phases</strong> through a series of <strong>tasks</strong>.
+      </p>
+      <p>
+        <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page', page='tasks' ) }}">Task list</a>
+      </p>
+    </div>
+  </div>
+  {% if report_type %}
+    <div class="col-md">
+      <div class="p-3 mb-2 alert-poster">
+        <h2>{{ report_type | title }}</h2>
+        <p>
+          Your buggy editor must include a webpage called <code>{{ report_type }}</code>
+          that "sells" your editor and summarises your journey through those tasks.
+        </p>
+        <p>
+          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details</a>
+        </p>
+      </div>
+    </div>
+  {% endif %}
+  <div class="col-md">
+    <div class="p-3 mb-2 alert-tech-notes">
+      <h2>Tech notes</h2>
+      <p>
+        The tech notes contain explanations and suggestions
+        to help you with the project (and some of the specific
+        tasks).
+      </p>
+      <p>
+        <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes</a>
+      </p>
+    </div>
+  </div>
+</div>

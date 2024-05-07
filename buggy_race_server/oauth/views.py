@@ -41,4 +41,4 @@ def github_callback():
     current_user.github_username = current_user.github.get('/user').json()['login']
     current_user.save()
 
-    return redirect(url_for('user.settings'))
+    return redirect(url_for('user.home_page'))

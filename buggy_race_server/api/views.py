@@ -16,11 +16,13 @@ blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../stat
 API_SECRET_LIFESPAN_MINS = 60
 
 def get_json_error_response(msg, status=401):
-  return Response(
+  response = Response(
     '{"error": "' + msg + '"}',
     status=status,
     mimetype="application/json"
   )
+  response.headers.add("Access-Control-Allow-Origin", "*") # CORS
+  return response
 
 @blueprint.route("/", methods=["GET"], strict_slashes=False)
 def describe_api():
@@ -30,7 +32,7 @@ def describe_api():
     buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
   )
 
-@blueprint.route("/upload", methods=["POST"], strict_slashes=True)
+@blueprint.route("/upload", methods=["POST", "OPTIONS"], strict_slashes=True)
 def create_buggy_with_json_via_api():
   """ API call  """
   # basic API call to /api/upload with four params:
@@ -39,6 +41,16 @@ def create_buggy_with_json_via_api():
   #        secret (must match recent secret)
   #        buggy_json
   #
+  if request.method == "OPTIONS":
+      # CORS preflight enquiry
+      # wildcards are OK here because the API is stateless so isn't
+      # handling cookies: auth is provided in the data payload
+      response = Response(status=204) # 204: no content
+      response.headers.add("Access-Control-Allow-Origin", "*")
+      response.headers.add("Access-Control-Allow-Headers", "*")
+      response.headers.add("Access-Control-Allow-Methods", "POST")
+      return response
+
   API_KEY_USER = "user"
   API_KEY_KEY = "key" # API key for the API key, heh
   API_KEY_SECRET = "secret"
@@ -89,8 +101,10 @@ def create_buggy_with_json_via_api():
       user.api_secret_count += 1
       user.save()
   # now send 200 even when response is an error (e.g., JSON parse fail)
-  return Response(
+  response = Response(
     json.dumps(handle_uploaded_json(BuggyJsonForm(request.form), user, True)),
     status=200,
     mimetype="application/json"
   )
+  response.headers.add("Access-Control-Allow-Origin", "*") # CORS
+  return response

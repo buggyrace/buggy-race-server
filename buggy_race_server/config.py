@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.5"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.53"
 #
 # ----------------------------------------------------------------------------
 
@@ -164,6 +164,20 @@ class ConfigSettingNames(Enum):
     # to avoid confusion. Only maintainers need this, so it's off by default.
     _IS_DOCS_HELPER_PAGE_ENABLED = auto()
 
+    # Flask provides a request.is_secure test *but* there are some unusual
+    # hosting setups where that will never be satisified: either because
+    # the requests the app sees are internal and the TLS is being handled
+    # as an external wrapper, or (more pragmatic, and not for production)
+    # when doing dev work on localhost without wanting to set up certificates.
+    # Set this to false if you don't expect request.is_secure to be meaningful.
+    # This is an internal setting related to, but different from, the config
+    # setting IS_REDIRECT_HTTP_TO_HTTPS_FORCED. The default behaviour is that
+    # TLS is expected, so you can test with request.is_secure normally. This
+    # setting is provided so you can bypass it and treat *all* requests as
+    # secure even if they are not (i.e., you don't really care if requests are
+    # secure by the time the Flask app sees them):
+    _IS_REQUEST_TLS_EXPECTED = auto()
+
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
@@ -195,6 +209,7 @@ class ConfigSettingNames(Enum):
     IS_API_SECRET_ONE_TIME_PW = auto()
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
+    IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
@@ -402,6 +417,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
@@ -430,6 +446,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: 0,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: 1,
         ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
@@ -476,6 +493,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: 0,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
@@ -564,6 +582,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
@@ -607,6 +626,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
@@ -860,6 +880,13 @@ class ConfigSettings:
           to avoid demoralising students for mishaps during races. This is
           the default for your project and you can override it on a
           race-by-race basis.""",
+
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name:
+          """On the task list, do you want every task to display a strapline at
+          the bottom of its "solution" block encouraging students to complete
+          the task text? This setting is ignored (so: no such message will be
+          displayed) if `IS_STORING_STUDENT_TASK_TEXTS` is `No`.
+          """,
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
           """The tech notes are static pages, rendered on a dark background (to
@@ -1497,6 +1524,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,
+        ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name,
         ConfigSettingNames._EDITOR_INPUT_DIR.name,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,

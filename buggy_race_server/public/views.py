@@ -99,7 +99,7 @@ def login():
             else:
                 redirect_url = request.args.get("next") or (
                     url_for("admin.admin") if current_user.is_staff
-                    else url_for("user.submit_buggy_data")
+                    else url_for("user.home_page")
                 )
             return redirect(redirect_url)
         else:

@@ -107,6 +107,13 @@
                 </div>
                 <div class="item solution">
   {{ task.solution_html(config) | safe }}
+  {% if is_storing_texts and is_encouraging_texts_on_every_task %}
+                  <div class="encourage-text">
+                    Remember to add a <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}">text
+                    for {{ task.fullname }}</a> {% if report_type %}for your {{ report_type }}{% endif %}
+                    (you can edit it later).
+                  </div>
+  {% endif %}
                 </div>
               <div class="item hints">
   {{ task.hints_html(config) | safe}}

@@ -566,6 +566,8 @@ def publish_task_list(app=current_app):
         qty_tasks=qty_tasks,
         created_at=datetime.now(app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]),
         is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
+        is_encouraging_texts_on_every_task=app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name],
+        report_type=app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
     generated_task_file = join_to_project_root(
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],

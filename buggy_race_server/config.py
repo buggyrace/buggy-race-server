@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.52"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.53"
 #
 # ----------------------------------------------------------------------------
 
@@ -209,6 +209,7 @@ class ConfigSettingNames(Enum):
     IS_API_SECRET_ONE_TIME_PW = auto()
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
+    IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
@@ -416,6 +417,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
@@ -491,6 +493,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: 0,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
@@ -623,6 +626,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
@@ -876,6 +880,13 @@ class ConfigSettings:
           to avoid demoralising students for mishaps during races. This is
           the default for your project and you can override it on a
           race-by-race basis.""",
+
+        ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name:
+          """On the task list, do you want every task to display a strapline at
+          the bottom of its "solution" block encouraging students to complete
+          the task text? This setting is ignored (so: no such message will be
+          displayed) if `IS_STORING_STUDENT_TASK_TEXTS` is `No`.
+          """,
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
           """The tech notes are static pages, rendered on a dark background (to

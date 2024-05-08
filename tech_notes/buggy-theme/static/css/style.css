@@ -352,8 +352,34 @@ nav, footer {
     margin:0 0 2em 0
 }
 
-nav hr, footer hr {
+footer hr {
     display:none
+}
+nav hr {
+    margin:0.5em 0 0.25em 0;
+}
+nav {
+    background-color: #151515;
+    top: 0;
+    margin-left:-0.5em;
+    padding:0.5em 0.5em;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+}
+nav.sticky-nav {
+    position:sticky;
+}
+nav.sticky-nav span.unstick-btn {
+    margin-top:-0.5em;
+    color:yellow;
+    font-weight: bold;
+    float:right;
+    padding:0.25em;
+    cursor:pointer;
+}
+span.unstick-btn:hover {
+    color:white;
+    text-decoration:underline;
 }
 
 footer {

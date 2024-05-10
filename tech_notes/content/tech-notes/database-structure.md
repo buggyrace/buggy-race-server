@@ -100,16 +100,25 @@ It's stored as a binary file, which means it's not arranged as text characters
 that you can simply read. If you try to read it in a text editor, for example,
 you'll see it doesn't make any sense.
 
-One way to investigate the contents of and SQLite database is by
-installing and running [SQLite](https://sqlite.org/index.html) itself. But you
-can also access it through the `sqlite` Python module (which ships as part of
-standard Python3 now)... which is how your buggy editor is doing it.
+One way to view the contents of the SQLite database is by
+installing the [SQLite Viewer for VSCode](https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer).
 
 ### Why don't all the columns have default values?
 
 They could do! You could add them if you think you know what they are.
 But _maybe_ the database is the wrong place to be enforcing that. What
 happens if they change? Is that likely?
+
+### How can I find out why my database insert is failing?
+
+Change the code in `app.py` to the following:
+```
+        except Exception as e: 
+            print(e) 
+            con.rollback()
+            msg = "error in update operation"
+```
+This will log any database errors to the Flask output terminal.
 
 <br><br>
 

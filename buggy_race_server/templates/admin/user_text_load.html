@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: user text JSON {% endblock %}
+{% block content %}
+{% if current_user.is_staff %}
+  {%include "admin/_nav.html" %}
+{% endif %}
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3">
+      Task texts for {{ user.pretty_username }}: JSON file
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <p class="btn-collection">
+        <a href="{{ url_for('user.download_texts', username=user.username, format='json') }}" class="btn btn-download btn-admin btn-outline-secondary {% if qty_texts==0 %}disabled{% endif %}">Download as&nbsp;JSON&nbsp;(admin)</a>
+      </p>
+      <p>
+        The JSON file of {{ user.pretty_username }}'s task texts
+        is suitable for loading into a buggy race server.
+        This might be useful to you <strong>if you've loaded <em>this</em>
+        server with a recovered database</strong>, after an accidental data
+        loss on another, live one.
+      </p>
+      <p class="btn-collection my-3">
+        {{ macros.docs_btn("Recovering task texts", "/running/recovering-texts") }}
+      </p>
+      <p class="btn-collection mt-5">
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.show_user', user_id=user.id) }}">Show user {{ user.pretty_username }}</a>
+      </p>
+    </div>
+    <div class="col-md-8">
+      <form method="POST" action="{{ url_for('admin.user_upload_texts', user_id=user.id) }}"
+        enctype="multipart/form-data" role="form">
+        {{ upload_text_form.csrf_token }}
+        <div class="container alert-warning border border-warning my-3 p-0">
+          <h2 class="alert-title m-0">Upload {{ user.pretty_username }}'s texts</h2>
+          <div class="row">
+            <div class="col">
+              <div class="container alert-danger">
+                <div class="p-3">
+                  <strong>Be careful!</strong> Try this first <em>without ignoring
+                  warnings</em>, because you are about to destroy any and all of
+                  {{ user.pretty_username }}'s task texts before replacing them
+                  with texts found in the uploaded JSON.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row m-3">
+            <div class="col-sm-6 pr-3">
+              {{ upload_text_form.is_ignoring_warnings.label }}
+            </div>
+            <div class="col-sm-6 mb-3">
+              <select id="is-ignoring-warnings" name="is_ignoring_warnings" class="form-control">
+                <option selected value="">No</option>
+                <option value="y">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="row m-3">
+            <div class="col-sm-6 pr-3">
+              {{ upload_text_form.texts_json_file.label }}
+            </div>
+            <div class="col-sm-6">
+              {{ upload_text_form.texts_json_file }}
+            </div>
+          </div>
+          <div class="row m-3">
+            <div class="col-sm-6 pr-3">
+              {{ upload_text_form.is_confirmed.label }}
+            </div>
+            <div class="col-sm-6">
+              <select id="is_confirmed" name="is_confirmed" class="form-control">
+                <option selected="" value="">No</option>
+                <option value="">I think so</option>
+                <option value="y">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="container bg-warning">
+                <div class="p-3">
+                  {{ upload_text_form.auth_code.label(class="") }}
+                  {{ upload_text_form.auth_code(class_="mx-0 form-control") }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col p-3">
+              <input type="submit" value="Upload texts for {{ user.pretty_username }}" class="btn btn-danger m-3">
+            </div>
+          </div> 
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Recovering task texts", "/running/recovering-texts") }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

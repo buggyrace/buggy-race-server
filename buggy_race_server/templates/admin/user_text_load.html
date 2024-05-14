@@ -13,10 +13,10 @@
   <div class="row">
     <div class="col-md-4 mb-4">
       <p class="border mt-3 p-3">
-        {% if most_recent_text_datestamp %}
+        {% if most_recent_text_timestamp %}
           Most recent timestamp on a task text (by {{ user.pretty_username }})
           found in this database:
-          <span style="white-space: nowrap">{{ most_recent_text_datestamp.strftime("%Y-%m-%d %H:%M") }}</span>
+          <span style="white-space: nowrap">{{ most_recent_text_timestamp.strftime("%Y-%m-%d %H:%M") }}</span>
         {% else %}
           No timestamps for task texts (by {{ user.pretty_username}}) found in
           this database.

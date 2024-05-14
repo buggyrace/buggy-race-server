@@ -2107,16 +2107,6 @@ def user_upload_texts(user_id):
     if user is None:
         abort(404)
     form = UploadTaskTextsForm(request.form)
-    texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
-    most_recent_text_datestamp = None
-    for t in texts_by_task_id:
-        text = texts_by_task_id[t]
-        most_recent_text_datestamp=most_recent_timestamp(
-            most_recent_text_datestamp, texts_by_task_id[t].created_at
-        )
-        most_recent_text_datestamp=most_recent_timestamp(
-            most_recent_text_datestamp, texts_by_task_id[t].modified_at
-        )
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             if form.is_confirmed.data:
@@ -2187,9 +2177,12 @@ def user_upload_texts(user_id):
                             else:
                                 if has_warnings and is_ignoring_warnings:
                                     flash("Making changes because you opted to ignore warnings", "warning")
-                                qty_texts_to_delete = TaskText.query.filter_by(user_id=user.id).count()
-                                TaskText.query.filter_by(user_id=user.id).delete()
-                                flash(f"Deleted any and all existing task texts ({qty_texts_to_delete}) for user {user.pretty_username}", "info")
+                                qty_texts_deleted = TaskText.query.filter_by(user_id=user.id).delete()
+                                db.session.commit() # force the deletion!
+                                if qty_texts_deleted == 1:
+                                    flash(f"Deleted one task text for user {user.pretty_username}", "info")
+                                else:
+                                    flash(f"Deleted {qty_texts_deleted} task texts for user {user.pretty_username}", "info")
                                 qty_new_texts = 0
                                 uploaded_at = datetime.now(timezone.utc)
                                 for text in result_data:
@@ -2230,10 +2223,20 @@ def user_upload_texts(user_id):
                 flash(f"Did not not load task texts for {user.pretty_username} because you did not explicity confirm it", "danger")
         else:
             flash_errors(form)
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    most_recent_text_timestamp = None
+    for t in texts_by_task_id:
+        text = texts_by_task_id[t]
+        most_recent_text_timestamp=most_recent_timestamp(
+            most_recent_text_timestamp, texts_by_task_id[t].created_at
+        )
+        most_recent_text_timestamp=most_recent_timestamp(
+            most_recent_text_timestamp, texts_by_task_id[t].modified_at
+        )
     return render_template(
         "admin/user_text_load.html",
         user=user,
         qty_texts=len(texts_by_task_id),
         upload_text_form=UploadTaskTextsForm(),
-        most_recent_text_datestamp=most_recent_text_datestamp,
+        most_recent_text_timestamp=most_recent_text_timestamp,
     )

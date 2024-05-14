@@ -826,3 +826,16 @@ def get_user_task_texts_as_list():
             "text": text.text
         })
     return list_of_texts
+
+def most_recent_timestamp(a, b):
+    if a is None:
+        return b
+    elif b is None:
+        return a
+    else:
+        # anticipate naive/timezone time problems: no remedy, just
+        # return the first (timestamps should be coming from same source)
+        try:
+            return max(a, b)
+        except:
+            return a

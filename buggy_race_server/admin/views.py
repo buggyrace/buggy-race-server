@@ -89,6 +89,7 @@ from buggy_race_server.utils import (
     load_config_setting,
     load_settings_from_db,
     load_tasks_into_db,
+    most_recent_timestamp,
     prettify_form_field_name,
     publish_task_list,
     publish_tasks_as_issues_csv,
@@ -2107,6 +2108,15 @@ def user_upload_texts(user_id):
         abort(404)
     form = UploadTaskTextsForm(request.form)
     texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    most_recent_text_datestamp = None
+    for t in texts_by_task_id:
+        text = texts_by_task_id[t]
+        most_recent_text_datestamp=most_recent_timestamp(
+            most_recent_text_datestamp, texts_by_task_id[t].created_at
+        )
+        most_recent_text_datestamp=most_recent_timestamp(
+            most_recent_text_datestamp, texts_by_task_id[t].modified_at
+        )
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             if form.is_confirmed.data:
@@ -2225,4 +2235,5 @@ def user_upload_texts(user_id):
         user=user,
         qty_texts=len(texts_by_task_id),
         upload_text_form=UploadTaskTextsForm(),
+        most_recent_text_datestamp=most_recent_text_datestamp,
     )

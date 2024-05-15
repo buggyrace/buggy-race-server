@@ -521,8 +521,9 @@ def admin():
     qty_texts_by_task = defaultdict(int)
     qty_texts = 0
     if is_storing_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
-        # TODO counting all texts, not only those of enrolled active students
-        texts = TaskText.query.all()
+        texts = TaskText.query.join(User).filter(
+            User.is_student==True).filter(User.is_active==True
+        ).all()
         qty_texts = len(texts)
         for text in texts:
             if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:

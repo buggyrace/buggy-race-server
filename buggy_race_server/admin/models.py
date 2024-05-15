@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from enum import Enum, auto
 import re
+import json
 import markdown
 from sqlalchemy import sql
 
@@ -295,6 +296,7 @@ class TaskText(SurrogatePK, Model):
     text = Column(db.Text(), unique=False, nullable=False, default="")
 
     __tablename__ = "tasktexts"
+
     def __init__(self, **kwargs):
        """Create instance."""
        db.Model.__init__(self, **kwargs)

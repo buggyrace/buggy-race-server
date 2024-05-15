@@ -502,15 +502,19 @@ def admin():
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
     buggies = Buggy.query.all()
-    students = [s for s in users if s.is_student]
-    students_active = [s for s in students if s.is_active]
-    students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
-    students_logged_in_today = [s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]
-    students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
+    students_active = [s for s in users if s.is_student and s.is_active]
+    students_never_logged_in = [s for s in students_active if s.logged_in_at is None ]
+    students_logged_in_ever = [s for s in students_active if s not in students_never_logged_in]
+    students_logged_in_today = [s for s in students_logged_in_ever if s.logged_in_at.date() >= today]
+    students_logged_in_this_week = [s for s in students_logged_in_ever
+                                        if s not in students_logged_in_today
+                                        and s.logged_in_at.date() >= one_week_ago
+                                    ]
+    students_logged_in_ever = [s for s in students_logged_in_ever if s.logged_in_at.date() < one_week_ago ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
     staff_users = [u for u in users if u.is_active and u.is_staff]
-    other_users = [u for u in users if u.is_active and not (u in students or u in staff_users)]
+    other_users = [u for u in users if u.is_active and not (u in students_active or u in staff_users)]
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
     tasks_by_id = {task.id: task.fullname for task in tasks}
@@ -546,8 +550,9 @@ def admin():
         qty_students_active=len(students_active),
         qty_students_logged_in_this_week=len(students_logged_in_this_week),
         qty_students_logged_in_today=len(students_logged_in_today),
+        qty_students_logged_in_ever=len(students_logged_in_ever),
         qty_students_never_logged_in=len(students_never_logged_in),
-        qty_students=len(students),
+        qty_students=len(students_active),
         qty_tasks=qty_tasks,
         qty_texts_by_task=qty_texts_by_task,
         qty_texts=qty_texts,
@@ -557,8 +562,9 @@ def admin():
         qty_users=len(users),
         staff_users=staff_users,
         students_active = students_active,
-        students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
+        students_logged_in_this_week=students_logged_in_this_week,
         students_logged_in_today=students_logged_in_today,
+        students_logged_in_ever=students_logged_in_ever,
         students_never_logged_in=students_never_logged_in,
         submission_deadline=submission_deadline,
         submit_deadline_day=get_day_of_week(submission_deadline),

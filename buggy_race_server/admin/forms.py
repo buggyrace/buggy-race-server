@@ -246,6 +246,23 @@ class GenerateTasksForm(FlaskForm):
     def validate(self):
         return super(GenerateTasksForm, self).validate()
 
+class UploadTaskTextsForm(FlaskForm):
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+    is_confirmed = BooleanField(
+      """All task texts belonging to this user will be deleted, and replaced
+      with texts in the JSON file. Are you sure?"""
+    )
+    texts_json_file = FileField("JSON task texts file")
+    is_ignoring_warnings = BooleanField("Ignore warnings?")
+
+    def __init__(self, *args, **kwargs):
+        super(UploadTaskTextsForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        return super(UploadTaskTextsForm, self).validate()
+
+
+
 class TaskForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
     phase = IntegerField(

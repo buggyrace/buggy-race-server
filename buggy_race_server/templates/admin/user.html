@@ -255,7 +255,8 @@
     <div class="col my-3 btn-collection">
       {% if current_user.is_administrator %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
-      {% endif %}
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.user_upload_texts',  user_id=user.id)}}">Load {{ user.pretty_username }}'s text as JSON</a>
+        {% endif %}
       {% if current_user.is_administrator or is_password_change_by_any_staff %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
       {% endif %}

@@ -3,6 +3,7 @@
    (except for races/racetracks — those are in admin/views_races.py)
 """
 import csv
+import json
 import io  # for CSV dump
 import random  # for API tests
 from datetime import datetime, timedelta, timezone
@@ -48,6 +49,7 @@ from buggy_race_server.admin.forms import (
     SubmitWithConfirmForm,
     SubmitWithConfirmAndAuthForm,
     TaskForm,
+    UploadTaskTextsForm,
 )
 from buggy_race_server.admin.models import (
     Announcement,
@@ -87,10 +89,12 @@ from buggy_race_server.utils import (
     load_config_setting,
     load_settings_from_db,
     load_tasks_into_db,
+    most_recent_timestamp,
     prettify_form_field_name,
     publish_task_list,
     publish_tasks_as_issues_csv,
     publish_tech_notes,
+    quote_string,
     redact_password_in_database_url,
     refresh_global_announcements,
     servertime_str,
@@ -498,23 +502,28 @@ def admin():
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
     buggies = Buggy.query.all()
-    students = [s for s in users if s.is_student]
-    students_active = [s for s in students if s.is_active]
-    students_logged_in_this_week = [s for s in students_active if s.logged_in_at and s.logged_in_at.date() >= one_week_ago]
-    students_logged_in_today = [s for s in students_logged_in_this_week if s.logged_in_at.date() >= today]
-    students_never_logged_in = [s for s in students_active if not s.logged_in_at ]
+    students_active = [s for s in users if s.is_student and s.is_active]
+    students_never_logged_in = [s for s in students_active if s.logged_in_at is None ]
+    students_logged_in_ever = [s for s in students_active if s not in students_never_logged_in]
+    students_logged_in_today = [s for s in students_logged_in_ever if s.logged_in_at.date() >= today]
+    students_logged_in_this_week = [s for s in students_logged_in_ever
+                                        if s not in students_logged_in_today
+                                        and s.logged_in_at.date() >= one_week_ago
+                                    ]
+    students_logged_in_ever = [s for s in students_logged_in_ever if s.logged_in_at.date() < one_week_ago ]
     students_uploaded_this_week = [s for s in students_active if s.uploaded_at and s.uploaded_at.date() >= one_week_ago]
     users_deactivated = [u for u in users if not u.is_active]
     staff_users = [u for u in users if u.is_active and u.is_staff]
-    other_users = [u for u in users if u.is_active and not (u in students or u in staff_users)]
+    other_users = [u for u in users if u.is_active and not (u in students_active or u in staff_users)]
     tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
     qty_tasks = len(tasks)
     tasks_by_id = {task.id: task.fullname for task in tasks}
     qty_texts_by_task = defaultdict(int)
     qty_texts = 0
     if is_storing_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
-        # TODO counting all texts, not only those of enrolled active students
-        texts = TaskText.query.all()
+        texts = TaskText.query.join(User).filter(
+            User.is_student==True).filter(User.is_active==True
+        ).all()
         qty_texts = len(texts)
         for text in texts:
             if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
@@ -542,8 +551,9 @@ def admin():
         qty_students_active=len(students_active),
         qty_students_logged_in_this_week=len(students_logged_in_this_week),
         qty_students_logged_in_today=len(students_logged_in_today),
+        qty_students_logged_in_ever=len(students_logged_in_ever),
         qty_students_never_logged_in=len(students_never_logged_in),
-        qty_students=len(students),
+        qty_students=len(students_active),
         qty_tasks=qty_tasks,
         qty_texts_by_task=qty_texts_by_task,
         qty_texts=qty_texts,
@@ -553,8 +563,9 @@ def admin():
         qty_users=len(users),
         staff_users=staff_users,
         students_active = students_active,
-        students_logged_in_this_week=[s for s in students_logged_in_this_week if s not in students_logged_in_today],
+        students_logged_in_this_week=students_logged_in_this_week,
         students_logged_in_today=students_logged_in_today,
+        students_logged_in_ever=students_logged_in_ever,
         students_never_logged_in=students_never_logged_in,
         submission_deadline=submission_deadline,
         submit_deadline_day=get_day_of_week(submission_deadline),
@@ -783,6 +794,7 @@ def show_user(user_id):
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+        upload_text_form=UploadTaskTextsForm(),
     )
 
 def manage_user(user_id):
@@ -2086,4 +2098,152 @@ def get_blueprint_urls():
         "admin/system.html",
         system_str="\n".join(sorted(routes)),
         title=title,
+    )
+
+@blueprint.route("/user/<user_id>/texts-admin", methods=['GET', 'POST'])
+@login_required
+@admin_only
+def user_upload_texts(user_id):
+    if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        flash("Task texts are not enabled on this project", "warning")
+        abort(404)
+    if str(user_id).isdigit():
+        user = User.get_by_id(int(user_id))
+    else:
+        user = User.query.filter_by(username=user_id).first()
+    if user is None:
+        abort(404)
+    form = UploadTaskTextsForm(request.form)
+    if request.method == "POST":
+        if form.is_submitted() and form.validate():
+            if form.is_confirmed.data:
+                is_ignoring_warnings = form.is_ignoring_warnings.data
+                if "texts_json_file" in request.files:
+                    is_ok = False
+                    json_file = request.files['texts_json_file']
+                    if json_file.filename:
+                        json_filename_with_path = os.path.join(
+                            current_app.config['UPLOAD_FOLDER'],
+                            f"texts-user-{user.username}.json"
+                        )
+                        json_file.save(json_filename_with_path)
+                        try:
+                            with open(json_filename_with_path, "r") as read_file:
+                                result_data = json.load(read_file)
+                            is_ok = True
+                        except UnicodeDecodeError as e:
+                            flash(
+                                "Encoding error (maybe that wasn't a JSON file you uploaded, "
+                                "or it contains unexpected characters?)",
+                                "warning"
+                            )
+                        except json.decoder.JSONDecodeError as e:
+                            flash("Failed to parse JSON data", "danger")
+                            flash(str(e), "warning")
+                            flash("No data was accepted", "info")
+                        if is_ok:
+                            has_warnings = False
+                            tasks = Task.query.all()
+                            tasks_by_full_name = {task.fullname: task for task in tasks}
+                            qty_texts_by_task = defaultdict(int)
+                            qty_tasks_with_bad_name = 0
+                            task_with_mismatch_username = []
+                            task_with_mismatch_task_name = []
+                            bad_usernames = []
+                            for text in result_data:
+                                task_name = text.get('task_name')
+                                if task_name is None:
+                                    qty_tasks_with_bad_name += 1
+                                    continue
+                                qty_texts_by_task[task_name] += 1
+                                if tasks_by_full_name.get(task_name) is None:
+                                    task_with_mismatch_task_name.append(task_name)
+                                username = text.get('username')
+                                if username != user.username:
+                                    task_with_mismatch_username.append(task_name)
+                                    if username not in bad_usernames:
+                                        bad_usernames.append(username)
+                            task_with_mismatch_username.sort()
+                            task_with_mismatch_task_name.sort()
+                            flash(f"Number of texts found in uploaded JSON file: {len(result_data)}", "info")                            
+                            if qty_tasks_with_bad_name > 0:
+                                flash(f"Warning: some texts refered to tasks without names: {qty_tasks_with_bad_name}", "danger")
+                                has_warnings = True
+                            if task_with_mismatch_task_name:
+                                flash(f"Warning: some texts refered to tasks that cannot be found: {', '.join(task_with_mismatch_task_name)}", "danger")
+                                has_warnings = True
+                            if task_with_mismatch_username:
+                                flash(f"Warning: you're loading texts for user \"{user.pretty_username}\", but that's not the author of these texts: {', '.join(task_with_mismatch_username)}", "danger")
+                                if len(bad_usernames) == 1:
+                                    flash(f"Warning: the 'original' username in the texts you uploaded is \"{ bad_usernames[0] }\"", "danger")
+                                else:
+                                    flash(f"Warning: the 'original' usernames in the texts you uploaded are: {', '.join(map(quote_string, sorted(bad_usernames)))}", "danger")
+                                has_warnings = True
+                            if has_warnings and not is_ignoring_warnings:
+                                flash("No changes were made (because you chose not to ignore warnings)", "info")
+                            else:
+                                if has_warnings and is_ignoring_warnings:
+                                    flash("Making changes because you opted to ignore warnings", "warning")
+                                qty_texts_deleted = TaskText.query.filter_by(user_id=user.id).delete()
+                                db.session.commit() # force the deletion!
+                                if qty_texts_deleted == 1:
+                                    flash(f"Deleted one task text for user {user.pretty_username}", "info")
+                                else:
+                                    flash(f"Deleted {qty_texts_deleted} task texts for user {user.pretty_username}", "info")
+                                qty_new_texts = 0
+                                uploaded_at = datetime.now(timezone.utc)
+                                for text in result_data:
+                                    task_name = text.get('task_name')
+                                    task = tasks_by_full_name.get(task_name)
+                                    if task is None:
+                                        flash(f"Failed to add text: no such task \"{ task_name }\"", "danger")
+                                    else:
+                                        created_at = uploaded_at
+                                        try: # for now, assume no seconds (see utils.get_user_task_texts_as_list)
+                                            created_at=datetime.strptime(text.get("created_at"), "%Y-%m-%d %H:%M")
+                                        except TypeError:
+                                            pass
+                                            # failure to parse created_at isn't critical:
+                                            # so fail silently, fallback to 'now'
+                                        text_body = text.get("text")
+                                        tasktext = TaskText(
+                                            user_id=user.id,
+                                            task_id=task.id,
+                                            text=text_body,
+                                            created_at=created_at,
+                                            modified_at=uploaded_at,
+                                        )
+                                        tasktext.save()
+                                        qty_new_texts += 1
+                                        flash(f"Added task text for {task.fullname} by user {user.pretty_username} ({len(text_body)} characters)", "info")
+                                if qty_new_texts == 0:
+                                    flash(f"Summary: loaded no new task texts for user {user.pretty_username}", "warning")
+                                elif qty_new_texts == 1:
+                                    flash(f"Summary: loaded only one new task text for user {user.pretty_username}", "info")
+                                else:
+                                    flash(f"Summary: loaded {qty_new_texts} new task texts for user {user.pretty_username}", "info")
+                    else:
+                        flash("Missing task texts JSON filename", "warning")
+                else:
+                    flash("Missing task texts file (no JSON found)", "warning")
+            else:  
+                flash(f"Did not not load task texts for {user.pretty_username} because you did not explicity confirm it", "danger")
+        else:
+            flash_errors(form)
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    most_recent_text_timestamp = None
+    for t in texts_by_task_id:
+        text = texts_by_task_id[t]
+        most_recent_text_timestamp=most_recent_timestamp(
+            most_recent_text_timestamp, texts_by_task_id[t].created_at
+        )
+        most_recent_text_timestamp=most_recent_timestamp(
+            most_recent_text_timestamp, texts_by_task_id[t].modified_at
+        )
+    return render_template(
+        "admin/user_text_load.html",
+        user=user,
+        qty_texts=len(texts_by_task_id),
+        upload_text_form=UploadTaskTextsForm(),
+        most_recent_text_timestamp=most_recent_text_timestamp,
     )

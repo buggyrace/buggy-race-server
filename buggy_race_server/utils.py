@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper utilities and decorators."""
+import json
 import os # for path
 import re
 import csv
@@ -314,6 +315,8 @@ def create_default_task_markdown_file(distrib_method):
         abort(500)
     return md_filename_with_path
 
+def quote_string(s):
+    return f"\"{s}\""
 
 def publish_tech_notes(app=current_app):
     """ Runs pelican to generate the tech notes.
@@ -606,7 +609,6 @@ def publish_tasks_as_issues_csv(app=current_app):
     issue_csv_file.write(csv)
     issue_csv_file.close()
 
-
 # get_flag_color_defs for handling pennant/flag display with 
 # custom CSS and SVG masks
 FLAG_COLOR_NAME_RE = re.compile(r"\W+")
@@ -792,3 +794,48 @@ def create_editor_zipfile(readme_contents, app=current_app):
         shutil.make_archive(target_zipfile, 'zip', editor_target_dir)
     except Exception as e:
         raise IOError("Failed to zip: {e}")
+
+
+def get_user_task_texts_as_list():
+    """ Used for dumping a user's task texts for saving/loading """
+    from buggy_race_server.user.models import User
+    all_users = db.session.query(
+        User.username, Task.phase, Task.name, Task.is_enabled, TaskText
+    ).filter(
+        User.username == "admin"
+    ).filter(
+        TaskText.user_id == User.id
+    ).filter(
+        TaskText.task_id == Task.id
+    ).all()
+    list_of_texts = []
+    for result in all_users:
+        (username, phase, task_name, is_enabled, text) = result
+        created_at_str = None
+        if text.created_at is not None:
+            created_at_str = datetime.strftime(text.created_at, "%Y-%m-%d %H:%M")
+        modified_at_str = None
+        if text.modified_at is not None:
+            modified_at_str = datetime.strftime(text.modified_at, "%Y-%m-%d %H:%M")
+        list_of_texts.append({
+            "task_name": f"{phase}-{task_name.upper()}",
+            "username": username,
+            "created_at": created_at_str,
+            "modified_at": modified_at_str,
+            "is_enabled": is_enabled,
+            "text": text.text
+        })
+    return list_of_texts
+
+def most_recent_timestamp(a, b):
+    if a is None:
+        return b
+    elif b is None:
+        return a
+    else:
+        # anticipate naive/timezone time problems: no remedy, just
+        # return the first (timestamps should be coming from same source)
+        try:
+            return max(a, b)
+        except:
+            return a

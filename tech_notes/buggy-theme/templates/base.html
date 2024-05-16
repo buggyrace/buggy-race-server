@@ -101,15 +101,15 @@
 
   <div class="container">
     <section id="main_content">
-      <nav>
+      <nav id="sticky-nav" class="sticky-nav">
         <strong><a href="{{ BUGGY_RACE_SERVER_URL }}">Race&nbsp;server</a></strong> |
         <a href="{{ SITEURL }}/tech-notes/">Tech&nbsp;notes</a> |
         <a href="{{ BUGGY_RACE_SERVER_URL }}/project/tasks">Task&nbsp;list</a> |
         {% if PROJECT_REPORT_TYPE %}
           <a href="{{ BUGGY_RACE_SERVER_URL }}/project/{{ PROJECT_REPORT_TYPE }}">{{ PROJECT_REPORT_TYPE | title }}</a>
         {% endif %}
+        <hr>
       </nav>
-      <hr>
 
       <main>
       {% block content %}
@@ -135,5 +135,20 @@
       <a href="{{ BUGGY_RACE_SERVER_URL }}">Buggy race server</a>
     </footer>
   </div>
+  <script>
+    // use JS to add extra capability to cancel sticky behaviour of nav...
+    // because _sometimes_ it interferes with the KSdiagram display
+    let nav = document.getElementById("sticky-nav");
+    if (nav) {
+      const nav_unstick_btn = document.createElement("span");
+      nav_unstick_btn.classList.add("unstick-btn");
+      nav_unstick_btn.innerHTML = "&times;";
+      nav_unstick_btn.addEventListener("click", function(){
+        nav.classList.remove("sticky-nav");
+        nav_unstick_btn.parentNode.removeChild(nav_unstick_btn);
+      });
+      nav.insertBefore(nav_unstick_btn, nav.childNodes[0]);
+    }
+  </script>
 </body>
 </html>

@@ -35,6 +35,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_pretty_approx_duration,
+    get_user_task_texts_as_list,
     is_authorised,
     warn_if_insecure,
 )
@@ -477,13 +478,19 @@ def list_task_texts():
 @login_required
 @active_user_required
 def download_texts(username, format):
-    """Get texts for current user in HTML or text format (html or txt)"""
+    """Get texts for current user in HTML or text format (html or txt)...
+    Or JSON: JSON is for admins as part of the mechanism for loading a
+    student's text en masse (special admin feature).
+    """
     if not current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
         flash("Task texts are not enabled on this project", "warning")
         abort(404)
-    if format not in ["html", "md2html", "txt"]:
+    if format not in ["html", "md2html", "txt", "json"]:
         flash("Task texts can be downloaded as HTML or plain text (html or txt) only", "error")
         abort(404)
+    if format == "json" and not current_user.is_administrator:
+        flash("Downloading task texts in JSON format is only available for administrators")
+        abort(403)
     user = User.query.filter_by(username=username).first()
     if not user:
         flash(f"Can't find user {username}", "danger")
@@ -497,21 +504,22 @@ def download_texts(username, format):
         for task_id in texts_by_task_id:
             texts_by_task_id[task_id].text = markdown.markdown(texts_by_task_id[task_id].text)
         format = "html"
-    filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)        
-    response = make_response(
-        render_template(
-            f"user/task_texts_download.{format}",
-            username=user.username,
-            texts_by_task_id=texts_by_task_id,
-            tasks_by_id=tasks_by_id,
-            project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-            report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-            downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
-            buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+    filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)
+    if format == "json":
+        response = jsonify(get_user_task_texts_as_list())
+    else:
+        response = make_response(
+            render_template(
+                f"user/task_texts_download.{format}",
+                username=user.username,
+                texts_by_task_id=texts_by_task_id,
+                tasks_by_id=tasks_by_id,
+                project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+                report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+                downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
+                buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+            )
         )
-    )
     response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
     return response
-
-
 

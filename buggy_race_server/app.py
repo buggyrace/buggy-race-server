@@ -209,6 +209,12 @@ def create_app():
                 current_user.save()
                 active_timestamp = session[ACTIVITY_AT] = now_utc
 
+    @app.teardown_request
+    def teardown_request(exception):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     return app
 
 

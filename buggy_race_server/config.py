@@ -1522,6 +1522,7 @@ class ConfigSettings:
         ConfigSettings.CACHEBUSTER_KEY,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
+        ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,
         ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name,

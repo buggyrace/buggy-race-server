@@ -79,7 +79,18 @@
           {% for setting_name in config_settings_to_display %}
             <tr>
               <td><code>{{ setting_name }}</code></td>
-              <td><code>{{ config[setting_name] }}</code></td>
+              <td>
+                {% if setting_name == '_CURRENT_ANNOUNCEMENTS' %}
+                  {% if announcement_summary %}
+                    <em class="mr-4">{{ announcement_summary }}</em>
+                    <a class="btn btn-admin btn-sm btn-outline-secondary btn-jump" href="{{ url_for('admin.list_announcements')}}">Announcements</a>
+                  {% else %}
+                    <em class="empty-setting">empty (no announcements)</em>
+                  {% endif %}
+                {% else %}
+                  <code>{{ config[setting_name] }}</code>
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>

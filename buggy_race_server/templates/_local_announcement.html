@@ -1,6 +1,6 @@
 {# local announcements are only shown on specific pages: e.g., home or login #}
-{% if config['CURRENT_ANNOUNCEMENTS'] %}
-  {% for announcement in config['CURRENT_ANNOUNCEMENTS'] %}
+{% if config['_CURRENT_ANNOUNCEMENTS'] %}
+  {% for announcement in config['_CURRENT_ANNOUNCEMENTS'] %}
     {% if announcement.type == local_announcement_type %}
       <div class="row">
         <div class="col alert">

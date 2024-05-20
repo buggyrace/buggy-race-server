@@ -312,7 +312,7 @@ def setup_summary():
     qty_announcements_global = 0
     qty_announcements_login = 0
     qty_announcements_tagline = 0
-    for ann in current_app.config['CURRENT_ANNOUNCEMENTS']:
+    for ann in current_app.config[ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name]:
         if ann.type == AnnouncementTypes.LOGIN.value:
             qty_announcements_login += 1
         elif ann.type == AnnouncementTypes.TAGLINE.value:
@@ -528,6 +528,7 @@ def admin():
         for text in texts:
             if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
                 qty_texts_by_task[tasks_by_id[text.task_id]] += 1
+
     submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
         "admin/dashboard.html",
@@ -1805,6 +1806,16 @@ def show_system_info():
         git_status = result.stdout
     except (ValueError, subprocess.CalledProcessError) as e:
         git_status = "[Unavailable]"
+    announcement_summary = None
+    if curr_anns := current_app.config.get(ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name):
+        try:
+            qty_anns = curr_anns.count()
+            if qty_anns == 1:
+                announcement_summary = "1 announcement"
+            elif qty_anns > 1:
+                announcement_summary = f"{qty_anns} announcements"
+        except AttributeError as e:
+            announcement_summary = f"(unexpected type): {curr_anns}"
     return render_template(
         "admin/system_info.html",
         config_settings_to_display=sorted(ConfigSettings.get_extra_names_for_config_dump()),
@@ -1819,6 +1830,7 @@ def show_system_info():
         redacted_alchemy_database_url=redacted_alchemy_db_url,
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         version_from_source=current_app.config[ConfigSettingNames._VERSION_IN_SOURCE.name],
+        announcement_summary=announcement_summary,
     )
 
 

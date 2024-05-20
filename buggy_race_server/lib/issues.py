@@ -6,7 +6,6 @@ class IssueParser:
         self.header_row = header_row
 
     def parse_issues(self):
-        print(f"FIXME test DEBUG: self.header_row={self.header_row}")
         # If Github requires CRLF (which it seemed to do),
         # see config setting IS_ISSUES_CSV_CRLF_TERMINATED
         # Note: parse_issues currently ALWAYS produces issues with 'title' and

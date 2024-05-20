@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 import subprocess
 
 def refresh_global_announcements(app):
-  app.config['CURRENT_ANNOUNCEMENTS'] = Announcement.query.filter_by(is_visible=True)
+  app.config[ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name] = Announcement.query.filter_by(is_visible=True)
 
 def flash_errors(form, category="warning"):
     """Flash all errors for a form."""

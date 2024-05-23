@@ -45,7 +45,7 @@
                     Texts by 
                     {{ qty_authors }} of {{ qty_students }} 
                     {% if qty_students == 1 %} student {% else %} students {% endif %}
-                    ({{ 100 * (qty_authors / qty_students ) | int }}%)
+                    ({{ ( 100 * qty_authors / qty_students ) | int }}%)
                   {% endif %}
                 {% endif %}
               </div>

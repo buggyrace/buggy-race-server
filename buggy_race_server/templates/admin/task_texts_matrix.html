@@ -13,7 +13,7 @@
   <div class="row">
     <div class="col">
       <div class="alert alert-warning">
-        Currently only texts belonging to <em>active students</em> are shown on this page.
+          Currently only texts belonging to <em>active students</em> are shown on this page.
       </div>
       {% if not students %}
         <div class="alert alert-danger">
@@ -75,6 +75,9 @@
       </tbody>
     </table>
   </div>
+  <p class="btn-collection">
+    <a href="{{ url_for('admin.task_texts_details')}}" class="btn btn-outline-secondary btn-admin btn-jump">Task text authors</a>
+  </p>
   <div class="row">
     <div class="col my-3 text-right">
       {{ macros.docs_btn("Task texts", "/teaching/progress#task-texts-for-the-report") }}

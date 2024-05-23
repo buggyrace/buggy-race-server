@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: task text details {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-5">
+  <div class="row my-3">
+    <div class="col-sm-9">
+      <h1>
+        Task text authors
+      </h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-warning">
+        Currently only texts belonging to <em>active students</em> are shown on this page.
+      </div>
+      {% if not students %}
+        <div class="alert alert-danger">
+          No active students found.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# not grouped explicitly into phases #}
+  {% for phase in tasks_by_phase %}
+    {% if tasks_by_phase[phase] %}
+      {% for task in tasks_by_phase[phase] %}
+        {% set has_texts = texts_by_task_id[task.id] | length > 0 %}
+        <div class="row mx-1 phase-tasks-{{phase}}" id="{{ task.anchor }}">
+          <div class="col my-3 border border-secondary">
+            <div class="row {% if has_texts %}task_has_texts{% endif %}">
+              <div class="col-md p-2">
+                <h3 class="m-1" >{{ task.fullname }}</h3> <!--<strong>{{ task.title }}</strong>-->
+              </div>
+              <div class="col p-2 pt-3">
+                {% if qty_students == 0 %}
+                  <em>no students</em>
+                {% else %}
+                  {% set qty_authors = texts_by_task_id[task.id] | length %}
+                  {% if qty_authors == 0 %}
+                    <em>No texts</em>
+                  {% else %}
+                    Texts by 
+                    {{ qty_authors }} of {{ qty_students }} 
+                    {% if qty_students == 1 %} student {% else %} students {% endif %}
+                    ({{ ( 100 * qty_authors / qty_students ) | int }}%)
+                  {% endif %}
+                {% endif %}
+              </div>
+              <div class="col p-2 text-right">
+                <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-white btn-jump">{{ task.fullname }}</a>
+              </div>
+            </div>
+            {% if has_texts %}
+              <div class="row">
+                <div class="col p-3">
+                  {% for text in texts_by_task_id[task.id] %}
+                      <a class="sm-item-link"
+                      href="{{ url_for('admin.show_user', user_id=text.user_id) }}#task-{{ task.fullname | lower }}"
+                      data-created-at="{{ text.created_at }}" data-modified-at="{{ text.created_at }}"
+                      data-length="{{ text.text | length }}"
+                      >{{ pretty_usernames_by_id[text.user_id] }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% set qty_nonauthors = nonauthors_by_task_id[task.id] | length %}
+              {% if qty_nonauthors > 0 %}
+                <div class="row">
+                  <div class="col m-2 pb-0 alert alert-danger nonauthors" id="nonauthor-{{ task.fullname | lower }}">
+                    <h2 class="alert-title mb-0">
+                      {{ qty_nonauthors }}
+                      {% if qty_nonauthors == 1 %} student {% else %} students {% endif %}
+                       without texts
+                    </h2>
+                    <div class="mt-2 pb-2" id="detail-nonauthor-{{ task.fullname | lower }}">
+                      {% for user_id in nonauthors_by_task_id[task.id] %}
+                        <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=user_id) }}">{{ pretty_usernames_by_id[user_id] }}</a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+</div>
+<script>
+  const non_author_divs = document.getElementsByClassName("nonauthors");
+  for (let div of non_author_divs) {
+    let detail_div = document.getElementById("detail-" + div.id);
+    detail_div.classList.add("hidden");
+    let button = document.createElement("button");
+    button.innerText="Show";
+    button.addEventListener("click", function(){
+      if (detail_div.classList.contains("hidden")) {
+        detail_div.classList.remove("hidden");
+        button.innerText="Hide";
+      } else {
+        detail_div.classList.add("hidden");
+        button.innerText="Show";
+      }
+    });
+    button.classList.add("float-right", "btn", "btn-sm", "btn-white", "btn-outline-danger");
+    button.style["margin-top"] = "-0.5em";
+    div.prepend(button);
+  }
+</script>
+{% endblock %}

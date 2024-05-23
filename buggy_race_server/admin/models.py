@@ -283,10 +283,29 @@ class TaskText(SurrogatePK, Model):
     @staticmethod
     def get_dict_texts_by_task_id(user_id):
         """Returns dict of texts keyed on task id"""
+        if user_id is None: # all active students
+            from buggy_race_server.user.models import User
+            texts = TaskText.query.join(User).filter(
+                    User.is_student==True
+                ).filter(User.is_active==True).all()
+            texts_by_task_id = defaultdict(list)
+            for text in texts:
+                texts_by_task_id[text.task_id].append(text)
+            return texts_by_task_id
         return {
-           tasktext.task_id: tasktext
-           for tasktext in TaskText.query.filter_by(user_id=user_id).all()
+            tasktext.task_id: tasktext
+            for tasktext in TaskText.query.filter_by(user_id=user_id).all()
         }
+
+    # def to_dict(self):
+    #     return {
+    #         "id": self.id,
+    #         "created_at": self.created_at,
+    #         "modified_at": self.modified_at,
+    #         "user_id": self.user_id,
+    #         "task_id": self.task_id,
+    #         "text": self.text,
+    #     }
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = Column(db.DateTime(timezone=True), nullable=False, default=sql.func.now())

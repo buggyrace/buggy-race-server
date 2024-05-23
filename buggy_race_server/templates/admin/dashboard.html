@@ -225,7 +225,7 @@
     <div class="col-sm-6">
       <table class="table table-striped table-bordered table-hover">
         <tr>
-          <td>Buggies uploaded</td>
+          <td>Students' buggies</td>
           <td class="text-right">
             {% if qty_students > 0 %}
               {{ (100 * qty_buggies/qty_students) | int }}%
@@ -286,7 +286,7 @@
       {% if is_storing_texts %}
         <table class="table table-striped table-bordered table-hover">
           <tr>
-            <td>Total students' task texts</td>
+            <td>Students' task texts</td>
             <td class="text-right">{{ qty_texts }}</td>
           </tr>
           {% for task in tasks %}

@@ -501,7 +501,9 @@ def admin():
     today = datetime.now(timezone.utc).date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
-    buggies = Buggy.query.all()
+    buggies = Buggy.query.join(User).filter(
+                User.is_student==True
+              ).filter(User.is_active==True).all()
     students_active = [s for s in users if s.is_student and s.is_active]
     students_never_logged_in = [s for s in students_active if s.logged_in_at is None ]
     students_logged_in_ever = [s for s in students_active if s not in students_never_logged_in]

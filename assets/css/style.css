@@ -882,3 +882,6 @@ body.race-player main {
   overflow-wrap:normal;
   white-space:nowrap;
 }
+.task_has_texts {
+  background-color:#cccccc;
+}

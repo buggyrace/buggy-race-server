@@ -1734,7 +1734,7 @@ def get_text_for_user_task(text_id):
   response.headers["Content-type"] = "application/json"
   return response
 
-@blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
+@blueprint.route("/task-texts-matrix", methods=["GET"], strict_slashes=False)
 @login_required
 @staff_only
 def task_texts():
@@ -1757,12 +1757,48 @@ def task_texts():
         if buggy.user_id in usernames_by_id: # TODO in lieu of a JOIN on active students
            buggies_by_username[usernames_by_id[buggy.user_id]] = buggy
     return render_template(
-       "admin/task_texts.html",
+       "admin/task_texts_matrix.html",
        buggies_by_username=buggies_by_username,
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
     )
+
+@blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
+@login_required
+@staff_only
+def task_texts_details():
+    tasks = Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all()
+    if not tasks:
+        flash("Cannot display texts because there are no tasks — maybe you need to load them into the database?", "warning")
+        return redirect(url_for("admin.admin"))
+    students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
+    pretty_usernames_by_id = {student.id: student.pretty_username for student in students}
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(None) # no specific user
+    tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False)
+    nonauthors_by_task_id = defaultdict(list)
+    for phase in tasks_by_phase:
+        for task in tasks_by_phase[phase]:
+            texts_by_task_id[task.id] = sorted(
+                texts_by_task_id.get(task.id) or [],
+                key=lambda text: pretty_usernames_by_id.get(text.user_id)
+            )
+            author_ids = [ text.user_id for text in texts_by_task_id[task.id] ]
+            nonauthors_by_task_id[task.id] = [
+                student.id for student in students
+                if student.id not in author_ids
+            ]
+    return render_template(
+      "admin/task_texts_details.html",
+      nonauthors_by_task_id=nonauthors_by_task_id,
+      pretty_usernames_by_id=pretty_usernames_by_id,
+      qty_students=len(students),
+      students=students,
+      tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
+      texts_by_task_id=texts_by_task_id,
+    )
+
+
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
 @login_required

@@ -64,7 +64,21 @@
     <div class="col">
       {% for type in data %}
         {% set pretty_type = type | title | replace('_', ' ') %}
-        <h3 class="mt-5" id="type-{{type}}">{{ pretty_type }}</h3>
+        <h3 class="mt-5" id="type-{{type}}">            
+          {% if type == "special" %}
+            Special: Other settings
+          {% else %}
+            {{ pretty_type }}
+          {% endif %}
+        </h3>
+        {% if type == "special" %}
+         <p>
+          These settings are special because they are not the values a setting
+          can take (that is, enumerations) but single items that can either be
+          present or not (except for <code>hamster_booster</code>, which is an
+          integer quantity). Each one of these is an item on your buggy.
+         </p>
+        {% endif %}
         {% set sample_key = data[type].keys() | first  %}
         <table class="table table-striped table-bordered table-hover table-responsive elastic bg-white">
           <thead class="thead-light">

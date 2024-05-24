@@ -86,7 +86,7 @@ def handle_uploaded_json(form, user, is_api=False):
             if not is_api:
               flash(f"Value for {key} was ignored because it wasn't an integer", "warning")
         else:
-          dirty_buggy_data[key] = dirty_buggy_data[key].strip().lower()
+          dirty_buggy_data[key] = str(dirty_buggy_data[key]).strip().lower()
           s = "#" if dirty_buggy_data[key].startswith("#") else ""
           STRING_CHARS = string.digits + string.ascii_letters
           s += "".join(c for c in dirty_buggy_data[key] if c in STRING_CHARS)

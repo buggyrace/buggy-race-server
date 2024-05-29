@@ -28,6 +28,9 @@ const EVENT_TYPE = 'e';
 const EVENT_DELTA = 'd';
 const EVENT_STRING = 's';
 
+const EVENT_TYPE_FINISH = 'f';
+const EVENT_TYPE_ATTACK_PREFIX = 'a';
+
 const RACE_INFO = {
   title: "Race",
   description: "Description",
@@ -103,6 +106,7 @@ var race_json;
 var racetrack_svg;
 var resize_time_id = null;
 var step_count = 0;
+var qty_finish_events = 0; // if > 0, we have a winner so stop reporting "lead"
 var svg_buggies = {}; // keyed on id
 
 // picked up from template/HTML definitions:
@@ -211,13 +215,25 @@ function report_event(text, buggy_id){
   p.append(timestamp);
   if (buggy_id) {
     let bspan = get_span(pretty_id(buggy_id), "buggy");
-    bspan.classList.add(buggy_id);
+    bspan.classList.add(buggy_id, "mr");
     if (crosshairs_tracking_id === buggy_id){
       bspan.classList.add(CSS_TRACKING);
     }
     p.append(bspan);
   }
-  p.append(get_span(text, "m1"));
+  let texts = text.split(/(\[\w+\])/);
+  for (t of texts) {
+    let span;
+    let usermatch = t.match(/\[(\w+)\]/); // inline username: allow tracking
+    if (usermatch){
+      let username = usermatch[1];
+      span = get_span(username, "buggy");
+      span.classList.add("buggy-" + username);
+    } else {
+      span = get_span(t, "m1");
+    }
+    p.append(span);
+  }
   RACELOG_DISPLAY.prepend(p);
 }
 
@@ -492,11 +508,17 @@ function do_step(){
       let buggy_id = event[EVENT_BUGGY];
       let buggy = svg_buggies[BUGGY_ID_PREFIX + buggy_id];
       let delta = event[EVENT_DELTA]; // TODO parseFloat
+      let event_type = event[EVENT_TYPE];
       if (buggy && delta){
           step_promises.push(step_move(buggy, delta));
       }
-      if (event[EVENT_TYPE]) {
-        // TODO animation/graphic etc
+      if (event_type) {
+        if (event_type == EVENT_TYPE_FINISH) {
+          qty_finish_events += 1;
+          // TODO finish line wave chequered flag/confetti?
+        } else if (event_type[0] == EVENT_TYPE_ATTACK_PREFIX) {
+          // TODO animation/graphic etc
+        }
       }
       if (event[EVENT_STRING]) {
         report_event(event[EVENT_STRING], BUGGY_ID_PREFIX+buggy_id)
@@ -515,7 +537,7 @@ function do_step(){
           leading_buggy = buggy;
         }
       }
-      if (leading_buggy && leading_buggy != leading_buggy_before) {
+      if (qty_finish_events===0 && leading_buggy && leading_buggy != leading_buggy_before) {
         report_event("takes the lead", leading_buggy.id);
         leading_buggy_before = leading_buggy;
       }

@@ -29,7 +29,7 @@ import csv
 import json
 import re
 from datetime import datetime, timezone # will need locale really
-from random import randint
+from random import randint, shuffle
 from enum import Enum
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
@@ -41,11 +41,15 @@ DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-07-FOURTH-RACE-STUDENTS.csv' # 'b
 DEFAULT_RACE_FILENAME = 'race.log'
 DEFAULT_RESULTS_FILENAME = 'race-results.json'
 DEFAULT_EVENT_LOG_FILENAME = "race-events.json"
-DEFAULT_COST_LIMIT = 100 # 200
+DEFAULT_COST_LIMIT = 500
 DEFAULT_INITIAL_STEPS = 100
-DEFAULT_MORE_STEPS =  10
-DEFAULT_MAX_LAPS = 1
+DEFAULT_MORE_STEPS =  50
+DEFAULT_MAX_LAPS = 4
 DEFAULT_LAP_LENGTH = 355
+
+DEFAULT_REPAIR_DICE = "3d4"
+DEFAULT_ATTACK_RANGE = 2
+DEFAULT_PK_OF_KARMIC_INJURY = 42
 
 DEFAULT_PK_OF_PUNCTURE = {
     "knobbly":   3,
@@ -145,8 +149,39 @@ def get_pretty_position(n):
     return f"{n}{suffix} place"
 
 class EventType(Enum):
-    PUNCTURE = "p"
+    ATTACK_BIOHAZARD = "ab"
+    ATTACK_CHARGE = "ac"
+    ATTACK_FLAME = "af"
+    ATTACK_SPIKE = "as"
     CHASSIS_FAIL = "xc"
+    FINISH = "f"
+    MESSAGE = "s" # actually "String message"
+    PUNCTURE = "p"
+
+EVENT_BY_ATTACK = {
+    "biohazard": EventType.ATTACK_BIOHAZARD,
+    "charge": EventType.ATTACK_CHARGE,
+    "flame": EventType.ATTACK_FLAME,
+    "spike": EventType.ATTACK_SPIKE
+}
+
+PK_SPIKE_VS_ARMOUR = {
+    "none":       950,
+    "wood":       800,
+    "aluminium":  600,
+    "thinsteel":  400,
+    "thicksteel": 200,
+    "titanium":   100,
+}
+
+PK_DECIDE_TO_ATTACK = {
+    "defensive": 100,
+    "steady":    300,
+    "offensive": 800,
+    "titfortat":   0,
+    "random":    500,
+    "buggy":       0
+}
 
 def pk(prob): # probability in 1000
     return randint(0, 1000) < prob
@@ -225,9 +260,10 @@ class RacingBuggy(BuggySpecs):
         #      from the values stored in the CSV?
         self.calculate_total_cost()
         self.calculate_mass()
+        self.damage_percent = 0
 
     def __str__(self):
-        return f"<{self.username}>"
+        return f"[{self.username}]"
 
     def result_data(self):
         """Data for each buggy that is presented in the `results` section of
@@ -259,6 +295,8 @@ class RacingBuggy(BuggySpecs):
         dstring = POWER_DATA[power_in_use]["delta"]
         delta = score_from_dice(dstring)
         delta *= good_wheel_ratio
+        if pk(100 * self.damage_percent):
+            delta = int(delta / ( 1 + score_from_dice("1d2")/2 ) )
         self.d += delta
 
     def consume_power(self):
@@ -270,7 +308,7 @@ class RacingBuggy(BuggySpecs):
                     # have not run out of power
                     self.power_units -= POWER_DATA[pwr]['rate'] * (randint(0, 10)/50)
                     self.advance(pwr)
-                    if pwr == "hamster" and self.hamster_booster > 0 and pk(10):
+                    if pwr == "hamster" and self.hamster_booster > 0 and pk(300):
                         self.d += score_from_dice("1d6+10")
                         self.hamster_booster -= 1
                         msg = f"employs hamster boost ({self.hamster_booster} left)"
@@ -311,6 +349,19 @@ class RacingBuggy(BuggySpecs):
         if self.qty_tyres < self.qty_good_wheels:
             self.qty_good_wheels = self.qty_tyres
         if self.qty_tyres == 0:
+            self.is_parked = True
+
+    def suffer_attack(self, attack):
+        # if attack == "biohazard":
+        #     # hamsters are the only motive power compromised by bio
+        #     if self.power_type == "hamster" and self.power_units > 0:
+        #         qty_hamsters_lost = min(self.power_units, score_from_dice("2d4"))
+        #         self.power_units = self.power_units - qty_hamsters_lost
+        #     elif self.aux_power_type == "hamster" and self.aux_power_units > 0:
+        #         qty_hamsters_lost = min(self.aux_power_units, score_from_dice("2d4"))
+        #         self.aux_power_units = self.aux_power_units - qty_hamsters_lost
+        self.damage_percent += score_from_dice("3d6")
+        if self.damage_percent >= 100:
             self.is_parked = True
 
     def set_rule_violations(self, cost_limit):
@@ -389,11 +440,11 @@ def load_race_file(json_filename=None):
             if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
                 buggy_data[k] = None
             if type(BuggySpecs.DEFAULTS[k]) == bool:
-                print(f"{k} is boolean! ({buggy_data[k]})")
                 if type(buggy_data[k]) != bool:
                     buggy_data[k] = buggy_data[k].lower() == "true"
         race_data["buggies"].append(RacingBuggy(buggy_data))
         print(".", end="", flush=True)
+    print("", flush=True)
     return race_data
 
 def load_csv(csv_filename=None):
@@ -432,6 +483,18 @@ def load_csv(csv_filename=None):
         print(".", end="", flush=True)
     print(" OK")
     return buggies
+
+def report_puncture(racelog, buggy, type="puncture"):
+    if buggy.qty_good_wheels == 0:
+        punc_str = "no tyres left: parked"
+    else:
+        punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
+        punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
+    racelog(
+        buggy=buggy,
+        event_type=EventType.PUNCTURE,
+        msg=f"{type}! {punc_str}"
+    )
 
 def run_race(race_data):
     buggies_entered = race_data["buggies"]
@@ -533,14 +596,113 @@ def run_race(race_data):
         steps = 0
         max_steps = DEFAULT_INITIAL_STEPS 
 
+        qty_attacks_launched = 0
         while steps < max_steps:
             events_this_step = []
             next_finisher_position += finishers_this_step # 2 buggies tie, next one is 3rd
             finishers_this_step = 0
             steps += 1
             print(f"------------------------ step {steps} ------------------------")
+
+            if steps > 1: # no fighting on the start line, it's unsporting
+                # calculate attacks:
+                # doing this before anyone has moved: now we calculate
+                # proximity (caculating attacks during the move loop is unfair
+                # on buggies early/late in the move cycle)
+                # TODO randomise the order of the buggies to prevent advantage
+                # to earlier (because a parked buggy won't attack so the order
+                # of attack matters )
+                shuffle(buggies)
+                for buggy in [b for b in buggies if b.qty_attacks > 0 and not b.is_parked]:
+                    if not pk(PK_DECIDE_TO_ATTACK[buggy.algo]):
+                        next
+                    attack_range = DEFAULT_ATTACK_RANGE
+                    targets = []
+                    for target in buggies:
+                        proximity = abs(target.d - buggy.d)
+                        if target != buggy and proximity <= attack_range:
+                            targets.append(target)
+                    if targets:
+                        shuffle(targets)
+                        target = targets[0]
+                        proximity = abs(target.d - buggy.d)
+                        racelog(
+                            buggy=buggy,
+                            event_type=EVENT_BY_ATTACK[buggy.attack],
+                            msg=f"attacks {target} with {buggy.attack}"
+                        )
+                        if buggy.attack == "spike":
+                            pretty_armour = ""
+                            if target.armour != "none":
+                                pretty_armour = f" through {target.armour}"
+                            if pk(PK_SPIKE_VS_ARMOUR[target.armour]):
+                                if pk(target.qty_good_wheels * 100) and pk(100 * DEFAULT_PK_OF_PUNCTURE[target.tyres]) :
+                                    target.suffer_puncture()
+                                    report_puncture(racelog, target, f"spike puncture{pretty_armour}")
+                                else:
+                                    buggy.suffer_attack(buggy.attack)
+                                    racelog(
+                                        buggy=target,
+                                        event_type=EventType.MESSAGE,
+                                        msg=f"now at {buggy.damage_percent}% damage"
+                                    )
+                            else:
+                                if target.armour != "none":
+                                    pretty_armour = f"{target.armour} "
+                                racelog(
+                                    buggy=target,
+                                    event_type=EventType.MESSAGE,
+                                    msg=f"{pretty_armour} repels {buggy}'s attack"
+                                )
+                        else: # buggy attack is not-spike
+                            if pk(DEFAULT_PK_OF_KARMIC_INJURY):
+                                buggy.suffer_attack(buggy.attack)
+                                racelog(
+                                    buggy=buggy,
+                                    event_type=EventType.MESSAGE,
+                                    msg=f"suffers karmic self-injury: now {buggy.damage_percent}% damage"
+                                )
+                            else:
+                                defence = BuggySpecs.ATTACK_DEFENCES.get(buggy.attack)
+                                if getattr(target, defence):
+                                    racelog(
+                                        buggy=target,
+                                        event_type=EventType.MESSAGE,
+                                        msg=f"{defence}: immune to {buggy}'s {buggy.attack}"
+                                    )
+                                else:
+                                    buggy.suffer_attack(buggy.attack)
+                                    racelog(
+                                        buggy=target,
+                                        event_type=EventType.MESSAGE,
+                                        msg=f"now at {buggy.damage_percent}% damage"
+                                    )
+                        buggy.qty_attacks -= 1
+                        qty_attacks_launched += 1
+                        if buggy.qty_attacks == 0:
+                            racelog(
+                                buggy=buggy,
+                                event_type=EventType.MESSAGE,
+                                msg="has no attacks left"
+                            )
+                        if target.algo == "titfortat":
+                            target.algo == "offensive"
+                            racelog(
+                                buggy=target,
+                                event_type=EventType.MESSAGE,
+                                msg="titfortat algo switched to offensive"
+                            )
+
             qty_active = 0
             for buggy in buggies:
+                if buggy.damage_percent > 0:
+                    buggy.damage_percent = max(0, buggy.damage_percent - score_from_dice(DEFAULT_REPAIR_DICE))
+                    if buggy.damage_percent == 0:
+                        racelog(
+                            buggy=buggy,
+                            event_type=EventType.MESSAGE,
+                            msg="all damage repaired"
+                        )
                 if not buggy.is_parked:
                     delta = 0
                     qty_active += 1
@@ -568,22 +730,8 @@ def run_race(race_data):
                             )
                     if delta and pk(DEFAULT_PK_OF_PUNCTURE[buggy.tyres] * buggy.qty_good_wheels):
                         buggy.suffer_puncture()
-                        if buggy.qty_good_wheels == 0:
-                            punc_str = "no tyres left: parked"
-                        else:
-                            punc_str = "use spare: still" if buggy.qty_good_wheels == buggy.qty_wheels else "now"
-                            punc_str += f" running on {buggy.qty_good_wheels} of {buggy.qty_wheels} wheels"
-                        racelog(
-                            buggy=buggy,
-                            event_type=EventType.PUNCTURE,
-                            msg="puncture! " + punc_str
-                        )
+                        report_puncture(racelog, buggy)
                         #   ? risk of primary power fail?
-                        #   data[id]["attacks"] > 0?
-                        #     anyone near? chance of attack?
-                        #     target defensive? steady?
-                        #        ? chance of attack backfire
-                        #          calculate damage of attack
                     if max_laps and buggy.d // lap_length >= max_laps:
                         buggy.is_parked = True
                         finishers_this_step += 1
@@ -594,9 +742,10 @@ def run_race(race_data):
                             position_str = f"tied {position_str}"
                         racelog(
                             buggy=buggy,
+                            event_type=EventType.FINISH,
                             msg=f"crosses the finish line in {position_str} ({pretty_race_length})"
                         )
-                        buggy.d += score_from_dice("3d4") # nudge over line
+                        buggy.d += 4 + score_from_dice("1d4") # nudge over line
                 else:
                     pass # buggy is parked
 
@@ -621,7 +770,7 @@ def run_race(race_data):
                         print("[-] no more steps, time is up")
                     max_steps += more_steps
             events.append(events_this_step)
-
+        print(f"[ ] attacks launched in that race: {qty_attacks_launched}")
         logfile.close()
         print(f"[:] race ends after {steps} steps")
         non_finishers = sorted(

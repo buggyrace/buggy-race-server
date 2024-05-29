@@ -121,7 +121,6 @@
         racetrack_path.setAttribute("stroke-width", 0);
         RACETRACK_SVG.append(racetrack_path);
         for (let label of document.querySelectorAll("#svg-btns label")){
-          console.log("adding event listent to ", label);
           let for_input = label.firstElementChild;
           label.addEventListener(
             "click",

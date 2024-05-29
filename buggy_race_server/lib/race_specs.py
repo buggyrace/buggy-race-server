@@ -89,6 +89,13 @@ class BuggySpecs:
         "banging":         {"cost":  42, "mass": 40, "desc": "banging?"}
     }
 
+    ATTACK_DEFENCES = {
+        # presence of the defence nullifies the attack
+        "flame": "fireproof",
+        "charge": "insulated",
+        "biohazard": "antibiotic"
+    }
+
     DEFAULTS = {
       'qty_wheels':           4,        # also minimum number of wheels
       'flag_color':           'white',

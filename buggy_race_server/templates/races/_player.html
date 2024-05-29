@@ -38,6 +38,8 @@
     flex-shrink: 0;
     width:95%;
     max-width:95%;
+    container-type: size;
+    container-name: racetrack-canvas;
   }
   #info-panel {
     flex-grow:1;
@@ -113,6 +115,7 @@
     font-weight: bold;
     font-family: monospace;
     color:white;
+
   }
   @keyframes blinky { to { visibility: hidden; } }
   
@@ -175,7 +178,7 @@
     border-top: 1px solid #333;
     padding:0.3rem 0.5rem;
   }
-  #race-log p span {
+  #race-log p span.mr {
     margin-right:1em;
   }
   #race-log p.event .ts {
@@ -227,6 +230,15 @@
     font-weight:normal;
   }
   .svg-buggy { cursor: pointer; }
+
+  @container racetrack-canvas (max-width: 50em) {
+    #replay-indicator, #time-indicator {
+      font-size:0.8em;
+    }
+    #replay-indicator.blink:before {
+      background-size: 1rem 1rem;
+    }
+  }
   </style>
   <div class="player-container">
     <a id="replay"></a><!-- #replay to skip header (if any) when loading -->

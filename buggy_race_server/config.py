@@ -17,9 +17,9 @@ but everything else from the settings in the database:
   accessed as an object here in config
 
 """
-
+import sys
 from enum import Enum, auto
-from environs import Env
+from environs import Env, EnvError
 from random import randint
 from os import path
 import re
@@ -1629,7 +1629,14 @@ class ConfigFromEnv():
     # In production, set to a higher number, like 31556926
     SEND_FILE_MAX_AGE_DEFAULT = env.int("SEND_FILE_MAX_AGE_DEFAULT", default=43200)
 
-    DATABASE_URL = env.str("DATABASE_URL")
+    try:
+        DATABASE_URL = env.str("DATABASE_URL")
+    except EnvError as e:
+        print("[!] The Buggy Race Server won't run without environment variable DATABASE_URL")
+        print("[ ] This is a feature not a bug!")
+        print("[ ] Suggestion for development only: \"sqlite:////tmp/buggy-race-server.db\"")
+        print("[ ] See https://www.buggyrace.net/docs/customising/env for more help", flush=True)
+        raise
 
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     

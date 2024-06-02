@@ -41,21 +41,23 @@ DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-07-FOURTH-RACE-STUDENTS.csv' # 'b
 DEFAULT_RACE_FILENAME = 'race.log'
 DEFAULT_RESULTS_FILENAME = 'race-results.json'
 DEFAULT_EVENT_LOG_FILENAME = "race-events.json"
-DEFAULT_COST_LIMIT = 500
+DEFAULT_COST_LIMIT = 250
 DEFAULT_INITIAL_STEPS = 100
 DEFAULT_MORE_STEPS =  50
-DEFAULT_MAX_LAPS = 4
-DEFAULT_LAP_LENGTH = 355
+DEFAULT_MAX_LAPS = 2
+DEFAULT_LAP_LENGTH = 464
 
 DEFAULT_REPAIR_DICE = "3d4"
 DEFAULT_ATTACK_RANGE = 2
 DEFAULT_PK_OF_KARMIC_INJURY = 42
 
+DEFAULT_PUNCTURE_MULTIPLIER = 1
+
 DEFAULT_PK_OF_PUNCTURE = {
-    "knobbly":   3,
-    "slick":     6,
-    "steelband": 2,
-    "reactive":  1,
+    "knobbly":   3 * DEFAULT_PUNCTURE_MULTIPLIER,
+    "slick":     6 * DEFAULT_PUNCTURE_MULTIPLIER,
+    "steelband": 2 * DEFAULT_PUNCTURE_MULTIPLIER,
+    "reactive":  1 * DEFAULT_PUNCTURE_MULTIPLIER,
     "maglev":    0
 }
 
@@ -614,8 +616,9 @@ def run_race(race_data):
                 # of attack matters )
                 shuffle(buggies)
                 for buggy in [b for b in buggies if b.qty_attacks > 0 and not b.is_parked]:
-                    if not pk(PK_DECIDE_TO_ATTACK[buggy.algo]):
-                        next
+                    print(f"FIXME : <{buggy.attack}> None? {buggy.attack is None}")
+                    if buggy.attack is None or buggy.attack == 'none':
+                        continue
                     attack_range = DEFAULT_ATTACK_RANGE
                     targets = []
                     for target in buggies:

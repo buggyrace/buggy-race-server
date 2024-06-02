@@ -184,7 +184,7 @@ chokes on a migration (if you hit this, let us know).
 The env variable needs to be something like (which is cheekily our default in
 the example environment file):
 
-    DATABASE_URL=sqlite:////tmp/dev.db
+    DATABASE_URL=sqlite:////tmp/buggy-race-server.db
 
 
 ### How to connect to mySQL

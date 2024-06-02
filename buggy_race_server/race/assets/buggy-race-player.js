@@ -275,7 +275,7 @@ function set_up_race(){
   RACETRACK_DATA.lap_length = Math.round(racetrack_path.getTotalLength());
   RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(0);
   RACETRACK_DATA.transform = racetrack_path.attributes["transform"]?
-    racetrack_path.attributes["transform"].value : "";
+    racetrack_path.attributes["transform"].value : "translate(0,0)";
   RACETRACK_DATA.path = racetrack_path;
   RACETRACK_CANVAS.style.backgroundImage = "url(" + race_json.track_image_url + ")";
   RACE_INFO.qty_buggies = 0;
@@ -586,11 +586,9 @@ function create_svg_buggy(buggy_data){
   buggy_rect.setAttribute(
     "id", BUGGY_ID_PREFIX + buggy_data[BUGGY_ID_SOURCE]
   );
-  if (RACETRACK_DATA.transform) {
-    buggy_rect.setAttribute(
-      "transform", RACETRACK_DATA.transform + " " + BUGGY_RECT_TRANSFORM
-    );
-  }
+  buggy_rect.setAttribute(
+    "transform", RACETRACK_DATA.transform + " " + BUGGY_RECT_TRANSFORM
+  );
   buggy_rect.setAttribute("class", "svg-buggy");
   init_track_data(buggy_rect);
   buggy_rect.addEventListener("click", buggy_click);

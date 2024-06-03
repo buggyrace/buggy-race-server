@@ -7,12 +7,12 @@
 {% endif %}
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-{% for task_id in texts_by_task_id %}
+{% for task_id in task_ids_in_order %}{% if task_id in texts_by_task_id %}
+
 <div class="task">
   <h2>{{ tasks_by_id[task_id].fullname }}: {{  tasks_by_id[task_id].title }}</h2>
 
   {{ texts_by_task_id[task_id].text | safe }}
 
 </div>
-
-{% endfor %}
+{% endif %}{% endfor %}

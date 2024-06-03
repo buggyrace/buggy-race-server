@@ -508,10 +508,17 @@ def download_texts(username, format):
     if format == "json":
         response = jsonify(get_user_task_texts_as_list())
     else:
+        task_ids_in_order = [
+            task.id for task in Task.query.order_by(
+              Task.phase.asc(),
+              Task.sort_position.asc()
+            ).all()
+        ]
         response = make_response(
             render_template(
                 f"user/task_texts_download.{format}",
                 username=user.username,
+                task_ids_in_order=task_ids_in_order,
                 texts_by_task_id=texts_by_task_id,
                 tasks_by_id=tasks_by_id,
                 project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],

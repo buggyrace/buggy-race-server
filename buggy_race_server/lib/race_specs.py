@@ -159,7 +159,7 @@ class BuggySpecs:
                 cost = int(
                     BuggySpecs.POWER_TYPES[self.power_type][C] * self.power_units
                     + BuggySpecs.SPECIAL_ITEMS['hamster_booster'][C] * self.hamster_booster
-                    + BuggySpecs.TYRE_TYPES[self.tyres][C] * self.qty_wheels
+                    + BuggySpecs.TYRE_TYPES[self.tyres][C] * self.qty_tyres
                     + BuggySpecs.ARMOUR_TYPES[self.armour][C] * armour_f
                     + BuggySpecs.ATTACK_TYPES[self.attack][C] * self.qty_attacks
                   )

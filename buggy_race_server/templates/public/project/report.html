@@ -184,14 +184,10 @@ def {{ report_type }}():
 
 &lt;section class="{{ report_type }}-tasks"&gt;
 
-
-&lt;!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *      --&gt;
-&lt;!--                                                                              --&gt;
-&lt;!-- THIS IS WHERE YOUR TEXTS GO! Paste in your texts, which you downloaded       --&gt;
-&lt;!-- as the HTML from https://rhul.buggyrace.net/user/task-texts                  --&gt;
-&lt;!--                                                                              --&gt;
-&lt;!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *      --&gt;
-
+&lt;!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+  THIS IS WHERE YOUR TEXTS GO! Paste in your texts, which you downloaded
+  as the HTML from {{ site_url }}
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --&gt;
 
 &lt;!-- this closes the section: keep it in! --&gt;
 &lt;/section&gt;
@@ -284,13 +280,15 @@ def {{ report_type }}():
     <div class="col example-report copy-to-clipboard" data-target="general-task-html">
         <pre id="general-task-html" class="border border-secondary p-3">&lt;div class="task"&gt;
   &lt;h2&gt;<span id="task-html-task-id">TASK-NAME TASK-TITLE</span>&lt;/h2&gt;
-  &lt;p&gt;
-    &lt;!-- sentence on _how_ you fixed it --&gt;
-  &lt;/p&gt;
-  &lt;p&gt;
-    &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-  &lt;/p&gt;
-&lt;/div&gt;</pre>
+  &lbrace;% raw %&rbrace;
+    &lt;p&gt;
+      &lt;!-- sentence on _how_ you fixed it --&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
+    &lt;/p&gt;
+  &lbrace;% endraw %&rbrace;
+  &lt;/div&gt;</pre>
     </div>
   </div>
   <script>

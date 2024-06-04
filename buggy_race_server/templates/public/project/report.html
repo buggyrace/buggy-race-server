@@ -188,20 +188,10 @@ def {{ report_type }}():
 
 &lt;section class="{{ report_type }}-tasks"&gt;
 
-&lt;div class="task"&gt;
-  &lt;h2&gt;0-GET Get the source code&lt;/h2&gt;
-  &lt;p&gt;
-    I forked the repo on GitHub and then used &lt;code&gt;git clone&lt;/code&gt; to make
-    a local copy.
-  &lt;/p&gt;
-  &lt;p&gt;
-    Once the repo was on my own machine I was able to commit changes to
-    version control as I went along, and I pushed back up to my GitHub repo
-    at the end of each day. I followed GitHub's instructions and set up a
-    SSH key so I didn't need to enter username and password every time I
-    pushed.
-  &lt;/p&gt;
-&lt;/div&gt;
+&lt;!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+  THIS IS WHERE YOUR TEXTS GO! Paste in your texts, which you downloaded
+  as the HTML from {{ site_url }}
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --&gt;
 
 &lt;!-- this closes the section: keep it in! --&gt;
 &lt;/section&gt;
@@ -294,13 +284,15 @@ def {{ report_type }}():
     <div class="col example-report copy-to-clipboard" data-target="general-task-html">
         <pre id="general-task-html" class="border border-secondary p-3">&lt;div class="task"&gt;
   &lt;h2&gt;<span id="task-html-task-id">TASK-NAME TASK-TITLE</span>&lt;/h2&gt;
-  &lt;p&gt;
-    &lt;!-- sentence on _how_ you fixed it --&gt;
-  &lt;/p&gt;
-  &lt;p&gt;
-    &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-  &lt;/p&gt;
-&lt;/div&gt;</pre>
+  &lbrace;% raw %&rbrace;
+    &lt;p&gt;
+      &lt;!-- sentence on _how_ you fixed it --&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
+    &lt;/p&gt;
+  &lbrace;% endraw %&rbrace;
+  &lt;/div&gt;</pre>
     </div>
   </div>
   <script>

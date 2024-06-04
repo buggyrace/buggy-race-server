@@ -9,8 +9,6 @@ For more about your {{ report_type}}, see
 {% for task_id in task_ids_in_order %}{% if task_id in texts_by_task_id %}
 {{ tasks_by_id[task_id].fullname }}: {{ tasks_by_id[task_id].title }}
 -------------------------------------------------------------------------------
-{{ "{% raw %}" }}
 {{ texts_by_task_id[task_id].text }}
-{{ "{% endraw %}" }}
 
 {% endif %}{% endfor %}

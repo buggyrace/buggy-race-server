@@ -12,9 +12,7 @@
 <div class="task">
   <h2>{{ tasks_by_id[task_id].fullname }}: {{  tasks_by_id[task_id].title }}</h2>
 
-  {{ "{% raw %}" }}
   {{ texts_by_task_id[task_id].text | safe }}
-  {{ "{% endraw %}" }}
 
 </div>
 {% endif %}{% endfor %}

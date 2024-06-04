@@ -186,15 +186,20 @@ def {{ report_type }}():
 &lt;!-- below this point keep this section tag and paste in a &lt;div&gt; for every        --&gt;
 &lt;!-- task you attempted.                                                          --&gt;
 
+&lbrace;% raw %&rbrace;
 &lt;section class="{{ report_type }}-tasks"&gt;
 
 &lt;!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-  THIS IS WHERE YOUR TEXTS GO! Paste in your texts, which you downloaded
-  as the HTML from {{ site_url }}
+  THIS IS WHERE YOUR TEXTS GO!
+  {% if is_storing_texts %}
+    Paste in your texts, which you downloaded as the HTML from
+    {{ site_url }}
+  {% endif %}
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --&gt;
 
 &lt;!-- this closes the section: keep it in! --&gt;
 &lt;/section&gt;
+&lbrace;% endraw %&rbrace;
 
 &lbrace;% endblock %&rbrace;
       </pre>
@@ -284,14 +289,12 @@ def {{ report_type }}():
     <div class="col example-report copy-to-clipboard" data-target="general-task-html">
         <pre id="general-task-html" class="border border-secondary p-3">&lt;div class="task"&gt;
   &lt;h2&gt;<span id="task-html-task-id">TASK-NAME TASK-TITLE</span>&lt;/h2&gt;
-  &lbrace;% raw %&rbrace;
-    &lt;p&gt;
-      &lt;!-- sentence on _how_ you fixed it --&gt;
-    &lt;/p&gt;
-    &lt;p&gt;
-      &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
-    &lt;/p&gt;
-  &lbrace;% endraw %&rbrace;
+  &lt;p&gt;
+    &lt;!-- sentence on _how_ you fixed it --&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;!-- sentence(s) on anything interesting/incomplete you did --&gt;
+  &lt;/p&gt;
   &lt;/div&gt;</pre>
     </div>
   </div>

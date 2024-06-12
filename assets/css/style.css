@@ -325,6 +325,7 @@ footer .footer-nav {
 .icon-enter:before { content: "\ea13"; }
 .icon-exit:before { content: "\ea14"; }
 .icon-github:before { content: "\eab0"; }
+.icon-home:before { content: "\e900"; }
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
 .icon-embed2:before { content: "\ea80"; }

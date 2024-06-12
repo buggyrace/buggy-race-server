@@ -293,7 +293,7 @@ The server has an unlinked `/admin/routes` page that dumps them out for you.
 
 We're using icons from the free icomoon pack (thanks icomoon!)
 
-There are currently 12 icons in the custom incomoon font. Here's the manual
+There are currently 14 icons in the custom incomoon font. Here's the manual
 process you need to follow if you need to add a new one:
 
 Go to [icomoon.io/app](https://icomoon.io/app/) and select all the icons you

@@ -194,6 +194,7 @@ class ConfigSettingNames(Enum):
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
     API_SECRET_TIME_TO_LIVE = auto()
+    DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EXT_ID_NAME = auto()
@@ -359,6 +360,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name,
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
@@ -477,6 +479,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -611,6 +614,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
@@ -787,6 +791,12 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
           """The default time-to-live for a users' API secret, in seconds (for
           example, 3600 seconds = 1 hour).""",
+
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name:
+          """The default `flag_color` for buggies (this should be a CSS color).
+          If you haven't raced before, the default (a middle-grey) is a good
+          choice, because it encourages students to change it to something more
+          interesting.""",
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshold for buggies: you can always

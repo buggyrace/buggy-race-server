@@ -116,11 +116,16 @@ def handle_uploaded_json(form, user, is_api=False):
     qty_defaults = 0
     qty_explicits = 0
     for field_name in Buggy.DEFAULTS:
-      if field_name in clean_buggy_data:
-        qty_explicits += 1
-      else:
-        clean_buggy_data[field_name] = Buggy.DEFAULTS[field_name]
-        qty_defaults += 1
+        if field_name in clean_buggy_data:
+            qty_explicits += 1
+        else:
+            if field_name == "flag_color":
+                clean_buggy_data[field_name] = current_app.config[
+                    ConfigSettingNames.DEFAULT_FLAG_COLOR.name
+                ]
+            else:
+                clean_buggy_data[field_name] = Buggy.DEFAULTS[field_name]
+            qty_defaults += 1
     if qty_explicits == 0:
         msg = "Nothing to change: no buggy settings were found in the uploaded data"
         if is_api:

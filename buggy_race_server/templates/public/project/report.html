@@ -103,13 +103,16 @@
         </a>
       </h2>
       <p>
-        Underneath that we want to see a list of the tasks your attempted with
-        a couple of sentences on each: what you did and anything you did and
-        didn't do. This is where we can give you credit for your
-        <em>understanding</em> even if you didn't manage to get all of the task
-        working.
+        Underneath that we want to see a list of the tasks you attempted, what
+        you did and anything you did and didn't do. This is where we can give you
+        credit for your <em>understanding</em> even if you didn't manage to get
+        all of the task working.
+        {% if is_storing_texts and suggested_text_size %}
+          <br>
+          <em>Suggested size for each task text:</em> {{ suggested_text_size }}
+        {% endif %}
       </p>
-      
+
       <h2 id="how-to-set-it-up" class="mt-4">
         <a class="toclink" href="#how-to-set-it-up">
           How to set it up

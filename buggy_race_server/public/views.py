@@ -301,6 +301,7 @@ def serve_project_page(page=None):
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
         report_type=report_type,
+        suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         submit_deadline=submit_deadline,

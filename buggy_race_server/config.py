@@ -268,6 +268,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
+    TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
@@ -419,6 +420,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
@@ -554,6 +556,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
@@ -688,6 +691,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
@@ -1270,6 +1274,13 @@ class ConfigSettings:
           is shown as a helpful link in the explanatory text on the reports
           page. If you haven't customised the task list, you don't need to
           change this.""",
+
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name:
+          """An indication for your students as to how much text you expect
+          them to provide in each of their task texts. It's shown on the
+          report page instructions, after _"Suggested size for each task
+          text:"_. No suggestion is shown if you've set it to the empty string
+          or `IS_STORING_STUDENT_TASK_TEXTS` is `No`.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on

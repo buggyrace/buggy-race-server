@@ -104,7 +104,9 @@
       <div class="row phase-tasks-{{phase}}" id="{{ task.anchor }}">
         <div class="col my-1">
           <div class="border border-secondary p-3 ml-4">
-            <p class="pb-3">Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong>
+            <p class="pb-3 task-text-title">
+              Task <strong>{{ task.fullname }}</strong>: <strong>{{ task.title }}</strong>
+              <a class="anchor-link-icon" href="{{ url_for('admin.show_user', user_id=user.username) }}#{{ task.anchor }}"><span class="icon-link mr-1"></span></a>
               <a href="{{ url_for('public.show_single_task', task_id=task.fullname) }}" class="btn btn-outline-secondary btn-jump float-right">{{ task.fullname }}</a>
             </p>
             {% if texts_by_task_id[task.id] %}

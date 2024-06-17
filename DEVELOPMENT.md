@@ -225,6 +225,22 @@ this dumps _just the data_ (handy for reloading the demo site?):
 The options `--column-inserts` `--data-only` force this to be a data-inserting-only
 SQL file. You can also use `--table=users` for example.
 
+
+### How to load a database restore into a local (postgres) database
+
+The `pg_restore` command will take a dump you've saved (e.g., from Heroku) and
+restore a database — it contains a few things that aren't relevant in your local
+copy (such as a `OWNER` information). Assuming you've already created a database
+(it's presumably what you've been developing with) you can replace it with the
+contents of the dump file like this:
+
+    pg_restore --clean -O -d database_name latest.dump
+
+`--clean` wipes the existing database (called `database_name`), `-O` uses the
+current postgres user as the `OWNER` and ignores what is in the dump, and
+`latest.dump` is the name of the Postgres dump file you got from doing `pg_dump`.
+
+
 ### How to add a new config setting to the code
 
 Adding a new config setting is relatively straightforward provided you add

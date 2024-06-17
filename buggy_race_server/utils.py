@@ -796,21 +796,24 @@ def create_editor_zipfile(readme_contents, app=current_app):
         raise IOError("Failed to zip: {e}")
 
 
-def get_user_task_texts_as_list():
+def get_user_task_texts_as_list(username):
     """ Used for dumping a user's task texts for saving/loading """
     from buggy_race_server.user.models import User
-    all_users = db.session.query(
-        User.username, Task.phase, Task.name, Task.is_enabled, TaskText
+    all_texts_for_this_user = db.session.query(
+        User.username, Task.phase, Task.name, Task.is_enabled, Task.sort_position, TaskText
     ).filter(
-        User.username == "admin"
+        User.username == username
     ).filter(
         TaskText.user_id == User.id
     ).filter(
         TaskText.task_id == Task.id
+    ).order_by(
+        Task.phase.asc(),
+        Task.sort_position.asc()
     ).all()
     list_of_texts = []
-    for result in all_users:
-        (username, phase, task_name, is_enabled, text) = result
+    for result in all_texts_for_this_user:
+        (username, phase, task_name, is_enabled, sort_position, text) = result
         created_at_str = None
         if text.created_at is not None:
             created_at_str = datetime.strftime(text.created_at, "%Y-%m-%d %H:%M")

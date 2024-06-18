@@ -202,10 +202,14 @@ def create_app():
                     delta_s = (now_utc - active_timestamp).total_seconds()
                 except TypeError as e: # login timestamp wasn't UTC
                     current_user.logged_in_at = now_utc
+                    if current_user.first_logged_in_at is None:
+                        current_user.first_logged_in_at = current_user.logged_in_at
                     current_user.save()
                     delta_s = 0
             if delta_s and delta_s > activity_update_period_s:
                 current_user.logged_in_at = now_utc
+                if current_user.first_logged_in_at is None:
+                    current_user.first_logged_in_at = current_user.logged_in_at
                 current_user.save()
                 active_timestamp = session[ACTIVITY_AT] = now_utc
 

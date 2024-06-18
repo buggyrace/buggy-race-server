@@ -97,6 +97,7 @@ class User(UserMixin, SurrogatePK, Model):
     github_access_token = Column(db.Text(), nullable=True)
     is_student = Column(db.Boolean(), default=True)
     logged_in_at = Column(db.DateTime(timezone=True), nullable=True)
+    first_logged_in_at = Column(db.DateTime(timezone=True), nullable=True)
     uploaded_at = Column(db.DateTime(timezone=True), nullable=True)
     api_secret =  Column(db.String(30), nullable=True)
     api_secret_at = Column(db.DateTime(timezone=True), nullable=True)

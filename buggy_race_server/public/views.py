@@ -84,6 +84,8 @@ def login():
         if form.is_submitted() and form.validate():
             login_user(form.user)
             form.user.logged_in_at = datetime.now(timezone.utc)
+            if form.user.first_logged_in_at is None:
+                form.user.first_logged_in_at = form.user.logged_in_at
             form.user.save()
             if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
                 pretty_name = current_user.first_name or current_user.pretty_username

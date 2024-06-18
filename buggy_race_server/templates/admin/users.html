@@ -50,6 +50,7 @@
         <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
         <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Last&nbsp;activity</button>
+        <button class="btn btn-outline-secondary btn-sm" data-column="u-first-login-at">First&nbsp;login</button>
         {% if is_showing_github_column %}
           <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
         {% endif %}
@@ -86,6 +87,7 @@
             <th  class="u-is-active">Active?</th>
           {% endif %}
           <th class="u-login-at">Last activity at</th>
+          <th class="u-first-login-at">First login</th>
           {% if is_showing_github_column %}
             <th class="u-github">GitHub (&rarr; repo)</th>
           {% endif %}
@@ -119,7 +121,8 @@
               <td class="u-created-at"></td>
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
             {% endif %}
-            <td class="u-login-at">{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td class="u-login-at">{{ qty_students_logged_in }}       ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td class="u-first-login-at">{{ qty_students_logged_in_first }} ({{ "%d" | format(100 * qty_students_logged_in_first/qty_students) }}%)</td>
             {% if is_showing_github_column %}
               <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
             {% endif %}
@@ -184,6 +187,13 @@
               <td class="u-login-at">
                 {% if u.logged_in_at %}
                   {{ u.logged_in_at | servertime }}
+                {% else %}
+                  <em class="empty-setting">none</em>
+                {% endif %}
+              </td>
+              <td class="u-first-login-at">
+                {% if u.first_logged_in_at %}
+                  {{ u.first_logged_in_at | servertime }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}

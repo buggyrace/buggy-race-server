@@ -434,6 +434,7 @@ def setup():
                 )
                 login_user(admin_user)
                 admin_user.logged_in_at = datetime.now(timezone.utc)
+                admin_user.first_logged_in_at = admin_user.logged_in_at
                 admin_user.save()
                 flash(f"OK, you're logged in with admin username \"{new_admin_username}\"", "success")
             else: # handle a regular settings update, which may also be part of setup
@@ -635,6 +636,7 @@ def list_users(data_format=None, want_detail=True):
             qty_students_github=len([s for s in students if s.github_username]),
             qty_students_logged_in=len([s for s in students if s.logged_in_at]),
             qty_students_uploaded_json=len([s for s in students if len(s.latest_json)>1]),
+            qty_students_logged_in_first=len([s for s in students if s.first_logged_in_at]),
             qty_students=len(students),
             qty_teaching_assistants=qty_teaching_assistants,
             users=users,

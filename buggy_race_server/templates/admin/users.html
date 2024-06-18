@@ -31,30 +31,31 @@
     </div>
     <div class="row my-3" id="user-column-toggles">
       <div class="col">
-        <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">All&nbsp;columns</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="all-columns">All&nbsp;columns</button>
         {% if config['USERS_HAVE_FIRST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">First&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-name">First&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_LAST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">Last&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-last-name">Last&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_EMAIL'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-email">Email</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-email">Email</button>
         {% endif %}
         {% if config['USERS_HAVE_EXT_USERNAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ ext_username_name }}</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-org-username">{{ ext_username_name }}</button>
         {% endif %}
         {% if config['USERS_HAVE_EXT_ID'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-ext-id">{{ ext_id_name }}</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-ext-id">{{ ext_id_name }}</button>
         {% endif %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Last&nbsp;activity</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-first-login-at">First&nbsp;login</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-created-at">Created</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-active">Active?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-login-at">Last&nbsp;activity</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-login-at">First&nbsp;login</button>
         {% if is_showing_github_column %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-github">GitHub</button>
         {% endif %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">Uploaded</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-uploaded">Uploaded</button>
+        <button id="long-short-time-chooser-btn" class="hidden btn btn-outline-secondary btn-sm" data-item-hidden="time-span"><span class="icon-clock"></span> HH:MM</button>
       </div>
     </div>
   {% endif %}
@@ -171,7 +172,7 @@
                 {% endif %}
                 <td class="u-created-at">
                     {% if u.created_at %}
-                      {{ u.created_at | servertime }}
+                      {{ u.created_at | servertime | time_span | safe  }}
                     {% else %}
                     <em class="empty-setting">none</em>
                     {% endif %}
@@ -186,14 +187,14 @@
               {% endif %}
               <td class="u-login-at">
                 {% if u.logged_in_at %}
-                  {{ u.logged_in_at | servertime }}
+                  {{ u.logged_in_at | servertime | time_span | safe }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}
               </td>
               <td class="u-first-login-at">
                 {% if u.first_logged_in_at %}
-                  {{ u.first_logged_in_at | servertime }}
+                  {{ u.first_logged_in_at | servertime | time_span | safe }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}
@@ -220,7 +221,7 @@
               </td>
               <td  class="u-uploaded">
                 {% if u.uploaded_at %}
-                  {{ u.uploaded_at | servertime }}
+                  {{ u.uploaded_at | servertime | time_span | safe }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}

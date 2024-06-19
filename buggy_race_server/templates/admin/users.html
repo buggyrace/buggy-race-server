@@ -189,11 +189,17 @@
                     No
                   {% endif %}
                 </td>
-                <td class="bool-{{ u.is_login_enabled | lower }} u-is-login-enabled">
+                <td class="{% if not u.is_administrator %}{{ u.is_login_enabled | lower }}{% endif %} u-is-login-enabled">
+                  {% if u.is_administrator or not u.is_active %}
+                    <em class="empty-setting">
+                  {% endif %}
                   {% if u.is_login_enabled %}
-                    Yes
+                      Yes
                   {% else %}
                     No
+                  {% endif %}
+                  {% if u.is_administrator or not u.is_active %}
+                    </em>
                   {% endif %}
                 </td>
               {% endif %}
@@ -220,7 +226,7 @@
                   {% endif %}
                 </td>
               {% endif %}
-              <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
+              <td class="{% if not u.is_administrator %}{{ u.latest_json|length is greaterthan 1 | lower }}{% endif %} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
                   <a href="{{ url_for('admin.show_buggy', user_id=u.username) }}"
                     class="btn btn-outline-secondary btn-admin icon-wrench ml-1"

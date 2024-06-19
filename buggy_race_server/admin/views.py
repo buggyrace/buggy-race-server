@@ -632,6 +632,7 @@ def list_users(data_format=None, want_detail=True):
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
             is_showing_github_column=is_showing_github_column,
             qty_admins=qty_admins,
+            qty_students_login_enabled=len([s for s in students if s.is_login_enabled]),
             qty_students_enabled=len([s for s in students if s.is_active]),
             qty_students_github=len([s for s in students if s.github_username]),
             qty_students_logged_in=len([s for s in students if s.logged_in_at]),

@@ -51,6 +51,7 @@
         {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-active">Active?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-login-enabled">Login enabled?</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-login-at">Last&nbsp;activity</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-login-at">First&nbsp;login</button>
         {% if is_showing_github_column %}
@@ -88,6 +89,7 @@
             {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>
+            <th  class="u-is-login-enabled">Login enabled?</th>
           {% endif %}
           <th class="u-login-at">Last activity at</th>
           <th class="u-first-login-at">First login</th>
@@ -123,6 +125,7 @@
               {% endif %}
               <td class="u-created-at"></td>
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
+              <td class="u-is-login-enabled">{{ qty_students_login_enabled }}   ({{ "%d" | format(100 * qty_students_login_enabled/qty_students) }}%) </td>
             {% endif %}
             <td class="u-login-at">{{ qty_students_logged_in }}       ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
             <td class="u-first-login-at">{{ qty_students_logged_in_first }} ({{ "%d" | format(100 * qty_students_logged_in_first/qty_students) }}%)</td>
@@ -181,6 +184,13 @@
                 </td>
                 <td class="bool-{{ u.is_active | lower }} u-is-active">
                   {% if u.is_active %}
+                    Yes
+                  {% else %}
+                    No
+                  {% endif %}
+                </td>
+                <td class="bool-{{ u.is_login_enabled | lower }} u-is-login-enabled">
+                  {% if u.is_login_enabled %}
                     Yes
                   {% else %}
                     No

@@ -39,7 +39,7 @@ class LoginForm(FlaskForm):
             self.username.errors.append(f"User \"{self.username.data}\" is inactive: cannot log in")
             return False
 
-        if not self.user.is_login_enabled:
+        if not self.user.is_login_enabled and not self.user.is_administrator:
             self.username.errors.append(f"Login currently disabled for user \"{self.username.data}\": cannot log in")
             return False
         

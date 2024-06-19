@@ -831,6 +831,7 @@ def manage_user(user_id):
           user.comment = form.comment.data
           user.is_student = form.is_student.data
           user.is_active = form.is_active.data
+          user.is_login_enabled = form.is_login_enabled.data
           user.is_demo_user = form.is_demo_user.data if form.is_demo_user is not None else False
           if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
               user.first_name = form.first_name.data

@@ -92,6 +92,8 @@ def login():
             else:
                 pretty_name = current_user.pretty_username
             flash(f"Hello {pretty_name}! You're logged in to the race server", "success")
+            if not current_user.is_login_enabled and current_user.is_administrator:
+                flash(f"Your login is disabled, but that was ignored because you're an administrator", "info")
             if setup_status := load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name):
                 redirect_url = url_for("admin.setup")
                 if current_user.is_administrator:

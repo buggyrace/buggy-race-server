@@ -80,8 +80,15 @@ def staff_only(function):
 def active_user_required(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
-        if current_user and not current_user.is_active:
-            flash(f"User \"{current_user.pretty_username}\" is inactive", "danger")
+        if current_user and not (
+            current_user.is_active
+            and
+            (current_user.is_login_enabled or current_user.is_administrator)
+        ):
+            if not current_user.is_active:
+                flash(f"User \"{current_user.pretty_username}\" is inactive", "danger")
+            else:
+                flash(f"Login disabled for user \"{current_user.pretty_username}\"", "danger")
             logout_user()
             return redirect(url_for("public.home"))
         return function(*args, **kwargs)

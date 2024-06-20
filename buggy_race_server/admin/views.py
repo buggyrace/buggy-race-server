@@ -29,7 +29,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import bindparam, insert, update
+from sqlalchemy import bindparam, select, insert, update
 
 from flask_wtf import FlaskForm
 from werkzeug.utils import secure_filename
@@ -39,6 +39,7 @@ from buggy_race_server.admin.forms import (
     AnnouncementForm,
     ApiKeyForm,
     BulkRegisterForm,
+    EnableDisableLoginsForm,
     GeneralSubmitForm,
     GenerateTasksForm,
     PublishEditorSourceForm,
@@ -50,6 +51,7 @@ from buggy_race_server.admin.forms import (
     SubmitWithConfirmAndAuthForm,
     TaskForm,
     UploadTaskTextsForm,
+    UserTypesForLogin,
 )
 from buggy_race_server.admin.models import (
     Announcement,
@@ -884,6 +886,46 @@ def manage_user(user_id):
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       user=user,
   )
+
+@blueprint.route("/users/logins", methods=['GET', 'POST'], strict_slashes=False)
+@login_required
+@admin_only
+def enable_or_disable_logins():
+    # UserTypesForLogin
+    form = EnableDisableLoginsForm(request.form)
+    if request.method == "POST":
+        if form.is_submitted() and form.validate():
+            if form.user_type.data == UserTypesForLogin.students.name:
+                base_query = select(User).filter(User.is_student == True).with_only_columns(User.id)
+                user_str = "all students"
+            elif form.user_type.data == UserTypesForLogin.teaching_assistants.name:
+                base_query = select(User).filter(User.access_level == User.TEACHING_ASSISTANT).with_only_columns(User.id)
+                user_str = "all TAs"
+            else:
+                base_query = select(User).with_only_columns(User.id)
+                user_str = "everybody"
+            try:
+                # note: would prefer to include synchronize_session='fetch'
+                db.session.execute(
+                    update(User).where(User.id.in_(base_query))
+                    .values(is_login_enabled=bool(form.submit_enable.data))
+                )
+                db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+            else:
+                flash(
+                    f"OK, enabled logins for {user_str}" if form.submit_enable.data
+                    else f"OK, disabled logins for {user_str}",
+                    "info"
+                )
+                return redirect(url_for("admin.list_users"))
+        else:
+            flash_errors(form)
+    return render_template(
+        "admin/user_logins.html",
+        form=form
+    )
 
 # user_id may be username or id
 @blueprint.route("/user/<user_id>/delete-github", methods=['POST'])

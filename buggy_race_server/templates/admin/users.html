@@ -257,6 +257,7 @@
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change passwords</a>
         {% endif %}
         {% if current_user.is_administrator %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.enable_or_disable_logins') }}">Enable/disable logins</a>
           <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV</a>
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.bulk_register') }}">Register new students</a>
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.new_user') }}">Register new user</a>

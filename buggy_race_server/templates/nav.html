@@ -52,7 +52,7 @@
             </li>
           {% endif %}
           <li class="nav-item active">
-            <a class="nav-link" href="{{ url_for('user.home_page') }}">Logged in as {{ current_user.pretty_username }}</a>
+            <a class="nav-link" href="{{ url_for('user.home_page') }}"><span class="icon-home mr-2"></span>Logged in as {{ current_user.pretty_username }}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('public.logout') }}"><span class="icon-exit mr-2"></span>Log&nbsp;out</a>

@@ -84,12 +84,16 @@ def login():
         if form.is_submitted() and form.validate():
             login_user(form.user)
             form.user.logged_in_at = datetime.now(timezone.utc)
+            if form.user.first_logged_in_at is None:
+                form.user.first_logged_in_at = form.user.logged_in_at
             form.user.save()
             if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
                 pretty_name = current_user.first_name or current_user.pretty_username
             else:
                 pretty_name = current_user.pretty_username
             flash(f"Hello {pretty_name}! You're logged in to the race server", "success")
+            if not current_user.is_login_enabled and current_user.is_administrator:
+                flash(f"Your login is disabled, but that was ignored because you're an administrator", "info")
             if setup_status := load_config_setting(current_app, ConfigSettingNames._SETUP_STATUS.name):
                 redirect_url = url_for("admin.setup")
                 if current_user.is_administrator:
@@ -301,6 +305,7 @@ def serve_project_page(page=None):
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
         report_type=report_type,
+        suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         submit_deadline=submit_deadline,

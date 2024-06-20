@@ -225,6 +225,70 @@ this dumps _just the data_ (handy for reloading the demo site?):
 The options `--column-inserts` `--data-only` force this to be a data-inserting-only
 SQL file. You can also use `--table=users` for example.
 
+
+### How to load a database restore into a local (postgres) database
+
+The `pg_restore` command will take a dump you've saved (e.g., from Heroku) and
+restore a database — it contains a few things that aren't relevant in your local
+copy (such as a `OWNER` information). Assuming you've already created a database
+(it's presumably what you've been developing with) you can replace it with the
+contents of the dump file like this:
+
+    pg_restore --clean -O -d database_name latest.dump
+
+`--clean` wipes the existing database (called `database_name`), `-O` uses the
+current postgres user as the `OWNER` and ignores what is in the dump, and
+`latest.dump` is the name of the Postgres dump file you got from doing `pg_dump`.
+
+
+### How to add a new config setting to the code
+
+Adding a new config setting is relatively straightforward provided you add
+_everything_ in this list at once. You _must_ provide a default value for the
+setting: the first time the code is run, the new setting will be added to the
+database and it will use this value if (as is likely in existing installations)
+there's no explicit value provided in ENV or `.env`.
+
+Go to `buggy_race_server/config.py` and add the new setting there. It's a good
+idea to find the most similar existing setting and search for that, because this
+is really about following the existing pattern!
+
+* Add the setting to the `ConfigSettingNames` `enum`. If it's one that admin
+  should edit during setup, add it to the (long) list that appears after
+  the comment "User-editable config settings: presented in the settings/config"
+
+* If it's a setting that admin should edit during setup, add it to the 
+  relevant `GROUP` in `ConfigSettings`
+
+* Add its default value to `DEFAULTS` in `ConfigSettings`.
+  You **must** add a default because this setting will be added (i.e., written
+  to the database) when the app launches.
+
+* Add the correct type to `TYPES` in `ConfigSettings`. If you don't it will
+  default to `STRING`... but be explicit anyway, so there's no doubt you meant
+  it to be what it is.
+
+* If it's a setting that admin should edit during setup, add a helpful text to
+ `DESCRIPTIONS`. This is used both in the config-setting form and also in the
+ documentation: see _How to keep the customising pages up to date in the docs_
+ below for the semi-automated way this works.
+
+If you do those things, the next time you run the race server app you'll see
+(in the console) a message telling you a config setting (with default value)
+was inserted into the database.
+
+### How to remove a config setting from the code
+
+If you made a config setting obsolete, that is, you _remove_ it from `config.py`
+because it's no longer used, the redundant setting will persist in the database
+_but_ a friendly blue button appears on the admin dashboard inviting you (or any
+staff user) to "purge" it. That's a safety mechanism which might be handy during
+development.
+
+Be sure to remove all references to it, of course — so you'll pretty much be
+doing the opposite of the process for adding a new setting to `congig.py`, above.
+
+
 ### How to add animated diagrams to the Tech Notes (202)
 
 > There are currently two: in _webserver_ and _flask-webserver_:
@@ -293,7 +357,7 @@ The server has an unlinked `/admin/routes` page that dumps them out for you.
 
 We're using icons from the free icomoon pack (thanks icomoon!)
 
-There are currently 12 icons in the custom incomoon font. Here's the manual
+There are currently 14 icons in the custom incomoon font. Here's the manual
 process you need to follow if you need to add a new one:
 
 Go to [icomoon.io/app](https://icomoon.io/app/) and select all the icons you

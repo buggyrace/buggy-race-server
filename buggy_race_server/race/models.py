@@ -384,6 +384,9 @@ class RaceResult(SurrogatePK, Model):
     not constant: they can and will change between races (if you need to find
     the details of buggie at the time they were entered in a race, follow that
     race's JSON file).
+    Note: flag_color's default here is really just advisory, because in effect
+    it is being overridden by the config's DEFAULT_FLAG_COLOR setting when set
+    via the app.
     """
     __tablename__ = "results"
     id = db.Column(db.Integer, primary_key=True)

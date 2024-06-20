@@ -506,7 +506,7 @@ def download_texts(username, format):
         format = "html"
     filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)
     if format == "json":
-        response = jsonify(get_user_task_texts_as_list())
+        response = jsonify(get_user_task_texts_as_list(user.username))
     else:
         task_ids_in_order = [
             task.id for task in Task.query.order_by(

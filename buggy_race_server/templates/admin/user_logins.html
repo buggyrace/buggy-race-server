@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: user logins {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-2">
+  <div class="row">
+    <div class="col my-3">
+      <h1>
+        Enable/disable user logins
+      </h1>
+    </div>
+  </div>
+  <div class="col grey-wrapper p-2 mx-3">
+    <form action="{{ url_for('admin.enable_or_disable_logins') }}" method="POST" role="form">
+      {{ form.csrf_token }}
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{ form.user_type.label }}
+        </div>
+        <div class="col-sm-4">
+          {{ form.user_type(class_="form-control") }}
+        </div>
+        <div class="col-sm-5">
+          You can enable or disable users' ability to log in by editing
+          them individually. This form applies to <em>all</em> users of the
+          type you select.
+          <br>
+          <strong>Administrators</strong> are unaffected by this setting:
+          they can always log in, even if you disable their login here.
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-3">
+          {{ form.is_confirmed.label }}
+        </div>
+        <div class="col-sm-4">
+          <select id="is_confirmed" name="is_confirmed" class="form-control">
+            <option selected value="">No</option>
+            <option value="">I think so</option>
+            <option value="y">Yes</option>
+          </select>  
+        </div>
+        <div class="col-sm-5">
+          Be careful! The change you are about to make affects <em>all</em>
+          the users of the chosen type. 
+        </div>
+      </div>
+      <div class="row bg-warning py-2 m-1">
+        <div class="col-sm-3">
+          {{form.auth_code.label}}
+        </div>
+        <div class="col-sm-4">
+          {{form.auth_code(class_="form-control mr-sm-1")}}
+        </div>
+        <div class="col-sm-5">
+          You must provide a valid authorisation code to
+          enable or disable user logins.
+        </div>
+      </div>
+      <div class="row bg-white py-2 m-1">
+        <div class="col-sm-12">
+          <p class="btn-collection">
+            {{ form.submit_disable(class_="btn btn-danger mr-4") }}
+            {{ form.submit_enable(class_="btn btn-primary") }}
+          </p>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Enabling or disabling logins", "/running/user-management#enabling-or-disabling-logins") }}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

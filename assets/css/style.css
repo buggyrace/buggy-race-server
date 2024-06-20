@@ -320,11 +320,14 @@ footer .footer-nav {
 .icon-bubble:before{ content: "\e96b"; }
 .icon-bubbles:before { content: "\e96c"; }
 .icon-clipboard:before { content: "\e9b8"; }
+.icon-clock:before { content: "\e94e"; }
 .icon-cog:before { content: "\e994"; }
 .icon-copy:before { content: "\e92c"; }
 .icon-enter:before { content: "\ea13"; }
 .icon-exit:before { content: "\ea14"; }
 .icon-github:before { content: "\eab0"; }
+.icon-home:before { content: "\e900"; }
+.icon-link:before { content: "\e9cb"; }
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
 .icon-embed2:before { content: "\ea80"; }
@@ -570,7 +573,14 @@ span.btn.disabled{
 pre.task-text {
   white-space: pre-wrap;
 }
-
+.task-text-title .anchor-link-icon {
+  color: #999999;
+  text-decoration: none;
+  visibility:hidden;
+}
+.task-text-title:hover .anchor-link-icon {
+  visibility:visible;
+}
 .table-vertical-heading {
   height:10rem;
   max-width:2rem;

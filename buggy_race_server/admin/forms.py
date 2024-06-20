@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from enum import Enum
 
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -338,6 +339,41 @@ class PublishEditorSourceForm(FlaskForm):
   
     def validate(self):
         return super(PublishEditorSourceForm, self).validate()
+
+class UserTypesForLogin(Enum):
+    students = 'All students'
+    teaching_assistants = 'All Teaching Assistants'
+    all_users = 'All users'
+
+    def __str__(self) -> str:
+        return self.value
+
+class EnableDisableLoginsForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+    user_type = SelectField(
+        "Which users?",
+        choices=[
+          (choice.name, choice.value) for choice in UserTypesForLogin
+        ]
+    )
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+    submit_enable = SubmitField(label='Enable logins')
+    submit_disable = SubmitField(label='Disable logins')
+
+    def __init__(self, *args, **kwargs):
+        super(EnableDisableLoginsForm, self).__init__(*args, **kwargs)
+  
+    def validate_is_confirmed(self, value):
+        if not self.is_confirmed.data:
+            if self.submit_enable.data:
+                msg = "You did not explicitly confirm enabling logins"
+            else:
+                msg = "You did not explicitly confirm disabling logins"
+            raise ValidationError(msg)
+        return self.is_confirmed.data
+
+    def validate(self):
+        return super(EnableDisableLoginsForm, self).validate()
 
 class SubmitWithConfirmForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")

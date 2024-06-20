@@ -354,64 +354,86 @@ $(function() {
   const CSS_BTN_COLUMN_SHOWN = "btn-dark";
   const CSS_BTN_COLUMN_HIDDEN = "btn-outline-secondary";
   const ALL_COLUMNS = "all-columns";
+  const SHOW_HIDE_TIMES = "time-span";
   let btn_all_columns;
 
-  let $user_column_toggle_div = $("#user-column-toggles");
-  if ($user_column_toggle_div){
-    let is_init_done = false;
-
-    function show_or_hide_col_by_button(btn, want_to_hide){
-      let css_class = btn.dataset.column;
-      localStorage.setItem(css_class, want_to_hide);
-      let $elements = $("."+css_class);
-      if (want_to_hide) {
-        btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
-        btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
-        if (is_init_done) {
-          $elements.fadeOut("slow");
-        } else {
-          $elements.hide();
-        }
+  function show_or_hide_col_by_button(btn, want_to_hide, want_slow_fade){
+    let css_class = btn.dataset.itemHidden;
+    localStorage.setItem(css_class, want_to_hide);
+    let $elements = $("."+css_class);
+    if (want_to_hide) {
+      btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
+      btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
+      if (want_slow_fade) {
+        $elements.fadeOut("slow");
       } else {
-        btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
-        btn.classList.add(CSS_BTN_COLUMN_SHOWN);
-        if (is_init_done) {
-          $elements.fadeIn("slow");
-        } else {
-          $elements.show();
-        }
+        $elements.hide();
       }
-      if (css_class === ALL_COLUMNS) {
-        $user_column_toggle_div.find("button").each(function(){
-          if ($(this)[0].dataset.column != ALL_COLUMNS) {
-            show_or_hide_col_by_button($(this)[0], want_to_hide)
-          }
-        });
-      } else if (want_to_hide && btn_all_columns){
-        // "All columns" not marked as "shown" if any cols are hidden
-        btn_all_columns.classList.remove(CSS_BTN_COLUMN_SHOWN);
-        btn_all_columns.classList.add(CSS_BTN_COLUMN_HIDDEN);
+    } else {
+      btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
+      btn.classList.add(CSS_BTN_COLUMN_SHOWN);
+      if (want_slow_fade) {
+        $elements.fadeIn("slow");
+      } else {
+        $elements.show();
       }
     }
-
-    $user_column_toggle_div.find("button").each(function(){
-      $(this).on("click", function(e){
-        show_or_hide_col_by_button(
-          e.target,
-          e.target.classList.contains(CSS_BTN_COLUMN_SHOWN)
-        )
+    if (css_class === ALL_COLUMNS) {
+      $user_column_toggle_div.find("button").each(function(){
+        let this_col = $(this)[0].dataset.itemHidden;
+        if (this_col != ALL_COLUMNS && this_col != SHOW_HIDE_TIMES) {
+          show_or_hide_col_by_button($(this)[0], want_to_hide, false)
+        }
       });
-      let want_to_hide = localStorage.getItem(this.dataset.column)=="true";
-      if ($(this)[0].dataset.column == ALL_COLUMNS) {
-        btn_all_columns = this;
-      } else {
-        show_or_hide_col_by_button(
-          $(this)[0],
-          want_to_hide
-        );
+    } else if (css_class === SHOW_HIDE_TIMES) {
+      // pass: not a true column button
+    } else if (want_to_hide && btn_all_columns){
+      // "All columns" not marked as "shown" if any cols are hidden
+      btn_all_columns.classList.remove(CSS_BTN_COLUMN_SHOWN);
+      btn_all_columns.classList.add(CSS_BTN_COLUMN_HIDDEN);
+    }
+  }
+  let $user_column_toggle_div = $("#user-column-toggles");
+  if ($user_column_toggle_div){
+    $user_column_toggle_div.find("button").each(function(){
+      if ($(this)[0].dataset.itemHidden != SHOW_HIDE_TIMES) {
+        $(this).on("click", function(e){
+          show_or_hide_col_by_button(
+            e.target,
+            e.target.classList.contains(CSS_BTN_COLUMN_SHOWN),
+            true
+          )
+        });
+        let want_to_hide = localStorage.getItem(this.dataset.itemHidden)=="true";
+        if ($(this)[0].dataset.itemHidden == ALL_COLUMNS) {
+          btn_all_columns = this;
+        } else {
+          show_or_hide_col_by_button(
+            $(this)[0],
+            want_to_hide,
+            false
+          );
+        }
       }
     });
-    is_init_done = true; // now show/hide uses slow fade, so user notices
+  }
+
+  let long_short_time_btn = document.getElementById("long-short-time-chooser-btn");
+  if (long_short_time_btn) {
+    long_short_time_btn.classList.remove("hidden");
+    // check if there's already a setting, and apply it
+    show_or_hide_col_by_button(
+      long_short_time_btn,
+      localStorage.getItem(SHOW_HIDE_TIMES)=="true",
+      false
+    );
+    long_short_time_btn.addEventListener("click", function(e){
+      show_or_hide_col_by_button(
+        e.target,
+        e.target.classList.contains(CSS_BTN_COLUMN_SHOWN),
+        true
+      )
+    });
   }
 
   let $task_counts = $(".task-count");

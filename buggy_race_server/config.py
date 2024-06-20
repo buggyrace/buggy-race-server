@@ -194,6 +194,7 @@ class ConfigSettingNames(Enum):
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
     API_SECRET_TIME_TO_LIVE = auto()
+    DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EXT_ID_NAME = auto()
@@ -267,6 +268,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
+    TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
@@ -359,6 +361,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
         # ConfigSettingNames.DEFAULT_RACE_LEAGUE.name, # not implemented yet
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name,
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name,
@@ -417,6 +420,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
@@ -477,6 +481,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -551,6 +556,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
@@ -611,6 +617,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
@@ -684,6 +691,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
@@ -787,6 +795,12 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name:
           """The default time-to-live for a users' API secret, in seconds (for
           example, 3600 seconds = 1 hour).""",
+
+        ConfigSettingNames.DEFAULT_FLAG_COLOR.name:
+          """The default `flag_color` for buggies (this should be a CSS color).
+          If you haven't raced before, the default (a middle-grey) is a good
+          choice, because it encourages students to change it to something more
+          interesting.""",
 
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name:
           """The default point cost threshold for buggies: you can always
@@ -1260,6 +1274,13 @@ class ConfigSettings:
           is shown as a helpful link in the explanatory text on the reports
           page. If you haven't customised the task list, you don't need to
           change this.""",
+
+        ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name:
+          """An indication for your students as to how much text you expect
+          them to provide in each of their task texts. It's shown on the
+          report page instructions, after _"Suggested size for each task
+          text:"_. No suggestion is shown if you've set it to the empty string
+          or `IS_STORING_STUDENT_TASK_TEXTS` is `No`.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on

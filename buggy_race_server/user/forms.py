@@ -28,6 +28,7 @@ class UserForm(FlaskForm):
     last_name = StringField("Last name")
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active?")
+    is_login_enabled = BooleanField("Is login enabled?")
     is_demo_user = BooleanField("Is demo user?")
     comment = TextAreaField("Comment", validators=[Optional(), Length(max=1024)])
     access_level = IntegerField("Staff role", validators=[Optional()])

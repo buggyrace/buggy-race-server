@@ -26,34 +26,39 @@
             {{ qty_admins }} are admins (&starf;),
           {% endif %}
           {{ qty_teaching_assistants }} teaching assistants (&star;).
+          <br>
+          Percentages shown are of <em>students</em> (not total users).
         </p>
       </div>
     </div>
     <div class="row my-3" id="user-column-toggles">
       <div class="col">
-        <button class="btn btn-outline-secondary btn-sm" data-column="all-columns">All&nbsp;columns</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="all-columns">All&nbsp;columns</button>
         {% if config['USERS_HAVE_FIRST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-first-name">First&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-name">First&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_LAST_NAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-last-name">Last&nbsp;name</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-last-name">Last&nbsp;name</button>
         {% endif %}
         {% if config['USERS_HAVE_EMAIL'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-email">Email</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-email">Email</button>
         {% endif %}
         {% if config['USERS_HAVE_EXT_USERNAME'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-org-username">{{ ext_username_name }}</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-org-username">{{ ext_username_name }}</button>
         {% endif %}
         {% if config['USERS_HAVE_EXT_ID'] %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-ext-id">{{ ext_id_name }}</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-ext-id">{{ ext_id_name }}</button>
         {% endif %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-created-at">Created</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-is-active">Active?</button>
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-login-at">Last&nbsp;activity</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-created-at">Created</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-active">Active?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-login-enabled">Login enabled?</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-login-at">Last&nbsp;activity</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-login-at">First&nbsp;login</button>
         {% if is_showing_github_column %}
-          <button class="btn btn-outline-secondary btn-sm" data-column="u-github">GitHub</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-github">GitHub</button>
         {% endif %}
-        <button class="btn btn-outline-secondary btn-sm" data-column="u-uploaded">Uploaded</button>
+        <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-uploaded">Uploaded</button>
+        <button id="long-short-time-chooser-btn" class="hidden btn btn-outline-secondary btn-sm" data-item-hidden="time-span"><span class="icon-clock"></span> HH:MM</button>
       </div>
     </div>
   {% endif %}
@@ -84,8 +89,10 @@
             {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>
+            <th  class="u-is-login-enabled">Login enabled?</th>
           {% endif %}
           <th class="u-login-at">Last activity at</th>
+          <th class="u-first-login-at">First login</th>
           {% if is_showing_github_column %}
             <th class="u-github">GitHub (&rarr; repo)</th>
           {% endif %}
@@ -118,8 +125,10 @@
               {% endif %}
               <td class="u-created-at"></td>
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
+              <td class="u-is-login-enabled">{{ qty_students_login_enabled }}   ({{ "%d" | format(100 * qty_students_login_enabled/qty_students) }}%) </td>
             {% endif %}
-            <td class="u-login-at">{{ qty_students_logged_in }}   ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td class="u-login-at">{{ qty_students_logged_in }}       ({{ "%d" | format(100 * qty_students_logged_in/qty_students) }}%)</td>
+            <td class="u-first-login-at">{{ qty_students_logged_in_first }} ({{ "%d" | format(100 * qty_students_logged_in_first/qty_students) }}%)</td>
             {% if is_showing_github_column %}
               <td class="u-github">{{ qty_students_github }}   ({{ "%d" | format(100 * qty_students_github/qty_students) }}%)</td>
             {% endif %}
@@ -168,7 +177,7 @@
                 {% endif %}
                 <td class="u-created-at">
                     {% if u.created_at %}
-                      {{ u.created_at | servertime }}
+                      {{ u.created_at | servertime | time_span | safe  }}
                     {% else %}
                     <em class="empty-setting">none</em>
                     {% endif %}
@@ -180,10 +189,30 @@
                     No
                   {% endif %}
                 </td>
+                <td class="{% if not u.is_administrator %}{{ u.is_login_enabled | lower }}{% endif %} u-is-login-enabled">
+                  {% if u.is_administrator or not u.is_active %}
+                    <em class="empty-setting">
+                  {% endif %}
+                  {% if u.is_login_enabled %}
+                      Yes
+                  {% else %}
+                    No
+                  {% endif %}
+                  {% if u.is_administrator or not u.is_active %}
+                    </em>
+                  {% endif %}
+                </td>
               {% endif %}
               <td class="u-login-at">
                 {% if u.logged_in_at %}
-                  {{ u.logged_in_at | servertime }}
+                  {{ u.logged_in_at | servertime | time_span | safe }}
+                {% else %}
+                  <em class="empty-setting">none</em>
+                {% endif %}
+              </td>
+              <td class="u-first-login-at">
+                {% if u.first_logged_in_at %}
+                  {{ u.first_logged_in_at | servertime | time_span | safe }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}
@@ -197,7 +226,7 @@
                   {% endif %}
                 </td>
               {% endif %}
-              <td class="bool-{{ u.latest_json|length is greaterthan 1 | lower }} u-uploaded"> 
+              <td class="{% if not u.is_administrator %}{{ u.latest_json|length is greaterthan 1 | lower }}{% endif %} u-uploaded"> 
                 {% if u.latest_json|length is greaterthan 1 %}
                   <a href="{{ url_for('admin.show_buggy', user_id=u.username) }}"
                     class="btn btn-outline-secondary btn-admin icon-wrench ml-1"
@@ -210,7 +239,7 @@
               </td>
               <td  class="u-uploaded">
                 {% if u.uploaded_at %}
-                  {{ u.uploaded_at | servertime }}
+                  {{ u.uploaded_at | servertime | time_span | safe }}
                 {% else %}
                   <em class="empty-setting">none</em>
                 {% endif %}
@@ -228,6 +257,7 @@
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('user.change_password') }}">Change passwords</a>
         {% endif %}
         {% if current_user.is_administrator %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.enable_or_disable_logins') }}">Enable/disable logins</a>
           <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.list_users', data_format='csv') }}">Download students CSV</a>
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.bulk_register') }}">Register new students</a>
           <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.new_user') }}">Register new user</a>

@@ -219,6 +219,31 @@
           <input type="hidden" name="is_active" value="1"/>
         {% endif %}
 
+        {% if user %}
+          <div class="row py-2 m-1 {% if user and not user.is_login_enabled %}alert-danger{% else %}bg-white{% endif %}">
+            <div class="col-sm-3">
+              {{form.is_login_enabled.label}}
+            </div>
+            <div class="col-sm-4 ">
+              <select name="is_login_enabled" class="form-control mr-sm-1">
+                <option value="" {% if user and not user.is_login_enabled %}selected{% endif %}>No</option>
+                <option value="Yes" {% if not user or user.is_login_enabled %}selected{% endif %}>Yes</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              Prevent this user logging in (if they're currently logged in,
+              their session will be suspended). Use this if you just want to
+              stop students making further changes without de-activating their
+              accounts.<br>
+              Administrator logins cannot be disabled (this setting is ignored
+              by admin accounts).
+            </div>
+          </div>
+        {% else %}
+          {# registration: new users always have login enabled to start with #}
+          <input type="hidden" name="is_login_enabled" value="1"/>
+        {% endif %}
+
         <div class="row alert-warning py-2 m-1">
           <div class="col-sm-3">
             {{form.access_level.label}}

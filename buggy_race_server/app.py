@@ -193,7 +193,8 @@ def create_app():
     def bump_login_timestamp():
         ACTIVITY_AT = "activity_at"
         activity_update_period_s = app.config.get(ConfigSettingNames.USER_ACTVITY_PERIOD_S.name) or 0
-        if current_user and current_user.is_authenticated and session:
+        if current_user and current_user.is_authenticated and session and (
+            current_user.is_login_enabled or current_user.is_administrator):
             now_utc = datetime.now(timezone.utc)
             active_timestamp = session.get(ACTIVITY_AT)
             if not active_timestamp:

@@ -2117,6 +2117,7 @@ def staff_race_replayer():
 def config_docs_helper():
     """ undocumented helper method for dumping config setting markdown for www site"""
     if not current_app.config[ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name]:
+        flash("To see the documentation helper page, set config _IS_DOCS_HELPER_PAGE_ENABLED=1", "warning")
         abort(404)
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     pretty_default_settings=ConfigSettings.get_pretty_defaults()

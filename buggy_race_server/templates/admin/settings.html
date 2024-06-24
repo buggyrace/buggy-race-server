@@ -37,11 +37,11 @@
         </div>
       </div>
       <div class="row my-5">
-        <div class="col px-4">
+        <div class="col-md-6 px-4">
           <div class="alert alert-warning">
             <h2 class="alert-title">Find group by setting</h2>
             <label for="config-chooser" style="display:block;">Select a config setting to jump to its group:</label>
-            <input type="text" id="config-chooser" name="config-chooser" list="settings-list" style="width:20rem"/>
+            <input type="text" id="config-chooser" name="config-chooser" list="settings-list" class="form-control"/>
             <datalist id="settings-list">
               {% for config_name in groups_by_setting | sort %}
                 <option value="{{ config_name }}" data-group="{{ groups_by_setting[config_name] }}"></option>
@@ -49,7 +49,7 @@
             </datalist>
           </div>
         </div>
-        <div class="col px-4">
+        <div class="col-md-6 px-4">
           <div class="alert border-secondary p-4">
             <p>
               Show <em>all</em> settings forms on this single page.
@@ -124,19 +124,30 @@
   {% endfor %}
   </div>
   <div class="row">
-    <div class="col my-3 text-right">
-      {{ macros.docs_btn("Customising & config", "/customising") }}
-    </div>
-  </div>
-  {% if group_name %}
-    <div class="row">
-      <div class="col">
+    <div class="col-lg-6">
+      {% if group_name %}
         <p class="btn-collection">
           <a href="{{ url_for('admin.settings')}}" class="btn btn-admin btn-outline-secondary btn-jump">Config (all settings)</a>
         </p>
-      </div>
+      {% else %}
+        <p>
+          There are additional config settings that you can inspect but cannot
+          edit here. They are listed on the System Information page.
+        </p>
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-admin btn-outline-secondary btn-jump">System info</a>
+        </p>
+      {% endif %}
     </div>
-  {% endif %}
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {% if not group_name %}
+        {{ macros.docs_btn("System info", "/customising/env#other-system-settings-system-info") }}
+      {% endif %}
+      {{ macros.docs_btn("Customising & config", "/customising") }}
+    </div>
+  </div>
 </div>
 {% if not group_name %}
   <script>

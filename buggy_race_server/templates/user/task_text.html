@@ -38,7 +38,7 @@
           {{ form.task_id(value=task.id) }}
           <div class="row">
             <div class="col p-3">
-              {{ form.text.label }}
+              <p>{{ form.text.label }}: {{ suggested_text_size }}</p>
               <textarea id="text" name="text" class="w-100" rows="8">{{ tasktext.text }}</textarea>
             </div>
           </div>

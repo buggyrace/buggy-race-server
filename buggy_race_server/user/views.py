@@ -448,6 +448,7 @@ def task_text(task_fullname):
         task=task,
         report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
         form=form,
+        suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
         delete_form=delete_form,
         pretty_timestamp=(tasktext.modified_at or tasktext.created_at).strftime("%Y-%m-%d %H:%M"),
     )

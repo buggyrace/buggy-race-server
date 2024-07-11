@@ -1018,7 +1018,7 @@ class ConfigSettings:
           store the URL correctly when you update the race. If you're running
           an especially large project or little server, there may be efficiency
           benefits in _not_ using the database, but otherwise it's simplest to
-          to choose `Yes`. """,
+          choose `Yes`. """,
 
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name:
           """Do you want students to be able to record text on this server

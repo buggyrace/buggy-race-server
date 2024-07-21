@@ -105,6 +105,9 @@ class ConfigSettingNames(Enum):
     # Path where static race assets (race player, etc) are found
     _RACE_ASSETS_PATH = auto()
 
+    # Path where static race player assets (images etc) are found
+    _RACE_ASSETS_IMAGES_PATH = auto()
+
     # Path where static racetrack assets (background images and path SVGs)
     # are found — might be a subdir of _RACE_ASSETS_PATH, but doesn't have
     # to be so, this is an entirely separate path
@@ -455,6 +458,7 @@ class ConfigSettings:
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
         ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
+        ConfigSettingNames._RACE_ASSETS_IMAGES_PATH.name: path.join("buggy_race_server", "race", "assets", "img"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
@@ -1552,6 +1556,7 @@ class ConfigSettings:
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name,
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name,
         ConfigSettingNames._RACE_ASSETS_PATH.name,
+        ConfigSettingNames._RACE_ASSETS_IMAGES_PATH.name,
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
         ConfigSettingNames._PUBLISHED_PATH.name,
         ConfigSettingNames._SETUP_STATUS.name,

@@ -21,6 +21,15 @@
       <p id="svg-report" class="p-3"></p>
     </div>
   </div>
+  <div id="svg-viewbox-check" class="row hidden">
+    <div class="col">
+      <div class="alert alert-danger">
+        <h2 class="alert-title">ViewBox (from SVG)</h2>
+        <p id="svg-viewbox-check-msg" class="mx-3">
+        </p>
+      </div>
+    </div>
+  </div>  
 {% endif %}
 <div class="row">
 <div class="col">
@@ -31,7 +40,7 @@
 </div>
 {% if track_svg_url %}
 <!-- SVG helper requires JavaScript, which will remove the "hidden" -->
-<div id="svg-helper" class="row">
+<div id="svg-helper" class="row hidden">
   <div class="col">
     <div class="alert alert-info">
       <h2 class="alert-title">Path (from SVG)</h2>
@@ -64,6 +73,7 @@
     </div>
   </div>
 </div>
+
 <script>
   //--------------------------------------------------------------------
   const PATH_SVG_URL = "{{ track_svg_url }}";
@@ -72,7 +82,51 @@
   const COPY_BTN = document.getElementById("btn-copy-lap-length");
   const RACETRACK_SVG = document.getElementById("racetrack-svg");
   const RACETRACK_PATH_ID = "race-path";
+  const SVG_VIEWBOX_CHECK = document.getElementById("svg-viewbox-check");
+  const SVG_VIEWBOX_CHECK_MSG = document.getElementById("svg-viewbox-check-msg");
+
   const SVG_HELPER = document.getElementById("svg-helper");
+  const REQUIRED_RACETRACK_WIDTH = 200;
+  const REQUIRED_RACETRACK_HEIGHT = 100;
+
+  function check_viewbox_values(viewbox_str) {
+    let is_ok = true;
+    let err_msg = "";
+    let values = viewbox_str.split(/\s+/);
+    if (values.length === 4) {
+      for (let i=0; i<values.length; i++) {
+        values[i] = parseInt(values[i]);
+        if (isNaN(values[i])) {
+          is_ok = false;
+          err_msg = "bad value in viewBox at position " + i + ": " + values[i];
+          break;
+        }
+      }
+      if (is_ok) {
+        let width = Math.abs(values[2] - values[0]);
+        let height = Math.abs(values[3] - values[1]);
+        if (width != REQUIRED_RACETRACK_WIDTH || height != REQUIRED_RACETRACK_HEIGHT) {
+          is_ok = false;
+          err_msg = "racetrack SVG viewBox must be " + REQUIRED_RACETRACK_WIDTH +
+           " × " + REQUIRED_RACETRACK_HEIGHT + ", but this one is " + width +
+           " × " + height;
+        }
+      } 
+    } else {
+      is_ok = false;
+      err_msg = ("could not find 4 values in viewBox attribute");
+    }
+    console.log(err_msg);
+    if (! is_ok) {
+      SVG_VIEWBOX_CHECK_MSG.innerText = "Problem: " + err_msg;
+      SVG_VIEWBOX_CHECK.classList.remove("hidden");
+    } else {
+      // don't reveal this (success isn't important) but set the message
+      // to avoid confustion if devs look at the source HTML in the browser
+      SVG_VIEWBOX_CHECK_MSG.innerText = "SVG viewBox dimension check " +
+        "passed OK:" + " \"" + viewbox_str + "\"";
+    }
+  }
 
   function say(msg, is_ok){
     SVG_REPORT.innerText = msg;;
@@ -97,13 +151,17 @@
     if (is_ok){
       let svg_tag = downloaded_svg.getElementsByTagName('svg');
       for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
+        let attib_val = undefined;
         try {
-          let val = svg_tag[0].attributes[attrib_name].value;
-          if (val != undefined) {
-            RACETRACK_SVG.setAttribute(attrib_name, val);
+          attib_val = svg_tag[0].attributes[attrib_name].value;
+          if (attib_val != undefined) {
+            RACETRACK_SVG.setAttribute(attrib_name, attib_val);
           }
         } catch (error) {
           console.log("failed to find " + attrib_name, error); // probably not fatal, so carry on
+        }
+        if (attrib_name === "viewBox" && attib_val) {
+          check_viewbox_values(attib_val);
         }
       }
       let paths = downloaded_svg.getElementsByTagName("path");
@@ -136,9 +194,10 @@
         say("OK, got SVG from URL and loaded the path", is_ok);
         let lap_length = Math.round(racetrack_path.getTotalLength());
         document.getElementById("path-lap-length").innerText = lap_length;
-
       }
     }
+  }).catch(function(error) {
+      say("Problem getting SVG: " + error.message, false);
   });
 </script>
 {% else %}

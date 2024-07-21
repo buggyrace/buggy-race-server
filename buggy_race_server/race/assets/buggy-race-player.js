@@ -30,6 +30,10 @@ const EVENT_STRING = 's';
 
 const EVENT_TYPE_FINISH = 'f';
 const EVENT_TYPE_ATTACK_PREFIX = 'a';
+const EVENT_TYPE_BIOHAZARD = EVENT_TYPE_ATTACK_PREFIX + 'b';
+const EVENT_TYPE_CHARGE = EVENT_TYPE_ATTACK_PREFIX + 'c';
+const EVENT_TYPE_FIRE = EVENT_TYPE_ATTACK_PREFIX + 'f';
+const EVENT_TYPE_SPIKE = EVENT_TYPE_ATTACK_PREFIX + 's';
 
 const RACE_INFO = {
   title: "Race",
@@ -72,6 +76,7 @@ const FAST_FORWARD_BUTTON = document.getElementById("btn-ff");
 const FAST_FORWARD_SPEED_UP = 8;
 const FF_BTN_FAST = "FAST";
 const FF_BTN_NORMAL = "ACTUAL";
+const IMG_ASSET_PATH = "/races/assets/img/";
 const INFO_PANEL = document.getElementById("info-panel");
 const IS_INVISIBLE_PATH = true; // force path stroke to be none? (CDC prevention)
 const IS_JITTERED = false; // experimental bumpiness off the path
@@ -94,6 +99,12 @@ const SCREEN_MASK = document.getElementById("screen-mask");
 const STEP_DURATION_IN_S = 1;
 const TIME_INDICATOR = document.getElementById("time-indicator");
 
+var ATTACK_GRAPHICS = {};
+ATTACK_GRAPHICS[EVENT_TYPE_BIOHAZARD] = IMG_ASSET_PATH + "attack-biohazard.gif";
+ATTACK_GRAPHICS[EVENT_TYPE_CHARGE] = IMG_ASSET_PATH + "attack-charge.gif";
+ATTACK_GRAPHICS[EVENT_TYPE_FIRE] = IMG_ASSET_PATH + "attack-fire.gif";
+ATTACK_GRAPHICS[EVENT_TYPE_SPIKE] = IMG_ASSET_PATH + "attack-spike.gif";
+
 var crosshairs;
 var crosshairs_tracking_id = null;
 var is_fast_fwd = false;
@@ -108,6 +119,7 @@ var resize_time_id = null;
 var step_count = 0;
 var qty_finish_events = 0; // if > 0, we have a winner so stop reporting "lead"
 var svg_buggies = {}; // keyed on id
+var next_graphic_id = 0;
 
 // picked up from template/HTML definitions:
 var race_url = RACE_RESULTS_JSON_URL;
@@ -352,6 +364,10 @@ function reset_replay(){
   FAST_FORWARD_BUTTON.classList.remove(CSS_FAST_FWD);
   FAST_FORWARD_BUTTON.innerText = FF_BTN_FAST;
   is_fast_fwd = false;
+  for (let graphic of document.getElementsByClassName("race-graphic")){
+    graphic.remove();
+  }
+  next_graphic_id = 0;
   for (let buggy_id in svg_buggies){
     let buggy = svg_buggies[buggy_id];
     buggy.setAttribute("x", RACETRACK_DATA.start_point.x);
@@ -517,7 +533,17 @@ function do_step(){
           qty_finish_events += 1;
           // TODO finish line wave chequered flag/confetti?
         } else if (event_type[0] == EVENT_TYPE_ATTACK_PREFIX) {
-          // TODO animation/graphic etc
+          if (ATTACK_GRAPHICS[event_type]) {
+            const point = RACETRACK_DATA.path.getPointAtLength(
+              buggy.track_data.distance % RACETRACK_DATA.lap_length
+            );
+            create_svg_graphic(
+              ATTACK_GRAPHICS[event_type],
+              point.x,
+              point.y,
+              1000
+            );
+          }
         }
       }
       if (event[EVENT_STRING]) {
@@ -547,6 +573,39 @@ function do_step(){
       do_step()
     }
   });
+}
+
+function create_svg_graphic(img_url, x, y, time_to_live){
+  next_graphic_id += 1;
+  const RACETRACK_CANVAS_WIDTH = 200;
+  const RACETRACK_CANVAS_HEIGHT = 100;
+  const RAW_GRAPHIC_WIDTH = 120;
+  const RAW_GRAPHIC_HEIGHT = 120;
+  const EFFECTIVE_GRAPHIC_HEIGHT = 32;
+  let graphic_width = Math.round(RAW_GRAPHIC_WIDTH * (EFFECTIVE_GRAPHIC_HEIGHT/RACETRACK_CANVAS_WIDTH));
+  let graphic_height = Math.round(RAW_GRAPHIC_HEIGHT * (EFFECTIVE_GRAPHIC_HEIGHT/RACETRACK_CANVAS_HEIGHT));
+  let graphic = document.createElementNS(NAMESPACE_SVG, 'image');
+  graphic.classList.add("race-graphic");
+  let attribs = {
+    id: "graphic-" + next_graphic_id,
+    width: graphic_width,
+    height: graphic_height,
+    href: img_url,
+    x: x - Math.round(graphic_width/2),
+    y: y - Math.round(graphic_height/2),
+    zIndex: 0,
+  }
+  for (let k in attribs){
+    graphic.setAttribute(k, attribs[k]);
+  }
+  RACETRACK_SVG.insertBefore(graphic, RACETRACK_SVG.firstChild);
+  if (time_to_live) {
+    setTimeout(
+      () => {
+        graphic.remove();
+      }, time_to_live
+    );
+  }
 }
 
 function create_svg_buggy(buggy_data){

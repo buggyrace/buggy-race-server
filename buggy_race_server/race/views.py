@@ -49,13 +49,21 @@ def _serve_race_asset_file(*args):
     if not os.path.exists(full_filename):
         # don't send full error page, as responses generally aren't
         # being seen by human user, but as a component on a page
-        return make_response("Race resource not found", 404)
+        print(f"Race resource not found <{full_filename}>")
+        return make_response(f"Race resource not found <{full_filename}>", 404)
     return send_file(full_filename)
 
 @blueprint.route("/assets/tracks/<filename>")
 def serve_racetrack_asset(filename):
     return _serve_race_asset_file(
         current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name],
+        filename
+    )
+
+@blueprint.route("/assets/img/<filename>")
+def serve_race_player_image(filename):
+    return _serve_race_asset_file(
+        current_app.config[ConfigSettingNames._RACE_ASSETS_IMAGES_PATH.name],
         filename
     )
 

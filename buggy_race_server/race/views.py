@@ -129,6 +129,15 @@ def replay_race(race_id):
 @blueprint.route("/<int:race_id>/result")
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
+    
+    is_preview = not (race.is_visible and race.is_result_visible)
+    if is_preview and (current_user.is_anonymous or not current_user.is_staff):
+        flash("Results for this race are not available yet", "danger")
+        flash("Either the results haven't been uploaded, or they haven't been published yet (maybe try again later?)", "info")
+        abort(404)
+    else:
+        flash("Results for this race have not been published yet: you're seeing this preview because you're staff", "warning")
+
     all_results = db.session.query(
         RaceResult, User).outerjoin(User).filter(
             RaceResult.race_id==race.id
@@ -145,6 +154,7 @@ def show_race_results(race_id):
     flag_color_css_defs = get_flag_color_css_defs([res for (res, _) in all_results])
     return render_template(
         "races/result.html",
+        is_preview=is_preview,
         current_user_id=0 if current_user.is_anonymous else current_user.id,
         flag_color_css_defs=flag_color_css_defs,
         is_showing_usernames=current_app.config[ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name],

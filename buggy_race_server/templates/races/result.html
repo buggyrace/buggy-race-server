@@ -7,6 +7,17 @@
       <div class="col">
         <div class="my-3 border text-center">
           <div class="w-100 finish-chequers" style="height:4em">&nbsp;</div>
+          {% if is_preview %}
+            <div class="alert alert-warning">
+              <h2 class="alert-title">Result preview</h2>
+              <p>
+                This is a preview of the results page. To make it public, you'll
+                need to <a href="{{ url_for( 'admin_race.edit_race', race_id=race.id) }}">edit
+                the race</a> and set "Is visible?" and "Are results visible?"
+                to <code>Yes</code>.
+              </p>
+            </div>
+          {% endif %}
           <h1 class="mt-3">
             Race result
             {% if race.title %}

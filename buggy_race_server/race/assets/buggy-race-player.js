@@ -594,6 +594,7 @@ function create_svg_graphic(img_url, x, y, time_to_live){
     x: x - Math.round(graphic_width/2),
     y: y - Math.round(graphic_height/2),
     zIndex: 0,
+    transform: RACETRACK_DATA.transform
   }
   for (let k in attribs){
     graphic.setAttribute(k, attribs[k]);

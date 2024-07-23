@@ -129,19 +129,20 @@ def replay_race(race_id):
 @blueprint.route("/<int:race_id>/result")
 def show_race_results(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
-    
-    is_preview = not (race.is_visible and race.is_result_visible)
-    if is_preview and (current_user.is_anonymous or not current_user.is_staff):
-        flash("Results for this race are not available yet", "danger")
-        flash("Either the results haven't been uploaded, or they haven't been published yet (maybe try again later?)", "info")
-        abort(404)
-    else:
-        flash("Results for this race have not been published yet: you're seeing this preview because you're staff", "warning")
+
+    if is_preview := not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("Results for this race are not available yet", "danger")
+            flash("Either the results haven't been uploaded, or they haven't been published yet (maybe try again later?)", "info")
+            abort(404)
+        else:
+            flash("Results for this race have not been published yet: you're seeing this preview because you're staff", "warning")
 
     all_results = db.session.query(
         RaceResult, User).outerjoin(User).filter(
             RaceResult.race_id==race.id
         ).order_by(RaceResult.race_position.asc()).all() 
+
     results_finishers = [(res, user)  for (res, user) in all_results if res.race_position > 0 ]
     results_nonfinishers = [(res, user) for (res, user) in all_results if res.race_position == 0 ]
     results_disqualified = [(res, user) for (res, user) in all_results if res.race_position < 0 ]
@@ -161,6 +162,7 @@ def show_race_results(race_id):
         is_tied=is_tied,
         race=race,
         replay_anchor=Race.get_replay_anchor(),
+        results=all_results,
         results_disqualified=results_disqualified,
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,

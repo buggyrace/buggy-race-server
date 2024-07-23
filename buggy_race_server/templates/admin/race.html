@@ -13,7 +13,7 @@
   <div class="row">
     <div class="col">
       <div class="alert alert-info">
-        <h2 class="alert-title">Race file (JSON)</h2>
+        <h2 class="alert-title">Results &amp; race file (JSON)</h2>
         <div class="container">
           <div class="row">
             <div class="col-md-7">
@@ -35,9 +35,23 @@
                   {% endif %}
                 </p>
               {% else %}
-                <p>
-                  <strong>This race has no results (yet)</strong>.
-                </p>
+                {% if race.results_uploaded_at %}
+                  <p>
+                    <strong>This race has empty results</strong>.
+                  </p>
+                  <p>
+                    There are no buggies in the results, but there <em>is</em>
+                    a results-uploaded date, which effectively means the race
+                    has been declared to have had <strong>no participants</strong>.
+                    If this is incorrect, either delete the "Results uploaded at"
+                    date below and submit no date instead, or upload a race file
+                    that contains some results.
+                  </p>
+                {% else %}
+                  <p>
+                    <strong>This race has no results (yet)</strong>.
+                  </p>
+                {% endif %}
                 <p>
                   The race file is the input you need to run a race
                   offline. Running the race produces a new race file,
@@ -132,10 +146,14 @@
             )
           </script>
         </div>
+        <div class="btn-collection text-right">
+          {{ macros.docs_btn("Downloading race files", "/races/downloading") }}
+          {{ macros.docs_btn("Uploading results", "/races/uploading-results") }}
+        </div>
       </div>
     </div>
   </div>
-  <div class="row">
+<div class="row">
     <div class="col">
       <table class="table table-striped table-bordered table-hover bg-white">
         <tbody>
@@ -144,6 +162,11 @@
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}">Edit race</a>
               {% if race.race_file_url %}
                 <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}">Replay</a>
+              {% endif %}
+              {% if race.is_visible and race.is_result_visible %}
+                <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (public)</a>
+              {% else %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (preview)</a>
               {% endif %}
             </td>
           </tr>
@@ -261,7 +284,7 @@
           </tr>
           <tr>
             <td>Results uploaded at</td>
-            <td>
+            <td {% if not race.results_uploaded_at %}class="bool-false"{% endif %}>
               {% if race.results_uploaded_at %}
                 <code>{{ race.results_uploaded_at | servertime }}</code>
               {% else %}

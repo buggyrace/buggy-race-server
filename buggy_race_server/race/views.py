@@ -113,15 +113,17 @@ def get_races_json():
         Race.start_at < datetime.now(timezone.utc)
       ).order_by(Race.start_at.asc())
     races_list = [
-            {
-                "id": race.id,
-                "title": race.title,
-                "start_at": servertime_str(
-                    current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
-                    race.start_at
-                ),
-                "race_file_url": race.race_file_url if race.is_result_visible else None
-            }
+        {
+            "id": race.id,
+            "title": race.title,
+            "start_at": servertime_str(
+                current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+                race.start_at
+            ),
+            "race_file_url": race.race_file_url if (
+                race.is_result_visible and not race.is_abandoned
+            ) else None
+        }
         for race in races
     ]
     json_data = json.dumps(races_list, indent=1, separators=(',', ': '))

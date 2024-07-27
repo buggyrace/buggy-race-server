@@ -249,6 +249,26 @@
           </div>
           <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
+              {{ form.is_abandoned.label }}
+            </div>
+            <div class="col-sm-4">
+              <select name="is_abandoned" class="form-control">
+                <option value="" {% if not race.is_abandoned %} selected="selected" {% endif %}>No</option>
+                <option value="1" {% if race.is_abandoned %} selected="selected" {% endif %}>Yes</option>
+              </select>
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Has the race been abandoned? Choose <code>Yes</code> if you
+                cannot upload any results — either because you decided not to
+                run the race, or because no buggies entered it. Abandon the race
+                if you want to show it as having <em>no results</em>, instead of
+                hiding or deleting it.
+              </p>
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
               Results meta-data
             </div>
             <div class="col-sm-4">

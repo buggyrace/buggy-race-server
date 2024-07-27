@@ -223,6 +223,13 @@
             </td>
           </tr>
           <tr>
+            <td>Was the race abandoned?</td>
+            {# note: "Yes" is the alarming state here, so reverse CSS class #}
+            <td class="bool-{{ not race.is_abandoned | lower }}">
+              {% if race.is_abandoned %} Yes {% else %} No {% endif %}
+            </td>
+          </tr>
+          <tr>
             <td>URL of image</td>
             <td>
               {% if race.track_image_url is none or race.track_image_url == "" %}

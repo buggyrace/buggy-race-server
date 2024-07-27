@@ -131,7 +131,11 @@
                   </td>
                 {% else %}
                   <td colspan="4" class="text-center">
-                    <em>Awaiting race report</em>
+                    {% if race.is_abandoned %}
+                      <em>Race abandoned</em>
+                    {% else %}
+                      <em>Awaiting race report</em>
+                    {% endif %}
                   </td>
                 {% endif %}
                 <td>

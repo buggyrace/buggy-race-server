@@ -42,6 +42,7 @@ class RaceForm(FlaskForm):
         format='%Y-%m-%dT%H:%M', # note: T is important!
         validators=[Optional()]
     )
+    is_abandoned = BooleanField("Is abandoned?")
     race_file_url = StringField(
         "URL of results JSON", validators=[Optional(), Length(max=255)]
     )

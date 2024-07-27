@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timezone
 import os
 import re
-from sqlalchemy import insert
+from sqlalchemy import insert, and_, or_
 from flask import (
     abort,
     Blueprint,
@@ -32,6 +32,7 @@ from buggy_race_server.utils import (
     get_flag_color_css_defs,
     staff_only,
     join_to_project_root,
+    servertime_str,
 )
 from buggy_race_server.config import ConfigSettingNames, ConfigSettings
 
@@ -81,11 +82,16 @@ def show_public_races():
         Race.is_visible==True,
         Race.start_at > datetime.now(timezone.utc)
       ).order_by(Race.start_at.asc()).first()
-    races = db.session.query(Race).join(RaceResult).filter(
+    races = db.session.query(Race).outerjoin(RaceResult).filter(
             Race.is_visible==True,
             Race.start_at < datetime.now(timezone.utc),
-            RaceResult.race_position > 0,
-            RaceResult.race_position <= 3,
+            or_(
+                Race.is_abandoned==True,
+                and_(
+                    RaceResult.race_position > 0,
+                    RaceResult.race_position <= 3
+                )
+            )
         ).order_by(Race.start_at.desc()).all()
     results = [ race.results for race in races ]
     flag_color_css_defs = get_flag_color_css_defs(
@@ -98,6 +104,33 @@ def show_public_races():
         races=races,
         replay_anchor=Race.get_replay_anchor(),
     )
+
+@blueprint.route("races.json", strict_slashes=True)
+def get_races_json():
+    filename = get_download_filename("races.json", want_datestamp=True)
+    races=Race.query.filter(
+        Race.is_visible==True,
+        Race.start_at < datetime.now(timezone.utc)
+      ).order_by(Race.start_at.asc())
+    races_list = [
+            {
+                "id": race.id,
+                "title": race.title,
+                "start_at": servertime_str(
+                    current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
+                    race.start_at
+                ),
+                "race_file_url": race.race_file_url if race.is_result_visible else None
+            }
+        for race in races
+    ]
+    json_data = json.dumps(races_list, indent=1, separators=(',', ': '))
+    output = make_response(json_data, 200)
+    output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    output.headers["Content-type"] = "application/json"
+    output.headers["Content-length"] = len(json_data)
+    return output
+
 
 @blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):
@@ -176,10 +209,22 @@ def serve_race_file(race_id):
         if current_user.is_anonymous or not current_user.is_staff:
             flash("Race file not available yet", "danger")
             abort(403)
-    racefile = DbFile.query.filter_by(
-        type=DbFile.RACE_FILE_TYPE,
-        item_id=race_id
-    ).first_or_404()
-    json_response = make_response(racefile.contents)
-    json_response.headers["Content-type"] = "application/json"
-    return json_response
+    if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
+        racefile = DbFile.query.filter_by(
+            type=DbFile.RACE_FILE_TYPE,
+            item_id=race_id
+        ).first_or_404()
+        json_response = make_response(racefile.contents)
+        json_response.headers["Content-type"] = "application/json"
+        return json_response
+    else:
+        # if there is a results_uploaded_at date, but no race file,
+        # this won't indicate the result... but on the other hand if
+        # this is for collecting buggy history (task 5-RACELOG) there's
+        # no data/information lost here
+        # Note: there's no validation on the URL here, including JSON
+        # MIME-type, but if IS_STORING_RACE_FILES_IN_DB has been turned
+        # off, that's perhaps unavoidable:
+        if not race.race_file_url:
+            abort(404)
+        return redirect(race.race_file_url)

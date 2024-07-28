@@ -122,7 +122,8 @@ def get_races_json():
             ),
             "race_file_url": race.race_file_url if (
                 race.is_result_visible and not race.is_abandoned
-            ) else None
+            ) else None,
+            "is_abandoned": race.is_abandoned if race.is_result_visible else None
         }
         for race in races
     ]
@@ -211,6 +212,9 @@ def serve_race_file(race_id):
         if current_user.is_anonymous or not current_user.is_staff:
             flash("Race file not available yet", "danger")
             abort(403)
+    if race.is_abandoned: # don't show race file
+        flash("No race file: race was abandoned", "info")
+        abort(404)
     if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
         racefile = DbFile.query.filter_by(
             type=DbFile.RACE_FILE_TYPE,
@@ -220,13 +224,9 @@ def serve_race_file(race_id):
         json_response.headers["Content-type"] = "application/json"
         return json_response
     else:
-        # if there is a results_uploaded_at date, but no race file,
-        # this won't indicate the result... but on the other hand if
-        # this is for collecting buggy history (task 5-RACELOG) there's
-        # no data/information lost here
+        if not race.race_file_url:
+            abort(404)
         # Note: there's no validation on the URL here, including JSON
         # MIME-type, but if IS_STORING_RACE_FILES_IN_DB has been turned
         # off, that's perhaps unavoidable:
-        if not race.race_file_url:
-            abort(404)
         return redirect(race.race_file_url)

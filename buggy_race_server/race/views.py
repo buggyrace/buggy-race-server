@@ -106,7 +106,7 @@ def show_public_races():
     )
 
 @blueprint.route("races.json", strict_slashes=True)
-def get_races_json():
+def serve_races_json():
     filename = get_download_filename("races.json", want_datestamp=True)
     races=Race.query.filter(
         Race.is_visible==True,

@@ -163,6 +163,13 @@
     </div>
   {% endif %}
   <div class="row">
+    <div class="col">
+      <p class="btn-collection text-right">
+        <a class="btn btn-sm btn-outline-secondary btn-white btn-download" href="{{ url_for('race.serve_races_json') }}">Races JSON</a>
+      </p>
+    </div>
+  </div>
+  <div class="row">
     <div class="col text-center">
       <img class="img-fluid" src="{{ static_url_for('static', filename='build/img/rene-buggy-1.png') }}" />
     </div>

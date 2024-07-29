@@ -217,6 +217,23 @@ def edit_race(race_id=None):
         delete_form=delete_form,
     )
 
+@blueprint.route("/<race_id>/abandon", methods=["GET", "POST"])
+@login_required
+@admin_only
+def abandon_race(race_id):
+    race = Race.get_by_id(race_id)
+    if race is None:
+        flash("Error: coudldn't find race", "danger")
+        abort(404)
+    form = SubmitWithConfirmForm(request.form)
+    qty_results = RaceResult.query.filter_by(race_id=race.id).count()
+    return render_template(
+        "admin/race_abandon.html",
+        form=form,
+        race=race,
+        qty_results=qty_results
+    )
+
 @blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])
 @login_required
 @admin_only

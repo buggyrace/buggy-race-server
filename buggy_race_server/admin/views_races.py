@@ -41,6 +41,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_url_protocol,
     join_to_project_root,
     staff_only,
 )
@@ -126,6 +127,9 @@ def view_race(race_id):
             current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
         )
     )
+    server_protocol = get_url_protocol(
+                current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    )
     return render_template(
         "admin/race.html",
         flag_color_css_defs=flag_color_css_defs,
@@ -138,8 +142,10 @@ def view_race(race_id):
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
         results=all_results,
+        server_protocol=server_protocol,
         track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
+        urls_with_different_protocol_dict=race.urls_with_different_protocol_dict(server_protocol),
     )
 
 @blueprint.route("/<race_id>/edit", methods=["GET", "POST"])

@@ -802,6 +802,11 @@ def create_editor_zipfile(readme_contents, app=current_app):
     except Exception as e:
         raise IOError("Failed to zip: {e}")
 
+def get_url_protocol(url_str):
+    PROTOCOL_SEP = "://"
+    if url_str and PROTOCOL_SEP in url_str:
+        return url_str[:url_str.find(PROTOCOL_SEP)].lower()
+    return None # note: local URLs (paths) may legitimately have no protocol
 
 def get_user_task_texts_as_list(username):
     """ Used for dumping a user's task texts for saving/loading """

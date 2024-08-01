@@ -138,16 +138,19 @@ def serve_races_json():
 @blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
+    if not (race.is_visible and race.is_result_visible):
+        if current_user.is_anonymous or not current_user.is_staff:
+            flash("The results of this race are not available yet", "warning")
+            abort(403)
+    if race.is_abandoned:
+        flash("Race was abandoned: nothing to replay", "warning")
+        abort(404)
     race_file_url = race.race_file_url
     if race_file_url and not (re.match(r"^https?://", race_file_url)):
         race_file_url = url_for(
             "race.serve_race_player_asset",
             filename=race_file_url
         )
-    if not (race.is_visible and race.is_result_visible):
-        if current_user.is_anonymous or not current_user.is_staff:
-            flash("The results of this race are not available yet", "warning")
-            abort(403)
     if player_url := current_app.config[ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name]:
         anchor = Race.get_replay_anchor()
         return redirect(f"{player_url}?race={race_file_url}{anchor}")

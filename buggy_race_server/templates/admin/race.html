@@ -16,64 +16,77 @@
         <h2 class="alert-title">Results &amp; race file (JSON)</h2>
         <div class="container">
           <div class="row">
-            <div class="col-md-7">
-              {% if has_results %}
+            {% if race.is_abandoned %}
+              <div class="col">
                 <p>
-                  <strong>This race already has results.</strong>
+                  This race has been abandoned.
                   <br>
-                  {% if race.race_file_url %}
-                    {% if race_file_is_local %}
-                      A race file for this race has been uploaded to
-                      this server.
-                    {% else %}
-                      A race file for this race has been uploaded to
-                      an external location.
-                    {% endif %}
-                  {% else %}
-                    Either the race file hasn't been published,
-                    or you haven't added its URL yet.
-                  {% endif %}
+                  An abandoned race has no per-buggy results.
+                  <br>
+                  If you want to run the race, you should edit it first and
+                  change <em>Is abandoned?</em> to <code>No</code>.
                 </p>
-              {% else %}
-                {% if race.results_uploaded_at %}
+              </div>
+            {% else %}
+              <div class="col-md-7">
+                {% if has_results %}
                   <p>
-                    <strong>This race has empty results</strong>.
+                    <strong>This race already has results.</strong>
+                    <br>
+                    {% if race.race_file_url %}
+                      {% if race_file_is_local %}
+                        A race file for this race has been uploaded to
+                        this server.
+                      {% else %}
+                        A race file for this race has been uploaded to
+                        an external location.
+                      {% endif %}
+                   {% else %}
+                      Either the race file hasn't been published,
+                      or you haven't added its URL yet.
+                    {% endif %}
                   </p>
-                  <p>
+                {% else %}
+                  {% if race.results_uploaded_at %}
+                    <p>
+                      <strong>This race has empty results</strong>.
+                    </p>
+                    <p>
                     There are no buggies in the results, but there <em>is</em>
                     a results-uploaded date, which effectively means the race
                     has been declared to have had <strong>no participants</strong>.
                     If this is incorrect, either delete the "Results uploaded at"
                     date below and submit no date instead, or upload a race file
                     that contains some results.
-                  </p>
-                {% else %}
-                  <p>
-                    <strong>This race has no results (yet)</strong>.
-                  </p>
-                {% endif %}
-                <p>
+                    </p>
+                  {% else %}
+                    <p>
+                      <strong>This race has no results (yet)</strong>.
+                    </p>
+                  {% endif %}
+                 <p>
                   The race file is the input you need to run a race
                   offline. Running the race produces a new race file,
                   containing the results and events, which you can
                   then upload.
-                </p>
-              {% endif %}
-            </div>
-            <div class="col-md-5 p-3 btn-collection">
-
-              {% if race.race_file_url %}
-                <a class="btn btn-primary btn-download mb-3"
-                href="{{ race.race_file_url }}"
-                >Get race file (with results)</a>
-              {% endif %}
-              {% if not has_results %}
-                <a class="btn btn-primary btn-download mb-3"
-                  href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
-                  >Download race file with (current) buggies</a>
-              {% endif %}
-              <button id="show-options-btn" class="hidden btn btn-outline-secondary btn-white mb-3">Show more download options</button>
-            </div>
+                  </p>
+           
+                {% endif %}
+              </div>
+              <div class="col-md-5 p-3 btn-collection">
+                {% if race.race_file_url %}
+                  <a class="btn btn-primary btn-download mb-3"
+                  href="{{ race.race_file_url }}"
+                  >Get race file (with results)</a>
+                {% endif %}
+                {% if not has_results %}
+                  <a class="btn btn-primary btn-download mb-3"
+                    href="{{ url_for('admin_race.download_race_json_with_buggies', race_id=race.id) }}"
+                    >Download race file with (current) buggies</a>
+                {% endif %}
+                <button id="show-options-btn" class="hidden btn btn-outline-secondary btn-white mb-3">Show more download options</button>
+              </div>
+            {% endif %}
           </div>
           <div class="row optional-section">
             <div class="col-md-7">
@@ -284,6 +297,16 @@
             </td>
           </tr>
           <tr>
+            <td>Number of laps</td>
+            <td>
+              {% if race.max_laps is number %}
+                {{ race.max_laps }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <td>Is Did-Not-Finish a position?</td>
             <td>
               {% if race.is_dnf_position %} Yes {% else %} No {% endif %}
@@ -320,16 +343,6 @@
                 <code>{{ race.results_uploaded_at | servertime }}</code>
               {% else %}
                 <em class="empty-setting">never</em>
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <td>Number of laps</td>
-            <td>
-              {% if race.max_laps is number %}
-                {{ race.max_laps }}
-              {% else %}
-                <em class="empty-setting">none</em>
               {% endif %}
             </td>
           </tr>

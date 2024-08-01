@@ -19,7 +19,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 
 from buggy_race_server.admin.forms import (
     GeneralSubmitForm,
@@ -221,6 +221,7 @@ def edit_race(race_id=None):
         default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
+        is_storing_racefiles_in_db=current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name],
     )
 
 @blueprint.route("/<race_id>/abandon", methods=["GET", "POST"])
@@ -232,6 +233,27 @@ def abandon_race(race_id):
         flash("Error: coudldn't find race", "danger")
         abort(404)
     form = SubmitWithConfirmForm(request.form)
+    if request.method == "POST":
+        if race.is_abandoned:
+            flash("Note: race was already abandoned", "info")
+        if form.is_submitted() and form.validate():
+            if not form.is_confirmed.data:
+                flash("Did not abandon race (you didn't confirm it)", "danger")
+            else:
+                race.is_abandoned = True
+                race.race_file_url =  None
+                race.results_uploaded_at = None
+                race.buggies_entered = 0
+                race.buggies_started = 0
+                race.buggies_finished = 0
+                race.save()
+                db.session.execute(delete(RaceResult).where(RaceResult.race_id==race.id))
+                db.session.commit()
+                flash("OK, race abandoned", "info")
+                return redirect(url_for('admin_race.view_race', race_id=race.id))
+        else:
+            flash_errors(form)
+            flash("Did not abandon race", "danger")
     qty_results = RaceResult.query.filter_by(race_id=race.id).count()
     return render_template(
         "admin/race_abandon.html",

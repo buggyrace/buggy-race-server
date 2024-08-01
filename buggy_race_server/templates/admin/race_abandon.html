@@ -15,7 +15,7 @@
     <div class="col-lg-9 my-3">
       <p>
         Abandon a race if it didn't run — either because you decided not to
-        run it, or if there were no entrants. An abandoned race can have no
+        run it, or if there were no entrants. An abandoned race has no
         results.
       </p>
     </div>
@@ -36,16 +36,21 @@
       Database contains result records for this race: they will be deleted.
     </div>  
   {% endif %}
+  {% if race.buggies_entered or race.buggies_finished or race.buggies_started %}
+    <div class="alert alert-danger">
+      The total number of buggies participating in this race will be set to zero.
+    </div>  
+{% endif %}
   {% if race.results_uploaded_at %}
-  <div class="alert alert-danger">
-    Race has a timestamp when results were uploaded ({{ race.results_uploaded_at | servertime }}): this will be deleted
-  </div>  
-{% endif %}
+    <div class="alert alert-danger">
+      Race has a timestamp when results were uploaded ({{ race.results_uploaded_at | servertime }}): this will be deleted.
+    </div>  
+  {% endif %}
   {% if race.race_file_url %}
-  <div class="alert alert-danger">
-    Race has a race file URL (<a href="{{ race.race_file_url }}"><code>{{ race.race_file_url }}</code></a>): this URL will be forgotten.
-  </div>  
-{% endif %}
+    <div class="alert alert-danger">
+      Race has a race file URL (<a href="{{ race.race_file_url }}"><code>{{ race.race_file_url }}</code></a>): this URL will be forgotten.
+    </div>  
+  {% endif %}
   <div class="row">
     <div class="col-md-6 mb-3">
       <form id="AbandonRaceForm" method="POST"
@@ -68,6 +73,12 @@
           </div>
         </div>
       </form>
+    </div>
+    <div class="col-md-6 mb-3">
+      <p>
+        If you abandon the race, consider editing it afterwards to add an
+        explanation to its <em>Description</em>.
+      </p>
     </div>
   </div>
   <div class="row">

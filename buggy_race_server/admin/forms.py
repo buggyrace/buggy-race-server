@@ -285,7 +285,7 @@ class TaskForm(FlaskForm):
       [DataRequired()]
     )
     hints_text = TextAreaField(
-      "Helful hints to help students understand the problem and perhaps concepts around it",
+      "Helpful hints to help students understand the problem and perhaps concepts around it",
       [DataRequired()]
     )
     sort_position = IntegerField("Sort position used to determine display order within each phase)",

@@ -690,7 +690,7 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
       # timestamp comes in as a string (which is common in the code),
       # so parse it into a datetime now — may or may not have seconds
       if m := re.search(
-        "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
+        r'\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*',
         utc_datetime_input
       ):
           m = m.groups()

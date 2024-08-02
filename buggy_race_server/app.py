@@ -101,7 +101,7 @@ def create_app():
         if utc_datetime:
             if type(utc_datetime) == str:
                 if m := re.search(
-                    "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
+                    r'\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*',
                     utc_datetime
                 ):
                     m = m.groups()

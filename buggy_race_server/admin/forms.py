@@ -338,7 +338,7 @@ class PublishEditorSourceForm(FlaskForm):
         f"README contents", validators=[DataRequired()]
     )
     is_writing_server_url_in_editor = BooleanField("Hardcode server URL in the Python source?")
-
+    is_writing_host_and_port_in_editor = BooleanField("Hardcocde editor host and port in the Python source?")
     def __init__(self, *args, **kwargs):
         super(PublishEditorSourceForm, self).__init__(*args, **kwargs)
   

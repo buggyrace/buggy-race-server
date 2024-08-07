@@ -1970,6 +1970,7 @@ def publish_editor_zip():
     readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename = current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
+    is_writing_host_and_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
     form = PublishEditorSourceForm(request.form)
     if request.method == "POST":
         readme_contents = form.readme_contents.data
@@ -1982,6 +1983,15 @@ def publish_editor_zip():
             value=1 if is_writing_server_url_in_editor else 0
         )
         current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name] = is_writing_server_url_in_editor
+
+        is_writing_host_and_port_in_editor = form.is_writing_host_and_port_in_editor.data
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
+            value=1 if is_writing_host_and_port_in_editor else 0
+        )
+        current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name] = is_writing_host_and_port_in_editor
+
         try:
             create_editor_zipfile(readme_contents, app=current_app)
         except (FileNotFoundError, IOError) as e:
@@ -2005,7 +2015,14 @@ def publish_editor_zip():
         if is_writing_server_url_in_editor:
             server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
             flash(
-                f"Set BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
+                f"Hardcoded BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
+                "info"
+            )
+        if is_writing_host_and_port_in_editor:
+            host = current_app.config[ConfigSettingNames.EDITOR_HOST.name]
+            port = current_app.config[ConfigSettingNames.EDITOR_PORT.name]
+            flash(
+                f"Hardcoded default host and port to \"{host}:{port}\" within {editor_python_filename}",
                 "info"
             )
         qty_lines_in_readme = readme_contents.count("\n")
@@ -2014,6 +2031,7 @@ def publish_editor_zip():
             "info"
         )
         flash("OK, editor files now zipped up and published", "success")
+        flash("You should download the zip file, unzip it and check its contents before you distribute it to students!", "info")
         return redirect(url_for("admin.show_buggy_editor_info"))
     else:
         readme_contents = render_template(
@@ -2026,6 +2044,7 @@ def publish_editor_zip():
         "admin/buggy_editor_publish.html",
         form=form,
         is_writing_server_url_in_editor=is_writing_server_url_in_editor,
+        is_writing_host_and_port_in_editor=is_writing_host_and_port_in_editor,
         qty_lines_in_readme=qty_lines_in_readme,
         readme_filename=readme_filename,
         editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],

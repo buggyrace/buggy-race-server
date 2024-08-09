@@ -14,6 +14,7 @@
     <div class="col">
       <div class="alert alert-info">
         <h2 class="alert-title">Results &amp; race file (JSON)</h2>
+        <h2 class="alert-title">Results &amp; race file (JSON)</h2>
         <div class="container">
           <div class="row">
             {% if race.is_abandoned %}
@@ -163,6 +164,10 @@
           {{ macros.docs_btn("Downloading race files", "/races/downloading") }}
           {{ macros.docs_btn("Uploading results", "/races/uploading-results") }}
         </div>
+        <div class="btn-collection text-right">
+          {{ macros.docs_btn("Downloading race files", "/races/downloading") }}
+          {{ macros.docs_btn("Uploading results", "/races/uploading-results") }}
+        </div>
       </div>
     </div>
   </div>
@@ -199,6 +204,11 @@
               <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}">Edit race</a>
               {% if race.race_file_url %}
                 <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}">Replay</a>
+              {% endif %}
+              {% if race.is_visible and race.is_result_visible %}
+                <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (public)</a>
+              {% else %}
+                <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (preview)</a>
               {% endif %}
               {% if race.is_visible and race.is_result_visible %}
                 <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (public)</a>
@@ -338,6 +348,7 @@
           </tr>
           <tr>
             <td>Results uploaded at</td>
+            <td {% if not race.results_uploaded_at %}class="bool-false"{% endif %}>
             <td {% if not race.results_uploaded_at %}class="bool-false"{% endif %}>
               {% if race.results_uploaded_at %}
                 <code>{{ race.results_uploaded_at | servertime }}</code>

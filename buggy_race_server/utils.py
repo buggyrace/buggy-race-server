@@ -710,6 +710,9 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
 def _get_buggy_editor_kwargs(app):
     project_code=app.config[ConfigSettingNames.PROJECT_CODE.name]
     buggy_editor_repo_owner=app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    editor_port = app.config[ConfigSettingNames.EDITOR_PORT.name]
+    if editor_port is None or editor_port.strip() == "":
+        editor_port = ""
     return {
       "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
@@ -717,6 +720,9 @@ def _get_buggy_editor_kwargs(app):
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
+      "editor_port": editor_port,
+      "editor_port_with_colon": f":{editor_port}" if editor_port else "",
       "institution_name": app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       "institution_short_name": app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
       "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner

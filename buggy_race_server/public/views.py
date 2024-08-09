@@ -26,7 +26,7 @@ from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import SocialSetting, Task
+from buggy_race_server.admin.models import DbFile, SocialSetting, Task
 
 from buggy_race_server.utils import (
     flash_errors,
@@ -219,21 +219,32 @@ def show_single_task(task_id):
 def serve_project_page(page=None):
     tasks = []
     if page == "tasks":
-        task_html_filename = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
-        generated_task_file = join_to_project_root(
-            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-            task_html_filename
-        )
-        if not path.exists(generated_task_file):
-            flash(f"Task list ({task_html_filename}) is missing: an administrator needs to update it", "danger")
-            abort(404)
-        try:
-            html_file = open(generated_task_file, "r")
-            task_html = "".join(html_file.readlines())
-            html_file.close()
-        except IOError as e:
-            flash(f"Error reading task list from {task_html_filename}: {e}", "danger")
-            abort(500)
+        task_html = ""
+        if current_app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
+            task_list_db = DbFile.query.filter_by(
+                type=DbFile.TASK_LIST
+            ).first()
+            if task_list_db is None:
+                flash(f"Task list is missing from database: an administrator needs to publish it", "danger")
+                abort(404)
+            else:
+                task_html = task_list_db.contents
+        else:
+            task_html_filename = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+            generated_task_file = join_to_project_root(
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                task_html_filename
+            )
+            if not path.exists(generated_task_file):
+                flash(f"Task list ({task_html_filename}) is missing: an administrator needs to update it", "danger")
+                abort(404)
+            try:
+                html_file = open(generated_task_file, "r")
+                task_html = "".join(html_file.readlines())
+                html_file.close()
+            except IOError as e:
+                flash(f"Error reading task list from {task_html_filename}: {e}", "danger")
+                abort(500)
         return render_template(
             "public/project/tasks.html",
             task_html=task_html

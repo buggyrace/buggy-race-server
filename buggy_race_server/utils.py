@@ -579,13 +579,22 @@ def publish_task_list(app=current_app):
         is_encouraging_texts_on_every_task=app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name],
         report_type=app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
     )
-    generated_task_file = join_to_project_root(
-        app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-        app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
-    )
-    task_list_html_file = open(generated_task_file, "w")
-    task_list_html_file.write(html)
-    task_list_html_file.close()
+    if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
+        generated_task_file = DbFile.query.filter_by(
+            type=DbFile.TASK_LIST
+        ).first() # there is only ever one task list
+        if generated_task_file is None:
+            generated_task_file = DbFile.create(type=DbFile.TASK_LIST)
+        generated_task_file.contents = html
+        generated_task_file.save()
+    else:
+        generated_task_file = join_to_project_root(
+            app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+        )
+        task_list_html_file = open(generated_task_file, "w")
+        task_list_html_file.write(html)
+        task_list_html_file.close()
     # set timestamp to none if there are no tasks, for force buttons to be red/danger
     set_and_save_config_setting(
         app,

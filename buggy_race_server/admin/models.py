@@ -16,6 +16,7 @@ class DbFile(SurrogatePK, Model):
 
     RACE_FILE_TYPE = "racefile"
     README_TYPE = "readme"
+    TASK_LIST = "tasklist"
 
     """Using database to store text files (write once, read many)
     to overcome some limitations of ephemeral file systems (like Heroku).

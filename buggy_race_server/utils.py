@@ -719,6 +719,9 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
 def _get_buggy_editor_kwargs(app):
     project_code=app.config[ConfigSettingNames.PROJECT_CODE.name]
     buggy_editor_repo_owner=app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    editor_port = app.config[ConfigSettingNames.EDITOR_PORT.name]
+    if editor_port is None or editor_port.strip() == "":
+        editor_port = ""
     return {
       "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
@@ -726,6 +729,9 @@ def _get_buggy_editor_kwargs(app):
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
+      "editor_port": editor_port,
+      "editor_port_with_colon": f":{editor_port}" if editor_port else "",
       "institution_name": app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       "institution_short_name": app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
       "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
@@ -745,7 +751,7 @@ def create_editor_zipfile(readme_contents, app=current_app):
     readme_filename = app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename=app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
-
+    is_writing_port_and_host_in_editor = app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
     if readme_contents is None: 
         # try to load readme_contents from database
         readme_db_file = DbFile.query.filter_by(
@@ -761,6 +767,9 @@ def create_editor_zipfile(readme_contents, app=current_app):
 
     # copy the editor in pubished/editor
     # replace contents of README.md with readme_contents
+    # optionally update app.py (this is enabled by default):
+    #    * race server URL
+    #    * editor host & port
     # zip it up
 
     editor_src_dir = join_to_project_root(
@@ -802,6 +811,21 @@ def create_editor_zipfile(readme_contents, app=current_app):
             py_body = old_py.read()
         if is_writing_server_url_in_editor:
             py_body=py_body.replace("https://RACE-SERVER-URL", server_url)
+        if is_writing_port_and_host_in_editor:
+            # These arei matching precisely against the punctuation of the
+            # target lines, so if the editor app.py, it may well break
+            py_body = re.sub(
+                # looking for 0.0.0.0 (or something very like it)
+                r'(host=environ.get\("FLASK_RUN_SERVER"\)\s+or\s+)"(\w+\.?)+',
+                f"\\1\"" + f"{current_app.config[ConfigSettingNames.EDITOR_HOST.name]}",
+                py_body
+            )
+            py_body = re.sub(
+                # looking for 5000 (or something very like it)
+                r'(port=environ.get\("FLASK_RUN_PORT"\)\s+or) \d+',
+                f"\\1 {current_app.config[ConfigSettingNames.EDITOR_PORT.name]}",
+                py_body
+            )
         with open(py_file, "w") as new_py:
             new_py.write(py_body)
     except IOError as e:

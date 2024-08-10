@@ -16,10 +16,10 @@ in order to enter races on the [race server]({{ buggy_race_server_url }}).
 The application is written in Python3 using the
 [Flask](https://palletsprojects.com/p/flask/) micro-framework.
 
-> It's also written in a way which you can and should fix! You should be able
-> to get it up and running (with SQLite) without needing to change the code...
-> but from that point on you'll need to change pretty much everything to make
-> it better. 
+> It's also written in a way which you can and should improve! You should be
+> able to get it up and running (with SQLite) without needing to change the
+> code... but from that point on you'll need to change pretty much everything
+> to make it better.
 
 * [Technical & project information]({{ buggy_race_server_url }}{{ url_for('public.serve_project_page', page='index') }})
 
@@ -35,13 +35,8 @@ execute them is slightly different.
 **The first task is [{{ task_0_get_name }}: get the source code]({{ buggy_race_server_url }}{{ url_for('public.show_single_task', task_id=task_0_get_name) }})**
 {% endif %}
 Start by logging into the [race server]({{ buggy_race_server_url }}).
-{% if is_using_github_api_to_fork %}
-If you follow the instructions there, it will automatically _fork_ the repo
-into your own GitHub account for you. Then clone that fork from your GitHub
-account onto your own machine.
-{% endif %}
 
-> If you don't have access to your own machine, it's possible to use
+> If you don't have access to your own machine, it may be possible to use
 > [repli.it](https://replit.com) or [pythonanywhere](https://www.pythonanywhere.com) instead.
 
 
@@ -51,26 +46,16 @@ You must have Python3 installed:
 
 * [Python 3](https://www.python.org) for programming
 
-It's best if you have Git installed too:
-
-* [Git](https://git-scm.com) for version control
-
-> If you don't/can't install git, you _can_ download the source code manually
-> but we recommend you don't do it that way.
-
-If Python or git are not already installed on your machine, see the
-downloads/installation instructions on their respective websites.
-
 
 ### Installation
 
-Before you can run the buggy editor webserver you need to install some
-Python modules.
+Before you can run the buggy editor webserver you need to install some Python
+modules.
 
 > **About virtual environments**
 >
 > Any software project depends on specific versions of tools (for example,
-> Python 3.8) and their associated libraries. You need these to be installed
+> Python 3.12) and their associated libraries. You need these to be installed
 > before you can use them.  Instead of installing them on your whole machine
 > (which might be a problem if other projects need different versions of the
 > same libraries) it's best to create a virtual environment just for this
@@ -80,10 +65,6 @@ Python modules.
 > using a virtual environment probably isn't worth it (yet). But if you want
 > to find out more, see the 
 > [tech notes]({{ buggy_race_server_url}}{{ url_for('public.serve_tech_notes', path='index') }}).
-
-Use the `cd` command to change to the directory that you got from either
-cloning or unzipping the source code (it will probably be called something
-like `{{ buggy_editor_repo_name  }}`).
 
 Use pip — which should have been installed as a side-effect of installing
 Python — to load the required modules (including Flask, the webserver
@@ -118,10 +99,10 @@ Run the application with:
 
     python3 app.py
 
-The webserver is running on port 5000 (that's the default for Flask apps). If
-you make a request for a web page, it will reply with one!
+By default, your webserver is running on port {{ editor_port }}. If you make a request for a
+web page, it will reply with one!
 
-Go to [http://localhost:5000](http://localhost:5000) in your web browser.
+Go to [http://localhost{{ editor_port_with_colon }}](http://localhost{{ editor_port_with_colon }}) in your web browser.
 You haven't specified which file you want, so you'll get the `/` route, which
 (you can see this by looking in `app.py`) invokes the `index.html` template.
 
@@ -133,7 +114,7 @@ action in the browser.
 
 When you want to stop the program running, in the terminal where the webserver
 is running, press Control-C. This interrupts the server and halts the execution
-of the program. (If you go to [http://localhost:5000](http://localhost:5000) in
+of the program. (If you go to [http://localhost{{ editor_port_with_colon }}](http://localhost{{ editor_port_with_colon }}) in
 your web browser now, you'll see a message saying you can't connect to the
 server — because you've killed it: it's no longer there).
 
@@ -141,26 +122,6 @@ server — because you've killed it: it's no longer there).
 > issuing the command `deactivate`.
 
 You're done!
-
-
-### Extra detail: setting `FLASK_ENV`
-
-It's best if you run in Flask's _development environment_. To do that, set the 
-environment variable `FLASK_ENV` before you run `appy.py` to `development`.
-Once you've done this, it's good for the rest of the session.
-
-On Windows cmd/Powershell do:
-
-    $env:FLASK_ENV = 'development'
-
-On Linux or Mac:
-
-    export FLASK_ENV=development
-
-{% if task_3_env_name %}
-When you get to task [{{ task_3_env_name }}]({{ buggy_race_server_url }}{{ url_for('public.show_single_task', task_id=task_3_env_name) }})
-you'll investigate other ways of doing this.
-{% endif %}
 
 ---
 

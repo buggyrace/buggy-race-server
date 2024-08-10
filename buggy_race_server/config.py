@@ -200,6 +200,8 @@ class ConfigSettingNames(Enum):
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
+    EDITOR_HOST = auto()
+    EDITOR_PORT = auto()
     EXT_ID_NAME = auto()
     EXT_ID_EXAMPLE = auto()
     EXT_USERNAME_EXAMPLE = auto()
@@ -214,6 +216,7 @@ class ConfigSettingNames(Enum):
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
     IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
+    IS_WRITING_HOST_AND_PORT_IN_EDITOR = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
@@ -290,6 +293,7 @@ class ConfigGroupNames(str, Enum):
     RACES = "races"
     SERVER = "server"
     SOCIAL = "social"
+    EDITOR = "editor"
     TASKS = "tasks"
     TECH_NOTES = "tech_notes"
     USERS = "users"
@@ -334,7 +338,6 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
-        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
@@ -400,6 +403,12 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name,
         ConfigSettingNames.SOCIAL_3_TEXT.name,
         ConfigSettingNames.SOCIAL_3_URL.name,
+      ),
+      ConfigGroupNames.EDITOR.name: (
+        ConfigSettingNames.EDITOR_HOST.name,
+        ConfigSettingNames.EDITOR_PORT.name,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
       ),
       ConfigGroupNames.PROJECT.name: (
         ConfigSettingNames.PROJECT_REPORT_TYPE.name,
@@ -490,6 +499,8 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
+        ConfigSettingNames.EDITOR_PORT.name: "5000",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
         ConfigSettingNames.EXT_ID_NAME.name: "External ID",
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
@@ -533,6 +544,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: 1,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
@@ -627,6 +639,8 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_HOST.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_PORT.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
@@ -669,6 +683,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
@@ -721,6 +736,7 @@ class ConfigSettings:
       ConfigGroupNames.SOCIAL.name,
       ConfigGroupNames.USERS.name,
       ConfigGroupNames.PROJECT.name,
+      ConfigGroupNames.EDITOR.name,
       ConfigGroupNames.TASKS.name,
       ConfigGroupNames.TECH_NOTES.name,
       ConfigGroupNames.RACES.name,
@@ -821,6 +837,22 @@ class ConfigSettings:
           leave this blank.""",
           # note: leagues not implemented yet: this isn't shown because
           #       the config setting is excluded from the "Race" group
+
+        ConfigSettingNames.EDITOR_HOST.name:
+          """The default host that the students' buggy editors use. Make sure
+          this matches the `host` argument that the editor app is launched with
+          (at the bottom of the editor `app.py`). This may appear in the task
+          and tech notes, and (if you're distributing the editor source code via
+          static zip file from this server) will be written into the `app.py`
+          file too.""",
+
+        ConfigSettingNames.EDITOR_PORT.name:
+          """The default port that the students' buggy editors use. Make sure
+          this matches the `port` argument that the editor app is launched with
+          (at the bottom of the editor `app.py`). This may appear in the task
+          and tech notes, and (if you're distributing the editor source code via
+          static zip file from this server) will be written into the `app.py`
+          file too.""",
 
         ConfigSettingNames.EXT_ID_EXAMPLE.name:
           """If users have an external ID, provide an example of what it might
@@ -1128,6 +1160,12 @@ class ConfigSettings:
           facilitate cloning the repo onto that server and subsequently access
           it through VS Code. This is quite a specific setup: if you're not
           sure, you almost certainly do not want this. """,
+
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name:
+          """If you publish the buggy editor app on this server, should the
+          `EDITOR_HOST` and `EDITOR_PORT` values be written into `app.py`? This
+          setting won't be used if you don't generate the zipfile on this server
+          (for example, if `IS_USING_GITHUB` is `Yes`).""",
 
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name:
           """If you publish the buggy editor app on this server, should the

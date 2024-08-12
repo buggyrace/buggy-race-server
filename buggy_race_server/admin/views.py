@@ -1226,6 +1226,7 @@ def settings(group_name=None):
         "admin/settings.html",
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        distrib_methods=DistribMethods,
         form=form,
         groups_by_setting=groups_by_setting,
         group_name=group_name,

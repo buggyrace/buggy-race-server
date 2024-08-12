@@ -895,3 +895,11 @@ body.race-player main {
 .task_has_texts {
   background-color:#cccccc;
 }
+
+label.radio-chooser:has(input[type="radio"]:checked) {
+  background-color:#bee5eb;
+}
+label.radio-chooser input {
+  display: inline-block;
+  margin-right:0.5em;
+}

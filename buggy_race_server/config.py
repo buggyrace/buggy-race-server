@@ -200,6 +200,7 @@ class ConfigSettingNames(Enum):
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
+    EDITOR_DISTRIBUTION_METHOD = auto()
     EDITOR_HOST = auto()
     EDITOR_PORT = auto()
     EXT_ID_NAME = auto()
@@ -405,6 +406,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name,
       ),
       ConfigGroupNames.EDITOR.name: (
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
         ConfigSettingNames.EDITOR_HOST.name,
         ConfigSettingNames.EDITOR_PORT.name,
         ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
@@ -499,6 +501,7 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name: "zip",
         ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
         ConfigSettingNames.EDITOR_PORT.name: "5000",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -837,6 +840,11 @@ class ConfigSettings:
           leave this blank.""",
           # note: leagues not implemented yet: this isn't shown because
           #       the config setting is excluded from the "Race" group
+
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name:
+          """How do your students get the Buggy Editor source code at the start
+          of the project? During set-up, choosing this setting affects some of
+          the other settings in subsequent groups.""",
 
         ConfigSettingNames.EDITOR_HOST.name:
           """The default host that the students' buggy editors use. Make sure

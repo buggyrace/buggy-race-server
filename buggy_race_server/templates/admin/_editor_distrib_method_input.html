@@ -1,0 +1,34 @@
+  <fieldfset>
+    {% set outloop_index = loop.index0 %}
+    {% set distrib_method_ns = namespace(is_checked=False) %}
+    {% for distrib_method in distrib_methods %}
+      <label for="distrib-method-{{ distrib_method.name | lower }}"
+          class="w-100 mb-1 p-1 border radio-chooser">
+          <input name="{{ SETTING_PREFIX }}-{{ outloop_index }}-value"
+            value="{{ distrib_method.name | lower }}"
+            id="distrib-method-{{ distrib_method.name | lower }}"
+            {% if settings[name] == (distrib_method.name | lower) %}
+              checked
+              {% set distrib_method_ns.is_checked = True %}
+            {% endif %}
+            type="radio"/>
+          <strong>{{ distrib_method.name | lower }}</strong>
+          <div class="radio-chooser-detail">
+            {{ distrib_method.desc }}
+          </div>
+        </label>
+    {% endfor %}
+    <label for="distrib-method-other" class="w-100 mb-1 p-1 border radio-chooser">
+      <input name="{{ SETTING_PREFIX }}-{{ outloop_index }}-value"
+        value=""
+        class="mr-2"
+        {% if not distrib_method_ns.is_checked %}checked{% endif %}
+        id="distrib-method-other"
+        type="radio"/>
+      <strong>other</strong>
+      <div  class="radio-chooser-detail">
+        No distribution method, or a custom one
+        {{ is_checked }} {{ not is_checked }}
+      </div>
+    </label>
+  </fieldfset>

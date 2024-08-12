@@ -120,13 +120,16 @@ def _is_from_dashboard():
     return False
 
 def _is_task_list_published():
-    task_list_fname = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
-    return task_list_fname and os.path.exists(
-        join_to_project_root(
-            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
-            task_list_fname
+    if current_app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
+        return DbFile.query.filter_by(type=DbFile.TASK_LIST).count() > 0
+    else:
+        task_list_fname = current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+        return task_list_fname and os.path.exists(
+            join_to_project_root(
+                current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+                task_list_fname
+            )
         )
-    )
 
 def _is_tech_notes_index_published():
     return os.path.exists(

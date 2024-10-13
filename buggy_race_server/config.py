@@ -732,14 +732,19 @@ class ConfigSettings:
     # (initial) setup: the _SETUP_STATUS config is effectively the index-1
     # into this array: when the setup is complete, _SETUP_STATUS is zero.
     # (the settings page uses the same order, because it's sensible)
+    #
+    # The EDITOR group must come before any groups that may contain
+    # "suggested" config settings that are based on the EDITOR_DISTRIBUTION_METHOD
+    # because during setup when that one is set, some subsequent settings are
+    # given values before they appear in the setup forms.
     SETUP_GROUPS = [
       ConfigGroupNames.AUTH.name,
       ConfigGroupNames.SERVER.name,
       ConfigGroupNames.ORG.name,
       ConfigGroupNames.SOCIAL.name,
       ConfigGroupNames.USERS.name,
-      ConfigGroupNames.PROJECT.name,
       ConfigGroupNames.EDITOR.name,
+      ConfigGroupNames.PROJECT.name,
       ConfigGroupNames.TASKS.name,
       ConfigGroupNames.TECH_NOTES.name,
       ConfigGroupNames.RACES.name,

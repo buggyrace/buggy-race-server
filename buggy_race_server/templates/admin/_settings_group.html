@@ -51,6 +51,17 @@
       </div>
       <div class="col-lg-5 col-md-6">
         {% include "admin/_env_setting_override.html" %}
+        {% if name == "EDITOR_DISTRIBUTION_METHOD" %}
+          <p class="btn-collection text-right">
+            {{
+              macros.docs_btn(
+                "Distributing the code",
+                "/buggy-editor/distributing-the-code",
+                ""
+              )
+            }}
+          </p>
+        {% endif %}
         {{ html_descriptions[name] | safe }}
         <div class="setting-default">
             <em>Default:</em>
@@ -60,6 +71,24 @@
               <code>{{ pretty_default_settings[name] }}</code>
             {% endif %}
         </div>
+        {% if name in pretty_suggested_settings %}
+        <div class="setting-default mt-2">
+          <em>Suggested:</em>
+            {% if pretty_default_settings[name] == pretty_suggested_settings[name] %}
+              <em class="empty-setting">use default</em>
+            {% else %}
+              {% if pretty_suggested_settings[name] == NONEMPTY_VALUE %}
+                <em>should <strong>not</strong> be empty</em>
+              {% elif pretty_suggested_settings[name] == "" %}
+                <em class="empty-setting">nothing/empty</em>
+              {% else %}
+                <code>{{ pretty_suggested_settings[name] }}</code>
+              {% endif %}
+            {% endif %}
+          <br>
+          (because <code>EDITOR_DISTRIBUTION_METHOD</code> is <code>{{ editor_distrib_method }}</code>)
+      </div>
+      {% endif %}
       </div>
     </div>
   {% endfor %}

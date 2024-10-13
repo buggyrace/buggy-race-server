@@ -1470,6 +1470,12 @@ class ConfigSettings:
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key
 
+    # placeholder value used in suggested config values (depending on the editor
+    # disribution method) to indicated the value should not be empty.
+    # This value is chosen because it's *never* an appropriate setting, so
+    # should never end up in the database. Not seen by users.
+    NONEMPTY_VALUE = "*_*"
+
     # config key for list of config settings that are being overridden by
     # declarations in the environment (e.g., from .env)
     ENV_SETTING_OVERRIDES_KEY = "_ENV_OVERRIDES"
@@ -1518,6 +1524,13 @@ class ConfigSettings:
           return "GitHub"
        else:
           return name.title().replace("_", " ")
+
+    @staticmethod
+    def get_group_name(setting_name):
+      for group in ConfigSettings.GROUPS:
+        if setting_name in ConfigSettings.GROUPS[group]:
+          return group
+      return None
 
     @staticmethod
     def stringify(name, value):
@@ -1645,6 +1658,149 @@ class ConfigSettings:
         "UPLOAD_FOLDER",
         "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
       ]
+
+class DistribMethods(Enum):
+    """ Summary of the methods that can be used to distribute the buggy
+        editor source code to the students. Mainly affects generation
+        of task list."""
+
+    def _generate_next_value_(name, start, count, last_values):
+        """ ConfigSettingNames values are lower case strings of their names.
+            These turn up in project/tasks-zip.md, tasks-page.md etc
+        """
+        return name.lower()
+
+    ZIP = auto() 
+    PAGE = auto()
+    REPO = auto()
+    FORK = auto()
+    AUTOFORK = auto()
+    VSREMOTE = auto()
+
+    @staticmethod
+    def get_desc(method_name):
+        if method_name is None:
+            return None
+        return {
+            DistribMethods.ZIP.name: "Students download a zipfile from race server (the default)",
+            DistribMethods.PAGE.name: "Students get the source code from a custom page you set up elsewhere",
+            DistribMethods.REPO.name: "Students get the source code from your repo",
+            DistribMethods.FORK.name: "Students manually fork your repo into their own account",
+            DistribMethods.AUTOFORK.name: "Server forks your repo into students' GitHub accounts",
+            DistribMethods.VSREMOTE.name: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
+        }.get(method_name.upper())
+
+    @property
+    def desc(self):
+        return DistribMethods.get_desc(self.name)
+
+    @staticmethod
+    def get_suggested_config_settings(distrib_method_value):
+       """ The setting for EDITOR_DISTRIBUTION_MODE affects other settings,
+           especially in the GITHUB group. The suggesting settings are used
+           to automatically override some defaults during the setup phase,
+           or to alert the admin to where they've diverged, later.
+           Note that config settings' values are lower case.
+
+           It's very likely the values should/will be the same as the defaults;
+           nontheless, duplicate them here, carefully — when they're displayed,
+           if they match the default value, the interface will indicate that
+           in the form the admin user sees.
+           Use ConfigSettings.NONEMPTY_VALUE to indicate that the admin
+           must not leave this empty: this applies when there's no sensible
+           default (for example, the GITHUB_CLIENT_ID must be specific).
+
+           Returns empty dictionary if unknown distribution method.
+       """
+       retval = {
+          DistribMethods.ZIP.value: {
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+          },
+          DistribMethods.PAGE.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.REPO.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.FORK.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.AUTOFORK.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+          DistribMethods.VSREMOTE.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 1,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+       }.get(distrib_method_value)
+       return retval if retval is not None else {}
+
+    @staticmethod
+    def get_config_diff_against_suggestions(app):
+        distrib_method = app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+        suggestions = DistribMethods.get_suggested_config_settings(distrib_method)
+        diff_by_setting_name = {}
+        for setting_name in suggestions:
+           if setting_name in app.config:
+              if app.config[setting_name] != suggestions[setting_name]:
+                 diff_by_setting_name[setting_name] = suggestions[setting_name]
+        return diff_by_setting_name
+
+    @staticmethod
+    def get_default_value():
+        """ the default distribution method should match the consquence
+        of accepting the default config settings: the server provides
+        the "built-in" copy of the buggy editor."""
+        return DistribMethods.ZIP.value
 
 class AnnouncementTypes(Enum):
     """ Control what announcements are supported, and where they go """

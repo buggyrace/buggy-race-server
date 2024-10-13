@@ -10,8 +10,8 @@ from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
 import shutil # for publishing the editor
 
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
-from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task, TaskText
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes, DistribMethods
+from buggy_race_server.admin.models import Announcement, DbFile, Setting, Task, TaskText
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone

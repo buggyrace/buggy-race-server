@@ -175,6 +175,32 @@
       </div>
     </div>
     <div class="col-md-6">
+      <div class="alert alert-warning">
+        <h2 class="alert-title">Editor distribution: <em>{{ editor_distrib_method }}</em></h2>
+        <p>
+          {{ editor_distrib_desc }}
+        </p>
+        {% if config_diff_against_suggestions %}
+          <div class="alert alert-danger">
+            <p>Config that doesn't match suggested values for this distribution method:</p>
+            <ul>
+              {% for setting in config_diff_against_suggestions | sort %}
+                <li>
+                  <code>{{ setting }}</code>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        <p class="btn-collection">
+          <a href="{{ url_for('admin.settings', group_name='editor') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Editor</span></a>
+          {% for group_name in config_diff_group_names %}
+            {% if group_name != "EDITOR" %}
+              <a href="{{ url_for('admin.settings', group_name=group_name|lower) }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>{{ config_diff_group_names[group_name] }}</span></a>
+            {% endif %}
+          {% endfor %}
+        </p>
+      </div>
       {% if is_using_github %}
         <div class="alert alert-warning">
         <h2 class="alert-title">GitHub &amp; editor repo</h2>

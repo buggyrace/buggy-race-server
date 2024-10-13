@@ -56,7 +56,6 @@ from buggy_race_server.admin.forms import (
 from buggy_race_server.admin.models import (
     Announcement,
     DbFile,
-    DistribMethods,
     TaskText,
     Setting,
     SocialSetting,
@@ -70,7 +69,8 @@ from buggy_race_server.config import (
     ConfigGroupNames,
     ConfigSettingNames,
     ConfigSettings,
-    ConfigTypes
+    ConfigTypes,
+    DistribMethods,
 )
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
@@ -323,6 +323,13 @@ def setup_summary():
             qty_announcements_global += 1
     buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
     api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name])
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+    editor_distrib_desc = DistribMethods.get_desc(editor_distrib_method)
+    config_diff_against_suggestions = DistribMethods.get_config_diff_against_suggestions(current_app)
+    config_diff_group_names = {}
+    for setting_name in config_diff_against_suggestions:
+        if group := ConfigSettings.get_group_name(setting_name):
+            config_diff_group_names[group] = ConfigSettings.pretty_group_name(group)
     return render_template(
       "admin/setup_summary.html",
       is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
@@ -334,6 +341,10 @@ def setup_summary():
       api_secret_ttl_pretty=api_secret_ttl_pretty,
       buggy_editor_repo_owner=buggy_editor_repo_owner,
       buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      config_diff_against_suggestions=config_diff_against_suggestions,
+      config_diff_group_names=config_diff_group_names,
+      editor_distrib_desc=editor_distrib_desc,
+      editor_distrib_method=editor_distrib_method,
       institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       institution_home_url=institution_home_url,
       institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
@@ -449,6 +460,21 @@ def setup():
                   )
                   # here we grant this session setup status
                   session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
+                  # special case: in setup, when the distribution method is
+                  # set, apply the suggested settings now (possibly overriding
+                  # default values). This assumes all the suggested values are
+                  # in _later_ config groups (otherwise it's overriding values
+                  # that have already been set by the user)
+                  if group_name == ConfigGroupNames.EDITOR.name:
+                    pass
+                    # flash("Some upcoming settings may have suggested values that "
+                    #       "differ from defaults, to match your "
+                    #     f"{ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name} setting",
+                    #     "info")
+                  # TODO: distrib_method =  get EDITOR_DISTRIBUTION_METHOD setting
+                  # DistribMethods.get_suggested_config_settings(distrib_method) 
+                  # set those suggestions now, ahead of them turning up in the
+                  # setup form (most are probably in the final, GITHUB group)
                 else:
                     # something wasn't OK, so don't save and move on
                     # (the errors will have been explicitly flashed)
@@ -477,8 +503,14 @@ def setup():
         name:ConfigSettings.pretty_group_name(name)
         for name in ConfigSettings.GROUPS
     }
+    suggested_settings = DistribMethods.get_suggested_config_settings(editor_distrib_method)
+    pretty_suggested_settings = {
+        name: ConfigSettings.prettify(name, value)
+        for name, value in suggested_settings.items()
+    }
     return render_template(
         "admin/setup.html",
+        NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
         group_name=group_name,
@@ -486,6 +518,7 @@ def setup():
         html_descriptions=html_descriptions,
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
+        pretty_suggested_settings=pretty_suggested_settings,
         qty_setup_steps=qty_setup_steps,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
@@ -493,6 +526,7 @@ def setup():
         setup_status=setup_status,
         social_settings=social_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+        suggested_settings=suggested_settings,
         type_of_settings=ConfigSettings.TYPES,
   )
 
@@ -1222,9 +1256,17 @@ def settings(group_name=None):
             for setting in ConfigSettings.GROUPS[group]:
                 groups_by_setting[setting] = group.lower()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+    suggested_settings = DistribMethods.get_suggested_config_settings(editor_distrib_method)
+    pretty_suggested_settings = {
+        name: ConfigSettings.prettify(name, value)
+        for name, value in suggested_settings.items()
+    }
     return render_template(
         "admin/settings.html",
+        NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
+        editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         distrib_methods=DistribMethods,
         form=form,
@@ -1235,6 +1277,7 @@ def settings(group_name=None):
         is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
+        pretty_suggested_settings=pretty_suggested_settings,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
         social_settings=social_settings,

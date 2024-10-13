@@ -120,43 +120,6 @@ class Announcement(SurrogatePK, Model):
         """Represent instance as a unique string."""
         return f"<Announcement({self.id!r} text:{self.text[0:16]}...)>"
 
-class DistribMethods(Enum):
-    """ Summary of the methods that can be used to distribute the buggy
-        editor source code to the students. Mainly affects generation
-        of task list."""
-
-    def _generate_next_value_(name, start, count, last_values):
-        """ ConfigSettingNames values are lower case strings of their names.
-            These turn up in project/tasks-zip.md, tasks-page.md etc
-        """
-        return name.lower()
-
-    ZIP = auto() 
-    PAGE = auto()
-    REPO = auto()
-    FORK = auto()
-    AUTOFORK = auto()
-    VSREMOTE = auto()
-
-    @property
-    def desc(self):
-        return {
-            DistribMethods.ZIP: "Students download a zipfile from race server (the default)",
-            DistribMethods.PAGE: "Students get the source code from a custom page you set up elsewhere",
-            DistribMethods.REPO: "Students get the source code from your repo",
-            DistribMethods.FORK: "Students manually fork your repo into their own account",
-            DistribMethods.AUTOFORK: "Server forks your repo into students' GitHub accounts",
-            DistribMethods.VSREMOTE: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
-        }.get(self)
-
-    @staticmethod
-    def get_default_value():
-        """ the default distribution method should match the consquence
-        of accepting the default config settings: the server provides
-        the "built-in" copy of the buggy editor."""
-        return DistribMethods.ZIP.value
-
-
 class Task(SurrogatePK, Model):
     """Task for students to complete."""
 

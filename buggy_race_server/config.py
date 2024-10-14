@@ -1804,9 +1804,13 @@ class DistribMethods(Enum):
         suggestions = DistribMethods.get_suggested_config_settings(distrib_method)
         diff_by_setting_name = {}
         for setting_name in suggestions:
-           if setting_name in app.config:
-              if app.config[setting_name] != suggestions[setting_name]:
-                 diff_by_setting_name[setting_name] = suggestions[setting_name]
+            if setting_name in app.config:
+                if app.config[setting_name] != suggestions[setting_name]:
+                    if suggestions[setting_name] == ConfigSettings.NONEMPTY_VALUE:
+                        if not app.config[setting_name]:
+                            diff_by_setting_name[setting_name] = suggestions[setting_name]
+                    else:
+                        diff_by_setting_name[setting_name] = suggestions[setting_name]
         return diff_by_setting_name
 
     @staticmethod

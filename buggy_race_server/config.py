@@ -1408,6 +1408,15 @@ class ConfigSettings:
         may be able to leave most settings to their defaults (and you can
         change most things later, if you need to).""",
 
+      ConfigGroupNames.EDITOR.name:
+        """These settings affect the Buggy Editor application that the students
+        develop. Crucially, they include the distribution method (how students
+        get the source code for this application). This is important, especially
+        during set up, because the values of other config settings (in other
+        groups, such as GitHub settings) may depend on your choice. These
+        suggested values are inserted during set-up when you pick a
+        distribution method (and you can still override them).""",
+
       ConfigGroupNames.GITHUB.name:
         """Setup the GitHub details here. If you're injecting issues into
         student's own repos, you must provide valid GitHub client details which

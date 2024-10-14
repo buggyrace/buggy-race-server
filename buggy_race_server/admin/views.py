@@ -178,7 +178,33 @@ def _update_settings_in_db(form):
     has_changed_secret_key = False
     is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
     is_update_ok = True # optimistic
-    for setting_form in form.settings.data:
+
+    # special case: in setup mode, when the editor distribution method is set,
+    # the "suggested" config settings that match it are set too: since we've
+    # anticipated the possibility of config being missing from the database
+    # during setup, add them here so they can be INSERTed instead of UPDATEd
+    # where appropriate
+    form_settings_data = [item for item in form.settings.data]
+    if is_in_setup_mode:
+        is_setting_suggested_values = False
+        distrib_method = None
+        for item in form.settings.data:
+            if item.get('name') == ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name:
+                distrib_method = item.get('value')
+                break
+        if distrib_method:
+            suggested_config = DistribMethods.get_suggested_config_settings(distrib_method)
+            for name, value in suggested_config.items():
+                if value is not None and value != ConfigSettings.NONEMPTY_VALUE:
+                    form_settings_data.append({'name': name, 'value': str(value)})
+                    is_setting_suggested_values = True
+            if is_setting_suggested_values:
+                flash(
+                    "Overriding some default config setting suggestions to match "
+                    f"the distribution method of \"{distrib_method}\"",
+                    "info"
+                )
+    for setting_form in form_settings_data:
         name = setting_form.get('name').upper() # force uppercase for config keys
         value = setting_form.get('value').strip()
         if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
@@ -213,6 +239,7 @@ def _update_settings_in_db(form):
         if is_changed_value:
             qty_settings_changed += 1
             has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY.name
+
     if qty_settings_changed:
         settings_table = Setting.__table__
         if config_data_update:
@@ -460,21 +487,6 @@ def setup():
                   )
                   # here we grant this session setup status
                   session[ConfigSettingNames._SETUP_STATUS.name] = setup_status
-                  # special case: in setup, when the distribution method is
-                  # set, apply the suggested settings now (possibly overriding
-                  # default values). This assumes all the suggested values are
-                  # in _later_ config groups (otherwise it's overriding values
-                  # that have already been set by the user)
-                  if group_name == ConfigGroupNames.EDITOR.name:
-                    pass
-                    # flash("Some upcoming settings may have suggested values that "
-                    #       "differ from defaults, to match your "
-                    #     f"{ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name} setting",
-                    #     "info")
-                  # TODO: distrib_method =  get EDITOR_DISTRIBUTION_METHOD setting
-                  # DistribMethods.get_suggested_config_settings(distrib_method) 
-                  # set those suggestions now, ahead of them turning up in the
-                  # setup form (most are probably in the final, GITHUB group)
                 else:
                     # something wasn't OK, so don't save and move on
                     # (the errors will have been explicitly flashed)
@@ -503,6 +515,10 @@ def setup():
         name:ConfigSettings.pretty_group_name(name)
         for name in ConfigSettings.GROUPS
     }
+    # note: suggested_settings aren't used on any pages until _after_ the
+    #       Editor group (which is where the distrib method is set)...
+    #       so the results here aren't used before that
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
     suggested_settings = DistribMethods.get_suggested_config_settings(editor_distrib_method)
     pretty_suggested_settings = {
         name: ConfigSettings.prettify(name, value)
@@ -511,6 +527,8 @@ def setup():
     return render_template(
         "admin/setup.html",
         NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
+        distrib_methods=DistribMethods,
+        editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
         group_name=group_name,

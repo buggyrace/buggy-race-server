@@ -527,6 +527,7 @@ def setup():
     return render_template(
         "admin/setup.html",
         NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
+        config_diff_against_suggestions=DistribMethods.get_config_diff_against_suggestions(current_app),
         distrib_methods=DistribMethods,
         editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
@@ -1283,6 +1284,7 @@ def settings(group_name=None):
     return render_template(
         "admin/settings.html",
         NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
+        config_diff_against_suggestions=DistribMethods.get_config_diff_against_suggestions(current_app),
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
         editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
@@ -1292,6 +1294,7 @@ def settings(group_name=None):
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,
+        is_showing_config_warnings=current_app.config[ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name],
         is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,

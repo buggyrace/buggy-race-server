@@ -228,6 +228,7 @@ class ConfigSettingNames(Enum):
     IS_RACE_FILE_START_STAMPED = auto()
     IS_RACE_VISIBLE_BY_DEFAULT = auto()
     IS_REDIRECT_HTTP_TO_HTTPS_FORCED = auto()
+    IS_SHOWING_CONFIG_WARNINGS = auto()
     IS_SHOWING_EXAMPLE_RACETRACKS = auto()
     IS_SHOWING_PROJECT_WORKFLOW = auto()
     IS_SHOWING_RESTART_SUGGESTION = auto()
@@ -389,6 +390,7 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name,
       ),
       ConfigGroupNames.SOCIAL.name: (
@@ -528,6 +530,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: 1,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: 0,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: 0,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: 1,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: 1,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: 0,
@@ -667,6 +670,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: ConfigTypes.BOOLEAN,
@@ -1033,6 +1037,14 @@ class ConfigSettings:
           does not require a restart _but_ in case your implementation would
           benefit from this, you can switch the suggestions on.""",
 
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name:
+          """Once setup is complete, the settings pages display a warning if any
+          of your config settings differ from the suggested values for the
+          editor distribution method you've chosen. Keep this set to `Yes`
+          unless you're sure your settings are correct and it's safe to ignore
+          the automated suggestions. If there are warnings, they will always be
+          shown on the setup summary page regardless of this setting.""",
+    
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name:
           """Do you want the admin interface to include the example racetracks?
           If you are certain you only want to use your own custom racetracks,

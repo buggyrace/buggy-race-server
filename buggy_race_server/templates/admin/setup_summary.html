@@ -183,7 +183,7 @@
         {% if config_diff_against_suggestions %}
           <div class="alert alert-danger">
             <p>Config that doesn't match suggested values for this distribution method:</p>
-            <ul>
+            <ul class="sm-item-list">
               {% for setting in config_diff_against_suggestions | sort %}
                 <li>
                   <code>{{ setting }}</code>

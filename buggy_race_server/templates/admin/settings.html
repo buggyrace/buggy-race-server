@@ -32,6 +32,28 @@
       </p>
     </div>
   </div>
+  {% if is_showing_config_warnings and config_diff_against_suggestions %}
+    <div class="alert alert-danger">
+      {% if config_diff_against_suggestions | length == 1 %}
+        One config setting does not match 
+      {% else %}
+        Some config settings do not match 
+      {% endif %}
+      suggested values for your server's editor distribution method
+      ("<code>{{ config['EDITOR_DISTRIBUTION_METHOD']}}</code>"):
+      <ul class="sm-item-list ml-4">
+        {% for item in config_diff_against_suggestions | sort %}
+          <li> {{ item }} </li>
+        {% endfor %}
+      </ul>
+      <hr>
+      <p class="my-0">
+        To hide this message, set
+        <code><a href="{{ url_for('admin.settings', group_name='server') }}">IS_SHOWING_CONFIG_WARNINGS</a></code>
+        to <code>No</code>.
+      </p>
+    </div>
+  {% endif %}
   {% if not group_name %}
     <!-- by default, if JS is enabled, don't show *all* the config forms — it's -->
     <!-- probably not helpful: instead help them find the right group/form      -->

@@ -200,6 +200,7 @@ class ConfigSettingNames(Enum):
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
+    EDITOR_DISTRIBUTION_METHOD = auto()
     EDITOR_HOST = auto()
     EDITOR_PORT = auto()
     EXT_ID_NAME = auto()
@@ -227,6 +228,7 @@ class ConfigSettingNames(Enum):
     IS_RACE_FILE_START_STAMPED = auto()
     IS_RACE_VISIBLE_BY_DEFAULT = auto()
     IS_REDIRECT_HTTP_TO_HTTPS_FORCED = auto()
+    IS_SHOWING_CONFIG_WARNINGS = auto()
     IS_SHOWING_EXAMPLE_RACETRACKS = auto()
     IS_SHOWING_PROJECT_WORKFLOW = auto()
     IS_SHOWING_RESTART_SUGGESTION = auto()
@@ -388,6 +390,7 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name,
       ),
       ConfigGroupNames.SOCIAL.name: (
@@ -405,6 +408,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name,
       ),
       ConfigGroupNames.EDITOR.name: (
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
         ConfigSettingNames.EDITOR_HOST.name,
         ConfigSettingNames.EDITOR_PORT.name,
         ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
@@ -499,6 +503,7 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name: "zip",
         ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
         ConfigSettingNames.EDITOR_PORT.name: "5000",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
@@ -525,6 +530,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: 1,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: 0,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: 0,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: 1,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: 1,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: 0,
@@ -664,6 +670,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: ConfigTypes.BOOLEAN,
@@ -729,14 +736,19 @@ class ConfigSettings:
     # (initial) setup: the _SETUP_STATUS config is effectively the index-1
     # into this array: when the setup is complete, _SETUP_STATUS is zero.
     # (the settings page uses the same order, because it's sensible)
+    #
+    # The EDITOR group must come before any groups that may contain
+    # "suggested" config settings that are based on the EDITOR_DISTRIBUTION_METHOD
+    # because during setup when that one is set, some subsequent settings are
+    # given values before they appear in the setup forms.
     SETUP_GROUPS = [
       ConfigGroupNames.AUTH.name,
       ConfigGroupNames.SERVER.name,
       ConfigGroupNames.ORG.name,
       ConfigGroupNames.SOCIAL.name,
       ConfigGroupNames.USERS.name,
-      ConfigGroupNames.PROJECT.name,
       ConfigGroupNames.EDITOR.name,
+      ConfigGroupNames.PROJECT.name,
       ConfigGroupNames.TASKS.name,
       ConfigGroupNames.TECH_NOTES.name,
       ConfigGroupNames.RACES.name,
@@ -837,6 +849,11 @@ class ConfigSettings:
           leave this blank.""",
           # note: leagues not implemented yet: this isn't shown because
           #       the config setting is excluded from the "Race" group
+
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name:
+          """How do your students get the Buggy Editor source code at the start
+          of the project? During set-up, choosing this setting affects some of
+          the other settings in subsequent groups.""",
 
         ConfigSettingNames.EDITOR_HOST.name:
           """The default host that the students' buggy editors use. Make sure
@@ -1020,6 +1037,14 @@ class ConfigSettings:
           does not require a restart _but_ in case your implementation would
           benefit from this, you can switch the suggestions on.""",
 
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name:
+          """Once setup is complete, the settings pages display a warning if any
+          of your config settings differ from the suggested values for the
+          editor distribution method you've chosen. Keep this set to `Yes`
+          unless you're sure your settings are correct and it's safe to ignore
+          the automated suggestions. If there are warnings, they will always be
+          shown on the setup summary page regardless of this setting.""",
+    
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name:
           """Do you want the admin interface to include the example racetracks?
           If you are certain you only want to use your own custom racetracks,
@@ -1395,6 +1420,15 @@ class ConfigSettings:
         may be able to leave most settings to their defaults (and you can
         change most things later, if you need to).""",
 
+      ConfigGroupNames.EDITOR.name:
+        """These settings affect the Buggy Editor application that the students
+        develop. Crucially, they include the distribution method (how students
+        get the source code for this application). This is important, especially
+        during set up, because the values of other config settings (in other
+        groups, such as GitHub settings) may depend on your choice. These
+        suggested values are inserted during set-up when you pick a
+        distribution method (and you can still override them).""",
+
       ConfigGroupNames.GITHUB.name:
         """Setup the GitHub details here. If you're injecting issues into
         student's own repos, you must provide valid GitHub client details which
@@ -1462,6 +1496,12 @@ class ConfigSettings:
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key
 
+    # placeholder value used in suggested config values (depending on the editor
+    # disribution method) to indicated the value should not be empty.
+    # This value is chosen because it's *never* an appropriate setting, so
+    # should never end up in the database. Not seen by users.
+    NONEMPTY_VALUE = "*_*"
+
     # config key for list of config settings that are being overridden by
     # declarations in the environment (e.g., from .env)
     ENV_SETTING_OVERRIDES_KEY = "_ENV_OVERRIDES"
@@ -1510,6 +1550,13 @@ class ConfigSettings:
           return "GitHub"
        else:
           return name.title().replace("_", " ")
+
+    @staticmethod
+    def get_group_name(setting_name):
+      for group in ConfigSettings.GROUPS:
+        if setting_name in ConfigSettings.GROUPS[group]:
+          return group
+      return None
 
     @staticmethod
     def stringify(name, value):
@@ -1637,6 +1684,153 @@ class ConfigSettings:
         "UPLOAD_FOLDER",
         "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
       ]
+
+class DistribMethods(Enum):
+    """ Summary of the methods that can be used to distribute the buggy
+        editor source code to the students. Mainly affects generation
+        of task list."""
+
+    def _generate_next_value_(name, start, count, last_values):
+        """ ConfigSettingNames values are lower case strings of their names.
+            These turn up in project/tasks-zip.md, tasks-page.md etc
+        """
+        return name.lower()
+
+    ZIP = auto() 
+    PAGE = auto()
+    REPO = auto()
+    FORK = auto()
+    AUTOFORK = auto()
+    VSREMOTE = auto()
+
+    @staticmethod
+    def get_desc(method_name):
+        if method_name is None:
+            return None
+        return {
+            DistribMethods.ZIP.name: "Students download a zipfile from race server (the default)",
+            DistribMethods.PAGE.name: "Students get the source code from a custom page you set up elsewhere",
+            DistribMethods.REPO.name: "Students get the source code from your repo",
+            DistribMethods.FORK.name: "Students manually fork your repo into their own account",
+            DistribMethods.AUTOFORK.name: "Server forks your repo into students' GitHub accounts",
+            DistribMethods.VSREMOTE.name: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
+        }.get(method_name.upper())
+
+    @property
+    def desc(self):
+        return DistribMethods.get_desc(self.name)
+
+    @staticmethod
+    def get_suggested_config_settings(distrib_method_value):
+       """ The setting for EDITOR_DISTRIBUTION_MODE affects other settings,
+           especially in the GITHUB group. The suggesting settings are used
+           to automatically override some defaults during the setup phase,
+           or to alert the admin to where they've diverged, later.
+           Note that config settings' values are lower case.
+
+           It's very likely the values should/will be the same as the defaults;
+           nontheless, duplicate them here, carefully — when they're displayed,
+           if they match the default value, the interface will indicate that
+           in the form the admin user sees.
+           Use ConfigSettings.NONEMPTY_VALUE to indicate that the admin
+           must not leave this empty: this applies when there's no sensible
+           default (for example, the GITHUB_CLIENT_ID must be specific).
+
+           Returns empty dictionary if unknown distribution method.
+       """
+       retval = {
+          DistribMethods.ZIP.value: {
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+          },
+          DistribMethods.PAGE.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.REPO.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.FORK.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.AUTOFORK.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+          DistribMethods.VSREMOTE.value: {
+             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 1,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+       }.get(distrib_method_value)
+       return retval if retval is not None else {}
+
+    @staticmethod
+    def get_config_diff_against_suggestions(app):
+        distrib_method = app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+        suggestions = DistribMethods.get_suggested_config_settings(distrib_method)
+        diff_by_setting_name = {}
+        for setting_name in suggestions:
+            if setting_name in app.config:
+                if app.config[setting_name] != suggestions[setting_name]:
+                    if suggestions[setting_name] == ConfigSettings.NONEMPTY_VALUE:
+                        if not app.config[setting_name]:
+                            diff_by_setting_name[setting_name] = suggestions[setting_name]
+                    else:
+                        diff_by_setting_name[setting_name] = suggestions[setting_name]
+        return diff_by_setting_name
+
+    @staticmethod
+    def get_default_value():
+        """ the default distribution method should match the consquence
+        of accepting the default config settings: the server provides
+        the "built-in" copy of the buggy editor."""
+        return DistribMethods.ZIP.value
 
 class AnnouncementTypes(Enum):
     """ Control what announcements are supported, and where they go """

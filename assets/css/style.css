@@ -647,6 +647,7 @@ a.btn-config-group span::before{
 a.btn-config-group span{
   display:block;
   padding:0 0.75rem 0.375rem 0.75rem;
+  min-width:3.2rem;
 }
 h2.alert-title {
   font-size:1em;
@@ -894,4 +895,12 @@ body.race-player main {
 }
 .task_has_texts {
   background-color:#cccccc;
+}
+
+label.radio-chooser:has(input[type="radio"]:checked) {
+  background-color:#bee5eb;
+}
+label.radio-chooser input {
+  display: inline-block;
+  margin-right:0.5em;
 }

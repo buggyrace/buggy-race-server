@@ -153,6 +153,17 @@ launching (you can see this in `package.json`) is:
     gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1
 
 
+If gunicorn won't run on your system then remember the server is "just" a Flask
+application, so you should be able to run a development server with:
+
+    flask --app=buggy_race_server/app.py run
+
+Instead of using the `--app` option, you canb set the environment variable
+`FLASK_APP` to `buggy_race_server/app.py`. By default this will run on port
+5000, but you can change that either with `--port` or the `FLASK_RUN_PORT`
+environment variable.
+
+
 ### Common new install error: static files give 403
 
 If you haven't run `webpack` (which requires node, so do `npm start`), the

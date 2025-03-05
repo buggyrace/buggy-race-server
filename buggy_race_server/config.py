@@ -196,6 +196,7 @@ class ConfigSettingNames(Enum):
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
+    VCS_NAME = auto()
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
@@ -337,6 +338,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
       ),
       ConfigGroupNames.GITHUB.name: (
+        ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.IS_USING_GITHUB.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
@@ -590,7 +592,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
-
+        ConfigSettingNames.VCS_NAME.name: "GitHub",
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -730,6 +732,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.VCS_NAME.name: ConfigTypes.STRING,
     }
 
     # This is the order of the setting groups that is used during the
@@ -1412,6 +1415,14 @@ class ConfigSettings:
           """Do users need to have a last name? If you can already identify
           your students from the other fields, you might not need this.""",
 
+        ConfigSettingNames.VCS_NAME.name:
+          """If you are distributing the editor code to your students through a
+          version control system (VCS), what is it called? GitHub is common, but
+          you might be using a different one (for example, if you're running
+          your own installation of GitLab). This setting is used anywhere the
+          VCS gets mentioned in texts such as in the tasks or tech notes (which
+          you might also edit or write yourself). This setting can be ignored
+          if `IS_USING_GITHUB` is `No`.""",
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
@@ -1790,6 +1801,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
              ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
              ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
           },
           DistribMethods.VSREMOTE.value: {
              ConfigSettingNames.IS_USING_GITHUB.name: 1,

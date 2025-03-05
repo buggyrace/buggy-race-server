@@ -904,3 +904,6 @@ label.radio-chooser input {
   display: inline-block;
   margin-right:0.5em;
 }
+.ghosted {
+  opacity: 0.5;
+}

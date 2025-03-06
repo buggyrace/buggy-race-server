@@ -790,21 +790,23 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           If you've forked the repo (and customised it), change this to your
-          GitHub username. It should match the username that appears in
+          username on the version control platform you're using (e.g., GitHub
+          or GitLab). It should match the username that appears in
           `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_VCS` is `No`, this setting
           is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
-          """If you are **not** using GitHub (`IS_USING_VCS` is `No`), and
-          want to use the default buggy editor source code served from this
-          server, what is the name of the zip file?""",
+          """If you are **not** using a VCS platform like Github or GitLab
+          (`IS_USING_VCS` is `No`), and want to use the default buggy editor
+          source code served from this server, what should the zip file that
+          students download be called?""",
 
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
-          """If you are **not** using GitHub (`IS_USING_VCS` is `No`), your
-          students can download the buggy editor zipfile directly from this
-          server. If you prefer to provide your own copy instead, provide a URL
-          to your own instructions or zipfile instead. This setting is ignored
-          if `IS_USING_VCS` is `Yes`. """,
+          """If you are **not** using a VCS platform like GitHub or GitLab
+          (`IS_USING_VCS` is `No`), your students can download the buggy editor
+          zipfile directly from this server. If you prefer to provide your own
+          copy instead, provide a URL to your own instructions or zipfile
+          instead. This setting is ignored if `IS_USING_VCS` is `Yes`. """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
@@ -1113,12 +1115,15 @@ class ConfigSettings:
           setting this to `Yes` they can opt in or out.""",
 
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name:
-          """Should students fork the buggy editor repo into their own GitHub
-          repo? Choose `No` if your students are not using GitHub. If you
-          choose `Yes`, make sure you've set `IS_USING_GITHUB_API_TO_FORK` if
-          you want this to be automated via the race server. This setting only
-          affects whether mentions of GitHub should be removed in instructions
-          on the server, and is ignored if `IS_USING_VCS` is `No`.""",
+          """Should students fork the buggy editor repo into their own (version
+          controlled) repo? Choose `No` if your students are not using a VCS
+          (such as GitHub or GitLab). If you choose yes, remember to set
+          `VCS_NAME` to match whichever such system you are using.  This setting
+          must align with what you've chosen for `EDITOR_DISTRIBUTION_METHOD`
+          in the Editor group of config settings. This setting is used to
+          ensure that the instructions students see on the race server match
+          how you're running the project, and is ignored if `IS_USING_VCS` is
+          `No`.""",
         
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
           """Teaching Assistants cannot edit user data. But do you want TAs to
@@ -1160,19 +1165,22 @@ class ConfigSettings:
           buggies' pennants) shown?""",
 
         ConfigSettingNames.IS_USING_VCS.name:
-          """Are you using GitHub to distribute the source code for the buggy
-          editor to students? If you choose `Yes` there is still quite a lot of
-          flexibility as to how it's implemented (from simply downloading from
-          GitHub to automatically forking it into their GitHub account). If you
-          choose `No`, the students can download a zip file from this server
-          (or you can override this with your own copy).""",
+          """Are you using a Version Control System (VCS) like GitHub or GitLab
+          to distribute the source code for the buggy editor to students? If you
+          choose `Yes` there is still quite a lot of flexibility as to how it's
+          implemented (from simply downloading from GitHub, to manually
+           preloading students' GitLab repos, to automatically forking via an
+           OAuth client into GitHub accounts). If you choose `No`, the students
+           can download a zip file from this server or your own site. See also
+          `EDITOR_DISTRIBUTION_METHOD` in the Editor group of config settings.""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
           """If students must work with the buggy editor in their own GitHub
           repo, the race server can help by automatically forking it for them,
           using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
           `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_VCS` and
-          `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`).""",
+          `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`). See also
+          `EDITOR_DISTRIBUTION_METHOD` in the Editor group of config settings.""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
           """If you have set the race server to use GitHub's API to fork the
@@ -1422,7 +1430,8 @@ class ConfigSettings:
           your own installation of GitLab). This setting is used anywhere the
           VCS gets mentioned in texts such as in the tasks or tech notes (which
           you might also edit or write yourself). This setting can be ignored
-          if `IS_USING_VCS` is `No`.""",
+          if `IS_USING_VCS` is `No`.  See also `EDITOR_DISTRIBUTION_METHOD`
+          in the Editor group of config settings.""",
     }
 
     SETUP_GROUP_DESCRIPTIONS = {

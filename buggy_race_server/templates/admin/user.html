@@ -138,7 +138,7 @@
               <td>
                 {% if user.github_username %}
                   <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
-                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                  <a href="{{ student_editor_repo_domain }}{{ user.github_username }}/{{ editor_repo_name }}" title="buggy repo"
                   class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
 
                 {% else %}

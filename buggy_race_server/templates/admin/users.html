@@ -220,8 +220,8 @@
               {% if is_showing_github_column %}
                 <td class="u-github">  
                   {% if u.github_username %}
-                    <a href="https://github.com/{{ u.github_username }}" title="{{ vcs_name }} account"><code>{{u.github_username}}</code></a>
-                    <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}" title="{{ vcs_name }} account"><code>{{u.github_username}}</code></a>
+                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
                     class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
                   {% endif %}
                 </td>

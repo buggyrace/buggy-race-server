@@ -694,6 +694,7 @@ def list_users(data_format=None, want_detail=True):
             qty_students_logged_in_first=len([s for s in students if s.first_logged_in_at]),
             qty_students=len(students),
             qty_teaching_assistants=qty_teaching_assistants,
+            student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name],
             users=users,
             vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
             want_detail=want_detail,
@@ -846,6 +847,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
@@ -855,6 +857,7 @@ def show_user(user_id):
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+        student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name],
         upload_text_form=UploadTaskTextsForm(),
         vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
@@ -941,6 +944,7 @@ def manage_user(user_id):
       is_current_user_comment_editor=is_current_user_comment_editor,
       is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
+      student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name],
       user=user,
       vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )

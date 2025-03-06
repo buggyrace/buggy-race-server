@@ -723,9 +723,9 @@ def _get_buggy_editor_kwargs(app):
     if editor_port is None or editor_port.strip() == "":
         editor_port = ""
     return {
-      "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      "buggy_editor_repo_url": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-      "buggy_editor_repo_owner": app,
+      "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],

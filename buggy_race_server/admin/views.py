@@ -370,7 +370,7 @@ def setup_summary():
       buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
       api_secret_ttl_pretty=api_secret_ttl_pretty,
       buggy_editor_repo_owner=buggy_editor_repo_owner,
-      buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
       config_diff_against_suggestions=config_diff_against_suggestions,
       config_diff_group_names=config_diff_group_names,
       editor_distrib_desc=editor_distrib_desc,
@@ -1524,7 +1524,7 @@ def tech_notes_admin():
     form=FlaskForm(request.form), # nothing except CSRF token
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     key_settings=[
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
         ConfigSettingNames.PROJECT_CODE.name,
         ConfigSettingNames.SOCIAL_0_NAME.name,

@@ -50,7 +50,7 @@ def home():
     """Home page."""
     warn_if_insecure()
     if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
-        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
+        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:
         editor_url = url_for("public.download_editor_zip")
     is_using_vcs = (
@@ -309,7 +309,7 @@ def serve_project_page(page=None):
     submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
     return render_template(
         template,
-        buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+        buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         is_personalsed_example=is_personalsed_example,
         is_report=is_report,

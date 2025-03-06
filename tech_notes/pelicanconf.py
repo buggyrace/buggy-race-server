@@ -44,7 +44,7 @@ CACHE_CONTENT = False
 # as a template (even though they mostly contain defaults/empty strings).
 JINJA_GLOBALS={
   "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
-  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
+  "BUGGY_EDITOR_REPO_URL": "https://github.com/buggyrace/buggy-race-editor",
   "BUGGY_EDITOR_REPO_NAME": "buggy-race-editor",
   "BUGGY_EDITOR_REPO_OWNER": "buggyrace",
   "PROJECT_CODE": "",

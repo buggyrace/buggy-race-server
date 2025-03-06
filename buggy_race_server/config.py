@@ -187,10 +187,10 @@ class ConfigSettingNames(Enum):
     API_SECRET_TIME_TO_LIVE = auto()
     AUTHORISATION_CODE = auto()
     BUGGY_EDITOR_DOWNLOAD_URL = auto()
-    BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
+    BUGGY_EDITOR_REPO_URL = auto()
     BUGGY_EDITOR_ZIPFILE_NAME = auto()
     BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
@@ -342,7 +342,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_VCS.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
         ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name,
@@ -492,9 +492,9 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: "title, description",
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
@@ -634,9 +634,9 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
@@ -776,24 +776,24 @@ class ConfigSettings:
           automatic injection into GitHub, as well as GitLab's CSV-to-issue
           mechanism).""",
 
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
-          """URL to the 'buggy editor' code the students need to start the
-          project. This will usually be the URL to your customised, forked
-          repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
-
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
-          """This should match the name in the `BUGGY_EDITOR_GITHUB_URL` and is
+          """This should match the name in the `BUGGY_EDITOR_REPO_URL` and is
           used in some of the GitHub API calls: if you've forked the repo and
           not changed its name, you won't need to change this. If
           `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
-          """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
+          """The `BUGGY_EDITOR_REPO_URL` is public and owned by `buggyrace`.
           If you've forked the repo (and customised it), change this to your
           username on the version control platform you're using (e.g., GitHub
           or GitLab). It should match the username that appears in
-          `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_VCS` is `No`, this setting
+          `BUGGY_EDITOR_REPO_URL`. If `IS_USING_VCS` is `No`, this setting
           is ignored.""",
+
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:
+          """URL to the 'buggy editor' code the students need to start the
+          project. This will usually be the URL to your customised, forked
+          repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
           """If you are **not** using a VCS platform like Github or GitLab
@@ -1765,7 +1765,7 @@ class DistribMethods(Enum):
        retval = {
           DistribMethods.ZIP.value: {
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
              ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
@@ -1775,7 +1775,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.PAGE.value: {
              ConfigSettingNames.IS_USING_VCS.name: 0,
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
@@ -1785,7 +1785,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.REPO.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
@@ -1795,7 +1795,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.FORK.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
@@ -1805,7 +1805,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.AUTOFORK.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
@@ -1818,7 +1818,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.VSREMOTE.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
-             ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",

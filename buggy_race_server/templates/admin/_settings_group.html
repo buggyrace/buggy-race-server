@@ -6,7 +6,12 @@
         "float-right"
       ) 
     }}
-    <h3 class="p-2">{{ pretty_group_name_dict[group] }} settings</h3>
+    <h3 class="p-2">
+      {{ pretty_group_name_dict[group] }}
+      {% if pretty_group_name_dict[group] == 'VCS' %}
+       (Version Control System)
+      {% endif %}
+      settings</h3>
   </div>
 </div>
 {% if group == 'SOCIAL' %}

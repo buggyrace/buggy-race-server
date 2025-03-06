@@ -290,7 +290,7 @@ class ConfigSettingNames(Enum):
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
     AUTH = "auth"
-    GITHUB = "github"
+    VCS = "vcs"
     ORG = "org"
     PROJECT = "project"
     RACES = "races"
@@ -337,7 +337,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name,
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
       ),
-      ConfigGroupNames.GITHUB.name: (
+      ConfigGroupNames.VCS.name: (
         ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.IS_USING_VCS.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
@@ -755,7 +755,7 @@ class ConfigSettings:
       ConfigGroupNames.TASKS.name,
       ConfigGroupNames.TECH_NOTES.name,
       ConfigGroupNames.RACES.name,
-      ConfigGroupNames.GITHUB.name
+      ConfigGroupNames.VCS.name
     ]
 
     DESCRIPTIONS = {
@@ -1374,7 +1374,7 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on
           this server. If you've customised them and have published them
-          somewhere else (for example, hosted on GitHub pages), then put the
+          somewhere else (for example, hosted on GitHub Pages), then put the
           URL here. By default, tech notes are hosted on the race server, so
           you can leave this blank.""",
 
@@ -1445,16 +1445,20 @@ class ConfigSettings:
         develop. Crucially, they include the distribution method (how students
         get the source code for this application). This is important, especially
         during set up, because the values of other config settings (in other
-        groups, such as GitHub settings) may depend on your choice. These
-        suggested values are inserted during set-up when you pick a
-        distribution method (and you can still override them).""",
+        groups, such as version control system (VCS) settings) may depend on
+        your choice. These suggested values are inserted during set-up when you
+        pick a distribution method (and you can still override them).""",
 
-      ConfigGroupNames.GITHUB.name:
-        """Setup the GitHub details here. If you're injecting issues into
-        student's own repos, you must provide valid GitHub client details which
-        may be specific to your installation. If you are not using Git or
-        GitHub, the first three settings are used (that is, don't be fooled by
-        the "GitHub" name of this group!).""",
+      ConfigGroupNames.VCS.name:
+        """Setup the version control system (VCS) details here. What you need
+        will depend largely on how you're distributing the editor source code
+        to your students (that is, what you've picked as your
+        `EDITOR_DISTRIBUTION_METHOD` in the Editor config settings). Use these
+        settings to nominate which VCS platform, if any, you and your students
+        will be using and, where necessary, extra details that might require.
+        For example, if you're injecting issues into student's own repos, you
+        must provide valid GitHub client details which may be specific to your
+        installation.""",
 
       ConfigGroupNames.ORG.name:
         """Provide general details about your institution/organisation.""",
@@ -1566,8 +1570,8 @@ class ConfigSettings:
     @staticmethod
     def pretty_group_name(name):
        """ Because Tom complained about the Github/GitHub case """
-       if name == "GITHUB":
-          return "GitHub"
+       if name == "VCS":
+          return "VCS" # (note: capitalised)
        else:
           return name.title().replace("_", " ")
 

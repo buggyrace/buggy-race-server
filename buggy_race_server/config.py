@@ -286,6 +286,7 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_EXT_USERNAME = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
+    USERS_HAVE_VCS_USERNAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -356,6 +357,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EMAIL.name,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name,
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
         ConfigSettingNames.USERS_HAVE_EXT_ID.name,
         ConfigSettingNames.USERNAME_EXAMPLE.name,
@@ -592,6 +594,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name: 0,
         ConfigSettingNames.VCS_NAME.name: "GitHub",
     }    
     
@@ -732,6 +735,7 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.VCS_NAME.name: ConfigTypes.STRING,
     }
 
@@ -1423,6 +1427,16 @@ class ConfigSettings:
           """Do users need to have a last name? If you can already identify
           your students from the other fields, you might not need this.""",
 
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name:
+          """Do users have an external username for a version control system
+          (VCS) such as GitHub or GitLab? You might want or need to store each
+          student's VCS username depending on whether or not your students need
+          to use a platform like GitHub or GitLab (which you specify by your
+          choice of `EDITOR_DISTRIBUTION_METHOD` setting in the Editor group).
+          If you set this to `Yes`, make sure you set the `VCS_NAME` setting in
+          the VCS group so everyone knows what platform this username is for.
+          If you're not using a VCS, leave this as `No`.""",
+
         ConfigSettingNames.VCS_NAME.name:
           """If you are distributing the editor code to your students through a
           version control system (VCS), what is it called? GitHub is common, but
@@ -1654,6 +1668,9 @@ class ConfigSettings:
             "last_name": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)
             ),
+            "github_username": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name)
+            )
         }
 
     @staticmethod

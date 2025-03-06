@@ -136,6 +136,26 @@
           </div>
         {% endif %}
 
+        {% if config['USERS_HAVE_VCS_USERNAME'] %}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ vcs_name }} username <!-- {{form.github_username.label}} -->
+          </div>
+          <div class="col-sm-4">
+            {{form.github_username(placeholder="", class_="form-control mr-sm-1")}}
+          </div>
+          <div class="col-sm-5">
+              User's {{ vcs_name }} username.
+              {% if user.github_access_token %}
+                <br>
+                There's an access token stored along with this username.
+                It's best to not change the username here:
+                see the "Delete {{ vcs_name }} details" form below. 
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
         {% if config['USERS_HAVE_EMAIL'] %}
           <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">

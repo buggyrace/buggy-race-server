@@ -674,11 +674,6 @@ def list_users(data_format=None, want_detail=True):
         ):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
-        is_showing_github_column = (
-            current_app.config[ConfigSettingNames.IS_USING_VCS.name]
-            and
-            current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
-        )
         return render_template("admin/users.html",
             admin_usernames=admin_usernames,
             current_user_can_edit=current_user_can_edit,
@@ -689,7 +684,7 @@ def list_users(data_format=None, want_detail=True):
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
-            is_showing_github_column=is_showing_github_column,
+            is_showing_github_column=current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name],
             qty_admins=qty_admins,
             qty_students_login_enabled=len([s for s in students if s.is_login_enabled]),
             qty_students_enabled=len([s for s in students if s.is_active]),
@@ -898,6 +893,8 @@ def manage_user(user_id):
               user.first_name = form.first_name.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
               user.last_name = form.last_name.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name]:
+              user.github_username = form.github_username.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
               user.email = form.email.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
@@ -935,6 +932,7 @@ def manage_user(user_id):
   return render_template(
       "admin/user_edit.html",
       action_url=action_url,
+      editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
       example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
       ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],

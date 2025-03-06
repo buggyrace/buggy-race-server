@@ -130,17 +130,24 @@
               </td>
             </tr>
           {% endif %}
-          {% if config['IS_STUDENT_USING_REPO'] %}
+          {% if config['USERS_HAVE_VCS_USERNAME'] %}
             <tr>
               <td>
                 {{ vcs_name }} username
               </td>
               <td>
-                {% if user.github_username is not none %}
+                {% if user.github_username %}
                   <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
+                  <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
+
+                {% else %}
+                  <em class="empty-setting">not set</em>
                 {% endif %}
               </td>  
             </tr>
+          {% endif %}
+          {% if config['IS_STUDENT_USING_REPO'] %}
             <tr>
               <td>
                 {{ vcs_name }} access token
@@ -149,11 +156,11 @@
                 {% if user.github_access_token %}
                   <em><code>[redacted]</code></em>
                 {% else %}
-                  <em>not set</em>
+                  <em class="empty-setting">not set</em>
                 {% endif %}
               </td>  
             </tr>
-            {% endif %}
+          {% endif %}
           <tr>
             <td>
               Last logged-in activity

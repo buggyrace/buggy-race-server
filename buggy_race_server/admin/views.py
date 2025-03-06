@@ -383,7 +383,7 @@ def setup_summary():
       is_report=bool(report_type),
       is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
-      is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+      is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
       is_task_list_published=_is_task_list_published(),
       is_tech_notes_index_published=_is_tech_notes_index_published(),
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],

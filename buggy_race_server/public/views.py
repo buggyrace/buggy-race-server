@@ -56,7 +56,7 @@ def home():
     is_using_vcs = (
         current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         or
-        current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name]
+        current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name]
     )
     vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
     source_code_icon = "embed2"
@@ -315,7 +315,7 @@ def serve_project_page(page=None):
         is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+        is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
         is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
         is_using_remote_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],

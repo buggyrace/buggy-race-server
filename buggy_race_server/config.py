@@ -235,7 +235,7 @@ class ConfigSettingNames(Enum):
     IS_STORING_STUDENT_TASK_TEXTS = auto()
     IS_STORING_TASK_LIST_IN_DB = auto()
     IS_STUDENT_API_OTP_ALLOWED = auto()
-    IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_STUDENT_USING_REPO = auto()
     IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TA_SET_API_KEY_ENABLED = auto()
@@ -345,7 +345,7 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name,
         ConfigSettingNames.GITHUB_CLIENT_ID.name,
@@ -541,7 +541,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name: 1,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: 1,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
@@ -681,7 +681,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
@@ -1114,7 +1114,7 @@ class ConfigSettings:
           for students to get the API working if it's not an OTP — but by
           setting this to `Yes` they can opt in or out.""",
 
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name:
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name:
           """Should students fork the buggy editor repo into their own (version
           controlled) repo? Choose `No` if your students are not using a VCS
           (such as GitHub or GitLab). If you choose yes, remember to set
@@ -1179,7 +1179,7 @@ class ConfigSettings:
           repo, the race server can help by automatically forking it for them,
           using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
           `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_VCS` and
-          `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`). See also
+          `IS_STUDENT_USING_REPO` must both be `Yes`). See also
           `EDITOR_DISTRIBUTION_METHOD` in the Editor group of config settings.""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
@@ -1768,7 +1768,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
              ConfigSettingNames.IS_USING_VCS.name: 0,
@@ -1779,7 +1779,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
@@ -1789,7 +1789,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
@@ -1799,7 +1799,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
@@ -1809,7 +1809,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
              ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
@@ -1822,7 +1822,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
              ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,

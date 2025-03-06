@@ -218,7 +218,7 @@
           <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
         </p>
         <p>
-          {% if not is_student_using_github_repo %}
+          {% if not is_student_using_repo %}
             The students do not need their <strong>own {{ vcs_name }} repos</strong>
             for this project.
           {% else %}

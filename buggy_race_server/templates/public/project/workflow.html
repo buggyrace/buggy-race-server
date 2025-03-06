@@ -145,7 +145,7 @@
         racing server password to you in plaintext.
       </p>
     </li>
-    {% if is_student_using_github_repo %}
+    {% if is_student_using_repo %}
       <li>
         <h3 id="sign-in-to-github">
           <a class="toclink" href="#sign-in-to-github">sign in to {{ vcs_name }}</a>
@@ -308,7 +308,7 @@
      <a href="{{ superbasics_url }}/file-system/">Read these superbasics</a>
      because you <em>must</em> be very comfortable with them!
     </p>
-    {% if is_student_using_github_repo and not is_using_remote_vs_workspace %}
+    {% if is_student_using_repo and not is_using_remote_vs_workspace %}
       <p>
         If you didn't clone the repo into a place you're happy with, you can
         <em>move the whole repo</em> on your machine. It's best to do this before
@@ -504,7 +504,7 @@
      You're a web dev now.
     </p>
    </li>
-   {% if is_student_using_github_repo %}
+   {% if is_student_using_repo %}
     <li class="optional">
       <h3 id="commit-changes">
         <a class="toclink" href="#commit-changes">commit changes</a>

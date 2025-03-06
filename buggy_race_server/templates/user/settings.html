@@ -126,10 +126,10 @@
         </div>
       </div>
     </div>
-    {% if is_using_github %}
+    {% if is_using_vcs %}
       <div class="col-lg-6 mb-4">
         <div class="row">
-          <h2 class="col">Your GitHub account</h2>
+          <h2 class="col">Your {{ vcs_name }} account</h2>
         </div>
         {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
         {% if not is_secure %}
@@ -140,7 +140,7 @@
                 You are not using the secure race server!
               </p>
               <p>
-                Setting up your GitHub account won't work unless you're logged into
+                Setting up your {{ vcs_name }} account won't work unless you're logged into
                 the secure server.
               </p>
               <p>
@@ -153,7 +153,7 @@
             <div class="row">
               <div class="col">
                 <div class="alert alert-warning">
-                  This buggy racing account is connected to your GitHub account
+                  This buggy racing account is connected to your {{ vcs_name }} account
                   (<strong>{{ current_user.github_username }}</strong>).
                 </div>
               </div>
@@ -162,10 +162,10 @@
               <div class="row">
                 <div class="col">
                   <p>
-                    You have forked the Buggy Editor repo into your GitHub account.
+                    You have forked the Buggy Editor repo into your {{ vcs_name }} account.
                   </p>
                   <p class="btn-collection">
-                    <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your GitHub repo</a>
+                    <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-jump">Your {{ vcs_name }} repo</a>
                   </p>
                   {% if is_using_vs_workspace %}
                     <div class="alert alert-info my-3">
@@ -191,7 +191,7 @@
                     <p>
                       You can now <em>fork</em> the Buggy Editor repo.
                       This will copy all the files you need into your own
-                      GitHub account
+                      {{ vcs_name }} account
                       (<strong>{{ current_user.github_username }}</strong>).
                       It will also add the project tasks as <em>issues</em>
                       to that repo.
@@ -213,29 +213,29 @@
             <div class="row">
               <div class="col">
                 <p>
-                  If you connect your GitHub account to this buggy racing
+                  If you connect your {{ vcs_name }} account to this buggy racing
                   server, we'll fork the Buggy Editor repo into your
-                  own account and then add the project tasks (as GitHub
+                  own account and then add the project tasks (as {{ vcs_name }}
                   "issues").
                 </p>
                 <p class="alert alert-danger">
                   To do this, this buggy racing server needs access to the 
                   <strong>repositories</strong> and <strong>personal user
-                  data</strong> of your GitHub account. When you click on the
-                  button below, GitHub will ask you to confirm that you know
+                  data</strong> of your {{ vcs_name }} account. When you click on the
+                  button below, {{ vcs_name }} will ask you to confirm that you know
                   this server needs such access.
                 </p>
                 <p>
-                  If you don't have a GitHub account yet, you can create one
+                  If you don't have a {{ vcs_name }} account yet, you can create one
                   as part of the process when you click this button (although
-                  it's simpler if you are already logged into GitHub before
+                  it's simpler if you are already logged into {{ vcs_name }} before
                   you start).
                 </p>
                 <p class="my-3">
-                  <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your GitHub account</a>
+                  <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your {{ vcs_name }} account</a>
                 </p>
                 <p>
-                  Afterwards, expect to receive an email from GitHub alerting
+                  Afterwards, expect to receive an email from {{ vcs_name }} alerting
                   you that “a third-party OAuth application
                   ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
                   with repo and user scopes was recently authorized to access

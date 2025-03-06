@@ -76,7 +76,7 @@ class ConfigSettingNames(Enum):
     # contains the (harcoded) race server URL
     _EDITOR_PYTHON_FILENAME = auto()
 
-    # Name of the CSV file into which tasks-as-issues (for GitHub) are put
+    # Name of the CSV file containing tasks-as-issues (for VCS, e.g. GitHub)
     _BUGGY_EDITOR_ISSUES_CSV_FILE = auto()
 
     # Current announcements are cached to avoid database reads on every hit
@@ -242,7 +242,7 @@ class ConfigSettingNames(Enum):
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
-    IS_USING_GITHUB = auto()
+    IS_USING_VCS = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
@@ -339,7 +339,7 @@ class ConfigSettings:
       ),
       ConfigGroupNames.GITHUB.name: (
         ConfigSettingNames.VCS_NAME.name,
-        ConfigSettingNames.IS_USING_GITHUB.name,
+        ConfigSettingNames.IS_USING_VCS.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
@@ -548,7 +548,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
-        ConfigSettingNames.IS_USING_GITHUB.name: 0,
+        ConfigSettingNames.IS_USING_VCS.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
@@ -688,7 +688,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_USING_GITHUB.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_VCS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
@@ -779,32 +779,32 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
           """URL to the 'buggy editor' code the students need to start the
           project. This will usually be the URL to your customised, forked
-          repo. If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
+          repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
           """This should match the name in the `BUGGY_EDITOR_GITHUB_URL` and is
           used in some of the GitHub API calls: if you've forked the repo and
           not changed its name, you won't need to change this. If
-          `IS_USING_GITHUB` is `No`, this setting is ignored.""",
+          `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
           If you've forked the repo (and customised it), change this to your
           GitHub username. It should match the username that appears in
-          `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_GITHUB` is `No`, this setting
+          `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_VCS` is `No`, this setting
           is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
-          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), and
+          """If you are **not** using GitHub (`IS_USING_VCS` is `No`), and
           want to use the default buggy editor source code served from this
           server, what is the name of the zip file?""",
 
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
-          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), your
+          """If you are **not** using GitHub (`IS_USING_VCS` is `No`), your
           students can download the buggy editor zipfile directly from this
           server. If you prefer to provide your own copy instead, provide a URL
           to your own instructions or zipfile instead. This setting is ignored
-          if `IS_USING_GITHUB` is `Yes`. """,
+          if `IS_USING_VCS` is `Yes`. """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
@@ -1118,7 +1118,7 @@ class ConfigSettings:
           choose `Yes`, make sure you've set `IS_USING_GITHUB_API_TO_FORK` if
           you want this to be automated via the race server. This setting only
           affects whether mentions of GitHub should be removed in instructions
-          on the server, and is ignored if `IS_USING_GITHUB` is `No`.""",
+          on the server, and is ignored if `IS_USING_VCS` is `No`.""",
         
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
           """Teaching Assistants cannot edit user data. But do you want TAs to
@@ -1159,7 +1159,7 @@ class ConfigSettings:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
 
-        ConfigSettingNames.IS_USING_GITHUB.name:
+        ConfigSettingNames.IS_USING_VCS.name:
           """Are you using GitHub to distribute the source code for the buggy
           editor to students? If you choose `Yes` there is still quite a lot of
           flexibility as to how it's implemented (from simply downloading from
@@ -1171,14 +1171,14 @@ class ConfigSettings:
           """If students must work with the buggy editor in their own GitHub
           repo, the race server can help by automatically forking it for them,
           using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
-          `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_GITHUB` and
+          `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_VCS` and
           `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`).""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
           """If you have set the race server to use GitHub's API to fork the
           buggy editor repo into each student's account, it will also also
           inject the tasks as GitHub issues into their repo unless you prevent
-          it here. This setting is ignored unless both `IS_USING_GITHUB` and
+          it here. This setting is ignored unless both `IS_USING_VCS` and
           `IS_USING_GITHUB_API_TO_FORK` are both set to `Yes`. """,
 
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
@@ -1193,13 +1193,13 @@ class ConfigSettings:
           """If you publish the buggy editor app on this server, should the
           `EDITOR_HOST` and `EDITOR_PORT` values be written into `app.py`? This
           setting won't be used if you don't generate the zipfile on this server
-          (for example, if `IS_USING_GITHUB` is `Yes`).""",
+          (for example, if `IS_USING_VCS` is `Yes`).""",
 
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name:
           """If you publish the buggy editor app on this server, should the
           `BUGGY_RACE_SERVER_URL` be written into `app.py`? This setting
           won't be used if you don't generate the zipfile on this server
-          (for example, if `IS_USING_GITHUB` is `Yes`) but remember you or
+          (for example, if `IS_USING_VCS` is `Yes`) but remember you or
           your students do need to change it inside the buggy editor source
           code eventually.""",
 
@@ -1422,7 +1422,7 @@ class ConfigSettings:
           your own installation of GitLab). This setting is used anywhere the
           VCS gets mentioned in texts such as in the tasks or tech notes (which
           you might also edit or write yourself). This setting can be ignored
-          if `IS_USING_GITHUB` is `No`.""",
+          if `IS_USING_VCS` is `No`.""",
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
@@ -1758,10 +1758,10 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
-             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+             ConfigSettingNames.IS_USING_VCS.name: 0,
           },
           DistribMethods.PAGE.value: {
-             ConfigSettingNames.IS_USING_GITHUB.name: 0,
+             ConfigSettingNames.IS_USING_VCS.name: 0,
              ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
@@ -1771,7 +1771,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
           DistribMethods.REPO.value: {
-             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1781,7 +1781,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
           DistribMethods.FORK.value: {
-             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1791,7 +1791,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
           DistribMethods.AUTOFORK.value: {
-             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1804,7 +1804,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.VCS_NAME.name: "GitHub",
           },
           DistribMethods.VSREMOTE.value: {
-             ConfigSettingNames.IS_USING_GITHUB.name: 1,
+             ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",

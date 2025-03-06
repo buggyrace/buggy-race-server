@@ -258,7 +258,8 @@ class User(UserMixin, SurrogatePK, Model):
                 # name address failure: if network connection isn't possible or
                 # GitHub has... gone, then Just Say No
                 # This may be temporary, but we'll probably reconnect on next try?
-                print(f"[!] failed to connect to GitHub: {gaie}")
+                vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
+                print(f"[!] failed to connect to {vcs_name}: {gaie}")
                 self._has_course_repository = False 
                 return False
             else:

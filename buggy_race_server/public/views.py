@@ -49,22 +49,29 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
-    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+    if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
     else:
         editor_url = url_for("public.download_editor_zip")
-    is_using_github = (
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+    is_using_vcs = (
+        current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         or
         current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name]
     )
+    vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
+    source_code_icon = "embed2"
+    if is_using_vcs and vcs_name:
+        if vcs_name.lower() == "github": # TODO: also gitlab and svn?
+          source_code_icon = vcs_name.lower()
     return render_template(
         "public/home.html",
         editor_url=editor_url,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-        is_using_github=is_using_github,
+        is_using_vcs=is_using_vcs,
         local_announcement_type=AnnouncementTypes.TAGLINE.value,
         social_site_links=SocialSetting.get_socials_from_config(current_app.config),
+        source_code_icon=source_code_icon,
+        vcs_name=vcs_name,
     )
 
 @blueprint.route("/logout", strict_slashes=False)
@@ -324,6 +331,7 @@ def serve_project_page(page=None):
         superbasics_url=current_app.config[ConfigSettingNames.SUPERBASICS_URL.name],
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
         workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
         zip_filename_example=zip_filename_example,
         zip_filename_type_name=zip_filename_type_name,
@@ -372,7 +380,7 @@ def serve_tech_notes(path=None):
 
 @blueprint.route("/editor/download", strict_slashes=False)
 def download_editor_zip():
-    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+    if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         flash("Cannot download editor source files from this race server", "warning")
         abort(404)
     if zip_url := current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name]:

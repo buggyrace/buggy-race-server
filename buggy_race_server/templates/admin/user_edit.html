@@ -340,19 +340,19 @@
               <div class="col-md-7 p-3">
                 <p>
                   {% if user.github_username %}
-                    GitHub username is <code>{{ user.github_username }}</code>
+                    {{ vcs_name }} username is <code>{{ user.github_username }}</code>
                   {% else %}
-                    No GitHub username for this user.
+                    No {{ vcs_name }} username for this user.
                   {% endif %}
                   <br>
                   {% if user.github_access_token %}
-                    A GitHub access token <strong>has</strong> been issued for this account.
+                    A {{ vcs_name }} access token <strong>has</strong> been issued for this account.
                   {% else %}
-                    There is <strong>no</strong> GitHub access token for this account.
+                    There is <strong>no</strong> {{ vcs_name }} access token for this account.
                   {% endif %}
                 </p>
                 <p>
-                  Deleting GitHub details here will not make any changes on GitHub, but
+                  Deleting {{ vcs_name }} details here will not make any changes on {{ vcs_name }}, but
                   will remove any connection to the account. Do this if the user joined
                   with the wrong account and you want to clear it (maybe so they can try again).
                 </p>
@@ -363,7 +363,7 @@
                   <input type="hidden" name="user_id" value="user.id"/>
                   <div class="row">
                     <div class="col p-3">
-                      <label for="is_confirmed">Really delete GitHub details?</label>
+                      <label for="is_confirmed">Really delete {{ vcs_name }} details?</label>
                       <select id="is_confirmed" name="is_confirmed" class="form-control">
                        <option selected value="">No</option>
                         <option value="">I think so</option>
@@ -373,7 +373,7 @@
                   </div>
                   <div class="row">
                     <div class="col p-3 bottom">
-                      <input type="submit" class="btn btn-danger" value="Delete GitHub details"/>
+                      <input type="submit" class="btn btn-danger" value="Delete {{ vcs_name }} details"/>
                     </div>
                   </div>
                 </form>

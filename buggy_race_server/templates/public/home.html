@@ -55,12 +55,12 @@
         <p><a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page' ) }}">Go to project</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><span class="{% if is_using_github %}icon-github{% else %}icon-embed2{% endif %}"></span> Source code</h2>
+        <h2><span class="{{ source_code_icon }}"></span> Source code</h2>
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver.
           {% if is_forking_github %}
-            We'll automatically fork this into your GitHub account.
+            We'll automatically fork this into your {{ vcs_name }} account.
           {% else %}
             We'll tell you how to get your own copy to work on.
           {% endif %}

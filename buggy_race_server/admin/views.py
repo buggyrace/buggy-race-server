@@ -362,7 +362,7 @@ def setup_summary():
             config_diff_group_names[group] = ConfigSettings.pretty_group_name(group)
     return render_template(
       "admin/setup_summary.html",
-      is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
       buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
@@ -407,6 +407,7 @@ def setup_summary():
       tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
       tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
       tech_notes_published_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
       workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
     )
 
@@ -599,7 +600,7 @@ def admin():
         is_task_list_published=_is_task_list_published(),
         is_tech_notes_index_published=_is_tech_notes_index_published(),
         is_editor_zipfile_published=_is_editor_zipfile_published(),
-        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+        is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
         buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
         notes_generated_timestamp=servertime_str(
           current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
@@ -674,7 +675,7 @@ def list_users(data_format=None, want_detail=True):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
         is_showing_github_column = (
-            current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+            current_app.config[ConfigSettingNames.IS_USING_VCS.name]
             and
             current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
         )
@@ -699,6 +700,7 @@ def list_users(data_format=None, want_detail=True):
             qty_students=len(students),
             qty_teaching_assistants=qty_teaching_assistants,
             users=users,
+            vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
             want_detail=want_detail,
         )
 
@@ -859,6 +861,7 @@ def show_user(user_id):
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
         upload_text_form=UploadTaskTextsForm(),
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 
 def manage_user(user_id):
@@ -941,6 +944,7 @@ def manage_user(user_id):
       is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       user=user,
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )
 
 @blueprint.route("/users/logins", methods=['GET', 'POST'], strict_slashes=False)
@@ -994,13 +998,14 @@ def delete_github_details(user_id):
         user = User.query.filter_by(username=user_id).first()
     if user is None:
         abort(404)
+    vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
     form = SubmitWithConfirmForm(request.form)
     if form.is_submitted() and form.validate():
         if (user.github_username is None and user.github_access_token is None):
-            flash("Nothing changed: user's GitHub details were already removed", "warning")
+            flash(f"Nothing changed: user's {vcs_name} details were already removed", "warning")
         elif not form.is_confirmed.data:
             flash(
-              f"Did not not delete GitHub details because you did not explicity confirm it",
+              f"Did not not delete {vcs_name} details because you did not explicity confirm it",
               "danger"
             )
             return redirect(url_for("admin.edit_user", user_id=user.id))
@@ -1009,11 +1014,11 @@ def delete_github_details(user_id):
             user.github_access_token = None
             user.save()
             flash(
-              f"OK, user {user.pretty_username}'s GitHub details have been removed",
+              f"OK, user {user.pretty_username}'s {vcs_name} details have been removed",
               "success"
             )
             flash(
-              "Reminder: this hasn't changed anything on GitHub.com — "
+              f"Reminder: this hasn't changed anything on the {vcs_name} site — "
               "if they forked the buggy editor repo, it will still be there",
               "info"
             )
@@ -1307,6 +1312,7 @@ def settings(group_name=None):
         social_settings=social_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
         type_of_settings=ConfigSettings.TYPES,
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 
 @blueprint.route("/announcements/no-html", strict_slashes=False)
@@ -1701,6 +1707,7 @@ def tasks_admin():
         task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
         tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
         tasks=tasks,
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
         form=form,
     )
 
@@ -1996,7 +2003,8 @@ def show_buggy_editor_info():
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
-      delete_form=SubmitWithConfirmForm()
+      delete_form=SubmitWithConfirmForm(),
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
    )
 
 @blueprint.route("/buggy-editor/delete", strict_slashes=False, methods=["POST"])

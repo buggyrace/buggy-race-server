@@ -133,7 +133,7 @@
           {% if config['IS_STUDENT_USING_GITHUB_REPO'] %}
             <tr>
               <td>
-                GitHub username
+                {{ vcs_name }} username
               </td>
               <td>
                 {% if user.github_username is not none %}
@@ -143,7 +143,7 @@
             </tr>
             <tr>
               <td>
-                GitHub access token
+                {{ vcs_name }} access token
               </td>
               <td>
                 {% if user.github_access_token %}

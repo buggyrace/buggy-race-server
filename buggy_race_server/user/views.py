@@ -62,13 +62,13 @@ def flash_explanation_if_unauth(msg):
 @active_user_required
 def home_page():
     form = ChangePasswordForm()
-    is_using_github = (
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+    is_using_vcs = (
+        current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
     )
     return render_template(
         "user/home.html",
-        is_using_github=is_using_github,
+        is_using_vcs=is_using_vcs,
         form=form,
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
@@ -83,6 +83,7 @@ def home_page():
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         is_secure=request.is_secure or not current_app.config[ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name],
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 
 @blueprint.route("/new")
@@ -102,15 +103,16 @@ def register_new_user():
 def submit_buggy_data():
     """Submit the JSON for the buggy."""
     if (
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+        current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         and
         current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
         and
         not current_user.is_github_connected()
     ):
+        vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
         flash(
             Markup(
-                "You haven't connected to GitHub yet. "
+                f"You haven't connected to {vcs_name} yet. "
                 f"<a href='{url_for('user.home_page')}'>Do it now!</a>"
             ),
             "danger"
@@ -336,17 +338,18 @@ def download_vscode_workspace():
     if not current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name]:
         flash("VS Code workspace files are not available for this project (IS_USING_REMOTE_VS_WORKSPACE not set)", "warning")
         abort(404)
+    vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
     remote_server_address = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name]
     remote_server_name = current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name]
     if not (remote_server_address and remote_server_name):
         flash("Remote server has not been configured on the race server: cannot create VScode workspace file", "danger")
         return redirect(url_for("user.home_page"))
     if not current_user.github_username:
-        flash("No GitHub username (have you forked the repo yet?): cannot create VScode workspace file", "danger")
+        flash(f"No {vcs_name} username (have you forked the repo yet?): cannot create VScode workspace file", "danger")
         return redirect(url_for("user.home_page"))
     github_repo = current_user.course_repository
     if not github_repo:
-        flash("Missing GitHub repo (have you forked the repo yet?): cannot create VScode workspace file", "danger")
+        flash(f"Missing {vcs_name} repo (have you forked the repo yet?): cannot create VScode workspace file", "danger")
         return redirect(url_for("user.home_page"))
     filename = get_download_filename("buggy-editor.code-workspace")
     project_name = f"{current_app.config[ConfigSettingNames.PROJECT_CODE.name]} Buggy Editor".strip()

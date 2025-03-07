@@ -1815,6 +1815,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.REPO.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1825,6 +1826,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.FORK.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1835,6 +1837,7 @@ class DistribMethods(Enum):
           },
           DistribMethods.AUTOFORK.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1844,10 +1847,10 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
              ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
              ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
-             ConfigSettingNames.VCS_NAME.name: "GitHub",
           },
           DistribMethods.VSREMOTE.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",

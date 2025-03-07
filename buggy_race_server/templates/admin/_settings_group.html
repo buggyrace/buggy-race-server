@@ -77,7 +77,7 @@
             {% endif %}
         </div>
         {% if name in pretty_suggested_settings %}
-        <div class="setting-default mt-2">
+        <div class="setting-default setting-suggestion mt-2">
           <em>Suggested:</em>
             {% if pretty_default_settings[name] == pretty_suggested_settings[name] %}
               <em class="empty-setting">use default</em>
@@ -91,7 +91,7 @@
               {% endif %}
             {% endif %}
           <br>
-          (because <code>EDITOR_DISTRIBUTION_METHOD</code> is <code>{{ editor_distrib_method }}</code>)
+          (because <code>EDITOR_DISTRIBUTION_METHOD</code> is <code><strong>{{ editor_distrib_method }}</strong></code>)
       </div>
       {% endif %}
       </div>

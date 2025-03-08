@@ -1753,6 +1753,7 @@ class DistribMethods(Enum):
     ZIP = auto() 
     PAGE = auto()
     REPO = auto()
+    PRELOAD = auto()
     FORK = auto()
     AUTOFORK = auto()
     VSREMOTE = auto()
@@ -1765,6 +1766,7 @@ class DistribMethods(Enum):
             DistribMethods.ZIP.name: "Students download a zipfile from race server (the default)",
             DistribMethods.PAGE.name: "Students get the source code from a custom page you set up elsewhere",
             DistribMethods.REPO.name: "Students get the source code from your repo",
+            DistribMethods.PRELOAD.name: "Admin preloads the source code by forking repo into student's accounts",
             DistribMethods.FORK.name: "Students manually fork your repo into their own account",
             DistribMethods.AUTOFORK.name: "Server forks your repo into students' GitHub accounts",
             DistribMethods.VSREMOTE.name: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
@@ -1824,6 +1826,20 @@ class DistribMethods(Enum):
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
           },
+
+          DistribMethods.PRELOAD.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitLab",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://YOUR-GITLAB-SERVER/",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+
           DistribMethods.FORK.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.VCS_NAME.name: "GitHub",
@@ -1831,6 +1847,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
@@ -1842,6 +1859,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,

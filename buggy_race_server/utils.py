@@ -723,9 +723,9 @@ def _get_buggy_editor_kwargs(app):
     if editor_port is None or editor_port.strip() == "":
         editor_port = ""
     return {
-      "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      "buggy_editor_repo_url": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-      "buggy_editor_repo_owner": app,
+      "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
@@ -735,7 +735,7 @@ def _get_buggy_editor_kwargs(app):
       "institution_name": app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       "institution_short_name": app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
       "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
-      "is_using_github": app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      "is_using_vcs": app.config[ConfigSettingNames.IS_USING_VCS.name],
       "is_using_github_api_to_fork": app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
       "project_code": project_code,
       "task_0_get_name": app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],

@@ -57,8 +57,8 @@
         {% endif %}
         {% if is_injecting_github_issues %}
           Publishing the task list also refreshes the CSV file used when
-          <strong>injecting tasks as GitHub issues</strong> into students'
-          GitHub accounts.
+          <strong>injecting tasks as {{ vcs_name }} issues</strong> into students'
+          {{ vcs_name }} accounts.
         {% endif %}
       </p>
       {% if config['IS_STORING_TASK_LIST_IN_DB'] %}
@@ -132,15 +132,15 @@
       <p>
         <em>You don't normally need this file!</em><br>
         The CSV file contains a comma-separated <strong>summary</strong>
-        of the tasks which we use for injecting issues into students' GitHub
-        repos. If you're using your own mechanism this might be handy,
-        so you can download it here.
+        of the tasks which can be used for injecting issues into students'
+        {{ vcs_name }} repos. If you're using your own mechanism this might be
+        handy, so you can download it here.
       </p> 
       <p>
-        The issues CSV file is public (so the GitHub API can access it from
-        outside) and is generated whenever you publish the task list. The
-        <em>current</em> list is calculated on-the-fly here if you need it
-        <em>before</em> you've published it.
+        The issues CSV file is public (so the {{ vcs_name }} API can potentially
+        access it from outside) and is generated whenever you publish the task
+        list. The <em>current</em> list is calculated on-the-fly here if you
+        need it <em>before</em> you've published it.
       </p>
     </div>
     <div class="col-md-6">

@@ -9,7 +9,7 @@ need to get your own copy of it to a place where you can edit it and run it.
 
 ### Solution
 
-* Go to the [GitHub repo of the buggy editor](%BUGGY_EDITOR_GITHUB_URL%).
+* Go to the [GitHub repo of the buggy editor](%BUGGY_EDITOR_REPO_URL%).
 
 * You need to extract the code from there: click on the green **Code** button.
   You can use of one of the options in the dialogue that appears to get the

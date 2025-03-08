@@ -22,7 +22,7 @@ is the way you're going to make that copy.
 ## What does _forking the repo_ mean?
 
 Forking happens up on GitHub. It means you make your own, personal copy of our
-repo. [Our repo]({{ BUGGY_EDITOR_GITHUB_URL }}) is in our GitHub account (the repo is
+repo. [Our repo]({{ BUGGY_EDITOR_REPO_URL }}) is in our GitHub account (the repo is
 public, so you can see it but you can't change it — that is, it's read-only).
 After forking, your repo is in _your_ GitHub account.
 

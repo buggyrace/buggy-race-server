@@ -907,3 +907,10 @@ label.radio-chooser input {
 .ghosted {
   opacity: 0.5;
 }
+.setting-suggestion {
+  border: 1px solid #fbf439;
+  border-left: 0.33rem solid #fbf439;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #ffffee;
+}

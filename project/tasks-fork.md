@@ -12,7 +12,7 @@ need to get your own copy of it to a place where you can edit it and run it.
 * If you don't have a account on [GitHub](https://github.com) already,
   create one and log in.
 
-* Go to the [GitHub repo of the buggy editor](%BUGGY_EDITOR_GITHUB_URL%).
+* Go to the [GitHub repo of the buggy editor](%BUGGY_EDITOR_REPO_URL%).
   You can't make changes to this repo, but you can make your own copy of
   it on GitHub by _forking_ it into your own account.
 

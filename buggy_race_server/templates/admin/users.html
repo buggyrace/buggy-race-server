@@ -55,7 +55,7 @@
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-login-at">Last&nbsp;activity</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-first-login-at">First&nbsp;login</button>
         {% if is_showing_github_column %}
-          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-github">GitHub</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-github">{{ vcs_name }}</button>
         {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-uploaded">Uploaded</button>
         <button id="long-short-time-chooser-btn" class="hidden btn btn-outline-secondary btn-sm" data-item-hidden="time-span"><span class="icon-clock"></span> HH:MM</button>
@@ -94,7 +94,7 @@
           <th class="u-login-at">Last activity at</th>
           <th class="u-first-login-at">First login</th>
           {% if is_showing_github_column %}
-            <th class="u-github">GitHub (&rarr; repo)</th>
+            <th class="u-github">{{ vcs_name }} (&rarr; repo)</th>
           {% endif %}
           <th colspan="2" class="u-uploaded">JSON uploaded</th>
         </tr>
@@ -220,8 +220,8 @@
               {% if is_showing_github_column %}
                 <td class="u-github">  
                   {% if u.github_username %}
-                    <a href="https://github.com/{{ u.github_username }}" title="GitHub account"><code>{{u.github_username}}</code></a>
-                    <a href="https://github.com/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
+                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}" title="{{ vcs_name }} account"><code>{{u.github_username}}</code></a>
+                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
                     class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
                   {% endif %}
                 </td>

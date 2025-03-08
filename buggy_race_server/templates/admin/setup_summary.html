@@ -201,11 +201,11 @@
           {% endfor %}
         </p>
       </div>
-      {% if is_using_github %}
+      {% if is_using_vcs %}
         <div class="alert alert-warning">
-        <h2 class="alert-title">GitHub &amp; editor repo</h2>
+        <h2 class="alert-title">{{ vcs_name }} &amp; editor repo</h2>
         <p>
-          <code><a href="{{ buggy_editor_github_url }}">{{ buggy_editor_github_url }}</a></code>
+          <code><a href="{{ buggy_editor_repo_url }}">{{ buggy_editor_repo_url }}</a></code>
           <br>
           {% if is_default_repo_owner  %}
              The editor repo is owned by <code>{{ buggy_editor_repo_owner }}</code>
@@ -218,11 +218,11 @@
           <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">Buggy editor</a>
         </p>
         <p>
-          {% if not is_student_using_github_repo %}
-            The students do not need their <strong>own GitHub repos</strong>
+          {% if not is_student_using_repo %}
+            The students do not need their <strong>own {{ vcs_name }} repos</strong>
             for this project.
           {% else %}
-            The students are using their <strong>own Github repos</strong>
+            The students are using their <strong>own {{ vcs_name }} repos</strong>
             for this project.
             {% if is_using_github_api_to_fork %}
               {% if is_using_github_api_to_inject_issues %}
@@ -240,12 +240,12 @@
           {% endif %}
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
+          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>
         </p>
         </div>
       {% else %}
         <div class="alert {% if not (buggy_editor_download_url or is_editor_zipfile_published) %}alert-danger{% else %}alert-warning{% endif %}">
-          <h2 class="alert-title">Not using GitHub</h2>
+          <h2 class="alert-title">Not using {{ vcs_name }}</h2>
           {% if buggy_editor_download_url %}
             <p>
               Students download the source code for their buggy editor

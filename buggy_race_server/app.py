@@ -156,7 +156,7 @@ def create_app():
 
             if (
                 app.config.get(ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name)
-                and not app.config.get(ConfigSettingNames.IS_USING_GITHUB.name)
+                and not app.config.get(ConfigSettingNames.IS_USING_VCS.name)
             ):
                 target_zipfile = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],

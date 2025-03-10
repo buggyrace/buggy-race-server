@@ -340,8 +340,8 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
       ),
       ConfigGroupNames.VCS.name: (
-        ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.IS_USING_VCS.name,
+        ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,

@@ -20,7 +20,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from buggy_race_server.database import db
-from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames, DistribMethods
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
@@ -49,7 +49,11 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
-    if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
+    editor_url = ""
+    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
+        if current_user and current_user.is_authenticated:
+            editor_url = current_user.editor_repo_url
+    elif current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:
         editor_url = url_for("public.download_editor_zip")
@@ -59,13 +63,16 @@ def home():
         current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name]
     )
     vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
-    source_code_icon = "embed2"
+    source_code_icon = "icon-embed2"
     if is_using_vcs and vcs_name:
-        if vcs_name.lower() == "github": # TODO: also gitlab and svn?
-          source_code_icon = vcs_name.lower()
+        if vcs_name.lower() == "github":
+          source_code_icon = "icon-github"
+        # elif vcs_name.lower() == "gitlab":  # TODO: also gitlab and svn?
+        #   source_code_icon = "icon-gitlab"
     return render_template(
         "public/home.html",
         editor_url=editor_url,
+        is_preloaded_repos=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_vcs=is_using_vcs,
         local_announcement_type=AnnouncementTypes.TAGLINE.value,

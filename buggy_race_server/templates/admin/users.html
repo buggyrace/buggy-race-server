@@ -94,7 +94,7 @@
           <th class="u-login-at">Last activity at</th>
           <th class="u-first-login-at">First login</th>
           {% if is_showing_github_column %}
-            <th class="u-github">{{ vcs_name }} (&rarr; repo)</th>
+            <th class="u-github">{{ vcs_name }}</th>
           {% endif %}
           <th colspan="2" class="u-uploaded">JSON uploaded</th>
         </tr>
@@ -220,9 +220,13 @@
               {% if is_showing_github_column %}
                 <td class="u-github">  
                   {% if u.github_username %}
-                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}" title="{{ vcs_name }} account"><code>{{u.github_username}}</code></a>
-                    <a href="{{ student_editor_repo_domain }}/{{ u.github_username }}/{{ editor_repo_name }}" title="buggy repo"
-                    class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
+                    <code>{{ u.github_username }}</code>
+                  {% endif %}
+                  {% if u.editor_repo_url %}
+                    <a href="{{ u.editor_repo_url }}" title="buggy repo"
+                    class="btn btn-outline-secondary btn-white btn-sm btn-jump float-right">Repo</a>
+                  {% else %}
+                    <em class="empty-setting">none</em>
                   {% endif %}
                 </td>
               {% endif %}

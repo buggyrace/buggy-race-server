@@ -238,6 +238,26 @@ class User(UserMixin, SurrogatePK, Model):
             current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name]
         )
 
+    @property
+    def editor_repo_url(self):
+        url_str = current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name]
+        if not url_str:
+            return ""
+        # we're not checking whether the config has explcitly enabled these
+        # fields on the user (e.g., USERS_HAVE_EXT_USERNAME): if those have
+        # been set and then revoked, then _old_ values in user records may
+        # still exist, but that is really a data problem.
+        replacements = {
+            '%USERNAME%': self.username if self.username else "",
+            '%VCS_USERNAME%': self.github_username if self.github_username else "",
+            '%EXT_USERNAME%': self.ext_username if self.ext_username else "",
+            '%EXT_ID%': self.ext_id if self.ext_id else "",
+        }
+        for placeholder in replacements:
+            if placeholder in url_str:
+                return url_str.replace(placeholder, replacements[placeholder])
+        return url_str
+
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<User({self.username!r})>"
@@ -270,6 +290,8 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def course_repository(self):
+        # Note: if we generalise "autofork" (e.g., to work for GitLab) then
+        # should use self.editor_repo_url instead of this: (TODO?)
         return f"https://github.com/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}"
 
     @property

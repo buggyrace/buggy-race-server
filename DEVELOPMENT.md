@@ -15,6 +15,25 @@ environment.
 > * https://github.com/buggyrace/buggy-race-about
 
 
+## Smoke test: bare bones, just see it running
+
+If you just want to spin the race server up as a local dev smoke test, the
+following are the bare bones that should get you going (Unix/MacOS). If you've
+got time to be more thorough, don't use this: step through the more detailed
+instructions in the rest of this document instead.
+
+Bare bones, from the the top directory of the `buggy-race-server` repo: this
+runs a race server on `localhost:5000` with an empty SQLite database (you'll
+need the default auth code: `CHANGEME`):
+
+```bash
+$> npm install
+$> webpack
+$> python -m pip install -r requirements.txt
+$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask db upgrade
+$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask run
+```
+
 ## Getting started
 
 The following notes are for a manual set-up. If you're familiar with docker

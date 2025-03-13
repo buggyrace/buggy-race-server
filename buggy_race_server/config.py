@@ -272,7 +272,7 @@ class ConfigSettingNames(Enum):
     SOCIAL_3_NAME = auto()
     SOCIAL_3_TEXT = auto()
     SOCIAL_3_URL = auto()
-    STUDENT_EDITOR_REPO_DOMAIN = auto()
+    STUDENT_EDITOR_REPO_URL = auto()
     SUPERBASICS_URL = auto()
     TASK_NAME_FOR_API = auto()
     TASK_NAME_FOR_ENV_VARS = auto()
@@ -341,14 +341,14 @@ class ConfigSettings:
       ),
       ConfigGroupNames.VCS.name: (
         ConfigSettingNames.IS_USING_VCS.name,
-        ConfigSettingNames.VCS_NAME.name,
+         ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
         ConfigSettingNames.IS_STUDENT_USING_REPO.name,
-        ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name,
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name,
         ConfigSettingNames.GITHUB_CLIENT_ID.name,
@@ -582,7 +582,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: "",
         ConfigSettingNames.SOCIAL_3_TEXT.name: "",
         ConfigSettingNames.SOCIAL_3_URL.name: "",
-        ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://github.com/",
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
         ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
@@ -724,7 +724,7 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
         ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: ConfigTypes.URL,
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: ConfigTypes.URL,
         ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
@@ -1341,14 +1341,22 @@ class ConfigSettings:
         ConfigSettingNames.SOCIAL_3_URL.name:
           """Full URL to external site/resource""",
 
-        ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name:
-          """The base URL to the version control site where the students'
-          own buggy editor repos end up (for example, if they are cloned).
-          This may well be the same base domain that's in
-          `BUGGY_EDITOR_REPO_URL` (it should probably relate to `VCS_NAME`
-          too). This is used to construct links from the race server to their
-          repo by using their (VCS) username and editor repo name. This 
-          setting is ignored if `IS_STUDENT_USING_REPO` is `No`.""",
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name:
+          """The URL for the students' own buggy editor repos (for example,
+          where they have been forked _to_). This may well be the same base
+          domain that's in `BUGGY_EDITOR_REPO_URL` (which is the URL of the repo
+          they were forked _from_). It should probably relate to `VCS_NAME` too.
+          This is used to construct links from the race server to each student's
+          repo: if one of the following placeholder strings (`%USERNAME%`,
+          `%VCS_USERNAME%`, `%EXT_USERNAME%`, or `%EXT_ID%`) occurs in the URL
+          string you provide, it will be replaced by the value for the current
+          user. Do not use this setting as a text substitution in tasks or tech
+          notes, because the current-user replacement is not applied on static
+          content. If you don't want to link to individual students' repos
+          (maybe you've set `USERS_HAVE_VCS_USERNAME` to `No`, so the server
+          cannot construct the URL), leave it blank. It *must* be specified if
+          `EDITOR_DISTRIBUTION_METHOD` is `autofork`.
+          This setting is ignored if `IS_STUDENT_USING_REPO` is `No`.""",
 
         ConfigSettingNames.SUPERBASICS_URL.name:
           """There are a few places (for example in the workflow page and the
@@ -1830,7 +1838,7 @@ class DistribMethods(Enum):
           DistribMethods.PRELOAD.value: {
              ConfigSettingNames.IS_USING_VCS.name: 1,
              ConfigSettingNames.VCS_NAME.name: "GitLab",
-             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://YOUR-GITLAB-SERVER/",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -1847,7 +1855,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://github.com/",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
@@ -1859,7 +1867,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
              ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
-             ConfigSettingNames.STUDENT_EDITOR_REPO_DOMAIN.name: "https://github.com/",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,

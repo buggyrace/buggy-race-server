@@ -59,13 +59,23 @@
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver.
-          {% if is_forking_github %}
+          {% if is_preloaded_repos %}
+            We'll fork this into your {{ vcs_name }} account.
+          {% elif is_forking_github %}
             We'll automatically fork this into your {{ vcs_name }} account.
           {% else %}
             We'll tell you how to get your own copy to work on.
           {% endif %}
         </p>
-        <p><a class="btn btn-outline-secondary btn-jump" href="{{ editor_url }}">Get the code</a></p>
+        {% if editor_url %}
+          <p><a class="btn btn-outline-secondary btn-jump" href="{{ editor_url }}">
+            {% if is_preloaded_repos %}
+              Go to {{ vcs_name }}
+            {% else %}
+              Get the code
+            {% endif %}
+          </a></p>
+        {% endif %}
       </div>
       <div class="col-lg-4">
         {% if social_site_links %}

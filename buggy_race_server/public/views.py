@@ -52,7 +52,7 @@ def home():
     editor_url = ""
     if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
         if current_user and current_user.is_authenticated:
-            editor_url = current_user.get_editor_repo_url
+            editor_url = current_user.editor_repo_url
     elif current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:

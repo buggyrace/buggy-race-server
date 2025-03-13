@@ -239,7 +239,7 @@ class User(UserMixin, SurrogatePK, Model):
         )
 
     @property
-    def get_editor_repo_url(self):
+    def editor_repo_url(self):
         url_str = current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name]
         if not url_str:
             return ""
@@ -291,7 +291,7 @@ class User(UserMixin, SurrogatePK, Model):
     @property
     def course_repository(self):
         # Note: if we generalise "autofork" (e.g., to work for GitLab) then
-        # should use self.get_editor_repo_url instead of this: (TODO?)
+        # should use self.editor_repo_url instead of this: (TODO?)
         return f"https://github.com/{self.github_username}/{current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name]}"
 
     @property

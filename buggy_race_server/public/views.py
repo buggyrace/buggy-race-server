@@ -390,12 +390,12 @@ def download_editor_zip():
     if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         flash("Cannot download editor source files from this race server", "warning")
         abort(404)
-    if zip_url := current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name]:
+    if zip_url := current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name]:
         return redirect(zip_url)
     zipfile = join_to_project_root(
         current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+        current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     )
     if not path.exists(zipfile):
         flash(

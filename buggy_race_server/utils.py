@@ -728,7 +728,7 @@ def _get_buggy_editor_kwargs(app):
       "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
-      "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "buggy_editor_zipfile_url": app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
       "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
       "editor_port": editor_port,
       "editor_port_with_colon": f":{editor_port}" if editor_port else "",
@@ -781,7 +781,7 @@ def create_editor_zipfile(readme_contents, app=current_app):
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
         current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name]
     )
-    target_zipfile = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    target_zipfile = current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     if target_zipfile.endswith(".zip"):
         target_zipfile = target_zipfile[0:-len(".zip")]
     target_zipfile = join_to_project_root(

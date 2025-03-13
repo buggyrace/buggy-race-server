@@ -146,7 +146,7 @@ def _is_editor_zipfile_published():
         join_to_project_root(
             current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
             current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-            current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
         )
     )
 
@@ -363,7 +363,7 @@ def setup_summary():
     return render_template(
       "admin/setup_summary.html",
       is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
-      buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      buggy_editor_download_url=current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       buggy_editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
@@ -601,7 +601,7 @@ def admin():
         is_tech_notes_index_published=_is_tech_notes_index_published(),
         is_editor_zipfile_published=_is_editor_zipfile_published(),
         is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
-        buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+        buggy_editor_download_url=current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
         notes_generated_timestamp=servertime_str(
           current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
           current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
@@ -2023,7 +2023,7 @@ def delete_buggy_editor_zip():
             )
             return redirect(url_for("admin.show_buggy_editor_info"))
         if form.is_confirmed.data:
-            zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            zipfilename = current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
             target_zipfile = join_to_project_root(
                 current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                 current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
@@ -2141,7 +2141,7 @@ def download_editor_zip_for_admin():
     zipfile = join_to_project_root(
         current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+        current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     )
     if not os.path.exists(zipfile):
         flash("Editor zip file not available (has not been published)", "danger")

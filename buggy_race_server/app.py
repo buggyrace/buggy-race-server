@@ -161,7 +161,7 @@ def create_app():
                 target_zipfile = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-                    app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+                    app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
                 )
                 if not path.exists(target_zipfile):
                     print(f"* publishing buggy editor zipfile", flush=True)

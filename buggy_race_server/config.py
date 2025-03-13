@@ -186,12 +186,12 @@ class ConfigSettingNames(Enum):
     # and a type.
     API_SECRET_TIME_TO_LIVE = auto()
     AUTHORISATION_CODE = auto()
-    BUGGY_EDITOR_DOWNLOAD_URL = auto()
+    EDITOR_DOWNLOAD_URL = auto()
     BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
     BUGGY_EDITOR_REPO_URL = auto()
-    BUGGY_EDITOR_ZIPFILE_NAME = auto()
+    EDITOR_ZIPFILE_NAME = auto()
     BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
@@ -341,9 +341,7 @@ class ConfigSettings:
       ),
       ConfigGroupNames.VCS.name: (
         ConfigSettingNames.IS_USING_VCS.name,
-         ConfigSettingNames.VCS_NAME.name,
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
+        ConfigSettingNames.VCS_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
@@ -415,6 +413,8 @@ class ConfigSettings:
       ),
       ConfigGroupNames.EDITOR.name: (
         ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.EDITOR_HOST.name,
         ConfigSettingNames.EDITOR_PORT.name,
         ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
@@ -499,8 +499,8 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
@@ -643,8 +643,8 @@ class ConfigSettings:
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  ConfigTypes.URL,
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
@@ -803,13 +803,13 @@ class ConfigSettings:
           project. This will usually be the URL to your customised, forked
           repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
 
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name:
           """If you are **not** using a VCS platform like Github or GitLab
           (`IS_USING_VCS` is `No`), and want to use the default buggy editor
           source code served from this server, what should the zip file that
           students download be called?""",
 
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name:
           """If you are **not** using a VCS platform like GitHub or GitLab
           (`IS_USING_VCS` is `No`), your students can download the buggy editor
           zipfile directly from this server. If you prefer to provide your own
@@ -1804,7 +1804,7 @@ class DistribMethods(Enum):
        """
        retval = {
           DistribMethods.ZIP.value: {
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
@@ -1818,7 +1818,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
@@ -1829,7 +1829,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
@@ -1842,7 +1842,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
@@ -1854,7 +1854,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
@@ -1866,7 +1866,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
@@ -1880,7 +1880,7 @@ class DistribMethods(Enum):
              ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
              ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
-             ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
              ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
              ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,

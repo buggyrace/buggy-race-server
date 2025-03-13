@@ -156,6 +156,27 @@
           </div>
         {% endif %}
 
+        {% if user.editor_repo_url %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              User's repo <!-- {{form.github_username.label}} -->
+            </div>
+            <div class="col-sm-4">
+              <a href="{{ user.editor_repo_url }}" title="buggy repo"
+              class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1">Repo</a>
+            </div>
+            <div class="col-sm-5">
+              The URL to the user's repo (if any) is constructed using the
+              <code>STUDENT_EDITOR_REPO_URL</code> config setting:<br>
+              {% if config['STUDENT_EDITOR_REPO_URL'] %}
+                <code>{{ config['STUDENT_EDITOR_REPO_URL'] }}</code>
+              {% else %}
+                <span class="empty-setting">not set</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        
         {% if config['USERS_HAVE_EMAIL'] %}
           <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">

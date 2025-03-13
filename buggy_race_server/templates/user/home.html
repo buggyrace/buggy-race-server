@@ -12,108 +12,6 @@
   </div>
 
   <div class="row">
-    {% if is_using_vcs %}
-      <div class="col-lg">
-        <div class="alert border-secondary">
-          <h2 class="alert-title">Your {{ vcs_name }} account</h2>
-          {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
-          {% if not is_secure %}
-            <div class="alert alert-danger">
-              <h2 class="alert-title">Warning: You are not using the secure race server!</h2>
-              <p>
-                Accessing up your {{ vcs_name }} account won't work unless
-                you're logged into the secure server.
-              </p>
-              {% if server_url.startswith("https:") %}
-                <p>
-                  <a href="{{ server_url }}" class="btn btn-warning btn-jump">Switch to {{ server_url }}</a>
-                </p>
-              {% endif %}
-            </div>
-          {% else %}
-            {% if current_user.is_github_connected() %}
-              <div class="alert alert-warning">
-                This buggy racing account is connected to your {{ vcs_name }} account
-                (<strong>{{ current_user.github_username }}</strong>).
-              </div>
-              {% if current_user.has_course_repository() %}
-                <p>
-                  You have forked the Buggy Editor repo into your {{ vcs_name }} account.
-                </p>
-                <p class="btn-collection">
-                  <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-white btn-jump">Your {{ vcs_name }} repo</a>
-                </p>
-                {% if is_using_vs_workspace %}
-                  <div class="alert alert-info my-3">
-                    <h2 class="alert-title">VS Code workspace</h2>
-                    <p>
-                      This workspace file connections your Visual Studio Code application to
-                      your account on {{ project_remote_server_name or "the remote server" }}.
-                      Download your VScode workspace file and load it into VS Code.
-                      <!-- TODO ...and some instruction! -->
-                    </p>
-                    <p class="btn-collection">
-                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
-                    </p>
-                  </div>
-                {% endif %}
-                {% include "_local_announcement.html" %}
-              {% else %}
-                <div class="alert alert-primary">
-                  <p>
-                    You can now <em>fork</em> the Buggy Editor repo.
-                    This will copy all the files you need into your own
-                    {{ vcs_name }} account
-                    (<strong>{{ current_user.github_username }}</strong>).
-                    It will also add the project tasks as <em>issues</em>
-                    to that repo.
-                  </p>
-                  <div class="my-3">
-                    <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                      <button type="submit" class="btn btn-primary btn-jump">Fork Buggy Editor repo</button>
-                    </form>
-                  </div>
-                  <p>
-                    Forking may take a few moments, so be patient when you click the button.
-                  </p>
-                </div>
-              {% endif %}
-            {% else %}
-              <p>
-                If you connect your {{ vcs_name }} account to this buggy racing
-                server, we'll fork the Buggy Editor repo into your
-                own account and then add the project tasks (as {{ vcs_name }}
-                "issues").
-              </p>
-              <p class="alert alert-danger">
-                To do this, this buggy racing server needs access to the 
-                <strong>repositories</strong> and <strong>personal user
-                data</strong> of your {{ vcs_name }} account. When you click on
-                the button below, {{ vcs_name }} will ask you to confirm that
-                you know this server needs such access.
-              </p>
-              <p>
-                If you don't have a {{ vcs_name }} account yet, you can create
-                one as part of the process when you click this button (although
-                it's simpler if you are already logged into {{ vcs_name }}
-                before you start).
-              </p>
-              <p class="my-3">
-                <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your {{ vcs_name }} account</a>
-              </p>
-              <p>
-                Afterwards, expect to receive an email from {{ vcs_name }}
-                alerting you that “a third-party OAuth application
-                ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
-                with repo and user scopes was recently authorized to access
-                your account.”
-              </p>
-            {% endif %}
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
     <div class="col-lg">
       <div class="row">
         <div class="col-md">
@@ -235,6 +133,108 @@
         {% endif %}
       </div>
     </div>
+    {% if is_using_vcs_to_fork %}
+      <div class="col-lg">
+        <div class="alert border-secondary">
+          <h2 class="alert-title">Your {{ vcs_name }} account</h2>
+          {# an increasingly urgent bodge: don't allow insecure unless dev on local:   #}
+          {% if not is_secure %}
+            <div class="alert alert-danger">
+              <h2 class="alert-title">Warning: You are not using the secure race server!</h2>
+              <p>
+                Accessing up your {{ vcs_name }} account won't work unless
+                you're logged into the secure server.
+              </p>
+              {% if server_url.startswith("https:") %}
+                <p>
+                  <a href="{{ server_url }}" class="btn btn-warning btn-jump">Switch to {{ server_url }}</a>
+                </p>
+              {% endif %}
+            </div>
+          {% else %}
+            {% if current_user.is_github_connected() %}
+              <div class="alert alert-warning">
+                This buggy racing account is connected to your {{ vcs_name }} account
+                (<strong>{{ current_user.github_username }}</strong>).
+              </div>
+              {% if current_user.has_course_repository() %}
+                <p>
+                  You have forked the Buggy Editor repo into your {{ vcs_name }} account.
+                </p>
+                <p class="btn-collection">
+                  <a href="{{ current_user.course_repository }}" class="btn btn-outline-primary btn-white btn-jump">Your {{ vcs_name }} repo</a>
+                </p>
+                {% if is_using_vs_workspace %}
+                  <div class="alert alert-info my-3">
+                    <h2 class="alert-title">VS Code workspace</h2>
+                    <p>
+                      This workspace file connections your Visual Studio Code application to
+                      your account on {{ project_remote_server_name or "the remote server" }}.
+                      Download your VScode workspace file and load it into VS Code.
+                      <!-- TODO ...and some instruction! -->
+                    </p>
+                    <p class="btn-collection">
+                      <a href="{{ url_for('user.download_vscode_workspace') }}" class="btn btn-primary btn-download">Download VS&nbsp;Code workspace</a>
+                    </p>
+                  </div>
+                {% endif %}
+                {% include "_local_announcement.html" %}
+              {% else %}
+                <div class="alert alert-primary">
+                  <p>
+                    You can now <em>fork</em> the Buggy Editor repo.
+                    This will copy all the files you need into your own
+                    {{ vcs_name }} account
+                    (<strong>{{ current_user.github_username }}</strong>).
+                    It will also add the project tasks as <em>issues</em>
+                    to that repo.
+                  </p>
+                  <div class="my-3">
+                    <form action="{{ url_for('user.setup_course_repository') }}" method="POST">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button type="submit" class="btn btn-primary btn-jump">Fork Buggy Editor repo</button>
+                    </form>
+                  </div>
+                  <p>
+                    Forking may take a few moments, so be patient when you click the button.
+                  </p>
+                </div>
+              {% endif %}
+            {% else %}
+              <p>
+                If you connect your {{ vcs_name }} account to this buggy racing
+                server, we'll fork the Buggy Editor repo into your
+                own account and then add the project tasks (as {{ vcs_name }}
+                "issues").
+              </p>
+              <p class="alert alert-danger">
+                To do this, this buggy racing server needs access to the 
+                <strong>repositories</strong> and <strong>personal user
+                data</strong> of your {{ vcs_name }} account. When you click on
+                the button below, {{ vcs_name }} will ask you to confirm that
+                you know this server needs such access.
+              </p>
+              <p>
+                If you don't have a {{ vcs_name }} account yet, you can create
+                one as part of the process when you click this button (although
+                it's simpler if you are already logged into {{ vcs_name }}
+                before you start).
+              </p>
+              <p class="my-3">
+                <a href="{{ url_for('oauth.github') }}" class="btn btn-primary btn-jump">Connect your {{ vcs_name }} account</a>
+              </p>
+              <p>
+                Afterwards, expect to receive an email from {{ vcs_name }}
+                alerting you that “a third-party OAuth application
+                ({{ config['INSTITUTION_SHORT_NAME']}} Buggy Racing Server)
+                with repo and user scopes was recently authorized to access
+                your account.”
+              </p>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 
   <div class="row">
@@ -248,6 +248,17 @@
         </p>
       </div>
     </div>
+    {% if is_student_using_vcs %}
+      <div class="col">
+        <div class="alert alert-warning">
+          <h2 class="alert-title">Your {{ vcs_name }} account</h2>
+          <p>
+            <a href="{{ current_user.editor_repo_url }}" title="buggy repo"
+              class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1">Repo</a>
+          </p>
+        </div>
+      </div>
+    {% endif %}
   </div>
   <div class="row">
     <div class="col">

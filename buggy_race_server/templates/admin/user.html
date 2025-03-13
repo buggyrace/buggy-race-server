@@ -137,12 +137,13 @@
               </td>
               <td>
                 {% if user.github_username %}
-                  <a href="https://github.com/{{ user.github_username }}">{{ user.github_username }}</a>
-                  <a href="{{ student_editor_repo_domain }}{{ user.github_username }}/{{ editor_repo_name }}" title="buggy repo"
-                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
-
+                  <code>{{ user.github_username }}</code>
                 {% else %}
                   <em class="empty-setting">not set</em>
+                {% endif %}
+                {% if user.editor_repo_url %}
+                  <a href="{{ user.editor_repo_url }}" title="buggy repo"
+                  class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1 float-right">Repo</a>
                 {% endif %}
               </td>  
             </tr>

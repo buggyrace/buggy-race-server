@@ -62,27 +62,32 @@ def flash_explanation_if_unauth(msg):
 @active_user_required
 def home_page():
     form = ChangePasswordForm()
-    is_using_vcs = (
+    is_student_using_vcs = (
+        current_app.config[ConfigSettingNames.IS_USING_VCS.name]
+        and current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name]
+    )
+    is_using_vcs_to_fork = (
         current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
     )
     return render_template(
         "user/home.html",
-        is_using_vcs=is_using_vcs,
         form=form,
-        report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
+        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        is_secure=request.is_secure or not current_app.config[ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name],
         is_showing_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_student_task_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        users_have_first_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
-        users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
+        is_student_using_vcs=is_student_using_vcs,
+        is_using_vcs_to_fork=is_using_vcs_to_fork,
+        report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
+        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
         users_have_email=current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name],
         users_have_ext_id=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name],
-        ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         users_have_ext_username=current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name],
-        ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
-        server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        is_secure=request.is_secure or not current_app.config[ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name],
+        users_have_first_name=current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name],
+        users_have_last_name=current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name],
         vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 

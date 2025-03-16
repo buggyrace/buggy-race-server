@@ -607,12 +607,15 @@ def publish_tasks_as_issues_csv(app=current_app):
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
     )
-
     is_line_terminator_crlf = app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
+    want_reversed = app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name]
     csv = get_tasks_as_issues_csv(
-      Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),
-      header_row=app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
-      is_line_terminator_crlf=is_line_terminator_crlf
+        Task.query.filter_by(is_enabled=True).order_by(
+                Task.phase.desc() if want_reversed else Task.phase.asc(),
+                Task.sort_position.desc() if want_reversed else Task.sort_position.asc(),
+            ).all(),
+        header_row=app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
+        is_line_terminator_crlf=is_line_terminator_crlf
     )
 
     line_terminator = "\r\n" if is_line_terminator_crlf else "\n"

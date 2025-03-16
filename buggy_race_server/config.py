@@ -219,6 +219,7 @@ class ConfigSettingNames(Enum):
     IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
+    IS_ISSUES_CSV_IN_REVERSE_ORDER = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
@@ -451,6 +452,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
       ),  
       ConfigGroupNames.TECH_NOTES.name: (
@@ -532,6 +534,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
@@ -674,6 +677,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -994,6 +998,17 @@ class ConfigSettings:
           of the task issues CSV file (you probably don't need to change
           this).""", # NB: possibly needed for GitHub API?
 
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name:
+          """Chosse `Yes` if you want the issues in the CSV to be in reverse
+          order (so task `0-GET` is the last row, not the first). The web
+          interface of GitHub and GitLab both list ther issues most-recent-first,
+          so if you want the issues to be listed in the same order as the
+          numbered tasks that they map to (with `0-GET`, the "first" task, at
+          the top), set this to `Yes`. Subsequently, the oldest issues (created
+          first) will be for the highest-numbered tasks. If you change this
+          value after you've published the task list, you should re-publish
+          (because the CSV file was cached).""",
+  
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
           title case? For example, choose `Yes` if the usernames you're using

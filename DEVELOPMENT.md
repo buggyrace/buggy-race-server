@@ -365,7 +365,7 @@ Go to `/admin/config-docs-helper` in any current install of the server to
 get the markdown for the config settings (including their default values)
 and copy-and-paste the section that's changed into relevant section of the page.
 
-Note that some pages — specifcally the `auth` and `social` setting groups —
+Note that some pages — specifcally the `auth` and `links` setting groups —
 don't use the verbatim text (you'll see if you look inside them).
 
 

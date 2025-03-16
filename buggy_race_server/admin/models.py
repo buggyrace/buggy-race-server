@@ -32,29 +32,29 @@ class DbFile(SurrogatePK, Model):
     contents = db.Column(db.Text(), unique=False, nullable=False, default="")
 
 
-class SocialSetting():
-  """A Social media link: note this is not a Flask/ORM model
-     SOCIAL_n_NAME, SOCIAL_n_URL, SOCIAL_n_TEXT
+class LinkedSiteSettings():
+  """A link to an external site: note this is not a Flask/ORM model
+     SITE_n_NAME, SITE_n_URL, SITE_n_TEXT
   """
 
-  MAX_SOCIALS = 4
+  MAX_SITE_LINKS = 4
   EMPTY_VALUE = "" # empty string, not None (so we can safely stringify them)
 
   @staticmethod
-  def get_socials_from_config(conf, want_all=False):
-    """ Get list of social site links from config (ignoring any with no name, unless want_all)"""
-    socials = []
-    for i in range(SocialSetting.MAX_SOCIALS):
-      if want_all or conf.get(f"SOCIAL_{i}_NAME"):
-        socials.append(
-          SocialSetting(
+  def get_linked_sites_from_config(conf, want_all=False):
+    """ Get list of other-site links from config (ignoring any with no name, unless want_all)"""
+    sites = []
+    for i in range(1, LinkedSiteSettings.MAX_SITE_LINKS+1):
+      if want_all or conf.get(f"SITE_{i}_NAME"):
+        sites.append(
+          LinkedSiteSettings(
             i,
-            conf.get(f"SOCIAL_{i}_NAME") or SocialSetting.EMPTY_VALUE,
-            conf.get(f"SOCIAL_{i}_URL") or SocialSetting.EMPTY_VALUE,
-            conf.get(f"SOCIAL_{i}_TEXT") or SocialSetting.EMPTY_VALUE
+            conf.get(f"SITE_{i}_NAME") or LinkedSiteSettings.EMPTY_VALUE,
+            conf.get(f"SITE_{i}_URL") or LinkedSiteSettings.EMPTY_VALUE,
+            conf.get(f"SITE_{i}_TEXT") or LinkedSiteSettings.EMPTY_VALUE
          )
         )
-    return socials
+    return sites
 
   def __str__(self):
     return f"<{self.index}: {self.name}, {self.url} [{self.text}]>"

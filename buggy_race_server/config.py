@@ -260,18 +260,18 @@ class ConfigSettingNames(Enum):
     PROJECT_WORKFLOW_URL = auto()
     PROJECT_ZIP_NAME_TYPE = auto()
     SECRET_KEY = auto()
-    SOCIAL_0_NAME = auto()
-    SOCIAL_0_TEXT = auto()
-    SOCIAL_0_URL = auto()
-    SOCIAL_1_NAME = auto()
-    SOCIAL_1_TEXT = auto()
-    SOCIAL_1_URL = auto()
-    SOCIAL_2_NAME = auto()
-    SOCIAL_2_TEXT = auto()
-    SOCIAL_2_URL = auto()
-    SOCIAL_3_NAME = auto()
-    SOCIAL_3_TEXT = auto()
-    SOCIAL_3_URL = auto()
+    SITE_1_NAME = auto()
+    SITE_1_TEXT = auto()
+    SITE_1_URL = auto()
+    SITE_2_NAME = auto()
+    SITE_2_TEXT = auto()
+    SITE_2_URL = auto()
+    SITE_3_NAME = auto()
+    SITE_3_TEXT = auto()
+    SITE_3_URL = auto()
+    SITE_4_NAME = auto()
+    SITE_4_TEXT = auto()
+    SITE_4_URL = auto()
     STUDENT_EDITOR_REPO_URL = auto()
     SUPERBASICS_URL = auto()
     TASK_NAME_FOR_API = auto()
@@ -296,8 +296,9 @@ class ConfigGroupNames(str, Enum):
     ORG = "org"
     PROJECT = "project"
     RACES = "races"
+    REMOTE = "remote"
     SERVER = "server"
-    SOCIAL = "social"
+    LINKS = "links"
     EDITOR = "editor"
     TASKS = "tasks"
     TECH_NOTES = "tech_notes"
@@ -397,22 +398,22 @@ class ConfigSettings:
         ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name,
       ),
-      ConfigGroupNames.SOCIAL.name: (
-        ConfigSettingNames.SOCIAL_0_NAME.name,
-        ConfigSettingNames.SOCIAL_0_TEXT.name,
-        ConfigSettingNames.SOCIAL_0_URL.name,
-        ConfigSettingNames.SOCIAL_1_NAME.name,
-        ConfigSettingNames.SOCIAL_1_TEXT.name,
-        ConfigSettingNames.SOCIAL_1_URL.name,
-        ConfigSettingNames.SOCIAL_2_NAME.name,
-        ConfigSettingNames.SOCIAL_2_TEXT.name,
-        ConfigSettingNames.SOCIAL_2_URL.name,
-        ConfigSettingNames.SOCIAL_3_NAME.name,
-        ConfigSettingNames.SOCIAL_3_TEXT.name,
-        ConfigSettingNames.SOCIAL_3_URL.name,
+      ConfigGroupNames.LINKS.name: (
+        ConfigSettingNames.SUPERBASICS_URL.name,
+        ConfigSettingNames.SITE_1_NAME.name,
+        ConfigSettingNames.SITE_1_TEXT.name,
+        ConfigSettingNames.SITE_1_URL.name,
+        ConfigSettingNames.SITE_2_NAME.name,
+        ConfigSettingNames.SITE_2_TEXT.name,
+        ConfigSettingNames.SITE_2_URL.name,
+        ConfigSettingNames.SITE_3_NAME.name,
+        ConfigSettingNames.SITE_3_TEXT.name,
+        ConfigSettingNames.SITE_3_URL.name,
+        ConfigSettingNames.SITE_4_NAME.name,
+        ConfigSettingNames.SITE_4_TEXT.name,
+        ConfigSettingNames.SITE_4_URL.name,
       ),
       ConfigGroupNames.EDITOR.name: (
-        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
         ConfigSettingNames.EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.EDITOR_HOST.name,
@@ -421,6 +422,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
       ),
       ConfigGroupNames.PROJECT.name: (
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
         ConfigSettingNames.PROJECT_CODE.name,
@@ -428,16 +430,17 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name,
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
+      ),
+      ConfigGroupNames.REMOTE.name: (
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
-        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
-        ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
-        ConfigSettingNames.SUPERBASICS_URL.name,
       ),
       ConfigGroupNames.TASKS.name: (
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name,
@@ -570,18 +573,18 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: "username",
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
-        ConfigSettingNames.SOCIAL_0_NAME.name: "",
-        ConfigSettingNames.SOCIAL_0_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_0_URL.name: "",
-        ConfigSettingNames.SOCIAL_1_NAME.name: "",
-        ConfigSettingNames.SOCIAL_1_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_1_URL.name: "",
-        ConfigSettingNames.SOCIAL_2_NAME.name: "",
-        ConfigSettingNames.SOCIAL_2_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_2_URL.name: "",
-        ConfigSettingNames.SOCIAL_3_NAME.name: "",
-        ConfigSettingNames.SOCIAL_3_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.SITE_1_NAME.name: "",
+        ConfigSettingNames.SITE_1_TEXT.name: "",
+        ConfigSettingNames.SITE_1_URL.name: "",
+        ConfigSettingNames.SITE_2_NAME.name: "",
+        ConfigSettingNames.SITE_2_TEXT.name: "",
+        ConfigSettingNames.SITE_2_URL.name: "",
+        ConfigSettingNames.SITE_3_NAME.name: "",
+        ConfigSettingNames.SITE_3_TEXT.name: "",
+        ConfigSettingNames.SITE_3_URL.name: "",
+        ConfigSettingNames.SITE_4_NAME.name: "",
+        ConfigSettingNames.SITE_4_TEXT.name: "",
+        ConfigSettingNames.SITE_4_URL.name: "",
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
         ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
@@ -712,18 +715,18 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_1_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_1_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_1_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_2_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_2_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_2_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_1_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_1_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_1_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_2_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_2_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_2_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_3_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_3_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_4_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_4_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_4_URL.name: ConfigTypes.URL,
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: ConfigTypes.URL,
         ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
@@ -756,14 +759,15 @@ class ConfigSettings:
       ConfigGroupNames.AUTH.name,
       ConfigGroupNames.SERVER.name,
       ConfigGroupNames.ORG.name,
-      ConfigGroupNames.SOCIAL.name,
-      ConfigGroupNames.USERS.name,
-      ConfigGroupNames.EDITOR.name,
+      ConfigGroupNames.LINKS.name,
       ConfigGroupNames.PROJECT.name,
+      ConfigGroupNames.EDITOR.name,
       ConfigGroupNames.TASKS.name,
-      ConfigGroupNames.TECH_NOTES.name,
+      ConfigGroupNames.USERS.name,
       ConfigGroupNames.RACES.name,
-      ConfigGroupNames.VCS.name
+      ConfigGroupNames.VCS.name,
+      ConfigGroupNames.REMOTE.name,
+      ConfigGroupNames.TECH_NOTES.name,
     ]
 
     DESCRIPTIONS = {
@@ -1316,29 +1320,29 @@ class ConfigSettings:
           changing it will almost certainly break existing sessions. For
           cleanest results, reboot the server as soon as you've changed it).""",
 
-        ConfigSettingNames.SOCIAL_0_NAME.name:
+        ConfigSettingNames.SITE_1_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_0_TEXT.name:
+        ConfigSettingNames.SITE_1_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_0_URL.name:
+        ConfigSettingNames.SITE_1_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_1_NAME.name:
+        ConfigSettingNames.SITE_2_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_1_TEXT.name:
+        ConfigSettingNames.SITE_2_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_1_URL.name:
+        ConfigSettingNames.SITE_2_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_2_NAME.name:
+        ConfigSettingNames.SITE_3_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_2_TEXT.name:
+        ConfigSettingNames.SITE_3_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_2_URL.name:
+        ConfigSettingNames.SITE_3_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_3_NAME.name:
+        ConfigSettingNames.SITE_4_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_3_TEXT.name:
+        ConfigSettingNames.SITE_4_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_3_URL.name:
+        ConfigSettingNames.SITE_4_URL.name:
           """Full URL to external site/resource""",
 
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name:
@@ -1517,7 +1521,7 @@ class ConfigSettings:
         BUGGY_RACE_SERVER_URL setting is critically important, whereas you may
         find you can accept the defaults for most or all of the others here.""",
 
-      ConfigGroupNames.SOCIAL.name:
+      ConfigGroupNames.LINKS.name:
         """These are used to add links to your institution's social or
         educational accounts. If you run support sites like Moodle or Discord
         or Teams for this project, add them here.""",

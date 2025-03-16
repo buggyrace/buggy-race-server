@@ -58,7 +58,7 @@ from buggy_race_server.admin.models import (
     DbFile,
     TaskText,
     Setting,
-    SocialSetting,
+    LinkedSiteSettings,
     Task
 )
 from buggy_race_server.buggy.models import Buggy
@@ -512,7 +512,7 @@ def setup():
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
-    social_settings = SocialSetting.get_socials_from_config(
+    link_settings = LinkedSiteSettings.get_linked_sites_from_config(
         settings_as_dict, want_all=True
     )
     pretty_group_name_dict = { 
@@ -547,7 +547,7 @@ def setup():
         settings=settings_as_dict,
         setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
         setup_status=setup_status,
-        social_settings=social_settings,
+        link_settings=link_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
         suggested_settings=suggested_settings,
         type_of_settings=ConfigSettings.TYPES,
@@ -1262,14 +1262,14 @@ def settings(group_name=None):
     """Admin settings check page."""
     form = SettingForm(request.form)
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-    social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+    link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
         # group_name = form['group'].data
         if form.is_submitted() and form.validate():
             _update_settings_in_db(form)
             # inefficient, but update to reflect changes
             settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-            social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+            link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
         else:
             _flash_errors(form)
     html_descriptions = { 
@@ -1311,7 +1311,7 @@ def settings(group_name=None):
         pretty_suggested_settings=pretty_suggested_settings,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
-        social_settings=social_settings,
+        link_settings=link_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
         type_of_settings=ConfigSettings.TYPES,
         vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
@@ -1529,10 +1529,10 @@ def tech_notes_admin():
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
         ConfigSettingNames.PROJECT_CODE.name,
-        ConfigSettingNames.SOCIAL_0_NAME.name,
-        ConfigSettingNames.SOCIAL_1_NAME.name,
-        ConfigSettingNames.SOCIAL_2_NAME.name,
-        ConfigSettingNames.SOCIAL_3_NAME.name,
+        ConfigSettingNames.SITE_1_NAME.name,
+        ConfigSettingNames.SITE_2_NAME.name,
+        ConfigSettingNames.SITE_3_NAME.name,
+        ConfigSettingNames.SITE_4_NAME.name,
     ],
     notes_generated_timestamp=servertime_str(
         current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],

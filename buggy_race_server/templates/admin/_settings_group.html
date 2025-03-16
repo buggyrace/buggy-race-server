@@ -14,10 +14,8 @@
       settings</h3>
   </div>
 </div>
-{% if group == 'SOCIAL' %}
-  {%include "admin/_social_settings.html" %}
-{% else %}
-  {% for name in groups[group] %}
+{% for name in groups[group] %}
+  {% if not (group == 'LINKS' and name.startswith('SITE')) %}
     <div class="row py-2 m-1 bg-white">
       <div class="col-lg-7 col-md-6">
           <div class="row">
@@ -96,8 +94,12 @@
       {% endif %}
       </div>
     </div>
-  {% endfor %}
+  {% endif %}
+{% endfor %}
+{% if group == 'LINKS' %}
+  {%include "admin/_links_settings.html" %}
 {% endif %}
+
 {% if group in ('SERVER', 'RACES') %}
   <script>
     {

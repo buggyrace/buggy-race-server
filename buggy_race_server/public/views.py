@@ -26,7 +26,7 @@ from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import DbFile, SocialSetting, Task
+from buggy_race_server.admin.models import DbFile, LinkedSiteSettings, Task
 
 from buggy_race_server.utils import (
     flash_errors,
@@ -76,7 +76,7 @@ def home():
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_vcs=is_using_vcs,
         local_announcement_type=AnnouncementTypes.TAGLINE.value,
-        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
+        external_site_links=LinkedSiteSettings.get_linked_sites_from_config(current_app.config),
         source_code_icon=source_code_icon,
         vcs_name=vcs_name,
     )

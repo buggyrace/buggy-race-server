@@ -1002,12 +1002,12 @@ class ConfigSettings:
           """Chosse `Yes` if you want the issues in the CSV to be in reverse
           order (so task `0-GET` is the last row, not the first). The web
           interface of GitHub and GitLab both list ther issues most-recent-first,
-          so if you want the issues to be listed in the same order as the
-          numbered tasks that they map to (with `0-GET`, the "first" task, at
-          the top), set this to `Yes`. Subsequently, the oldest issues (created
-          first) will be for the highest-numbered tasks. If you change this
-          value after you've published the task list, you should re-publish
-          (because the CSV file was cached).""",
+          so if you want the issues to be displayed in the same order as the
+          numbered tasks that they map to (with `0-GET`, the first task, at
+          the top), set this to `Yes`. This causes the highest-numbered tasks'
+          issues to be created first, and hence be the oldest. If you change
+          this value after you've published the task list, you should re-publish
+          the list (because the CSV file is cached).""",
   
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using

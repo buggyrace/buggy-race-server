@@ -150,6 +150,16 @@
         <a href="{{ url_for('admin.download_tasks', type='current', format='csv') }}"
         class="btn btn-outline-secondary btn-admin btn-download">Download <strong>current</strong> tasks as issues CSV</a>
       </p>
+      <a href="{{ url_for('admin.settings', group_name='tasks') }}" class="btn btn-outline-secondary btn-config-group btn-white float-right ml-3"><span>Tasks</span></a>
+      <p>
+        {% if is_issues_csv_in_reverse_order %}
+          The current issues are listed in the CSV file in reverse
+          order, with phase 0 last.
+        {% else %}
+          The current issues are listed in the CSV file in
+          order, with phase 0 first.
+        {% endif %}
+      </p>
       <p>
         Check that the config settings it uses (shown below) are correct,
         because they are used to generate the links within the CSV. Be

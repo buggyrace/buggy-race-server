@@ -1698,6 +1698,7 @@ def tasks_admin():
         example_task=example_task,
         is_fresh_update=is_fresh_update,
         is_injecting_github_issues=is_injecting_github_issues,
+        is_issues_csv_in_reverse_order=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name],
         is_showing_all_tasks=want_all,
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,

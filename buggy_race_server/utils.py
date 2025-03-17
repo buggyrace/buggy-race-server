@@ -266,10 +266,10 @@ def get_tasks_as_issues_csv(tasks, header_row="", is_line_terminator_crlf=False)
         [
           f"{task.fullname} {task.title}",
           "\n\n".join([ # markdown: blank line between paras
-            re.sub(any_newline, "\\n", task.problem_text),
-            re.sub(any_newline, "\\n", task.solution_text),
+            re.sub(any_newline, line_terminator, task.problem_text),
+            re.sub(any_newline, line_terminator, task.solution_text),
             f"[{task.fullname}]({task.get_url(current_app.config)})"
-          ]).replace("\n", "\\n")
+          ]).replace("\n", line_terminator)
         ]
       )
     return str(issues_str)

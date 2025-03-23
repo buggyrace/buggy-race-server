@@ -251,10 +251,13 @@ class ConfigSettingNames(Enum):
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
+    PROJECT_POSTER_TYPE = auto()
+    PROJECT_POSTER_URL = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
     PROJECT_REMOTE_SERVER_APP_URL = auto()
     PROJECT_REMOTE_SERVER_NAME = auto()
     PROJECT_REPORT_TYPE = auto()
+    PROJECT_REPORT_URL = auto()
     PROJECT_SLUG = auto()
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
@@ -425,6 +428,9 @@ class ConfigSettings:
       ConfigGroupNames.PROJECT.name: (
         ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name,
+        ConfigSettingNames.PROJECT_REPORT_URL.name,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name,
+        ConfigSettingNames.PROJECT_POSTER_URL.name,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
         ConfigSettingNames.PROJECT_CODE.name,
         ConfigSettingNames.PROJECT_SLUG.name,
@@ -566,10 +572,13 @@ class ConfigSettings:
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name: "in editor",
+        ConfigSettingNames.PROJECT_POSTER_URL.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
-        ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name: "in editor",
+        ConfigSettingNames.PROJECT_REPORT_URL.name: "",
         ConfigSettingNames.PROJECT_SLUG.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
@@ -709,10 +718,13 @@ class ConfigSettings:
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
+        ConfigSettingNames.PROJECT_POSTER_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REPORT_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
@@ -1257,6 +1269,22 @@ class ConfigSettings:
           page). If you don't want this, set it to zero to remove the
           recommendation entirely.""",
 
+        ConfigSettingNames.PROJECT_POSTER_URL.name:
+          """The race server will display a basic page of instructions about
+          the poster (which is especially helpful if `PROJECT_POSTER_TYPE` is
+          `In editor`), but if you prefer to direct students to a custom page,
+          provide a URL to use insteead. This setting is ignored if
+          `PROJECT_POSTER_TYPE` is `No poster`.""",
+
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name:
+          """Do you require students to produce a poster proclaiming the
+          features of their editor? If it's `top of report` or 
+          `bottom of report` this means it's part of the report (so
+          `PROJECT_REPORT_TYPE` must not be `No report`). Choose `in editor`
+          if the report takes the form of an additional webpage in the student's
+          buggy editor webserver.  If you choose `No poster`, all mentions will
+          be removed.""",
+
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
           """If students are going to develop on a remote server, what is its
           address? This is used with their external username (or just username,
@@ -1280,13 +1308,20 @@ class ConfigSettings:
           project server, leave this blank.""",
 
         ConfigSettingNames.PROJECT_REPORT_TYPE.name:
-          """If you require students to include a report of how they tackled
-          the tasks, indicate that here ("report" or "poster" are just
-          different names for the same thing, due to an historic anomaly). The
-          report takes the form of an additional webpage in the student's buggy
-          editor webserver. If you choose `No report`, all mentions will be
-          removed: see also the `IS_STORING_STUDENT_TASK_TEXTS` setting in the
-          **Tasks** group of settings. """,
+          """If you require students to produce a report of how they tackled
+          the tasks, indicate that here. Choose `document` if you want students
+          to make a document, or `in editor` if the report takes the form
+          of an additional webpage in the student's buggy editor webserver. If
+          you choose `No report`, all mentions will be removed: see also the
+          `IS_STORING_STUDENT_TASK_TEXTS` setting in the **Tasks** group of
+          settings. """,
+
+        ConfigSettingNames.PROJECT_REPORT_URL.name:
+          """The race server will display a basic page of instructions about
+          the report (which is especially helpful if `PROJECT_REPORT_TYPE` is
+          `In editor`), but if you prefer to direct students to a custom page,
+          provide a URL to use insteead. This setting is ignored if
+          `PROJECT_REPORT_TYPE` is `No report`.""",
 
         ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears — as a prefix — in any
@@ -1412,8 +1447,10 @@ class ConfigSettings:
           """An indication for your students as to how much text you expect
           them to provide in each of their task texts. It's shown on the
           report page instructions, after _"Suggested size for each task
-          text:"_. No suggestion is shown if you've set it to the empty string
-          or `IS_STORING_STUDENT_TASK_TEXTS` is `No`.""",
+          text:"_. No suggestion is shown if you've set it to the empty string.
+          This applies to task texts in the report (i.e., if
+          `PROJECT_REPORT_TYPE` is not `No report`) or on the race server if
+          `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`, and is only advisory.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on
@@ -1605,6 +1642,18 @@ class ConfigSettings:
     SQLALCHEMY_DATABASE_URI_KEY = "SQLALCHEMY_DATABASE_URI"
 
     @staticmethod
+    def is_valid_report_poster_type_combo(report_type, poster_type):
+        print(f"is_valid_report_poster_type_combo(<{report_type}>, <{poster_type}>)", flush=True)
+        return (
+            report_type in ("", "document", "in editor")
+            and (poster_type in ("", "document", "in editor")
+                or (report_type and
+                    (poster_type in ("top of report", "bottom of report"))
+                )
+            )
+        )
+
+    @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
   
@@ -1765,6 +1814,7 @@ class ConfigSettings:
         "UPLOAD_FOLDER",
         "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
       ]
+
 
 class DistribMethods(Enum):
     """ Summary of the methods that can be used to distribute the buggy

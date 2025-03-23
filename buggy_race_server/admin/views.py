@@ -1291,6 +1291,15 @@ def settings(group_name=None):
         name: ConfigSettings.prettify(name, value)
         for name, value in suggested_settings.items()
     }
+    report_poster_warning = ""
+    if not ConfigSettings.is_valid_report_poster_type_combo(
+        current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    ):
+        report_poster_warning = f"""The values for
+          {ConfigSettingNames.PROJECT_REPORT_TYPE.name} and 
+          {ConfigSettingNames.PROJECT_POSTER_TYPE.name} (in the "Projects" group)
+          do not look correct (maybe an invalid combination?)"""
     return render_template(
         "admin/settings.html",
         NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
@@ -1309,6 +1318,7 @@ def settings(group_name=None):
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
         pretty_suggested_settings=pretty_suggested_settings,
+        report_poster_warning=report_poster_warning,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
         link_settings=link_settings,

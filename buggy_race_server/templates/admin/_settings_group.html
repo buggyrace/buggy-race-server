@@ -24,7 +24,9 @@
             </div>
             <div class="col-lg-6 mb-3">
               <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-              {%if name == "PROJECT_REPORT_TYPE" %}
+              {% if name == "PROJECT_REPORT_TYPE" %}
+                {%include "admin/_report_type_input.html" %}
+              {% elif name == "PROJECT_POSTER_TYPE" %}
                 {%include "admin/_report_type_input.html" %}
               {% elif name == "PROJECT_ZIP_NAME_TYPE" %}
                 {% include "admin/_zip_name_type_input.html" %}

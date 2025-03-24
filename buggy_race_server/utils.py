@@ -158,6 +158,14 @@ def load_settings_from_db(app):
 
     return Setting.get_dict_from_db(settings) # pass the settings back as a dict
 
+def is_poster(app):
+    """ the PROJECT_POSTER_TYPE setting may depend on the PROJECT_REPORT_TYPE
+        setting, so a little utility to do that (maybe should be in Config?)"""
+    poster_type = app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    if poster_type and poster_type in ("top of report", "bottom of report"):
+        # so depends on report being not false: (i.e., document or editor)
+        poster_type = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
+    return poster_type
 
 def set_and_save_config_setting(app, name, value):
     # this changes the app's config setting and also saves that
@@ -266,10 +274,10 @@ def get_tasks_as_issues_csv(tasks, header_row="", is_line_terminator_crlf=False)
         [
           f"{task.fullname} {task.title}",
           "\n\n".join([ # markdown: blank line between paras
-            re.sub(any_newline, "\\n", task.problem_text),
-            re.sub(any_newline, "\\n", task.solution_text),
+            re.sub(any_newline, line_terminator, task.problem_text),
+            re.sub(any_newline, line_terminator, task.solution_text),
             f"[{task.fullname}]({task.get_url(current_app.config)})"
-          ]).replace("\n", "\\n")
+          ]).replace("\n", line_terminator)
         ]
       )
     return str(issues_str)
@@ -744,6 +752,20 @@ def _get_buggy_editor_kwargs(app):
       "task_0_get_name": app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
       "task_3_env_name": app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
     }
+
+def get_buggy_editor_local_url(app):
+    editor_host = app.config[ConfigSettingNames.EDITOR_HOST.name]
+    if editor_host is None or editor_host.strip() == "":
+        # unusually, override empty value with the default because otherwise
+        # we're certainly producing an invalid and confusing URL
+        editor_host = ConfigSettings.DEFAULTS[ConfigSettingNames.EDITOR_HOST.name]
+    if editor_host.endswith("/"):
+        editor_host = editor_host[:-1]
+    editor_port = app.config[ConfigSettingNames.EDITOR_PORT.name]
+    if editor_port is None or editor_port.strip() == "":
+        editor_port = ""
+    editor_port_with_colon = f":{editor_port}" if editor_port else ""
+    return f"http://{ editor_host }{ editor_port_with_colon }"
 
 def create_editor_zipfile(readme_contents, app=current_app):
     """ creates a zip from from the buggy editor source code that is hardcopied

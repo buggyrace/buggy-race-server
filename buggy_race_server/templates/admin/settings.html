@@ -32,23 +32,29 @@
       </p>
     </div>
   </div>
-  {% if is_showing_config_warnings and config_diff_against_suggestions %}
+  {% if is_showing_config_warnings and (config_diff_against_suggestions or report_poster_warning) %}
     <div class="alert alert-danger">
-      {% if config_diff_against_suggestions | length == 1 %}
-        One config setting does not match 
-      {% else %}
-        Some config settings do not match 
+      {% if config_diff_against_suggestions %}
+        {% if config_diff_against_suggestions | length == 1 %}
+          One config setting does not match 
+        {% else %}
+          Some config settings do not match 
+        {% endif %}
+        suggested values for your server's editor distribution method
+        ("<code>{{ config['EDITOR_DISTRIBUTION_METHOD']}}</code>"):
+        <ul class="sm-item-list ml-4">
+          {% for item in config_diff_against_suggestions | sort %}
+            <li> {{ item }} </li>
+          {% endfor %}
+        </ul>
+        <hr>
       {% endif %}
-      suggested values for your server's editor distribution method
-      ("<code>{{ config['EDITOR_DISTRIBUTION_METHOD']}}</code>"):
-      <ul class="sm-item-list ml-4">
-        {% for item in config_diff_against_suggestions | sort %}
-          <li> {{ item }} </li>
-        {% endfor %}
-      </ul>
-      <hr>
+      {% if report_poster_warning %}
+        {{ report_poster_warning }}
+        <hr>
+      {% endif %}
       <p class="my-0">
-        To hide this message, set
+        You can hide this alert by setting
         <code><a href="{{ url_for('admin.settings', group_name='server') }}">IS_SHOWING_CONFIG_WARNINGS</a></code>
         to <code>No</code>.
       </p>

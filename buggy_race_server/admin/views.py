@@ -1291,6 +1291,15 @@ def settings(group_name=None):
         name: ConfigSettings.prettify(name, value)
         for name, value in suggested_settings.items()
     }
+    report_poster_warning = ""
+    if not ConfigSettings.is_valid_report_poster_type_combo(
+        current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    ):
+        report_poster_warning = f"""The values for
+          {ConfigSettingNames.PROJECT_REPORT_TYPE.name} and 
+          {ConfigSettingNames.PROJECT_POSTER_TYPE.name} (in the "Projects" group)
+          do not look correct (maybe an invalid combination?)"""
     return render_template(
         "admin/settings.html",
         NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
@@ -1309,6 +1318,7 @@ def settings(group_name=None):
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
         pretty_suggested_settings=pretty_suggested_settings,
+        report_poster_warning=report_poster_warning,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
         link_settings=link_settings,
@@ -1698,6 +1708,7 @@ def tasks_admin():
         example_task=example_task,
         is_fresh_update=is_fresh_update,
         is_injecting_github_issues=is_injecting_github_issues,
+        is_issues_csv_in_reverse_order=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name],
         is_showing_all_tasks=want_all,
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -2255,7 +2266,8 @@ def config_dump_as_dotenv():
     # not useful when loading a new buggy racing server:
     EXCLUDE_FROM_DUMP = [
         'FLASK_DEBUG', 
-        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'
+        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES',
+        '_CURRENT_ANNOUNCEMENTS', # is transient (and was dumping SQL!)
     ]
     config_text_lines = [
         "# config dump (suitable as .env?) of buggy race server "

@@ -335,12 +335,6 @@ def serve_project_page(page=None):
 
     submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
 
-    print("FIXME:: serve_project_page: - - - - - - - - - - - - - - - - - - - -")
-    print(f"FIXME::    is_report: <{is_report}>  report_type: <{report_type}>")
-    print(f"FIXME::    is_poster: <{is_a_poster}>  poster_type: <{poster_type}>")
-    print(f"FIXME::    report_link_text: <{report_link_text}>")
-    print(f"FIXME::    is_storing_text: <{current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]}>\n")
-
     return render_template(
         template,
         buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],

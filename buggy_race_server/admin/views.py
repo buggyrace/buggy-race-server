@@ -2266,7 +2266,8 @@ def config_dump_as_dotenv():
     # not useful when loading a new buggy racing server:
     EXCLUDE_FROM_DUMP = [
         'FLASK_DEBUG', 
-        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'
+        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES',
+        '_CURRENT_ANNOUNCEMENTS', # is transient (and was dumping SQL!)
     ]
     config_text_lines = [
         "# config dump (suitable as .env?) of buggy race server "

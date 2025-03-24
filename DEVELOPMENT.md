@@ -361,9 +361,14 @@ The docs about customising the race server include all the config settings and
 descriptions which are from `config.py` within the application. For example, see
 the page [about the server settings](https://www.buggyrace.net/docs/customising/server.html).
 
-Go to `/admin/config-docs-helper` in any current install of the server to
-get the markdown for the config settings (including their default values)
-and copy-and-paste the section that's changed into relevant section of the page.
+Go to `/admin/config-docs-helper` in any current install of the server that
+has `_IS_DOCS_HELPER_PAGE_ENABLED` set to `1` (i.e., is set to be truthy).
+That gives you the markdown for the config settings section (including their
+default values) ready to be copy-and-pasteed into the relevant part of the page.
+This takes a bit of time because you really do need to do it page-by-page unless
+you're sure you know which specific page has changed (e.g., if you've just
+added one new config setting). But it's a whole lot better than doing it without
+the copy-and-paste!
 
 Note that some pages — specifcally the `auth` and `links` setting groups —
 don't use the verbatim text (you'll see if you look inside them).

@@ -19,7 +19,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from sqlalchemy import insert
+from sqlalchemy import insert, delete
 
 from buggy_race_server.admin.forms import (
     GeneralSubmitForm,
@@ -41,6 +41,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_url_protocol,
     join_to_project_root,
     staff_only,
 )
@@ -126,6 +127,9 @@ def view_race(race_id):
             current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
         )
     )
+    server_protocol = get_url_protocol(
+                current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    )
     return render_template(
         "admin/race.html",
         flag_color_css_defs=flag_color_css_defs,
@@ -138,8 +142,10 @@ def view_race(race_id):
         results_finishers=results_finishers,
         results_nonfinishers=results_nonfinishers,
         results=all_results,
+        server_protocol=server_protocol,
         track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
+        urls_with_different_protocol_dict=race.urls_with_different_protocol_dict(server_protocol),
     )
 
 @blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
@@ -168,6 +174,7 @@ def edit_race(race_id=None):
                   start_at=form.start_at.data,
                   is_visible=form.is_visible.data,
                   is_result_visible=form.is_result_visible.data,
+                  is_abandoned=form.is_abandoned.data,
                   track_image_url=form.track_image_url.data,
                   track_svg_url=form.track_svg_url.data,
                   lap_length=form.lap_length.data,
@@ -185,6 +192,7 @@ def edit_race(race_id=None):
                 race.cost_limit = form.cost_limit.data
                 race.is_visible = form.is_visible.data
                 race.is_result_visible = form.is_result_visible.data
+                race.is_abandoned = form.is_abandoned.data
                 race.results_uploaded_at = form.results_uploaded_at.data
                 race.race_file_url = form.race_file_url.data.strip() or None
                 race.track_image_url = form.track_image_url.data
@@ -213,6 +221,45 @@ def edit_race(race_id=None):
         default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
+        is_storing_racefiles_in_db=current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name],
+    )
+
+@blueprint.route("/<race_id>/abandon", methods=["GET", "POST"])
+@login_required
+@admin_only
+def abandon_race(race_id):
+    race = Race.get_by_id(race_id)
+    if race is None:
+        flash("Error: coudldn't find race", "danger")
+        abort(404)
+    form = SubmitWithConfirmForm(request.form)
+    if request.method == "POST":
+        if race.is_abandoned:
+            flash("Note: race was already abandoned", "info")
+        if form.is_submitted() and form.validate():
+            if not form.is_confirmed.data:
+                flash("Did not abandon race (you didn't confirm it)", "danger")
+            else:
+                race.is_abandoned = True
+                race.race_file_url =  None
+                race.results_uploaded_at = None
+                race.buggies_entered = 0
+                race.buggies_started = 0
+                race.buggies_finished = 0
+                race.save()
+                db.session.execute(delete(RaceResult).where(RaceResult.race_id==race.id))
+                db.session.commit()
+                flash("OK, race abandoned", "info")
+                return redirect(url_for('admin_race.view_race', race_id=race.id))
+        else:
+            flash_errors(form)
+            flash("Did not abandon race", "danger")
+    qty_results = RaceResult.query.filter_by(race_id=race.id).count()
+    return render_template(
+        "admin/race_abandon.html",
+        form=form,
+        race=race,
+        qty_results=qty_results
     )
 
 @blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])

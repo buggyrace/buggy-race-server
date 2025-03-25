@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v2.0.77"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.0"
 #
 # ----------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ class ConfigSettingNames(Enum):
     # contains the (harcoded) race server URL
     _EDITOR_PYTHON_FILENAME = auto()
 
-    # Name of the CSV file into which tasks-as-issues (for GitHub) are put
+    # Name of the CSV file containing tasks-as-issues (for VCS, e.g. GitHub)
     _BUGGY_EDITOR_ISSUES_CSV_FILE = auto()
 
     # Current announcements are cached to avoid database reads on every hit
@@ -184,24 +184,27 @@ class ConfigSettingNames(Enum):
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
-    USER_ACTVITY_PERIOD_S = auto()
+    API_SECRET_TIME_TO_LIVE = auto()
     AUTHORISATION_CODE = auto()
+    EDITOR_DOWNLOAD_URL = auto()
     BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
-    BUGGY_EDITOR_GITHUB_URL = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
-    BUGGY_EDITOR_DOWNLOAD_URL = auto()
-    BUGGY_EDITOR_ZIPFILE_NAME = auto()
+    BUGGY_EDITOR_REPO_URL = auto()
+    EDITOR_ZIPFILE_NAME = auto()
     BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
-    API_SECRET_TIME_TO_LIVE = auto()
+    VCS_NAME = auto()
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
-    EXT_ID_NAME = auto()
+    EDITOR_DISTRIBUTION_METHOD = auto()
+    EDITOR_HOST = auto()
+    EDITOR_PORT = auto()
     EXT_ID_EXAMPLE = auto()
+    EXT_ID_NAME = auto()
     EXT_USERNAME_EXAMPLE = auto()
     EXT_USERNAME_NAME = auto()
     GITHUB_CLIENT_ID = auto()
@@ -214,9 +217,9 @@ class ConfigSettingNames(Enum):
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
     IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
-    IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
+    IS_ISSUES_CSV_IN_REVERSE_ORDER = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
@@ -224,6 +227,7 @@ class ConfigSettingNames(Enum):
     IS_RACE_FILE_START_STAMPED = auto()
     IS_RACE_VISIBLE_BY_DEFAULT = auto()
     IS_REDIRECT_HTTP_TO_HTTPS_FORCED = auto()
+    IS_SHOWING_CONFIG_WARNINGS = auto()
     IS_SHOWING_EXAMPLE_RACETRACKS = auto()
     IS_SHOWING_PROJECT_WORKFLOW = auto()
     IS_SHOWING_RESTART_SUGGESTION = auto()
@@ -232,41 +236,47 @@ class ConfigSettingNames(Enum):
     IS_STORING_STUDENT_TASK_TEXTS = auto()
     IS_STORING_TASK_LIST_IN_DB = auto()
     IS_STUDENT_API_OTP_ALLOWED = auto()
-    IS_STUDENT_USING_GITHUB_REPO = auto()
+    IS_STUDENT_USING_REPO = auto()
     IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TA_SET_API_KEY_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
-    IS_USING_GITHUB = auto()
+    IS_USING_VCS = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
+    IS_WRITING_HOST_AND_PORT_IN_EDITOR = auto()
+    IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
+    PROJECT_POSTER_TYPE = auto()
+    PROJECT_POSTER_URL = auto()
     PROJECT_REMOTE_SERVER_ADDRESS = auto()
     PROJECT_REMOTE_SERVER_APP_URL = auto()
     PROJECT_REMOTE_SERVER_NAME = auto()
     PROJECT_REPORT_TYPE = auto()
+    PROJECT_REPORT_URL = auto()
     PROJECT_SLUG = auto()
     PROJECT_SUBMISSION_DEADLINE = auto()
     PROJECT_SUBMISSION_LINK = auto()
     PROJECT_WORKFLOW_URL = auto()
     PROJECT_ZIP_NAME_TYPE = auto()
     SECRET_KEY = auto()
-    SOCIAL_0_NAME = auto()
-    SOCIAL_0_TEXT = auto()
-    SOCIAL_0_URL = auto()
-    SOCIAL_1_NAME = auto()
-    SOCIAL_1_TEXT = auto()
-    SOCIAL_1_URL = auto()
-    SOCIAL_2_NAME = auto()
-    SOCIAL_2_TEXT = auto()
-    SOCIAL_2_URL = auto()
-    SOCIAL_3_NAME = auto()
-    SOCIAL_3_TEXT = auto()
-    SOCIAL_3_URL = auto()
+    SITE_1_NAME = auto()
+    SITE_1_TEXT = auto()
+    SITE_1_URL = auto()
+    SITE_2_NAME = auto()
+    SITE_2_TEXT = auto()
+    SITE_2_URL = auto()
+    SITE_3_NAME = auto()
+    SITE_3_TEXT = auto()
+    SITE_3_URL = auto()
+    SITE_4_NAME = auto()
+    SITE_4_TEXT = auto()
+    SITE_4_URL = auto()
+    STUDENT_EDITOR_REPO_URL = auto()
     SUPERBASICS_URL = auto()
     TASK_NAME_FOR_API = auto()
     TASK_NAME_FOR_ENV_VARS = auto()
@@ -274,22 +284,26 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_VALIDATION = auto()
     TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
+    USER_ACTVITY_PERIOD_S = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_EXT_ID = auto()
     USERS_HAVE_EXT_USERNAME = auto()
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
+    USERS_HAVE_VCS_USERNAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
     AUTH = "auth"
-    GITHUB = "github"
+    VCS = "vcs"
     ORG = "org"
     PROJECT = "project"
     RACES = "races"
+    REMOTE = "remote"
     SERVER = "server"
-    SOCIAL = "social"
+    LINKS = "links"
+    EDITOR = "editor"
     TASKS = "tasks"
     TECH_NOTES = "tech_notes"
     USERS = "users"
@@ -322,44 +336,51 @@ class ConfigSettings:
     #    the session you're changing it in.
 
     GROUPS = {
-      ConfigGroupNames.AUTH.name:(
+      ConfigGroupNames.AUTH.name: (
         ConfigSettingNames.AUTHORISATION_CODE.name
+      ),
+      ConfigGroupNames.EDITOR.name: (
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name,
+        ConfigSettingNames.EDITOR_HOST.name,
+        ConfigSettingNames.EDITOR_PORT.name,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
+        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
+      ),
+      ConfigGroupNames.LINKS.name: (
+        ConfigSettingNames.SUPERBASICS_URL.name,
+        ConfigSettingNames.SITE_1_NAME.name,
+        ConfigSettingNames.SITE_1_TEXT.name,
+        ConfigSettingNames.SITE_1_URL.name,
+        ConfigSettingNames.SITE_2_NAME.name,
+        ConfigSettingNames.SITE_2_TEXT.name,
+        ConfigSettingNames.SITE_2_URL.name,
+        ConfigSettingNames.SITE_3_NAME.name,
+        ConfigSettingNames.SITE_3_TEXT.name,
+        ConfigSettingNames.SITE_3_URL.name,
+        ConfigSettingNames.SITE_4_NAME.name,
+        ConfigSettingNames.SITE_4_TEXT.name,
+        ConfigSettingNames.SITE_4_URL.name,
       ),
       ConfigGroupNames.ORG.name: (
         ConfigSettingNames.INSTITUTION_FULL_NAME.name,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name,
         ConfigSettingNames.INSTITUTION_HOME_URL.name,
       ),
-      ConfigGroupNames.GITHUB.name: (
-        ConfigSettingNames.IS_USING_GITHUB.name,
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name,
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name,
-        ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
-        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
-        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name,
-        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name,
-        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name,
-        ConfigSettingNames.GITHUB_CLIENT_ID.name,
-        ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
-      ),
-      ConfigGroupNames.USERS.name: (
-        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name,
-        ConfigSettingNames.USERS_HAVE_EMAIL.name,
-        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
-        ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
-        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
-        ConfigSettingNames.USERS_HAVE_EXT_ID.name,
-        ConfigSettingNames.USERNAME_EXAMPLE.name,
-        ConfigSettingNames.EXT_USERNAME_NAME.name,
-        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
-        ConfigSettingNames.EXT_ID_NAME.name,
-        ConfigSettingNames.EXT_ID_EXAMPLE.name,
-        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
-        ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
-        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
-        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
+      ConfigGroupNames.PROJECT.name: (
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name,
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name,
+        ConfigSettingNames.PROJECT_REPORT_URL.name,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name,
+        ConfigSettingNames.PROJECT_POSTER_URL.name,
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
+        ConfigSettingNames.PROJECT_CODE.name,
+        ConfigSettingNames.PROJECT_SLUG.name,
+        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
+        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
+        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name,
+        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
+        ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
       ),
       ConfigGroupNames.RACES.name: (
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name,
@@ -375,6 +396,12 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name,
         ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name,
       ),
+      ConfigGroupNames.REMOTE.name: (
+        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
+        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
+      ),
       ConfigGroupNames.SERVER.name: (
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name,
@@ -385,40 +412,11 @@ class ConfigSettings:
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name,
       ),
-      ConfigGroupNames.SOCIAL.name: (
-        ConfigSettingNames.SOCIAL_0_NAME.name,
-        ConfigSettingNames.SOCIAL_0_TEXT.name,
-        ConfigSettingNames.SOCIAL_0_URL.name,
-        ConfigSettingNames.SOCIAL_1_NAME.name,
-        ConfigSettingNames.SOCIAL_1_TEXT.name,
-        ConfigSettingNames.SOCIAL_1_URL.name,
-        ConfigSettingNames.SOCIAL_2_NAME.name,
-        ConfigSettingNames.SOCIAL_2_TEXT.name,
-        ConfigSettingNames.SOCIAL_2_URL.name,
-        ConfigSettingNames.SOCIAL_3_NAME.name,
-        ConfigSettingNames.SOCIAL_3_TEXT.name,
-        ConfigSettingNames.SOCIAL_3_URL.name,
-      ),
-      ConfigGroupNames.PROJECT.name: (
-        ConfigSettingNames.PROJECT_REPORT_TYPE.name,
-        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
-        ConfigSettingNames.PROJECT_CODE.name,
-        ConfigSettingNames.PROJECT_SLUG.name,
-        ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
-        ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
-        ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name,
-        ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name,
-        ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name,
-        ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
-        ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
-        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
-        ConfigSettingNames.SUPERBASICS_URL.name,
-      ),
       ConfigGroupNames.TASKS.name: (
+        ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name,
@@ -429,6 +427,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name,
       ),  
       ConfigGroupNames.TECH_NOTES.name: (
@@ -436,7 +435,38 @@ class ConfigSettings:
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name,
-      )
+      ),
+      ConfigGroupNames.USERS.name: (
+        ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name,
+        ConfigSettingNames.USERS_HAVE_EMAIL.name,
+        ConfigSettingNames.USERS_HAVE_FIRST_NAME.name,
+        ConfigSettingNames.USERS_HAVE_LAST_NAME.name,
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name,
+        ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name,
+        ConfigSettingNames.USERS_HAVE_EXT_ID.name,
+        ConfigSettingNames.USERNAME_EXAMPLE.name,
+        ConfigSettingNames.EXT_USERNAME_NAME.name,
+        ConfigSettingNames.EXT_USERNAME_EXAMPLE.name,
+        ConfigSettingNames.EXT_ID_NAME.name,
+        ConfigSettingNames.EXT_ID_EXAMPLE.name,
+        ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name,
+        ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
+        ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
+        ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
+      ),
+      ConfigGroupNames.VCS.name: (
+        ConfigSettingNames.IS_USING_VCS.name,
+        ConfigSettingNames.VCS_NAME.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name,
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name,
+        ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name,
+        ConfigSettingNames.GITHUB_CLIENT_ID.name,
+        ConfigSettingNames.GITHUB_CLIENT_SECRET.name,
+      ),
     }
 
     # **Every** config setting in ConfigSettingNames **must** have an entry
@@ -477,11 +507,11 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: "title, description",
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: "",
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
@@ -490,6 +520,9 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name: "zip",
+        ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
+        ConfigSettingNames.EDITOR_PORT.name: "5000",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
         ConfigSettingNames.EXT_ID_NAME.name: "External ID",
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
@@ -507,6 +540,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
@@ -514,6 +548,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: 1,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: 0,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: 0,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: 1,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: 1,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: 0,
@@ -522,42 +557,47 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: 1,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name: 1,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: 1,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: 0,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
-        ConfigSettingNames.IS_USING_GITHUB.name: 0,
+        ConfigSettingNames.IS_USING_VCS.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: 1,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name: "in editor",
+        ConfigSettingNames.PROJECT_POSTER_URL.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: "",
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: "",
-        ConfigSettingNames.PROJECT_REPORT_TYPE.name: "report",
+        ConfigSettingNames.PROJECT_REPORT_TYPE.name: "in editor",
+        ConfigSettingNames.PROJECT_REPORT_URL.name: "",
         ConfigSettingNames.PROJECT_SLUG.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: "",
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: "",
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: "",
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: "username",
         ConfigSettingNames.SECRET_KEY.name: f"{randint(10000, 99999)}-secret-{randint(10000, 99999)}",
-        ConfigSettingNames.SOCIAL_0_NAME.name: "",
-        ConfigSettingNames.SOCIAL_0_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_0_URL.name: "",
-        ConfigSettingNames.SOCIAL_1_NAME.name: "",
-        ConfigSettingNames.SOCIAL_1_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_1_URL.name: "",
-        ConfigSettingNames.SOCIAL_2_NAME.name: "",
-        ConfigSettingNames.SOCIAL_2_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_2_URL.name: "",
-        ConfigSettingNames.SOCIAL_3_NAME.name: "",
-        ConfigSettingNames.SOCIAL_3_TEXT.name: "",
-        ConfigSettingNames.SOCIAL_3_URL.name: "",
+        ConfigSettingNames.SITE_1_NAME.name: "",
+        ConfigSettingNames.SITE_1_TEXT.name: "",
+        ConfigSettingNames.SITE_1_URL.name: "",
+        ConfigSettingNames.SITE_2_NAME.name: "",
+        ConfigSettingNames.SITE_2_TEXT.name: "",
+        ConfigSettingNames.SITE_2_URL.name: "",
+        ConfigSettingNames.SITE_3_NAME.name: "",
+        ConfigSettingNames.SITE_3_TEXT.name: "",
+        ConfigSettingNames.SITE_3_URL.name: "",
+        ConfigSettingNames.SITE_4_NAME.name: "",
+        ConfigSettingNames.SITE_4_TEXT.name: "",
+        ConfigSettingNames.SITE_4_URL.name: "",
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
         ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
@@ -572,7 +612,8 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: 0,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: 0,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: 0,
-
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name: 0,
+        ConfigSettingNames.VCS_NAME.name: "GitHub",
     }    
     
     MIN_PASSWORD_LENGTH = 4
@@ -614,11 +655,11 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:  ConfigTypes.URL,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  ConfigTypes.URL,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
@@ -627,6 +668,8 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_HOST.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_PORT.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
@@ -643,6 +686,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -650,6 +694,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_RACE_FILE_START_STAMPED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: ConfigTypes.BOOLEAN,
@@ -658,42 +703,47 @@ class ConfigSettings:
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_USING_GITHUB.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_VCS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
+        ConfigSettingNames.PROJECT_POSTER_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REPORT_TYPE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_REPORT_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_SLUG.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name: ConfigTypes.DATETIME,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.SECRET_KEY.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_0_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_1_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_1_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_1_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_2_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_2_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_2_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.SOCIAL_3_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_3_TEXT.name: ConfigTypes.STRING,
-        ConfigSettingNames.SOCIAL_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_1_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_1_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_1_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_2_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_2_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_2_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_3_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_3_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_3_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.SITE_4_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_4_TEXT.name: ConfigTypes.STRING,
+        ConfigSettingNames.SITE_4_URL.name: ConfigTypes.URL,
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: ConfigTypes.URL,
         ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
@@ -708,23 +758,32 @@ class ConfigSettings:
         ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_FIRST_NAME.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_LAST_NAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.VCS_NAME.name: ConfigTypes.STRING,
     }
 
     # This is the order of the setting groups that is used during the
     # (initial) setup: the _SETUP_STATUS config is effectively the index-1
     # into this array: when the setup is complete, _SETUP_STATUS is zero.
     # (the settings page uses the same order, because it's sensible)
+    #
+    # The EDITOR group must come before any groups that may contain
+    # "suggested" config settings that are based on the EDITOR_DISTRIBUTION_METHOD
+    # because during setup when that one is set, some subsequent settings are
+    # given values before they appear in the setup forms.
     SETUP_GROUPS = [
       ConfigGroupNames.AUTH.name,
       ConfigGroupNames.SERVER.name,
       ConfigGroupNames.ORG.name,
-      ConfigGroupNames.SOCIAL.name,
-      ConfigGroupNames.USERS.name,
+      ConfigGroupNames.LINKS.name,
       ConfigGroupNames.PROJECT.name,
+      ConfigGroupNames.EDITOR.name,
       ConfigGroupNames.TASKS.name,
-      ConfigGroupNames.TECH_NOTES.name,
+      ConfigGroupNames.USERS.name,
       ConfigGroupNames.RACES.name,
-      ConfigGroupNames.GITHUB.name
+      ConfigGroupNames.VCS.name,
+      ConfigGroupNames.REMOTE.name,
+      ConfigGroupNames.TECH_NOTES.name,
     ]
 
     DESCRIPTIONS = {
@@ -745,35 +804,37 @@ class ConfigSettings:
           automatic injection into GitHub, as well as GitLab's CSV-to-issue
           mechanism).""",
 
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name:
-          """URL to the 'buggy editor' code the students need to start the
-          project. This will usually be the URL to your customised, forked
-          repo. If `IS_USING_GITHUB` is `No`, this setting is ignored.""",
-
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name:
-          """This should match the name in the `BUGGY_EDITOR_GITHUB_URL` and is
+          """This should match the name in the `BUGGY_EDITOR_REPO_URL` and is
           used in some of the GitHub API calls: if you've forked the repo and
           not changed its name, you won't need to change this. If
-          `IS_USING_GITHUB` is `No`, this setting is ignored.""",
+          `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
-          """The `BUGGY_EDITOR_GITHUB_URL` is public and owned by `buggyrace`.
+          """The `BUGGY_EDITOR_REPO_URL` is public and owned by `buggyrace`.
           If you've forked the repo (and customised it), change this to your
-          GitHub username. It should match the username that appears in
-          `BUGGY_EDITOR_GITHUB_URL`. If `IS_USING_GITHUB` is `No`, this setting
+          username on the version control platform you're using (e.g., GitHub
+          or GitLab). It should match the username that appears in
+          `BUGGY_EDITOR_REPO_URL`. If `IS_USING_VCS` is `No`, this setting
           is ignored.""",
 
-        ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name:
-          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), and
-          want to use the default buggy editor source code served from this
-          server, what is the name of the zip file?""",
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:
+          """URL to the 'buggy editor' code the students need to start the
+          project. This will usually be the URL to your customised, forked
+          repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
 
-        ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name:
-          """If you are **not** using GitHub (`IS_USING_GITHUB` is `No`), your
-          students can download the buggy editor zipfile directly from this
-          server. If you prefer to provide your own copy instead, provide a URL
-          to your own instructions or zipfile instead. This setting is ignored
-          if `IS_USING_GITHUB` is `Yes`. """,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name:
+          """If you are **not** using a VCS platform like Github or GitLab
+          (`IS_USING_VCS` is `No`), and want to use the default buggy editor
+          source code served from this server, what should the zip file that
+          students download be called?""",
+
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name:
+          """If you are **not** using a VCS platform like GitHub or GitLab
+          (`IS_USING_VCS` is `No`), your students can download the buggy editor
+          zipfile directly from this server. If you prefer to provide your own
+          copy instead, provide a URL to your own instructions or zipfile
+          instead. This setting is ignored if `IS_USING_VCS` is `Yes`. """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
@@ -821,6 +882,27 @@ class ConfigSettings:
           leave this blank.""",
           # note: leagues not implemented yet: this isn't shown because
           #       the config setting is excluded from the "Race" group
+
+        ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name:
+          """How do your students get the Buggy Editor source code at the start
+          of the project? During set-up, choosing this setting affects some of
+          the other settings in subsequent groups.""",
+
+        ConfigSettingNames.EDITOR_HOST.name:
+          """The default host that the students' buggy editors use. Make sure
+          this matches the `host` argument that the editor app is launched with
+          (at the bottom of the editor `app.py`). This may appear in the task
+          and tech notes, and (if you're distributing the editor source code via
+          static zip file from this server) will be written into the `app.py`
+          file too.""",
+
+        ConfigSettingNames.EDITOR_PORT.name:
+          """The default port that the students' buggy editors use. Make sure
+          this matches the `port` argument that the editor app is launched with
+          (at the bottom of the editor `app.py`). This may appear in the task
+          and tech notes, and (if you're distributing the editor source code via
+          static zip file from this server) will be written into the `app.py`
+          file too.""",
 
         ConfigSettingNames.EXT_ID_EXAMPLE.name:
           """If users have an external ID, provide an example of what it might
@@ -928,6 +1010,17 @@ class ConfigSettings:
           of the task issues CSV file (you probably don't need to change
           this).""", # NB: possibly needed for GitHub API?
 
+        ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name:
+          """Chosse `Yes` if you want the issues in the CSV to be in reverse
+          order (so task `0-GET` is the last row, not the first). The web
+          interface of GitHub and GitLab both list ther issues most-recent-first,
+          so if you want the issues to be displayed in the same order as the
+          numbered tasks that they map to (with `0-GET`, the first task, at
+          the top), set this to `Yes`. This causes the highest-numbered tasks'
+          issues to be created first, and hence be the oldest. If you change
+          this value after you've published the task list, you should re-publish
+          the list (because the CSV file is cached).""",
+  
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name:
           """Should usernames (which are always lower case) be displayed using
           title case? For example, choose `Yes` if the usernames you're using
@@ -988,6 +1081,14 @@ class ConfigSettings:
           does not require a restart _but_ in case your implementation would
           benefit from this, you can switch the suggestions on.""",
 
+        ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name:
+          """Once setup is complete, the settings pages display a warning if any
+          of your config settings differ from the suggested values for the
+          editor distribution method you've chosen. Keep this set to `Yes`
+          unless you're sure your settings are correct and it's safe to ignore
+          the automated suggestions. If there are warnings, they will always be
+          shown on the setup summary page regardless of this setting.""",
+    
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name:
           """Do you want the admin interface to include the example racetracks?
           If you are certain you only want to use your own custom racetracks,
@@ -1052,13 +1153,16 @@ class ConfigSettings:
           for students to get the API working if it's not an OTP — but by
           setting this to `Yes` they can opt in or out.""",
 
-        ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name:
-          """Should students fork the buggy editor repo into their own GitHub
-          repo? Choose `No` if your students are not using GitHub. If you
-          choose `Yes`, make sure you've set `IS_USING_GITHUB_API_TO_FORK` if
-          you want this to be automated via the race server. This setting only
-          affects whether mentions of GitHub should be removed in instructions
-          on the server, and is ignored if `IS_USING_GITHUB` is `No`.""",
+        ConfigSettingNames.IS_STUDENT_USING_REPO.name:
+          """Should students fork the buggy editor repo into their own (version
+          controlled) repo? Choose `No` if your students are not using a VCS
+          (such as GitHub or GitLab). If you choose yes, remember to set
+          `VCS_NAME` to match whichever such system you are using.  This setting
+          must align with what you've chosen for `EDITOR_DISTRIBUTION_METHOD`
+          in the Project group of config settings. This setting is used to
+          ensure that the instructions students see on the race server match
+          how you're running the project, and is ignored if `IS_USING_VCS` is
+          `No`.""",
         
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name:
           """Teaching Assistants cannot edit user data. But do you want TAs to
@@ -1099,26 +1203,29 @@ class ConfigSettings:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
 
-        ConfigSettingNames.IS_USING_GITHUB.name:
-          """Are you using GitHub to distribute the source code for the buggy
-          editor to students? If you choose `Yes` there is still quite a lot of
-          flexibility as to how it's implemented (from simply downloading from
-          GitHub to automatically forking it into their GitHub account). If you
-          choose `No`, the students can download a zip file from this server
-          (or you can override this with your own copy).""",
+        ConfigSettingNames.IS_USING_VCS.name:
+          """Are you using a Version Control System (VCS) like GitHub or GitLab
+          to distribute the source code for the buggy editor to students? If you
+          choose `Yes` there is still quite a lot of flexibility as to how it's
+          implemented (from simply downloading from GitHub, to manually
+           preloading students' GitLab repos, to automatically forking via an
+           OAuth client into GitHub accounts). If you choose `No`, the students
+           can download a zip file from this server or your own site. See also
+          `EDITOR_DISTRIBUTION_METHOD` in the Project group of config settings.""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name:
           """If students must work with the buggy editor in their own GitHub
           repo, the race server can help by automatically forking it for them,
           using the GitHub API. You must configure the `GITHUB_CLIENT_ID` and
-          `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_GITHUB` and
-          `IS_STUDENT_USING_GITHUB_REPO` must both be `Yes`).""",
+          `GITHUB_CLIENT_SECRET` for this to work (and `IS_USING_VCS` and
+          `IS_STUDENT_USING_REPO` must both be `Yes`). See also
+          `EDITOR_DISTRIBUTION_METHOD` in the Project group of config settings.""",
 
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name:
           """If you have set the race server to use GitHub's API to fork the
           buggy editor repo into each student's account, it will also also
           inject the tasks as GitHub issues into their repo unless you prevent
-          it here. This setting is ignored unless both `IS_USING_GITHUB` and
+          it here. This setting is ignored unless both `IS_USING_VCS` and
           `IS_USING_GITHUB_API_TO_FORK` are both set to `Yes`. """,
 
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name:
@@ -1129,11 +1236,17 @@ class ConfigSettings:
           it through VS Code. This is quite a specific setup: if you're not
           sure, you almost certainly do not want this. """,
 
+        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name:
+          """If you publish the buggy editor app on this server, should the
+          `EDITOR_HOST` and `EDITOR_PORT` values be written into `app.py`? This
+          setting won't be used if you don't generate the zipfile on this server
+          (for example, if `IS_USING_VCS` is `Yes`).""",
+
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name:
           """If you publish the buggy editor app on this server, should the
           `BUGGY_RACE_SERVER_URL` be written into `app.py`? This setting
           won't be used if you don't generate the zipfile on this server
-          (for example, if `IS_USING_GITHUB` is `Yes`) but remember you or
+          (for example, if `IS_USING_VCS` is `Yes`) but remember you or
           your students do need to change it inside the buggy editor source
           code eventually.""",
 
@@ -1155,6 +1268,22 @@ class ConfigSettings:
           expectation is displayed to students (for example on the task list
           page). If you don't want this, set it to zero to remove the
           recommendation entirely.""",
+
+        ConfigSettingNames.PROJECT_POSTER_URL.name:
+          """The race server will display a basic page of instructions about
+          the poster (which is especially helpful if `PROJECT_POSTER_TYPE` is
+          `In editor`), but if you prefer to direct students to a custom page,
+          provide a URL to use insteead. This setting is ignored if
+          `PROJECT_POSTER_TYPE` is `No poster`.""",
+
+        ConfigSettingNames.PROJECT_POSTER_TYPE.name:
+          """Do you require students to produce a poster proclaiming the
+          features of their editor? If it's `top of report` or 
+          `bottom of report` this means it's part of the report (so
+          `PROJECT_REPORT_TYPE` must not be `No report`). Choose `in editor`
+          if the report takes the form of an additional webpage in the student's
+          buggy editor webserver.  If you choose `No poster`, all mentions will
+          be removed.""",
 
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name:
           """If students are going to develop on a remote server, what is its
@@ -1179,13 +1308,20 @@ class ConfigSettings:
           project server, leave this blank.""",
 
         ConfigSettingNames.PROJECT_REPORT_TYPE.name:
-          """If you require students to include a report of how they tackled
-          the tasks, indicate that here ("report" or "poster" are just
-          different names for the same thing, due to an historic anomaly). The
-          report takes the form of an additional webpage in the student's buggy
-          editor webserver. If you choose `No report`, all mentions will be
-          removed: see also the `IS_STORING_STUDENT_TASK_TEXTS` setting in the
-          **Tasks** group of settings. """,
+          """If you require students to produce a report of how they tackled
+          the tasks, indicate that here. Choose `document` if you want students
+          to make a document, or `in editor` if the report takes the form
+          of an additional webpage in the student's buggy editor webserver. If
+          you choose `No report`, all mentions will be removed: see also the
+          `IS_STORING_STUDENT_TASK_TEXTS` setting in the **Tasks** group of
+          settings. """,
+
+        ConfigSettingNames.PROJECT_REPORT_URL.name:
+          """The race server will display a basic page of instructions about
+          the report (which is especially helpful if `PROJECT_REPORT_TYPE` is
+          `In editor`), but if you prefer to direct students to a custom page,
+          provide a URL to use insteead. This setting is ignored if
+          `PROJECT_REPORT_TYPE` is `No report`.""",
 
         ConfigSettingNames.PROJECT_SLUG.name:
           """This is how the `PROJECT_CODE` appears — as a prefix — in any
@@ -1234,30 +1370,47 @@ class ConfigSettings:
           changing it will almost certainly break existing sessions. For
           cleanest results, reboot the server as soon as you've changed it).""",
 
-        ConfigSettingNames.SOCIAL_0_NAME.name:
+        ConfigSettingNames.SITE_1_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_0_TEXT.name:
+        ConfigSettingNames.SITE_1_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_0_URL.name:
+        ConfigSettingNames.SITE_1_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_1_NAME.name:
+        ConfigSettingNames.SITE_2_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_1_TEXT.name:
+        ConfigSettingNames.SITE_2_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_1_URL.name:
+        ConfigSettingNames.SITE_2_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_2_NAME.name:
+        ConfigSettingNames.SITE_3_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_2_TEXT.name:
+        ConfigSettingNames.SITE_3_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_2_URL.name:
+        ConfigSettingNames.SITE_3_URL.name:
           """Full URL to external site/resource""",
-        ConfigSettingNames.SOCIAL_3_NAME.name:
+        ConfigSettingNames.SITE_4_NAME.name:
           """Name (shown on button)""",
-        ConfigSettingNames.SOCIAL_3_TEXT.name:
+        ConfigSettingNames.SITE_4_TEXT.name:
           """Short description""",
-        ConfigSettingNames.SOCIAL_3_URL.name:
+        ConfigSettingNames.SITE_4_URL.name:
           """Full URL to external site/resource""",
+
+        ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name:
+          """The URL for the students' own buggy editor repos (for example,
+          where they have been forked _to_). This may well be the same base
+          domain that's in `BUGGY_EDITOR_REPO_URL` (which is the URL of the repo
+          they were forked _from_). It should probably relate to `VCS_NAME` too.
+          This is used to construct links from the race server to each student's
+          repo: if one of the following placeholder strings (`%USERNAME%`,
+          `%VCS_USERNAME%`, `%EXT_USERNAME%`, or `%EXT_ID%`) occurs in the URL
+          string you provide, it will be replaced by the value for the current
+          user. Do not use this setting as a text substitution in tasks or tech
+          notes, because the current-user replacement is not applied on static
+          content. If you don't want to link to individual students' repos
+          (maybe you've set `USERS_HAVE_VCS_USERNAME` to `No`, so the server
+          cannot construct the URL), leave it blank. It *must* be specified if
+          `EDITOR_DISTRIBUTION_METHOD` is `autofork`.
+          This setting is ignored if `IS_STUDENT_USING_REPO` is `No`.""",
 
         ConfigSettingNames.SUPERBASICS_URL.name:
           """There are a few places (for example in the workflow page and the
@@ -1294,13 +1447,15 @@ class ConfigSettings:
           """An indication for your students as to how much text you expect
           them to provide in each of their task texts. It's shown on the
           report page instructions, after _"Suggested size for each task
-          text:"_. No suggestion is shown if you've set it to the empty string
-          or `IS_STORING_STUDENT_TASK_TEXTS` is `No`.""",
+          text:"_. No suggestion is shown if you've set it to the empty string.
+          This applies to task texts in the report (i.e., if
+          `PROJECT_REPORT_TYPE` is not `No report`) or on the race server if
+          `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`, and is only advisory.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on
           this server. If you've customised them and have published them
-          somewhere else (for example, hosted on GitHub pages), then put the
+          somewhere else (for example, hosted on GitHub Pages), then put the
           URL here. By default, tech notes are hosted on the race server, so
           you can leave this blank.""",
 
@@ -1349,6 +1504,25 @@ class ConfigSettings:
           """Do users need to have a last name? If you can already identify
           your students from the other fields, you might not need this.""",
 
+        ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name:
+          """Do users have an external username for a version control system
+          (VCS) such as GitHub or GitLab? You might want or need to store each
+          student's VCS username depending on whether or not your students need
+          to use a platform like GitHub or GitLab (which you specify by your
+          choice of `EDITOR_DISTRIBUTION_METHOD` setting in the Project group).
+          If you set this to `Yes`, make sure you set the `VCS_NAME` setting in
+          the VCS group so everyone knows what platform this username is for.
+          If you're not using a VCS, leave this as `No`.""",
+
+        ConfigSettingNames.VCS_NAME.name:
+          """If you are distributing the editor code to your students through a
+          version control system (VCS), what is it called? GitHub is common, but
+          you might be using a different one (for example, if you're running
+          your own installation of GitLab). This setting is used anywhere the
+          VCS gets mentioned in texts such as in the tasks or tech notes (which
+          you might also edit or write yourself). This setting can be ignored
+          if `IS_USING_VCS` is `No`.  See also `EDITOR_DISTRIBUTION_METHOD`
+          in the Project group of config settings.""",
     }
 
     SETUP_GROUP_DESCRIPTIONS = {
@@ -1357,12 +1531,19 @@ class ConfigSettings:
         may be able to leave most settings to their defaults (and you can
         change most things later, if you need to).""",
 
-      ConfigGroupNames.GITHUB.name:
-        """Setup the GitHub details here. If you're injecting issues into
-        student's own repos, you must provide valid GitHub client details which
-        may be specific to your installation. If you are not using Git or
-        GitHub, the first three settings are used (that is, don't be fooled by
-        the "GitHub" name of this group!).""",
+      ConfigGroupNames.EDITOR.name:
+        """These settings affect the Buggy Editor application that the students
+        develop. Crucially, they include the distribution method (how students
+        get the source code for this application). This is important, especially
+        during set up, because the values of other config settings (in other
+        groups, such as version control system (VCS) settings) may depend on
+        your choice. These suggested values are inserted during set-up when you
+        pick a distribution method (and you can still override them).""",
+
+      ConfigGroupNames.LINKS.name:
+        """These are used to add links to your institution's social or
+        educational accounts. If you run support sites like Moodle or Discord
+        or Teams for this project, add them here.""",
 
       ConfigGroupNames.ORG.name:
         """Provide general details about your institution/organisation.""",
@@ -1381,15 +1562,17 @@ class ConfigSettings:
         """Race settings can all be left to default (you can change them
         later if you need to).""",
 
+      ConfigGroupNames.REMOTE.name:
+        """These are settings that you only need if you've set
+        `EDITOR_DISTRIBUTION_METHOD` to `vsremote` (because it needs extra
+        config). This requires an SSH tunnel between the students' VSCode
+        workspace and a remote server. If you're using any other method,
+        including the default, these settings will be ignored.""",
+  
       ConfigGroupNames.SERVER.name:
         """These settings control the behaviour of the server. The
         BUGGY_RACE_SERVER_URL setting is critically important, whereas you may
         find you can accept the defaults for most or all of the others here.""",
-
-      ConfigGroupNames.SOCIAL.name:
-        """These are used to add links to your institution's social or
-        educational accounts. If you run support sites like Moodle or Discord
-        or Teams for this project, add them here.""",
 
       ConfigGroupNames.TASKS.name:
         """The work the students must do to develop their buggy editor is
@@ -1420,9 +1603,27 @@ class ConfigSettings:
         students' first names, maybe add a first name so you can recognise who
         they are). Only admin users see these additional fields — they aren't
         made public.""",
+
+      ConfigGroupNames.VCS.name:
+        """Setup the version control system (VCS) details here. What you need
+        will depend largely on how you're distributing the editor source code
+        to your students (that is, what you've picked as your
+        `EDITOR_DISTRIBUTION_METHOD` in the Project config settings). Use these
+        settings to nominate which VCS platform, if any, you and your students
+        will be using and, where necessary, extra details that might require.
+        For example, if you're injecting issues into student's own repos, you
+        must provide valid GitHub client details which may be specific to your
+        installation.""",
+
     }
 
     NO_KEY = "_NOTHING_" # special case of unexpected config with no key
+
+    # placeholder value used in suggested config values (depending on the editor
+    # disribution method) to indicated the value should not be empty.
+    # This value is chosen because it's *never* an appropriate setting, so
+    # should never end up in the database. Not seen by users.
+    NONEMPTY_VALUE = "*_*"
 
     # config key for list of config settings that are being overridden by
     # declarations in the environment (e.g., from .env)
@@ -1449,6 +1650,18 @@ class ConfigSettings:
     SQLALCHEMY_DATABASE_URI_KEY = "SQLALCHEMY_DATABASE_URI"
 
     @staticmethod
+    def is_valid_report_poster_type_combo(report_type, poster_type):
+        print(f"is_valid_report_poster_type_combo(<{report_type}>, <{poster_type}>)", flush=True)
+        return (
+            report_type in ("", "document", "in editor")
+            and (poster_type in ("", "document", "in editor")
+                or (report_type and
+                    (poster_type in ("top of report", "bottom of report"))
+                )
+            )
+        )
+
+    @staticmethod
     def is_valid_name(name):
       return name in ConfigSettings.DEFAULTS
   
@@ -1468,10 +1681,17 @@ class ConfigSettings:
     @staticmethod
     def pretty_group_name(name):
        """ Because Tom complained about the Github/GitHub case """
-       if name == "GITHUB":
-          return "GitHub"
+       if name == "VCS":
+          return "VCS" # (note: capitalised)
        else:
           return name.title().replace("_", " ")
+
+    @staticmethod
+    def get_group_name(setting_name):
+      for group in ConfigSettings.GROUPS:
+        if setting_name in ConfigSettings.GROUPS[group]:
+          return group
+      return None
 
     @staticmethod
     def stringify(name, value):
@@ -1545,6 +1765,9 @@ class ConfigSettings:
             "last_name": bool(
               app.config.get(ConfigSettingNames.USERS_HAVE_LAST_NAME.name)
             ),
+            "github_username": bool(
+              app.config.get(ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name)
+            )
         }
 
     @staticmethod
@@ -1599,6 +1822,176 @@ class ConfigSettings:
         "UPLOAD_FOLDER",
         "_ANNOUNCEMENT_TOP_OF_PAGE_TYPES",
       ]
+
+
+class DistribMethods(Enum):
+    """ Summary of the methods that can be used to distribute the buggy
+        editor source code to the students. Mainly affects generation
+        of task list."""
+
+    def _generate_next_value_(name, start, count, last_values):
+        """ ConfigSettingNames values are lower case strings of their names.
+            These turn up in project/tasks-zip.md, tasks-page.md etc
+        """
+        return name.lower()
+
+    ZIP = auto() 
+    PAGE = auto()
+    REPO = auto()
+    PRELOAD = auto()
+    FORK = auto()
+    AUTOFORK = auto()
+    VSREMOTE = auto()
+
+    @staticmethod
+    def get_desc(method_name):
+        if method_name is None:
+            return None
+        return {
+            DistribMethods.ZIP.name: "Students download a zipfile from race server (the default)",
+            DistribMethods.PAGE.name: "Students get the source code from a custom page you set up elsewhere",
+            DistribMethods.REPO.name: "Students get the source code from your repo",
+            DistribMethods.PRELOAD.name: "Admin preloads the source code by forking repo into student's accounts",
+            DistribMethods.FORK.name: "Students manually fork your repo into their own account",
+            DistribMethods.AUTOFORK.name: "Server forks your repo into students' GitHub accounts",
+            DistribMethods.VSREMOTE.name: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
+        }.get(method_name.upper())
+
+    @property
+    def desc(self):
+        return DistribMethods.get_desc(self.name)
+
+    @staticmethod
+    def get_suggested_config_settings(distrib_method_value):
+       """ The setting for EDITOR_DISTRIBUTION_MODE affects other settings,
+           especially in the GITHUB group. The suggesting settings are used
+           to automatically override some defaults during the setup phase,
+           or to alert the admin to where they've diverged, later.
+           Note that config settings' values are lower case.
+
+           It's very likely the values should/will be the same as the defaults;
+           nontheless, duplicate them here, carefully — when they're displayed,
+           if they match the default value, the interface will indicate that
+           in the form the admin user sees.
+           Use ConfigSettings.NONEMPTY_VALUE to indicate that the admin
+           must not leave this empty: this applies when there's no sensible
+           default (for example, the GITHUB_CLIENT_ID must be specific).
+
+           Returns empty dictionary if unknown distribution method.
+       """
+       retval = {
+          DistribMethods.ZIP.value: {
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+             ConfigSettingNames.IS_USING_VCS.name: 0,
+          },
+          DistribMethods.PAGE.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 0,
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "https://example.com/your-download-page",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.REPO.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+
+          DistribMethods.PRELOAD.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitLab",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://YOUR-GITLAB-SERVER/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+
+          DistribMethods.FORK.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 0,
+          },
+          DistribMethods.AUTOFORK.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+          DistribMethods.VSREMOTE.value: {
+             ConfigSettingNames.IS_USING_VCS.name: 1,
+             ConfigSettingNames.VCS_NAME.name: "GitHub",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name: "https://github.com/YOUR-GITHUB-NAME/buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
+             ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "YOUR-GITHUB-NAME",
+             ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
+             ConfigSettingNames.IS_STUDENT_USING_REPO.name: 0,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 1,
+             ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
+             ConfigSettingNames.GITHUB_CLIENT_ID.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.GITHUB_CLIENT_SECRET.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 1,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigSettings.NONEMPTY_VALUE,
+             ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigSettings.NONEMPTY_VALUE,
+          },
+       }.get(distrib_method_value)
+       return retval if retval is not None else {}
+
+    @staticmethod
+    def get_config_diff_against_suggestions(app):
+        distrib_method = app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+        suggestions = DistribMethods.get_suggested_config_settings(distrib_method)
+        diff_by_setting_name = {}
+        for setting_name in suggestions:
+            if setting_name in app.config:
+                if app.config[setting_name] != suggestions[setting_name]:
+                    if suggestions[setting_name] == ConfigSettings.NONEMPTY_VALUE:
+                        if not app.config[setting_name]:
+                            diff_by_setting_name[setting_name] = suggestions[setting_name]
+                    else:
+                        diff_by_setting_name[setting_name] = suggestions[setting_name]
+        return diff_by_setting_name
+
+    @staticmethod
+    def get_default_value():
+        """ the default distribution method should match the consquence
+        of accepting the default config settings: the server provides
+        the "built-in" copy of the buggy editor."""
+        return DistribMethods.ZIP.value
 
 class AnnouncementTypes(Enum):
     """ Control what announcements are supported, and where they go """

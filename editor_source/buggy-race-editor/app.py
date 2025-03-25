@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 import sqlite3 as sql
+from os import environ
 
 # the flask application: uses the webserver imported from the flask module:
 app = Flask(__name__)
@@ -83,4 +84,8 @@ def send_buggy_json():
 # with control-C), it will run forever... so any code you put _after_ app.run
 # here won't normally be run.
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(
+        debug=True,
+        host=environ.get("FLASK_RUN_SERVER") or "0.0.0.0",
+        port=environ.get("FLASK_RUN_PORT") or 5000
+    )

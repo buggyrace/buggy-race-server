@@ -55,27 +55,37 @@
         <p><a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page' ) }}">Go to project</a></p>
       </div>
       <div class="col-lg-4">
-        <h2><span class="{% if is_using_github %}icon-github{% else %}icon-embed2{% endif %}"></span> Source code</h2>
+        <h2><span class="{{ source_code_icon }}"></span> Source code</h2>
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver.
-          {% if is_forking_github %}
-            We'll automatically fork this into your GitHub account.
+          {% if is_preloaded_repos %}
+            We'll fork this into your {{ vcs_name }} account.
+          {% elif is_forking_github %}
+            We'll automatically fork this into your {{ vcs_name }} account.
           {% else %}
             We'll tell you how to get your own copy to work on.
           {% endif %}
         </p>
-        <p><a class="btn btn-outline-secondary btn-jump" href="{{ editor_url }}">Get the code</a></p>
+        {% if editor_url %}
+          <p><a class="btn btn-outline-secondary btn-jump" href="{{ editor_url }}">
+            {% if is_preloaded_repos %}
+              Go to {{ vcs_name }}
+            {% else %}
+              Get the code
+            {% endif %}
+          </a></p>
+        {% endif %}
       </div>
       <div class="col-lg-4">
-        {% if social_site_links %}
+        {% if external_site_links %}
           <h2><span class="icon-bubbles"></span> Other places</h2>
-          {% for social_site in social_site_links %}
+          {% for site in external_site_links %}
               <p>
-                {{ social_site.text }}
+                {{ site.text }}
               </p>
               <p>
-                <a class="btn btn-outline-secondary btn-jump" href="{{ social_site.url }}">{{ social_site.name }}</a>
+                <a class="btn btn-outline-secondary btn-jump" href="{{ site.url }}">{{ site.name }}</a>
                 <br>
                 <br>
               </p>

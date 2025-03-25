@@ -6,13 +6,16 @@
         "float-right"
       ) 
     }}
-    <h3 class="p-2">{{ pretty_group_name_dict[group] }} settings</h3>
+    <h3 class="p-2">
+      {{ pretty_group_name_dict[group] }}
+      {% if pretty_group_name_dict[group] == 'VCS' %}
+       (Version Control System)
+      {% endif %}
+      settings</h3>
   </div>
 </div>
-{% if group == 'SOCIAL' %}
-  {%include "admin/_social_settings.html" %}
-{% else %}
-  {% for name in groups[group] %}
+{% for name in groups[group] %}
+  {% if not (group == 'LINKS' and name.startswith('SITE')) %}
     <div class="row py-2 m-1 bg-white">
       <div class="col-lg-7 col-md-6">
           <div class="row">
@@ -21,10 +24,14 @@
             </div>
             <div class="col-lg-6 mb-3">
               <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>
-              {%if name == "PROJECT_REPORT_TYPE" %}
+              {% if name == "PROJECT_REPORT_TYPE" %}
+                {%include "admin/_report_type_input.html" %}
+              {% elif name == "PROJECT_POSTER_TYPE" %}
                 {%include "admin/_report_type_input.html" %}
               {% elif name == "PROJECT_ZIP_NAME_TYPE" %}
                 {% include "admin/_zip_name_type_input.html" %}
+              {% elif name == "EDITOR_DISTRIBUTION_METHOD" %}
+                {% include "admin/_editor_distrib_method_input.html" %}
               {% elif type_of_settings[name] == "bool" %}
                 <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control">
                   <option value="0" {% if settings[name] == "0" %} selected="selected" {% endif %}>No</option>
@@ -49,6 +56,17 @@
       </div>
       <div class="col-lg-5 col-md-6">
         {% include "admin/_env_setting_override.html" %}
+        {% if name == "EDITOR_DISTRIBUTION_METHOD" %}
+          <p class="btn-collection text-right">
+            {{
+              macros.docs_btn(
+                "Distributing the code",
+                "/buggy-editor/distributing-the-code",
+                ""
+              )
+            }}
+          </p>
+        {% endif %}
         {{ html_descriptions[name] | safe }}
         <div class="setting-default">
             <em>Default:</em>
@@ -58,10 +76,32 @@
               <code>{{ pretty_default_settings[name] }}</code>
             {% endif %}
         </div>
+        {% if name in pretty_suggested_settings %}
+        <div class="setting-default setting-suggestion mt-2">
+          <em>Suggested:</em>
+            {% if pretty_default_settings[name] == pretty_suggested_settings[name] %}
+              <em class="empty-setting">use default</em>
+            {% else %}
+              {% if pretty_suggested_settings[name] == NONEMPTY_VALUE %}
+                <em>should <strong>not</strong> be empty</em>
+              {% elif pretty_suggested_settings[name] == "" %}
+                <em class="empty-setting">nothing/empty</em>
+              {% else %}
+                <code>{{ pretty_suggested_settings[name] }}</code>
+              {% endif %}
+            {% endif %}
+          <br>
+          (because <code>EDITOR_DISTRIBUTION_METHOD</code> is <code><strong>{{ editor_distrib_method }}</strong></code>)
+      </div>
+      {% endif %}
       </div>
     </div>
-  {% endfor %}
+  {% endif %}
+{% endfor %}
+{% if group == 'LINKS' %}
+  {%include "admin/_links_settings.html" %}
 {% endif %}
+
 {% if group in ('SERVER', 'RACES') %}
   <script>
     {

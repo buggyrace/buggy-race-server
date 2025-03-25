@@ -1,21 +1,29 @@
-<div class="row">
-  <div class="col-lg-8">
-    <p class="mb-3 px-2">
+<div class="row p-0 m-2 bg-white" style="border:2px solid #ddd;">
+  <h4 class="col-sm-12 p-2" style="background-color:#ddd;">
+    {{ link_settings | length }} links to external sites:
+  </h4>
+  <div class="col-lg-7">
+    <p class="pr-3">
       Links to up to four "Other places" (such as social media) are shown
       on the server's home page. If you're using supporting sites such as
-      Moodle, Discord, Teams or Piazza, add them here.<br>
-      If you leave the <em>Name</em> blank, the link won't be displayed.
+      Moodle, Discord, Teams or Piazza, add them below.
+    </p>
+  </div>
+  <div class="col-lg-5">
+    <p>
+      if you leave the <em>Name</em> of a site blank, the link 
+      <strong>will not be displayed</strong>.
     </p>
   </div>
 </div>
-{% for social in social_settings %}
+{% for site in link_settings %}
   <div class="row p-0 m-2 bg-white" style="border:2px solid #ddd;">
     <h4 class="col-sm-12 p-2" style="background-color:#ddd;">
-      Social site:
-      {% if social.name %}
-        {{ social.name }}
+      External site:
+      {% if site.name %}
+        {{ site.name }}
       {% else %}
-        {{ social.index }}
+        #{{ site.index }}
       {% endif %}
     </h4>
     <div class="col">
@@ -24,10 +32,10 @@
           Name
         </div>
         <div class="col-sm-4">
-          {% set social_field = social.index * 3 %}
-          {% set name = "SOCIAL_" ~ social.index ~ "_NAME" %}
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.name }}" class="form-control"/>
+          {% set link_field = site.index * 3 %}
+          {% set name = "SITE_" ~ site.index ~ "_NAME" %}
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-value" type="text" value="{{ site.name }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {% include "admin/_env_setting_override.html" %}
@@ -42,10 +50,10 @@
           URL
         </div>
         <div class="col-sm-4">
-          {% set social_field = social_field + 1 %}
-          {% set name = "SOCIAL_" ~ social.index ~ "_URL" %}
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text" value="{{ social.url }}" class="form-control"/>
+          {% set link_field = link_field + 1 %}
+          {% set name = "SITE_" ~ site.index ~ "_URL" %}
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-value" type="text" value="{{ site.url }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {% include "admin/_env_setting_override.html" %}
@@ -60,10 +68,10 @@
           Text/description
         </div>
         <div class="col-sm-4">
-          {% set social_field = social_field + 1 %}
-          {% set name = "SOCIAL_" ~ social.index ~ "_TEXT" %}
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-name" type="hidden" value="{{ name }}" />
-          <input name="{{ SETTING_PREFIX }}-{{ social_field }}-value" type="text"  value="{{ social.text }}" class="form-control"/>
+          {% set link_field = link_field + 1 %}
+          {% set name = "SITE_" ~ site.index ~ "_TEXT" %}
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-name" type="hidden" value="{{ name }}" />
+          <input name="{{ SETTING_PREFIX }}-{{ link_field }}-value" type="text"  value="{{ site.text }}" class="form-control"/>
         </div>
         <div class="col-sm-5">
           {% include "admin/_env_setting_override.html" %}

@@ -15,6 +15,25 @@ environment.
 > * https://github.com/buggyrace/buggy-race-about
 
 
+## Smoke test: bare bones, just see it running
+
+If you just want to spin the race server up as a local dev smoke test, the
+following are the bare bones that should get you going (Unix/MacOS). If you've
+got time to be more thorough, don't use this: step through the more detailed
+instructions in the rest of this document instead.
+
+Bare bones, from the the top directory of the `buggy-race-server` repo: this
+runs a race server on `localhost:5000` with an empty SQLite database (you'll
+need the default auth code: `CHANGEME`):
+
+```bash
+$> npm install
+$> webpack
+$> python -m pip install -r requirements.txt
+$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask db upgrade
+$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask run
+```
+
 ## Getting started
 
 The following notes are for a manual set-up. If you're familiar with docker
@@ -151,6 +170,17 @@ If you want to run the webserver directly, the command that npm is
 launching (you can see this in `package.json`) is:
 
     gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1
+
+
+If gunicorn won't run on your system then remember the server is "just" a Flask
+application, so you should be able to run a development server with:
+
+    flask --app=buggy_race_server/app.py run
+
+Instead of using the `--app` option, you canb set the environment variable
+`FLASK_APP` to `buggy_race_server/app.py`. By default this will run on port
+5000, but you can change that either with `--port` or the `FLASK_RUN_PORT`
+environment variable.
 
 
 ### Common new install error: static files give 403
@@ -331,11 +361,16 @@ The docs about customising the race server include all the config settings and
 descriptions which are from `config.py` within the application. For example, see
 the page [about the server settings](https://www.buggyrace.net/docs/customising/server.html).
 
-Go to `/admin/config-docs-helper` in any current install of the server to
-get the markdown for the config settings (including their default values)
-and copy-and-paste the section that's changed into relevant section of the page.
+Go to `/admin/config-docs-helper` in any current install of the server that
+has `_IS_DOCS_HELPER_PAGE_ENABLED` set to `1` (i.e., is set to be truthy).
+That gives you the markdown for the config settings section (including their
+default values) ready to be copy-and-pasteed into the relevant part of the page.
+This takes a bit of time because you really do need to do it page-by-page unless
+you're sure you know which specific page has changed (e.g., if you've just
+added one new config setting). But it's a whole lot better than doing it without
+the copy-and-paste!
 
-Note that some pages — specifcally the `auth` and `social` setting groups —
+Note that some pages — specifcally the `auth` and `links` setting groups —
 don't use the verbatim text (you'll see if you look inside them).
 
 

@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: abandon race {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-2">
+  <div class="row">
+    <h1 class="col my-3">
+      Abandon race
+      {% if race.title %}
+        for <em>{{ race.title }}</em>
+      {% endif %}
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-9 my-3">
+      <p>
+        Abandon a race if it didn't run — either because you decided not to
+        run it, or if there were no entrants. An abandoned race has no
+        results.
+      </p>
+    </div>
+  </div>
+  {% if not race.is_visible %}
+    <div class="alert alert-info">
+      This race is currently not visible to students.
+    </div>  
+  {% elif not race.is_result_visible %}
+    <div class="alert alert-info">
+      This race is currently visible to students, but the results — including
+      whether or not it has been abandoned — will not be published until you
+      set "Are results visible?" to Yes.
+    </div>
+  {% endif %}
+  {% if qty_results > 0 %}
+    <div class="alert alert-danger">
+      Database contains result records for this race: they will be deleted.
+    </div>  
+  {% endif %}
+  {% if race.buggies_entered or race.buggies_finished or race.buggies_started %}
+    <div class="alert alert-danger">
+      The total number of buggies participating in this race will be set to zero.
+    </div>  
+{% endif %}
+  {% if race.results_uploaded_at %}
+    <div class="alert alert-danger">
+      Race has a timestamp when results were uploaded ({{ race.results_uploaded_at | servertime }}): this will be deleted.
+    </div>  
+  {% endif %}
+  {% if race.race_file_url %}
+    <div class="alert alert-danger">
+      Race has a race file URL (<a href="{{ race.race_file_url }}"><code>{{ race.race_file_url }}</code></a>): this URL will be forgotten.
+    </div>  
+  {% endif %}
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <form id="AbandonRaceForm" method="POST"
+        action="{{ url_for('admin_race.abandon_race', race_id=race.id) }}"
+        role="form">
+        <div class="container border">
+          {{ form.csrf_token }}
+          <div class="row">
+            <div class="col-xs-6 p-3">
+              {{ form.is_confirmed.label }}
+              <select id="is_confirmed" name="is_confirmed" class="form-control">
+                <option selected value="">No</option>
+                <option value="">I think so</option>
+                <option value="y">Yes</option>
+              </select>  
+            </div>
+          </div>
+          <div class="col-xs-6 p-3 bottom">
+            <button class="btn btn-danger" type="submit">Abandon race</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 mb-3">
+      <p>
+        If you abandon the race, consider editing it afterwards to add an
+        explanation to its <em>Description</em>.
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="btn-collection">
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.view_race', race_id=race.id) }}">Details</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin_race.edit_race', race_id=race.id) }}{{ replay_anchor }}">Edit race</a>
+        {% if race.is_visible and race.is_result_visible %}
+          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (public)</a>
+        {% else %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('race.show_race_results', race_id=race.id) }}">View results (preview)</a>
+        {% endif %}
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("Uploading results", "/races/uploading-results") }}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

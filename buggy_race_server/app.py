@@ -101,7 +101,7 @@ def create_app():
         if utc_datetime:
             if type(utc_datetime) == str:
                 if m := re.search(
-                    "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
+                    r'\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*',
                     utc_datetime
                 ):
                     m = m.groups()
@@ -156,12 +156,12 @@ def create_app():
 
             if (
                 app.config.get(ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name)
-                and not app.config.get(ConfigSettingNames.IS_USING_GITHUB.name)
+                and not app.config.get(ConfigSettingNames.IS_USING_VCS.name)
             ):
                 target_zipfile = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-                    app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+                    app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
                 )
                 if not path.exists(target_zipfile):
                     print(f"* publishing buggy editor zipfile", flush=True)

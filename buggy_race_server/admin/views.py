@@ -56,10 +56,9 @@ from buggy_race_server.admin.forms import (
 from buggy_race_server.admin.models import (
     Announcement,
     DbFile,
-    DistribMethods,
     TaskText,
     Setting,
-    SocialSetting,
+    LinkedSiteSettings,
     Task
 )
 from buggy_race_server.buggy.models import Buggy
@@ -70,7 +69,8 @@ from buggy_race_server.config import (
     ConfigGroupNames,
     ConfigSettingNames,
     ConfigSettings,
-    ConfigTypes
+    ConfigTypes,
+    DistribMethods,
 )
 from buggy_race_server.database import db
 from buggy_race_server.extensions import csrf, bcrypt
@@ -146,7 +146,7 @@ def _is_editor_zipfile_published():
         join_to_project_root(
             current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
             current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-            current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
         )
     )
 
@@ -181,7 +181,33 @@ def _update_settings_in_db(form):
     has_changed_secret_key = False
     is_in_setup_mode = bool(current_app.config[ConfigSettingNames._SETUP_STATUS.name])
     is_update_ok = True # optimistic
-    for setting_form in form.settings.data:
+
+    # special case: in setup mode, when the editor distribution method is set,
+    # the "suggested" config settings that match it are set too: since we've
+    # anticipated the possibility of config being missing from the database
+    # during setup, add them here so they can be INSERTed instead of UPDATEd
+    # where appropriate
+    form_settings_data = [item for item in form.settings.data]
+    if is_in_setup_mode:
+        is_setting_suggested_values = False
+        distrib_method = None
+        for item in form.settings.data:
+            if item.get('name') == ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name:
+                distrib_method = item.get('value')
+                break
+        if distrib_method:
+            suggested_config = DistribMethods.get_suggested_config_settings(distrib_method)
+            for name, value in suggested_config.items():
+                if value is not None and value != ConfigSettings.NONEMPTY_VALUE:
+                    form_settings_data.append({'name': name, 'value': str(value)})
+                    is_setting_suggested_values = True
+            if is_setting_suggested_values:
+                flash(
+                    "Overriding some default config setting suggestions to match "
+                    f"the distribution method of \"{distrib_method}\"",
+                    "info"
+                )
+    for setting_form in form_settings_data:
         name = setting_form.get('name').upper() # force uppercase for config keys
         value = setting_form.get('value').strip()
         if ConfigSettings.TYPES.get(name) == ConfigTypes.PASSWORD:
@@ -216,6 +242,7 @@ def _update_settings_in_db(form):
         if is_changed_value:
             qty_settings_changed += 1
             has_changed_secret_key = name == ConfigSettingNames.SECRET_KEY.name
+
     if qty_settings_changed:
         settings_table = Setting.__table__
         if config_data_update:
@@ -326,17 +353,28 @@ def setup_summary():
             qty_announcements_global += 1
     buggy_editor_repo_owner=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
     api_secret_ttl_pretty=get_pretty_approx_duration(current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name])
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+    editor_distrib_desc = DistribMethods.get_desc(editor_distrib_method)
+    config_diff_against_suggestions = DistribMethods.get_config_diff_against_suggestions(current_app)
+    config_diff_group_names = {}
+    for setting_name in config_diff_against_suggestions:
+        if group := ConfigSettings.get_group_name(setting_name):
+            config_diff_group_names[group] = ConfigSettings.pretty_group_name(group)
     return render_template(
       "admin/setup_summary.html",
-      is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
-      buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
+      buggy_editor_download_url=current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       buggy_editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
       buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
       api_secret_ttl_pretty=api_secret_ttl_pretty,
       buggy_editor_repo_owner=buggy_editor_repo_owner,
-      buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
+      config_diff_against_suggestions=config_diff_against_suggestions,
+      config_diff_group_names=config_diff_group_names,
+      editor_distrib_desc=editor_distrib_desc,
+      editor_distrib_method=editor_distrib_method,
       institution_full_name=current_app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       institution_home_url=institution_home_url,
       institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
@@ -345,7 +383,7 @@ def setup_summary():
       is_report=bool(report_type),
       is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
-      is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+      is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
       is_task_list_published=_is_task_list_published(),
       is_tech_notes_index_published=_is_tech_notes_index_published(),
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
@@ -369,6 +407,7 @@ def setup_summary():
       tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
       tech_notes_external_url=current_app.config[ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name],
       tech_notes_published_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
       workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
     )
 
@@ -473,15 +512,28 @@ def setup():
         setting: markdown.markdown(ConfigSettings.DESCRIPTIONS[setting])
         for setting in ConfigSettings.DESCRIPTIONS
     }
-    social_settings = SocialSetting.get_socials_from_config(
+    link_settings = LinkedSiteSettings.get_linked_sites_from_config(
         settings_as_dict, want_all=True
     )
     pretty_group_name_dict = { 
         name:ConfigSettings.pretty_group_name(name)
         for name in ConfigSettings.GROUPS
     }
+    # note: suggested_settings aren't used on any pages until _after_ the
+    #       Editor group (which is where the distrib method is set)...
+    #       so the results here aren't used before that
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+    suggested_settings = DistribMethods.get_suggested_config_settings(editor_distrib_method)
+    pretty_suggested_settings = {
+        name: ConfigSettings.prettify(name, value)
+        for name, value in suggested_settings.items()
+    }
     return render_template(
         "admin/setup.html",
+        NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
+        config_diff_against_suggestions=DistribMethods.get_config_diff_against_suggestions(current_app),
+        distrib_methods=DistribMethods,
+        editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
         form=form,
         group_name=group_name,
@@ -489,13 +541,15 @@ def setup():
         html_descriptions=html_descriptions,
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
+        pretty_suggested_settings=pretty_suggested_settings,
         qty_setup_steps=qty_setup_steps,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
         setup_group_description=ConfigSettings.SETUP_GROUP_DESCRIPTIONS[group_name],
         setup_status=setup_status,
-        social_settings=social_settings,
+        link_settings=link_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+        suggested_settings=suggested_settings,
         type_of_settings=ConfigSettings.TYPES,
   )
 
@@ -546,8 +600,8 @@ def admin():
         is_task_list_published=_is_task_list_published(),
         is_tech_notes_index_published=_is_tech_notes_index_published(),
         is_editor_zipfile_published=_is_editor_zipfile_published(),
-        is_using_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB.name],
-        buggy_editor_download_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+        is_using_vcs=current_app.config[ConfigSettingNames.IS_USING_VCS.name],
+        buggy_editor_download_url=current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
         notes_generated_timestamp=servertime_str(
           current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
           current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
@@ -620,11 +674,6 @@ def list_users(data_format=None, want_detail=True):
         ):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
-        is_showing_github_column = (
-            current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
-            and
-            current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
-        )
         return render_template("admin/users.html",
             admin_usernames=admin_usernames,
             current_user_can_edit=current_user_can_edit,
@@ -635,7 +684,7 @@ def list_users(data_format=None, want_detail=True):
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
-            is_showing_github_column=is_showing_github_column,
+            is_showing_github_column=current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name],
             qty_admins=qty_admins,
             qty_students_login_enabled=len([s for s in students if s.is_login_enabled]),
             qty_students_enabled=len([s for s in students if s.is_active]),
@@ -645,7 +694,9 @@ def list_users(data_format=None, want_detail=True):
             qty_students_logged_in_first=len([s for s in students if s.first_logged_in_at]),
             qty_students=len(students),
             qty_teaching_assistants=qty_teaching_assistants,
+            student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
             users=users,
+            vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
             want_detail=want_detail,
         )
 
@@ -796,6 +847,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
@@ -805,7 +857,9 @@ def show_user(user_id):
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+        student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
         upload_text_form=UploadTaskTextsForm(),
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 
 def manage_user(user_id):
@@ -842,6 +896,8 @@ def manage_user(user_id):
               user.first_name = form.first_name.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:
               user.last_name = form.last_name.data
+          if current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name]:
+              user.github_username = form.github_username.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_EMAIL.name]:
               user.email = form.email.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_USERNAME.name]:
@@ -879,6 +935,7 @@ def manage_user(user_id):
   return render_template(
       "admin/user_edit.html",
       action_url=action_url,
+      editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
       example_username=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
       ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
       ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
@@ -887,7 +944,9 @@ def manage_user(user_id):
       is_current_user_comment_editor=is_current_user_comment_editor,
       is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
+      student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
       user=user,
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )
 
 @blueprint.route("/users/logins", methods=['GET', 'POST'], strict_slashes=False)
@@ -941,13 +1000,14 @@ def delete_github_details(user_id):
         user = User.query.filter_by(username=user_id).first()
     if user is None:
         abort(404)
+    vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
     form = SubmitWithConfirmForm(request.form)
     if form.is_submitted() and form.validate():
         if (user.github_username is None and user.github_access_token is None):
-            flash("Nothing changed: user's GitHub details were already removed", "warning")
+            flash(f"Nothing changed: user's {vcs_name} details were already removed", "warning")
         elif not form.is_confirmed.data:
             flash(
-              f"Did not not delete GitHub details because you did not explicity confirm it",
+              f"Did not not delete {vcs_name} details because you did not explicity confirm it",
               "danger"
             )
             return redirect(url_for("admin.edit_user", user_id=user.id))
@@ -956,11 +1016,11 @@ def delete_github_details(user_id):
             user.github_access_token = None
             user.save()
             flash(
-              f"OK, user {user.pretty_username}'s GitHub details have been removed",
+              f"OK, user {user.pretty_username}'s {vcs_name} details have been removed",
               "success"
             )
             flash(
-              "Reminder: this hasn't changed anything on GitHub.com — "
+              f"Reminder: this hasn't changed anything on the {vcs_name} site — "
               "if they forked the buggy editor repo, it will still be there",
               "info"
             )
@@ -1202,14 +1262,14 @@ def settings(group_name=None):
     """Admin settings check page."""
     form = SettingForm(request.form)
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-    social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+    link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
         # group_name = form['group'].data
         if form.is_submitted() and form.validate():
             _update_settings_in_db(form)
             # inefficient, but update to reflect changes
             settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
-            social_settings = SocialSetting.get_socials_from_config(settings_as_dict, want_all=True)
+            link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
         else:
             _flash_errors(form)
     html_descriptions = { 
@@ -1225,23 +1285,46 @@ def settings(group_name=None):
             for setting in ConfigSettings.GROUPS[group]:
                 groups_by_setting[setting] = group.lower()
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
+    editor_distrib_method = current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]
+    suggested_settings = DistribMethods.get_suggested_config_settings(editor_distrib_method)
+    pretty_suggested_settings = {
+        name: ConfigSettings.prettify(name, value)
+        for name, value in suggested_settings.items()
+    }
+    report_poster_warning = ""
+    if not ConfigSettings.is_valid_report_poster_type_combo(
+        current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    ):
+        report_poster_warning = f"""The values for
+          {ConfigSettingNames.PROJECT_REPORT_TYPE.name} and 
+          {ConfigSettingNames.PROJECT_POSTER_TYPE.name} (in the "Projects" group)
+          do not look correct (maybe an invalid combination?)"""
     return render_template(
         "admin/settings.html",
+        NONEMPTY_VALUE=ConfigSettings.NONEMPTY_VALUE,
+        config_diff_against_suggestions=DistribMethods.get_config_diff_against_suggestions(current_app),
         docs_url=current_app.config[ConfigSettingNames._BUGGY_RACE_DOCS_URL.name],
+        editor_distrib_method=editor_distrib_method,
         env_setting_overrides=current_app.config[ConfigSettings.ENV_SETTING_OVERRIDES_KEY],
+        distrib_methods=DistribMethods,
         form=form,
         groups_by_setting=groups_by_setting,
         group_name=group_name,
         groups=ConfigSettings.GROUPS,
         html_descriptions=html_descriptions,
+        is_showing_config_warnings=current_app.config[ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name],
         is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
         pretty_default_settings=ConfigSettings.get_pretty_defaults(),
         pretty_group_name_dict=pretty_group_name_dict,
+        pretty_suggested_settings=pretty_suggested_settings,
+        report_poster_warning=report_poster_warning,
         SETTING_PREFIX=SETTING_PREFIX,
         settings=settings_as_dict,
-        social_settings=social_settings,
+        link_settings=link_settings,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
         type_of_settings=ConfigSettings.TYPES,
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
     )
 
 @blueprint.route("/announcements/no-html", strict_slashes=False)
@@ -1453,13 +1536,13 @@ def tech_notes_admin():
     form=FlaskForm(request.form), # nothing except CSRF token
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     key_settings=[
-        ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name,
+        ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
         ConfigSettingNames.PROJECT_CODE.name,
-        ConfigSettingNames.SOCIAL_0_NAME.name,
-        ConfigSettingNames.SOCIAL_1_NAME.name,
-        ConfigSettingNames.SOCIAL_2_NAME.name,
-        ConfigSettingNames.SOCIAL_3_NAME.name,
+        ConfigSettingNames.SITE_1_NAME.name,
+        ConfigSettingNames.SITE_2_NAME.name,
+        ConfigSettingNames.SITE_3_NAME.name,
+        ConfigSettingNames.SITE_4_NAME.name,
     ],
     notes_generated_timestamp=servertime_str(
         current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
@@ -1625,6 +1708,7 @@ def tasks_admin():
         example_task=example_task,
         is_fresh_update=is_fresh_update,
         is_injecting_github_issues=is_injecting_github_issues,
+        is_issues_csv_in_reverse_order=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name],
         is_showing_all_tasks=want_all,
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
@@ -1636,6 +1720,7 @@ def tasks_admin():
         task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
         tasks_loaded_at=current_app.config[ConfigSettingNames._TASKS_LOADED_DATETIME.name],
         tasks=tasks,
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
         form=form,
     )
 
@@ -1671,17 +1756,22 @@ def download_tasks(type=None, format=None):
             pass # failure to delete is untidy but not important
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=False)
     elif type == CURRENT:
-        tasks = Task.query.filter_by(is_enabled=True).order_by(
-            Task.phase.asc(),
-            Task.sort_position.asc()
-        ).all()
         if format == FORMAT_CSV:
+            want_reversed = current_app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name]
+            tasks = Task.query.filter_by(is_enabled=True).order_by(
+                Task.phase.desc() if want_reversed else Task.phase.asc(),
+                Task.sort_position.desc() if want_reversed else Task.sort_position.asc(),
+            ).all()
             payload = get_tasks_as_issues_csv(
                 tasks,
                 current_app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
                 is_line_terminator_crlf=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
             )
         else:
+            tasks = Task.query.filter_by(is_enabled=True).order_by(
+                Task.phase.asc(),
+                Task.sort_position.asc()
+            ).all()
             payload = "".join([task.raw_markdown for task in tasks if task.is_enabled])
         filename = get_download_filename(f"tasks-{type}.{format}", want_datestamp=True)
     return Response(
@@ -1931,7 +2021,8 @@ def show_buggy_editor_info():
       is_editor_zipfile_published=_is_editor_zipfile_published(),
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
-      delete_form=SubmitWithConfirmForm()
+      delete_form=SubmitWithConfirmForm(),
+      vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
    )
 
 @blueprint.route("/buggy-editor/delete", strict_slashes=False, methods=["POST"])
@@ -1948,7 +2039,7 @@ def delete_buggy_editor_zip():
             )
             return redirect(url_for("admin.show_buggy_editor_info"))
         if form.is_confirmed.data:
-            zipfilename = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+            zipfilename = current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
             target_zipfile = join_to_project_root(
                 current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                 current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
@@ -1973,6 +2064,7 @@ def publish_editor_zip():
     readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename = current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
+    is_writing_host_and_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
     form = PublishEditorSourceForm(request.form)
     if request.method == "POST":
         readme_contents = form.readme_contents.data
@@ -1985,6 +2077,15 @@ def publish_editor_zip():
             value=1 if is_writing_server_url_in_editor else 0
         )
         current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name] = is_writing_server_url_in_editor
+
+        is_writing_host_and_port_in_editor = form.is_writing_host_and_port_in_editor.data
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
+            value=1 if is_writing_host_and_port_in_editor else 0
+        )
+        current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name] = is_writing_host_and_port_in_editor
+
         try:
             create_editor_zipfile(readme_contents, app=current_app)
         except (FileNotFoundError, IOError) as e:
@@ -2008,7 +2109,14 @@ def publish_editor_zip():
         if is_writing_server_url_in_editor:
             server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
             flash(
-                f"Set BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
+                f"Hardcoded BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
+                "info"
+            )
+        if is_writing_host_and_port_in_editor:
+            host = current_app.config[ConfigSettingNames.EDITOR_HOST.name]
+            port = current_app.config[ConfigSettingNames.EDITOR_PORT.name]
+            flash(
+                f"Hardcoded default host and port to \"{host}:{port}\" within {editor_python_filename}",
                 "info"
             )
         qty_lines_in_readme = readme_contents.count("\n")
@@ -2017,6 +2125,7 @@ def publish_editor_zip():
             "info"
         )
         flash("OK, editor files now zipped up and published", "success")
+        flash("You should download the zip file, unzip it and check its contents before you distribute it to students!", "info")
         return redirect(url_for("admin.show_buggy_editor_info"))
     else:
         readme_contents = render_template(
@@ -2029,6 +2138,7 @@ def publish_editor_zip():
         "admin/buggy_editor_publish.html",
         form=form,
         is_writing_server_url_in_editor=is_writing_server_url_in_editor,
+        is_writing_host_and_port_in_editor=is_writing_host_and_port_in_editor,
         qty_lines_in_readme=qty_lines_in_readme,
         readme_filename=readme_filename,
         editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
@@ -2047,7 +2157,7 @@ def download_editor_zip_for_admin():
     zipfile = join_to_project_root(
         current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+        current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     )
     if not os.path.exists(zipfile):
         flash("Editor zip file not available (has not been published)", "danger")
@@ -2156,7 +2266,8 @@ def config_dump_as_dotenv():
     # not useful when loading a new buggy racing server:
     EXCLUDE_FROM_DUMP = [
         'FLASK_DEBUG', 
-        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES'
+        '_ANNOUNCEMENT_TOP_OF_PAGE_TYPES',
+        '_CURRENT_ANNOUNCEMENTS', # is transient (and was dumping SQL!)
     ]
     config_text_lines = [
         "# config dump (suitable as .env?) of buggy race server "

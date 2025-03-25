@@ -145,16 +145,16 @@
         racing server password to you in plaintext.
       </p>
     </li>
-    {% if is_student_using_github_repo %}
+    {% if is_student_using_repo %}
       <li>
         <h3 id="sign-in-to-github">
-          <a class="toclink" href="#sign-in-to-github">sign in to GitHub</a>
+          <a class="toclink" href="#sign-in-to-github">sign in to {{ vcs_name }}</a>
         </h3>
         <p>
-          If you haven't already got a GitHub account, you'll need to register
-          a new account on <a href="https://github.com">GitHub</a>.
+          If you haven't already got a {{ vcs_name }} account, you'll need to register
+          a new account on <a href="https://github.com">{{ vcs_name }}</a>.
           <br>
-          Log into your GitHub account.
+          Log into your {{ vcs_name }} account.
         </p>
       </li>
       {% if not is_using_github_api_to_fork %}
@@ -163,22 +163,22 @@
             <a class="toclink" href="#manually-fork">fork the repo</a>
           </h3>
           <p>
-            (You must be logged into GitHub to do this).<br>
-            Go to the <a href="{{ buggy_editor_github_url }}">buggy editor repo</a>
+            (You must be logged into {{ vcs_name }} to do this).<br>
+            Go to the <a href="{{ buggy_editor_repo_url }}">buggy editor repo</a>
             and <em>fork</em> it into your account by clicking on the "fork" button
             near the top right of the page. This makes your own copy of
-            the buggy editor repo in your own GitHub account.
+            the buggy editor repo in your own {{ vcs_name }} account.
           </p>
         </li>
       {% else %}
         <li>
           <h3 id="connect-to-github">
-            <a class="toclink" href="#connect-to-github">connect to GitHub</a>
+            <a class="toclink" href="#connect-to-github">connect to {{ vcs_name }}</a>
           </h3>
           <p>
             On the race server, there's a button for this:
             <a href="{{ url_for('user.home_page') }}">Connect your race server account</a>
-            to your GitHub account.
+            to your {{ vcs_name }} account.
           </p>
         </li>
         <li>
@@ -186,7 +186,7 @@
             <a class="toclink" href="#fork-the-repo">fork the repo</a>
           </h3>
           <p>
-            Fork the Buggy Editor repo into your GitHub account (by pressing
+            Fork the Buggy Editor repo into your {{ vcs_name }} account (by pressing
             the <a href="{{ url_for('user.home_page') }}">button</a>
             on the race server — this is what you authorised the server
             to do in the previous step).
@@ -198,7 +198,7 @@
               <a class="toclink" href="#see-the-issues-arrive">see the issues arrive</a>
             </h3>
             <p>
-              Moments after forking, our server tries to inject GitHub issues into
+              Moments after forking, our server tries to inject {{ vcs_name }} issues into
               your repo (one for each task). You don't <em>need</em> these — they are
               just for fun/learning.
             </p>
@@ -216,8 +216,8 @@
         </h3>
         <p>
           Now clone <em>your</em> copy of the buggy editor repo (that's
-          the one you just forked into your own GitHub account) onto your
-          own machine, if you can. Find the repo in your own GitHub account
+          the one you just forked into your own {{ vcs_name }} account) onto your
+          own machine, if you can. Find the repo in your own {{ vcs_name }} account
           and click on the green <strong>Code</strong> button to get the URL
           of the repo (it's either <code>https:</code> or <code>git@</code>
           depending on what authentication you've got set up).
@@ -251,7 +251,7 @@
             and work entirely in-browser.
           </li>
           <li>
-            Download the zip file from GitHub (click the green <strong>code</strong>
+            Download the zip file from {{ vcs_name }} (click the green <strong>code</strong>
             button on your repo) and unzip it on your own machine. (This will require
             installing python, pip and sqlite3 locally on your computer).
           </li>
@@ -262,8 +262,8 @@
             If you're feeling up to the challenge of using git, we have some options for you!
           </p>
           <p>
-            The best way is probably to use GitHub GUI (video:
-            <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dc1be577-db16-4f23-b975-ad200135c7a0">0-GET with GitHub GUI</a>),
+            The best way is probably to use {{ vcs_name }} GUI (video:
+            <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=dc1be577-db16-4f23-b975-ad200135c7a0">0-GET with {{ vcs_name }} GUI</a>),
             or install Git and try the command line (video:
             <a href="https://rhul.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=66081520-cc38-4ef5-a40a-ad2001272186">0-GET with command-line git</a>)
             in a terminal or (Windows) git bash.
@@ -277,8 +277,8 @@
         </h3>
         {# note this is very dependent on how the project is being run: should be a custom edit #}
         <p>
-          Get your copy of the editor code. You can download it from GitHub but going to
-          <a href="{{ buggy_editor_github_url }}">the buggy editor repo</a> and clicking on the
+          Get your copy of the editor code. You can download it from {{ vcs_name }} by going to
+          <a href="{{ buggy_editor_repo_url }}">the buggy editor repo</a> and clicking on the
           green <strong>Code</strong> button:
         </p>
         <ul>
@@ -308,7 +308,7 @@
      <a href="{{ superbasics_url }}/file-system/">Read these superbasics</a>
      because you <em>must</em> be very comfortable with them!
     </p>
-    {% if is_student_using_github_repo and not is_using_remote_vs_workspace %}
+    {% if is_student_using_repo and not is_using_remote_vs_workspace %}
       <p>
         If you didn't clone the repo into a place you're happy with, you can
         <em>move the whole repo</em> on your machine. It's best to do this before
@@ -504,7 +504,7 @@
      You're a web dev now.
     </p>
    </li>
-   {% if is_student_using_github_repo %}
+   {% if is_student_using_repo %}
     <li class="optional">
       <h3 id="commit-changes">
         <a class="toclink" href="#commit-changes">commit changes</a>

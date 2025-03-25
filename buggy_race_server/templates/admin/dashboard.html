@@ -57,7 +57,7 @@
       </div>
     {% endif %}
   {% endif %}
-  {% if not is_using_github %}
+  {% if not is_using_vcs %}
     {% if not buggy_editor_download_url and not is_editor_zipfile_published %}
       <div class="alert alert-danger">
         <h2 class="alert-title">Editor source zipfile has not been published yet</h2>

@@ -16,7 +16,10 @@
           <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('user.list_task_texts') }}">Texts</a>
         {% endif %}
         {% if is_report %}
-          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details</a>
+          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page='report' ) }}">Report</a>
+        {% endif %}
+        {% if is_poster %}
+          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page='poster' ) }}">Poster</a>
         {% endif %}
         <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes</a>
         {% if is_showing_project_workflow %}

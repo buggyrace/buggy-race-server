@@ -17,22 +17,47 @@
     </h1>
   </div>
   {% if race %}
-    <div class="row">
-      <div class="col my-3">
-        <div class="alert-info">
-          <div class="row p-3">
-            <div class="col-md-4">
-              <a href="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
-            </div>
-            <div class="col-md-8">
-              To upload results, you'll need to have the <strong>results JSON
-              file</strong> that is produced when you run the race using the
-              (offline) run-buggy-race utliity.
-            </div>
+    {% if race.is_abandoned %}
+      <div class="row">
+        <div class="col my-3">
+          <div class="alert-info p-3">
+              This race has been abandoned.
+              <br>
+              If you want to change this, set <em>Is abandoned?</em>
+              to <code>No</code>. When the race is no longer abandoned, you can
+              upload results.
           </div>
         </div>
       </div>
-    </div>
+    {% else %}
+      <div class="row mb-3">
+        <div class="col mb-3">
+          <div class="alert-info">
+            <div class="row p-3">
+              <div class="col-md-4">
+                <a href="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-jump">Upload results</a>
+              </div>
+              <div class="col-md-8">
+                To upload results, you'll need to have the <strong>results JSON
+                file</strong> that is produced when you run the race using the
+                (offline) run-buggy-race utliity.
+              </div>
+            </div>
+            {% if not race.is_abandoned %}
+              <div class="row p-3">
+                <div class="col-md-4">
+                  <a href="{{ url_for('admin_race.abandon_race', race_id=race.id) }}" class="btn btn-outline-danger btn-admin btn-jump">Abandon race</a>
+                </div>
+                <div class="col-md-8">
+                  Abandon the race if you have decided not to run it, or there
+                  are were no buggies entered.
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
   {% endif %}
   <div class="row">
     <div class="col grey-wrapper p-2">
@@ -192,7 +217,7 @@
             </p>
           </div>
         </div>
-        <div class="row bg-white py-2 m-1">
+        <div class="row  {% if (race and not race.is_visible) %} alert-danger {% else %} bg-white {% endif %} py-2 m-1">
           <div class="col-sm-3">
             {{ form.is_visible.label }}
           </div>
@@ -212,7 +237,7 @@
             </p>
           </div>
         </div>
-        <div class="row bg-white py-2 m-1">
+        <div class="row {% if (race and not race.is_result_visible) %} alert-danger {% else %} bg-white {% endif %} py-2 m-1">
           <div class="col-sm-3">
             {{ form.is_result_visible.label }}
           </div>
@@ -234,17 +259,33 @@
           </div>
         </div>
         {% if race %}
-          <div class="row bg-white py-2 m-1 ">
+          <div class="row alert-warning py-2 m-1 ">
             <div class="col-sm-3">
-              {{ form.race_file_url.label }}
+              {{ form.is_abandoned.label }}
             </div>
             <div class="col-sm-4">
-              {{ form.race_file_url(class_="form-control mr-sm-1") }}
+              {% if race.is_abandoned %}
+                <select name="is_abandoned" class="form-control">
+                  <option value="">No</option>
+                  <option value="1" selected="selected">Yes</option>
+                </select>
+              {% else %}
+                <em>No</em>
+              {% endif %}
             </div>
             <div class="col-sm-5">
-              <p>
-                URL for the JSON file containing the race results (if any).
-              </p>
+              {% if race.is_abandoned %}
+                <p>
+                  This race has been abandoned. If you want to revert this,
+                  choose <code>No</code>. You will have to subsequently upload
+                  some results.
+                </p>
+              {% else %}
+                <p>
+                  To abandon the race, click the <em>Abandon race</em> button
+                  at the top of the page.
+                </p>
+              {% endif %}
             </div>
           </div>
           <div class="row alert-warning py-2 m-1 ">
@@ -260,6 +301,25 @@
               Some or all of the following fields may be set automatically
               when you upload results, because they can be included in the
               result JSON that is generated when you run the race.
+            </div>
+          </div>
+          <div class="row alert-warning py-2 m-1 ">
+            <div class="col-sm-3">
+              {{ form.race_file_url.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.race_file_url(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                URL for the JSON file containing the race results (if any).
+                {% if is_storing_racefiles_in_db %}
+                  <br>
+                  Because <code>IS_STORING_RACE_FILES_IN_DB</code> is set to
+                  <code>Yes</code>, the race file is automatically stored on
+                  this server when you upload results.
+                {% endif %}
+              </p>
             </div>
           </div>
           <div class="row alert-warning py-2 m-1 ">

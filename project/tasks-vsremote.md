@@ -22,7 +22,7 @@ to happen:
 * Go to the [buggy race server](%BUGGY_RACE_SERVER_URL%) and login.
 * Link your account to your Github personal account.
 * `Fork` the template for the buggy race editor from
-  [our Github repository](%BUGGY_EDITOR_GITHUB_URL%) to yours.
+  [our Github repository](%BUGGY_EDITOR_REPO_URL%) to yours.
 * Download your *VSCode workspace configuration file* by clicking in the
   corresponding button. Store it somewhere safe.
 * Open it with VSCode. It might complain that some plugins and packages are
@@ -62,7 +62,7 @@ clone the repo from GitHub into your personal home directory on the server:
 * (We'll also inject these tasks directly into your repo's issues for you too).
 
 * The source code for your webserver app is in
-  [this Git repository](%BUGGY_EDITOR_GITHUB_URL%) (but don't use that repo!
+  [this Git repository](%BUGGY_EDITOR_REPO_URL%) (but don't use that repo!
   Fork youn own copy of it — see above!).
 
 * The VSCode workspace file you have downloaded from the Buggy Race Server is
@@ -79,7 +79,7 @@ clone the repo from GitHub into your personal home directory on the server:
   your copy, you can make changes.
 
 * To fork manually: first, log into GitHub, then go to
-  [our copy of the repo](%BUGGY_EDITOR_GITHUB_URL%) and click on Fork (on the
+  [our copy of the repo](%BUGGY_EDITOR_REPO_URL%) and click on Fork (on the
   top right of the screen). (But: don't do this! See the first hint ↑ up there).
 
 * We expect you to do your development on our _teaching server_ (where you can

@@ -3,7 +3,7 @@
 File `tasks.md` contains the text for all the tasks _except_ the first
 two tasks - 0-GET and 0-RUN. These depend on the config settings of the
 distribution method, and the names/keys of those are in
-`buggy_race_server/admin/models.py` as `DistribMethods`.
+`buggy_race_server/config.py` as `DistribMethods`.
 The default is "zip".
 
 See the docs on

@@ -87,6 +87,11 @@
                   {% else %}
                     <em class="empty-setting">empty (no announcements)</em>
                   {% endif %}
+                {% elif setting_name == '_IS_DOCS_HELPER_PAGE_ENABLED' %}
+                  <code class="mr-4">{{ config[setting_name] }}</code>
+                  {% if config[setting_name] %}
+                    <a class="btn btn-admin btn-sm btn-outline-secondary btn-jump" href="{{ url_for('admin.config_docs_helper')}}">Docs helper</a>
+                  {% endif %}
                 {% else %}
                   <code>{{ config[setting_name] }}</code>
                 {% endif %}

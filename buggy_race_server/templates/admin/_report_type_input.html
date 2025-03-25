@@ -1,5 +1,11 @@
 <select name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-value" class="form-control">
-  <option value="" {% if settings[name] == "" %} selected="selected" {% endif %}>No report</option>
-  <option value="report" {% if settings[name] == "report" %} selected="selected" {% endif %}>Report</option>
-  <option value="poster" {% if settings[name] == "poster" %} selected="selected" {% endif %}>Poster</option>
+  <option value="" {% if settings[name] == "" %} selected="selected" {% endif %}
+  >No {% if name == 'PROJECT_POSTER_TYPE' %} poster {% else %} report {% endif %}
+  </option>
+  <option value="document" {% if settings[name] == "document" %} selected="selected" {% endif %}>Document</option>
+  <option value="in editor" {% if settings[name] == "in editor" %} selected="selected" {% endif %}>In editor</option>
+  {% if name == 'PROJECT_POSTER_TYPE' %}
+    <option value="top of report" {% if settings[name] == "top of report" %} selected="selected" {% endif %}>Top of report</option>
+    <option value="bottom of report" {% if settings[name] == "bottom of report" %} selected="selected" {% endif %}>Bottom of report</option>
+  {% endif %}
 </select>

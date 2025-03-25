@@ -285,7 +285,7 @@ class TaskForm(FlaskForm):
       [DataRequired()]
     )
     hints_text = TextAreaField(
-      "Helful hints to help students understand the problem and perhaps concepts around it",
+      "Helpful hints to help students understand the problem and perhaps concepts around it",
       [DataRequired()]
     )
     sort_position = IntegerField("Sort position used to determine display order within each phase)",
@@ -338,7 +338,7 @@ class PublishEditorSourceForm(FlaskForm):
         f"README contents", validators=[DataRequired()]
     )
     is_writing_server_url_in_editor = BooleanField("Hardcode server URL in the Python source?")
-
+    is_writing_host_and_port_in_editor = BooleanField("Hardcocde editor host and port in the Python source?")
     def __init__(self, *args, **kwargs):
         super(PublishEditorSourceForm, self).__init__(*args, **kwargs)
   

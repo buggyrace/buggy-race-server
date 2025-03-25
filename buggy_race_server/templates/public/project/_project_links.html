@@ -13,16 +13,50 @@
       </p>
     </div>
   </div>
-  {% if report_type %}
+  {% if is_report or is_poster %}
     <div class="col-md">
       <div class="p-3 mb-2 alert-poster">
-        <h2>{{ report_type | title }}</h2>
+        <h2>{{ report_link_text }}</h2>
         <p>
-          Your buggy editor must include a webpage called <code>{{ report_type }}</code>
-          that "sells" your editor and summarises your journey through those tasks.
+          {% if is_report and is_poster %}
+            You must produce a report and a poster for the project.
+          {% elif is_report %}
+            You must produce a report for the project.
+          {% elif is_poster %}
+            You must produce a poster for the project.
+          {% endif %}
+          {% if report_type == "in editor" %}
+            {% if is_poster %}
+              {% if poster_type == "top of report" or poster_type == "bottom of report" %}
+                Make sure your buggy editor includes a webpage called
+                <code>report</code> that contains both of them.
+              {% elif poster_type == "in editor" %}
+                Make sure your buggy editor includes webpages called
+                <code>report</code> and <code>poster</code> that contains them.
+              {% else %}
+                Make sure your buggy editor includes a webpage called
+                <code>report</code> that contains the report.
+              {% endif %}
+            {% else %}
+              Make sure your buggy editor includes a webpage called
+              <code>report</code> that contains it.
+            {% endif %}
+          {% elif is_poster and poster_type != "document" %}
+            Make sure your buggy editor includes a webpage called
+            <code>poster</code> that contains it.
+          {% endif %}
+          {% if is_report and is_storing_texts %}
+            You can build your report as you complete the tasks by saving 
+            <strong>texts</strong> on this race server.
+          {% endif %}
         </p>
-        <p>
-          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details</a>
+        <p class="btn-collection">
+          {% if is_report %}
+            <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page', page='report' ) }}">Report</a>
+          {% endif %}
+          {% if is_poster %}
+            <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for( 'public.serve_project_page', page='poster' ) }}">Poster</a>
+          {% endif %}
         </p>
       </div>
     </div>

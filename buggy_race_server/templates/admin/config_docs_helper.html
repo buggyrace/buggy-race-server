@@ -6,6 +6,15 @@
   <div class="row">
     <h1 class="col my-3">Config docs helper</h1>
   </div>
+  <div class="row my-3">
+    <div class="col">
+      {% for group_name in sorted_groupnames %}
+        {% if group_name != "AUTH" %}
+          <a href="#h2-{{ group_name | lower }}" class="btn btn-white btn-outline-secondary btn-sm">{{ pretty_group_name_dict[group_name] }}</a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
   <div class="row">
     <div class="col-md-8">
       <p>
@@ -18,9 +27,18 @@
         (tables) on pages like this: &rarr;
         {{ macros.docs_btn("Customising & config: server", "/customising/server#config-settings-server") }}
       </p>
-      <p>
+      <p class="p-3 border">
         See this <a href="https://github.com/buggyrace/buggy-race-about/blob/main/utils/update-customising-with-current-config.py">Python script</a>
         in the <code>utils/</code> directory of the documentation repo for details.
+        <br>
+        <strong>Script currently out-of-date!</strong> (Mar-2025)<br>
+        <em>
+        (because it turned out to be more common to copy-and-paste individual
+        sections by hand:
+        it's unusual to need to change <em>all</em> the config sections' docs
+        now, but should fix it so it is still feasible, especially as the
+        <code>LINKS</code> group is handled properly now)
+        </em>
       </p>
       <p>
         You can enable/disable access to <em>this</em> page on this server via the
@@ -28,25 +46,34 @@
       </p>
     </div>
   </div>
-  <div class="row">
-    <div class="col copy-to-clipboard" data-target="config-documentation-markdown">
-      <pre class="border border-secondary task-text p-3" id="config-documentation-markdown">
-{% for group_name in sorted_groupnames %}{% if group_name != "AUTH" %}
----------------------------------------------------------
-# {{ pretty_group_name_dict[group_name] }}
----------------------------------------------------------
 
+{% for group_name in sorted_groupnames %}
+  {% if group_name != "AUTH" %}
+  <div class="row">
+    <div class="col">
+      <h2 id="h2-{{ group_name | lower }}">{{ pretty_group_name_dict[group_name] }}</h2>
+    </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col copy-to-clipboard" data-target="config-{{ group_name | lower }}">
+      <pre class="border border-secondary task-text p-3" id="config-{{ group_name | lower }}">
 ## Config settings ("{{ pretty_group_name_dict[group_name] }}")
 
 {: .config-settings}
 | Setting  | Description   |
 |----------|---------------|
-{% for setting_name in groups[group_name] %}| `{{ setting_name }}` | {{ descriptions[ setting_name ] }}  &lt;br&gt;&lt;br&gt; _Default value:_ {{ md_pretty_default_settings[ setting_name ] }} |
-{% endfor %}{% endif %}
+{%+ for setting_name in groups[group_name] -%}
+  {%- if not (setting_name.startswith('SITE_2') or setting_name.startswith('SITE_3') or setting_name.startswith('SITE_4')) -%}
+    | `{{ setting_name }}` | {{ descriptions[ setting_name ] }}  &lt;br&gt;&lt;br&gt; _Default value:_ {{ md_pretty_default_settings[ setting_name ] }} |
+  {%- endif +%}
 {% endfor %}
       </pre>
     </div>
   </div>
+{% endif %}
+{% endfor %}
+
 </div>
+
 {% endblock %}
 

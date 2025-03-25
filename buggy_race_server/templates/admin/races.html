@@ -71,7 +71,11 @@
             <td class="text-right">
               {{ race.cost_limit }}
             </td>
-            {% if race.results_uploaded_at %}
+            {% if race.is_abandoned %}
+              <td colspan="3" class="text-center">
+                <em>Race abandoned</em>
+              </td>
+            {% elif race.results_uploaded_at %}
               <td class="text-right">
                 {{ race.buggies_entered }}
               </td>

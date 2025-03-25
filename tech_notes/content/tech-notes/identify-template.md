@@ -18,7 +18,7 @@ That tells you the _route_ on the webserver to that page, that you got to by
 clicking on a link on the preceding page. Your browser sent the request to
 `GET` `/new`. That's enough information to identify the code that is invoked
 for route `/new` with request method `GET`:
-[specific line (27)]({{ BUGGY_EDITOR_GITHUB_URL }}/blob/master/app.py#L26) in `app.py`:
+[specific line (27)]({{ BUGGY_EDITOR_REPO_URL }}/blob/master/app.py#L26) in `app.py`:
 
 ```python
 return render_template("buggy-form.html")

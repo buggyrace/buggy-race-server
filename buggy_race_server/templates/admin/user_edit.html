@@ -136,6 +136,47 @@
           </div>
         {% endif %}
 
+        {% if config['USERS_HAVE_VCS_USERNAME'] %}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ vcs_name }} username <!-- {{form.github_username.label}} -->
+          </div>
+          <div class="col-sm-4">
+            {{form.github_username(placeholder="", class_="form-control mr-sm-1")}}
+          </div>
+          <div class="col-sm-5">
+              User's {{ vcs_name }} username.
+              {% if user.github_access_token %}
+                <br>
+                There's an access token stored along with this username.
+                It's best to not change the username here:
+                see the "Delete {{ vcs_name }} details" form below. 
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if user.editor_repo_url %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              User's repo <!-- {{form.github_username.label}} -->
+            </div>
+            <div class="col-sm-4">
+              <a href="{{ user.editor_repo_url }}" title="buggy repo"
+              class="btn btn-outline-secondary btn-white btn-sm btn-jump ml-1">Repo</a>
+            </div>
+            <div class="col-sm-5">
+              The URL to the user's repo (if any) is constructed using the
+              <code>STUDENT_EDITOR_REPO_URL</code> config setting:<br>
+              {% if config['STUDENT_EDITOR_REPO_URL'] %}
+                <code>{{ config['STUDENT_EDITOR_REPO_URL'] }}</code>
+              {% else %}
+                <span class="empty-setting">not set</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        
         {% if config['USERS_HAVE_EMAIL'] %}
           <div class="row bg-white py-2 m-1">
             <div class="col-sm-3">
@@ -340,19 +381,19 @@
               <div class="col-md-7 p-3">
                 <p>
                   {% if user.github_username %}
-                    GitHub username is <code>{{ user.github_username }}</code>
+                    {{ vcs_name }} username is <code>{{ user.github_username }}</code>
                   {% else %}
-                    No GitHub username for this user.
+                    No {{ vcs_name }} username for this user.
                   {% endif %}
                   <br>
                   {% if user.github_access_token %}
-                    A GitHub access token <strong>has</strong> been issued for this account.
+                    A {{ vcs_name }} access token <strong>has</strong> been issued for this account.
                   {% else %}
-                    There is <strong>no</strong> GitHub access token for this account.
+                    There is <strong>no</strong> {{ vcs_name }} access token for this account.
                   {% endif %}
                 </p>
                 <p>
-                  Deleting GitHub details here will not make any changes on GitHub, but
+                  Deleting {{ vcs_name }} details here will not make any changes on {{ vcs_name }}, but
                   will remove any connection to the account. Do this if the user joined
                   with the wrong account and you want to clear it (maybe so they can try again).
                 </p>
@@ -363,7 +404,7 @@
                   <input type="hidden" name="user_id" value="user.id"/>
                   <div class="row">
                     <div class="col p-3">
-                      <label for="is_confirmed">Really delete GitHub details?</label>
+                      <label for="is_confirmed">Really delete {{ vcs_name }} details?</label>
                       <select id="is_confirmed" name="is_confirmed" class="form-control">
                        <option selected value="">No</option>
                         <option value="">I think so</option>
@@ -373,7 +414,7 @@
                   </div>
                   <div class="row">
                     <div class="col p-3 bottom">
-                      <input type="submit" class="btn btn-danger" value="Delete GitHub details"/>
+                      <input type="submit" class="btn btn-danger" value="Delete {{ vcs_name }} details"/>
                     </div>
                   </div>
                 </form>

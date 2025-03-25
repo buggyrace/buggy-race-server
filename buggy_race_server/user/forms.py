@@ -26,6 +26,7 @@ class UserForm(FlaskForm):
     email = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")
+    github_username = StringField("VCS username")
     is_student = BooleanField("Is an enrolled student?")
     is_active = BooleanField("Is active?")
     is_login_enabled = BooleanField("Is login enabled?")

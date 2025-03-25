@@ -16,7 +16,7 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 LINKS = ()
-SOCIAL = ()
+SITES = ()
 DEFAULT_PAGINATION = False
 
 # toc ("Table of Contents") extension makes headings linkable
@@ -44,23 +44,23 @@ CACHE_CONTENT = False
 # as a template (even though they mostly contain defaults/empty strings).
 JINJA_GLOBALS={
   "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
-  "BUGGY_EDITOR_GITHUB_URL": "https://github.com/buggyrace/buggy-race-editor",
+  "BUGGY_EDITOR_REPO_URL": "https://github.com/buggyrace/buggy-race-editor",
   "BUGGY_EDITOR_REPO_NAME": "buggy-race-editor",
   "BUGGY_EDITOR_REPO_OWNER": "buggyrace",
   "PROJECT_CODE": "",
   "PROJECT_REPORT_TYPE": "report",
-  "SOCIAL_0_NAME": "",
-  "SOCIAL_0_TEXT": "",
-  "SOCIAL_0_URL": "",
-  "SOCIAL_1_NAME": "",
-  "SOCIAL_1_TEXT": "",
-  "SOCIAL_1_URL": "",
-  "SOCIAL_2_NAME": "",
-  "SOCIAL_2_TEXT": "",
-  "SOCIAL_2_URL": "",
-  "SOCIAL_3_NAME": "",
-  "SOCIAL_3_TEXT": "",
-  "SOCIAL_3_URL": "",
+  "SITE_1_NAME": "",
+  "SITE_1_TEXT": "",
+  "SITE_1_URL": "",
+  "SITE_2_NAME": "",
+  "SITE_2_TEXT": "",
+  "SITE_2_URL": "",
+  "SITE_3_NAME": "",
+  "SITE_3_TEXT": "",
+  "SITE_3_URL": "",
+  "SITE_4_NAME": "",
+  "SITE_4_TEXT": "",
+  "SITE_4_URL": "",
   "TASK_NAME_FOR_API": "4-API",
   "TASK_NAME_FOR_VALIDATION": "1-VALID",
   "WANT_FAKE_LATEX": 0,

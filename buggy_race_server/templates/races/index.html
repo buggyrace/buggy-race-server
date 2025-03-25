@@ -95,7 +95,11 @@
         <tbody>
             {% for race in races %}
               <tr class="race-visible-{{ race.is_visible }}">
-                {% if race.results_uploaded_at %}
+                {% if not race.is_result_visible %}
+                  <td colspan="4" class="text-center">
+                    <em>Awaiting race report</em>
+                  </td>
+                {% elif race.results_uploaded_at %}
                   <td class="btn-collection">
                     {% if race.results_uploaded_at %}
                       <a class="btn btn-outline-secondary btn-white btn-jump"
@@ -131,7 +135,11 @@
                   </td>
                 {% else %}
                   <td colspan="4" class="text-center">
-                    <em>Awaiting race report</em>
+                    {% if race.is_abandoned %}
+                      <em>Race abandoned</em>
+                    {% else %}
+                      <em>Awaiting race report</em>
+                    {% endif %}
                   </td>
                 {% endif %}
                 <td>
@@ -154,6 +162,13 @@
       </table>
     </div>
   {% endif %}
+  <div class="row">
+    <div class="col">
+      <p class="btn-collection text-right">
+        <a class="btn btn-sm btn-outline-secondary btn-white btn-download" href="{{ url_for('race.serve_races_json') }}">Races JSON</a>
+      </p>
+    </div>
+  </div>
   <div class="row">
     <div class="col text-center">
       <img class="img-fluid" src="{{ static_url_for('static', filename='build/img/rene-buggy-1.png') }}" />

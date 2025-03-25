@@ -8,11 +8,11 @@
       Buggy Editor (the students' source code)
     </h1>
   </div>
-  {% if not is_using_github %}
+  {% if not is_using_vcs %}
     <div class="row">
       <div class="col-md-6">
         <div class="alert alert-info">
-          <h2 class="alert-title">Not using GitHub</h2>
+          <h2 class="alert-title">Not using Version Control</h2>
           {% if buggy_editor_zipfile_url %}
             <p>
               Your students can download the editor source code
@@ -132,11 +132,11 @@
             be downloading:
           </p>
           <p>
-            <code>{{ buggy_editor_github_url }}</code>
+            <code>{{ buggy_editor_repo_url }}</code>
           </p>
           </p>
           <p class="btn-collection">
-            <a href="{{ buggy_editor_github_url }}" class="btn btn-outline-primary btn-jump btn-white">Buggy editor repo on GitHub</a>
+            <a href="{{ buggy_editor_repo_url }}" class="btn btn-outline-primary btn-jump btn-white">Buggy editor repo on {{ vcs_name }}</a>
           </p>  
         </div>
       </div>
@@ -145,7 +145,7 @@
           <h2 class="alert-title">Customising the editor repo</h2>
           <p>
             {% if is_default_repo_owner  %}
-              You should probably fork that repo into your own GitHub account
+              You should probably fork that repo into your own {{ vcs_name }} account
               (or one belonging to {{ institution_short_name or institution_name or 'your institution'}}).
             {% endif %}
             Before your project starts, you should customise the <code>{{ readme_filename }}</code>

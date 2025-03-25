@@ -19,7 +19,7 @@ from buggy_race_server.admin.models import DbFile
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import servertime_str
+from buggy_race_server.utils import servertime_str, get_url_protocol
 
 class Racetrack(SurrogatePK, Model):
 
@@ -122,6 +122,14 @@ class Race(SurrogatePK, Model):
         return bool (self.race_file_url)
 
     @property
+    def url_dict(self):
+        return {
+            "Race file": self.race_file_url,
+            "Racetrack image": self.track_image_url,
+            "Racetrack SVG": self.track_svg_url
+        }
+
+    @property
     def start_at_servertime(self):
         """ Allows Jinja to display day/month/time as separate elements"""
         return servertime_str(
@@ -157,6 +165,25 @@ class Race(SurrogatePK, Model):
                     if race_file_url and race.race_file_url == race_file_url:
                         dup_fields["race_file_url"] = True
         return dup_fields.keys()
+
+    def urls_with_different_protocol_dict(self, server_protocol):
+        """ Returns a dictionary of pretty-name:values for URLs within this race
+            with a protocol that differs from the server's (e.g. https vs http).
+            Used for warning if we've ended up with a mix of protocols in the
+            URLs associated with the race — it's not critical, and probably
+            unlikely in live projects, but in dev (with imported databases) it
+            can catch you out, so it's used as a warning in the admin when
+            viewing a race's details.
+            Protocol_str: see utils get_protocol(url_str) e.g. "https", or None
+        """
+        urls = {}
+        if server_protocol:
+            for url_name in self.url_dict:
+                if url := self.url_dict[url_name]:
+                    if url_protocol := get_url_protocol(url):
+                        if url_protocol != server_protocol:
+                            urls[url_name] = url
+        return urls
 
 
     def load_race_results(self, results_data, is_ignoring_warnings=False, is_overwriting_urls=True):

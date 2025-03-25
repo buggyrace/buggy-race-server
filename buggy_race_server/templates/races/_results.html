@@ -1,4 +1,12 @@
-{% if race.results_uploaded_at or all_results|count %}
+{% if race.is_abandoned %}
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-info p-3">
+        This race was abandoned.
+      </div>
+    </div>
+  </div>
+{% elif race.results_uploaded_at or all_results|count %}
   <div class="row">
     <div class="col-md-6 my-3">
       <h3>Raced</h3>
@@ -113,11 +121,13 @@
     </div>
   </div>
 {% else %}
-  {# there's no results_uploaded_at and all_results is empty #}
+  {# There's no results_uploaded_at and all_results is empty. This may be     #}
+  {# because the race has been abandoned, in which case this section isn't    #}
+  {# displayed.                                                               #}
   <div class="row">
     <div class="col">
       <div class="alert alert-info p-3">
-        No results have been uploaded for this race yet.
+        No results have been uploaded for this race.
       </div>
     </div>
   </div>

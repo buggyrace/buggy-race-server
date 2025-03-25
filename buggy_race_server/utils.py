@@ -10,8 +10,8 @@ from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
 import shutil # for publishing the editor
 
-from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes
-from buggy_race_server.admin.models import Announcement, DbFile, DistribMethods, Setting, Task, TaskText
+from buggy_race_server.config import ConfigSettingNames, ConfigSettings, ConfigTypes, DistribMethods
+from buggy_race_server.admin.models import Announcement, DbFile, Setting, Task, TaskText
 from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
@@ -158,6 +158,14 @@ def load_settings_from_db(app):
 
     return Setting.get_dict_from_db(settings) # pass the settings back as a dict
 
+def is_poster(app):
+    """ the PROJECT_POSTER_TYPE setting may depend on the PROJECT_REPORT_TYPE
+        setting, so a little utility to do that (maybe should be in Config?)"""
+    poster_type = app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    if poster_type and poster_type in ("top of report", "bottom of report"):
+        # so depends on report being not false: (i.e., document or editor)
+        poster_type = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
+    return poster_type
 
 def set_and_save_config_setting(app, name, value):
     # this changes the app's config setting and also saves that
@@ -266,10 +274,10 @@ def get_tasks_as_issues_csv(tasks, header_row="", is_line_terminator_crlf=False)
         [
           f"{task.fullname} {task.title}",
           "\n\n".join([ # markdown: blank line between paras
-            re.sub(any_newline, "\\n", task.problem_text),
-            re.sub(any_newline, "\\n", task.solution_text),
+            re.sub(any_newline, line_terminator, task.problem_text),
+            re.sub(any_newline, line_terminator, task.solution_text),
             f"[{task.fullname}]({task.get_url(current_app.config)})"
-          ]).replace("\n", "\\n")
+          ]).replace("\n", line_terminator)
         ]
       )
     return str(issues_str)
@@ -607,12 +615,15 @@ def publish_tasks_as_issues_csv(app=current_app):
         app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
     )
-
     is_line_terminator_crlf = app.config[ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name]
+    want_reversed = app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name]
     csv = get_tasks_as_issues_csv(
-      Task.query.filter_by(is_enabled=True).order_by(Task.phase.asc(), Task.sort_position.asc()).all(),
-      header_row=app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
-      is_line_terminator_crlf=is_line_terminator_crlf
+        Task.query.filter_by(is_enabled=True).order_by(
+                Task.phase.desc() if want_reversed else Task.phase.asc(),
+                Task.sort_position.desc() if want_reversed else Task.sort_position.asc(),
+            ).all(),
+        header_row=app.config[ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name],
+        is_line_terminator_crlf=is_line_terminator_crlf
     )
 
     line_terminator = "\r\n" if is_line_terminator_crlf else "\n"
@@ -699,7 +710,7 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
       # timestamp comes in as a string (which is common in the code),
       # so parse it into a datetime now — may or may not have seconds
       if m := re.search(
-        "\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*",
+        r'\s*(\d\d\d\d-\d\d-\d\d \d\d:\d\d)(:\d\d)?.*',
         utc_datetime_input
       ):
           m = m.groups()
@@ -719,22 +730,42 @@ def servertime_str(server_timezone, utc_datetime_input, want_datetime=False):
 def _get_buggy_editor_kwargs(app):
     project_code=app.config[ConfigSettingNames.PROJECT_CODE.name]
     buggy_editor_repo_owner=app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name]
+    editor_port = app.config[ConfigSettingNames.EDITOR_PORT.name]
+    if editor_port is None or editor_port.strip() == "":
+        editor_port = ""
     return {
-      "buggy_editor_github_url": app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+      "buggy_editor_repo_url": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
-      "buggy_editor_repo_owner": app,
+      "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
       "editor_title": f"{project_code} Racing Buggy editor".strip(),
-      "buggy_editor_zipfile_url": app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name],
+      "buggy_editor_zipfile_url": app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
+      "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
+      "editor_port": editor_port,
+      "editor_port_with_colon": f":{editor_port}" if editor_port else "",
       "institution_name": app.config[ConfigSettingNames.INSTITUTION_FULL_NAME.name],
       "institution_short_name": app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
       "is_default_repo_owner": buggy_editor_repo_owner == 'buggyrace', # the default owner
-      "is_using_github": app.config[ConfigSettingNames.IS_USING_GITHUB.name],
+      "is_using_vcs": app.config[ConfigSettingNames.IS_USING_VCS.name],
       "is_using_github_api_to_fork": app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
       "project_code": project_code,
       "task_0_get_name": app.config[ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name],
       "task_3_env_name": app.config[ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name],
     }
+
+def get_buggy_editor_local_url(app):
+    editor_host = app.config[ConfigSettingNames.EDITOR_HOST.name]
+    if editor_host is None or editor_host.strip() == "":
+        # unusually, override empty value with the default because otherwise
+        # we're certainly producing an invalid and confusing URL
+        editor_host = ConfigSettings.DEFAULTS[ConfigSettingNames.EDITOR_HOST.name]
+    if editor_host.endswith("/"):
+        editor_host = editor_host[:-1]
+    editor_port = app.config[ConfigSettingNames.EDITOR_PORT.name]
+    if editor_port is None or editor_port.strip() == "":
+        editor_port = ""
+    editor_port_with_colon = f":{editor_port}" if editor_port else ""
+    return f"http://{ editor_host }{ editor_port_with_colon }"
 
 def create_editor_zipfile(readme_contents, app=current_app):
     """ creates a zip from from the buggy editor source code that is hardcopied
@@ -745,7 +776,7 @@ def create_editor_zipfile(readme_contents, app=current_app):
     readme_filename = app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename=app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
-
+    is_writing_port_and_host_in_editor = app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
     if readme_contents is None: 
         # try to load readme_contents from database
         readme_db_file = DbFile.query.filter_by(
@@ -761,6 +792,9 @@ def create_editor_zipfile(readme_contents, app=current_app):
 
     # copy the editor in pubished/editor
     # replace contents of README.md with readme_contents
+    # optionally update app.py (this is enabled by default):
+    #    * race server URL
+    #    * editor host & port
     # zip it up
 
     editor_src_dir = join_to_project_root(
@@ -772,7 +806,7 @@ def create_editor_zipfile(readme_contents, app=current_app):
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
         current_app.config[ConfigSettingNames._EDITOR_REPO_DIR_NAME.name]
     )
-    target_zipfile = current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+    target_zipfile = current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     if target_zipfile.endswith(".zip"):
         target_zipfile = target_zipfile[0:-len(".zip")]
     target_zipfile = join_to_project_root(
@@ -802,6 +836,21 @@ def create_editor_zipfile(readme_contents, app=current_app):
             py_body = old_py.read()
         if is_writing_server_url_in_editor:
             py_body=py_body.replace("https://RACE-SERVER-URL", server_url)
+        if is_writing_port_and_host_in_editor:
+            # These arei matching precisely against the punctuation of the
+            # target lines, so if the editor app.py, it may well break
+            py_body = re.sub(
+                # looking for 0.0.0.0 (or something very like it)
+                r'(host=environ.get\("FLASK_RUN_SERVER"\)\s+or\s+)"(\w+\.?)+',
+                f"\\1\"" + f"{current_app.config[ConfigSettingNames.EDITOR_HOST.name]}",
+                py_body
+            )
+            py_body = re.sub(
+                # looking for 5000 (or something very like it)
+                r'(port=environ.get\("FLASK_RUN_PORT"\)\s+or) \d+',
+                f"\\1 {current_app.config[ConfigSettingNames.EDITOR_PORT.name]}",
+                py_body
+            )
         with open(py_file, "w") as new_py:
             new_py.write(py_body)
     except IOError as e:
@@ -811,6 +860,11 @@ def create_editor_zipfile(readme_contents, app=current_app):
     except Exception as e:
         raise IOError("Failed to zip: {e}")
 
+def get_url_protocol(url_str):
+    PROTOCOL_SEP = "://"
+    if url_str and PROTOCOL_SEP in url_str:
+        return url_str[:url_str.find(PROTOCOL_SEP)].lower()
+    return None # note: local URLs (paths) may legitimately have no protocol
 
 def get_user_task_texts_as_list(username):
     """ Used for dumping a user's task texts for saving/loading """

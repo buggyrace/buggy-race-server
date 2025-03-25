@@ -20,22 +20,24 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from buggy_race_server.database import db
-from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames, DistribMethods
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.extensions import login_manager
 from buggy_race_server.public.forms import LoginForm
 from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
-from buggy_race_server.admin.models import DbFile, SocialSetting, Task
+from buggy_race_server.admin.models import DbFile, LinkedSiteSettings, Task
 
 from buggy_race_server.utils import (
     flash_errors,
     get_day_of_week,
     get_download_filename,
+    get_buggy_editor_local_url,
     join_to_project_root,
     warn_if_insecure,
     load_config_setting,
     get_flag_color_css_defs,
+    is_poster,
 )
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -49,22 +51,36 @@ def load_user(user_id):
 def home():
     """Home page."""
     warn_if_insecure()
-    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
-        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name]
+    editor_url = ""
+    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
+        if current_user and current_user.is_authenticated:
+            editor_url = current_user.editor_repo_url
+    elif current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
+        editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:
         editor_url = url_for("public.download_editor_zip")
-    is_using_github = (
-        current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]
+    is_using_vcs = (
+        current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         or
-        current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name]
+        current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name]
     )
+    vcs_name = current_app.config[ConfigSettingNames.VCS_NAME.name]
+    source_code_icon = "icon-embed2"
+    if is_using_vcs and vcs_name:
+        if vcs_name.lower() == "github":
+          source_code_icon = "icon-github"
+        # elif vcs_name.lower() == "gitlab":  # TODO: also gitlab and svn?
+        #   source_code_icon = "icon-gitlab"
     return render_template(
         "public/home.html",
         editor_url=editor_url,
+        is_preloaded_repos=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
-        is_using_github=is_using_github,
+        is_using_vcs=is_using_vcs,
         local_announcement_type=AnnouncementTypes.TAGLINE.value,
-        social_site_links=SocialSetting.get_socials_from_config(current_app.config),
+        external_site_links=LinkedSiteSettings.get_linked_sites_from_config(current_app.config),
+        source_code_icon=source_code_icon,
+        vcs_name=vcs_name,
     )
 
 @blueprint.route("/logout", strict_slashes=False)
@@ -251,14 +267,22 @@ def serve_project_page(page=None):
         )
     elif page is None or page == "index":
         template = "public/project/index.html"
-    elif page in ["poster", "report"]:
+    elif page == "report":
         if not current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]:
             abort(404) # nothing to show if there's no report
+        if current_app.config[ConfigSettingNames.PROJECT_REPORT_URL.name]:
+            return redirect(current_app.config[ConfigSettingNames.PROJECT_REPORT_URL.name])
         tasks = Task.query.filter_by(is_enabled=True).order_by(
                     Task.phase.asc(),
                     Task.sort_position.asc()
                 ).all()
         template = "public/project/report.html"
+    elif page == "poster":
+        if not is_poster(current_app):
+            abort(404) # nothing to show if there's no poster
+        if current_app.config[ConfigSettingNames.PROJECT_POSTER_URL.name]:
+            return redirect(current_app.config[ConfigSettingNames.PROJECT_POSTER_URL.name])
+        template = "public/project/poster.html"
     elif page == "workflow":
         if not current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name]:
             abort(404)
@@ -269,6 +293,16 @@ def serve_project_page(page=None):
         abort(404)
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     is_report = bool(report_type) # if it's not empty string (or maybe None?)
+    poster_type = current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    is_a_poster = is_poster(current_app)
+    if is_report:
+        report_link_text = "Report"
+        if is_a_poster:
+            report_link_text = "Report & Poster"
+    elif is_a_poster:
+        report_link_text = "Poster"
+    else:
+        report_link_text = ""
     is_zip_info_displayed = current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
     zip_filename_type = current_app.config[ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name]
     zip_filename_type_name = None
@@ -300,22 +334,27 @@ def serve_project_page(page=None):
             zip_filename_example = current_user.username
 
     submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
+
     return render_template(
         template,
-        buggy_editor_github_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_GITHUB_URL.name],
+        buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],
+        editor_local_url=get_buggy_editor_local_url(current_app),
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         is_personalsed_example=is_personalsed_example,
+        is_poster=is_a_poster,
         is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_student_using_github_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_GITHUB_REPO.name],
+        is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
         is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
         is_using_remote_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         is_zip_info_displayed=is_zip_info_displayed,
+        poster_type=poster_type,
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
         report_type=report_type,
+        report_link_text=report_link_text,
         suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
@@ -324,6 +363,7 @@ def serve_project_page(page=None):
         superbasics_url=current_app.config[ConfigSettingNames.SUPERBASICS_URL.name],
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],
+        vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
         workflow_url=current_app.config[ConfigSettingNames.PROJECT_WORKFLOW_URL.name],
         zip_filename_example=zip_filename_example,
         zip_filename_type_name=zip_filename_type_name,
@@ -372,15 +412,15 @@ def serve_tech_notes(path=None):
 
 @blueprint.route("/editor/download", strict_slashes=False)
 def download_editor_zip():
-    if current_app.config[ConfigSettingNames.IS_USING_GITHUB.name]:
+    if current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         flash("Cannot download editor source files from this race server", "warning")
         abort(404)
-    if zip_url := current_app.config[ConfigSettingNames.BUGGY_EDITOR_DOWNLOAD_URL.name]:
+    if zip_url := current_app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name]:
         return redirect(zip_url)
     zipfile = join_to_project_root(
         current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
         current_app.config[ConfigSettingNames._EDITOR_OUTPUT_DIR.name],
-        current_app.config[ConfigSettingNames.BUGGY_EDITOR_ZIPFILE_NAME.name]
+        current_app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
     )
     if not path.exists(zipfile):
         flash(

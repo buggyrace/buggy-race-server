@@ -84,7 +84,7 @@ solutions here are the other local addresses (for example, try `localhost` or
 
 ### But _why_ is it telling you to connect to 0.0.0.0?
 
-The very [last line of `app.py`]({{ BUGGY_EDITOR_GITHUB_URL }}/blob/main/app.py#L88)
+The very [last line of `app.py`]({{ BUGGY_EDITOR_REPO_URL }}/blob/main/app.py#L88)
 is doing this:
 
 ```python

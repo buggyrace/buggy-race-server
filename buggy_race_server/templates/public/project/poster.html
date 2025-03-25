@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% block page_title %} {{ config['PROJECT_CODE'] }} Poster {% endblock %}
+{% block body_class%}report-page{% endblock %}
+{% block content %}
+
+<div class="container pb-5">
+  <div class="row">
+    <h1 class="col my-3" id="project-details">
+      {{ config['PROJECT_CODE'] }} Buggy Racing project: your poster
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-8">
+      <h2 id="about-the-{{ report_type }}">
+        <a class="toclink"  href="#about-the-{{ report_type }}">
+          About the poster
+        </a>
+      </h2>
+              
+      {% if poster_type == "top of report" %}
+        <p>
+          Your poster goes at the <strong>top</strong> of
+          <a href="{{ url_for( 'public.serve_project_page', page='report' ) }}">your report</a>.
+        </p>
+      {% elif poster_type == "bottom of report" %}
+        <p>
+          Your poster goes at the <strong>bottom</strong> of
+          <a href="{{ url_for( 'public.serve_project_page', page='report' ) }}">your report</a>.
+        </p>
+      {% elif poster_type == "in editor" %}
+        <p>
+          Because you have developed a webserver, for the
+          {{ config['PROJECT_CODE'] }} Buggy Racing project
+          your poster is — 
+          {% if report_type == "in editor" %}
+            like your report
+          {% else %}
+            of course 
+          {% endif %}
+          — a page on your webserver at:
+        </p>
+        <ul>
+          <li>
+            <code>{{ editor_local_url }}/poster</code>
+          </li>
+        </ul>
+      {% else %}
+        <p>
+          Your poster is a document you must submit at the end of the
+          project.
+        </p>
+      {% endif %}
+
+      <h2 id="what-is-on-your-poster" class="mt-4">
+        <a class="toclink" aria-labelledby="what-is-on-your-poster" href="#what-is-on-your-poster">
+          What is on your poster?
+        </a>
+      </h2>
+      <ul>
+        <li>"sell" the features of your editor</li>
+      </ul>
+      <p>
+        You've made a working buggy editor! 
+        
+        {% if poster_type == "document" or ( poster_type != "in editor" and report_type == "document") %}
+          Tell a buggy racer who sees the poster why they should choose
+          <em>your</em> editor over any others.
+        {% else %}
+          Tell a buggy racer who's thinking of using your editor what's so 
+          great about it! 
+        {% endif %}
+        
+        What does it offer? What can you do with it? What features have you
+        implemented? Use CSS, use images if you want, but remember to think
+        about the information you're presenting too.
+      </p>
+      <p>
+        This is about conveying the <em>features</em> your editor has and what
+        capabilities you have programmed into it.
+      </p>
+    </div>
+  </div>
+  {% if poster_type == "in editor" %}
+    <div class="row">
+      <div class="col-lg-8">
+        <h2 id="how-to-set-it-up" class="mt-4">
+          <a class="toclink" href="#how-to-set-it-up">
+            How to set up the <code>/poster</code> page in your buggy editor
+          </a>
+        </h2>
+      </div>
+    </div>
+    {% if report_type == "in editor" %}
+      <div class="row">
+        <div class="col-lg-8 my-3">
+          <div class="alert alert-info border border-info">
+              This is the same as how you're
+              <a href="{{ url_for( 'public.serve_project_page', page='report' ) }}">adding
+              the report</a>, except the route (and template) is called
+              <code>poster</code> instead of <code>report</code>.
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="row">
+        <div class="col-lg-8">
+          <p>
+            As you'll know by the time you set this up, there is more than one way
+            to do this, but you are <em>strongly recommended</em> to add your
+            poster like this:
+          </p>
+        </div>
+      </div>
+    {% endif %}
+    <div class="row">
+      <div class="col-lg-8">
+        <p>
+          Add a new route in <code>app.py</code> (drop it in with your other
+          routes, which means somewhere <em>before</em> <code>app.run()</code>
+          is called):
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col copy-to-clipboard" data-target="route-html">
+        <pre class="border border-secondary p-3" id="route-html">
+@app.route('/poster')
+def poster():
+  return render_template('poster.html')
+</pre>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-8">
+        <p>
+          In <code>templates/</code> add a new template file called
+          <code>poster.html</code> with content like this:
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col copy-to-clipboard" data-target="page-html">
+        <pre class="border border-secondary p-3" id="page-html">
+&lbrace;% extends "base.html" %&rbrace;
+&lbrace;% block content %&rbrace;
+
+&lt;style&gt;
+.poster &lbrace;
+  /* change or delete! */
+  border-top: 1px solid black;
+  margin: 1em;
+&rbrace;
+{% include "public/project/_poster_placeholder.html" %}
+&lbrace;% endblock %&rbrace;
+</pre>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if is_report %}
+    <div class="row mt-4">
+      <div class="col-lg-8">
+        <hr>
+        <p>
+          See also this information about your report:
+        </p>
+        <p>
+          <a class="btn btn-outline-secondary btn-jump btn-white" href="{{ url_for( 'public.serve_project_page', page='report' ) }}">Report</a>
+        </p>
+      </div>
+    </div>  
+  {% endif %}
+
+</div>
+{% endblock %}

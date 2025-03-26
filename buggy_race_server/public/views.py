@@ -335,7 +335,6 @@ def serve_project_page(page=None):
 
     submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
 
-    print(f"FIXME is_zip_info_displayed={is_zip_info_displayed}, ?<{ bool(is_zip_info_displayed)}>")
     return render_template(
         template,
         buggy_editor_repo_url=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name],

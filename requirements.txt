@@ -1,12 +1,13 @@
 # Flask
-click>=7.0
-Flask==2.3.2
-Werkzeug==2.3.6
-Jinja2>=3.1.4
+click==8.1.8
+Flask==3.1.0
+Werkzeug>=3.0.6
+Jinja2>=3.1.6
+MarkupSafe==3.0.2
 
 # Database
 Flask-SQLAlchemy==3.0.5
-mysql-connector-python==8.0.33
+mysql-connector-python>=9.1.0
 psycopg2-binary==2.9.6
 SQLAlchemy==2.0.17
 
@@ -15,8 +16,8 @@ Flask-Migrate==4.0.4
 
 # Forms
 email-validator==2.0.0.post2
-Flask-WTF==1.1.1
-WTForms==3.0.1
+Flask-WTF==1.2.2
+WTForms==3.2.1
 
 # Deployment
 gevent==23.9.0
@@ -34,7 +35,7 @@ Flask-Login==0.6.3
 Flask-Caching>=2.0.2
 
 # Debug toolbar
-Flask-DebugToolbar==0.13.1
+Flask-DebugToolbar==0.16.0
 
 # Environment variable parsing
 environs==9.5.0

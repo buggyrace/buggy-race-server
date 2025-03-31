@@ -4,7 +4,7 @@ import json
 import os # for path
 import re
 import csv
-from flask import abort, flash, request, redirect, Markup, url_for, current_app, render_template
+from flask import abort, flash, request, redirect, url_for, current_app, render_template
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user

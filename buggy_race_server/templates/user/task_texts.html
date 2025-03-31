@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block page_title %}
-  {{ user.pretty_username }}'s {{ report_type }} task texts
+  {{ user.pretty_username }}'s task texts for the report
 {% endblock %}
 {% block content %}
 <div class="container pb-5">
@@ -11,7 +11,7 @@
       {% else %}
           {{ user.pretty_username }}'s
       {% endif %}
-      {{ report_type }} task texts
+      task texts
     </h1>
   </div>
   {% include "admin/_task_texts_for_user.html" %}

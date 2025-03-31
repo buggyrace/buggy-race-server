@@ -303,7 +303,7 @@ def serve_project_page(page=None):
         report_link_text = "Poster"
     else:
         report_link_text = ""
-    is_zip_info_displayed = current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name],
+    is_zip_info_displayed = current_app.config[ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name]
     zip_filename_type = current_app.config[ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name]
     zip_filename_type_name = None
     zip_filename_example = current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name]

@@ -9,8 +9,8 @@
       {% else %}
           {{ user.pretty_username }}’s
       {% endif %}
-      {{ report_type }} text
-      for task {{ task.fullname }}
+      task text
+      for {{ task.fullname }}
     </h1>
   </div>
   <div class="row">
@@ -22,6 +22,17 @@
       </p>
     </div>
   </div>
+  {% if is_own_text and report_type %}
+    <div class="row">
+      <div class="col-lg-8">
+        <p>
+          Write your task texts as you go along, and save them here on the race
+          server. You can download them all later as a single text or HTML file,
+          to copy-and-paste into your report.
+        </p>
+      </div>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col-lg-8">
       <div class="alert alert-info p-3">

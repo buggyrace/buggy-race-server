@@ -42,12 +42,13 @@
 {% endif %}
 
 <div class="row">
-  <div class="col my-2">
+  <div class="col-lg-8 my-2">
     {% if report_type %}
       {% if is_own_text %}
         <p>
-          You can download all your texts as a single text or HTML file, to copy-and-paste
-          into your {{ report_type }}.
+          Write your task texts as you go along, and save them here on the race
+          server. You can download them all as a single text or HTML file, to
+          copy-and-paste into your report.
           <br>
           Not sure how? Follow
           <a href="{{ url_for('public.serve_project_page', page='report') }}#how-to-set-it-up">these instructions</a>.

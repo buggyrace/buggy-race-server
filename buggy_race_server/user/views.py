@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timezone
 import threading
 import markdown
+from markupsafe import Markup
 from flask import (
     abort,
     Blueprint,
@@ -11,7 +12,6 @@ from flask import (
     flash,
     jsonify,
     make_response,
-    Markup,
     redirect,
     render_template,
     request,

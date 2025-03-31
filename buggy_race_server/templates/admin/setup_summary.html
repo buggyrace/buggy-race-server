@@ -133,12 +133,44 @@
         <h2 class="alert-title">Project</h2>
         <p>
           {% if is_report %}
-            The <strong>{{ project_code }} buggy racing project</strong>
-            requires students to include
-            a {{ report_type }} in their editor.
+            {% if report_type == "document" %}
+              The <strong>{{ project_code }} buggy racing project</strong>
+              requires students to produce a report.
+            {% else %}
+              {% if poster_type == "in editor" %}
+                The <strong>{{ project_code }} buggy racing project</strong>
+                requires students to include <code>/report</code> <em>and</em>
+                <code>/poster</code> pages inside their editor.
+              {% else %}
+                The <strong>{{ project_code }} buggy racing project</strong>
+                requires students to include a <code>/report</code> page inside
+                their editor.
+              {% endif %}
+            {% endif %}
           {% else %}
-            The <strong>{{ project_code }} buggy racing project</strong>
-            requires no report.
+            {% if is_poster %}
+              The <strong>{{ project_code }} buggy racing project</strong>
+              requires no report.
+            {% else %}
+              The <strong>{{ project_code }} buggy racing project</strong>
+              does not require students to produce a report or a poster.
+            {% endif %}
+          {% endif %}
+          {% if is_poster %}
+            {% if poster_type == "in editor" %}
+              {% if report_type != "in editor" %}
+                Students must include a <code>/poster</code> page inside their
+                editor.
+              {% endif %}
+            {% elif poster_type == "top of report" %} 
+              There must be a poster at the top of the report.
+            {% elif poster_type == "bottom of report" %} 
+              There must be a poster at the bottom of the report.
+            {% else %}
+              Students must produce a poster.
+            {% endif %}
+          {% elif is_report %}{# because already described if no report #}
+            Students are not required to produce a poster.
           {% endif %}
           {% if submission_deadline %}
             The submission deadline is {{ submission_deadline }}.
@@ -160,7 +192,10 @@
         </p>
         <p class="btn-collection">
           {% if is_report %}
-           <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}" class="btn btn-outline-secondary btn-white btn-jump">{{ report_type | title }} details</a>
+           <a href="{{ url_for( 'public.serve_project_page', page='report' ) }}" class="btn btn-outline-secondary btn-white btn-jump">Report details</a>
+          {% endif %}
+          {% if is_poster %}
+           <a href="{{ url_for( 'public.serve_project_page', page='poster' ) }}" class="btn btn-outline-secondary btn-white btn-jump">Poster details</a>
           {% endif %}
           {% if is_showing_project_workflow %}
             <a href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}" class="btn btn-outline-secondary btn-white btn-jump">Workflow</a>

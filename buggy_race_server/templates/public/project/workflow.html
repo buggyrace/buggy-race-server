@@ -529,7 +529,7 @@
      (in phase order).
      {% if is_report %}
       Keep notes of what you did because you'll need to summarise this in
-      <a href="{{ url_for('public.serve_project_page', page=report_type) }}">your&nbsp;{{ report_type }}</a>.
+      <a href="{{ url_for('public.serve_project_page', page=report_type) }}">your&nbsp;report</a>.
      {% endif %}
     </p>
    </li>
@@ -561,12 +561,12 @@
   <ul class="timeline">
    {% if is_report %}
    <li>
-    <h3 id="check-the-{{ report_type }}">
-     <a class="toclink" href="#check-the-{{ report_type }}">check the {{ report_type }}</a>
+    <h3 id="check-the-report">
+     <a class="toclink" href="#check-the-report">check the report</a>
     </h3>
     <p>
      See the
-     <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type }} details</a>
+     <a href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">report details</a>
     </p>
    </li>
    {% endif %}

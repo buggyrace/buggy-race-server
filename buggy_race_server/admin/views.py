@@ -340,6 +340,7 @@ def setup_summary():
       )
     )
     institution_home_url = current_app.config[ConfigSettingNames.INSTITUTION_HOME_URL.name]
+    poster_type = current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
     report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
     qty_announcements_global = 0
     qty_announcements_login = 0
@@ -380,6 +381,7 @@ def setup_summary():
       institution_short_name=current_app.config[ConfigSettingNames.INSTITUTION_SHORT_NAME.name],
       is_api_secret_otp=current_app.config[ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name],
       is_default_repo_owner=buggy_editor_repo_owner == 'buggyrace', # the default owner
+      is_poster=bool(poster_type),
       is_report=bool(report_type),
       is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
@@ -389,6 +391,7 @@ def setup_summary():
       is_tech_note_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
       is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
       is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
+      poster_type=poster_type,
       pretty_institution_home_url=re.sub(r"^https?://", "", institution_home_url),
       pretty_user_fields=pretty_user_fields,
       project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],

@@ -1988,13 +1988,13 @@ def show_system_info():
         git_status = "[Unavailable]"
     announcement_summary = None
     if curr_anns := current_app.config.get(ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name):
-        try:
-            qty_anns = curr_anns.count()
+        if isinstance(curr_anns, list):
+            qty_anns = len(curr_anns)
             if qty_anns == 1:
                 announcement_summary = "1 announcement"
             elif qty_anns > 1:
                 announcement_summary = f"{qty_anns} announcements"
-        except AttributeError as e:
+        else:
             announcement_summary = f"(unexpected type): {curr_anns}"
     return render_template(
         "admin/system_info.html",

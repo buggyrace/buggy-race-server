@@ -81,8 +81,8 @@
         </div>
         <div class="row">
           {% for col in csv_fieldnames %}
-            <div class="col-sm-4 p-3 mb-3">
-              <label for="choose-{{ col }}">
+            <div class="col-sm-4 p-2 m-2 border">
+              <label for="choose-{{ col }}" style="font-weight:bold;" class="pb-3">
                 {% if col == 'ext_username' %}
                   {{ ext_username_name }}
                 {% elif col == 'ext_id' %}
@@ -92,8 +92,9 @@
                 {% endif %}
               </label>
               <select id="choose-{{ col }}" class="form-control mr-sm-1"></select>
+              <label for="extra-{{ col }}" class="pt-2"><em>Using:</em></label>
               <select id="extra-{{ col }}" class="form-control mr-sm-1 mt-1">
-                <option>all</option>
+                <option>all words</option>
                 <option value="first">first word</option>
                 <option value="last">last word</option>
                 <option value="nose">all but last</option>
@@ -128,6 +129,13 @@
   <div class="row">
     <div class="col my-3 text-right">
       {{ macros.docs_btn("CSV utility", "/registering-users/spreadsheet#helpful-utility-for-creating-the-csv-file") }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="btn-collection">
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.bulk_register') }}">Register new students</a>
+      </p>
     </div>
   </div>
 </div>

@@ -21,36 +21,42 @@
     </div>
   </noscript>  
   <div class="row my-3">
-    <div class="col-md-6">
+    <div class="col">
       <div class="alert alert-info p-3">
-        <p>
-          If you've got a CSV for users that doesn't (yet) have the columns
-          needed for registration, use this utility to create it. Upload the
-          source CSV and nominate which columns to populate or rename. You can
-          then download the new copy (for example, use this to add a password
-          column: you'll need the downloaded copy if you're going to notify
-          the students of their initial passwords).
-        </p>
-        <p>
-          The secondary CSV is for the special case of you needing to include
-          data (such as an external ID) that comes from a different system —
-          it's fine not to need it! If you do upload a secondary CSV, its
-          columns will be added to each student's source columns, provided
-          there's a single column in both CSVs that the data can be joined on
-          (using an identical match). 
-        </p>
+        <div class="row">
+          <div class="col-md-6 my-3">
+            <p>
+              If you've got a CSV for users that doesn't (yet) have the columns
+              needed for registration, use this utility to create it. Upload the
+              source CSV and nominate which columns to populate or rename. You can
+              then download the new copy (for example, use this to add a password
+              column: you'll need the downloaded copy if you're going to notify
+              the students of their initial passwords).
+            </p>
+          </div>
+          <div class="col-md-6 my-3">
+            <p>
+              The secondary CSV is for the special case of you needing to include
+              data (such as an external ID) that comes from a different system —
+              it's fine not to need it! If you do upload a secondary CSV, its
+              columns will be added to each student's source columns, provided
+              there's a single column in both CSVs that the data can be joined on
+              (using an identical match). 
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-md-6">
+  </div>
+  <div class="row my-3">
+    <div class="col">
       <div class="container border p-3">
         <div class="row">
-          <div class="col mb-3">
+          <div class="col-md-6 px-4 pb-4">
             <label for="csv_file">Source CSV file (student data)</label>
             <input class="form-control mr-sm-1" id="csv-file-1" name="csv_file" type="file">    
           </div>
-        </div>
-        <div class="row">
-          <div class="col my-3">
+          <div class="col-md-6 px-4 pb-4">
             <label for="csv_file_2">
               <strong>Optional</strong> secondary CSV file<br>
               (must have one column that matches source CSV)
@@ -61,9 +67,9 @@
           </div>
         </div>
         <div class="row">
-          <div class="col">
+          <div class="col px-4">
             <p class="btn-collection">
-              <button id="btn-show-options" class="btn btn-primary hidden">Show options</button>
+              <button id="btn-show-options" class="btn btn-primary disabled">Show options</button>
             </p>
           </div>
         </div>  
@@ -94,7 +100,7 @@
               <select id="choose-{{ col }}" class="form-control mr-sm-1"></select>
               <label for="extra-{{ col }}" class="pt-2"><em>Using:</em></label>
               <select id="extra-{{ col }}" class="form-control mr-sm-1 mt-1">
-                <option>all words</option>
+                <option>whole thing</option>
                 <option value="first">first word</option>
                 <option value="last">last word</option>
                 <option value="nose">all but last</option>
@@ -103,7 +109,18 @@
             </div>
           {% endfor %}
           <div class="col-sm-4 p-3 mb-3">
-            <button class="btn btn-primary" id="btn-create-csv">Create CSV</button>
+            <label for="sup-policy" class="pt-2">
+              Duplicate username policy:
+            </label>
+            <select id="dup-policy" class="form-control mr-sm-1 mt-1">
+              <option value="null-1">ada1, ada2, ada3</option>
+              <option value="hyphen-1">ada-1, ada-2, ada-3</option>
+              <option value="null">ada, ada2, ada3</option>
+              <option value="hyphen-2">ada, ada-2, ada-3</option>
+            </select>
+          </div>
+          <div class="col-sm-4 p-3 mb-3">
+            <button class="btn btn-primary mt-4" id="btn-create-csv">Create CSV</button>
           </div>
         </div>
       </div>
@@ -201,7 +218,11 @@ let result_msg_container = document.getElementById("csv-result-msg");
 function comma_split(row){
   result = [];
   for (let item of row.split(",")){
-    result.push(item.replace(/^\s*"(.*)"\s*$/, "$1").replace(/^\s+|\s+$/g, "").replace(/""/g, '"'));
+    result.push(
+      item.replace(/^\s*"(.*)"\s*$/, "$1")
+      .replace(/^\s+|\s+$/g, "")
+      .replace(/""/g, '"')
+    );
   }
   return result;
 }
@@ -237,7 +258,8 @@ function populate_select_inputs(){
   select_container.classList.add("hidden");
   let primary_cols = csv_primary_rows.length? comma_split(csv_primary_rows[0]) : [];
   let secondary_cols = csv_secondary_rows.length? comma_split(csv_secondary_rows[0]) : [];
-  if (primary_cols.length == 1) {
+  let is_single_col_primary = primary_cols.length === 1;
+  if (is_single_col_primary) {
     // special case: uploaded just a column of names, want to add password
     // this is a bit of a bodge, and means any text file is mistaken for CSV
     // but is probably more helpful than not
@@ -247,8 +269,12 @@ function populate_select_inputs(){
       csv_primary_rows[i] += ","; // add empty column
     }
   }
-  if (primary_cols.length < 2) { // used to be 2, but it may be useful to upload names only
-    display_error("Source CSV file must have at least one column (or maybe that's not really a CSV file?)");
+  if (csv_primary_rows.length < 2){
+    if (btn_show_options.classList.contains("disabled")){
+      display_error("Primary CSV file must contain some data (have you uploaded a source CSV containing student data yet?)");
+    } else {
+      display_error("Primary CSV file must have at least one header row and one row of data (or maybe that's not really a CSV file?)");
+    }
     return
   }
   if (csv_secondary_rows.length > 0 && secondary_cols.length < 2) {
@@ -290,6 +316,8 @@ function populate_select_inputs(){
         if (target_col == source_col) {
           opt.setAttribute("selected", "true");
           has_auto_match = true;
+        } else if (is_single_col_primary && secondary_cols.length === 0) {
+          opt.setAttribute("selected", "true");
         }
         opt_group.appendChild(opt);
       }
@@ -339,12 +367,32 @@ function display_message(msg, is_error){
   result_msg_container.innerHTML = "<p>"+msg+"</p>";
 }
 
+function get_next_dup(username, dup_join_char, usernames){
+  let num_regex = new RegExp("(.+)" + dup_join_char + "(\\d+)\$");
+  for (const name of usernames) {
+    if (username === name) {
+      // is there a number in the name? extract it
+      let num_matches = username.match(num_regex);
+      let root_name = num_matches? num_matches[1] : username;
+      let bump_number = num_matches? (parseInt(num_matches[2])+1) : "2";
+      let bumped_name = root_name + dup_join_char + bump_number;
+      return get_next_dup(bumped_name, dup_join_char, usernames);
+    }
+  }
+  return username;
+}
+
 //-----------------------------------------------------------------
 function construct_download_csv(){
   // clear the outputs
   csv_textarea.innnerText="";
   csv_display.innerText="";
   download_container.classList.add("hidden");
+  
+  // scroll into view so the messages/output aren't below
+  // the "fold", which otherwise happens often because the
+  // button is at the bottom of the form.
+  create_btn.scrollIntoView({behavior:"smooth"});
 
   // gather the sources: where we're getting each col from
   if (csv_primary_rows.length == 0) {
@@ -380,6 +428,9 @@ function construct_download_csv(){
   // for now, ignore quotes and commas (normal case from moodle won't have them, hmm)
 
   let all_students = [];
+  let dup_policy = document.getElementById("dup-policy").value;
+  let dup_join_char = dup_policy.indexOf("hyphen") != -1 ? "-" : "";
+  let is_first_dup_numbered = dup_policy.indexOf("1") != -1;
 
   for (let i=1; i < csv_primary_rows.length; i++){
     if (csv_primary_rows[i].indexOf(",") < 0) {
@@ -424,13 +475,15 @@ function construct_download_csv(){
   // now all_students has keys from both sources (1:col_name, 1:another, 2:different)
   // loop through the primary CSV rows, picking the source columns, creating new output rowa
   // calculate the CSV using the selections
-  let output_csv_rows = [MANDATORY_COLS.join(",")];
+  let output_csv_rows_by_username = {};
 
   // keep track of the usernames (to detect and increment duplicates)
-  let username_counts = {};
-  let bumped_usernames = [];
+  let usernames = [];
+  let bumped_usernames = []; // e.g. ada2, ada3
+  let bumped_usernames_by_root = {};
 
   for (let student of all_students) {
+    let username = "_user";
     let output_row = [];
     for (let j=0; j<MANDATORY_COLS.length; j++){
       let col = MANDATORY_COLS[j];
@@ -457,39 +510,81 @@ function construct_download_csv(){
       if (col === "username"){
         if (! value) {
           value = "user"; // crisis fallback
-          if (!bumped_usernames.includes(value)){
-            bumped_usernames.push(value);
-          }
         } else {
           value = (value).toLowerCase().replace(/\s+/g, "");
         }
         // usernames get count suffix, for uniqueness
-        if (username_counts[value]) {
-          username_counts[value] += 1;
-          value += username_counts[value];
-          bumped_usernames.push(value);
-          // the bumped value itself might occur in the source
+        username = get_next_dup(value, dup_join_char, usernames);
+        if (value != username) {
+          if (!bumped_usernames.includes(value)) {
+            bumped_usernames.push(value);
+          }
+          if (! bumped_usernames_by_root[value]) {
+            bumped_usernames_by_root[value]=[ username ];
+          } else {
+            bumped_usernames_by_root[value].push(username);
+          }
         }
-        username_counts[value] = 1;
+        output_row.push(username);
+      } else {
+        output_row.push(value)
       }
-      output_row.push(value)
     }
-    output_csv_rows.push(output_row.join(","))
+    usernames.push(username);
+    output_csv_rows_by_username[username] = output_row;
+  }
+
+  if (is_first_dup_numbered && bumped_usernames.length) {
+    let usernames = Object.keys(output_csv_rows_by_username).sort();
+    for (const username of usernames){
+      if (bumped_usernames.includes(username) ) {
+        // adding "1"... need to test in case there's a 1 in the source already
+        let bumped_username = get_next_dup(
+          username + dup_join_char + "1",
+          dup_join_char,
+          usernames
+        );
+        if (! bumped_usernames_by_root[username]) {
+          bumped_usernames_by_root[username]=[ bumped_username ];
+        } else {
+          bumped_usernames_by_root[username].push(bumped_username);
+        }
+        output_csv_rows_by_username[bumped_username] = output_csv_rows_by_username[username];
+        output_csv_rows_by_username[bumped_username][0] = bumped_username;
+        delete output_csv_rows_by_username[username];
+      }
+    }
+  }
+
+  let output_csv_rows = [MANDATORY_COLS.join(",")];
+  let sorted_usernames = Object.keys(output_csv_rows_by_username).sort();
+  for (const username of sorted_usernames){
+    output_csv_rows.push(output_csv_rows_by_username[username].join(","));
   }
 
   if (output_csv_rows.length < 2) {
-    display_error("No CSV data to download — check the CSV file you uploaded has good data in it");
+    display_error("No CSV data to download — check the source CSV file you uploaded has good data in it (maybe there are some missing columns or values?)");
   } else {
     csv_textarea.value = output_csv_rows.join("\n");
     csv_display.innerText = output_csv_rows.join("\n");
     download_container.classList.remove("hidden");
-    let msg = "CSV is ready to download: " + (output_csv_rows.length - 1) + " users";
+    let qty_users = output_csv_rows.length - 1;
+    let msg = "CSV is ready to download: contains " +
+      (qty_users === 1? "only 1 user" : qty_users + " users");
     if (bumped_usernames.length) {
-      if (bumped_usernames.length == 1) {
-        msg += "<br>Note this username was 'bumped': " + bumped_usernames[0];
-      } else {
-        msg += "<br>Note these usernames were 'bumped': " + bumped_usernames.sort().join(", ");
+      let bumps = [];
+      for (const username of bumped_usernames.sort()){
+        bumps.push(
+          `${username} (&rarr; ${bumped_usernames_by_root[username].sort().join(", ")})`
+        );
       }
+      msg += "<br><strong>Note:</strong> ";
+      if (bumped_usernames.length == 1) {
+        msg += "this username was 'bumped': ";
+      } else {
+        msg += "these usernames were 'bumped': ";
+      }
+      msg += bumps.join(", ");
     }
     display_success(msg);
   }
@@ -516,7 +611,7 @@ function clear_display(){
    secondary_match_column.classList.add("hidden");
    secondary_match_column.innerText = "";
    clear_message();
-   btn_show_options.classList.remove("hidden");
+   btn_show_options.classList.remove("disabled");
 }
 
 csv_file_primary.addEventListener("change", function(){

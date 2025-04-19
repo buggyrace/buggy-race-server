@@ -380,6 +380,24 @@ class EnableDisableLoginsForm(FlaskForm):
     def validate(self):
         return super(EnableDisableLoginsForm, self).validate()
 
+class BulkDeleteUsersForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+    user_type = SelectField(
+        "Delete which users?",
+        choices=[
+          (choice.name, choice.value) for choice in UserTypesForLogin
+        ]
+    )
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+
+    def __init__(self, *args, **kwargs):
+        super(BulkDeleteUsersForm, self).__init__(*args, **kwargs)
+  
+    def validate_is_confirmed(self, value):
+        if not self.is_confirmed.data:
+            raise ValidationError("You did not explicitly confirm the delete operation")
+        return self.is_confirmed.data
+
 class SubmitWithConfirmForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")
   

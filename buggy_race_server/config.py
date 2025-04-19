@@ -186,23 +186,22 @@ class ConfigSettingNames(Enum):
     # and a type.
     API_SECRET_TIME_TO_LIVE = auto()
     AUTHORISATION_CODE = auto()
-    EDITOR_DOWNLOAD_URL = auto()
     BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
     BUGGY_EDITOR_REPO_URL = auto()
-    EDITOR_ZIPFILE_NAME = auto()
     BUGGY_RACE_PLAYER_ANCHOR = auto()
     BUGGY_RACE_PLAYER_URL = auto()
     BUGGY_RACE_SERVER_TIMEZONE = auto()
     BUGGY_RACE_SERVER_URL = auto()
-    VCS_NAME = auto()
     DEFAULT_FLAG_COLOR = auto()
     DEFAULT_RACE_COST_LIMIT = auto()
     DEFAULT_RACE_LEAGUE = auto()
     EDITOR_DISTRIBUTION_METHOD = auto()
+    EDITOR_DOWNLOAD_URL = auto()
     EDITOR_HOST = auto()
     EDITOR_PORT = auto()
+    EDITOR_ZIPFILE_NAME = auto()
     EXT_ID_EXAMPLE = auto()
     EXT_ID_NAME = auto()
     EXT_USERNAME_EXAMPLE = auto()
@@ -243,10 +242,10 @@ class ConfigSettingNames(Enum):
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
-    IS_USING_VCS = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
+    IS_USING_VCS = auto()
     IS_WRITING_HOST_AND_PORT_IN_EDITOR = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     PROJECT_CODE = auto()
@@ -285,6 +284,7 @@ class ConfigSettingNames(Enum):
     TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USER_ACTVITY_PERIOD_S = auto()
+    USER_BULK_DELETE_TIMEOUT_DAYS = auto()
     USERNAME_EXAMPLE = auto()
     USERS_HAVE_EMAIL = auto()
     USERS_HAVE_EXT_ID = auto()
@@ -292,6 +292,7 @@ class ConfigSettingNames(Enum):
     USERS_HAVE_FIRST_NAME = auto()
     USERS_HAVE_LAST_NAME = auto()
     USERS_HAVE_VCS_USERNAME = auto()
+    VCS_NAME = auto()
 
 class ConfigGroupNames(str, Enum):
     """ Config settings are in groups to make the setting form more manageable """
@@ -453,6 +454,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
+        ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name,
       ),
       ConfigGroupNames.VCS.name: (
         ConfigSettingNames.IS_USING_VCS.name,
@@ -473,24 +475,24 @@ class ConfigSettings:
     # in the DEFAULTS (it's used during setup to populate the database)
 
     DEFAULTS = {
-        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
-        ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: "buggy-editor-issues.csv",
+        ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
+        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: "https://www.buggyrace.net/docs",
-        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
         ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: "editor",
+        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
         ConfigSettingNames._EDITOR_README_FILENAME.name: "README.md",
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: "buggy-race-editor",
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: "",
         ConfigSettingNames._IS_DEMO_SERVER.name: 0,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: 0,
         ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: 1,
-        ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: "project",
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: "tasks.md",
-        ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
+        ConfigSettingNames._PUBLISHED_PATH.name: "published",
         ConfigSettingNames._RACE_ASSETS_IMAGES_PATH.name: path.join("buggy_race_server", "race", "assets", "img"),
+        ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
@@ -505,24 +507,24 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: "tech_notes",
         ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: "pages",
         ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
+        ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: "title, description",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  "https://github.com/buggyrace/buggy-race-editor",
-        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
-        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: "#replay",
         ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: "",
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: pytz.timezone("Europe/London"),
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: "http://localhost:8000",
-        ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: "#888888", # middle-grey
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: 200,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name: "zip",
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
         ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
         ConfigSettingNames.EDITOR_PORT.name: "5000",
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",
         ConfigSettingNames.EXT_ID_NAME.name: "External ID",
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: "abcd123",
@@ -532,8 +534,8 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
-        ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
+        ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: 0,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
@@ -564,10 +566,10 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
-        ConfigSettingNames.IS_USING_VCS.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
+        ConfigSettingNames.IS_USING_VCS.name: 0,
         ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: 1,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
@@ -599,13 +601,14 @@ class ConfigSettings:
         ConfigSettingNames.SITE_4_URL.name: "",
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
         ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
-        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
-        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
+        ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: 1, # (in days) 1 day
         ConfigSettingNames.USERNAME_EXAMPLE.name: "hamster",
         ConfigSettingNames.USERS_HAVE_EMAIL.name: 0,
         ConfigSettingNames.USERS_HAVE_EXT_ID.name: 0,
@@ -625,21 +628,21 @@ class ConfigSettings:
     # database. By default they are strings, but it's best to be explicit.
 
     TYPES = {
-        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: ConfigTypes.STRING,
+        ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: ConfigTypes.URL,
-        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: ConfigTypes.STRING,
+        ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_README_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_REPO_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._IS_DEMO_SERVER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames._PROJECT_TASKS_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._PUBLISHED_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
@@ -653,23 +656,23 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_OUTPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._TECH_NOTES_PAGES_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
+        ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name:  ConfigTypes.URL,
-        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
-        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name: ConfigTypes.STRING,
+        ConfigSettingNames.BUGGY_RACE_PLAYER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name: ConfigTypes.TIMEZONE,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_FLAG_COLOR.name: ConfigTypes.STRING,
         ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name: ConfigTypes.INT,
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: ConfigTypes.URL,
         ConfigSettingNames.EDITOR_HOST.name: ConfigTypes.STRING,
         ConfigSettingNames.EDITOR_PORT.name: ConfigTypes.STRING,
+        ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_ID_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name: ConfigTypes.STRING,
@@ -710,16 +713,16 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_USING_VCS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USING_VCS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
-        ConfigSettingNames.PROJECT_POSTER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_POSTER_TYPE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_POSTER_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_ADDRESS.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name: ConfigTypes.URL,
         ConfigSettingNames.PROJECT_REMOTE_SERVER_NAME.name: ConfigTypes.STRING,
@@ -745,13 +748,14 @@ class ConfigSettings:
         ConfigSettingNames.SITE_4_URL.name: ConfigTypes.URL,
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: ConfigTypes.URL,
         ConfigSettingNames.SUPERBASICS_URL.name: ConfigTypes.URL,
-        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
-        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_API.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
+        ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: ConfigTypes.INT,
         ConfigSettingNames.USERNAME_EXAMPLE.name: ConfigTypes.STRING,
         ConfigSettingNames.USERS_HAVE_EMAIL.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.USERS_HAVE_EXT_ID.name: ConfigTypes.BOOLEAN,
@@ -1471,6 +1475,16 @@ class ConfigSettings:
           """A placeholder string used in the login form. This can be
           especially helpful if students use a different username for accessing
           other college systems. You can set this to be blank.""",
+
+        ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name:
+          """Normally you only need to bulk-delete users (students or TAs) while
+          you're setting things up, or during tear-down (and even then, only
+          with care). Consequently, this feature is hidden from from the admin
+          interface when the most recent **student** record is older than this
+          number of days. Set to `0` if you never want it hidden (so changing
+          this to `0` will make the ability to delete all user records available
+          immediately). Remember that this is only about bulk deletion: as admin,
+          you can always delete (or suspend) users individually.""",
 
         ConfigSettingNames.USERS_HAVE_EXT_ID.name:
           """Do users have an ID from an external system? This might be useful

@@ -4,6 +4,7 @@ import datetime as datetime
 from random import randint
 import json
 import re
+from datetime import datetime, timezone, timedelta
 
 from flask import current_app
 from flask_login import UserMixin
@@ -194,6 +195,22 @@ class User(UserMixin, SurrogatePK, Model):
             to be as forgiving as possible with that header row
         """
         return [re.sub(r'[ -]+', '_', f.strip().lower()) for f in fieldnames]
+
+    @staticmethod
+    def is_allowing_bulk_user_delete(app=current_app):
+        timeout_days = app.config[ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name]
+        if not timeout_days:
+            return True # no timeout means bulk delete is always enabled
+        newest_student_record = User.query.filter_by(is_student=True) \
+            .with_only_columns(User.created_at) \
+            .order_by(User.created_at.desc()).first()
+        print(f"FIXME {newest_student_record} created_at={newest_student_record.created_at}")
+        if newest_student_record:
+            cutoff_time = datetime.now(timezone.utc) - timedelta(days=timeout_days)
+            return newest_student_record.created_at > cutoff_time
+        else: # no students: bulk delete is hidden (yes it's oddly specific)
+            return False
+
 
     def get_example_data(example_user, fieldnames):
         return [ EXAMPLE_USER_DATA[example_user][fieldname] for fieldname in fieldnames ]

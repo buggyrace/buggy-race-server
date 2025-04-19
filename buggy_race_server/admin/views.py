@@ -29,7 +29,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import bindparam, select, insert, update
+from sqlalchemy import bindparam, select, delete, insert, update
 
 from flask_wtf import FlaskForm
 from werkzeug.utils import secure_filename
@@ -38,6 +38,7 @@ from buggy_race_server.admin.forms import (
     AnnouncementActionForm,
     AnnouncementForm,
     ApiKeyForm,
+    BulkDeleteUsersForm,
     BulkRegisterForm,
     EnableDisableLoginsForm,
     GeneralSubmitForm,
@@ -685,6 +686,7 @@ def list_users(data_format=None, want_detail=True):
             ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
             ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+            is_allowing_bulk_user_delete=User.is_allowing_bulk_user_delete(current_app),
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
             is_showing_github_column=current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name],
@@ -951,6 +953,64 @@ def manage_user(user_id):
       user=user,
       vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )
+
+@blueprint.route("/users/delete", methods=['GET', 'POST'], strict_slashes=False)
+@login_required
+@admin_only
+def bulk_delete_users():
+    if not User.is_allowing_bulk_user_delete(current_app):
+        timeout = current_app.config[ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name]
+        pretty_timeout = "1 day" if timeout==1 else f"{timeout} days"
+        flash(
+            f"Bulk-deletion of users was automatically disabled {pretty_timeout}"
+            f" after the last student's user record was created. Change the ",
+            f"{ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name} setting"
+            "to re-enable this feature.",
+            "warning"
+        )
+        abort(403)
+    form = BulkDeleteUsersForm(request.form)
+    if request.method == "POST":
+        if form.is_submitted() and form.validate():
+            if form.user_type.data == UserTypesForLogin.students.name:
+                base_query = select(User).filter(
+                    User.is_student == True,
+                    User.access_level == User.NO_STAFF_ROLE
+                ).with_only_columns(User.id)
+                user_str = "all students"
+            elif form.user_type.data == UserTypesForLogin.teaching_assistants.name:
+                base_query = select(User).filter(
+                    User.access_level == User.TEACHING_ASSISTANT
+                ).with_only_columns(User.id)
+                user_str = "all TAs"
+            else:
+                base_query = select(User).with_only_columns(User.id)
+                base_query = select(User).filter(
+                    User.access_level < User.ADMINISTRATOR
+                ).with_only_columns(User.id)
+
+                user_str = "all students and TAs"
+            try:
+                # note: would prefer to include synchronize_session='fetch'
+                db.session.execute(
+                    delete(User).where(User.id.in_(base_query))
+                )
+                db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+            else:
+                flash(
+                    f"OK, deleted {user_str}",
+                    "info"
+                )
+                return redirect(url_for("admin.list_users"))
+        else:
+            flash_errors(form)
+    return render_template(
+        "admin/user_bulk_delete.html",
+        form=form,
+    )
+
 
 @blueprint.route("/users/logins", methods=['GET', 'POST'], strict_slashes=False)
 @login_required

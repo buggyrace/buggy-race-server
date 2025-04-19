@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: bulk-delete users {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-2">
+  <div class="row">
+    <div class="col my-3">
+      <h1>
+        Bulk delete user records
+      </h1>
+    </div>
+  </div>
+  <div class="col p-2 mx-3">
+    <div id="delete-form" class="border border-danger container alert-danger">
+      <form action="{{ url_for('admin.bulk_delete_users') }}" method="POST" role="form">
+        {{ form.csrf_token }}
+        <div class="row py-2">
+          <div class="col-sm-3">
+            {{ form.user_type.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.user_type(class_="form-control") }}
+          </div>
+          <div class="col-sm-5">
+            <br>
+            You cannot delete <strong>Administrators</strong> this way:
+            they will always be excluded. So "All users" will delete all
+            students <em>and</em> Teaching Assistants, leaving only the
+            admin users.
+          </div>
+        </div>
+        <div class="row py-2">
+          <div class="col-sm-3">
+            {{ form.is_confirmed.label }}
+          </div>
+          <div class="col-sm-4">
+            <select id="is_confirmed" name="is_confirmed" class="form-control">
+              <option selected value="">No</option>
+              <option value="">I think so</option>
+              <option value="y">Yes</option>
+            </select>  
+          </div>
+          <div class="col-sm-5">
+            Be careful! This will delete <em>all</em> the users of the chosen
+            type, as well as their buggies, texts, and results.
+          </div>
+        </div>
+        <div class="row bg-warning py-2">
+          <div class="col-sm-3">
+            {{form.auth_code.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.auth_code(class_="form-control mr-sm-1")}}
+          </div>
+          <div class="col-sm-5">
+            You must provide a valid authorisation code to
+            delete users.
+          </div>
+        </div>
+        <div class="row py-2">
+          <div class="col-sm-12">
+            <p class="btn-collection">
+              <input type="submit" class="btn btn-danger" value="Delete users"/>
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+    </div>
+  <div class="row">
+    <div class="col my-3 text-right">
+      {{ macros.docs_btn("User management", "/running/user-management") }}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

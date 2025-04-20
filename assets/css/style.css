@@ -210,6 +210,13 @@ textarea {
   }
 }
 
+/* 576px is --breakpoint-sm from Bootstrap */
+@media (max-width: 576px) {
+  #main-content-block {
+    max-width:99vw;
+  }
+}
+
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
 .buggy-project .phase-6 .task .task-heading,
 .buggy-project .phase-0 .task .task-heading { background-color: #ffffbb; color:black; }
@@ -792,6 +799,10 @@ body.task-list-page main::before{
   right:1em;
   top:0;
   margin:1em;
+}
+pre {
+  overflow-x: auto;
+  max-width:100%;
 }
 
 code {

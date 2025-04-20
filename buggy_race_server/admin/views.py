@@ -988,8 +988,7 @@ def bulk_delete_users():
                 base_query = select(User).filter(
                     User.access_level < User.ADMINISTRATOR
                 ).with_only_columns(User.id)
-
-                user_str = "all students and TAs"
+                user_str = "all users (except admins)"
             try:
                 # note: would prefer to include synchronize_session='fetch'
                 db.session.execute(

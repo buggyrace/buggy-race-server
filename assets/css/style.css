@@ -924,3 +924,8 @@ label.radio-chooser input {
   padding: 0.5rem;
   background-color: #ffffee;
 }
+
+.code-is-nowrap code {
+  text-wrap: nowrap;
+  word-break: keep-all;
+}

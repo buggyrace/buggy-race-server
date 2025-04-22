@@ -39,6 +39,11 @@ function bulk_registration_by_ajax(bulk_register_form){
   let qty_reg_fail = 0;
   let qty_reg_total = 0;
 
+  function full_trim(s){
+    // trims whitespace and \r (which may sneak in via some line endings)
+    return s.trim().replace(/\r+/gm, "")
+  }
+
   function reset_display(){
     qty_reg_ok = 0;
     qty_reg_fail = 0;
@@ -156,7 +161,7 @@ function bulk_registration_by_ajax(bulk_register_form){
       csv_raw_rows = bulk_register_form[USER_REGISTER_CSV_ID].value.split("\n");
     }
     for (let i=0; i<csv_raw_rows.length; i++) {
-      let row = csv_raw_rows[i].split(/\s*,\s*/);
+      let row = csv_raw_rows[i].split(/\s*,\s*/).map(full_trim);
       if (i === 0) {
         let missing_cols = [];
         for (let colname of ideal_header_items){

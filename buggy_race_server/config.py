@@ -1481,10 +1481,11 @@ class ConfigSettings:
           you're setting things up, or during tear-down (and even then, only
           with care). Consequently, this feature is hidden from from the admin
           interface when the most recent **student** record is older than this
-          number of days. Set to `0` if you never want it hidden (so changing
-          this to `0` will make the ability to delete all user records available
-          immediately). Remember that this is only about bulk deletion: as admin,
-          you can always delete (or suspend) users individually.""",
+          number of days (or if there are no students at all). Set to `0` if you
+          never want it hidden (so changing this to `0` will make the ability to
+          delete all user records available all the time). Remember that this
+          is only about bulk deletion: as admin, you can always delete (or
+          suspend) users individually.""",
 
         ConfigSettingNames.USERS_HAVE_EXT_ID.name:
           """Do users have an ID from an external system? This might be useful

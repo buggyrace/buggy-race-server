@@ -6,70 +6,126 @@
   <div class="row">
     <div class="col my-3">
       <h1>
-        Bulk delete user records
+        Bulk delete users
       </h1>
     </div>
   </div>
-  <div class="col p-2 mx-3">
-    <div id="delete-form" class="border border-danger container alert-danger">
-      <form action="{{ url_for('admin.bulk_delete_users') }}" method="POST" role="form">
-        {{ form.csrf_token }}
-        <div class="row py-2">
-          <div class="col-sm-3">
-            {{ form.user_type.label }}
-          </div>
-          <div class="col-sm-4">
-            {{ form.user_type(class_="form-control") }}
-          </div>
-          <div class="col-sm-5">
-            <br>
-            You cannot delete <strong>Administrators</strong> this way:
-            they will always be excluded. So "All users" will delete all
-            students <em>and</em> Teaching Assistants, leaving only the
-            admin users.
-          </div>
-        </div>
-        <div class="row py-2">
-          <div class="col-sm-3">
-            {{ form.is_confirmed.label }}
-          </div>
-          <div class="col-sm-4">
-            <select id="is_confirmed" name="is_confirmed" class="form-control">
-              <option selected value="">No</option>
-              <option value="">I think so</option>
-              <option value="y">Yes</option>
-            </select>  
-          </div>
-          <div class="col-sm-5">
-            Be careful! This will delete <em>all</em> the users of the chosen
-            type, as well as their buggies, texts, and results.
-          </div>
-        </div>
-        <div class="row bg-warning py-2">
-          <div class="col-sm-3">
-            {{form.auth_code.label}}
-          </div>
-          <div class="col-sm-4">
-            {{form.auth_code(class_="form-control mr-sm-1")}}
-          </div>
-          <div class="col-sm-5">
-            You must provide a valid authorisation code to
-            delete users.
-          </div>
-        </div>
-        <div class="row py-2">
-          <div class="col-sm-12">
-            <p class="btn-collection">
-              <input type="submit" class="btn btn-danger" value="Delete users"/>
-            </p>
-          </div>
-        </div>
-      </form>
+  <div class="row">
+    <div class="col-md-6">
+      <table class="col table table-striped table-bordered table-hover bg-white">
+        <thead>
+          <tr>
+            <th>User type</th>
+            <th>Quantity to delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Students</td>
+            <td class="text-right">{{ qty_students }}</td>
+          </tr>
+          <tr>
+            <td>Teaching Assistants</td>
+            <td class="text-right">{{ qty_tas }}</td>
+          </tr>
+          <tr>
+            <td>All users (except administrators)</td>
+            <td class="text-right">{{ qty_non_admin }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <div class="col-md-6 px-3">
+      <p class="mb-5">
+        Bulk deletion does not consider whether users are active or not, and
+        always excludes administrators, so the quantities shown here might not
+        always match what you see on other pages.
+      </p>
     </div>
+  </div>
+  <div class="row">
+    <div class="col p-3">
+      <div id="delete-form" class="col border border-danger container alert-danger">
+        <form action="{{ url_for('admin.bulk_delete_users') }}" method="POST" role="form">
+          {{ form.csrf_token }}
+          <div class="row py-2">
+            <div class="col-md-3">
+              {{ form.user_type.label }}
+            </div>
+            <div class="col-md-4">
+              {{ form.user_type(class_="form-control") }}
+            </div>
+            <div class="col-md-5">
+              You cannot delete <strong>Administrators</strong> this way:
+              they will always be excluded. So "All users" will delete all
+              user records (students, non-students, and Teaching Assistants),
+              leaving only the admin users.
+            </div>
+          </div>
+          <div class="row py-2">
+            <div class="col-md-3">
+              {{ form.is_confirmed.label }}
+            </div>
+            <div class="col-md-4">
+              <select id="is_confirmed" name="is_confirmed" class="form-control">
+                <option selected value="">No</option>
+                <option value="">I think so</option>
+                <option value="y">Yes</option>
+              </select>  
+            </div>
+            <div class="col-md-5">
+              Be careful! This will delete <em>all</em> the users of the chosen
+              type, as well as their buggies, texts, and results.
+            </div>
+          </div>
+          <div class="row bg-warning py-2">
+            <div class="col-md-3">
+              {{form.auth_code.label}}
+            </div>
+            <div class="col-md-4">
+              {{form.auth_code(class_="form-control mr-sm-1")}}
+            </div>
+            <div class="col-md-5">
+              You must provide a valid authorisation code to
+              delete users.
+            </div>
+          </div>
+          <div class="row py-2">
+            <div class="col-sm-12">
+              <p class="btn-collection">
+                <input type="submit" class="btn btn-danger" value="Delete users"/>
+              </p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row m-2">
+    <div class="col-md-8 mt-4">
+      <p>
+        <code>USER_BULK_DELETE_TIMEOUT_DAYS = {{ config['USER_BULK_DELETE_TIMEOUT_DAYS'] }}</code>
+        {% if not config['USER_BULK_DELETE_TIMEOUT_DAYS'] %}
+         (special case: always enabled)
+        {% endif %}
+      </p>
+      <p>
+        Bulk deleting users is only possible while student records are "fresh".
+        Specifically, if the most recently created student user was added to the
+        database more than <code>USER_BULK_DELETE_TIMEOUT_DAYS</code> days ago
+        (or if there are no student users), the bulk delete option will be
+        disabled and hidden from the interface. 
+      </p>
+    </div>
+    <div class="col-md-2">
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.settings', group_name='users') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Users</span></a>
+      </p>
+    </div>
+  </div>
   <div class="row">
     <div class="col my-3 text-right">
-      {{ macros.docs_btn("User management", "/running/user-management") }}
+      {{ macros.docs_btn("Bulk deleting users", "/running/user-management#bulk-deleting-users") }}
     </div>
   </div>
 </div>

@@ -963,31 +963,39 @@ def bulk_delete_users():
         pretty_timeout = "1 day" if timeout==1 else f"{timeout} days"
         flash(
             f"Bulk-deletion of users was automatically disabled {pretty_timeout}"
-            f" after the last student's user record was created. Change the ",
+            f" after the last student's user record was created. Change the "
             f"{ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name} setting"
             "to re-enable this feature.",
             "warning"
         )
         abort(403)
+    users = User.query.all()
+    # note: can't use User.is_staff etc because those also require is_active
+    #       and the bulk delete is more simplistic
+    qty_students = len([s for s in users if s.is_student and not (
+        s.access_level in [User.TEACHING_ASSISTANT, User.ADMINISTRATOR]
+    )])
+    qty_tas = len([s for s in users if s.access_level == User.TEACHING_ASSISTANT])
+    qty_non_admin = len([s for s in users if s.access_level < User.ADMINISTRATOR])
+
     form = BulkDeleteUsersForm(request.form)
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             if form.user_type.data == UserTypesForLogin.students.name:
-                base_query = select(User).filter(
+                base_query = select(User.id).where(
                     User.is_student == True,
                     User.access_level == User.NO_STAFF_ROLE
-                ).with_only_columns(User.id)
+                )
                 user_str = "all students"
             elif form.user_type.data == UserTypesForLogin.teaching_assistants.name:
-                base_query = select(User).filter(
+                base_query = select(User.id).where(
                     User.access_level == User.TEACHING_ASSISTANT
-                ).with_only_columns(User.id)
+                )
                 user_str = "all TAs"
             else:
-                base_query = select(User).with_only_columns(User.id)
-                base_query = select(User).filter(
+                base_query = select(User.id).with_only_columns(User.id).where(
                     User.access_level < User.ADMINISTRATOR
-                ).with_only_columns(User.id)
+                )
                 user_str = "all users (except admins)"
             try:
                 # note: would prefer to include synchronize_session='fetch'
@@ -1008,6 +1016,9 @@ def bulk_delete_users():
     return render_template(
         "admin/user_bulk_delete.html",
         form=form,
+        qty_non_admin=qty_non_admin,
+        qty_students=qty_students,
+        qty_tas=qty_tas,
     )
 
 

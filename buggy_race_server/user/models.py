@@ -202,9 +202,7 @@ class User(UserMixin, SurrogatePK, Model):
         if not timeout_days:
             return True # no timeout means bulk delete is always enabled
         newest_student_record = User.query.filter_by(is_student=True) \
-            .with_only_columns(User.created_at) \
             .order_by(User.created_at.desc()).first()
-        print(f"FIXME {newest_student_record} created_at={newest_student_record.created_at}")
         if newest_student_record:
             cutoff_time = datetime.now(timezone.utc) - timedelta(days=timeout_days)
             return newest_student_record.created_at > cutoff_time

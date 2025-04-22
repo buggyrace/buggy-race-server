@@ -1666,7 +1666,6 @@ class ConfigSettings:
 
     @staticmethod
     def is_valid_report_poster_type_combo(report_type, poster_type):
-        print(f"is_valid_report_poster_type_combo(<{report_type}>, <{poster_type}>)", flush=True)
         return (
             report_type in ("", "document", "in editor")
             and (poster_type in ("", "document", "in editor")

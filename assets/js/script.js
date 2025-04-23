@@ -1,5 +1,16 @@
 // App initialization code goes here
 
+function is_local_storage_available(){
+  var test = 'test';
+  try {
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+  } catch(e) {
+      return false;
+  }
+}
+
 // if both these elements are present on the page, do bulk-registration:
 const USER_REGISTER_FORM_ID = "registerForm";
 const USER_REGISTER_CSV_ID = "userdata";
@@ -612,6 +623,7 @@ $(function() {
     }
   })
 });
+
 $(function() {
   // code for the race-picker... needs jQuery to dismiss bootstrap modal :-(
   const TRACK_PICKER_MODAL = document.getElementById("track-picker-modal");
@@ -681,24 +693,52 @@ $(function() {
 })
 
 $(function() {
+  const IS_EXPANDING_ADMIN_BTNS = "is-expanding-admin-btns";
   const $admin_more_btn = $("#admin-more-btn");
   const HTML_SHOW_EXTRA_NAV = "&bull;&bull;&bull;";
   const HTML_HIDE_EXTRA_NAV = "&bull;&times;&bull;";
   const $admin_management_btns = $("#admin-management-btns");
-  if ($admin_more_btn.length && $admin_management_btns.length) {
-    $admin_more_btn.data("want-more", "yes");
-    $admin_more_btn.on("click", function(e){
+  const admin_expanded_controls = document.getElementById("is-admin-always-expanded-container");
+  var is_admin_btn_always_expanded = 0;
+
+  function hide_or_exand_admin_btns(e){
+    if (e){
       e.preventDefault();
-      if ($admin_more_btn.data("want-more") === "yes"){
+    }
+    if ($admin_more_btn.data("want-more") === "yes"){
+      if (e) {
         $admin_management_btns.slideDown();
-        $admin_more_btn.html(HTML_HIDE_EXTRA_NAV);
-        $admin_more_btn.data("want-more", "no");
-      } else {
-        $admin_management_btns.slideUp();
-        $admin_more_btn.html(HTML_SHOW_EXTRA_NAV);
-        $admin_more_btn.data("want-more", "yes");
+      } else { // this user always wants btns expanded before click
+        $admin_management_btns.show();
       }
-    })
-    $admin_more_btn.removeClass("hidden");
+      $admin_more_btn.html(HTML_HIDE_EXTRA_NAV);
+      $admin_more_btn.data("want-more", "no");
+    } else {
+      $admin_management_btns.slideUp();
+      $admin_more_btn.html(HTML_SHOW_EXTRA_NAV);
+      $admin_more_btn.data("want-more", "yes");
+    }
+  }
+  if (is_local_storage_available()) {
+    is_admin_btn_always_expanded = localStorage.getItem(IS_EXPANDING_ADMIN_BTNS)==="1";
+    if (admin_expanded_controls) {
+      let expand_select = document.getElementById("is-admin-always-expanded");
+      if (expand_select) {
+        expand_select.value = is_admin_btn_always_expanded? "1" : "0";
+        admin_expanded_controls.classList.remove("hidden");
+        expand_select.addEventListener("change", function(){
+          is_admin_btn_always_expanded = expand_select.value === "1";
+          localStorage.setItem(IS_EXPANDING_ADMIN_BTNS, is_admin_btn_always_expanded? "1" : "0"); 
+        })
+      }
+    }
+    if ($admin_more_btn.length && $admin_management_btns.length) {
+      $admin_more_btn.data("want-more", "yes");
+      if (is_admin_btn_always_expanded) {
+        hide_or_exand_admin_btns(); // note: no event passed in
+      }
+      $admin_more_btn.on("click", function(e){hide_or_exand_admin_btns(e)})
+      $admin_more_btn.removeClass("hidden");
+    }
   }
 })

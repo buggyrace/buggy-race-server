@@ -242,6 +242,7 @@ class ConfigSettingNames(Enum):
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
+    IS_USER_TOLD_TO_CHANGE_PASSWORD = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
@@ -454,6 +455,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
+        ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name,
       ),
       ConfigGroupNames.VCS.name: (
@@ -566,6 +568,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
+        ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
@@ -713,6 +716,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
@@ -1206,6 +1210,12 @@ class ConfigSettings:
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
+
+        ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name:
+          """Do you want users to see a message reminding them to change their
+          password when they very first log in? This can be helpful if you have
+          allocated passwords as part of the set-up. Only *student* users are
+          shown the message.""",
 
         ConfigSettingNames.IS_USING_VCS.name:
           """Are you using a Version Control System (VCS) like GitHub or GitLab

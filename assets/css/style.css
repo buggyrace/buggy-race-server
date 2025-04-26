@@ -338,6 +338,8 @@ footer .footer-nav {
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
 .icon-embed2:before { content: "\ea80"; }
+.icon-eye:before { content: "\e9ce"; }
+.icon-eye-blocked:before { content: "\e9d1"; }
 .icon-info:before {
   content: "\ea0c";
   padding-right:0.2rem; /* used in buttons only? */
@@ -928,4 +930,13 @@ label.radio-chooser input {
 .code-is-nowrap code {
   text-wrap: nowrap;
   word-break: keep-all;
+}
+
+.password-with-eye {
+  display: inline-block;
+  max-width: 85%;
+}
+span.icon-eye-blocked, span.icon-eye {
+  cursor:pointer;
+  color:#333333;
 }

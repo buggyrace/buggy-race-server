@@ -695,6 +695,33 @@ $(function() {
 })
 
 $(function() {
+  const pw_togglers = document.getElementsByClassName("password-toggler");
+  for (const toggler of pw_togglers) {
+    console.log("FIXME adding event handler to password field: ", toggler);
+    console.log("FIXME for " + toggler.dataset.for, document.getElementById(toggler.dataset.for));
+    const input_id = toggler.dataset.for;
+    if (input_id){
+      const input = document.getElementById(input_id);
+      if (input) {
+        input.classList.add("password-with-eye");
+        toggler.classList.remove("hidden");
+        toggler.addEventListener("click", function(e){
+          if (input.getAttribute("type") === "password") {
+            input.setAttribute("type", "text");
+            this.classList.add("icon-eye");
+            this.classList.remove("icon-eye-blocked");
+          } else {
+            input.setAttribute("type", "password");
+            this.classList.add("icon-eye-blocked");
+            this.classList.remove("icon-eye");
+          }
+        });
+      }
+    }
+  }
+});
+
+$(function() {
   const IS_EXPANDING_ADMIN_BTNS = "is-expanding-admin-btns";
   const $admin_more_btn = $("#admin-more-btn");
   const HTML_SHOW_EXTRA_NAV = "&bull;&bull;&bull;";

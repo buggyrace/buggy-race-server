@@ -276,6 +276,8 @@ function run_countdown(){
 }
 
 $(function() {
+  document.getElementsByTagName("HTML")[0].classList.remove("no-js");
+
   TASK_PATH = "/project/tasks";
   const TASK_RE = new RegExp('#task-(\\d)-(\\w+)', 'i');
   if (window.location.pathname.slice(0, TASK_PATH.length)==TASK_PATH){

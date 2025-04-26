@@ -216,6 +216,7 @@ class ConfigSettingNames(Enum):
     IS_BUGGY_DELETE_ALLOWED = auto()
     IS_DNF_POSITION_DEFAULT = auto()
     IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
+    IS_ENCOURAGING_VCS_ON_EVERY_TASK = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_ISSUES_CSV_IN_REVERSE_ORDER = auto()
@@ -427,6 +428,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
+        ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -542,6 +544,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: 0,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: 1,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
+        ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name: 0,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: 0,
@@ -690,6 +693,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: ConfigTypes.BOOLEAN,
@@ -999,6 +1003,13 @@ class ConfigSettings:
           the task text? This setting is ignored (so: no such message will be
           displayed) if `IS_STORING_STUDENT_TASK_TEXTS` is `No`.
           """,
+
+        ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name:
+          """On the task list, do you want every task to display a strapline at
+          the bottom of its "solution" block reminding students to commit and
+          push to version control? This setting is ignored (so: no such
+          message will be displayed) if `IS_USING_VCS` is `No`. Furthermore,
+          phase zero tasks are excluded.""",
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
           """The tech notes are static pages, rendered on a dark background (to

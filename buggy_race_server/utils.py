@@ -579,6 +579,7 @@ def publish_task_list(app=current_app):
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
     created_at = datetime.now(timezone.utc)
+    is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]
     html = render_template(
         "public/project/_tasks.html",
         poster_word = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
@@ -587,9 +588,17 @@ def publish_task_list(app=current_app):
         tasks_by_phase = tasks_by_phase,
         qty_tasks=qty_tasks,
         created_at=datetime.now(app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]),
-        is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_encouraging_texts_on_every_task=app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name],
+        is_encouraging_texts_on_every_task=(
+            app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name]
+            and is_storing_texts
+        ),
+        is_encouraging_vcs_on_every_task=(
+            app.config[ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name]
+            and app.config[ConfigSettingNames.IS_USING_VCS.name]
+        ),
+        is_storing_texts=is_storing_texts,
         report_type=app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        vcs_name=app.config[ConfigSettingNames.VCS_NAME.name],
     )
     if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
         generated_task_file = DbFile.query.filter_by(

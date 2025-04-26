@@ -165,9 +165,17 @@ textarea {
   padding: 0.5em 2em;
   margin: 0em 0em -0.5em 0em;
 }
-.buggy-project .task .solution .encourage-text a {
+.buggy-project .task .solution .encourage-text:has(+ div) {
+  margin-bottom:0em;
+}
+  .buggy-project .task .solution .encourage-text a {
   color: rgb(13, 13, 184);
   font-weight:bold;
+}
+.buggy-project .task .solution .encourage-vcs {
+  background-color: #e3f27e;
+  padding: 0.5em 2em;
+  margin: 0em 0em -0.5em 0em;
 }
 
 .buggy-project .task h3 {

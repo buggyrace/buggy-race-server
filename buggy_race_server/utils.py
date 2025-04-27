@@ -579,7 +579,11 @@ def publish_task_list(app=current_app):
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
     created_at = datetime.now(timezone.utc)
+    vcs_name=app.config[ConfigSettingNames.VCS_NAME.name]
     is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]
+    task_encourage_vcs_message = app.config[ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name]
+    # special case of "%VCS_NAME%" when used in TASK_ENCOURAGE_VCS_MESSAGE:
+    task_encourage_vcs_message = task_encourage_vcs_message.replace("%VCS_NAME%", vcs_name)
     html = render_template(
         "public/project/_tasks.html",
         poster_word = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
@@ -598,7 +602,8 @@ def publish_task_list(app=current_app):
         ),
         is_storing_texts=is_storing_texts,
         report_type=app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-        vcs_name=app.config[ConfigSettingNames.VCS_NAME.name],
+        task_encourage_vcs_message=task_encourage_vcs_message,
+        vcs_name=vcs_name,
     )
     if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
         generated_task_file = DbFile.query.filter_by(

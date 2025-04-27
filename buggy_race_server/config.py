@@ -279,6 +279,7 @@ class ConfigSettingNames(Enum):
     SITE_4_URL = auto()
     STUDENT_EDITOR_REPO_URL = auto()
     SUPERBASICS_URL = auto()
+    TASK_ENCOURAGE_VCS_MESSAGE = auto()
     TASK_NAME_FOR_API = auto()
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
@@ -429,6 +430,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
+        ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -607,6 +609,7 @@ class ConfigSettings:
         ConfigSettingNames.SITE_4_URL.name: "",
         ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name: "https://github.com/",
         ConfigSettingNames.SUPERBASICS_URL.name: "https://superbasics.beholder.uk",
+        ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name: "Don't forget to commit any changes you make for this task and push them to %VCS_NAME%.",
         ConfigSettingNames.TASK_NAME_FOR_API.name: "4-API",
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
@@ -1005,11 +1008,12 @@ class ConfigSettings:
           """,
 
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name:
-          """On the task list, do you want every task to display a strapline at
-          the bottom of its "solution" block reminding students to commit and
-          push to version control? This setting is ignored (so: no such
-          message will be displayed) if `IS_USING_VCS` is `No`. Furthermore,
-          phase zero tasks are excluded.""",
+          """On the task list, do you want every task (except those in phase 0)
+          to display a message at the bottom of its "solution" block reminding
+          students to commit and push to version control? You can customise
+          the message by changing `TASK_ENCOURAGE_VCS_MESSAGE`. This setting is
+          ignored (so: no such message will be displayed) if `IS_USING_VCS` is
+          `No`.""",
 
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name:
           """The tech notes are static pages, rendered on a dark background (to
@@ -1445,6 +1449,15 @@ class ConfigSettings:
           links are to specific paths within the superbasics, which are added
           to this base URL, so if you host your own version be cautious about
           changing existing paths within it.""",
+
+        ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name:
+          """If you are encouraging students to commit/push their work to a
+          version control system, the race server will display this message
+          along with each task. See `IS_ENCOURAGING_VCS_ON_EVERY_TASK` for more
+          about this behaviour. If the special string `%VCS_NAME%` occurs in the
+          message, it will be replaced with the value of config setting
+          `VCS_NAME`. This setting is ignored if
+          `IS_ENCOURAGING_VCS_ON_EVERY_TASK` is `No`""",
 
         ConfigSettingNames.TASK_NAME_FOR_API.name:
           """The name of the task that require use of the upload API. If set,

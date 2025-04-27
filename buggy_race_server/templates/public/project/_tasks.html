@@ -117,8 +117,7 @@
                 {% if phase > 0 %}
                   {% if is_encouraging_vcs_on_every_task %}
                     <div class="encourage-vcs">
-                      Don't forget to commit the changes you made for this task
-                      and push them to {{ vcs_name }}.
+                      {{ task_encourage_vcs_message }}
                     </div>
                   {% endif %}
                 {% endif %}

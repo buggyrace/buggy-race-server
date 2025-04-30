@@ -248,7 +248,8 @@ class ConfigSettingNames(Enum):
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
     IS_USING_REMOTE_VS_WORKSPACE = auto()
     IS_USING_VCS = auto()
-    IS_WRITING_HOST_AND_PORT_IN_EDITOR = auto()
+    IS_WRITING_HOST_IN_EDITOR = auto()
+    IS_WRITING_PORT_IN_EDITOR = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     PROJECT_CODE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
@@ -348,7 +349,8 @@ class ConfigSettings:
         ConfigSettingNames.EDITOR_ZIPFILE_NAME.name,
         ConfigSettingNames.EDITOR_HOST.name,
         ConfigSettingNames.EDITOR_PORT.name,
-        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
+        ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name,
+        ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name,
       ),
       ConfigGroupNames.LINKS.name: (
@@ -578,7 +580,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: 0,
         ConfigSettingNames.IS_USING_VCS.name: 0,
-        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: 1,
+        ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name: 0,
+        ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name: 1,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
@@ -728,7 +731,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_VCS.name: ConfigTypes.BOOLEAN,
-        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
@@ -839,17 +843,18 @@ class ConfigSettings:
           repo. If `IS_USING_VCS` is `No`, this setting is ignored.""",
 
         ConfigSettingNames.EDITOR_ZIPFILE_NAME.name:
-          """If you are **not** using a VCS platform like Github or GitLab
-          (`IS_USING_VCS` is `No`), and want to use the default buggy editor
-          source code served from this server, what should the zip file that
-          students download be called?""",
+          """If you want your students to use the default buggy editor
+          source code served from this server (and not, for example, via a
+          version control system), what should the zip file that students
+          download be called? This setting is ignored unless
+          `EDITOR_DISTRIBUTION_METHOD` is `zip`. """,
 
         ConfigSettingNames.EDITOR_DOWNLOAD_URL.name:
-          """If you are **not** using a VCS platform like GitHub or GitLab
-          (`IS_USING_VCS` is `No`), your students can download the buggy editor
-          zipfile directly from this server. If you prefer to provide your own
-          copy instead, provide a URL to your own instructions or zipfile
-          instead. This setting is ignored if `IS_USING_VCS` is `Yes`. """,
+          """If you are not distributing the buggy editor code through a
+          version control system, and they aren't downloading a it as a zip from
+          the race server, what URL should they use instead? This setting is
+          ignored if `EDITOR_DISTRIBUTION_METHOD` is not `zip`, `page`,
+          or `other`.  """,
 
         ConfigSettingNames.BUGGY_RACE_PLAYER_ANCHOR.name:
           """Anchor which is appended to any race player URLs. If the race
@@ -1265,11 +1270,20 @@ class ConfigSettings:
           it through VS Code. This is quite a specific setup: if you're not
           sure, you almost certainly do not want this. """,
 
-        ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name:
-          """If you publish the buggy editor app on this server, should the
-          `EDITOR_HOST` and `EDITOR_PORT` values be written into `app.py`? This
-          setting won't be used if you don't generate the zipfile on this server
-          (for example, if `IS_USING_VCS` is `Yes`).""",
+        ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name:
+          """If you publish the buggy editor app (as a zipfile) on this server,
+          should the `EDITOR_HOST` value be hardcoded into `app.py`? Usually,
+          you do not want to do this, because `0.0.0.0` is going to map to the
+          localhost anyway. This setting is only used when you generate the zip
+          file on the race server, which you'll probably only do if
+          `EDITOR_DISTRIBUTION_METHOD` is `zip`.""",
+
+        ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name:
+          """If you publish the buggy editor app (as a zipfile) on this server,
+          should the `EDITOR_PORT` value be hardcoded into `app.py`? This
+          setting is only used when you generate the zip file on the race
+          server, which you'll probably only do if `EDITOR_DISTRIBUTION_METHOD`
+          is `zip`.""",
 
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name:
           """If you publish the buggy editor app on this server, should the

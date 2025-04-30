@@ -8,12 +8,15 @@
       Buggy Editor (the students' source code)
     </h1>
   </div>
-  {% if not is_using_vcs %}
+  {% if editor_distribution_method in ["zip", "page", "other"]  %}
     <div class="row">
       <div class="col-md-6">
         <div class="alert alert-info">
-          <h2 class="alert-title">Not using Version Control</h2>
+          <h2 class="alert-title">Direct download (not using version control)</h2>
           {% if buggy_editor_zipfile_url %}
+            <p>
+              Editor source code distribution method is <strong>{{ editor_distribution_method }}</strong>.
+            </p>
             <p>
               Your students can download the editor source code
               from <code><a href="{{ buggy_editor_zipfile_url }}">{{ buggy_editor_zipfile_url }}</a></code>
@@ -30,11 +33,12 @@
           {% endif %}
         </div>
         <p>
-          You can change this behaviour with the "GitHub" config
+          You can change this behaviour with the "Project" and "Editor" config
           settings.
         </p>
         <p class="btn-collection">
-          <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>
+          <a href="{{ url_for('admin.settings', group_name='project') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Project</span></a>
+          <a href="{{ url_for('admin.settings', group_name='editor') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Editor</span></a>
         </p>
       </div>
       <div class="col-md-6">
@@ -59,28 +63,28 @@
             {% endif %}
             <p class="btn-collection">
               <a class="btn btn-outline-secondary btn-admin btn-download" href="{{ url_for('admin.download_editor_zip_for_admin')}}">Download zipfile (staff only)</a>
-              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
             </p>
-            <form action="{{ url_for('admin.delete_buggy_editor_zip') }}" method="POST">
-              <div class="container border">
-                {{ delete_form.csrf_token }}
-                <div class="row">
-                  <div class="col-xs-6 p-3">
-                    {{ delete_form.is_confirmed.label }}
-                    <select id="is_confirmed" name="is_confirmed" class="form-control">
-                      <option selected value="">No</option>
-                      <option value="">I think so</option>
-                      <option value="y">Yes</option>
-                    </select>  
-                  </div>
-                  <div class="col-xs-6 p-3 bottom">
-                    <button class="btn btn-danger">Delete zipfile</button>
-                  </div>
+          </div>
+          <form action="{{ url_for('admin.delete_buggy_editor_zip') }}" method="POST">
+            <div class="alert alert-danger my-3">
+              <h2 class="alert-title">Delete zipfile</h2>
+              {{ delete_form.csrf_token }}
+              <div class="row">
+                <div class="col-xs-6 p-3">
+                  {{ delete_form.is_confirmed.label }}
+                  <select id="is_confirmed" name="is_confirmed" class="form-control">
+                    <option selected value="">No</option>
+                    <option value="">I think so</option>
+                    <option value="y">Yes</option>
+                  </select>  
+                </div>
+                <div class="col-xs-6 p-3 bottom">
+                  <button class="btn btn-danger">Delete zipfile</button>
                 </div>
               </div>
-            </form>
-          </div>
-        {% else %}
+            </div>
+          </form>
+          {% else %}
           <div class="alert {% if buggy_editor_zipfile_url %}alert-warning{% else %}alert-danger{% endif %}">
             <h2 class="alert-title">Zipfile is not yet published</h2>
             {% if buggy_editor_zipfile_url %}
@@ -95,9 +99,6 @@
                 available for students to download.
               </p>
             {% endif %}
-            <p class="btn-collection">
-              <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.publish_editor_zip')}}">Publish editor zipfile</a>
-            </p>
           </div>
         {% endif %}
       </div>

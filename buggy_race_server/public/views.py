@@ -53,12 +53,15 @@ def home():
     """Home page."""
     warn_if_insecure()
     editor_url = ""
-    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
+    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.ZIP.value:
+        editor_url = editor_url = url_for("public.download_editor_zip")
+    elif current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
         if current_user and current_user.is_authenticated:
             editor_url = current_user.editor_repo_url
     elif current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:
+        # note: this itself redirects if there's an explicit download URL set
         editor_url = url_for("public.download_editor_zip")
     is_using_vcs = (
         current_app.config[ConfigSettingNames.IS_USING_VCS.name]
@@ -75,6 +78,7 @@ def home():
     return render_template(
         "public/home.html",
         editor_url=editor_url,
+        is_downloading_zip=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.ZIP.value,
         is_preloaded_repos=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_vcs=is_using_vcs,

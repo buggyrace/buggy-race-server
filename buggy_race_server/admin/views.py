@@ -2092,6 +2092,7 @@ def show_buggy_editor_info():
       "admin/buggy_editor.html",
       **_get_buggy_editor_kwargs(current_app),
       is_editor_zipfile_published=_is_editor_zipfile_published(),
+      editor_distribution_method=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name],
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
       delete_form=SubmitWithConfirmForm(),
@@ -2134,10 +2135,12 @@ def delete_buggy_editor_zip():
 @login_required
 @admin_only
 def publish_editor_zip():
+    server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
     readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename = current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
-    is_writing_host_and_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
+    is_writing_host_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name]
+    is_writing_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name]
     form = PublishEditorSourceForm(request.form)
     if request.method == "POST":
         readme_contents = form.readme_contents.data
@@ -2151,13 +2154,21 @@ def publish_editor_zip():
         )
         current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name] = is_writing_server_url_in_editor
 
-        is_writing_host_and_port_in_editor = form.is_writing_host_and_port_in_editor.data
+        is_writing_host_in_editor = form.is_writing_host_in_editor.data
         set_and_save_config_setting(
             current_app,
-            name=ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
-            value=1 if is_writing_host_and_port_in_editor else 0
+            name=ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name,
+            value=1 if is_writing_host_in_editor else 0
         )
-        current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name] = is_writing_host_and_port_in_editor
+        current_app.config[ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name] = is_writing_host_in_editor
+
+        is_writing_port_in_editor = form.is_writing_port_in_editor.data
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name,
+            value=1 if is_writing_port_in_editor else 0
+        )
+        current_app.config[ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name] = is_writing_port_in_editor
 
         try:
             create_editor_zipfile(readme_contents, app=current_app)
@@ -2180,16 +2191,20 @@ def publish_editor_zip():
         )
 
         if is_writing_server_url_in_editor:
-            server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
             flash(
                 f"Hardcoded BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
                 "info"
             )
-        if is_writing_host_and_port_in_editor:
+        if is_writing_host_in_editor:
             host = current_app.config[ConfigSettingNames.EDITOR_HOST.name]
+            flash(
+                f"Hardcoded default host to \"{host}\" within {editor_python_filename}",
+                "info"
+            )
+        if is_writing_port_in_editor:
             port = current_app.config[ConfigSettingNames.EDITOR_PORT.name]
             flash(
-                f"Hardcoded default host and port to \"{host}:{port}\" within {editor_python_filename}",
+                f"Hardcoded default port number to \"{port}\" within {editor_python_filename}",
                 "info"
             )
         qty_lines_in_readme = readme_contents.count("\n")
@@ -2210,13 +2225,17 @@ def publish_editor_zip():
     return render_template(
         "admin/buggy_editor_publish.html",
         form=form,
+        editor_host=current_app.config[ConfigSettingNames.EDITOR_HOST.name],
+        editor_port=current_app.config[ConfigSettingNames.EDITOR_PORT.name],
         is_writing_server_url_in_editor=is_writing_server_url_in_editor,
-        is_writing_host_and_port_in_editor=is_writing_host_and_port_in_editor,
+        is_writing_host_in_editor=is_writing_host_in_editor,
+        is_writing_port_in_editor=is_writing_port_in_editor,
         qty_lines_in_readme=qty_lines_in_readme,
         readme_filename=readme_filename,
         editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
         buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
         editor_python_filename=editor_python_filename,
+        server_url=server_url,
     )
 
 @blueprint.route("/buggy-editor/download", strict_slashes=False)

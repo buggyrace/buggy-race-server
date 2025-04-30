@@ -86,6 +86,6 @@ def send_buggy_json():
 if __name__ == "__main__":
     app.run(
         debug=True,
-        host=environ.get("FLASK_RUN_SERVER") or "0.0.0.0",
-        port=environ.get("FLASK_RUN_PORT") or 5000
+        host=environ.get("BUGGY_EDITOR_HOST") or "0.0.0.0",
+        port=environ.get("BUGGY_EDITOR_PORT") or 5000
     )

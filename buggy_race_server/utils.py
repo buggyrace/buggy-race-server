@@ -756,7 +756,7 @@ def _get_buggy_editor_kwargs(app):
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
       "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-      "editor_title": f"{project_code} Racing Buggy editor".strip(),
+      "editor_title": f"{project_code} Buggy Editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
       "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
       "editor_port": editor_port,

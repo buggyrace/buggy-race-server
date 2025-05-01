@@ -18,7 +18,11 @@ from datetime import datetime, timezone
 import subprocess
 
 def refresh_global_announcements(app):
-  app.config[ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name] = Announcement.query.filter_by(is_visible=True)
+  announcements = []
+  # build the list up explicitly, to force the underlying query to execute
+  for ann in Announcement.query.filter_by(is_visible=True):
+      announcements.append(ann)
+  app.config[ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name] = announcements
 
 def flash_errors(form, category="warning"):
     """Flash all errors for a form."""
@@ -575,6 +579,11 @@ def publish_task_list(app=current_app):
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
     created_at = datetime.now(timezone.utc)
+    vcs_name=app.config[ConfigSettingNames.VCS_NAME.name]
+    is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]
+    task_encourage_vcs_message = app.config[ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name]
+    # special case of "%VCS_NAME%" when used in TASK_ENCOURAGE_VCS_MESSAGE:
+    task_encourage_vcs_message = task_encourage_vcs_message.replace("%VCS_NAME%", vcs_name)
     html = render_template(
         "public/project/_tasks.html",
         poster_word = app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
@@ -583,9 +592,18 @@ def publish_task_list(app=current_app):
         tasks_by_phase = tasks_by_phase,
         qty_tasks=qty_tasks,
         created_at=datetime.now(app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]),
-        is_storing_texts=app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
-        is_encouraging_texts_on_every_task=app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name],
+        is_encouraging_texts_on_every_task=(
+            app.config[ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name]
+            and is_storing_texts
+        ),
+        is_encouraging_vcs_on_every_task=(
+            app.config[ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name]
+            and app.config[ConfigSettingNames.IS_USING_VCS.name]
+        ),
+        is_storing_texts=is_storing_texts,
         report_type=app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+        task_encourage_vcs_message=task_encourage_vcs_message,
+        vcs_name=vcs_name,
     )
     if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
         generated_task_file = DbFile.query.filter_by(
@@ -738,7 +756,7 @@ def _get_buggy_editor_kwargs(app):
       "buggy_editor_repo_name": app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
       "buggy_editor_repo_owner": buggy_editor_repo_owner,
       "buggy_race_server_url": app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-      "editor_title": f"{project_code} Racing Buggy editor".strip(),
+      "editor_title": f"{project_code} Buggy Editor".strip(),
       "buggy_editor_zipfile_url": app.config[ConfigSettingNames.EDITOR_DOWNLOAD_URL.name],
       "editor_host": app.config[ConfigSettingNames.EDITOR_HOST.name],
       "editor_port": editor_port,
@@ -776,7 +794,8 @@ def create_editor_zipfile(readme_contents, app=current_app):
     readme_filename = app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename=app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
-    is_writing_port_and_host_in_editor = app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
+    is_writing_host_in_editor = app.config[ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name]
+    is_writing_port_in_editor = app.config[ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name]
     if readme_contents is None: 
         # try to load readme_contents from database
         readme_db_file = DbFile.query.filter_by(
@@ -836,18 +855,19 @@ def create_editor_zipfile(readme_contents, app=current_app):
             py_body = old_py.read()
         if is_writing_server_url_in_editor:
             py_body=py_body.replace("https://RACE-SERVER-URL", server_url)
-        if is_writing_port_and_host_in_editor:
-            # These arei matching precisely against the punctuation of the
-            # target lines, so if the editor app.py, it may well break
+        # These are matching precisely against the punctuation of the
+        # target lines, so if the editor app.py, it may well break
+        if is_writing_host_in_editor:
             py_body = re.sub(
                 # looking for 0.0.0.0 (or something very like it)
-                r'(host=environ.get\("FLASK_RUN_SERVER"\)\s+or\s+)"(\w+\.?)+',
+                r'(host=environ.get\("BUGGY_EDITOR_HOST"\)\s+or\s+)"(\w+\.?)+',
                 f"\\1\"" + f"{current_app.config[ConfigSettingNames.EDITOR_HOST.name]}",
                 py_body
             )
+        if is_writing_port_in_editor:
             py_body = re.sub(
                 # looking for 5000 (or something very like it)
-                r'(port=environ.get\("FLASK_RUN_PORT"\)\s+or) \d+',
+                r'(port=environ.get\("BUGGY_EDITOR_PORT"\)\s+or) \d+',
                 f"\\1 {current_app.config[ConfigSettingNames.EDITOR_PORT.name]}",
                 py_body
             )

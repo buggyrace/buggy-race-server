@@ -59,7 +59,9 @@
         <p>
           The basic <strong>buggy editor</strong> is a Python
           Flask webserver.
-          {% if is_preloaded_repos %}
+          {% if is_downloading_zip %}
+            You can download a zip file containing the source code.
+          {% elif is_preloaded_repos %}
             We'll fork this into your {{ vcs_name }} account.
           {% elif is_forking_github %}
             We'll automatically fork this into your {{ vcs_name }} account.

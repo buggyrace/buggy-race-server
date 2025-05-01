@@ -29,7 +29,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import bindparam, select, insert, update
+from sqlalchemy import bindparam, select, delete, insert, update
 
 from flask_wtf import FlaskForm
 from werkzeug.utils import secure_filename
@@ -38,6 +38,7 @@ from buggy_race_server.admin.forms import (
     AnnouncementActionForm,
     AnnouncementForm,
     ApiKeyForm,
+    BulkDeleteUsersForm,
     BulkRegisterForm,
     EnableDisableLoginsForm,
     GeneralSubmitForm,
@@ -685,6 +686,7 @@ def list_users(data_format=None, want_detail=True):
             ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
             ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
             ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+            is_allowing_bulk_user_delete=User.is_allowing_bulk_user_delete(current_app),
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
             is_showing_github_column=current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name],
@@ -951,6 +953,74 @@ def manage_user(user_id):
       user=user,
       vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )
+
+@blueprint.route("/users/delete", methods=['GET', 'POST'], strict_slashes=False)
+@login_required
+@admin_only
+def bulk_delete_users():
+    if not User.is_allowing_bulk_user_delete(current_app):
+        timeout = current_app.config[ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name]
+        pretty_timeout = "1 day" if timeout==1 else f"{timeout} days"
+        flash(
+            f"Bulk-deletion of users was automatically disabled {pretty_timeout}"
+            f" after the last student's user record was created. Change the "
+            f"{ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name} setting"
+            "to re-enable this feature.",
+            "warning"
+        )
+        abort(403)
+    users = User.query.all()
+    # note: can't use User.is_staff etc because those also require is_active
+    #       and the bulk delete is more simplistic
+    qty_students = len([s for s in users if s.is_student and not (
+        s.access_level in [User.TEACHING_ASSISTANT, User.ADMINISTRATOR]
+    )])
+    qty_tas = len([s for s in users if s.access_level == User.TEACHING_ASSISTANT])
+    qty_non_admin = len([s for s in users if s.access_level < User.ADMINISTRATOR])
+
+    form = BulkDeleteUsersForm(request.form)
+    if request.method == "POST":
+        if form.is_submitted() and form.validate():
+            if form.user_type.data == UserTypesForLogin.students.name:
+                base_query = select(User.id).where(
+                    User.is_student == True,
+                    User.access_level == User.NO_STAFF_ROLE
+                )
+                user_str = "all students"
+            elif form.user_type.data == UserTypesForLogin.teaching_assistants.name:
+                base_query = select(User.id).where(
+                    User.access_level == User.TEACHING_ASSISTANT
+                )
+                user_str = "all TAs"
+            else:
+                base_query = select(User.id).with_only_columns(User.id).where(
+                    User.access_level < User.ADMINISTRATOR
+                )
+                user_str = "all users (except admins)"
+            try:
+                # note: would prefer to include synchronize_session='fetch'
+                db.session.execute(
+                    delete(User).where(User.id.in_(base_query))
+                )
+                db.session.commit()
+            except Exception as e:
+                flash(str(e), "danger")
+            else:
+                flash(
+                    f"OK, deleted {user_str}",
+                    "info"
+                )
+                return redirect(url_for("admin.list_users"))
+        else:
+            flash_errors(form)
+    return render_template(
+        "admin/user_bulk_delete.html",
+        form=form,
+        qty_non_admin=qty_non_admin,
+        qty_students=qty_students,
+        qty_tas=qty_tas,
+    )
+
 
 @blueprint.route("/users/logins", methods=['GET', 'POST'], strict_slashes=False)
 @login_required
@@ -1988,13 +2058,13 @@ def show_system_info():
         git_status = "[Unavailable]"
     announcement_summary = None
     if curr_anns := current_app.config.get(ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name):
-        try:
-            qty_anns = curr_anns.count()
+        if isinstance(curr_anns, list):
+            qty_anns = len(curr_anns)
             if qty_anns == 1:
                 announcement_summary = "1 announcement"
             elif qty_anns > 1:
                 announcement_summary = f"{qty_anns} announcements"
-        except AttributeError as e:
+        else:
             announcement_summary = f"(unexpected type): {curr_anns}"
     return render_template(
         "admin/system_info.html",
@@ -2022,6 +2092,7 @@ def show_buggy_editor_info():
       "admin/buggy_editor.html",
       **_get_buggy_editor_kwargs(current_app),
       is_editor_zipfile_published=_is_editor_zipfile_published(),
+      editor_distribution_method=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name],
       editor_zip_generated_datetime=current_app.config[ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name],
       readme_filename=current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name],
       delete_form=SubmitWithConfirmForm(),
@@ -2064,10 +2135,12 @@ def delete_buggy_editor_zip():
 @login_required
 @admin_only
 def publish_editor_zip():
+    server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
     readme_filename = current_app.config[ConfigSettingNames._EDITOR_README_FILENAME.name]
     editor_python_filename = current_app.config[ConfigSettingNames._EDITOR_PYTHON_FILENAME.name]
     is_writing_server_url_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name]
-    is_writing_host_and_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name]
+    is_writing_host_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name]
+    is_writing_port_in_editor = current_app.config[ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name]
     form = PublishEditorSourceForm(request.form)
     if request.method == "POST":
         readme_contents = form.readme_contents.data
@@ -2081,13 +2154,21 @@ def publish_editor_zip():
         )
         current_app.config[ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name] = is_writing_server_url_in_editor
 
-        is_writing_host_and_port_in_editor = form.is_writing_host_and_port_in_editor.data
+        is_writing_host_in_editor = form.is_writing_host_in_editor.data
         set_and_save_config_setting(
             current_app,
-            name=ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name,
-            value=1 if is_writing_host_and_port_in_editor else 0
+            name=ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name,
+            value=1 if is_writing_host_in_editor else 0
         )
-        current_app.config[ConfigSettingNames.IS_WRITING_HOST_AND_PORT_IN_EDITOR.name] = is_writing_host_and_port_in_editor
+        current_app.config[ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name] = is_writing_host_in_editor
+
+        is_writing_port_in_editor = form.is_writing_port_in_editor.data
+        set_and_save_config_setting(
+            current_app,
+            name=ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name,
+            value=1 if is_writing_port_in_editor else 0
+        )
+        current_app.config[ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name] = is_writing_port_in_editor
 
         try:
             create_editor_zipfile(readme_contents, app=current_app)
@@ -2110,16 +2191,20 @@ def publish_editor_zip():
         )
 
         if is_writing_server_url_in_editor:
-            server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
             flash(
                 f"Hardcoded BUGGY_RACE_SERVER_URL=\"{server_url}\" within {editor_python_filename}",
                 "info"
             )
-        if is_writing_host_and_port_in_editor:
+        if is_writing_host_in_editor:
             host = current_app.config[ConfigSettingNames.EDITOR_HOST.name]
+            flash(
+                f"Hardcoded default host to \"{host}\" within {editor_python_filename}",
+                "info"
+            )
+        if is_writing_port_in_editor:
             port = current_app.config[ConfigSettingNames.EDITOR_PORT.name]
             flash(
-                f"Hardcoded default host and port to \"{host}:{port}\" within {editor_python_filename}",
+                f"Hardcoded default port number to \"{port}\" within {editor_python_filename}",
                 "info"
             )
         qty_lines_in_readme = readme_contents.count("\n")
@@ -2140,13 +2225,17 @@ def publish_editor_zip():
     return render_template(
         "admin/buggy_editor_publish.html",
         form=form,
+        editor_host=current_app.config[ConfigSettingNames.EDITOR_HOST.name],
+        editor_port=current_app.config[ConfigSettingNames.EDITOR_PORT.name],
         is_writing_server_url_in_editor=is_writing_server_url_in_editor,
-        is_writing_host_and_port_in_editor=is_writing_host_and_port_in_editor,
+        is_writing_host_in_editor=is_writing_host_in_editor,
+        is_writing_port_in_editor=is_writing_port_in_editor,
         qty_lines_in_readme=qty_lines_in_readme,
         readme_filename=readme_filename,
         editor_source_commit=current_app.config[ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name],
         buggy_editor_origin_github_url=current_app.config[ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name],
         editor_python_filename=editor_python_filename,
+        server_url=server_url,
     )
 
 @blueprint.route("/buggy-editor/download", strict_slashes=False)

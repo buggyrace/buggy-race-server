@@ -18,6 +18,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
+from markupsafe import Markup
 
 from buggy_race_server.database import db
 from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames, DistribMethods
@@ -52,12 +53,15 @@ def home():
     """Home page."""
     warn_if_insecure()
     editor_url = ""
-    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
+    if current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.ZIP.value:
+        editor_url = editor_url = url_for("public.download_editor_zip")
+    elif current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value:
         if current_user and current_user.is_authenticated:
             editor_url = current_user.editor_repo_url
     elif current_app.config[ConfigSettingNames.IS_USING_VCS.name]:
         editor_url = current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name]
     else:
+        # note: this itself redirects if there's an explicit download URL set
         editor_url = url_for("public.download_editor_zip")
     is_using_vcs = (
         current_app.config[ConfigSettingNames.IS_USING_VCS.name]
@@ -74,6 +78,7 @@ def home():
     return render_template(
         "public/home.html",
         editor_url=editor_url,
+        is_downloading_zip=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.ZIP.value,
         is_preloaded_repos=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value,
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_vcs=is_using_vcs,
@@ -99,9 +104,16 @@ def login():
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             login_user(form.user)
+            is_showing_change_password_msg = current_app.config[
+                ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name
+            ]
             form.user.logged_in_at = datetime.now(timezone.utc)
             if form.user.first_logged_in_at is None:
                 form.user.first_logged_in_at = form.user.logged_in_at
+                if not current_user.is_student:
+                    is_showing_change_password_msg = False
+            else:
+                is_showing_change_password_msg = False
             form.user.save()
             if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
                 pretty_name = current_user.first_name or current_user.pretty_username
@@ -121,6 +133,14 @@ def login():
                     url_for("admin.admin") if current_user.is_staff
                     else url_for("user.home_page")
                 )
+            if is_showing_change_password_msg:
+                flash(
+                    Markup(
+                        "Remember to <a href=\""
+                        f"${url_for('user.change_password')}\">change your password</a>!"
+                    ),
+                    "warning"
+                )
             return redirect(redirect_url)
         else:
             flash_errors(form)
@@ -131,6 +151,7 @@ def login():
             current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name]
             or (not current_user.is_anonymous and current_user.is_administrator)
         ),
+        
         local_announcement_type=AnnouncementTypes.LOGIN.value,
         username_example=current_app.config[ConfigSettingNames.USERNAME_EXAMPLE.name],
     )

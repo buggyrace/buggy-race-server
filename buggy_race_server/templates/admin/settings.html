@@ -114,7 +114,8 @@
               </div>
               <div class="col-sm-4">
                 <input name="{{ SETTING_PREFIX }}-0-name" type="hidden" value="AUTHORISATION_CODE" />
-                <input name="{{ SETTING_PREFIX }}-0-value" type="password"  class="form-control mr-sm-1"/>
+                <input name="{{ SETTING_PREFIX }}-0-value" type="password"  class="form-control mr-sm-1" id="{{ SETTING_PREFIX }}-0-value"/>
+                <span class="password-toggler hidden icon-eye-blocked" data-for="{{ SETTING_PREFIX }}-0-value"></span>
               </div>
               <div class="col-sm-5">
                 {% set name = "AUTHORISATION_CODE" %}
@@ -131,7 +132,8 @@
                 <label for="auth_code">Authorisation code</label>
               </div>
               <div class="col-sm-4">
-                <input id="auth_code" name="auth_code" type="password" value=""  class="form-control mr-sm-1"/>
+                <input id="auth_code" name="auth_code" type="password" value="" class="form-control mr-sm-1"/>
+                <span class="password-toggler hidden icon-eye-blocked" data-for="auth_code"></span>
               </div>
               <div class="col-sm-5">
                 You must provide the current authorisation code to make changes.
@@ -146,6 +148,7 @@
               </div>
               <div class="col-sm-4">
                 {{ form.auth_code(class="mr-sm-1")}}
+                <span class="password-toggler hidden icon-eye-blocked" data-for="auth_code"></span>
               </div>
               <div class="col-sm-5">
                 You must provide the current authorisation code to make changes.

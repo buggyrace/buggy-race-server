@@ -267,19 +267,34 @@
           </td>
         </tr>
         <tr>
-          <td>With report?</td>
+          <td>Report?</td>
           <td>
             {% if config['PROJECT_REPORT_TYPE'] == "" %}
-              no
+              no report
             {% else %}
-              yes
-              {% if config['PROJECT_REPORT_TYPE'] != "report" %}
-                (as "{{ config['PROJECT_REPORT_TYPE'] }}")
-              {% endif %}
+              yes ({{ config['PROJECT_REPORT_TYPE'] }})
             {% endif %}
           </td>
           <td>Tasks</td>
           <td class="text-right">{{ qty_tasks }}</td>
+        </tr>
+        <tr>
+          <td>Poster?</td>
+          <td>
+            {% if config['PROJECT_POSTER_TYPE'] == "" %}
+              no poster
+            {% else %}
+              yes ({{ config['PROJECT_POSTER_TYPE'] }})
+            {% endif %}
+          </td>
+          <td>Min. phase</td>
+          <td class="text-right">
+            {% if config['PROJECT_PHASE_MIN_TARGET'] %}
+              {{ config['PROJECT_PHASE_MIN_TARGET'] }}
+            {% else %}
+              <em class="empty-setting">none</em>
+            {% endif %}
+          </td>
         </tr>
       </table>
 

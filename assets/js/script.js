@@ -697,8 +697,6 @@ $(function() {
 $(function() {
   const pw_togglers = document.getElementsByClassName("password-toggler");
   for (const toggler of pw_togglers) {
-    console.log("FIXME adding event handler to password field: ", toggler);
-    console.log("FIXME for " + toggler.dataset.for, document.getElementById(toggler.dataset.for));
     const input_id = toggler.dataset.for;
     if (input_id){
       const input = document.getElementById(input_id);

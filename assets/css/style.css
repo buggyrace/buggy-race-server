@@ -589,6 +589,11 @@ span.btn.disabled{
 pre.task-text {
   white-space: pre-wrap;
 }
+pre code {
+  display:block;
+  margin:0 2em;
+}
+
 .task-text-title .anchor-link-icon {
   color: #999999;
   text-decoration: none;

@@ -511,7 +511,10 @@ def download_texts(username, format):
     texts_by_task_id = TaskText.get_dict_texts_by_task_id(user.id)
     if format == "md2html":
         for task_id in texts_by_task_id:
-            texts_by_task_id[task_id].text = markdown.markdown(texts_by_task_id[task_id].text)
+            texts_by_task_id[task_id].text = markdown.markdown(
+                texts_by_task_id[task_id].text,
+                extensions=['fenced_code']
+            )
         format = "html"
     filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)
     if format == "json":

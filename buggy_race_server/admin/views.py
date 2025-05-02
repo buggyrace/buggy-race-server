@@ -1785,6 +1785,7 @@ def tasks_admin():
         is_injecting_github_issues=is_injecting_github_issues,
         is_issues_csv_in_reverse_order=current_app.config[ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name],
         is_showing_all_tasks=want_all,
+        is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
         key_settings=[
           ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
           ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
@@ -1906,6 +1907,53 @@ def edit_task(task_id=None):
       form=form,
       task=task,
     )
+
+@blueprint.route("/tasks/check-tech-notes", methods=["GET"])
+def check_tasks_for_tech_notes():
+    tasks = Task.query.filter_by(is_enabled=True).order_by(
+        Task.phase.asc(),
+        Task.sort_position.asc()
+    ).all()
+    if qty_tasks := len(tasks):
+        # look for markdown or HTML links to blah/tech-notes/blah
+        tech_note_link_re = re.compile(
+            r'(\]\([-a-z0-9:.#/]*/tech-notes/[-a-z0-9:.#/]+\)|href\s*\=\s*\S+/tech-notes/)',
+            re.IGNORECASE
+        )
+        qty_found = 0 # tasks with links to tech notes
+        for task in tasks:
+            text_types_with_tech_note_links = []
+            for text_type, text in {
+                "problem": task.problem_text,
+                "hints": task.hints_text,
+                "solution": task.solution_text,
+            }.items():
+                if text and re.search(tech_note_link_re, text):
+                    text_types_with_tech_note_links.append(text_type)
+            if len(text_types_with_tech_note_links):
+                flash(
+                    f"Task {task.phase}-{task.name} may contain links to tech notes "
+                    "(in " + " + ".join(text_types_with_tech_note_links) + " text)",
+                    "danger"
+                )
+                qty_found += 1
+        if (qty_tasks == 1):
+            msg = "Checked one task's texts for links to tech notes, found"
+        else:
+            msg = f"Checked {qty_tasks} tasks' texts for links to tech notes, found "
+        if qty_found == 0:
+            msg += "none"
+        elif qty_found == 1:
+            msg += "1 possible link"
+        else:
+            msg += f"{qty_found} possible links"
+        flash(msg, "info")
+    else:
+        flash("Found no tasks to check for links to tech notes", "danger")
+    qty_tasks = len(tasks)
+
+    # if current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name]:
+    return tasks_admin()
 
 @blueprint.route("/json/latest-json/<user_id>", methods=["GET"])
 def get_uploaded_json_for_user(user_id):

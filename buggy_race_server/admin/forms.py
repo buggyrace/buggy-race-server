@@ -338,7 +338,8 @@ class PublishEditorSourceForm(FlaskForm):
         f"README contents", validators=[DataRequired()]
     )
     is_writing_server_url_in_editor = BooleanField("Hardcode server URL in the Python source?")
-    is_writing_host_and_port_in_editor = BooleanField("Hardcocde editor host and port in the Python source?")
+    is_writing_host_in_editor = BooleanField("Hardcocde editor host address in the Python source?")
+    is_writing_port_in_editor = BooleanField("Hardcocde editor port number in the Python source?")
     def __init__(self, *args, **kwargs):
         super(PublishEditorSourceForm, self).__init__(*args, **kwargs)
   
@@ -379,6 +380,24 @@ class EnableDisableLoginsForm(FlaskForm):
 
     def validate(self):
         return super(EnableDisableLoginsForm, self).validate()
+
+class BulkDeleteUsersForm(FlaskForm):
+    is_confirmed = BooleanField("Are you sure?")
+    user_type = SelectField(
+        "Delete which users?",
+        choices=[
+          (choice.name, choice.value) for choice in UserTypesForLogin
+        ]
+    )
+    auth_code = PasswordField("Authorisation code",  [is_authorised])
+
+    def __init__(self, *args, **kwargs):
+        super(BulkDeleteUsersForm, self).__init__(*args, **kwargs)
+  
+    def validate_is_confirmed(self, value):
+        if not self.is_confirmed.data:
+            raise ValidationError("You did not explicitly confirm the delete operation")
+        return self.is_confirmed.data
 
 class SubmitWithConfirmForm(FlaskForm):
     is_confirmed = BooleanField("Are you sure?")

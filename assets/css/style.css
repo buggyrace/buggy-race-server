@@ -165,9 +165,17 @@ textarea {
   padding: 0.5em 2em;
   margin: 0em 0em -0.5em 0em;
 }
-.buggy-project .task .solution .encourage-text a {
+.buggy-project .task .solution .encourage-text:has(+ div) {
+  margin-bottom:0em;
+}
+  .buggy-project .task .solution .encourage-text a {
   color: rgb(13, 13, 184);
   font-weight:bold;
+}
+.buggy-project .task .solution .encourage-vcs {
+  background-color: #e3f27e;
+  padding: 0.5em 2em;
+  margin: 0em 0em -0.5em 0em;
 }
 
 .buggy-project .task h3 {
@@ -207,6 +215,13 @@ textarea {
   }
   .buggy-project .task h3 a{
     margin-left:-0.5em;
+  }
+}
+
+/* 576px is --breakpoint-sm from Bootstrap */
+@media (max-width: 576px) {
+  #main-content-block {
+    max-width:99vw;
   }
 }
 
@@ -331,6 +346,8 @@ footer .footer-nav {
 .icon-trophy:before { content: "\e99e"; }
 .icon-wrench:before { content: "\e991"; }
 .icon-embed2:before { content: "\ea80"; }
+.icon-eye:before { content: "\e9ce"; }
+.icon-eye-blocked:before { content: "\e9d1"; }
 .icon-info:before {
   content: "\ea0c";
   padding-right:0.2rem; /* used in buttons only? */
@@ -793,6 +810,10 @@ body.task-list-page main::before{
   top:0;
   margin:1em;
 }
+pre {
+  overflow-x: auto;
+  max-width:100%;
+}
 
 code {
   color: #661111;
@@ -912,4 +933,18 @@ label.radio-chooser input {
   margin-bottom: 1rem;
   padding: 0.5rem;
   background-color: #ffffee;
+}
+
+.code-is-nowrap code {
+  text-wrap: nowrap;
+  word-break: keep-all;
+}
+
+.password-with-eye {
+  display: inline-block;
+  max-width: 85%;
+}
+span.icon-eye-blocked, span.icon-eye {
+  cursor:pointer;
+  color:#333333;
 }

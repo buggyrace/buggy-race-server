@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, render_template, request
-import sqlite3 as sql
+from flask import Flask, jsonify, render_template, request, send_file
 from os import environ
+import sqlite3 as sql
 
 # the flask application: uses the webserver imported from the flask module:
 app = Flask(__name__)
@@ -16,6 +16,7 @@ BUGGY_RACE_SERVER_URL = "https://RACE-SERVER-URL"
 @app.route("/")
 def home():
     return render_template("index.html", server_url=BUGGY_RACE_SERVER_URL)
+
 
 #-----------------------------------------------------------------------------
 # creating a new buggy:
@@ -46,6 +47,7 @@ def create_buggy():
             db_connection.close()
         return render_template("updated.html", msg=message)
 
+
 #-----------------------------------------------------------------------------
 # a page for displaying the buggy
 #-----------------------------------------------------------------------------
@@ -57,6 +59,7 @@ def show_buggies():
     cur.execute("SELECT * FROM buggies")
     record = cur.fetchone(); 
     return render_template("buggy.html", buggy=record)
+
 
 #-----------------------------------------------------------------------------
 # get the JSON data that describes the buggy:
@@ -77,6 +80,24 @@ def send_buggy_json():
         {key: val for key, val in buggies if not (val == "" or val is None)}
     )
 
+
+#-----------------------------------------------------------------------------
+# send the favicon for the buggy editor:
+# This sends the browser an icon image with a cache "time to live" of 24 hours,
+# so you shouldn't see this being requested too often while you're debugging.
+# There's no template here because it's sending a file straight back.
+# (Usually you'd let Flask send images back as static content but this route
+# adds the cache header as a special case).
+#-----------------------------------------------------------------------------
+@app.route("/favicon.png")
+def send_favicon():
+    return send_file(
+        "static/favicon.png",
+        mimetype='image/png',
+        max_age=60*60*24
+    )
+
+
 #------------------------------------------------------------
 # finally, after all the set-up above, run the app:
 # This listens to the port for incoming HTTP requests, and sends a response
@@ -86,6 +107,6 @@ def send_buggy_json():
 if __name__ == "__main__":
     app.run(
         debug=True,
-        host=environ.get("FLASK_RUN_SERVER") or "0.0.0.0",
-        port=environ.get("FLASK_RUN_PORT") or 5000
+        host=environ.get("BUGGY_EDITOR_HOST") or "0.0.0.0",
+        port=environ.get("BUGGY_EDITOR_PORT") or 5000
     )

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import os
 import re
 import json
+import roman
 
 from sqlalchemy.inspection import inspect
 
@@ -163,12 +164,31 @@ def edit_race(race_id=None):
             flash("No such race", "danger")
             abort(404)
         delete_form = RaceDeleteForm(race_id=race_id)
+    # check existing races to suggest next autofill name
+    race_title_pattern = re.compile(r"^Race ([ivx]+)", re.IGNORECASE)
+    max_race_number = 0
+    for existing_race in Race.query.filter(Race.title != None).all():
+        if match := re.match(race_title_pattern, existing_race.title):
+            try:
+                race_number = roman.fromRoman(match.group(1))
+                if race_number > max_race_number:
+                    max_race_number = race_number
+            except roman.InvalidRomanNumeralError:
+                pass # can ignore badly formed numerals
+    suggested_next_name = f"Race {roman.toRoman(max_race_number+1)}"
+
     form = RaceForm(request.form, obj=race)
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             if race is None:
+                # untitled races are allowed (so can be edited), but they're
+                # unhelpful... so override it on creation, to discourage untitled
+                new_title = form.title.data.strip()
+                if new_title == "":
+                    new_title = suggested_next_name
+                    flash(f"No title provided, using \"{new_title}\" (you can edit this)", "warning")
                 race = Race.create(
-                  title=form.title.data.strip(),
+                  title=new_title,
                   desc=form.desc.data.strip(),
                   cost_limit=form.cost_limit.data,
                   start_at=form.start_at.data,
@@ -222,6 +242,7 @@ def edit_race(race_id=None):
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
         is_storing_racefiles_in_db=current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name],
+        suggested_next_name=suggested_next_name,
     )
 
 @blueprint.route("/<race_id>/abandon", methods=["GET", "POST"])

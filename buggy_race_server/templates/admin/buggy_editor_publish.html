@@ -19,12 +19,13 @@
       <p>
         The files are a fixed snapshot from the editor repo, taken from this
         commit:
-        <a href="{{ buggy_editor_origin_github_url }}/commit/{{ editor_source_commit }}">{{ editor_source_commit[:9] }}</a>.
+        <a href="{{ buggy_editor_origin_github_url }}/commit/{{ editor_source_commit }}">{{ editor_source_commit[:9] }}</a>
+        (although the README, below, will be slightly different).
       </p>
       <p>
         When you submit this form, the config settings
-        <code>IS_WRITING_SERVER_URL_IN_EDITOR</code> and
-        <code>IS_WRITING_HOST_AND_PORT_IN_EDITOR</code> will be updated to
+        <code>IS_WRITING_SERVER_URL_IN_EDITOR</code>,  <code>IS_WRITING_HOST_IN_EDITOR</code> and
+        <code>IS_WRITING_PORT_IN_EDITOR</code> will be updated to
         remember your choices.
       </p>
     </div>
@@ -42,26 +43,42 @@
         <div class="container border">
           <div class="row">
             <div class="col p-3" id="readme-col">
+              <p>This README contains some current config setting values<br>
+                (for example, the race server URL: <code>{{ server_url }}</code>)
+              </p>
               {{ form.readme_contents.label() }}
               {{ form.readme_contents(id="readme-input", class="form-control mr-sm-1", rows=qty_lines_in_readme) }}
             </div>      
           </div>
+          <div class="alert alert-secondary">
+            <h2 class="alert-title">Inside <code>app.py</code></h2>
           <div class="row">
-            <div class="col p-3">
+            <div class="col-md-4 p-3">
               {{ form.is_writing_server_url_in_editor.label() }}
+              <p><code>{{ server_url }}</code></p>
               <select name="is_writing_server_url_in_editor" class="form-control">
                 <option value="" {% if not is_writing_server_url_in_editor %}selected{% endif %}>No</option>
                 <option value="1" {% if is_writing_server_url_in_editor %}selected{% endif %}>Yes</option>
               </select>
             </div>
-            <div class="col p-3">
-              {{ form.is_writing_host_and_port_in_editor.label() }}
-              <select name="is_writing_host_and_port_in_editor" class="form-control">
-                <option value="" {% if not is_writing_host_and_port_in_editor %}selected{% endif %}>No</option>
-                <option value="1" {% if is_writing_host_and_port_in_editor %}selected{% endif %}>Yes</option>
+            <div class="col-md-4 p-3">
+              {{ form.is_writing_host_in_editor.label() }}
+              <p><code>{{ editor_host }}</code> replacing <code>0.0.0.0</code></p>
+              <select name="is_writing_host_in_editor" class="form-control">
+                <option value="" {% if not is_writing_host_in_editor %}selected{% endif %}>No</option>
+                <option value="1" {% if is_writing_host_in_editor %}selected{% endif %}>Yes</option>
+              </select>
+            </div>
+            <div class="col-md-4 p-3">
+              {{ form.is_writing_port_in_editor.label() }}
+              <p><code>{{ editor_port }}</code> replacing <code>5000</code></p>
+              <select name="is_writing_port_in_editor" class="form-control">
+                <option value="" {% if not is_writing_port_in_editor %}selected{% endif %}>No</option>
+                <option value="1" {% if is_writing_port_in_editor %}selected{% endif %}>Yes</option>
               </select>
             </div>
           </div>
+        </div>
           <div class="row">
             <div class="col p-3 btn-collection">
               <button class="btn btn-primary">Create zip file and publish</button>

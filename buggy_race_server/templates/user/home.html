@@ -63,6 +63,15 @@
                       <p class="btn-collection">
                         <a href="{{ url_for('admin.admin') }}" class="btn btn-outline-secondary btn-admin btn-jump"><span class="icon-cog"></span> Admin&nbsp;pages</a>
                       </p>
+                      {% if current_user.is_administrator %}
+                        <div id="is-admin-always-expanded-container" class="form-group mt-3 hidden">
+                          <label for="is-admin-always-expanded">Admin button preference:</label>
+                          <select name="is-admin-always-expanded" id="is-admin-always-expanded" class="form-control mr-sm-1">
+                            <option value="1" selected>Expanded</option>
+                            <option value="0">Collapsed</option>
+                          </select>
+                        </div>
+                      {% endif %}
                     </td>
                   </tr>
                 {% endif %}

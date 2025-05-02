@@ -50,10 +50,10 @@ out of the way first.
 
 ## Set up Python
 
-Use Python 3.9+ (3.8 works but timezones came into the standard library in 3.9
-and although we're not using that yet, we're almost certainly going to).
+Although it probably still runs with older Pythons, currently we're running it
+with Python 3.12.
 
-Set up a virtual environment with
+Set up a virtual environment with:
 
     python -m venv venv
 
@@ -68,10 +68,11 @@ Get the libraries/modules:
 > some header files (`/usr/local/header/uuid/uuid.h`) from `util-linux`. I had
 > to remove them to get gevent to compile.
 
-> _D:_ I've bumped into problems with `psycopg2-binary` breaking the pip
-> install on MacOS —  a workaround was removing it from the requirements and
-> falling through to a system one that was already installed; good luck. If
-> you are totally blocking on this, a panic bypass is to switch to mySQL ;-)
+> _D:_ Earlier I bumped into problems with `psycopg2-binary` breaking the pip
+> install on MacOS (it seems to behave recently though) —  a workaround was
+> removing it from the requirements and falling through to a system one that was
+> already installed; good luck. If you are totally blocking on this, a panic
+> bypass is to switch to mySQL ;-)
 
 
 ### Set up a database

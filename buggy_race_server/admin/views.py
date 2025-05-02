@@ -385,6 +385,7 @@ def setup_summary():
       is_poster=bool(poster_type),
       is_report=bool(report_type),
       is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+      is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
       is_student_api_otp_allowed=current_app.config[ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name],
       is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
       is_task_list_published=_is_task_list_published(),
@@ -1607,6 +1608,7 @@ def tech_notes_admin():
   return render_template(
     "admin/tech_notes.html",
     form=FlaskForm(request.form), # nothing except CSRF token
+    is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     key_settings=[
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,

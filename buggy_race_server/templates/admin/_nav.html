@@ -40,7 +40,7 @@
       <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.api_keys')}}">API keys</a>
       <a href="{{ url_for('admin.show_buggy_editor_info') }}" class="btn btn-outline-secondary btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}">Buggy editor</a>
       <a class="btn {% if ns_admin.is_task_list_out_of_date %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.tasks_admin')}}">Tasks</a>
-      {%if config['IS_TECH_NOTE_PUBLISHING_ENABLED'] %}
+      {%if config['IS_SHOWING_TECH_NOTES'] and config['IS_TECH_NOTE_PUBLISHING_ENABLED'] %}
         <a class="btn {% if tech_note_published_at %}btn-outline-secondary{% else %}btn-outline-danger{% endif %} btn-admin btn-jump {% if not current_user.is_administrator %}disabled{% endif %}" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
       {% endif %}
     </div>

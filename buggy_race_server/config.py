@@ -530,7 +530,7 @@ class ConfigSettings:
         ConfigSettingNames.DEFAULT_RACE_LEAGUE.name: "",
         ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name: "zip",
         ConfigSettingNames.EDITOR_DOWNLOAD_URL.name: "",
-        ConfigSettingNames.EDITOR_HOST.name: "0.0.0.0",
+        ConfigSettingNames.EDITOR_HOST.name: "localhost",
         ConfigSettingNames.EDITOR_PORT.name: "5000",
         ConfigSettingNames.EDITOR_ZIPFILE_NAME.name: "buggy-race-editor.zip",
         ConfigSettingNames.EXT_ID_EXAMPLE.name: "12345",

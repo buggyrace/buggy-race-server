@@ -26,7 +26,7 @@ from buggy_race_server.utils import (
     has_settings_table,
 )
 from buggy_race_server.admin.models import Announcement
-from buggy_race_server.config import ConfigSettings, ConfigSettingNames
+from buggy_race_server.config import ConfigSettings, ConfigSettingNames, DistribMethods
 from buggy_race_server.extensions import (
     bcrypt,
     cache,
@@ -113,6 +113,7 @@ def create_app():
                 return int(diff.total_seconds())
     def wrap_time_in_span(time_str):
         return re.sub(r'( \d\d:\d\d(:\d\d)?)$', r'<span class="time-span">\1</span>', time_str)
+
     app.jinja_env.filters['servertime'] = get_servertime
     app.jinja_env.filters['servertime_age_in_s'] = get_servertime_age_in_s
     app.jinja_env.filters['time_span'] = wrap_time_in_span
@@ -215,6 +216,10 @@ def create_app():
                     current_user.first_logged_in_at = current_user.logged_in_at
                 current_user.save()
                 active_timestamp = session[ACTIVITY_AT] = now_utc
+
+    @app.template_global()
+    def is_admin_showing_buggy_editor(current_distrib_method):
+        return DistribMethods.is_using_internal_buggy_editor(current_distrib_method)
 
     @app.teardown_request
     def teardown_request(exception):

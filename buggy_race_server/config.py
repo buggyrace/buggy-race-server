@@ -1929,6 +1929,23 @@ class DistribMethods(Enum):
             DistribMethods.VSREMOTE.name: "Server forks your repo into students' GitHub accounts and then clones via VSCode",
         }.get(method_name.upper())
 
+    @staticmethod
+    def is_using_internal_buggy_editor(distrib_method_name):
+        """ Returns True if this distribution method means the server should
+           allow admin to have access to the internal buggy editor (or, perhaps
+           more to the point, whether it's helpful to _hide_ the buggy editor
+           (admin) page because it's not useful)."""
+        if not distrib_method_name:
+            return True  # if in doubt/error, show it
+        else:
+            return distrib_method_name.upper() not in (
+               DistribMethods.REPO.name,
+               DistribMethods.PRELOAD.name,
+               DistribMethods.FORK.name,
+               DistribMethods.AUTOFORK.name,
+               DistribMethods.VSREMOTE.name
+            )
+    
     @property
     def desc(self):
         return DistribMethods.get_desc(self.name)

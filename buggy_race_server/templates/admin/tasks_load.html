@@ -93,25 +93,21 @@
               <input type="radio" class="tab-itself" id="tab-1" name="tab-group-1" checked>
               <label for="tab-1" class="tab-itself">Use defaults</label>
               <div class="tab-content">
-                <h4>Use built-in default tasks</h4>
                 <div class="float-right">
                   {{ macros.docs_btn("Distributing the source code", "/buggy-editor/distributing-the-code") }}
                 </div>
+                <h4>Use built-in default tasks</h4>
                 <div class="p-3">
-                  <label for="distrib_method" class="d-block">
-                    How are you distributing the buggy editor source code?
-                    <br>
-                    (This affects tasks 0-GET and 0-RUN).
-                  </label>
-                  <select name="distrib_method" class="form-control">
-                    {% for method in distrib_methods %}
-                      <option value="{{ method.value }}">{{ method.desc }}</option>
-                    {% endfor %}
-                  </select>
-                  <p class="my-2">
-                    Be careful: the distribution method you choose must
-                    match the config settings you've already set.
-                  </p>
+                    The editor distribution method for your project affects tasks
+                    0-GET and 0-RUN. It is currently set to be
+                    <strong>{{ editor_distribution_method }}</strong>:
+                    {{ pretty_distrib_method }}.
+                    <p class="btn-collection">
+                      <a href="{{ url_for('admin.settings', group_name='project') }}" class="btn btn-outline-secondary btn-config-group btn-white float-right"><span>Project</span></a>
+                      If you need to change the distribution method,
+                      change the config setting <em>before</em> loading the
+                      default tasks.
+                    </p>
                 </div>
               </div>
             </div>

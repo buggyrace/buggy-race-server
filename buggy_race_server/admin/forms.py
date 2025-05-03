@@ -235,7 +235,6 @@ class GenerateTasksForm(FlaskForm):
       """All tasks on the server will be deleted and replaced by these new ones.
       You cannot undo this. Are you sure?"""
     )
-    distrib_method = StringField("Distribution method", [Optional()])
     markdown_file =FileField(
       "Upload a markdown file describing the tasks",
       [Optional()]

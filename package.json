@@ -32,7 +32,7 @@
   "homepage": "https://github.com/buggyrace/buggy_race_server#readme",
   "dependencies": {
     "bootstrap": "4.3.1",
-    "jquery": "3.4.1",
+    "jquery": "3.7.1",
     "popper.js": "1.15.0"
   },
   "devDependencies": {

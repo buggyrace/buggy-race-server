@@ -66,6 +66,7 @@ from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.buggy.views import show_buggy as show_buggy_by_user
 from buggy_race_server.buggy.views import delete_buggy as delete_buggy_by_user
 from buggy_race_server.config import (
+    MANUAL_LATEST_VERSION_IN_SOURCE,
     AnnouncementTypes,
     ConfigGroupNames,
     ConfigSettingNames,
@@ -2364,17 +2365,20 @@ def staff_race_replayer():
     )
 
 @blueprint.route("/config-docs-helper")
+@blueprint.route("/config-docs-helper/<data_format>")
 @login_required
 @admin_only
-def config_docs_helper():
+def config_docs_helper(data_format=None):
     """ undocumented helper method for dumping config setting markdown for www site"""
     if not current_app.config[ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name]:
         flash("To see the documentation helper page, set config _IS_DOCS_HELPER_PAGE_ENABLED=1", "warning")
         abort(404)
     pretty_group_name_dict = { name:ConfigSettings.pretty_group_name(name) for name in ConfigSettings.GROUPS }
     pretty_default_settings=ConfigSettings.get_pretty_defaults()
-    return render_template(
-        "admin/config_docs_helper.html",
+    data_format = "txt" if data_format == "text" else "html"
+    output = render_template(
+        f"admin/config_docs_helper.{data_format}",
+        data_format=data_format,
         descriptions={
             name: re.sub(r"(\n|\s)+", " ", ConfigSettings.DESCRIPTIONS[name])
             for name in ConfigSettings.DESCRIPTIONS
@@ -2386,7 +2390,14 @@ def config_docs_helper():
         },
         pretty_group_name_dict=pretty_group_name_dict,
         sorted_groupnames=[name for name in ConfigSettings.SETUP_GROUPS],
+        version_string=MANUAL_LATEST_VERSION_IN_SOURCE,
     )
+    if data_format == 'txt':
+        reponse = make_response(output)
+        reponse.headers["Content-Disposition"] = f"attachment; filename=config-settings-for-docs.txt"
+        reponse.headers["Content-type"] = "text/plain"
+        return reponse
+    return output
 
 @blueprint.route("/config/dump")
 @login_required

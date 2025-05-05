@@ -67,8 +67,10 @@
               <code>{{ env_overrides_key }}</code>
               <br>
               (settings overridden by ENV)
+              <br>
+              {{ macros.docs_btn("Envs in database", "/customising/env#environment-settings-are-saved-to-the-database") }}
             </td>
-            <td class="{% if env_overrides %}alert-danger{% else %}alert-success{% endif %}"">
+            <td class="{% if env_overrides %}alert-danger{% else %}alert-success{% endif %}">
               {% for name in env_overrides %}
                 <code>{{ name }}</code><br>
               {% else %}

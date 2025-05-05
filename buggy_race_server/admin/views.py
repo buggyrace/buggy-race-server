@@ -602,6 +602,7 @@ def admin():
         "admin/dashboard.html",
         form=GeneralSubmitForm(), # for publish submit buttons
         is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
+        is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
         is_storing_texts=is_storing_texts,
         is_task_list_published=_is_task_list_published(),
         is_tech_notes_index_published=_is_tech_notes_index_published(),

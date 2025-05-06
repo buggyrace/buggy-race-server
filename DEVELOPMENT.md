@@ -29,10 +29,19 @@ need the default auth code: `CHANGEME`):
 ```bash
 $> npm install
 $> webpack
+$> python -m venv venv
+$> source venv/bin/activate
 $> python -m pip install -r requirements.txt
-$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask db upgrade
-$> FLASK_APP=buggy_race_server/app.py DATABASE_URL=sqlite:////tmp/buggy.db flask run
+$> export DATABASE_URL=sqlite:////tmp/buggy.db
+$> export FLASK_APP=buggy_race_server/app.py
+$> flask db upgrade
+$> flask run
 ```
+
+Ctl-C stops the webserver and `deactivate` exits the virtual environment.
+
+You can avoid those `export`s by creating a `.env` file instead, which flask
+will read when your launch it. See notes below!
 
 ## Getting started
 
@@ -74,55 +83,88 @@ Get the libraries/modules:
 > already installed; good luck. If you are totally blocking on this, a panic
 > bypass is to switch to mySQL ;-)
 
+## Flask needs to know where the app is!
+
+By default, flask looks for `app.py` in the current directory. Unfortunately,
+the Race Server's `app.py` isn't in the project's root directory (there are
+good reasons for this, inherited from `flask-cookiecutter`) so you need to tell
+it: either set the environment variable `FLASK_APP` to be
+`buggy_race_server/app.py`:
+
+    export FLASK_APP=buggy_race_server/app.py
+
+or use the `app` option when you run `flask`:
+
+    flask --app=buggy_race_server/app.py
+
+or declare the env variable with each invocation:
+
+    FLASK_APP=buggy_race_server/app.py flask
+
+or (maybe the best option because do-it-once now and you're good thereafter):
+
+    cp env.example .env
+
+...and then edit that `.env` file! (It's got `FLASK_APP` in it already).
+
 
 ### Set up a database
 
 > _There are SQL-dialect specific notes further down in this file!_
 
-If you don't explicitly set a database, the default is an SQLite one — but if
-you've got mySQL or PostgreSQL running then it's best to use that: create a
-database by saying something like this to your SQL shell:
+You must explicitly tell the race sever which database to use with the
+`DATABASE_URL` environment variable.
 
-    CREATE DATABASE buggyrace
+> If you want to use mySQL or PostgreSQL then you need to get those services up
+> and running first, which is beyond the scope of this document, and you'll
+> need to create a database to use. When you've done that you need to nominate
+> it in the `DATABASE_URL` environment variable: for that you'll probably need
+> to know the database name, the port it's server from, the username of the
+> owner and their password.
+>
+> Alternatively, provided this is just for dev/smoke test, you can use
+> SQLite instead: it doesn't need to run as a service.
 
-...and make sure you know the username of the `OWNER` and their password,
-because you need that in the `DATABASE_URL`.
+Probably the most convenient way set `DATABASE_URL` is to use a `.env` file,
+because your flask app will look in there. If you don't have one already,
+copy `env.example` to `.env` and edit it. You'll see example values there for
+databases, including the SQLite one. If you use SQLite you don't even need to
+create the database first, because it will create it (although note you'll
+still need to populate it with the `flask db` command).
 
-We've been using `flask db` to manage the datbase, but note that it needs to
-find the flask app, so you might need to set `FLASK_APP` first, e.g.:
-
-    export FLASK_APP=buggy_race_server/app.py
-
-Populate the database with:
+We've been using `flask db` to manage the database, but note that flask won't
+recognise the `db` command if you haven't told it where the app is (see the
+previous section — for example, export `FLASK_APP` or set it in `.env`):
 
     flask db upgrade
 
 (this applies the migrations and creates the tables, etc).
 
+#### If you are changing models hence database structure
+
 If you change the models and want to create new migrations, do something like:
 
-    flask db migrate -m "store user star sign"
+    flask db migrate -m "store user's star sign"
 
+_Note for devs:_  
 Behind the scenes that's Flask-SQLalchemy doing a pretty impressive job of
 generating the schema migrations _but_ we have bumped into some SQL-dialect
-gotchas (some ALTER TABLE column changes break in SQLite, but mySQL and
-Postgres handle indexes a little differently too). As a courtesy please check
-you haven't broken the migrations for the dialect you're _not_ using, because
-this is a blocker for other devs who hit it later.
+gotchas (some ALTER TABLE column changes break in SQLite, although mySQL and
+Postgres handle indexes a little differently too). Before you push any code
+back, as a courtesy please check you haven't broken the migrations for the
+dialect you're _not_ using, because this is a blocker for other devs who hit it
+later.
 
 
 ### Set up environment variables
 
-Unless you're using the default SQLite database, the critical one is
-`DATABASE_URL`. The easiest way to set things up is
+The critical ones are `FLASK_APP` and `DATABASE_URL`. The easiest way to set
+things up is
 
     cp env.example .env
 
 ...and edit that. Set or use the default value for `AUTHORISATION_CODE` (you
 will need it to do anything useful within the admin interface).
-
-You need to have `FLASK_APP` set too — `buggy_race_server/app.py` works (which
-is the default).
 
 Almost all the config settings for buggy racing are stored in the database, but
 the app reads the environment variables first, and _overwrites_ any it finds
@@ -138,14 +180,51 @@ exposed in the web interface for changing config settings (i.e., buggy racing
 admins can't change them without diving into the env backstage). If it's
 useful, have a look at `/admin/system` which dumps a load of them for you.
 
+### Run webpack (to make the static asset "bundles")
+
+The webserver uses webpack to gather all the CSS, Javascript, and images into
+a `static/build/` directory. If you're not changing any of those things, you
+only need to run this once. Unfortunately webpack uses node, so you'll need to
+install that and all its libraries too:
+
+    npm install
+
+...that creates `node_modules` loaded with all the libraries and dependencies.
+Then run webpack with something like:
+
+    webpack
+
+or (`npm run webpack-watch` with a Ctl-C when it's done).
+
 
 ### Run the webserver
 
-We had different ways of doing this, but you could try:
+The simplest, dev-only way of doing this is:
+
+    flask run
+
+That will only work if the environment variables are available to it — which
+they should be if you've got here by following the previous set-up. 
+
+Because you're starting with an empty database, the race server will be in
+set-up mode when you first launch — you'll be guided through a bunch of config
+screens (most of which you can accept the defaults for: see the full
+documentation at https://www.buggyrace.net/docs/ because at this point you're
+inside the application).
+
+#### Other ways to run it
+
+If you want to run the webserver directly, the command that npm is
+launching (you can see this in `package.json`) is:
+
+    gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1
+
+Alternatively, you can try to run the same way it happens up on heroku, by
+telling node to launch things:
 
     npm start
 
-will try to run both webpack and the flask app: however note that this will
+which will run both webpack and the flask app: however note that this will
 run webpack (once) and launch the webserver on a secure connection — if you're
 running on localhost check you're hitting **secure `localhost`**
 ([https://localhost:5000](https://localhost:5000)) because `http` and
@@ -166,22 +245,6 @@ things separately:
   to run flask webserver without the  15 second delay and without SSL
   — then you can hit [http://localhost:5000](http://localhost:5000)
 
-
-If you want to run the webserver directly, the command that npm is
-launching (you can see this in `package.json`) is:
-
-    gunicorn buggy_race_server.app:app -b 0.0.0.0:8000 -w 1
-
-
-If gunicorn won't run on your system then remember the server is "just" a Flask
-application, so you should be able to run a development server with:
-
-    flask --app=buggy_race_server/app.py run
-
-Instead of using the `--app` option, you canb set the environment variable
-`FLASK_APP` to `buggy_race_server/app.py`. By default this will run on port
-5000, but you can change that either with `--port` or the `FLASK_RUN_PORT`
-environment variable.
 
 
 ### Common new install error: static files give 403
@@ -208,6 +271,10 @@ do it this way because the migrations are likely to always be the definitive
 way to do it. But this gives you a way to get the database up and running
 separately from Flask and the app and/or if you're using a dialect of SQL that
 chokes on a migration (if you hit this, let us know).
+
+If you get `Error: No such command 'db'` it's because you've not told flask
+where its app is either with  the `FLASK_APP` environment variable or the
+`--app` option.
 
 
 ### How to connect to SQLite (dev only!)
@@ -368,11 +435,11 @@ That gives you the markdown for the config settings section (including their
 default values) ready to be copy-and-pasteed into the relevant part of the page.
 This takes a bit of time because you really do need to do it page-by-page unless
 you're sure you know which specific page has changed (e.g., if you've just
-added one new config setting). But it's a whole lot better than doing it without
-the copy-and-paste!
-
-Note that some pages — specifcally the `auth` and `links` setting groups —
-don't use the verbatim text (you'll see if you look inside them).
+added one new config setting). Alternatively, there's a utility script in
+the docs repo (`buggy-race-about`) that takes the downloaded text file from
+that docs helper and replaces _all_ of the customisation pages with the tables
+of settings values. It also passes the current (suspected; it's not clever)
+version string and updates that in the docs too.
 
 
 ### How to run a race 
@@ -416,6 +483,10 @@ These are used like this:
 
     <span class="icon-trophy"></span>
 
+This icomoon process (of re-constituting the font by picking all the symbols
+we are using) is getting cumulatively more fiddly as we add more and more icons,
+hmm.
+
 
 ### Workflow/hardcoded version number
 
@@ -434,7 +505,9 @@ in the `/admin/system` (or `/about` under the hamster) pages.
 
 We zeroed the migrations at the end of the (somewhat frantic) development that
 was going on during RHUL term 3 in 2023, which is why the version number was
-bumped to `v2`: this was a breaking change.
+bumped to `v2`: this was a breaking change. There were more breaking changes
+(in the config setting handling, I think) in 2024 which is why we bumped up
+to `v3`.
 
 
 

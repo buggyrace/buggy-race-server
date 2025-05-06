@@ -940,7 +940,7 @@ label.radio-chooser input {
   background-color: #ffffee;
 }
 
-.code-is-nowrap code {
+.code-is-nowrap code, code.code-is-nowrap {
   text-wrap: nowrap;
   word-break: keep-all;
 }

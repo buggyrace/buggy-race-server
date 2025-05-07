@@ -35,7 +35,8 @@ EXAMPLE_USER_DATA = {
         "last_name": "Lovelace",
         "ext_username": "al003",
         "ext_id": "123003",
-        "email": "a.lovelace@example.com"
+        "email": "a.lovelace@example.com",
+        "github_username": "adalovelace"
     },
     "chaz":{
         "username": "chaz",
@@ -44,7 +45,8 @@ EXAMPLE_USER_DATA = {
         "last_name": "Babbage",
         "ext_username": "cb002",
         "ext_id": "123013",
-        "email": "c.babbage@example.com"
+        "email": "c.babbage@example.com",
+        "github_username": "chazbabbage"
     },
 }
 

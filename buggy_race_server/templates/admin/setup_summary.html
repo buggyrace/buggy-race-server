@@ -98,28 +98,34 @@
           <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-white btn-jump">Task&nbsp;list</a>
         </p>
       </div>
-      <div class="alert {% if not (is_tech_notes_index_published and tech_notes_published_at) %} alert-danger {% else %} alert-info {% endif %}">
+      <div class="alert {% if (is_showing_tech_notes and not (is_tech_notes_index_published and tech_notes_published_at)) %} alert-danger {% else %} alert-info {% endif %}">
         <h2 class="alert-title">Tech notes</h2>
-        <p>
-          {% if tech_notes_external_url %}
-            The <strong>tech notes are not server by this server</strong>: instead
-            they are at <code>{{ tech_notes_external_url }}</code>.
-          {% else %}
-            {% if is_tech_notes_index_published and tech_notes_published_at %}
-              The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at | servertime }}.
+        {% if is_showing_tech_notes %}
+          <p>
+            {% if tech_notes_external_url %}
+              The <strong>tech notes are not served by this server</strong>: instead
+              they are at <code>{{ tech_notes_external_url }}</code>.
             {% else %}
-              The supporting <strong>tech notes have not yet been published</strong>.
+              {% if is_tech_notes_index_published and tech_notes_published_at %}
+                The supporting <strong>tech notes</strong> were published on {{ tech_notes_published_at | servertime }}.
+              {% else %}
+                The supporting <strong>tech notes have not yet been published</strong>.
+              {% endif %}
             {% endif %}
-          {% endif %}
-          {% if not is_tech_note_publishing_enabled %}
-            You <strong>cannot publish tech notes</strong> on this server: the config
-            currently disables this feature.
-          {% endif %}
-        </p>
-        <p class="btn-collection">
-          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
-          <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">View tech notes</a>
-        </p>
+            {% if not is_tech_note_publishing_enabled %}
+              You <strong>cannot publish tech notes</strong> on this server: the config
+              currently disables this feature.
+            {% endif %}
+          </p>
+          <p class="btn-collection">
+            <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.tech_notes_admin')}}">Tech notes</a>
+            <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">View tech notes</a>
+          </p>
+        {% else %}
+          <p>
+            Tech notes are <strong>not</strong> being displayed.
+          </p>
+        {% endif %}
         <p class="btn-collection">
           <a href="{{ url_for('admin.settings', group_name='tech_notes') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Tech notes</span></a>
         </p>

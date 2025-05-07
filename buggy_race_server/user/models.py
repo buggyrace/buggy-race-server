@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """User models."""
-import datetime as datetime
 from random import randint
 import json
 import re
@@ -36,7 +35,8 @@ EXAMPLE_USER_DATA = {
         "last_name": "Lovelace",
         "ext_username": "al003",
         "ext_id": "123003",
-        "email": "a.lovelace@example.com"
+        "email": "a.lovelace@example.com",
+        "github_username": "adalovelace"
     },
     "chaz":{
         "username": "chaz",
@@ -45,7 +45,8 @@ EXAMPLE_USER_DATA = {
         "last_name": "Babbage",
         "ext_username": "cb002",
         "ext_id": "123013",
-        "email": "c.babbage@example.com"
+        "email": "c.babbage@example.com",
+        "github_username": "chazbabbage"
     },
 }
 
@@ -204,7 +205,10 @@ class User(UserMixin, SurrogatePK, Model):
         newest_student_record = User.query.filter_by(is_student=True) \
             .order_by(User.created_at.desc()).first()
         if newest_student_record:
-            cutoff_time = datetime.now(timezone.utc) - timedelta(days=timeout_days)
+            cutoff_time = datetime.now(
+                # use student record's tz (SQLite, for example, has None)
+                newest_student_record.created_at.tzinfo
+                ) - timedelta(days=timeout_days)
             return newest_student_record.created_at > cutoff_time
         else: # no students: bulk delete is hidden (yes it's oddly specific)
             return False

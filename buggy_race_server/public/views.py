@@ -80,6 +80,7 @@ def home():
         editor_url=editor_url,
         is_downloading_zip=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.ZIP.value,
         is_preloaded_repos=current_app.config[ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name]==DistribMethods.PRELOAD.value,
+        is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
         is_forking_github=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
         is_using_vcs=is_using_vcs,
         local_announcement_type=AnnouncementTypes.TAGLINE.value,
@@ -365,6 +366,7 @@ def serve_project_page(page=None):
         is_poster=is_a_poster,
         is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
+        is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
         is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
         is_student_using_repo=current_app.config[ConfigSettingNames.IS_STUDENT_USING_REPO.name],
         is_using_github_api_to_fork=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name],
@@ -409,6 +411,9 @@ def tech_notes_redirect_to_index():
 
 @blueprint.route("/tech-notes/<path:path>", strict_slashes=False)
 def serve_tech_notes(path=None):
+    if not current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name]:
+        flash("This race server is not displaying tech notes", "warning")
+        abort(404)
     external_url = current_app.config.get(ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name)
     if not path:
         path = "index.html"

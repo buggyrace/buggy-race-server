@@ -21,7 +21,9 @@
         {% if is_poster %}
           <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page='poster' ) }}">Poster</a>
         {% endif %}
-        <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes</a>
+        {% if is_showing_tech_notes %}
+          <a class="btn btn-outline-secondary btn-jump" href="{{ url_for('public.serve_tech_notes', path='index') }}">Tech notes</a>
+        {% endif %}
         {% if is_showing_project_workflow %}
           <a class="btn btn-outline-secondary btn-jump" href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
         {% endif %}

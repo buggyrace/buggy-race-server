@@ -9,7 +9,7 @@
   {% if not tasks %}
     <div class="alert alert-danger">
       <h2 class="alert-title">There are no tasks in the project</h2>
-      Go to <a href="{{ url_for('admin.tasks_admin')}}">config for tasks</a>
+      Go to <a href="{{ url_for('admin.tasks_admin')}}">admin for tasks</a>
       and either accept the default tasks or upload your own customised markdown file.
     </div>
   {% endif %}
@@ -19,7 +19,7 @@
         <div class="col mb-3">
           <h2 class="alert-title">The task list has not been published</h2>
           Specifically, the generated task list file cannot be found.
-          Go to <a href="{{ url_for('admin.tasks_admin') }}">config for tasks</a>
+          Go to <a href="{{ url_for('admin.tasks_admin') }}">admin for tasks</a>
           to publish it.
         </div>
         {% if task_list_updated_timestamp %}
@@ -34,7 +34,7 @@
       </div>
     </div>
   {% endif %}
-  {% if not external_tech_notes_url and is_publishing_enabled %}
+  {% if is_showing_tech_notes and not external_tech_notes_url and is_publishing_enabled %}
     {% if not (is_tech_notes_index_published and tech_notes_generated_at) %}
       <div class="alert alert-danger">
         <div class="row">

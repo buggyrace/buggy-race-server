@@ -197,6 +197,28 @@
       </table>
     </div>
   </div>
+  {% if not is_showing_tech_notes %}
+  <div class="row my-4">
+    <div class="col">
+      <h2>Check for tech notes in tasks</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p>
+        The race server is not displaying any tech notes (because the config
+        setting <code>IS_SHOWING_TECH_NOTES</code> is set to <code>No</code>).
+        You can check to see if the current tasks contain links to tech notes
+        that might return 404. This checks the tasks as they are in the database,
+        so may differ from what is published if you have edited them since.
+      </p>
+      <p class="btn-collection">
+        <a href="{{ url_for('admin.check_tasks_for_tech_notes') }}"
+        class="btn btn-primary btn-jump">Check for Tech Note links</a>
+      </p>
+    </div>
+  </div>
+  {% endif %}
   <div class="row">
     <div class="col my-3 text-right btn-collection">
       {{ macros.docs_btn("Creating tasks", "/customising/creating-tasks") }}

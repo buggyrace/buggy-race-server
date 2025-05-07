@@ -8,7 +8,7 @@
       Buggy Editor (the students' source code)
     </h1>
   </div>
-  {% if editor_distribution_method in ["zip", "page", "other"]  %}
+  {% if is_admin_showing_buggy_editor(editor_distribution_method) %}
     <div class="row">
       <div class="col-md-6">
         <div class="alert alert-info">
@@ -105,6 +105,19 @@
     </div>
   {% else %}
     <div class="row">
+      <div class="col">
+        <div class="alert alert-danger">
+          <h2 class="alert-title">Caution: buggy editor source on this server is not in use</h2>
+          The editor distribution method for this project
+          (<strong>{{ editor_distribution_method }}</strong>) directs students
+          to source code on an external site. This page is not linked by the
+          admin navigation (yellow buttons, above) because changes you make
+          here will be affecting the server's local copy of the editor source
+          code, which your students will not see.
+        </div>
+      </div>
+    </div>
+    <div class="row">
       <div class="col-md-6">
         {% if is_default_repo_owner  %}
           <div class="alert alert-danger">
@@ -121,9 +134,13 @@
         {% else %}
           <div class="alert alert-success">
             <p>
-              This race server is currently configured to
-              use a fork of the buggy editor, owned by
-              <code>{{ buggy_editor_repo_owner }}</code>.  
+              {% if buggy_editor_repo_owner %}
+                This race server is currently configured to
+                use a fork of the buggy editor, owned by
+                <code>{{ buggy_editor_repo_owner }}</code>.  
+              {% else %}
+                This race server currently has no repo owner configured.
+              {% endif %}
             </p>
           </div>
         {% endif %}
@@ -133,7 +150,11 @@
             be downloading:
           </p>
           <p>
-            <code>{{ buggy_editor_repo_url }}</code>
+            {% if buggy_editor_repo_url %}
+              <code>{{ buggy_editor_repo_url }}</code>
+            {% else %}
+              <em class="empty-setting">none</em>
+            {% endif %}
           </p>
           </p>
           <p class="btn-collection">
@@ -150,12 +171,15 @@
               (or one belonging to {{ institution_short_name or institution_name or 'your institution'}}).
             {% endif %}
             Before your project starts, you should customise the <code>{{ readme_filename }}</code>
-            with the example text below (or something like it), and commit the changes.
-            Finally make sure the server's config settings are pointing at
-            your customised repo.
+            — text below, for example — and commit the changes. You might want to squash
+            the commit history too, because it's irrelevant to your students how your
+            project differs from the default one. Finally make sure the server's config
+            settings are pointing at your customised repo.
           </p>
           <p class="btn-collection">
-            <a href="{{ url_for('admin.settings', group_name='github') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>GitHub</span></a>          
+            <a href="{{ url_for('admin.settings', group_name='project') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Project</span></a>
+            <a href="{{ url_for('admin.settings', group_name='editor') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Editor</span></a>
+            <a href="{{ url_for('admin.settings', group_name='vcs') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>VCS</span></a>
           </p>
         </div>
       </div>

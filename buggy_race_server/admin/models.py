@@ -189,17 +189,20 @@ class Task(SurrogatePK, Model):
 
     def problem_html(self, config):
         return markdown.markdown(
-            Task._sub_config_in_text(config, self.problem_text)
+            Task._sub_config_in_text(config, self.problem_text),
+            extensions=['fenced_code']
         )
 
     def solution_html(self, config):
         return markdown.markdown(
-            Task._sub_config_in_text(config, self.solution_text)
+            Task._sub_config_in_text(config, self.solution_text),
+            extensions=['fenced_code']
         )
 
     def hints_html(self, config):
         return markdown.markdown(
-            Task._sub_config_in_text(config, self.hints_text)
+            Task._sub_config_in_text(config, self.hints_text),
+            extensions=['fenced_code']
         )
 
     def get_url(self, config):

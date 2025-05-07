@@ -330,6 +330,7 @@
           </div>
           <div class="col-sm-4">
             {{form.auth_code(class_="form-control mr-sm-1")}}
+            <span class="password-toggler hidden icon-eye-blocked" data-for="auth_code"></span>
           </div>
           <div class="col-sm-5">
             {% if user %}
@@ -465,7 +466,8 @@
                   {{form.auth_code.label}}
                 </div>
                 <div class="col-sm-4">
-                  {{form.auth_code(class_="form-control mr-sm-1")}}
+                  {{form.auth_code(class_="form-control mr-sm-1", id_="del-auth-code")}}
+                  <span class="password-toggler hidden icon-eye-blocked" data-for="del-auth-code"></span>
                 </div>
                 <div class="col-sm-5">
                     You must provide a valid authorisation code to

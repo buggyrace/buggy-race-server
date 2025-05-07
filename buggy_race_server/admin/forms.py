@@ -131,8 +131,14 @@ class ConfigSettingForm(Form):
             raise ValidationError(f"{name} isn't in YYYY-MM-DD HH:MM format")
       elif data_type == ConfigTypes.INT:
         if self.value.data and not str(self.value.data).isdigit():
-          raise ValidationError(f"{name} must be a number")
-        return int(self.value.data)
+          raise ValidationError(f"{name} must be an integer")
+        try:
+            return int(self.value.data)
+        except ValueError:
+            if self.value.data:
+                raise ValidationError(f"{name} must be an integer")
+            else:
+                raise ValidationError(f"{name} must be an integer, but was empty")
       elif data_type == ConfigTypes.PASSWORD:
         if len(self.value.data) < ConfigSettings.MIN_PASSWORD_LENGTH:
           raise ValidationError(f"{name} is too short: need at least {ConfigSettings.MIN_PASSWORD_LENGTH} characters")

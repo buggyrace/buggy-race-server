@@ -64,11 +64,13 @@
         <tbody>
           <tr>
             <td>
-              <code>{{ env_overrides_key }}</code>
+              <code class="code-is-nowrap">{{ env_overrides_key }}</code>
               <br>
               (settings overridden by ENV)
+              <br>
+              {{ macros.docs_btn("Envs in database", "/customising/env#environment-settings-are-saved-to-the-database") }}
             </td>
-            <td class="{% if env_overrides %}alert-danger{% else %}alert-success{% endif %}"">
+            <td class="{% if env_overrides %}alert-danger{% else %}alert-success{% endif %}">
               {% for name in env_overrides %}
                 <code>{{ name }}</code><br>
               {% else %}
@@ -78,7 +80,7 @@
           </tr>
           {% for setting_name in config_settings_to_display %}
             <tr>
-              <td><code>{{ setting_name }}</code></td>
+              <td><code class="code-is-nowrap">{{ setting_name }}</code></td>
               <td>
                 {% if setting_name == '_CURRENT_ANNOUNCEMENTS' %}
                   {% if announcement_summary %}
@@ -114,19 +116,19 @@
         </thead>
         <tbody>
           <tr>
-            <td><code>{{ is_db_uri_password_as_query_key }}</code></td>
+            <td><code class="code-is-nowrap">{{ is_db_uri_password_as_query_key }}</code></td>
             <td><code>{{ is_db_uri_password_as_query }}</code></td>
           </tr>
           <tr>
-            <td><code>{{ forced_db_uri_ssl_mode_key }}</code></td>
+            <td><code class="code-is-nowrap">{{ forced_db_uri_ssl_mode_key }}</code></td>
             <td><code>{{ forced_db_uri_ssl_mode }}</code></td>
           </tr>
           <tr>
-            <td><code>DATABASE_URL</code><br>(redacted)</td>
+            <td><code class="code-is-nowrap">DATABASE_URL</code><br>(redacted)</td>
             <td><code style="word-break: break-all;">{{ redacted_database_url }}</code></td>
           </tr>
           <tr>
-            <td><code>SQLALCHEMY_DATABASE_URI</code><br>(redacted)</td>
+            <td><code class="code-is-nowrap">SQLALCHEMY_DATABASE_URI</code><br>(redacted)</td>
             <td><code style="word-break: break-all;">{{ redacted_alchemy_database_url }}</code></td>
           </tr>
           <tr>

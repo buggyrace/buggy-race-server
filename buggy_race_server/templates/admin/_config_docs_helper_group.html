@@ -1,0 +1,10 @@
+## Config settings ("{{ pretty_group_name_dict[group_name] }}")
+
+{: .config-settings}
+| Setting  | Description   |
+|----------|---------------|
+{%+ for setting_name in groups[group_name] -%}
+  {%- if not (setting_name.startswith('SITE_2') or setting_name.startswith('SITE_3') or setting_name.startswith('SITE_4')) -%}
+    | `{{ setting_name }}` | {{ descriptions[ setting_name ] }}  {% if data_format == 'txt' %}<br/><br/>{% else %}&lt;br&gt;&lt;br&gt;{% endif %} _Default value:_ {{ md_pretty_default_settings[ setting_name ] }} |
+  {%- endif +%}
+{% endfor %}

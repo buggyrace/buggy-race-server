@@ -28,6 +28,7 @@
             </div>
             <div class="col-sm-4">
               {{ form.auth_code(class="mr-sm-1") }}
+              <span class="password-toggler hidden icon-eye-blocked" data-for="auth_code"></span>
             </div>
             <div class="col-sm-5">
               {% set name = "AUTHORISATION_CODE" %}
@@ -57,6 +58,7 @@
             </div>
             <div class="col-sm-4">
               {{ form.new_auth_code(class="mr-sm-1") }}
+              <span class="password-toggler hidden icon-eye-blocked" data-for="new_auth_code"></span>
             </div>
             <div class="col-sm-5">
               You <strong>must</strong> change the authorisation code.
@@ -100,6 +102,7 @@
             </div>
             <div class="col-sm-4">
               {{ form.admin_password(class="mr-sm-1") }}
+              <span class="password-toggler hidden icon-eye-blocked" data-for="admin_password"></span>
             </div>
             <div class="col-sm-5">
               Password of the admin user (once you've finished setup, you

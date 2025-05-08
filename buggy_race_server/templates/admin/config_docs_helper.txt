@@ -1,0 +1,12 @@
+{% block content %}
+<<VERSION: "{{ version_string }}">>
+{% for group_name in sorted_groupnames -%}
+  {%- if group_name != "AUTH" -%}
+--{{ '-' * (pretty_group_name_dict[group_name] | length) }}
+# {{ pretty_group_name_dict[group_name] }}
+--{{ '-' * (pretty_group_name_dict[group_name] | length) }}
+
+{% include "admin/_config_docs_helper_group.html" %}
+  {% endif %}
+{% endfor %}
+{% endblock %}

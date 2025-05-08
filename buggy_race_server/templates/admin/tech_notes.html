@@ -8,6 +8,22 @@
       Tech notes admin
     </h1>
   </div>
+  {% if not is_showing_tech_notes %}
+    <div class="row">
+      <div class="col">
+        <div class="alert alert-danger">
+          Tech notes are currently <strong>not displayed</strong> (or even
+          linked-to) on this server. To change this, set
+          <code>IS_SHOWING_TECH_NOTES</code> to <code>Yes</code>.
+          <p class="btn-collection">
+            <a href="{{ url_for('admin.settings', group_name='tech_notes') }}"
+            class="btn btn-outline-secondary btn-config-group bg-white"><span>Tech Notes</span></a>
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   {% if tech_notes_external_url %}
     <div class="row">
       <div class="col">
@@ -55,10 +71,17 @@
           Note that the HTML pages of the tech notes may be cached
           by your (or your students') browsers.
         </p>
-        <p class="btn-collection my-3">
-          <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
-            class="btn btn-outline-secondary btn-jump">View tech notes</a>
-        </p>
+        {% if is_showing_tech_notes %}
+          <p class="btn-collection my-3">
+            <a href="{{ url_for('public.serve_tech_notes', path='index') }}?cachebuster={{ range(1000,9999) | random }}"
+              class="btn btn-outline-secondary btn-jump">View tech notes</a>
+          </p>
+        {% else %}
+          <p>
+            You cannot view the tech notes, because
+            <code>IS_SHOWING_TECH_NOTES</code> is set to <code>No</code>.
+          </p>
+        {% endif %}
       </div>
     </div>
     <div class="row my-3">

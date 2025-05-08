@@ -104,9 +104,9 @@
       <nav id="sticky-nav" class="sticky-nav">
         <strong><a href="{{ BUGGY_RACE_SERVER_URL }}">Race&nbsp;server</a></strong> |
         <a href="{{ SITEURL }}/tech-notes/">Tech&nbsp;notes</a> |
-        <a href="{{ BUGGY_RACE_SERVER_URL }}/project/tasks">Task&nbsp;list</a> |
+        <a href="{{ BUGGY_RACE_SERVER_URL }}/project/tasks">Task&nbsp;list</a>
         {% if PROJECT_REPORT_TYPE %}
-          <a href="{{ BUGGY_RACE_SERVER_URL }}/project/{{ PROJECT_REPORT_TYPE }}">{{ PROJECT_REPORT_TYPE | title }}</a>
+          | <a href="{{ BUGGY_RACE_SERVER_URL }}/project/report">Report</a>
         {% endif %}
         <hr>
       </nav>

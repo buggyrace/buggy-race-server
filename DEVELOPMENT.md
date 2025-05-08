@@ -26,6 +26,9 @@ Bare bones, from the the top directory of the `buggy-race-server` repo: this
 runs a race server on `localhost:5000` with an empty SQLite database (you'll
 need the default auth code: `CHANGEME`):
 
+> Note: you can skip the two `export`s here by creating a `.env` file instead:
+> do `cp env.example .env` and then edit `.env`. See notes below!
+
 ```bash
 $> npm install
 $> webpack
@@ -40,8 +43,6 @@ $> flask run
 
 Ctl-C stops the webserver and `deactivate` exits the virtual environment.
 
-You can avoid those `export`s by creating a `.env` file instead, which flask
-will read when your launch it. See notes below!
 
 ## Getting started
 
@@ -81,7 +82,8 @@ Get the libraries/modules:
 > install on MacOS (it seems to behave recently though) —  a workaround was
 > removing it from the requirements and falling through to a system one that was
 > already installed; good luck. If you are totally blocking on this, a panic
-> bypass is to switch to mySQL ;-)
+> bypass is to switch to mySQL or SQLite ;-)
+
 
 ## Flask needs to know where the app is!
 
@@ -129,8 +131,8 @@ Probably the most convenient way set `DATABASE_URL` is to use a `.env` file,
 because your flask app will look in there. If you don't have one already,
 copy `env.example` to `.env` and edit it. You'll see example values there for
 databases, including the SQLite one. If you use SQLite you don't even need to
-create the database first, because it will create it (although note you'll
-still need to populate it with the `flask db` command).
+create the database first, because running the app will create it (although
+note you'll still need to populate it with the `flask db` command).
 
 We've been using `flask db` to manage the database, but note that flask won't
 recognise the `db` command if you haven't told it where the app is (see the
@@ -139,21 +141,6 @@ previous section — for example, export `FLASK_APP` or set it in `.env`):
     flask db upgrade
 
 (this applies the migrations and creates the tables, etc).
-
-#### If you are changing models hence database structure
-
-If you change the models and want to create new migrations, do something like:
-
-    flask db migrate -m "store user's star sign"
-
-_Note for devs:_  
-Behind the scenes that's Flask-SQLalchemy doing a pretty impressive job of
-generating the schema migrations _but_ we have bumped into some SQL-dialect
-gotchas (some ALTER TABLE column changes break in SQLite, although mySQL and
-Postgres handle indexes a little differently too). Before you push any code
-back, as a courtesy please check you haven't broken the migrations for the
-dialect you're _not_ using, because this is a blocker for other devs who hit it
-later.
 
 
 ### Set up environment variables
@@ -179,6 +166,7 @@ are prefixed with `_` which are effectively application constants. These aren't
 exposed in the web interface for changing config settings (i.e., buggy racing
 admins can't change them without diving into the env backstage). If it's
 useful, have a look at `/admin/system` which dumps a load of them for you.
+
 
 ### Run webpack (to make the static asset "bundles")
 
@@ -211,6 +199,7 @@ set-up mode when you first launch — you'll be guided through a bunch of config
 screens (most of which you can accept the defaults for: see the full
 documentation at https://www.buggyrace.net/docs/ because at this point you're
 inside the application).
+
 
 #### Other ways to run it
 
@@ -375,6 +364,7 @@ If you do those things, the next time you run the race server app you'll see
 (in the console) a message telling you a config setting (with default value)
 was inserted into the database.
 
+
 ### How to remove a config setting from the code
 
 If you made a config setting obsolete, that is, you _remove_ it from `config.py`
@@ -385,6 +375,36 @@ development.
 
 Be sure to remove all references to it, of course — so you'll pretty much be
 doing the opposite of the process for adding a new setting to `congig.py`, above.
+
+
+### How to change a model and its underlying database table
+
+This is managed via Flask/SQLalchemy's ORM. If you add or change a model (for
+example, to add a `star_sign` attribute to `User`, you'd edit the class in
+`user/models.py`) and then run Flask's `db migrate`:
+
+    flask db migrate -m "store user's star sign"
+
+This will produce an migration file. You'll need to apply it with
+`flask db upgrade` in order to make changes to the database. Those migrations
+are run automatically as part of the deploy mechanism on heroku for example,
+which is how live installations' databases get migrated to match the code
+they are being deployed with. If we get an accumulation of migration files,
+there comes a point when it's tidier to delete them all and make a new
+single one, but this is a breaking change and would have to be a new version
+release of the whole server. Note that you should also make no-data dump of
+the latest database and save it as a new commit on `schema.sql`. This is a 
+convenience that allows anyone who can't run the migrations to still set up
+their database.
+
+_Note for devs:_  
+Behind the scenes this is Flask-SQLalchemy doing a pretty impressive job of
+generating the schema migrations _but_ we have bumped into some SQL-dialect
+gotchas (some ALTER TABLE column changes break in SQLite, although mySQL and
+Postgres handle indexes a little differently too). Before you push any code
+back, as a courtesy please check you haven't broken the migrations for the
+dialect you're _not_ using, because this is a blocker for other devs who hit it
+later.
 
 
 ### How to add animated diagrams to the Tech Notes (202)

@@ -37,6 +37,7 @@ from buggy_race_server.utils import (
     get_pretty_approx_duration,
     get_user_task_texts_as_list,
     is_authorised,
+    is_poster,
     warn_if_insecure,
 )
 
@@ -70,16 +71,33 @@ def home_page():
         current_app.config[ConfigSettingNames.IS_USING_VCS.name]
         and current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name]
     )
+    report_type = current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name]
+    is_report = bool(report_type) # if it's not empty string (or maybe None?)
+    poster_type = current_app.config[ConfigSettingNames.PROJECT_POSTER_TYPE.name]
+    is_a_poster = is_poster(current_app)
+    if is_report:
+        report_link_text = "Report"
+        if is_a_poster:
+            report_link_text = "Report & Poster"
+    elif is_a_poster:
+        report_link_text = "Poster"
+    else:
+        report_link_text = ""
     return render_template(
         "user/home.html",
         form=form,
         ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
+        is_poster=is_a_poster,
+        is_report=is_report,
         is_secure=request.is_secure or not current_app.config[ConfigSettingNames._IS_REQUEST_TLS_EXPECTED.name],
+        is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
         is_showing_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_storing_student_task_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
+        is_storing_texts=current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name],
         is_student_using_vcs=is_student_using_vcs,
         is_using_vcs_to_fork=is_using_vcs_to_fork,
+        report_link_text=report_link_text,
         report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
         server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],

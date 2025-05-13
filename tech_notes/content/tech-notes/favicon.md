@@ -28,9 +28,9 @@ When you're developing your buggy editor, [requests](flask-webserver) are
 usually triggered by one of two things:
 
 * you entered a URL or clicked a link to send a request
-* a page you loaded required additional resources (such as a CSS or images)
-  whose URLs are explicitly stated in the HTML (often relative to the domain
-  and route of the page)
+* a page you loaded required additional resources (such as CSS stylesheets or
+  images) whose URLs are explicitly stated in the HTML (often relative to the
+  domain and route of the page)
 
 But favicons are different because they _can_ be implicit: that is, when you
 load a resource from a domain, your browser might make a request for a favicon

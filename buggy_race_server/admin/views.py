@@ -1620,6 +1620,8 @@ def tech_notes_admin():
         ConfigSettingNames.SITE_2_NAME.name,
         ConfigSettingNames.SITE_3_NAME.name,
         ConfigSettingNames.SITE_4_NAME.name,
+        ConfigSettingNames.EDITOR_HOST.name,
+        ConfigSettingNames.EDITOR_PORT.name,
     ],
     notes_generated_timestamp=servertime_str(
         current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],

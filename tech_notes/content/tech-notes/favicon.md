@@ -76,15 +76,16 @@ Unlike the other routes, this isn't using a template, and it's not reading the
 database (which is what the `/json` route does). Instead, it's simply sending
 back a static file. There's something odd here: that file is in the `static`
 directory, which Flask already knows how to handle — Flask doesn't need to find
-a route in your Python for static files. You can see this because your app is
+a route in your Python for static files. You know this because your app is
 serving the stylesheet `app.css` even though there's no route in `app.py` for
-it.
+it (confirm this for yourself by going to your browser and hitting
+`http://{{ EDITOR_HOST }}:{{ EDITOR_PORT }}/static/app.css`).
 
-The reason we've included this route is so that your buggy editor can add that
-`max_age` header to its response. This is effectively telling the browser
-"this icon is good to reuse for the next 24 hours"  (the value of `max_age` is
-a number of seconds, so 60×60×24 is one day). It's telling the browser to
-**cache** the icon.
+The reason we've included this `/favicon.png` route is so that your buggy editor
+can add that `max_age` header to its response. This is effectively telling the
+browser "this icon is good to reuse for the next 24 hours"  (the value of
+`max_age` is a number of seconds, so 60×60×24 is one day). It's telling the
+browser to **cache** the icon.
 
 What would happen without the `max_age`? Well, _because we encourage you to
 run your buggy editor in Flask's `development` mode_, everything is usually
@@ -97,6 +98,13 @@ you didn't ask for (and which isn't changing anyway). By dropping the favicon
 link into the base template, putting its route into `app.py`, and caching its
 response, we've made what's going on less mysterious.
 
+> Incidentally, because `"/favicon.png"` is identifying a route here, it doesn't
+> _need_ to look like a filename — that is, it would still work if you changed
+> the route not to have the `.png` extension (provided you also removed that
+> `.png` from the URL in the `<link rel="icon"...>`'s `href` attribute, because
+> that's the URL that your browser will be requesting). However, in this case,
+> keeping the `.png` in the route is probably the least confusing way of doing
+> it, because the route really is only serving that image file.
 
 ## When caching is not your friend
 
@@ -125,17 +133,18 @@ and [conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Gui
 (especially the `If-Modified-Since` header).
 
 
-## The .png format vs. .ico format
+## The .png format versus the .ico format
 
 You may have noticed that your buggy editor's favicon is `favicon.png`, which
 is not the same as the default `favicon.ico` that the browser would otherwise
 ask for.
 
 > By the way, you can discover this default for yourself by commenting out the
-> favicon `<link>` (e.g., use `<!-- -->`) and watch your buggy editor's activity
-> log when you load pages... you'll probably see `404` errors on a request for
-> `/favicon.ico` that you didn't ask for. (This behaviour does depend a little bit
-> on which browser you're using, but this is default for most).
+> favicon `<link>` (e.g., use `<!-- -->`) in your buggy editor's `base.html`
+> template. Then watch your buggy editor's activity log when you load pages...
+> you'll probably see `404` errors on a request for `/favicon.ico` that you
+> didn't ask for. (This behaviour does depend a little bit on which browser
+> you're using, but this is default for most).
 
 We've used a [PNG format](https://en.wikipedia.org/wiki/PNG) for the buggy
 editor because that's a common format for image files on the web, and if you try
@@ -149,12 +158,21 @@ complexity than the basic buggy editor needs. You can read more about the
 ## Why do browsers assume that the icon is at `/favicon.ico`?
 
 If you can specify a URL with `<link rel="icon"...>`, you may wonder why
-browsers don't just always use that. The answer is that browsers may want to
-apply a favicon to resources that are not HTML pages: for example, a `PDF`
-page from a website. Your buggy editor's `/json` route is another example. So
-the behaviour of requesting a favicon applies to resources other that HTML
-pages, and those resources are not capable of expressing the URL of an
-associated icon.
+browsers should ever try guess or assume where the icon is. Why don't they only
+use a URL when the server tells them where to find it? The answer is that
+browsers may want to apply a favicon to resources that are not HTML pages: for
+example, a PDF document from a website. Your buggy editor's `/json` route is
+another example. So the behaviour of requesting a favicon applies to all
+resources, whether or not they are HTML pages, and many of those resources are
+not capable of nominating the URL of an associated icon. Arguably, HTML pages
+are the special case because, uniquely, they do allow the server to nominate a
+specific URL for the favicon.
+
+> Technically, a mechanism does exist by which a server could nominate a URL
+> to use as an icon regardless of the type of resource. HTTP response headers
+> convey meta-data along with the payload of the resource itself, and a
+> `Link` header has been proposed. But it was not widely adopted, and the
+> practice of the client assuming `/favicon.ico` has become mainstream.
 
 Apple devices make similar unsolicited requests for `apple-touch-icon.png`
 (if you're testing your buggy editor on a Mac with the Safari browser, you might
@@ -168,5 +186,5 @@ through widespread adoption rather than collaborative design. Icons are somewhat
 complicated because their use and resolution can vary considerably depending on
 the client device. The HTML5 specification provides a
 [`sizes` attribute](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement/sizes)
-within the `<link>` tag, which allows the client (browser) to choose
-the most suitable one to download.
+within the `<link>` tag, which allows the client (browser) to choose the most
+suitable one to download.

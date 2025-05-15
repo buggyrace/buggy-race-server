@@ -1,8 +1,8 @@
 {{ project_code }} Buggy Editor Project texts by {{ username }}
 Downloaded from the race server: {{ downloaded_at }}
 {% if report_type %}
-For more about your {{ report_type}}, see
-{{ buggy_race_server_url }}{{ url_for('public.serve_project_page', page=report_type )}}
+For more about your report, see
+{{ buggy_race_server_url }}{{ url_for('public.serve_project_page', page='report' )}}
 {% endif %}
 ----------------------------------------
 

@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.4"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.5"
 #
 # ----------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.4"
 # manually because we're _not_ using Git submodules)
 # This is from https://github.com/buggyrace/buggy-race-editor/
 #
-MANUAL_EDITOR_COMMIT = "7727cb75404c68e864376fb727d04762fe63ff32"
+MANUAL_EDITOR_COMMIT = "660bf1e6a246ed0232912e4a9d5b54a6d5d96fd9"
 #
 # ----------------------------------------------------------------------------
 
@@ -1170,7 +1170,10 @@ class ConfigSettings:
           database? If you choose `No`, the cached HTML will be written as a
           file instead — in most cases (and especially if you are running on an
           ephemeral file system such as Heroku's) it's probably best to choose
-          `Yes` and only change if you notice performance problems.""",
+          `Yes` and only change if you notice performance problems. **Caution:**
+          if you change this setting _after the task list has already been
+          published_, the page showing the task list **will be deleted**, and
+          you'll need to republish it.""",
 
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name:
           """Do you want students to be able to record text on this server

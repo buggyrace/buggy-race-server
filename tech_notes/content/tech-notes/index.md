@@ -72,5 +72,5 @@ Notes for using Flask's _flash messages_:
 How to add images to your Flask app:
 
 * [adding static content](static-content)
-
+* [about favicons](favicon)
 

@@ -606,13 +606,13 @@ def publish_task_list(app=current_app):
         vcs_name=vcs_name,
     )
     if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
-        generated_task_file = DbFile.query.filter_by(
+        generated_task_list_in_db = DbFile.query.filter_by(
             type=DbFile.TASK_LIST
         ).first() # there is only ever one task list
-        if generated_task_file is None:
-            generated_task_file = DbFile.create(type=DbFile.TASK_LIST)
-        generated_task_file.contents = html
-        generated_task_file.save()
+        if generated_task_list_in_db is None:
+            generated_task_list_in_db = DbFile.create(type=DbFile.TASK_LIST)
+        generated_task_list_in_db.contents = html
+        generated_task_list_in_db.save()
     else:
         generated_task_file = join_to_project_root(
             app.config[ConfigSettingNames._PUBLISHED_PATH.name],
@@ -627,6 +627,7 @@ def publish_task_list(app=current_app):
         name=ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         value=stringify_datetime(created_at) if qty_tasks else "",
     )
+    purge_task_list(app=app)
 
 def publish_tasks_as_issues_csv(app=current_app):
     generated_issuefile = join_to_project_root(
@@ -653,6 +654,28 @@ def publish_tasks_as_issues_csv(app=current_app):
     #     )
     issue_csv_file.write(csv)
     issue_csv_file.close()
+
+def purge_task_list(app=current_app, is_storing_task_list_in_db=None):
+    # the task list is "special" because it's only static content if it's not
+    # being stored in the database: purging it deletes whichever of its forms
+    # (hard file or DbFile) we're _not_ using.
+    if is_storing_task_list_in_db is None:
+        is_storing_task_list_in_db = app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]
+    if is_storing_task_list_in_db: # we don't want the old task_list on file
+        generated_task_file = join_to_project_root(
+            app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+        )
+        if os.path.exists(generated_task_file):
+            print("* purging unwanted task file (using database instead)", flush=True)
+            try:
+                os.unlink(generated_task_file)
+            except os.error as e:
+                print(f"* problem deleting uploaded file: {e}", flush=True)
+    else: # we're not using the database, so don't want old task_list in there
+        if task_list_dbfile := DbFile.query.filter_by(type=DbFile.TASK_LIST).first():
+            task_list_dbfile.delete()
+            print("* purged task list from database (using file instead)", flush=True)
 
 # get_flag_color_defs for handling pennant/flag display with 
 # custom CSS and SVG masks

@@ -98,6 +98,7 @@ from buggy_race_server.utils import (
     publish_task_list,
     publish_tasks_as_issues_csv,
     publish_tech_notes,
+    purge_task_list,
     quote_string,
     redact_password_in_database_url,
     refresh_global_announcements,
@@ -1338,6 +1339,7 @@ def settings(group_name=None):
     """Admin settings check page."""
     form = SettingForm(request.form)
     settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
+    was_storing_task_list_in_db = settings_as_dict[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]
     link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
     if request.method == "POST":
         # group_name = form['group'].data
@@ -1346,6 +1348,24 @@ def settings(group_name=None):
             # inefficient, but update to reflect changes
             settings_as_dict = Setting.get_dict_from_db(Setting.query.all())
             link_settings = LinkedSiteSettings.get_linked_sites_from_config(settings_as_dict, want_all=True)
+            if (
+                (settings_as_dict[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]
+                != was_storing_task_list_in_db ) and
+                current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name]
+            ):
+                set_and_save_config_setting(
+                    current_app,
+                    ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
+                    "" # no date
+                )
+                flash(
+                    "You must re-publish the task list "
+                    "(because you changed how/where it is being stored)",
+                    "warning"
+                )
+                # delete the task list in all circumstances
+                purge_task_list(is_storing_task_list_in_db=True)
+                purge_task_list(is_storing_task_list_in_db=False)
         else:
             _flash_errors(form)
     html_descriptions = { 
@@ -1649,6 +1669,11 @@ def tasks_generate():
                 flash("You should load some tasks into the database before the project can start", "warning")
             else:
                 flash(f"OK, task list page has been generated with latest data ({qty_tasks} tasks)", "success")
+                if current_app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
+                    flash(
+                        "The task list page is being stored in the database "
+                        "(and not written to file as static content)", "info"
+                    )
             if _is_from_dashboard():
                 return redirect(url_for('admin.admin'))
     return redirect(url_for('admin.tasks_admin'))

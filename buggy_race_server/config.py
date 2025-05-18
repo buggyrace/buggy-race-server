@@ -1170,7 +1170,10 @@ class ConfigSettings:
           database? If you choose `No`, the cached HTML will be written as a
           file instead — in most cases (and especially if you are running on an
           ephemeral file system such as Heroku's) it's probably best to choose
-          `Yes` and only change if you notice performance problems.""",
+          `Yes` and only change if you notice performance problems. **Caution:**
+          if you change this setting _after the task list has already been
+          published_, the page showing the task list **will be deleted**, and
+          you'll need to republish it.""",
 
         ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name:
           """Do you want students to be able to record text on this server

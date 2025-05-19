@@ -77,3 +77,7 @@ venv/
 # Mac finder
 **/.DS_Store
 
+# source dir for local source material inc. graphics files for
+# screenshots for tech notes etc
+local-source/
+

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
 import logging
+import os
 import sys
 from datetime import datetime, timezone
 from sqlalchemy.exc import OperationalError
@@ -19,6 +20,7 @@ from buggy_race_server.utils import (
     publish_tasks_as_issues_csv,
     publish_task_list,
     publish_tech_notes,
+    purge_task_list,
     save_config_env_overrides_to_db,
     load_settings_from_db,
     servertime_str,
@@ -124,17 +126,19 @@ def create_app():
         server_url = app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
 
         with app.test_request_context(server_url):
-
+            # if there is no generated datetime for an item, then it's OK for
+            # that item/document to be absent: it hasn't ever been published
             if app.config.get(ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name):
                 generated_task_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
                 )
-                if not path.exists(generated_task_file):
+                is_storing_task_link_in_db = app.config.get(ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name)
+                if not is_storing_task_link_in_db and not path.exists(generated_task_file):
                     print(f"* publishing task list (for {server_url})", flush=True)
                     publish_task_list(app)
                     print(f"* published task list", flush=True)
-
+                purge_task_list(app, is_storing_task_list_in_db=is_storing_task_link_in_db)
                 generated_issue_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
                     app.config[ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name]
@@ -157,7 +161,7 @@ def create_app():
 
             if (
                 app.config.get(ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name)
-                and not app.config.get(ConfigSettingNames.IS_USING_VCS.name)
+                and DistribMethods.is_using_internal_buggy_editor(app.config.get(ConfigSettingNames.EDITOR_DISTRIBUTION_METHOD.name))
             ):
                 target_zipfile = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],

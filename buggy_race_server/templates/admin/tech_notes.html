@@ -98,7 +98,7 @@
               {# don't show empty external link names #}
               {% if not setting_name.startswith('SITE') or config[setting_name] %}
                 <tr>
-                  <td><code>{{ setting_name }}</code></td>
+                  <td><code class="code-is-nowrap">{{ setting_name }}</code></td>
                   <td><code>{{ config[setting_name] }}</code></td>
                 </tr>
               {% endif %}

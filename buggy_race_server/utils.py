@@ -4,7 +4,7 @@ import json
 import os # for path
 import re
 import csv
-from flask import abort, flash, request, redirect, url_for, current_app, render_template
+from flask import abort, flash, request, redirect, url_for, current_app, render_template, make_response
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
@@ -16,6 +16,18 @@ from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
 import subprocess
+
+def cors_allow_origin(func):
+    """ Simple decorator that adds a wildcard CORS header. Not using the
+        flask-cors extension (https://github.com/corydolphin/flask-cors)
+        because uncertain about current maintenance, and at this stage it's
+        overkill because it's only being applied on race JSON and images."""
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        response = make_response(func(*args, **kwargs))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    return decorated_function
 
 def refresh_global_announcements(app):
   announcements = []

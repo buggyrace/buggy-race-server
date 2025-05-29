@@ -109,6 +109,10 @@ or (maybe the best option because do-it-once now and you're good thereafter):
 
 ...and then edit that `.env` file! (It's got `FLASK_APP` in it already).
 
+Note that Flask respects the value of env variables `FLASK_RUN_PORT` (and
+`FLASK_RUN_HOST`) — the default port is 5000. You can set these in `.env` if
+you need them.
+
 
 ### Set up a database
 

@@ -643,7 +643,7 @@ def run_race(race_data):
                                     target.suffer_puncture()
                                     report_puncture(racelog, target, f"spike puncture{pretty_armour}")
                                 else:
-                                    buggy.suffer_attack(buggy.attack)
+                                    target.suffer_attack(buggy.attack)
                                     racelog(
                                         buggy=target,
                                         event_type=EventType.MESSAGE,
@@ -659,7 +659,7 @@ def run_race(race_data):
                                 )
                         else: # buggy attack is not-spike
                             if pk(DEFAULT_PK_OF_KARMIC_INJURY):
-                                buggy.suffer_attack(buggy.attack)
+                                target.suffer_attack(buggy.attack)
                                 racelog(
                                     buggy=buggy,
                                     event_type=EventType.MESSAGE,
@@ -674,7 +674,7 @@ def run_race(race_data):
                                         msg=f"{defence}: immune to {buggy}'s {buggy.attack}"
                                     )
                                 else:
-                                    buggy.suffer_attack(buggy.attack)
+                                    target.suffer_attack(buggy.attack)
                                     racelog(
                                         buggy=target,
                                         event_type=EventType.MESSAGE,

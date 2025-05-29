@@ -30,6 +30,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_temp_race_file_info,
     staff_only,
     join_to_project_root,
     servertime_str,
@@ -133,7 +134,6 @@ def serve_races_json():
     output.headers["Content-type"] = "application/json"
     output.headers["Content-length"] = len(json_data)
     return output
-
 
 @blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):

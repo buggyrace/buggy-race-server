@@ -131,6 +131,9 @@ class ConfigSettingNames(Enum):
     # Filename of the generated task list (effectively static content)
     _TASK_LIST_HTML_FILENAME = auto()
 
+    # Filename for temporary race file (for use in previews: not preserved)
+    _TASK_TEMP_RACE_FILE_FILENAME = auto()
+
     # Tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) but  putting them in config
     # to allow future tech notes to come from a different source
@@ -507,6 +510,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: "_temporary_race_file.json",
         ConfigSettingNames._TASKS_EDITED_DATETIME.name: "",
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
@@ -661,6 +665,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._TASKS_EDITED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: ConfigTypes.STRING,
@@ -1871,6 +1876,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name,
         ConfigSettingNames._TASKS_EDITED_DATETIME.name,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,

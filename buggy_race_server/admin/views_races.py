@@ -42,6 +42,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_temp_race_file_info,
     get_url_protocol,
     join_to_project_root,
     staff_only,
@@ -102,6 +103,23 @@ def list_races():
 @staff_only
 def new_race():
     return edit_race(None)
+
+@blueprint.route("/<int:race_id>", methods=["GET"])
+@blueprint.route("/temporary-race-file.json", methods=["GET"])
+@login_required
+@staff_only
+def serve_temporary_race_file_json():
+    temp_race_file_info = get_temp_race_file_info()
+    temp_filename = temp_race_file_info.get("filename_with_path")
+    if not (temp_filename or temp_race_file_info.get("is_available")):
+        abort(404)
+    with open(temp_filename, "r") as temp_race_file:
+        json_data = temp_race_file.read()
+    output = make_response(json_data, 200)
+    # no Content-Disposition of attachment, because this is served for previews
+    output.headers["Content-type"] = "application/json"
+    output.headers["Content-length"] = len(json_data)
+    return output
 
 @blueprint.route("/<int:race_id>", methods=["GET"])
 @login_required
@@ -577,3 +595,71 @@ def edit_track(track_id):
         form=form,
         track=track,
     )
+
+@blueprint.route("/replay-preview", methods=["GET", "POST"])
+@login_required
+@staff_only
+def race_preview_tool():
+    """ allows previews of race files irrespective of whether they are for
+    races that are on the server (yet)"""
+    temp_file_info = get_temp_race_file_info()
+    is_temp_file_available = temp_file_info.get("is_available")
+    tmp_file_name = temp_file_info.get("filename_with_path")
+    created_at = temp_file_info.get("created_at")
+    form = RaceResultsForm(request.form)
+    want_delete = False # if true, delete the temp file
+    if request.method == "POST":
+        if form.is_submitted() and form.validate():
+            if "results_json_file" in request.files:
+                json_file = request.files['results_json_file']
+                if json_file.filename:
+                    json_file.filename = tmp_file_name
+                    json_file.save(tmp_file_name)
+                    try:
+                        with open(tmp_file_name, "r") as read_file:
+                            result_data = json.load(read_file)
+                        # if there are different URLs there may be CORS errors
+                        # in the player, so check for any URLs that don't
+                        # match this server url and report with a danger flash?
+                        result_data = ""
+                    except UnicodeDecodeError as e:
+                        flash(
+                            "Encoding error (maybe that wasn't a JSON file you uploaded, "
+                            "or it contained unexpected characters?)",
+                            "warning"
+                        )
+                        want_delete = True
+                    except json.decoder.JSONDecodeError as e:
+                        flash("Failed to parse JSON data", "danger")
+                        flash(str(e), "warning")
+                        flash("No temporary race file available", "info")
+                        want_delete = True
+                else:
+                    want_delete = True # because no results_json_file uploaded
+                if not want_delete: # OK to preview!
+                    return redirect(
+                        url_for('admin.staff_race_replayer') + "?race=" +
+                        url_for('admin_race.serve_temporary_race_file_json')
+                    )
+            else:
+                want_delete = True # because no results_json_file uploaded
+            if want_delete and is_temp_file_available:
+                try:
+                    os.unlink(tmp_file_name)
+                    is_temp_file_available = False
+                    flash("Deleted temporary race file from the race server", "info")
+                except os.error as e:
+                    print("[!] Faied to delete temporary race file: {e}")
+                    flash("Failed to delete temporary race file from the race server", "warning")
+        else:
+            flash_errors(form)
+            flash("Did not change temporary race file", "danger")
+        if not is_temp_file_available:
+            flash("There is currently no temporary race file up here on the race server", "info")
+    return render_template(
+        "admin/race_replay_preview.html",
+        form=form,
+        is_temp_file_available=is_temp_file_available,
+        created_at=created_at,
+    )
+    

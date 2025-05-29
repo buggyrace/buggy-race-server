@@ -955,3 +955,24 @@ def most_recent_timestamp(a, b):
             return max(a, b)
         except:
             return a
+
+def get_temp_race_file_info():
+    filename = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name]
+    )
+    is_available = os.path.exists(filename)
+    created_at = None # actually modified time, but we never modify this
+    if is_available:
+        created_at = datetime.fromtimestamp(
+            os.path.getmtime(filename),
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]
+        )
+    return {
+        "filename": current_app.config[ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name],
+        "filename_with_path": filename,
+        "is_available": is_available,
+        "created_at": created_at,
+        "url": current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+               + url_for("admin_race.serve_temporary_race_file_json")
+    }

@@ -19,7 +19,7 @@ from buggy_race_server.admin.models import DbFile
 from buggy_race_server.buggy.models import Buggy
 from buggy_race_server.lib.race_specs import RuleNames
 from buggy_race_server.user.models import User
-from buggy_race_server.utils import servertime_str, get_url_protocol
+from buggy_race_server.utils import servertime_str, get_url_protocol, join_to_project_root
 
 class Racetrack(SurrogatePK, Model):
 
@@ -137,6 +137,16 @@ class Race(SurrogatePK, Model):
             self.start_at,
             want_datetime=True # otherwise we get a string
         )
+
+    @staticmethod
+    def save_temp_race_file(json):
+        temp_race_filename = join_to_project_root(
+            current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+            current_app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
+        )
+        temp_race_file = open(temp_race_filename, "w")
+        temp_race_file.write(json)
+        temp_race_file.close()
 
     @staticmethod
     def get_replay_anchor():

@@ -104,7 +104,6 @@ def list_races():
 def new_race():
     return edit_race(None)
 
-@blueprint.route("/<int:race_id>", methods=["GET"])
 @blueprint.route("/temporary-race-file.json", methods=["GET"])
 @login_required
 @staff_only

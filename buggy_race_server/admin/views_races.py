@@ -103,7 +103,7 @@ def list_races():
 def new_race():
     return edit_race(None)
 
-@blueprint.route("/<race_id>", methods=["GET"])
+@blueprint.route("/<int:race_id>", methods=["GET"])
 @login_required
 @staff_only
 def view_race(race_id):
@@ -149,7 +149,7 @@ def view_race(race_id):
         urls_with_different_protocol_dict=race.urls_with_different_protocol_dict(server_protocol),
     )
 
-@blueprint.route("/<race_id>/edit", methods=["GET", "POST"])
+@blueprint.route("/<int:race_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_only
 def edit_race(race_id=None):
@@ -245,7 +245,7 @@ def edit_race(race_id=None):
         suggested_next_name=suggested_next_name,
     )
 
-@blueprint.route("/<race_id>/abandon", methods=["GET", "POST"])
+@blueprint.route("/<int:race_id>/abandon", methods=["GET", "POST"])
 @login_required
 @admin_only
 def abandon_race(race_id):
@@ -283,7 +283,7 @@ def abandon_race(race_id):
         qty_results=qty_results
     )
 
-@blueprint.route("/<race_id>/upload-results", methods=["GET", "POST"])
+@blueprint.route("/<int:race_id>/upload-results", methods=["GET", "POST"])
 @login_required
 @admin_only
 def upload_race_file(race_id):
@@ -378,19 +378,19 @@ def upload_race_file(race_id):
         race=race,
     )
 
-@blueprint.route("/<race_id>/download-race-file/with-buggies", methods=["GET"])
+@blueprint.route("/<int:race_id>/download-race-file/with-buggies", methods=["GET"])
 @login_required
 @admin_only
 def download_race_json_with_buggies(race_id):
     return _download_race_json(race_id, want_buggies=True)
 
-@blueprint.route("/<race_id>/download-race-file", methods=["GET"])
+@blueprint.route("/<int:race_id>/download-race-file", methods=["GET"])
 @login_required
 @admin_only
 def download_race_json_without_buggies(race_id):
     return _download_race_json(race_id, want_buggies=False)
  
-@blueprint.route("/<race_id>/delete", methods=["POST"])
+@blueprint.route("/<int:race_id>/delete", methods=["POST"])
 @login_required
 @admin_only
 def delete_race(race_id):

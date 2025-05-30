@@ -65,9 +65,11 @@
           <div class="col-sm-5">
             Usernames are always lower case (although they may be displayed
             in title case: see the User settings in config).
-            <p>
-              <em>Example:</em> <code>{{ example_username }}</code>
-            </p>
+            {% if example_username %}
+              <p>
+                <em>Example:</em> <code>{{ example_username }}</code>
+              </p>
+            {% endif %}
           </div>
         </div>
 
@@ -106,9 +108,11 @@
               If users have an external username that they use in your organisation
               or institution, add it here. It's generally not used by the buggy race
               server unless you're using VS workspace files.
-              <p>
-                <em>Example:</em> <code>{{ ext_username_example }}</code>
-              </p>
+              {% if ext_username_example %}
+                <p>
+                  <em>Example:</em> <code>{{ ext_username_example }}</code>
+                </p>
+              {% endif %}
             </div>
           </div>
         {% endif %}
@@ -221,6 +225,12 @@
                 If users have an external ID (for example, if you're
                 using a system like Moodle, Canvas or Blackboard)
                 add it here.
+              {% endif %}
+              FIXME-998
+              {% if ext_id_example %}
+                <p>
+                  <em>Example:</em> <code>{{ ext_id_example }}</code>
+                </p>
               {% endif %}
             </div>
           </div>

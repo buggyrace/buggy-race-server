@@ -945,8 +945,8 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
           """If users have an external username, provide an example format
           (e.g., `abcd123` or `ada@example.org`). Note that this only serves as
-          a placeholder suggestion when inputting — it's not used to validate
-          or force the format of inputs. This setting is ignored if
+          an example/suggestion when inputting — it's not used to validate or
+          force the format of inputs. This setting is ignored if
           `USERS_HAVE_EXT_USERENAME` is `No`.""",
 
         ConfigSettingNames.EXT_USERNAME_NAME.name:

@@ -46,6 +46,7 @@ DEFAULT_INITIAL_STEPS = 100
 DEFAULT_MORE_STEPS =  50
 DEFAULT_MAX_LAPS = 2
 DEFAULT_LAP_LENGTH = 464
+DEFAULT_IS_DNF_A_POSITION = 1
 
 DEFAULT_REPAIR_DICE = "3d4"
 DEFAULT_ATTACK_RANGE = 2
@@ -513,13 +514,17 @@ def run_race(race_data):
         print(f"[.] {steps:=5} [{buggy_id}] {show_delta} {ev.string or ''}", flush=True)
         events_this_step.append(ev)
 
+    title_str = f"Race {race_data["title"]}"
+    print(f"\n[ ] {title_str}")
+    print(f"[ ] {'=' * len(title_str)}\n")
     print(f"[ ] buggies entered for this race (i.e., from CSV): {len(buggies_entered)}")
+    default_cost_limit = race_data.get("cost_limit") or DEFAULT_COST_LIMIT
     cost_limit = 0
     while cost_limit < 1:
         cost_limit = str(
-            input(f"[?] Maximum buggy cost for this race? [{DEFAULT_COST_LIMIT}] ")).strip()
+            input(f"[?] Maximum buggy cost for this race? [{default_cost_limit}] ")).strip()
         if cost_limit == '':
-            cost_limit = DEFAULT_COST_LIMIT
+            cost_limit = default_cost_limit
         else:
             try:
                 cost_limit = int(cost_limit)
@@ -529,11 +534,12 @@ def run_race(race_data):
     print(f"[ ] race cost limit: {cost_limit}")
 
     max_laps = 0
+    default_max_laps = race_data.get("max_laps") or DEFAULT_MAX_LAPS
     while max_laps < 1:
         max_laps = str(
-            input(f"[?] Number of laps for this race? [{DEFAULT_MAX_LAPS}] ")).strip()
+            input(f"[?] Number of laps for this race? [{default_max_laps}] ")).strip()
         if max_laps == '':
-            max_laps = DEFAULT_MAX_LAPS
+            max_laps = default_max_laps
         else:
             try:
                 max_laps = int(max_laps)
@@ -542,12 +548,13 @@ def run_race(race_data):
                 max_laps = 0
     print(f"[ ] race laps: {max_laps}")
 
+    default_lap_length = race_data.get("lap_length") or DEFAULT_LAP_LENGTH
     lap_length = 0
     while lap_length < 1:
         lap_length = str(
-            input(f"[?] Lap length? [{DEFAULT_LAP_LENGTH}] ")).strip()
+            input(f"[?] Lap length? [{default_lap_length}] ")).strip()
         if lap_length == '':
-            lap_length = DEFAULT_LAP_LENGTH
+            lap_length = default_lap_length
         else:
             try:
                 lap_length = int(lap_length)
@@ -557,6 +564,14 @@ def run_race(race_data):
     print(f"[ ] lap length: {lap_length}")
 
     pretty_race_length = f"{max_laps} lap race"
+
+    default_is_dnf_a_position = "y"
+    is_dnf_a_position = str(
+        input(f"[?] Is did-not-finish a position? [{default_is_dnf_a_position}] ")).strip()
+    if is_dnf_a_position == '':
+        is_dnf_a_position = default_is_dnf_a_position
+    is_dnf_a_position = is_dnf_a_position.lower().startswith("y")
+    print(f"[ ] did-not-finish is a position (but check this matches on the server)")
 
     logfilename = DEFAULT_RACE_FILENAME
     print(f"[ ] opening race log file {logfilename}... ")
@@ -659,7 +674,7 @@ def run_race(race_data):
                                 )
                         else: # buggy attack is not-spike
                             if pk(DEFAULT_PK_OF_KARMIC_INJURY):
-                                target.suffer_attack(buggy.attack)
+                                buggy.suffer_attack(buggy.attack)
                                 racelog(
                                     buggy=buggy,
                                     event_type=EventType.MESSAGE,
@@ -785,17 +800,20 @@ def run_race(race_data):
             buggy.position = next_finisher_position
             next_finisher_position += 1
 
-    print(f"[ ] see race log in {logfilename}")
+    # print(f"[ ] see race log in {logfilename}")
 
-    # for events_in_step in events:
-    #     json_events.append(
-    #         "    [\n"
-    #         + ",\n".join([ev.to_json() for ev in events_in_step])
-    #         + "\n    ]"
-    #     )
+    top_dogs = finishers
+    if is_dnf_a_position:
+        top_dogs += non_finishers
+    if top_dogs:
+        print("[ ] chequered flag:")
+        for i in range(100):
+            if i < len(top_dogs):
+                print(f"[*]   {top_dogs[i].position} {top_dogs[i]}")
+    else:
+        print("[ ] no buggies got a position")
 
     results = {
- 
       "race_file_url": race_data["race_file_url"],
       "title": race_data["title"],
       "description": race_data["description"],
@@ -817,20 +835,8 @@ def run_race(race_data):
     print(f"[ ] opening results JSON file {jsonfilename}... ")
     jsonfile = open(jsonfilename, "w")
     print(json.dumps(results, indent=2), file=jsonfile)
-    jsonfile.close()
+    jsonfile.close()    
     print(f"[ ] wrote to {jsonfilename}, ready to upload")
-    print(f"[.] bye")
-
-    # jsonfilename = DEFAULT_EVENT_LOG_FILENAME
-    # print(f"[ ] opening events JSON file {jsonfilename}... ")
-    # jsonfile = open(jsonfilename, "w")
-    # print('{\n "events": [', file=jsonfile)
-    # print(",\n".join(json_strings), file=jsonfile)
-    # print('  ]\n}', file=jsonfile)
-    # jsonfile.close()
-    # print(f"[ ] wrote to {jsonfilename}, ready to upload")
-
-    print(f"[.] bye")
 
 def main():
     print("[ ] Ready to race!")
@@ -852,6 +858,7 @@ def main():
             quit()
         race_data["buggies"] = buggies
     run_race(race_data)
+    print(f"[.] bye")
 
 if __name__ == "__main__":
     main()

@@ -567,7 +567,7 @@ def run_race(race_data):
 
     default_is_dnf_a_position = "y"
     is_dnf_a_position = str(
-        input(f"[?] Is did-not-finish a position? [{default_is_dnf_a_position}] ")).strip()
+        input(f"[?] Is did-not-finish (DNF) a position? [{default_is_dnf_a_position}] ")).strip()
     if is_dnf_a_position == '':
         is_dnf_a_position = default_is_dnf_a_position
     is_dnf_a_position = is_dnf_a_position.lower().startswith("y")
@@ -802,17 +802,41 @@ def run_race(race_data):
 
     # print(f"[ ] see race log in {logfilename}")
 
-    top_dogs = finishers
+    top_dogs = finishers.copy()
     if is_dnf_a_position:
-        top_dogs += non_finishers
+        top_dogs += non_finishers.copy()
     if top_dogs:
-        print("[ ] chequered flag:")
-        for i in range(100):
-            if i < len(top_dogs):
-                print(f"[*]   {top_dogs[i].position} {top_dogs[i]}")
+        podium_size = -1
+        default_podium_size = len(top_dogs)
+        while podium_size < 0:
+            podium_size = str(
+                input(f"[?] See how many buggies in results summary right now? [{default_podium_size}] ")).strip()
+            if podium_size == '':
+                podium_size = default_podium_size
+            else:
+                try:
+                    podium_size = int(podium_size)
+                except ValueError:
+                    print("[!] integer needed")
+                    podium_size = -1
+        if podium_size:
+            if podium_size < len(top_dogs):
+                msg = f"Results summary: top racers {podium_size} (of {len(top_dogs)}) on the podium:"
+            else:
+                msg = "Results summary: racers on the podium:"
+            print(f"\n[ ] {msg}")
+            print(f"[ ] {'=' * len(msg)}")
+            last_pos = None
+            for b in top_dogs:
+                dnf = "(DNF)" if b not in finishers else ""
+                eq = "=" if b.position == last_pos else ""
+                print(f"[★] {eq:1}{b.position:-2} {dnf:5}  {b.username}")
+                last_pos = b.position
+            print()
     else:
-        print("[ ] no buggies got a position")
-
+        print("[ ] no buggies got a position on the podium: rerun it")
+        print("[!] you cannot upload a race with no results...")
+        print("[!] ...but (up on the server) you can declate it abandoned")
     results = {
       "race_file_url": race_data["race_file_url"],
       "title": race_data["title"],

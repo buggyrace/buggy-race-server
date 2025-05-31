@@ -604,6 +604,7 @@ def run_race(race_data):
         logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
     logfile.write("#\n")
     finishers = []
+    non_finishers = []
     if len(buggies) == 0:
         logfile.write("# race abandoned: no buggies available to run\n")
         print("[!] race abandoned because nobody entered it")
@@ -845,6 +846,7 @@ def run_race(race_data):
       "max_laps": max_laps,
       "track_image_url": race_data["track_image_url"],
       "track_svg_url": race_data["track_svg_url"],
+      "lap_length": lap_length,
       "league": race_data["league"],
       "start_at": race_data["start_at"],
       "raced_at": race_start_at,

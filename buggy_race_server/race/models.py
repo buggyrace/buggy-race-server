@@ -212,12 +212,33 @@ class Race(SurrogatePK, Model):
         uploaded_title = results_data.get("title")
         if (self.title or uploaded_title) and self.title != uploaded_title:
             warnings.append(
-                f"JSON data you uploaded has wrong race title for this race: "
+                "uploaded race results have different race title for this race: "
                 f" expected \"{self.title}\", uploaded \"{uploaded_title}\""
             )
+        uploaded_cost_limit = int(results_data.get("cost_limit") or 0)
+        if self.cost_limit != uploaded_cost_limit:
+            warnings.append(
+                "Uploaded race results have different cost limit for this race: "
+                f" expected {self.cost_limit}, uploaded {uploaded_cost_limit}"
+            )
+        if results_data.get("lap_length") is None: # legacy: until v3.0.5
+            warnings.append(
+                "Uploaded race results have no lap length for this race: "
+                f" assuming it was {self.lap_length}"
+            )
+        else:
+            uploaded_lap_length = int(results_data.get("lap_length"))
+            if uploaded_lap_length != self.lap_length:
+                warnings.append(
+                    "Uploaded race results have different lap length for this race: "
+                    f" expected {self.lap_length}, uploaded {uploaded_lap_length}"
+                )
         max_laps = results_data.get("max_laps")
         if max_laps != self.max_laps and self.max_laps:
-            warnings.append(f"number of laps (\"max_laps\") in race result is {max_laps}, race was for {self.max_laps}")
+            warnings.append(
+                "Uploaded race results have different number of laps for this race: "
+                f" expected {self.max_laps}, uploaded {max_laps}"
+            )
         total_buggies_entered = int(results_data.get("buggies_entered") or 0)
         total_buggies_started = int(results_data.get("buggies_started") or 0)
         total_buggies_finished = int(results_data.get("buggies_finished") or 0)
@@ -225,11 +246,20 @@ class Race(SurrogatePK, Model):
         if buggy_results := results_data.get("buggies"):
             if buggy_results[0] and buggy_results[0].get('race_position') is None:
                 buggy_results = []
-                warnings.append("Buggies found in race file, but no results (race positions are missing: was this file output from a race?)")
+                warnings.append(
+                    "Buggies found in race file, but no results (race positions "
+                    "are missing: was this file really output from a race?)"
+                )
         elif buggy_results := results_data.get("results"): # old format of file used "results"
-            warnings.append("Results found but in an out-of-date format (can still use them... for now)")
+            warnings.append(
+                "Results found but in an out-of-date format "
+                "(can still use them... for now)"
+            )
         if not buggy_results:
-            warnings.append(f"No results found inside uploaded JSON data")
+            warnings.append(
+                f"No results found inside uploaded JSON data: "
+                "maybe choose Abandon Race instead of Upload Results?"
+            )
             buggy_results = []
         qty_buggies_entered = 0
         qty_buggies_started = 0
@@ -318,17 +348,44 @@ class Race(SurrogatePK, Model):
         if multi_usernames:
             warnings.append(f"usernames with more than one buggy in this race: {', '.join(sorted(multi_usernames))}")
         if total_buggies_entered != qty_buggies_entered:
-            warnings.append(f"number of buggies entered ({qty_buggies_entered}) does not match total in JSON ({total_buggies_entered})")
+            warnings.append(
+                f"number of buggies entered ({qty_buggies_entered}) does not match "
+                f"total in JSON ({total_buggies_entered})"
+            )
         if total_buggies_started != qty_buggies_started:
-            warnings.append(f"number of buggies started ({qty_buggies_started}) does not match total in JSON ({total_buggies_started})")
+            warnings.append(
+                f"number of buggies started ({qty_buggies_started}) does not match "
+                f"total in JSON ({total_buggies_started})"
+            )
         if total_buggies_finished != qty_buggies_finished:
-            warnings.append(f"number of buggies finished ({qty_buggies_finished}) does not match total in JSON ({total_buggies_finished})")
+            if not results_data.get("is_dnf_position"):
+                warnings.append(
+                    f"number of buggies finished ({qty_buggies_finished}) does "
+                    f"not match total in JSON ({total_buggies_finished})"
+                )
+        if results_data.get("is_dnf_position") is None: # legacy: old for old race files
+            warnings.append(
+                f"race file doesn't specify whether 'Did-Not-Finish' is a position: "
+                f"this race's setting for DNF is '{'Yes' if self.is_dnf_position else 'No'}'"
+            )
+        else:
+            if bool(results_data.get("is_dnf_position")) != bool(self.is_dnf_position):
+                msg = "Uploaded race results for 'Is Did-Not-Finish a position' differs from race: "
+                if self.is_dnf_position:
+                    warnings.append(f"{msg} expected Yes, uploaded No")
+                else:
+                    warnings.append(f"{msg} expected No, uploaded Yes")
+        if total_buggies_entered == 0:
+            warnings.append(f"No buggies entered the race: maybe you should Abandon Race instead?")
         if not warnings or is_ignoring_warnings:
             db.session.execute(delete(RaceResult).where(RaceResult.race_id==self.id))
             if results:
                 db.session.execute(insert(RaceResult).values(results))
-            else: # TODO: not having results is problematic — see issue #129
-                pass 
+            else: # not having results is problematic (see issue #129)
+                raise ValueError(
+                    f"Results data contains no results for this race ({self.id}): "
+                    "maybe you should Abandon Race instead?"
+                )
             self.results_uploaded_at = datetime.now(timezone.utc)
             self.buggies_entered = qty_buggies_entered
             self.buggies_started = qty_buggies_started
@@ -368,6 +425,7 @@ class Race(SurrogatePK, Model):
             "track_svg_url": self.track_svg_url,
             "lap_length": self.lap_length,
             "max_laps": self.max_laps,
+            "is_dnf_position": self.is_dnf_position,
             "start_at": servertime_str(
                 current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name],
                 self.start_at

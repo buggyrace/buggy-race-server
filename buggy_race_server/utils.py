@@ -988,3 +988,23 @@ def get_temp_race_file_info():
         "url": current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
                + url_for("admin_race.serve_temporary_race_file_json")
     }
+
+def get_races_keyed_by_racetrack_id(racetracks, races):
+    """ Passing all tracks and all races as arguments because this is being
+        called when we've probably read at least one of these already. This is
+        used to indicate on the racetrack picker (e.g., when making a new race)
+        which racetracks have already been used for a race. We don't _really_
+        know, because it's not stored as a racterack id — which is why what's
+        really going on is explicit comparison of the SVG and image URLs.
+    """
+    racetrack_races = {}
+    for track in racetracks:
+        print(f"FIXME {track.id} url:{track.track_image_url}")
+        racetrack_races[track.id] = [
+            race for race in races if (
+                race.track_image_url and race.track_svg_url and
+                race.track_image_url==track.track_image_url
+                and race.track_svg_url==track.track_svg_url
+            )
+        ]
+    return racetrack_races

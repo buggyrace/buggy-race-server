@@ -42,6 +42,7 @@ from buggy_race_server.utils import (
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_races_keyed_by_racetrack_id,
     get_temp_race_file_info,
     get_url_protocol,
     join_to_project_root,
@@ -249,11 +250,16 @@ def edit_race(race_id=None):
             else:
                 flash(f"Did not create new race", "danger")
             flash_errors(form)
+    racetracks = Racetrack.query.order_by(Racetrack.title.asc(),).all()
     return render_template(
         "admin/race_edit.html",
         form=form,
         race=race,
-        racetracks=Racetrack.query.order_by(Racetrack.title.asc(),).all(),
+        racetracks=racetracks,
+        racetrack_races=get_races_keyed_by_racetrack_id(
+            racetracks,
+            Race.query.all()
+        ),
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
         default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
@@ -493,12 +499,14 @@ def autofill_tracks():
 @login_required
 @admin_only
 def show_tracks():
-    racetracks = Racetrack.query.order_by(
-          Racetrack.title.asc(),
-        ).all()
+    racetracks = Racetrack.query.order_by(Racetrack.title.asc()).all()
     return render_template(
         "admin/racetracks.html",
         racetracks=racetracks,
+        racetrack_races = get_races_keyed_by_racetrack_id(
+            racetracks,
+            Race.query.all()
+        ),
         form=GeneralSubmitForm(), # for autofill
         is_showing_example_racetracks=current_app.config[ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name],
     )
@@ -661,4 +669,3 @@ def race_preview_tool():
         is_temp_file_available=is_temp_file_available,
         created_at=created_at,
     )
-    

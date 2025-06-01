@@ -421,6 +421,7 @@
       </div>
       <div class="modal-footer" style="justify-content:space-between">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal" id="cancel-btn">Cancel</button>
+        <button id="show-used-by-races-btn" class="btn btn-outline-primary hidden"></button>
         <a href="{{ url_for('admin_race.show_tracks') }}" target="_blank" id="btn-to-user-texts" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
       </div>
     </div>
@@ -454,6 +455,5 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 

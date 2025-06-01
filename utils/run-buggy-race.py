@@ -31,6 +31,7 @@ import optparse
 import sys
 import csv
 import json
+import math
 import re
 from datetime import datetime, timezone # will need locale really
 from random import randint, shuffle
@@ -325,7 +326,7 @@ class RacingBuggy(BuggySpecs):
         delta *= good_wheel_ratio
         if pk(100 * self.damage_percent):
             delta = int(delta / ( 1 + score_from_dice("1d2")/2 ) )
-        self.d += delta
+        self.d += math.ceil(delta)
 
     def consume_power(self):
         pwr = self.power_in_use()

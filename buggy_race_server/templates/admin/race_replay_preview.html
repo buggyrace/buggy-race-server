@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block page_title %} Admin: preview race replay {% endblock %}
+{% block content %}
+{%include "admin/_nav.html" %}
+<div class="container pb-2">
+  <div class="row">
+    <h1 class="col my-3">
+      Preview race replay (staff&nbsp;only)
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6 p-3">
+      <p>
+        If you want to test a race replay, use this standalone player (which
+        accepts the JSON results file URL as the <code>?race=</code>
+        variable). You can replay a race even if the buggies/users are not
+        in the database.
+      </p>
+      <p>
+        This is not a public page — only staff can access it.
+      </p>
+      <noscript>
+        <p>
+          <strong>You must enable JavaScript to replay races.</strong>
+        </p>
+      </noscript>
+    </div>
+    <div class="col-md-6 p-3">
+      <div>
+        <label id="result-json-label" for="result-json-input" class="hidden">
+          URL of race results JSON file
+        </label>
+        <input id="result-json-input" class="hidden form-control mr-sm-1" type="text"/>
+      </div>
+      <p class="btn-collection">
+        <a id="result-json-btn" href="{{ url_for('admin.staff_race_replayer')}}{{ replay_anchor }}" class="btn btn-outline-secondary btn-admin btn-jump">Replay race</a>
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <h2 class="col mt-4">
+      Upload and preview temporary race file
+    </h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6 p-3">
+      <div class="alert alert-info">
+        {% if is_temp_file_available %}
+          <h2 class="alert-title">A temporary file is available for preview</h2>
+          <p>
+            {% if created_at %}
+              It was uploaded at {{ created_at | servertime }}.
+            {% else %}
+              Cannot determine an upload date.
+            {% endif %}
+          </p>
+          <p class="btn-collection">
+            <a href="{{ url_for('admin.staff_race_replayer') }}?race={{ url_for('admin_race.serve_temporary_race_file_json') }}" class="btn btn-outline-secondary btn-admin btn-jump">Replay temp race file</a>
+          </p>
+          <form id="DeleteTempRaceFileForm" method="POST"
+                action="{{ url_for('admin_race.race_preview_tool') }}" 
+                role="form">
+            {{ form.csrf_token }}
+            <input type="hidden" name="results_json_file" value="" />
+            <button class="btn btn-danger my-3 mx-1">Delete temporary file</button>
+          </form>
+        {% else %}
+          <h2 class="alert-title">No temporary file is currently available</h2>
+          <p>
+            Upload a race file (containing results) that has been generated
+            by running a race.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-6 p-3">
+      <div class="alert alert-warning">
+        <h2 class="alert-title">
+          {% if is_temp_file_available %}
+            Upload and replay a different race file
+          {% else %}
+            Upload and replay a race file
+          {% endif %}
+        </h2>
+        <form id="UploadTempRaceFileForm" method="POST"
+          action="{{ url_for('admin_race.race_preview_tool') }}"
+          enctype="multipart/form-data" role="form">
+          {{ form.csrf_token }}
+          <p>
+            {{ form.results_json_file(required=required) }}
+          </p>
+          <p class="btn-collection">
+            <button class="btn btn-primary">Upload and replay</button>
+          </p>
+        </form>
+      </div>
+      <p>
+        Upload a race file that contains results (and, crucially, events) if
+        you want to preview its replay here and now.
+        This is <strong>not</strong> uploading results! (If you want to do that,
+        <a href="{{ url_for('admin_race.list_races') }}">go to the races admin</a>,
+        and choose <em>Upload results</em> for the relevant race). This temporary
+        race file upload is just a way to preview a race replay for which you do
+        not have a URL. The results won't go into the database or change anything
+        with races on this server. The file will remain until you upload another
+        one, delete it, or the server purges it during a restart.
+      </p>
+      <p>
+        Note that if the file you upload contains URLs that are loading
+        resources (such as the racetrack image or SVG) from another server, you
+        may encounter CORS errors which prevent the replay running.
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col my-3 text-right btn-collection">
+      {{ macros.docs_btn("Standalone player", "/races/replaying#standalone-player") }}
+      {{ macros.docs_btn("About race files", "/races/race-file") }}
+    </div>
+  </div>
+</div>
+<script>
+  let result_json_label = document.getElementById("result-json-label");
+  let result_json_input = document.getElementById("result-json-input");
+  let result_json_btn = document.getElementById("result-json-btn");
+  result_json_btn.addEventListener("click", function(e){
+    e.preventDefault();
+    let url = "{{ url_for('admin.staff_race_replayer')}}?race="
+            + result_json_input.value + "{{ replay_anchor }}";
+    window.location.href=url;
+  })
+  result_json_label.classList.remove("hidden");
+  result_json_input.classList.remove("hidden");
+</script>
+
+{% endblock %}

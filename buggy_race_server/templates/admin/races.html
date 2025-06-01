@@ -20,7 +20,7 @@
           <th rowspan="2">Race<br>shown?</th>
           <th rowspan="2">Results<br>shown?</th>
           <th rowspan="2">Race start<br>(upload deadline)</th>
-          <th rowspan="2">Title &amp;<br>Description</th>
+          <th rowspan="2">Title</th>
           <th rowspan="2">Cost<br>limit</th>
           <th colspan="3" class="text-center">Buggies</th>
         </tr>
@@ -102,53 +102,11 @@
           <a href="{{ url_for('admin_race.new_race')}}" class="btn btn-outline-secondary btn-admin btn-jump">Add new race</a>
           <a href="{{ url_for('admin_race.show_tracks')}}" class="btn btn-outline-secondary btn-admin btn-jump">View racetracks</a>
         </p>
+        <p class="btn-collection my-3">
+          <a href="{{ url_for('admin_race.race_preview_tool')}}" class="btn btn-outline-secondary btn-admin btn-jump">Preview race replays</a>
+        </p>
       </div>
     </div>
-  {% endif %}
-  {% if current_user.is_staff %}
-    <div class="row">
-      <div class="col my-3 border">
-        <div class="row">
-          <div class="col-md-6 p-3">
-            If you want to test a race replay before it's in the database, use
-            this standalone player (which accepts the JSON results file URL as
-            the <code>?race=</code> variable). You can replay a race even if
-            the buggies/users are not in the database.
-            <br>
-            This is not a public page — only staff can access it.
-            <noscript>
-              <p>
-                <strong>You must enable JavaScript to replay races.</strong>
-              </p>
-            </noscript>
-          </div>
-          <div class="col-md-6 p-3">
-            <div>
-              <label id="result-json-label" for="result-json-input" class="hidden">
-                URL of race results JSON file
-              </label>
-              <input id="result-json-input" class="hidden form-control mr-sm-1" type="text"/>
-            </div>
-            <p class="btn-collection">
-              <a id="result-json-btn" href="{{ url_for('admin.staff_race_replayer')}}{{ replay_anchor }}" class="btn btn-outline-secondary btn-admin btn-jump">Replay race</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-      let result_json_label = document.getElementById("result-json-label");
-      let result_json_input = document.getElementById("result-json-input");
-      let result_json_btn = document.getElementById("result-json-btn");
-      result_json_btn.addEventListener("click", function(e){
-        e.preventDefault();
-        let url = "{{ url_for('admin.staff_race_replayer')}}?race="
-                + result_json_input.value + "{{ replay_anchor }}";
-        window.location.href=url;
-      })
-      result_json_label.classList.remove("hidden");
-      result_json_input.classList.remove("hidden");
-    </script>
   {% endif %}
   <div class="row">
     <div class="col my-3 text-right">

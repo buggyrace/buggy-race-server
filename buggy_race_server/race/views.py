@@ -27,9 +27,11 @@ from buggy_race_server.race.models import Race, RaceResult
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
+    cors_allow_origin,
     flash_errors,
     get_download_filename,
     get_flag_color_css_defs,
+    get_temp_race_file_info,
     staff_only,
     join_to_project_root,
     servertime_str,
@@ -55,6 +57,7 @@ def _serve_race_asset_file(*args):
     return send_file(full_filename)
 
 @blueprint.route("/assets/tracks/<filename>")
+@cors_allow_origin
 def serve_racetrack_asset(filename):
     return _serve_race_asset_file(
         current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name],
@@ -62,6 +65,7 @@ def serve_racetrack_asset(filename):
     )
 
 @blueprint.route("/assets/img/<filename>")
+@cors_allow_origin
 def serve_race_player_image(filename):
     return _serve_race_asset_file(
         current_app.config[ConfigSettingNames._RACE_ASSETS_IMAGES_PATH.name],
@@ -106,6 +110,7 @@ def show_public_races():
     )
 
 @blueprint.route("races.json", strict_slashes=True)
+@cors_allow_origin
 def serve_races_json():
     filename = get_download_filename("races.json", want_datestamp=True)
     races=Race.query.filter(
@@ -133,7 +138,6 @@ def serve_races_json():
     output.headers["Content-type"] = "application/json"
     output.headers["Content-length"] = len(json_data)
     return output
-
 
 @blueprint.route("/<int:race_id>/replay")
 def replay_race(race_id):
@@ -209,6 +213,7 @@ def show_race_results(race_id):
 
 @blueprint.route("/<int:race_id>/race-file.json")
 @blueprint.route("/<int:race_id>/race-file")
+@cors_allow_origin
 def serve_race_file(race_id):
     race = Race.query.filter_by(id=race_id).first_or_404()
     if not (race.is_visible and race.is_result_visible):

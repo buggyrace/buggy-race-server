@@ -8,7 +8,10 @@
 # and can run as many times here as wanted
 #
 # Before you start:
-#   * Download the a buggy CSV file from the race server
+#   * Download a race file from the race server
+#      - it might also include buggies that are entered into the race
+#   * if there aren't buggies in the race file (or you don't want to use them)
+#      * Download the a buggy CSV file from the race server
 #
 # When you've finished:
 #
@@ -18,36 +21,62 @@
 #      * edit the JSON to fix them
 #      * upload again, this time with "ignore warnings"
 #
-#   * (TODO): (not implemented; and even then maybe optional):
-#     publish the race log, buggies.csv and result log and add their
-#     URLs by editing the race.
-#     These three files are needed to _replay_ the race.
+# See the docs on uploading race results:
+# https://www.buggyrace.net/docs/races/uploading-results.html
 #
+#------------------------------------------------------------------------------
+
 import os
+import optparse
 import sys
 import csv
 import json
+import math
 import re
 from datetime import datetime, timezone # will need locale really
 from random import randint, shuffle
 from enum import Enum
+from time import sleep
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', ''))
 from buggy_race_server.lib.race_specs import BuggySpecs
 
-DEFAULT_RACE_FILENAME_JSON = 'race.json'
+parser = optparse.OptionParser()
+parser.add_option(
+    "-c", "--csv", dest="is_using_buggies_csv", action="store_true",
+    help="load the buggies from a CSV file (if you've got a JSON race file, "
+         "you can still use it, but this option ignores any buggies in that "
+         "JSON and loads them from the CSV file instead)"
+)
+parser.add_option(
+    "-n", "--no-race-file", dest="no_race_file", action="store_true",
+    help="run a race without loading data from a race file (normally you don't "
+         "want to do this because you've downloaded a race file from your race"
+         "server)"
+)
+opts, args = parser.parse_args()
 
-DEFAULT_CSV_FILENAME = 'cs1999-buggies-2023-06-07-FOURTH-RACE-STUDENTS.csv' # 'buggies.csv'
+# opts.no_race_file
+
+DEFAULT_RACE_FILENAME_JSON = 'race.json'
+DEFAULT_CSV_FILENAME = 'buggies.csv'
 DEFAULT_RACE_FILENAME = 'race.log'
 DEFAULT_RESULTS_FILENAME = 'race-results.json'
-DEFAULT_EVENT_LOG_FILENAME = "race-events.json"
+
+# these defaults are only used if there's no race file:
+# (because if there is a race file, it should contain all this information,
+# and deviating from it will (at least) generate warnings when you upload the
+# results and (at worst) create a race that doesn't match the declared race
+# -- in particular, changing cost limit or lap length from what's up on the
+# race server is going to get you into trouble
 DEFAULT_COST_LIMIT = 250
 DEFAULT_INITIAL_STEPS = 100
 DEFAULT_MORE_STEPS =  50
 DEFAULT_MAX_LAPS = 2
 DEFAULT_LAP_LENGTH = 464
+DEFAULT_IS_DNF_A_POSITION = True
 
-DEFAULT_REPAIR_DICE = "3d4"
+DEFAULT_REPAIR_DICE = "2d3"
 DEFAULT_ATTACK_RANGE = 2
 DEFAULT_PK_OF_KARMIC_INJURY = 42
 
@@ -188,8 +217,6 @@ PK_DECIDE_TO_ATTACK = {
 def pk(prob): # probability in 1000
     return randint(0, 1000) < prob
 
-def distance_by_power(power_type):
-    return 3 + randint(1 ,6) +  randint(1, 6)
 
 class RacingBuggy(BuggySpecs):
 
@@ -299,7 +326,7 @@ class RacingBuggy(BuggySpecs):
         delta *= good_wheel_ratio
         if pk(100 * self.damage_percent):
             delta = int(delta / ( 1 + score_from_dice("1d2")/2 ) )
-        self.d += delta
+        self.d += math.ceil(delta)
 
     def consume_power(self):
         pwr = self.power_in_use()
@@ -422,7 +449,7 @@ def load_race_file(json_filename=None):
         print(f"[ ] defaulting to {DEFAULT_RACE_FILENAME_JSON}")
         json_filename = DEFAULT_RACE_FILENAME_JSON
     if not os.path.isfile(json_filename):
-        raise FileNotFoundError(f"can't find JSON file containing race data ({json_filename}) ")
+        raise FileNotFoundError(f"can't find JSON file containing race data (\"{json_filename}\") ")
     try:
         with open(json_filename, "r") as read_file:
             race_data = json.load(read_file)
@@ -432,21 +459,28 @@ def load_race_file(json_filename=None):
     except json.decoder.JSONDecodeError as e:
         print("[!] Failed to parse JSON data:\n    {e}")
         quit()
-    buggy_data = race_data["buggies"]
+    title_str = f"Race {race_data.get('title')}" # TODO
+    print(f"\n[ ] {title_str}")
+    print(f"[ ] {'=' * len(title_str)}\n")
+    buggy_data = race_data.get("buggies")
     race_data["buggies"] = []
-    print("[ ] Processing: ", end="")
-    for i, buggy_data in enumerate(buggy_data):
-        for k in BuggySpecs.DEFAULTS:
-            if k not in buggy_data:
-               raise ValueError(f"column/key \"{k}\" is missing from CSV (buggy {i})")
-            if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
-                buggy_data[k] = None
-            if type(BuggySpecs.DEFAULTS[k]) == bool:
-                if type(buggy_data[k]) != bool:
-                    buggy_data[k] = buggy_data[k].lower() == "true"
-        race_data["buggies"].append(RacingBuggy(buggy_data))
-        print(".", end="", flush=True)
-    print("", flush=True)
+    if buggy_data is not None:
+        if opts.is_using_buggies_csv:
+            print("[ ] ignoring buggies in race file, because --csv option")
+        else:
+            print("[ ] Processing buggies: ", end="")
+            for i, buggy_data in enumerate(buggy_data):
+                for k in BuggySpecs.DEFAULTS:
+                    if k not in buggy_data:
+                        raise ValueError(f"column/key \"{k}\" is missing from CSV (buggy {i})")
+                    if buggy_data[k] == '': # anomaly of CSV dumping: tidy nones
+                        buggy_data[k] = None
+                    if type(BuggySpecs.DEFAULTS[k]) == bool:
+                        if type(buggy_data[k]) != bool:
+                            buggy_data[k] = buggy_data[k].lower() == "true"
+                race_data["buggies"].append(RacingBuggy(buggy_data))
+                print(".", end="", flush=True)
+            print("OK", flush=True)
     return race_data
 
 def load_csv(csv_filename=None):
@@ -456,7 +490,7 @@ def load_csv(csv_filename=None):
         print(f"[ ] defaulting to {DEFAULT_CSV_FILENAME}")
         csv_filename = DEFAULT_CSV_FILENAME
     if not os.path.isfile(csv_filename):
-        raise FileNotFoundError(f"can't find CSV file containing buggy data (csv_filename) ")
+        raise FileNotFoundError(f"can't find CSV file containing buggy data (\"{csv_filename}\") ")
     print("[ ] reading CSV...")
     with open(csv_filename) as csvfile:
         reader = csv.DictReader(csvfile)
@@ -498,6 +532,34 @@ def report_puncture(racelog, buggy, type="puncture"):
         msg=f"{type}! {punc_str}"
     )
 
+def input_integer(name, minimum=1, default=-1, prompt=None):
+    if prompt is None:
+        prompt = f"{name.title()}?"
+    ret_val = minimum - 1
+    while ret_val < minimum:
+        ret_val = input(f"[?] {prompt} [{default}] ").strip()
+        if ret_val == '':
+            ret_val = default
+        else:
+            try:
+                ret_val = int(ret_val)
+                if ret_val < minimum:
+                    print(f"[!] too small: minimum is {minimum}")
+            except ValueError:
+                print("[!] oops! Wasn't an integer. Try again...")
+                ret_val = minimum - 1
+    print(f"[ ] {name}: {ret_val}")
+    return ret_val    
+
+def input_boolean(name, default=True, prompt=None):
+    if prompt is None:
+        prompt = f"{name.title()}?"
+    pretty_default = "y" if default else "n"
+    ret_val = input(f"[?] {prompt} [{pretty_default}] ").strip()
+    ret_val = default if not ret_val else ret_val.lower().startswith("y")
+    print(f"[ ] {name} {ret_val}")
+    return ret_val
+
 def run_race(race_data):
     buggies_entered = race_data["buggies"]
     events = [] # into here goes one array for each step
@@ -513,57 +575,38 @@ def run_race(race_data):
         print(f"[.] {steps:=5} [{buggy_id}] {show_delta} {ev.string or ''}", flush=True)
         events_this_step.append(ev)
 
-    print(f"[ ] buggies entered for this race (i.e., from CSV): {len(buggies_entered)}")
-    cost_limit = 0
-    while cost_limit < 1:
-        cost_limit = str(
-            input(f"[?] Maximum buggy cost for this race? [{DEFAULT_COST_LIMIT}] ")).strip()
-        if cost_limit == '':
-            cost_limit = DEFAULT_COST_LIMIT
-        else:
-            try:
-                cost_limit = int(cost_limit)
-            except ValueError:
-                print("[!] integer greater than 1 needed")
-                cost_limit = 0
-    print(f"[ ] race cost limit: {cost_limit}")
+    print(f"[ ] buggies entered for this race: {len(buggies_entered)}")
 
-    max_laps = 0
-    while max_laps < 1:
-        max_laps = str(
-            input(f"[?] Number of laps for this race? [{DEFAULT_MAX_LAPS}] ")).strip()
-        if max_laps == '':
-            max_laps = DEFAULT_MAX_LAPS
-        else:
-            try:
-                max_laps = int(max_laps)
-            except ValueError:
-                print("[!] integer greater than 1 needed")
-                max_laps = 0
-    print(f"[ ] race laps: {max_laps}")
-
-    lap_length = 0
-    while lap_length < 1:
-        lap_length = str(
-            input(f"[?] Lap length? [{DEFAULT_LAP_LENGTH}] ")).strip()
-        if lap_length == '':
-            lap_length = DEFAULT_LAP_LENGTH
-        else:
-            try:
-                lap_length = int(lap_length)
-            except ValueError:
-                print("[!] integer greater than 1 needed")
-                lap_length = 0
-    print(f"[ ] lap length: {lap_length}")
-
+    cost_limit = input_integer(
+        "cost limit",
+        minimum=10,
+        default=race_data.get("cost_limit") or DEFAULT_COST_LIMIT, 
+        prompt="Maximum buggy cost for this race?"
+    )
+    max_laps = input_integer(
+        "number of laps",
+        minimum=1,
+        default=race_data.get("max_laps") or DEFAULT_MAX_LAPS,
+        prompt="Number of laps for this race?"
+    )
+    lap_length = input_integer(
+        "lap length",
+        minimum=1,
+        default=race_data.get("lap_length") or DEFAULT_LAP_LENGTH,
+    )
+    dnf_default = race_data.get("is_dnfx_position") 
+    if dnf_default is None:
+        print("[!] !!! caution: \"is DNF a position?\" is not in the race file: ")
+        print("[!]     maybe check what's up on the server for this race")
+        dnf_default = DEFAULT_IS_DNF_A_POSITION
+    is_dnf_a_position = input_boolean(
+        "is DNF position?",
+        default=dnf_default,
+        prompt="Is Did-Not-Finish (DNF) a position?"
+    )
     pretty_race_length = f"{max_laps} lap race"
-
-    logfilename = DEFAULT_RACE_FILENAME
-    print(f"[ ] opening race log file {logfilename}... ")
-    logfile = open(logfilename, "w")
     race_start_at = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-    logfile.write(f"# race cost<={cost_limit} run at {race_start_at}\n")
-    print("[ ] Checking race rules...")
+    print("[ ] Scrutineering: checking race rules...")
     qty_violators = 0
     buggies = []
 
@@ -575,29 +618,30 @@ def run_race(race_data):
             continue
         if buggy.violations:
             qty_violators += 1
-            print(f"[ ]    {buggy.nom} {buggy.qty_wheels}×o ({buggy.qty_tyres}) {buggy.flag_color} £{buggy.total_cost}")
-            print(f"[-]    violates: {'+'.join(buggy.violations)}")
-            logfile.write(f"VIOLATION: {buggy.username},{'+'.join(buggy.violations)}\n")
+            print(f"[ ]    {buggy.nom} {buggy.qty_wheels}×o ({buggy.qty_tyres}) {buggy.flag_color} cost={buggy.total_cost}")
+            print(f"[-]        violates: {'+'.join(buggy.violations)}")
         else:
             buggy.position = 0
             buggies.append(buggy)
     print(f"[*] {qty_violators} buggies are excluded due to race rule violations")
-    logfile.write("#\n")
     print(f"[ ] next: {len(buggies)} buggies ready to start the race:")
     print("[ ]       " + ", ".join([b.username for b in buggies]))
-    for b in buggies:
-        logfile.write(f"ENTRANT: {b.username},{b.flag_color},{b.flag_pattern},{b.flag_color_secondary}\n")
-    logfile.write("#\n")
     finishers = []
+    non_finishers = []
     if len(buggies) == 0:
-        logfile.write("# race abandoned: no buggies available to run\n")
-        print("[!] race abandoned because nobody entered it")
+        print("[!] look like this race may need to be abandoned because nobody entered it")
     else:
-        logfile.write("# race starts...\n")
-        print("[ ] GO!")
+        if not (
+            input_boolean(
+                "ok to start?",
+                default=True,
+                prompt="Check this ↑ all looked good... OK to start race?"
+            )
+        ):
+            print("[ ] cancelled race")
+            exit()
         steps = 0
         max_steps = DEFAULT_INITIAL_STEPS 
-
         qty_attacks_launched = 0
         while steps < max_steps:
             events_this_step = []
@@ -606,7 +650,7 @@ def run_race(race_data):
             steps += 1
             print(f"------------------------ step {steps} ------------------------")
 
-            if steps > 1: # no fighting on the start line, it's unsporting
+            if steps > 2: # no fighting on the start line, it's unsporting
                 # calculate attacks:
                 # doing this before anyone has moved: now we calculate
                 # proximity (caculating attacks during the move loop is unfair
@@ -616,7 +660,6 @@ def run_race(race_data):
                 # of attack matters )
                 shuffle(buggies)
                 for buggy in [b for b in buggies if b.qty_attacks > 0 and not b.is_parked]:
-                    print(f"FIXME : <{buggy.attack}> None? {buggy.attack is None}")
                     if buggy.attack is None or buggy.attack == 'none':
                         continue
                     attack_range = DEFAULT_ATTACK_RANGE
@@ -643,11 +686,11 @@ def run_race(race_data):
                                     target.suffer_puncture()
                                     report_puncture(racelog, target, f"spike puncture{pretty_armour}")
                                 else:
-                                    buggy.suffer_attack(buggy.attack)
+                                    target.suffer_attack(buggy.attack)
                                     racelog(
                                         buggy=target,
                                         event_type=EventType.MESSAGE,
-                                        msg=f"now at {buggy.damage_percent}% damage"
+                                        msg=f"now at {target.damage_percent}% damage"
                                     )
                             else:
                                 if target.armour != "none":
@@ -674,11 +717,11 @@ def run_race(race_data):
                                         msg=f"{defence}: immune to {buggy}'s {buggy.attack}"
                                     )
                                 else:
-                                    buggy.suffer_attack(buggy.attack)
+                                    target.suffer_attack(buggy.attack)
                                     racelog(
                                         buggy=target,
                                         event_type=EventType.MESSAGE,
-                                        msg=f"now at {buggy.damage_percent}% damage"
+                                        msg=f"now at {target.damage_percent}% damage"
                                     )
                         buggy.qty_attacks -= 1
                         qty_attacks_launched += 1
@@ -774,7 +817,6 @@ def run_race(race_data):
                     max_steps += more_steps
             events.append(events_this_step)
         print(f"[ ] attacks launched in that race: {qty_attacks_launched}")
-        logfile.close()
         print(f"[:] race ends after {steps} steps")
         non_finishers = sorted(
             [buggy for buggy in buggies if buggy.position == 0 ],
@@ -785,63 +827,87 @@ def run_race(race_data):
             buggy.position = next_finisher_position
             next_finisher_position += 1
 
-    print(f"[ ] see race log in {logfilename}")
-
-    # for events_in_step in events:
-    #     json_events.append(
-    #         "    [\n"
-    #         + ",\n".join([ev.to_json() for ev in events_in_step])
-    #         + "\n    ]"
-    #     )
-
+    top_dogs = finishers.copy()
+    if is_dnf_a_position:
+        top_dogs += non_finishers.copy()
+    if top_dogs:
+        sleep(1) # pause in case you've been bouncing on the ENTER key
+        podium_size = 1 if len(top_dogs) ==  1 else input_integer(
+            name="podium size",
+            default=len(top_dogs),
+            minimum=0,
+            prompt=f"Want to see the result summary... for how many of the {len(top_dogs)} buggies?"
+        )
+        if podium_size:
+            if podium_size < len(top_dogs):
+                msg = f"Results summary: top racers {podium_size} (of {len(top_dogs)}) on the podium:"
+            else:
+                msg = "Results summary: this is all the racers on the podium:"
+            print(f"\n[ ] {msg}")
+            print(f"[ ] {'=' * len(msg)}")
+            last_pos = None
+            for index, b in enumerate(top_dogs):
+                dnf = "(DNF)" if b not in finishers else ""
+                eq = "=" if b.position == last_pos else ""
+                print(f"[★] {eq:1}{b.position:-2} {dnf:5}  {b.username}")
+                last_pos = b.position
+                if index + 1 == podium_size:
+                    break
+            print()
+    else:
+        print("[ ] no buggies got a position on the podium: maybe rerun it?")
+        print("[!] you cannot upload a race with no results...")
+        print("[!] ...but (up on the server) you can edit the race and declare it abandoned")
     results = {
- 
-      "race_file_url": race_data["race_file_url"],
-      "title": race_data["title"],
-      "description": race_data["description"],
+      "race_file_url": race_data.get("race_file_url") or "",
+      "title": race_data.get("title") or "",
+      "description": race_data.get("description") or "",
       "cost_limit": cost_limit,
       "max_laps": max_laps,
-      "track_image_url": race_data["track_image_url"],
-      "track_svg_url": race_data["track_svg_url"],
-      "league": race_data["league"],
-      "start_at": race_data["start_at"],
+      "track_image_url": race_data.get("track_image_url") or "",
+      "track_svg_url": race_data.get("track_svg_url") or "",
+      "lap_length": lap_length,
+      "league": race_data.get("league"),
+      "start_at": race_data.get("start_at") or "",
       "raced_at": race_start_at,
+      "is_dnf_position": is_dnf_a_position,
       "buggies_entered": len(buggies_entered),
       "buggies_started": len(buggies),
       "buggies_finished": len(finishers),
       "buggies": RacingBuggy.get_json_list_of_buggies(buggies_entered),
       "events": [RaceEvent.get_list_of_events(events_in_step) for events_in_step in events],
-      "version": "1.0"
+      "version": "1.1"
     }
     jsonfilename = DEFAULT_RESULTS_FILENAME
-    print(f"[ ] opening results JSON file {jsonfilename}... ")
+    print(f"[ ] opening results JSON file \"{jsonfilename}\"... ")
     jsonfile = open(jsonfilename, "w")
     print(json.dumps(results, indent=2), file=jsonfile)
-    jsonfile.close()
-    print(f"[ ] wrote to {jsonfilename}, ready to upload")
-    print(f"[.] bye")
-
-    # jsonfilename = DEFAULT_EVENT_LOG_FILENAME
-    # print(f"[ ] opening events JSON file {jsonfilename}... ")
-    # jsonfile = open(jsonfilename, "w")
-    # print('{\n "events": [', file=jsonfile)
-    # print(",\n".join(json_strings), file=jsonfile)
-    # print('  ]\n}', file=jsonfile)
-    # jsonfile.close()
-    # print(f"[ ] wrote to {jsonfilename}, ready to upload")
-
-    print(f"[.] bye")
+    jsonfile.close()    
+    print(f"[ ] wrote to \"{jsonfilename}\", ready to upload")
 
 def main():
-    print("[ ] Ready to race!")
+    print("[ ] Get ready to race!")
     buggies = None
-    try:
-        race_data = load_race_file()
-    except FileNotFoundError as e:
-        print(f"\n[!] File not found: {e}")
-        exit()
+    race_data = {}
+    if opts.no_race_file:
+        print("[ ] running without a race-file for input (because -n option)")
+    else:
+        try:
+            race_data = load_race_file()
+        except FileNotFoundError as e:
+            print(f"\n[!] File not found: {e}")
+            exit()
+        if not race_data.get("buggies"):
+            print(
+                "[ ] race file does not contain buggies: will try to read them "
+                "from a CSV instead"
+            )
+    # get race_data values
+
+
     if not race_data.get("buggies"):
-        print("[ ] Race file does not contain buggies: will try to read them from a CSV instead")
+        if race_data is None:
+            print
         try:
             buggies = load_csv()
         except FileNotFoundError as e:
@@ -852,6 +918,7 @@ def main():
             quit()
         race_data["buggies"] = buggies
     run_race(race_data)
+    print(f"[.] bye")
 
 if __name__ == "__main__":
     main()

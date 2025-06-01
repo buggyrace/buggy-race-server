@@ -60,11 +60,16 @@
             {{form.username.label}}
           </div>
           <div class="col-sm-4">
-            {{form.username(placeholder=example_username, class_="form-control mr-sm-1")}}
+            {{form.username(class_="form-control mr-sm-1")}}
           </div>
           <div class="col-sm-5">
             Usernames are always lower case (although they may be displayed
             in title case: see the User settings in config).
+            {% if example_username %}
+              <p>
+                <em>Example:</em> <code>{{ example_username }}</code>
+              </p>
+            {% endif %}
           </div>
         </div>
 
@@ -97,12 +102,17 @@
               <label for="ext_username">{{ ext_username_name }}</label>
             </div>
             <div class="col-sm-4">
-              {{form.ext_username(placeholder=ext_username_example, class_="form-control mr-sm-1")}}
+              {{form.ext_username(class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
               If users have an external username that they use in your organisation
               or institution, add it here. It's generally not used by the buggy race
               server unless you're using VS workspace files.
+              {% if ext_username_example %}
+                <p>
+                  <em>Example:</em> <code>{{ ext_username_example }}</code>
+                </p>
+              {% endif %}
             </div>
           </div>
         {% endif %}
@@ -113,11 +123,14 @@
               {{form.first_name.label}}
             </div>
             <div class="col-sm-4">
-              {{form.first_name(placeholder="Ada", class_="form-control mr-sm-1")}}
+              {{form.first_name(class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
               User's first name (if you're using first names as usernames,
               you might not need this field).
+              <p>
+                <em>Example:</em> <code>Ada</code>
+              </p>
             </div>
           </div>
         {% endif %}
@@ -128,10 +141,13 @@
               {{form.last_name.label}}
             </div>
             <div class="col-sm-4">
-              {{form.last_name(placeholder="Lovelace", class_="form-control mr-sm-1")}}
+              {{form.last_name(class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
               User's last name.
+              <p>
+                <em>Example:</em> <code>Lovelace</code>
+              </p>
             </div>
           </div>
         {% endif %}
@@ -142,7 +158,7 @@
             {{ vcs_name }} username <!-- {{form.github_username.label}} -->
           </div>
           <div class="col-sm-4">
-            {{form.github_username(placeholder="", class_="form-control mr-sm-1")}}
+            {{form.github_username(class_="form-control mr-sm-1")}}
           </div>
           <div class="col-sm-5">
               User's {{ vcs_name }} username.
@@ -183,10 +199,13 @@
               {{form.email.label}}
             </div>
             <div class="col-sm-4">
-              {{form.email(placeholder="name@example.com", class_="form-control mr-sm-1")}}
+              {{form.email(class_="form-control mr-sm-1")}}
             </div>
             <div class="col-sm-5">
               User's email address.
+              <p>
+                <em>Example:</em> <code>name@example.com</code>
+              </p>              
             </div>
           </div>
         {% endif %}
@@ -206,6 +225,12 @@
                 If users have an external ID (for example, if you're
                 using a system like Moodle, Canvas or Blackboard)
                 add it here.
+              {% endif %}
+              FIXME-998
+              {% if ext_id_example %}
+                <p>
+                  <em>Example:</em> <code>{{ ext_id_example }}</code>
+                </p>
               {% endif %}
             </div>
           </div>

@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.5"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.6"
 #
 # ----------------------------------------------------------------------------
 
@@ -130,6 +130,9 @@ class ConfigSettingNames(Enum):
 
     # Filename of the generated task list (effectively static content)
     _TASK_LIST_HTML_FILENAME = auto()
+
+    # Filename for temporary race file (for use in previews: not preserved)
+    _TASK_TEMP_RACE_FILE_FILENAME = auto()
 
     # Tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) but  putting them in config
@@ -507,6 +510,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: "_temporary_race_file.json",
         ConfigSettingNames._TASKS_EDITED_DATETIME.name: "",
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: "",
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: "pelicanconf.py",
@@ -661,6 +665,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name: ConfigTypes.INT,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: ConfigTypes.STRING,
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: ConfigTypes.STRING,
         ConfigSettingNames._TASKS_EDITED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name: ConfigTypes.DATETIME,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name: ConfigTypes.STRING,
@@ -940,8 +945,8 @@ class ConfigSettings:
         ConfigSettingNames.EXT_USERNAME_EXAMPLE.name:
           """If users have an external username, provide an example format
           (e.g., `abcd123` or `ada@example.org`). Note that this only serves as
-          a placeholder suggestion when inputting — it's not used to validate
-          or force the format of inputs. This setting is ignored if
+          an example/suggestion when inputting — it's not used to validate or
+          force the format of inputs. This setting is ignored if
           `USERS_HAVE_EXT_USERENAME` is `No`.""",
 
         ConfigSettingNames.EXT_USERNAME_NAME.name:
@@ -1871,6 +1876,7 @@ class ConfigSettings:
         ConfigSettingNames._SETUP_STATUS.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
+        ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name,
         ConfigSettingNames._TASKS_EDITED_DATETIME.name,
         ConfigSettingNames._TASKS_LOADED_DATETIME.name,
         ConfigSettingNames._TECH_NOTES_CONFIG_FILE_NAME.name,

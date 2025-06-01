@@ -71,7 +71,7 @@
             {{ form.title.label }}
           </div>
           <div class="col-sm-4">
-            {{ form.title(placeholder="Season opener", class_="form-control mr-sm-1") }}
+            {{ form.title(class_="form-control mr-sm-1") }}
           </div>
           <div class="col-sm-5">
             Title is used to distinguish this race.<br>
@@ -95,13 +95,16 @@
             {{ form.start_at.label }}
           </div>
           <div class="col-sm-4">
-            {{ form.start_at(placeholder="YYYY-MM-DD HH:MM", class_="form-control mr-sm-1", type="datetime-local") }}
+            {{ form.start_at(class_="form-control mr-sm-1", type="datetime-local") }}
           </div>
           <div class="col-sm-5">
             <p>
               The start of the race is effectively the <strong>deadline for
               students to upload buggy JSON</strong>. This isn't enforced
               automatically.
+            </p>
+            <p>If your browser doesn't format dates for you,
+              <code class="code-nowrap">YYYY-MM-DD HH:mm</code> works.
             </p>
             <p><em>Default:</em> 2 minutes to midnight, tomorrow</p>
           </div>
@@ -418,6 +421,7 @@
       </div>
       <div class="modal-footer" style="justify-content:space-between">
         <button type="button" class="btn btn-outline-danger" data-dismiss="modal" id="cancel-btn">Cancel</button>
+        <button id="show-used-by-races-btn" class="btn btn-outline-primary hidden"></button>
         <a href="{{ url_for('admin_race.show_tracks') }}" target="_blank" id="btn-to-user-texts" class="btn btn-admin btn-outline-secondary btn-jump">View racetracks</a>
       </div>
     </div>
@@ -451,6 +455,5 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 

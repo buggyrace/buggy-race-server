@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.5+dev"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.0.6+dev"
 #
 # ----------------------------------------------------------------------------
 

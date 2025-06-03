@@ -594,7 +594,7 @@ def run_race(race_data):
         minimum=1,
         default=race_data.get("lap_length") or DEFAULT_LAP_LENGTH,
     )
-    dnf_default = race_data.get("is_dnfx_position") 
+    dnf_default = race_data.get("is_dnf_position") 
     if dnf_default is None:
         print("[!] !!! caution: \"is DNF a position?\" is not in the race file: ")
         print("[!]     maybe check what's up on the server for this race")

@@ -1896,7 +1896,6 @@ class ConfigSettings:
         "FLASK_DEBUG",
         "FLASK_ENV",
         "GUNICORN_WORKERS",
-        "JSONIFY_PRETTYPRINT_REGULAR",
         "LOG_LEVEL",
         "SEND_FILE_MAX_AGE_DEFAULT",
         "SQLALCHEMY_TRACK_MODIFICATIONS",
@@ -2168,10 +2167,6 @@ class ConfigFromEnv():
 
     GUNICORN_WORKERS = env.int("GUNICORN_WORKERS", default=1)
     
-    # handily makes all downloaded JSON pretty:
-    # less confusing for students (e.g., downloading spec files)
-    JSONIFY_PRETTYPRINT_REGULAR = True
-
     _UNEXPECTED_CONFIG_SETTINGS = []
 
     # must set SECRET_KEY for sessions to work, and must

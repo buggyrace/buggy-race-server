@@ -231,6 +231,10 @@ def create_app():
             db.session.rollback()
         db.session.remove()
 
+    # handily makes all outgoing JSON pretty:
+    # less confusing for students (e.g., downloading spec files)
+    app.json.compact = False
+
     return app
 
 

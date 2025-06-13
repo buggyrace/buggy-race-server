@@ -45,6 +45,7 @@ from buggy_race_server.utils import (
     get_races_keyed_by_racetrack_id,
     get_temp_race_file_info,
     get_url_protocol,
+    get_alien_server_url,
     join_to_project_root,
     staff_only,
 )
@@ -618,6 +619,7 @@ def race_preview_tool():
     if request.method == "POST":
         if form.is_submitted() and form.validate():
             if "results_json_file" in request.files:
+                result_data = None
                 json_file = request.files['results_json_file']
                 if json_file.filename:
                     json_file.filename = tmp_file_name
@@ -628,7 +630,6 @@ def race_preview_tool():
                         # if there are different URLs there may be CORS errors
                         # in the player, so check for any URLs that don't
                         # match this server url and report with a danger flash?
-                        result_data = ""
                     except UnicodeDecodeError as e:
                         flash(
                             "Encoding error (maybe that wasn't a JSON file you uploaded, "
@@ -641,6 +642,13 @@ def race_preview_tool():
                         flash(str(e), "warning")
                         flash("No temporary race file available", "info")
                         want_delete = True
+                    if result_data is not None:
+                        if track_image_url := result_data.get("track_image_url"):
+                            if server_url := get_alien_server_url(track_image_url):
+                                flash(f"New temporary race file's racetrack background image is on a different server: {server_url}", "info")
+                        if track_svg_url := result_data.get("track_svg_url"):
+                            if server_url := get_alien_server_url(track_svg_url):
+                                flash(f"New temporary race file's racetrack SVG path is on a different server: {server_url}", "info")
                 else:
                     want_delete = True # because no results_json_file uploaded
                 if not want_delete: # OK to preview!

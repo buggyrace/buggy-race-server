@@ -1008,3 +1008,16 @@ def get_races_keyed_by_racetrack_id(racetracks, races):
             )
         ]
     return racetrack_races
+
+def get_alien_server_url(alien_url):
+    """ return URL of server if it is not this one, otherwise None.
+        If it doesn't start with http, assume relative URL, so return None.
+    """
+    alien_url = str(alien_url)
+    if (alien_url.lower().startswith("http") and
+         alien_url.startswith(current_app.config.get(
+            ConfigSettingNames.BUGGY_RACE_SERVER_URL.name
+        ).lower())
+    ):
+        return re.sub(r"(?<=\w)/.*", "", alien_url)
+    return None

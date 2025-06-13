@@ -656,7 +656,7 @@ def race_preview_tool():
                     is_temp_file_available = False
                     flash("Deleted temporary race file from the race server", "info")
                 except os.error as e:
-                    print("[!] Faied to delete temporary race file: {e}")
+                    print("[!] Failed to delete temporary race file: {e}")
                     flash("Failed to delete temporary race file from the race server", "warning")
         else:
             flash_errors(form)

@@ -661,6 +661,11 @@ $(function() {
       card.addEventListener(
         "click",
         function(e){
+          if (e.target.classList.contains("link-to-race")) {
+            // clicked on a race-link within track cards, allow browser
+            // to open link (in a new tab: the a tag should have a target)
+            return; // do nothing other than bubble the default event out
+          }
           e.preventDefault();
           selected_card = card;
           CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
@@ -692,6 +697,31 @@ $(function() {
       el.classList.add("alert-info");
     }
   }
+
+  const SHOW_RACES_BTN = document.getElementById("show-used-by-races-btn");
+  // used on admin/_racetracks.html (which is both for managing racetracks and
+  // in the select-a-racetrack dialogue when editing/making a new race)
+  if (SHOW_RACES_BTN) {
+    SHOW_RACES_BTN.innerText = "Show used-by races";
+    SHOW_RACES_BTN.classList.remove("hidden");
+    SHOW_RACES_BTN.addEventListener("click", function(e){
+      e.preventDefault();
+      let want_to_show = SHOW_RACES_BTN.innerText.indexOf("Show") === 0;
+      for (const used_by_race_link of document.getElementsByClassName("used-by-races")){
+        if (want_to_show){
+          used_by_race_link.classList.remove("hidden");
+        } else {
+          used_by_race_link.classList.add("hidden");
+        }
+      }
+      if (want_to_show){
+        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Show", "Hide", 1)
+      } else {
+        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Hide", "Show", 1)
+      }
+    })
+  }
+
 })
 
 $(function() {

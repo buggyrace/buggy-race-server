@@ -108,8 +108,8 @@
           <form class="form" id="ApiSecretForm" method="POST" action="{{ url_for('user.set_api_secret') }}" role="form">
             {{ form.csrf_token }}
             <div class="form-group">
-              {{form.api_secret.label}}
-              {{ form.api_secret(placeholder="99Hamster", autocomplete="off", value="", class_="form-control mr-sm-1") }}
+              {{ form.api_secret.label }} 
+              {{ form.api_secret(autocomplete="off", value="", class_="form-control mr-sm-1") }}
             </div>
             {% if is_student_api_otp_allowed %}
               <div class="form-group">

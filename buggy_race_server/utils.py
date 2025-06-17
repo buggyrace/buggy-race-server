@@ -4,7 +4,7 @@ import json
 import os # for path
 import re
 import csv
-from flask import abort, flash, request, redirect, url_for, current_app, render_template
+from flask import abort, flash, request, redirect, url_for, current_app, render_template, make_response
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
 from flask_login import current_user, logout_user
@@ -16,6 +16,18 @@ from buggy_race_server.extensions import db, bcrypt
 from sqlalchemy import bindparam, insert, update
 from datetime import datetime, timezone
 import subprocess
+
+def cors_allow_origin(func):
+    """ Simple decorator that adds a wildcard CORS header. Not using the
+        flask-cors extension (https://github.com/corydolphin/flask-cors)
+        because uncertain about current maintenance, and at this stage it's
+        overkill because it's only being applied on race JSON and images."""
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        response = make_response(func(*args, **kwargs))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    return decorated_function
 
 def refresh_global_announcements(app):
   announcements = []
@@ -955,3 +967,44 @@ def most_recent_timestamp(a, b):
             return max(a, b)
         except:
             return a
+
+def get_temp_race_file_info():
+    filename = join_to_project_root(
+        current_app.config[ConfigSettingNames._PUBLISHED_PATH.name],
+        current_app.config[ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name]
+    )
+    is_available = os.path.exists(filename)
+    created_at = None # actually modified time, but we never modify this
+    if is_available:
+        created_at = datetime.fromtimestamp(
+            os.path.getmtime(filename),
+            current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]
+        )
+    return {
+        "filename": current_app.config[ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name],
+        "filename_with_path": filename,
+        "is_available": is_available,
+        "created_at": created_at,
+        "url": current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+               + url_for("admin_race.serve_temporary_race_file_json")
+    }
+
+def get_races_keyed_by_racetrack_id(racetracks, races):
+    """ Passing all tracks and all races as arguments because this is being
+        called when we've probably read at least one of these already. This is
+        used to indicate on the racetrack picker (e.g., when making a new race)
+        which racetracks have already been used for a race. We don't _really_
+        know, because it's not stored as a racterack id — which is why what's
+        really going on is explicit comparison of the SVG and image URLs.
+    """
+    racetrack_races = {}
+    for track in racetracks:
+        print(f"FIXME {track.id} url:{track.track_image_url}")
+        racetrack_races[track.id] = [
+            race for race in races if (
+                race.track_image_url and race.track_svg_url and
+                race.track_image_url==track.track_image_url
+                and race.track_svg_url==track.track_svg_url
+            )
+        ]
+    return racetrack_races

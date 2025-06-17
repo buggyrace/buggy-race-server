@@ -379,6 +379,9 @@ footer .footer-nav {
 .table-striped tbody tr:nth-of-type(odd).staff{ background-color: #f0e0aa; }
 .table-striped tbody tr:nth-of-type(odd).staff:hover{ background-color: #eddca6; }
 
+/* don't let table columns collapse _too_ much by adding text-col to their th */
+.table tr th.text-col { min-width: 16rem }
+
 .bottom { /* for droppinging flex items (delete button) in flex containers */
   align-self: end;
 }

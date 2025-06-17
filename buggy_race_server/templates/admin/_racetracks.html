@@ -24,6 +24,15 @@
           <a href="{{ url_for('admin_race.view_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">View</a>
           <a href="{{ url_for('admin_race.edit_track', track_id=track.id) }}" class="btn btn-admin btn-sm btn-outline-secondary btn-jump">Edit</a>
         </p>
+        {% if racetrack_races[track.id] %}
+          <p class="card-text border mt-3 py-1 px-2 hidden used-by-races">
+            <em>Used by:</em>
+            {% for r in racetrack_races[track.id] %}
+              <br>
+              <a href="{{ url_for('admin_race.view_race', race_id=r.id) }}" target="_blank" class="link-to-race">{{ r.title }}</a>
+            {% endfor %}
+          </p>
+        {% endif %}
       </div>
     </div>
   </div>

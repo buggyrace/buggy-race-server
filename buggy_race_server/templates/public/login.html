@@ -15,18 +15,18 @@
         <form id="loginForm" method="POST" action="{{ url_for('public.login' )}}" role="login">
           {{ form.csrf_token }}
           <div class="row">
-            <div class="col-4 text-right py-2">
-              {{form.username.label}}
+            <div class="col-md-4 py-2">
+              {{ form.username.label }}
             </div>
-            <div class="col-8">
+            <div class="col-md-8">
               {{ form.username(placeholder=username_example, class_="form-control mr-sm-1") }}
             </div>
           </div>
           <div class="row my-2">
-            <div class="col-4 text-right py-2">
-              {{form.password.label}}
+            <div class="col-md-4 py-2">
+              {{ form.password.label }}
             </div>
-            <div class="col-8">
+            <div class="col-md-8">
               {{ form.password(class_="form-control mr-sm-1") }}
               <span class="password-toggler hidden icon-eye-blocked" data-for="password"></span>
             </div>

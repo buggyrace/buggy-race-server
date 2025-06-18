@@ -563,9 +563,10 @@ def setup():
 @blueprint.route("/", strict_slashes=False)
 @login_required
 @staff_only
-def admin():
+def admin(want_json=None):
     TASK_NOTE_LENGTH_THRESHOLD = 2 # texts shorter than this are not counted
-    today = datetime.now(timezone.utc).date()
+    now = datetime.now(timezone.utc)
+    today = now.date()
     one_week_ago = today - timedelta(days=7)
     users = User.query.order_by(User.username).all()
     buggies = Buggy.query.join(User).filter(
@@ -589,6 +590,7 @@ def admin():
     tasks_by_id = {task.id: task.fullname for task in tasks}
     qty_texts_by_task = defaultdict(int)
     qty_texts = 0
+    texts_by_author_id = defaultdict(list) # used in the JSON
     if is_storing_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
         texts = TaskText.query.join(User).filter(
             User.is_student==True).filter(User.is_active==True
@@ -597,8 +599,72 @@ def admin():
         for text in texts:
             if len(text.text) > TASK_NOTE_LENGTH_THRESHOLD:
                 qty_texts_by_task[tasks_by_id[text.task_id]] += 1
-
+                texts_by_author_id[text.user_id].append( text ) # this could be big
     submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
+    qty_buggies=len(buggies)
+    qty_other_users=len(other_users)
+    qty_staff_users=len(staff_users)
+    qty_students_active=len(students_active)
+    qty_students_logged_in_this_week=len(students_logged_in_this_week)
+    qty_students_logged_in_today=len(students_logged_in_today)
+    qty_students_logged_in_ever=len(students_logged_in_ever)
+    qty_students_never_logged_in=len(students_never_logged_in)
+    qty_students=len(students_active)
+    qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today])
+    qty_uploads_week=len(students_uploaded_this_week)
+    qty_users_deactivated=len(users_deactivated)
+    qty_users=len(users)
+    if want_json:
+        """Provide the data that's available in the dashboard in a JSON format
+        so staff can collect these and run analytics. This is pushing the
+        analysis of activity data off the server instead of (for example) logging
+        it in the database."""
+        server_timezone = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]
+        payload = {
+            "timestamp": servertime_str(server_timezone, now),
+            "submission_deadline": servertime_str(server_timezone, submission_deadline),
+            "quantitites": {
+                "qty_buggies": qty_buggies,
+                "qty_other_users": qty_other_users,
+                "qty_staff_users": qty_staff_users,
+                "qty_students_active": qty_students_active,
+                "qty_students_logged_in_ever": qty_students_logged_in_ever,
+                "qty_students_logged_in_this_week": qty_students_logged_in_this_week,
+                "qty_students_logged_in_today": qty_students_logged_in_today,
+                "qty_students_never_logged_in": qty_students_never_logged_in,
+                "qty_students": qty_students,
+                "qty_tasks": qty_tasks,
+                "qty_texts_by_task": qty_texts_by_task,
+                "qty_texts": qty_texts,
+                "qty_uploads_today": qty_uploads_today,
+                "qty_uploads_week": qty_uploads_week,
+                "qty_users_deactivated": qty_users_deactivated,
+                "qty_users": qty_users
+            },
+            "students_active": {
+                s.username: {
+                    "last_login": servertime_str(server_timezone, s.logged_in_at),
+                    "last_upload_at": servertime_str(server_timezone, s.uploaded_at),
+                    "json_length": s.pretty_json_length,
+                    "github_username": s.github_username,
+                    "texts": {
+                        tasks_by_id[t.task_id]: {
+                            "length": len(t.text) if t.text else 0,
+                            "created_at": servertime_str(server_timezone, t.created_at),
+                            "modified_at": servertime_str(server_timezone, t.modified_at)
+                        } for t in texts_by_author_id[s.id]
+                    },
+                    "qty_texts": len(texts_by_author_id[s.id])
+                }
+                for s in students_active
+            }
+        }
+        filename = get_download_filename("dashboard-snapshot.json", want_datestamp=True)
+        response = make_response(jsonify(payload))
+        response.headers["Content-type"] = "application/json"
+        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
+
     return render_template(
         "admin/dashboard.html",
         form=GeneralSubmitForm(), # for publish submit buttons
@@ -616,22 +682,22 @@ def admin():
         ),
         other_users=other_users,
         purge_form = GeneralSubmitForm(),
-        qty_buggies=len(buggies),
-        qty_other_users=len(other_users),
-        qty_staff_users=len(staff_users),
-        qty_students_active=len(students_active),
-        qty_students_logged_in_this_week=len(students_logged_in_this_week),
-        qty_students_logged_in_today=len(students_logged_in_today),
-        qty_students_logged_in_ever=len(students_logged_in_ever),
-        qty_students_never_logged_in=len(students_never_logged_in),
-        qty_students=len(students_active),
+        qty_buggies=qty_buggies,
+        qty_other_users=qty_other_users,
+        qty_staff_users=qty_staff_users,
+        qty_students_active=qty_students_active,
+        qty_students_logged_in_this_week=qty_students_logged_in_this_week,
+        qty_students_logged_in_today=qty_students_logged_in_today,
+        qty_students_logged_in_ever=qty_students_logged_in_ever,
+        qty_students_never_logged_in=qty_students_never_logged_in,
+        qty_students=qty_students,
         qty_tasks=qty_tasks,
         qty_texts_by_task=qty_texts_by_task,
         qty_texts=qty_texts,
-        qty_uploads_today=len([s for s in students_uploaded_this_week if s.uploaded_at.date() >= today]),
-        qty_uploads_week=len(students_uploaded_this_week),
-        qty_users_deactivated=len(users_deactivated),
-        qty_users=len(users),
+        qty_uploads_today=qty_uploads_today,
+        qty_uploads_week=qty_uploads_week,
+        qty_users_deactivated=qty_users_deactivated,
+        qty_users=qty_users,
         staff_users=staff_users,
         students_active = students_active,
         students_logged_in_this_week=students_logged_in_this_week,
@@ -646,6 +712,12 @@ def admin():
         unexpected_config_settings=current_app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY],
         users_deactivated=users_deactivated,
     )
+
+@blueprint.route("/dashboard-snapshot.json")
+@login_required
+@staff_only
+def download_dashboard_summary_json():
+    return admin(want_json=True)
 
 @blueprint.route("/users", strict_slashes=False)
 @blueprint.route("/users/<data_format>")

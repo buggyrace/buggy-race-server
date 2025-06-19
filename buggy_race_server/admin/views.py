@@ -560,10 +560,10 @@ def setup():
         type_of_settings=ConfigSettings.TYPES,
   )
 
-@blueprint.route("/", strict_slashes=False)
-@login_required
-@staff_only
-def admin(want_json=None):
+def get_admin_dashboard_data_response(want_json=False):
+    """ The dashboard code is broken out into its own function so it is
+        available via the API (which doesn't use session (@login_required)
+        to determine whether or not the user is authorised. """
     TASK_NOTE_LENGTH_THRESHOLD = 2 # texts shorter than this are not counted
     now = datetime.now(timezone.utc)
     today = now.date()
@@ -664,7 +664,6 @@ def admin(want_json=None):
         response.headers["Content-type"] = "application/json"
         response.headers["Content-Disposition"] = f"attachment; filename={filename}"
         return response
-
     return render_template(
         "admin/dashboard.html",
         form=GeneralSubmitForm(), # for publish submit buttons
@@ -713,11 +712,17 @@ def admin(want_json=None):
         users_deactivated=users_deactivated,
     )
 
+@blueprint.route("/", strict_slashes=False)
+@login_required
+@staff_only
+def admin(want_json=None):
+    return get_admin_dashboard_data_response(want_json=False)
+
 @blueprint.route("/dashboard-snapshot.json")
 @login_required
 @staff_only
 def download_dashboard_summary_json():
-    return admin(want_json=True)
+    return get_admin_dashboard_data_response(want_json=True)
 
 @blueprint.route("/users", strict_slashes=False)
 @blueprint.route("/users/<data_format>")

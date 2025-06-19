@@ -4,16 +4,22 @@
 import json
 from datetime import datetime, timezone, timedelta
 
-from flask import Blueprint, Response, request, current_app, render_template
+from flask import Blueprint, Response, request, current_app, render_template, after_this_request
 
 from buggy_race_server.buggy.forms import BuggyJsonForm
 from buggy_race_server.buggy.views import handle_uploaded_json
 from buggy_race_server.user.models import User
 from buggy_race_server.config import ConfigSettingNames
+from buggy_race_server.admin.views import get_admin_dashboard_data_response
 
 blueprint = Blueprint("api", __name__, url_prefix="/api", static_folder="../static")
 
 API_SECRET_LIFESPAN_MINS = 60
+
+API_KEY_USER = "user"
+API_KEY_KEY = "key" # API key for the API key, heh
+API_KEY_SECRET = "secret"
+API_KEY_JSON = "buggy_json"
 
 def get_json_error_response(msg, status=401):
   response = Response(
@@ -31,6 +37,36 @@ def describe_api():
     api_task_name=current_app.config[ConfigSettingNames.TASK_NAME_FOR_API.name],
     buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
   )
+
+def get_user_or_response_from_api_post(request):
+    """ returns either"""
+    username = ""
+    api_key = ""
+    secret = ""
+    if API_KEY_USER in request.form:
+        username = request.form[API_KEY_USER].strip()
+    if not username:
+        return get_json_error_response("missing user")
+    if API_KEY_KEY in request.form:
+        api_key = request.form[API_KEY_KEY].strip()
+    if not api_key:
+        return get_json_error_response("missing API key")
+    if API_KEY_SECRET in request.form:
+        secret = request.form[API_KEY_SECRET].strip()
+    if not secret:
+        return get_json_error_response("missing secret")
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return get_json_error_response("not authorised (bad user)")
+    if user.api_key != api_key:
+        return get_json_error_response("not authorised (wrong API key for this user)")
+    if user.api_secret is None:
+        return get_json_error_response("not authorised (missing secret)")
+    if user.api_secret_at is None:
+        return get_json_error_response("not authorised (missing secret timestamp)")
+    if user.api_secret != secret:
+        return get_json_error_response(f"not authorised (bad secret)")
+    return user
 
 @blueprint.route("/upload", methods=["POST", "OPTIONS"], strict_slashes=True)
 def create_buggy_with_json_via_api():
@@ -50,43 +86,17 @@ def create_buggy_with_json_via_api():
       response.headers.add("Access-Control-Allow-Headers", "*")
       response.headers.add("Access-Control-Allow-Methods", "POST")
       return response
-
-  API_KEY_USER = "user"
-  API_KEY_KEY = "key" # API key for the API key, heh
-  API_KEY_SECRET = "secret"
-  API_KEY_JSON = "buggy_json"
-
-  username = ""
-  buggy_json = ""
-  if API_KEY_USER in request.form:
-    username = request.form[API_KEY_USER].strip()
-  if not username:
-    return get_json_error_response("missing user")
-
-  if API_KEY_KEY in request.form:
-    api_key = request.form[API_KEY_KEY].strip()
-  if not api_key:
-    return get_json_error_response("missing API key")
-
-  if API_KEY_SECRET in request.form:
-    secret = request.form[API_KEY_SECRET].strip()
-  if not secret:
-    return get_json_error_response("missing secret")
+  user_or_response = get_user_or_response_from_api_post(request)
+  if isinstance(user_or_response, Response):
+      return user_or_response
+  if not isinstance(user_or_response, User): # unexpected: should be Resonse or User
+      return get_json_error_response("bad request") # didn't get a user
+  user = user_or_response
   if API_KEY_JSON in request.form:
-    buggy_json = request.form[API_KEY_JSON].strip()
+      buggy_json = request.form[API_KEY_JSON].strip()
   if not buggy_json:
-    return get_json_error_response(f"no JSON ({API_KEY_JSON}) provided", status=200)
-  user = User.query.filter_by(username=username).first()
-  if user is None:
-      return get_json_error_response("not authorised (bad user)")
-  if user.api_key != api_key:
-      return get_json_error_response("not authorised (wrong API key for this user)")
-  if user.api_secret is None:
-      return get_json_error_response("not authorised (missing secret)")
-  if user.api_secret_at is None:
-      return get_json_error_response("not authorised (missing secret timestamp)")
-  if user.api_secret != secret:
-      return get_json_error_response(f"not authorised (bad secret)")
+      return get_json_error_response(f"no JSON ({API_KEY_JSON}) provided", status=200)
+
   now_utc = datetime.now(timezone.utc)
   api_secret_at_utc = user.api_secret_at.replace(tzinfo=timezone.utc)
   try:
@@ -108,3 +118,31 @@ def create_buggy_with_json_via_api():
   )
   response.headers.add("Access-Control-Allow-Origin", "*") # CORS
   return response
+
+@blueprint.route("/admin/dashboard", methods=["GET", "POST"], strict_slashes=True)
+def dashboard_data_via_api():
+    """ API call  """
+    @after_this_request
+    def add_no_cache_header(response):
+        # discourage caching here
+        response.headers["Vary"] = "*" # Flask also unhelpfully sets "cookie"
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+    payload = {}
+    if not current_app.config[ConfigSettingNames.IS_ADMIN_API_ENABLED.name]:
+        status = 404
+    elif request.method != "POST":
+        status = 405 # method not allowed
+    else:
+        user_or_response = get_user_or_response_from_api_post(request)
+        if isinstance(user_or_response, Response):
+            return user_or_response
+        user = user_or_response
+        if not user.is_administrator:
+            return get_json_error_response("not authorised (user not an administrator)")
+        return get_admin_dashboard_data_response(want_json=True)
+    return Response(
+        json.dumps(payload) if payload else None, # None results in empty body
+        status=status,
+        mimetype="application/json"
+    )

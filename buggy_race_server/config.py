@@ -214,6 +214,7 @@ class ConfigSettingNames(Enum):
     INSTITUTION_FULL_NAME = auto()
     INSTITUTION_HOME_URL = auto()
     INSTITUTION_SHORT_NAME = auto()
+    IS_ADMIN_API_ENABLED = auto()
     IS_ALL_CONFIG_IN_TECH_NOTES = auto()
     IS_API_SECRET_ONE_TIME_PW = auto()
     IS_BUGGY_DELETE_ALLOWED = auto()
@@ -424,6 +425,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name,
         ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name,
+        ConfigSettingNames.IS_ADMIN_API_ENABLED.name,
       ),
       ConfigGroupNames.TASKS.name: (
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name,
@@ -548,6 +550,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: "Acme School of Buggy Programming",
         ConfigSettingNames.INSTITUTION_HOME_URL.name: "https://acme.example.com/",
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: "ASBP",
+        ConfigSettingNames.IS_ADMIN_API_ENABLED.name: 0,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: 1,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: 0,
@@ -702,6 +705,7 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_FULL_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.INSTITUTION_HOME_URL.name: ConfigTypes.URL,
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name: ConfigTypes.STRING,
+        ConfigSettingNames.IS_ADMIN_API_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_API_SECRET_ONE_TIME_PW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_BUGGY_DELETE_ALLOWED.name: ConfigTypes.BOOLEAN,
@@ -978,6 +982,14 @@ class ConfigSettings:
         ConfigSettingNames.INSTITUTION_SHORT_NAME.name:
           """Short name or abbreviation for your institution, college, or
           school.""",
+
+        ConfigSettingNames.IS_ADMIN_API_ENABLED.name:
+          """If you enable the admin API, then admin users can download a JSON
+          dump of "dashboard" data if they provide a valid API key and secret.
+          This may be helpful if you are monitoring engagement data and want to
+          schedule regular data downloads. Only enable the admin API if you are
+          accessing the server over https. If this is set to `No`, the admin
+          endpoint will return a 404 response.""",
 
         ConfigSettingNames.IS_ALL_CONFIG_IN_TECH_NOTES.name:
           """Choose `Yes` if all the config settings' values should be

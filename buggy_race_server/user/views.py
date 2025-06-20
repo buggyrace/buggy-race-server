@@ -25,7 +25,7 @@ from wtforms import ValidationError
 from buggy_race_server.admin.forms import TaskTextForm, TaskTextDeleteForm
 from buggy_race_server.admin.models import TaskText, Task
 from buggy_race_server.buggy.forms import BuggyJsonForm
-from buggy_race_server.config import AnnouncementTypes, ConfigSettingNames
+from buggy_race_server.config import AnnouncementTypes, ConfigSettings, ConfigSettingNames
 from buggy_race_server.lib.issues import IssueParser
 from buggy_race_server.user.models import User
 from buggy_race_server.user.forms import ChangePasswordForm, ApiSecretForm
@@ -351,6 +351,7 @@ def set_api_secret():
         is_api_secret_otp=is_api_secret_otp,
         is_student_api_otp_allowed=is_student_api_otp_allowed,
         api_task_name=api_task_name,
+        min_secret_length=ConfigSettings.MIN_API_SECRET_LENGTH
     )
 
 @blueprint.route("/vscode-workspace", methods=['GET'], strict_slashes=False)

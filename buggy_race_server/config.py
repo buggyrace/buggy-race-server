@@ -641,10 +641,31 @@ class ConfigSettings:
         ConfigSettingNames.VCS_NAME.name: "GitHub",
     }    
     
+    # min and max values used by input form validation
+    # these aren't dynamically configurable but it's useful to be explicit here
+    MIN_API_SECRET_LENGTH = 4
+    MAX_API_SECRET_LENGTH = 64
+    MIN_BUGGY_JSON_LENGTH = 1
+    MAX_BUGGY_JSON_LENGTH = 2048
+    MAX_COMMENT_LENGTH = 1024
+    MIN_EMAIL_LENGTH = 3
+    MAX_EMAIL_LENGTH = 80
+    MIN_EXT_USERNAME_LENGTH = 2
+    MAX_EXT_USERNAME_LENGTH = 32
+    MIN_FIRST_NAME_LENGTH = 2
+    MAX_FIRST_NAME_LENGTH = 32
+    MIN_LAST_NAME_LENGTH = 2
+    MAX_LAST_NAME_LENGTH = 64
     MIN_PASSWORD_LENGTH = 4
+    MAX_PASSWORD_LENGTH = 80
+    MIN_RACE_COST_LIMIT = 10
+    MAX_RACE_DESC_LENGTH = 255
+    MAX_RACE_TITLE_LENGTH = 80
+    MAX_URL_LENGTH = 255
     MIN_USERNAME_LENGTH = 2
     MAX_USERNAME_LENGTH = 32
-
+    MAX_PHASE_NUMBER = 9
+    
     # TYPES are used to force casting when input either through the
     # admin/settings interface or simply when read as strings from ENV or the
     # database. By default they are strings, but it's best to be explicit.

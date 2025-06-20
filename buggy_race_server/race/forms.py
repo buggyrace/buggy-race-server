@@ -21,14 +21,20 @@ class RaceForm(FlaskForm):
     id = HiddenField()
 
     title = StringField(
-        "Title", validators=[Optional(), Length(max=80)]
+        "Title", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_TITLE_LENGTH)]
     )
     desc = TextAreaField(
-        "Description", validators=[Optional(), Length(max=255)]
+        "Description", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_DESC_LENGTH)]
     )
     cost_limit = IntegerField(
         "Cost limit",
-        validators=[Optional(), NumberRange(min=10, max=None)]
+        validators=[
+            Optional(),
+            NumberRange(
+                min=ConfigSettings.MIN_RACE_COST_LIMIT,
+                max=None
+            )
+        ]
     )
     start_at = DateTimeField(
         "Race start time",
@@ -44,13 +50,13 @@ class RaceForm(FlaskForm):
     )
     is_abandoned = BooleanField("Is abandoned?")
     race_file_url = StringField(
-        "URL of results JSON", validators=[Optional(), Length(max=255)]
+        "URL of results JSON", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     track_image_url = StringField(
-        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+        "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     track_svg_url = StringField(
-        "URL of path SVG", validators=[Optional(), Length(max=255)]
+        "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     max_laps = IntegerField(
         "Number of laps",
@@ -111,16 +117,16 @@ class RaceResultsForm(FlaskForm):
 
 class RacetrackForm(FlaskForm):
     title = StringField(
-        "Title", validators=[Optional(), Length(max=80)]
+        "Title", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_TITLE_LENGTH)]
     )
     desc = TextAreaField(
-        "Description", validators=[Optional(), Length(max=255)]
+        "Description", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_DESC_LENGTH)]
     )
     track_image_url = StringField(
-        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+        "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     track_svg_url = StringField(
-        "URL of path SVG", validators=[Optional(), Length(max=255)]
+        "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     lap_length = IntegerField(
         "Lap length",

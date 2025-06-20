@@ -183,16 +183,35 @@ class SettingForm(FlaskForm):
 class SetupAuthForm(FlaskForm):
     auth_code = PasswordField("Authorisation code", [DataRequired(), is_authorised])
     new_auth_code = PasswordField(
-      "New authorisation code", 
-      [DataRequired(), Length(min=ConfigSettings.MIN_PASSWORD_LENGTH)]
+        "New authorisation code", 
+        [
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_PASSWORD_LENGTH,
+                max=ConfigSettings.MAX_PASSWORD_LENGTH
+            )
+        ]
     )
     new_auth_code_confirm = PasswordField("New authorisation code confirm", [Optional()])
     admin_username = StringField(
-      "Admin username",
-      [DataRequired(), Length(min=ConfigSettings.MIN_USERNAME_LENGTH, max=ConfigSettings.MAX_USERNAME_LENGTH)])
+        "Admin username",
+        [
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_USERNAME_LENGTH,
+                max=ConfigSettings.MAX_USERNAME_LENGTH
+            )
+        ]
+    )
     admin_password = PasswordField(
-      "Admin user password",
-      [DataRequired(), Length(min=ConfigSettings.MIN_PASSWORD_LENGTH)]
+        "Admin user password",
+        [
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_PASSWORD_LENGTH,
+                max=ConfigSettings.MAX_PASSWORD_LENGTH
+            )
+        ]
     )
     admin_password_confirm = PasswordField("Admin password confirm", [Optional()])
 
@@ -273,7 +292,7 @@ class TaskForm(FlaskForm):
     auth_code = PasswordField("Authorisation code",  [is_authorised])
     phase = IntegerField(
       "Phase number",
-      [InputRequired(), NumberRange(min=0, max=9)]  # 9 a bit arbitrary TODO
+      [InputRequired(), NumberRange(min=0, max=ConfigSettings.MAX_PHASE_NUMBER)]
     )
     name = StringField("One-word name", [DataRequired()])
     title = StringField("Short summary title", [DataRequired()])

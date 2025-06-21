@@ -66,6 +66,19 @@ def get_user_or_response_from_api_post(request):
         return get_json_error_response("not authorised (missing secret timestamp)")
     if user.api_secret != secret:
         return get_json_error_response(f"not authorised (bad secret)")
+    now_utc = datetime.now(timezone.utc)
+    api_secret_at_utc = user.api_secret_at.replace(tzinfo=timezone.utc)
+    try:
+        delta_time_in_s = (now_utc - user.api_secret_at) / timedelta(seconds=1)
+    except TypeError:
+        delta_time_in_s = (now_utc - api_secret_at_utc) / timedelta(seconds=1)
+    if delta_time_in_s > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
+        return get_json_error_response("not authorised (secret has expired)")
+    if user.is_api_secret_otp:
+        if user.api_secret_count > 0:
+            return get_json_error_response("one-time secret has already been used")
+        user.api_secret_count += 1
+        user.save()
     return user
 
 @blueprint.route("/upload", methods=["POST", "OPTIONS"], strict_slashes=True)
@@ -96,20 +109,6 @@ def create_buggy_with_json_via_api():
       buggy_json = request.form[API_KEY_JSON].strip()
   if not buggy_json:
       return get_json_error_response(f"no JSON ({API_KEY_JSON}) provided", status=200)
-
-  now_utc = datetime.now(timezone.utc)
-  api_secret_at_utc = user.api_secret_at.replace(tzinfo=timezone.utc)
-  try:
-      delta_time_in_s = (now_utc - user.api_secret_at) / timedelta(seconds=1)
-  except TypeError:
-      delta_time_in_s = (now_utc - api_secret_at_utc) / timedelta(seconds=1)
-  if delta_time_in_s > current_app.config[ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name]:
-      return get_json_error_response("not authorised (secret has expired)")
-  if user.is_api_secret_otp:
-      if user.api_secret_count > 0:
-          return get_json_error_response("one-time secret has already been used")
-      user.api_secret_count += 1
-      user.save()
   # now send 200 even when response is an error (e.g., JSON parse fail)
   response = Response(
     json.dumps(handle_uploaded_json(BuggyJsonForm(request.form), user, True)),

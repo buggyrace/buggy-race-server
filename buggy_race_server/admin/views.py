@@ -1514,7 +1514,12 @@ def list_announcements(is_html_enabled=True):
     form = AnnouncementActionForm(request.form)
     announcements = sorted(
         Announcement.query.all(),
-        key=lambda announcement: (announcement.type, announcement.text)
+        key=lambda announcement: (
+            not announcement.is_visible,
+            announcement.type,
+            announcement.created_at,
+            announcement.text
+        )
     )
     has_example_already = bool(
         [
@@ -1620,12 +1625,7 @@ def publish_announcement(announcement_id):
             else:
                 flash("OK, hid an announcement", "success")
             refresh_global_announcements(current_app)
-    announcements=Announcement.query.all()
-    return render_template(
-        "admin/announcements.html",
-        announcements=announcements,
-        form=form
-    )
+    return redirect(url_for("admin.list_announcements"))
 
 @blueprint.route("/announcements/<int:announcement_id>/delete", methods=["POST"])
 @login_required

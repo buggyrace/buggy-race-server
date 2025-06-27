@@ -21,6 +21,7 @@
     <div class="col grey-wrapper p-2">
       <form id="track-form" class="form" method="POST"
         action="{% if track %}{{ url_for('admin_race.edit_track', track_id=track.id)}}{% else %}{{ url_for('admin_race.new_track') }}{% endif %}"
+        {% if is_storing_race_assets %} enctype="multipart/form-data" {% endif %}
         role="form">
         {{ form.csrf_token }}
         <div class="row bg-white py-2 m-1">
@@ -58,6 +59,21 @@
             </p>
           </div>
         </div>
+        {% if is_storing_race_assets %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{ form.track_image_file.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.track_image_file(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Upload a 2:1 background image for the racetrack.
+              </p>
+            </div>
+          </div>
+        {% endif %}
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.track_svg_url.label }}

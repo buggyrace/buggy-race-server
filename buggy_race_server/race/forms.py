@@ -125,8 +125,14 @@ class RacetrackForm(FlaskForm):
     track_image_url = StringField(
         "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
+    track_image_file = FileField(
+        "Racetrack image", validators=[Optional()]
+    )
     track_svg_url = StringField(
         "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
+    )
+    track_svg_file = FileField(
+        "Racetrack path SVG", validators=[Optional()]
     )
     lap_length = IntegerField(
         "Lap length",

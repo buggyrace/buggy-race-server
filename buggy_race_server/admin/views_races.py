@@ -558,6 +558,7 @@ def new_track():
 @login_required
 @admin_only
 def edit_track(track_id):
+    is_storing_race_assets = current_app.config[ConfigSettingNames.IS_STORING_RACE_ASSETS_IN_DB.name]
     if track_id is None:
         track = None
         delete_form = None
@@ -570,11 +571,16 @@ def edit_track(track_id):
     form = RacetrackForm(request.form, obj=track)
     if request.method == "POST":
         if form.is_submitted() and form.validate():
+            new_track_image_url = None
+            if is_storing_race_assets and "track_image_file" in request.files:
+                track_image_file = request.files['track_image_file']
+                print(f"FIXME uploading image file (track_image_file): <{track_image_file}>")
+                new_track_image_url = "FIXME-uploaded-image"
             if track is None:
                 track = Racetrack.create(
                   title=form.title.data.strip(),
                   desc=form.desc.data.strip(),
-                  track_image_url=form.track_image_url.data.strip(),
+                  track_image_url=new_track_image_url or form.track_image_url.data.strip(),
                   track_svg_url=form.track_svg_url.data.strip(),
                   lap_length=form.lap_length.data
                 )
@@ -582,7 +588,7 @@ def edit_track(track_id):
             else:
                 track.title = form.title.data.strip()
                 track.desc = form.desc.data.strip()
-                track.track_image_url=form.track_image_url.data.strip()
+                track.track_image_url=new_track_image_url or form.track_image_url.data.strip()
                 track.track_svg_url=form.track_svg_url.data.strip()
                 track.lap_length=form.lap_length.data
                 track.save()
@@ -602,6 +608,7 @@ def edit_track(track_id):
         delete_form=delete_form,
         form=form,
         track=track,
+        is_storing_race_assets=is_storing_race_assets,
     )
 
 @blueprint.route("/replay-preview", methods=["GET", "POST"])

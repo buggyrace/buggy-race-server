@@ -1,8 +1,8 @@
-"""v2.0.2 with timestamps
+"""empty message
 
-Revision ID: 8541b7aad85a
+Revision ID: 8634dc66be87
 Revises: 
-Create Date: 2023-07-19 11:47:54.262126
+Create Date: 2025-06-29 16:43:06.740328
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8541b7aad85a'
+revision = '8634dc66be87'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,6 +45,7 @@ def upgrade():
     sa.Column('track_image_url', sa.String(length=255), nullable=True),
     sa.Column('track_svg_url', sa.String(length=255), nullable=True),
     sa.Column('max_laps', sa.Integer(), nullable=True),
+    sa.Column('svg_path_length', sa.Integer(), nullable=True),
     sa.Column('lap_length', sa.Integer(), nullable=True),
     sa.Column('is_dnf_position', sa.Boolean(), nullable=False),
     sa.Column('is_abandoned', sa.Boolean(), nullable=False),
@@ -57,6 +58,10 @@ def upgrade():
     sa.Column('desc', sa.Text(), nullable=False),
     sa.Column('track_image_url', sa.String(length=255), nullable=True),
     sa.Column('track_svg_url', sa.String(length=255), nullable=True),
+    sa.Column('track_image', sa.LargeBinary(), nullable=True),
+    sa.Column('image_media_type', sa.String(length=32), nullable=True),
+    sa.Column('track_svg', sa.Text(), nullable=True),
+    sa.Column('svg_path_length', sa.Integer(), nullable=True),
     sa.Column('lap_length', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -97,6 +102,8 @@ def upgrade():
     sa.Column('github_access_token', sa.Text(), nullable=True),
     sa.Column('is_student', sa.Boolean(), nullable=True),
     sa.Column('logged_in_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('first_logged_in_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_login_enabled', sa.Boolean(), nullable=False),
     sa.Column('uploaded_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('api_secret', sa.String(length=30), nullable=True),
     sa.Column('api_secret_at', sa.DateTime(timezone=True), nullable=True),

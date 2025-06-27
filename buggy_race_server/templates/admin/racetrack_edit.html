@@ -21,6 +21,7 @@
     <div class="col grey-wrapper p-2">
       <form id="track-form" class="form" method="POST"
         action="{% if track %}{{ url_for('admin_race.edit_track', track_id=track.id)}}{% else %}{{ url_for('admin_race.new_track') }}{% endif %}"
+        {% if is_storing_race_assets %} enctype="multipart/form-data" {% endif %}
         role="form">
         {{ form.csrf_token }}
         <div class="row bg-white py-2 m-1">
@@ -45,6 +46,58 @@
             The description is only seen by staff, in the admin.
           </div>
         </div>
+        {% if track.track_image_url %}
+          <!-- display existing image, if URL is already set -->
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+            </div>
+            <div class="col-sm-4">
+              <img src="{{ track.track_image_url }}"
+              class="card-img-top" style="max-height:50%">
+            </div>
+          </div>
+        {% endif %}
+        {% if is_storing_race_assets %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{ form.track_image_file.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.track_image_file(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Upload a custom 2:1 background image for the racetrack.
+              </p>
+              <p>
+                {% if track.image_media_type %}
+                  Current image is <code>{{ track.image_media_type }}</code>
+                {% else %}
+                  This racetrack does not contain its own custom image.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          {% if track.track_image %}
+            <div class="row bg-white py-2 m-1">
+              <div class="col-sm-3">
+                {{ form.is_deleting_track_image_file.label }}
+              </div>
+              <div class="col-sm-4">
+                <select id="is_deleting_track_image_file" name="is_deleting_track_image_file" class="form-control">
+                  <option value="" selected>No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="col-sm-5">
+                <p>
+                  Only check this if you want to <em>remove</em> the previously
+                  uploaded custom image from this racetrack.
+                </p>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.track_image_url.label }}
@@ -56,8 +109,53 @@
             <p>
               Fully-qualified URL for a 2:1 background image for the racetrack.
             </p>
+            <p>
+              If you upload a custom racetrack image file now, this URL will be
+              updated automatically.
+            </p>
           </div>
         </div>
+        {% if is_storing_race_assets %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{ form.track_svg_file.label }}
+            </div>
+            <div class="col-sm-4">
+              {{ form.track_svg_file(class_="form-control mr-sm-1") }}
+            </div>
+            <div class="col-sm-5">
+              <p>
+                Upload a custom SVG file containing the racetrack's path.
+              </p>
+              <p>
+                {% if track.track_svg %}
+                  Current SVG is {{ track.track_svg | length }} chars.
+                {% else %}
+                  This racetrack does not contain its own custom SVG.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          {% if track.track_svg %}
+            <div class="row bg-white py-2 m-1">
+              <div class="col-sm-3">
+                {{ form.is_deleting_track_svg.label }}
+              </div>
+              <div class="col-sm-4">
+                <select id="is_deleting_track_svg" name="is_deleting_track_svg" class="form-control">
+                  <option value="" selected>No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="col-sm-5">
+                <p>
+                  Only check this if you want to <em>remove</em> the previously
+                  uploaded custom SVG from this racetrack.
+                </p>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.track_svg_url.label }}
@@ -72,6 +170,24 @@
               follow. Use a viewport of 200&times;100 to keep units consistent with the
               existing tracks. See the racetracks on this server for examples.
             </p>
+            <p>
+              If you upload an SVG file now, this will be updated automatically.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{ form.svg_path_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.svg_path_length(class_="form-control mr-sm-1", type="number") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The length of the path in the SVG. This must match the calculated
+              length of the <code>path</code> in the SVG found at
+              the URL provided above.
+            </p>
           </div>
         </div>
         <div class="row bg-white py-2 m-1">
@@ -83,9 +199,9 @@
           </div>
           <div class="col-sm-5">
             <p>
-              The length of the path in the SVG. This must match the calculated
-              length of the <code>path</code> in the SVG found at
-              the URL provided above.
+              The length of the path as far as the race runner is concerned.
+              This is the "game length" that the SVG represents. If you don't
+              specify one, this falls back to matching the SVG path length.
             </p>
           </div>
         </div>

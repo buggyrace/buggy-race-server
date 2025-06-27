@@ -66,6 +66,10 @@ class RaceForm(FlaskForm):
         "Lap length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
+    svg_path_length = IntegerField(
+        "SVG path length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
     is_dnf_position = BooleanField("Is Did-Not-Finish a position?")
     
     def __init__(self, *args, **kwargs):
@@ -125,10 +129,31 @@ class RacetrackForm(FlaskForm):
     track_image_url = StringField(
         "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
+    track_image_file = FileField(
+        "Custom racetrack image", validators=[Optional()]
+    )
+    # allow form to specifiy _removal_ of (existing) image data
+    is_deleting_track_image_file = BooleanField(
+        "Delete racetrack image?",
+        default=False,
+        render_kw ={'checked':''},
+        validators=[Optional()]
+    )
     track_svg_url = StringField(
         "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
+    track_svg_file = FileField(
+        "Custom racetrack path SVG", validators=[Optional()]
+    )
+    # allow form to specifiy _removal_ of (existing) SVG
+    is_deleting_track_svg = BooleanField(
+        "Delete custom SVG?", validators=[Optional()]
+    )
     lap_length = IntegerField(
         "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    svg_path_length = IntegerField(
+        "SVG path length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )

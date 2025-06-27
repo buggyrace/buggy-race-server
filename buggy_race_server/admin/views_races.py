@@ -5,7 +5,6 @@ import os
 import re
 import json
 import roman
-
 from sqlalchemy.inspection import inspect
 
 from flask import (
@@ -493,6 +492,10 @@ def autofill_tracks():
     return render_template(
         "admin/racetracks.html",
         racetracks=racetracks,
+        racetrack_races = get_races_keyed_by_racetrack_id(
+            racetracks,
+            Race.query.all()
+        ),
         form=GeneralSubmitForm(),
     )
 
@@ -558,6 +561,7 @@ def new_track():
 @login_required
 @admin_only
 def edit_track(track_id):
+    is_storing_race_assets = current_app.config[ConfigSettingNames.IS_STORING_RACE_ASSETS_IN_DB.name]
     if track_id is None:
         track = None
         delete_form = None
@@ -570,25 +574,102 @@ def edit_track(track_id):
     form = RacetrackForm(request.form, obj=track)
     if request.method == "POST":
         if form.is_submitted() and form.validate():
+            # For custom image:
+            # if a file was uploaded, update the image, URL, and type
+            # otherwise, just update what was sent (but be careful
+            # not to destroy the image data if it exists!)
+            #=========================================================
+            is_uploading_new_image = False
+            new_image_media_type = None
+            new_track_image_bytes = None
+            is_uploading_new_svg = False
+            new_svg_contents = None
+            if is_storing_race_assets:
+                if "track_image_file" in request.files:
+                    track_image_file = request.files['track_image_file']
+                    new_track_image_bytes = track_image_file.read()
+                    is_uploading_new_image = len(new_track_image_bytes) > 0
+                    if is_uploading_new_image:
+                        # infer the media type from uploaded file's extension
+                        filename = track_image_file.filename.lower()
+                        if filename.endswith(".png"):
+                            new_image_media_type = "image/png"
+                        elif (filename.endswith(".jpg") or filename.endswith(".jpeg")):
+                            new_image_media_type = "image/jpeg"
+                if form.is_deleting_track_image_file and form.is_deleting_track_image_file.data:
+                    if is_uploading_new_image:
+                        flash("Ignoring 'delete custom image' because you uploaded a file", "info")
+                    else:
+                        is_uploading_new_image = True
+                        new_track_image_bytes = None
+                if "track_svg_file" in request.files:
+                    track_svg_file = request.files['track_svg_file']
+                    new_svg_contents = track_svg_file.read().decode('utf-8')
+                    is_uploading_new_svg = len(new_svg_contents) > 0
+                # if form.is_deleting_svg and form.is_deleting_track_image_file.data:
+                #     if is_uploading_new_image:
+                #         flash("Ignoring 'delete custom image' because you uploaded a file", "info")
+                #     else:
+                #         is_uploading_new_image = True
+                #         new_track_image_bytes = None
             if track is None:
                 track = Racetrack.create(
                   title=form.title.data.strip(),
                   desc=form.desc.data.strip(),
-                  track_image_url=form.track_image_url.data.strip(),
-                  track_svg_url=form.track_svg_url.data.strip(),
-                  lap_length=form.lap_length.data
+                  track_image=new_track_image_bytes,
+                  image_media_type=new_image_media_type,
+                  track_svg=new_svg_contents,
+                  lap_length=form.lap_length.data,
+                  svg_path_length=form.svg_path_length.data,
+                  track_image_url=form.track_image_url.data.strip(), # note below
+                  track_svg_url=form.track_svg_url.data.strip(), # note below
                 )
-                success_msg = f"OK, created new racetrack"
+                success_msg = f"OK, created %title%"
             else:
                 track.title = form.title.data.strip()
                 track.desc = form.desc.data.strip()
-                track.track_image_url=form.track_image_url.data.strip()
-                track.track_svg_url=form.track_svg_url.data.strip()
+                if is_uploading_new_image:
+                    track.track_image = new_track_image_bytes
+                    if new_track_image_bytes is None: # actually deleting it
+                        track.track_image_url = None
+                        track.image_media_type = None
+                        flash("Removed custom racetrack image", "info")
+                    else:
+                        flash("Uploaded custom racetrack image and set media type and image URL", "info")
+                        track.image_media_type = new_image_media_type
+                        track.track_image_url=url_for("race.serve_racetrack_custom_image", track_id=track.id)
+                else:
+                    track.track_image_url=form.track_image_url.data.strip()
+                if is_uploading_new_svg:
+                    track.track_svg = new_svg_contents
+                    if new_svg_contents is None: # actually deleting it
+                        track.track_svg_url = None
+                    else:
+                        track.track_svg_url = url_for("race.serve_racetrack_custom_svg", track_id=track.id)
                 track.lap_length=form.lap_length.data
                 track.save()
-                pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
-                success_msg = f"OK, updated {pretty_title}" 
-            flash(success_msg, "success")
+                success_msg = "OK, updated %title%"
+
+            # now re-save image to overwrite URLs (and remove redundancies)
+            # if URLs were explicitly set, then uploading obliterates them here
+            if is_uploading_new_image:
+                if new_track_image_bytes is None: # so we are deleting it
+                    track.track_image_url = None
+                    track.image_media_type = None
+                else:
+                    track.track_image_url=url_for("race.serve_racetrack_custom_image", track_id=track.id)
+            if is_uploading_new_svg:
+                if new_svg_contents is None: # so we are deleting it
+                    track.track_svg = None
+                    track.track_svg_url = None
+                else:
+                    track_svg = new_svg_contents
+                    track.track_svg_url=url_for("race.serve_racetrack_custom_svg", track_id=track.id)
+            if is_uploading_new_image or is_uploading_new_svg:
+                track.save()
+
+            pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
+            flash(success_msg.replace("%title%", pretty_title), "success")
             return redirect(url_for("admin_race.show_tracks"))
         else:
             if track:
@@ -602,6 +683,7 @@ def edit_track(track_id):
         delete_form=delete_form,
         form=form,
         track=track,
+        is_storing_race_assets=is_storing_race_assets,
     )
 
 @blueprint.route("/replay-preview", methods=["GET", "POST"])

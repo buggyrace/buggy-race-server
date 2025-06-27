@@ -999,7 +999,6 @@ def get_races_keyed_by_racetrack_id(racetracks, races):
     """
     racetrack_races = {}
     for track in racetracks:
-        print(f"FIXME {track.id} url:{track.track_image_url}")
         racetrack_races[track.id] = [
             race for race in races if (
                 race.track_image_url and race.track_svg_url and

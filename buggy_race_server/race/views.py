@@ -23,7 +23,7 @@ from buggy_race_server.admin.forms import GeneralSubmitForm, SubmitWithConfirmFo
 from buggy_race_server.admin.models import DbFile
 from buggy_race_server.database import db
 from buggy_race_server.race.forms import RaceForm, RaceDeleteForm, RaceResultsForm, RacetrackForm
-from buggy_race_server.race.models import Race, RaceResult
+from buggy_race_server.race.models import Race, RaceResult, Racetrack
 from buggy_race_server.user.models import User
 from buggy_race_server.utils import (
     admin_only,
@@ -55,6 +55,38 @@ def _serve_race_asset_file(*args):
         print(f"Race resource not found <{full_filename}>")
         return make_response(f"Race resource not found <{full_filename}>", 404)
     return send_file(full_filename)
+
+@blueprint.route("/assets/track/<int:track_id>/img")
+@cors_allow_origin
+def serve_racetrack_custom_image(track_id):
+    track = Racetrack.get_by_id(track_id)
+    if track is None:
+        abort(404)
+    if track.track_image is None or len(track.track_image) == 0 or not track.image_media_type:
+        flash("No custom image associated with this track", "danger")
+        abort(404)
+    print(f"FIXME serving track <{track_id}> image: {len(track.track_image)} bytes, type=<{track.image_media_type}>")
+    ext = re.sub(r'.*/', "", track.image_media_type)
+    response = make_response(track.track_image)
+    response.headers["Content-type"] = track.image_media_type
+    response.headers["Content-disposition"] = f"attachment; filename=racetrack-{track_id}.{ext}"
+    response.headers["Content-length"] = len(track.track_image)
+    return response
+
+@blueprint.route("/assets/track/<int:track_id>/svg")
+@cors_allow_origin
+def serve_racetrack_custom_svg(track_id):
+    track = Racetrack.get_by_id(track_id)
+    if track is None:
+        abort(404)
+    if track.track_svg is None or len(track.track_svg) == 0:
+        flash("No custom SVG path associated with this track", "danger")
+        abort(404)
+    response = make_response(track.track_svg)
+    response.headers["Content-type"] = "image/svg+xml; charset=utf-8"
+    response.headers["Content-disposition"] = f"attachment; filename=racetrack-{track_id}.svg"
+    response.headers["Content-length"] = len(track.track_svg)
+    return response
 
 @blueprint.route("/assets/tracks/<filename>")
 @cors_allow_origin

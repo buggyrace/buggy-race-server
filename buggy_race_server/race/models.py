@@ -57,6 +57,10 @@ class Racetrack(SurrogatePK, Model):
     desc = Column(db.Text(), unique=False, nullable=False, default="")
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    track_image = Column(db.LargeBinary(length=None), nullable=True)
+    image_media_type = Column(db.String(32), nullable=True)
+    track_svg = Column(db.Text(), unique=False, nullable=True)
+    svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
 
     def __init__(self, **kwargs):
@@ -91,6 +95,7 @@ class Race(SurrogatePK, Model):
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
     max_laps = db.Column(db.Integer(),  nullable=True)
+    svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
     is_dnf_position = Column(db.Boolean(), nullable=False, default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name]))
     is_abandoned = Column(db.Boolean(), nullable=False, default=False)

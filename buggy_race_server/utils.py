@@ -1020,3 +1020,9 @@ def get_alien_server_url(alien_url):
     ):
         return re.sub(r"(?<=\w)/.*", "", alien_url)
     return None
+
+def make_race_server_url(abs_path):
+    url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    if url.endswith("/"):
+        url = url[:-1]
+    return url + abs_path

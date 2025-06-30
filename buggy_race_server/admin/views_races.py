@@ -46,6 +46,7 @@ from buggy_race_server.utils import (
     get_url_protocol,
     get_alien_server_url,
     join_to_project_root,
+    make_race_server_url,
     staff_only,
 )
 
@@ -359,10 +360,13 @@ def upload_race_file(race_id):
                             if not warnings or is_ignoring_warnings:
                                 if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
                                     race.store_race_file(result_data)
-                                    url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
-                                        + url_for("race.serve_race_file", race_id=race.id)
-                                    race.race_file_url = url
-                                    flash(f"Stored race file on this server for use in replay (at {url})", "success")
+                                    race.race_file_url = make_race_server_url(
+                                        url_for("race.serve_race_file", race_id=race.id)
+                                    )
+                                    flash("Stored race file on this server for use in replay "
+                                          f"(at {race.race_file_url})",
+                                          "success"
+                                    )
                                 race.results_uploaded_at = datetime.now(timezone.utc) 
                                 race.save()
                                 flash("OK, updated race results", "success")
@@ -606,69 +610,54 @@ def edit_track(track_id):
                     track_svg_file = request.files['track_svg_file']
                     new_svg_contents = track_svg_file.read().decode('utf-8')
                     is_uploading_new_svg = len(new_svg_contents) > 0
-                # if form.is_deleting_svg and form.is_deleting_track_image_file.data:
-                #     if is_uploading_new_image:
-                #         flash("Ignoring 'delete custom image' because you uploaded a file", "info")
-                #     else:
-                #         is_uploading_new_image = True
-                #         new_track_image_bytes = None
+                if form.is_deleting_track_svg and form.is_deleting_track_svg.data:
+                    if is_uploading_new_svg:
+                        flash("Ignoring 'delete custom SVG' because you uploaded a file", "info")
+                    else:
+                        is_uploading_new_svg = True
+                        new_svg_contents = None
+            is_new_racetrack = False
             if track is None:
-                track = Racetrack.create(
-                  title=form.title.data.strip(),
-                  desc=form.desc.data.strip(),
-                  track_image=new_track_image_bytes,
-                  image_media_type=new_image_media_type,
-                  track_svg=new_svg_contents,
-                  lap_length=form.lap_length.data,
-                  svg_path_length=form.svg_path_length.data,
-                  track_image_url=form.track_image_url.data.strip(), # note below
-                  track_svg_url=form.track_svg_url.data.strip(), # note below
-                )
-                success_msg = f"OK, created %title%"
-            else:
-                track.title = form.title.data.strip()
-                track.desc = form.desc.data.strip()
-                if is_uploading_new_image:
-                    track.track_image = new_track_image_bytes
-                    if new_track_image_bytes is None: # actually deleting it
-                        track.track_image_url = None
-                        track.image_media_type = None
-                        flash("Removed custom racetrack image", "info")
-                    else:
-                        flash("Uploaded custom racetrack image and set media type and image URL", "info")
-                        track.image_media_type = new_image_media_type
-                        track.track_image_url=url_for("race.serve_racetrack_custom_image", track_id=track.id)
-                else:
-                    track.track_image_url=form.track_image_url.data.strip()
-                if is_uploading_new_svg:
-                    track.track_svg = new_svg_contents
-                    if new_svg_contents is None: # actually deleting it
-                        track.track_svg_url = None
-                    else:
-                        track.track_svg_url = url_for("race.serve_racetrack_custom_svg", track_id=track.id)
-                track.lap_length=form.lap_length.data
-                track.save()
-                success_msg = "OK, updated %title%"
-
-            # now re-save image to overwrite URLs (and remove redundancies)
-            # if URLs were explicitly set, then uploading obliterates them here
+                track = Racetrack.create()
+                is_new_racetrack = True
+            track.title = form.title.data.strip()
+            track.desc = form.desc.data.strip()
             if is_uploading_new_image:
-                if new_track_image_bytes is None: # so we are deleting it
-                    track.track_image_url = None
+                custom_img_url = make_race_server_url(
+                    url_for("race.serve_racetrack_custom_image", track_id=track.id)
+                )
+                track.track_image = new_track_image_bytes
+                if new_track_image_bytes is None: # actually deleting it
                     track.image_media_type = None
+                    if track.track_image_url and track.track_image_url == custom_img_url:
+                        track.track_image_url = None
+                    flash("Removed custom racetrack image", "info")
                 else:
-                    track.track_image_url=url_for("race.serve_racetrack_custom_image", track_id=track.id)
+                    track.image_media_type = new_image_media_type
+                    track.track_image_url = custom_img_url
+                    flash("Uploaded custom racetrack image and set media type and image URL", "info")
+            else:
+                track.track_image_url=form.track_image_url.data.strip()
             if is_uploading_new_svg:
-                if new_svg_contents is None: # so we are deleting it
-                    track.track_svg = None
-                    track.track_svg_url = None
+                custom_svg_url = make_race_server_url(
+                    url_for("race.serve_racetrack_custom_svg", track_id=track.id)
+                )
+                track.track_svg = new_svg_contents
+                if new_svg_contents is None: # actually deleting it
+                    if track.track_svg_url and track.track_svg_url == custom_svg_url:
+                        track.track_svg_url = None
+                    flash("Removed custom racetrack path SVG", "info")
                 else:
-                    track_svg = new_svg_contents
-                    track.track_svg_url=url_for("race.serve_racetrack_custom_svg", track_id=track.id)
-            if is_uploading_new_image or is_uploading_new_svg:
-                track.save()
-
+                    track.track_svg_url = custom_svg_url
+                    flash("Uploaded custom racetrack path SVG", "info")
+            track.lap_length=form.lap_length.data
+            track.svg_path_length=form.svg_path_length.data
+            track.save()
             pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
+            if is_new_racetrack:
+                success_msg = f"OK, created {pretty_title}"
+            else:
+                success_msg = f"OK, updated {pretty_title}"
             flash(success_msg.replace("%title%", pretty_title), "success")
             return redirect(url_for("admin_race.show_tracks"))
         else:

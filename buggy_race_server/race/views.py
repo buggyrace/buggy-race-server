@@ -65,7 +65,6 @@ def serve_racetrack_custom_image(track_id):
     if track.track_image is None or len(track.track_image) == 0 or not track.image_media_type:
         flash("No custom image associated with this track", "danger")
         abort(404)
-    print(f"FIXME serving track <{track_id}> image: {len(track.track_image)} bytes, type=<{track.image_media_type}>")
     ext = re.sub(r'.*/', "", track.image_media_type)
     response = make_response(track.track_image)
     response.headers["Content-type"] = track.image_media_type

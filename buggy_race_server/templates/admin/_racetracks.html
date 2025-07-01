@@ -6,7 +6,7 @@
       data-title="{{ track.title }}"
       data-track-image-url="{{ track.track_image_url }}"
       data-track-svg-url="{{ track.track_svg_url }}"
-      data-svg-path-length="{{ track.svg_path_length}}"
+      data-svg-path-length="{{ track.svg_path_length }}"
       data-lap-length="{{ track.lap_length }}"
     >
       <img src="{{track.track_image_url}}" class="card-img-top" alt="racetrack">
@@ -14,11 +14,19 @@
         <h5 class="card-title">{{ track.title }}</h5>
         <p class="card-text">
           Lap:
-          {% if track.lap_length is none %}
+          {% if track.svg_path_length is none %}
             <em>—</em>
           {% else %}
-            <code>{{ track.lap_length }}</code>
+            {% if track.svg_path_length > 0 %}
+                <code>{{ track.svg_path_length }}</code>
+                {% if track.lap_length %}
+                  {% if track.lap_length > 0 and track.lap_length != track.svg_path_length %}
+                      <code>({{ track.lap_length }})</code>
+                  {% endif %}
+                {% endif %}
+            {% endif %}
           {% endif %}
+          <br>
           {{ track.desc }}
         </p>
         <p class="btn-collection track-view-edit-btns">

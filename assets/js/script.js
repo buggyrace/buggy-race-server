@@ -635,6 +635,7 @@ $(function() {
     const $TRACK_PICKER_MODAL = $("#track-picker-modal"); // needed to dismiss, sigh
     const $CONFIRM_MODAL = $("#confirm-modal");
     const CONFIRM_MSG = document.getElementById("confirm-msg");
+    const SVG_LENGTH_WARNING_MSG = document.getElementById("missing-data-warning-msg");
     const INSERT_CONFIRM_BTN = document.getElementById("confirm-track-insert");
     const RACE_SUBMIT_BTN = document.getElementById("race-submit-btn");
     const REMINDER_BTN_TXT  = document.getElementById("reminder-btn-text");
@@ -670,6 +671,11 @@ $(function() {
           e.preventDefault();
           selected_card = card;
           CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
+          if (isNaN(parseInt(card.dataset.svgPathLength))) {
+            SVG_LENGTH_WARNING_MSG.classList.remove("hidden")
+          } else {
+            SVG_LENGTH_WARNING_MSG.classList.add("hidden")
+          }
           REMINDER_BTN_TXT.innerText = RACE_SUBMIT_BTN.value;
           // non-trivial to dismiss bootstrap modal without jQuery :-(
           $TRACK_PICKER_MODAL.modal("hide");

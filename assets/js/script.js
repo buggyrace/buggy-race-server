@@ -701,7 +701,8 @@ $(function() {
   const SHOW_RACES_BTN = document.getElementById("show-used-by-races-btn");
   // used on admin/_racetracks.html (which is both for managing racetracks and
   // in the select-a-racetrack dialogue when editing/making a new race)
-  if (SHOW_RACES_BTN) {
+  // (checking for .card.racetrack because if none... don't show the button)
+  if (SHOW_RACES_BTN && document.querySelector(".card.racetrack")) {
     SHOW_RACES_BTN.innerText = "Show used-by races";
     SHOW_RACES_BTN.classList.remove("hidden");
     SHOW_RACES_BTN.addEventListener("click", function(e){
@@ -720,6 +721,8 @@ $(function() {
         SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Hide", "Show", 1)
       }
     })
+  } else {
+    SHOW_RACES_BTN.innerText = "FIXME-999";
   }
 
 })

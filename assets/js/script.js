@@ -646,6 +646,7 @@ $(function() {
     const RACE_TRACK_INPUTS = {
       "track_image_url": document.querySelector('input[name="track_image_url"]'),
       "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
+      "svg_path_length": document.querySelector('input[name="svg_path_length"]'),
       "lap_length": document.querySelector('input[name="lap_length"]')
     }
 
@@ -683,7 +684,8 @@ $(function() {
         if (selected_card){
           RACE_TRACK_INPUTS["track_image_url"].value = selected_card.dataset.trackImageUrl;
           RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
-          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;  
+          RACE_TRACK_INPUTS["svg_path_length"].value = selected_card.dataset.svgPathLength;
+          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;
         } else {
           console.error("unexpected: no racetrack selected")
         }

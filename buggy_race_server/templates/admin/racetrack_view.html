@@ -53,10 +53,22 @@
         </tr>
         <tr>
           <td>
+            SVG path length
+          </td>
+          <td>
+            {% if track.svg_path_length is none %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.svg_path_length }}</code>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>
             Lap length
           </td>
           <td>
-            {% if track.lap_lengh is none %}
+            {% if track.lap_length is none %}
               <em class="empty-setting">none</em>
             {% else %}
               <code>{{ track.lap_length }}</code>

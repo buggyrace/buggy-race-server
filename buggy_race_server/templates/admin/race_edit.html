@@ -171,6 +171,22 @@
         </div>
         <div class="row bg-white py-2 m-1 track-picker-control">
           <div class="col-sm-3">
+            {{ form.svg_path_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.svg_path_length(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Length of the SVG path. Specifically, this is the length of the
+              path in the SVG file you nominate for the track. If you don't know
+              this value already, you can see it by viewing the racetrack in
+              the racetrack gallery.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
             {{ form.lap_length.label }}
           </div>
           <div class="col-sm-4">
@@ -178,10 +194,7 @@
           </div>
           <div class="col-sm-5">
             <p>
-              Length of one lap. Specifically, this is the length of the path
-              in the SVG file you nominate for the track. If you don't know
-              this value already, you can see it by viewing the racetrack in
-              the racetrack gallery.
+              Length of one lap.
             </p>
           </div>
         </div>

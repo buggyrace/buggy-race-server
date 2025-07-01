@@ -589,10 +589,15 @@ def run_race(race_data):
         default=race_data.get("max_laps") or DEFAULT_MAX_LAPS,
         prompt="Number of laps for this race?"
     )
+    svg_path_length = input_integer(
+        "SVG path length",
+        minimum=1,
+        default=race_data.get("svg_path_length") or race_data.get("svg_path_length") or DEFAULT_LAP_LENGTH,
+    )
     lap_length = input_integer(
         "lap length",
         minimum=1,
-        default=race_data.get("lap_length") or DEFAULT_LAP_LENGTH,
+        default=race_data.get("lap_length") or race_data.get("svg_path_length") or DEFAULT_LAP_LENGTH,
     )
     dnf_default = race_data.get("is_dnf_position") 
     if dnf_default is None:
@@ -866,6 +871,7 @@ def run_race(race_data):
       "max_laps": max_laps,
       "track_image_url": race_data.get("track_image_url") or "",
       "track_svg_url": race_data.get("track_svg_url") or "",
+      "svg_path_length": svg_path_length,
       "lap_length": lap_length,
       "league": race_data.get("league"),
       "start_at": race_data.get("start_at") or "",

@@ -444,6 +444,10 @@ def autofill_tracks():
     they are not already there. Specifically, it scans the track assets
     dir, matching the image and SVG files together (so consistent naming
     in those files is important) — this avoids explicit lists in config."""
+
+    # the image filenames look like "racetrack-01.jpg"
+    # the corresponsing SVG filenames look like "racetrack-01-path-460.svg"
+
     racetracks = Racetrack.query.order_by(
           Racetrack.title.asc(),
         ).all()
@@ -456,28 +460,36 @@ def autofill_tracks():
         current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name]
     )
     img_filenames_by_number = {}
-    dir_filenames = os.listdir(track_dir)
+    dir_filenames = sorted(os.listdir(track_dir))
     for filename in dir_filenames:
         if m := re.match(TRACK_IMAGE_FILE_RE, filename):
             url = Racetrack.get_local_url_for_asset(filename)
             if url not in tracks_by_img_url:
                 img_filenames_by_number[f"{ m.group(1) }"] = {
-                    "track_image_url": Racetrack.get_local_url_for_asset(filename)
+                    "track_image_url": make_race_server_url(Racetrack.get_local_url_for_asset(filename))
                 }
     if img_filenames_by_number:
         for filename in dir_filenames:
             if m := re.match(TRACK_PATH_FILE_RE, filename):
                 if proto_track := img_filenames_by_number.get(m.group(1)):
-                    proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(filename)
-                    if lap_length := m.group(2):
+                    proto_track['track_svg_url'] = make_race_server_url(Racetrack.get_local_url_for_asset(filename))
+                    if lap_length := m.group(2): # extract the length from the filename
                         proto_track['svg_path_length'] = lap_length
                         proto_track['lap_length'] = lap_length
     if request.method == "POST":
         new_tracks = [ ]
         if img_filenames_by_number:
-            for number in img_filenames_by_number:
+            track_numbers = sorted(img_filenames_by_number)
+            for number in track_numbers:
                 proto_track = img_filenames_by_number[number]
-                if proto_track.get('track_svg_url'):
+                # check to see if racetracks read from database have matching
+                # image *and* SVG URLs: if they don't, then add it
+                qty_matching_tracks = len([t for t in racetracks if (
+                    t.track_image_url == proto_track['track_image_url']
+                    and
+                    t.track_svg_url == proto_track['track_svg_url']
+                )])
+                if qty_matching_tracks == 0:
                     new_tracks.append(
                         {
                             "title": f"Racetrack {number}",
@@ -488,10 +500,15 @@ def autofill_tracks():
                             "lap_length": proto_track.get("lap_length") # may be none
                         }
                     )
-                    flash(f"Added racetrack {number} to database", "success")
+                    flash(f"Adding racetrack {number} to database", "info")
         if new_tracks:
             db.session.execute(insert(Racetrack.__table__), new_tracks)
             db.session.commit()
+            if len(new_tracks) == 1:
+                success_msg = "Added one new racetrack"
+            else:
+                success_msg = f"Added {len(new_tracks)} new racetracks"
+            flash(success_msg, "success")
             racetracks = Racetrack.query.order_by(Racetrack.title.asc(),).all()
         else:
             flash("No new racetracks found to add", "warning")

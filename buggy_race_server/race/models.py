@@ -426,6 +426,7 @@ class Race(SurrogatePK, Model):
             "description": self.desc,
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
+            "svg_path_length": self.svg_path_length,
             "lap_length": self.lap_length,
             "max_laps": self.max_laps,
             "is_dnf_position": self.is_dnf_position,

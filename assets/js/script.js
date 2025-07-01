@@ -710,23 +710,22 @@ $(function() {
     SHOW_RACES_BTN.addEventListener("click", function(e){
       e.preventDefault();
       let want_to_show = SHOW_RACES_BTN.innerText.indexOf("Show") === 0;
-      for (const used_by_race_link of document.getElementsByClassName("used-by-races")){
+      const used_by_races_divs = document.getElementsByClassName("used-by-races");
+      for (const used_by_race_link of used_by_races_divs){
         if (want_to_show){
           used_by_race_link.classList.remove("hidden");
         } else {
           used_by_race_link.classList.add("hidden");
         }
       }
+      const qty_used_racetracks = used_by_races_divs.length;
       if (want_to_show){
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Show", "Hide", 1)
+        SHOW_RACES_BTN.innerText = "Hide used-by races (" + qty_used_racetracks + ")"
       } else {
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Hide", "Show", 1)
+        SHOW_RACES_BTN.innerText = "Show used-by races (" + qty_used_racetracks + ")"
       }
     })
-  } else {
-    SHOW_RACES_BTN.innerText = "FIXME-999";
   }
-
 })
 
 $(function() {

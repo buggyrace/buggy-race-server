@@ -470,6 +470,7 @@ def autofill_tracks():
                 if proto_track := img_filenames_by_number.get(m.group(1)):
                     proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(filename)
                     if lap_length := m.group(2):
+                        proto_track['svg_path_length'] = lap_length
                         proto_track['lap_length'] = lap_length
     if request.method == "POST":
         new_tracks = [ ]
@@ -483,6 +484,7 @@ def autofill_tracks():
                             "desc": "",
                             "track_image_url": proto_track["track_image_url"],
                             "track_svg_url": proto_track["track_svg_url"],
+                            "svg_path_length": proto_track.get("lap_length"),
                             "lap_length": proto_track.get("lap_length") # may be none
                         }
                     )

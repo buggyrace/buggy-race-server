@@ -216,6 +216,7 @@ def edit_race(race_id=None):
                   is_abandoned=form.is_abandoned.data,
                   track_image_url=form.track_image_url.data,
                   track_svg_url=form.track_svg_url.data,
+                  svg_path_length=form.svg_path_length.data,
                   lap_length=form.lap_length.data,
                   max_laps=form.max_laps.data,
                   is_dnf_position=form.is_dnf_position.data,
@@ -236,6 +237,7 @@ def edit_race(race_id=None):
                 race.race_file_url = form.race_file_url.data.strip() or None
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data
+                race.svg_path_length = form.svg_path_length.data
                 race.lap_length = form.lap_length.data
                 race.max_laps = form.max_laps.data
                 race.is_dnf_position = form.is_dnf_position.data
@@ -261,12 +263,15 @@ def edit_race(race_id=None):
             racetracks,
             Race.query.all()
         ),
+        track_svg_url=race.track_svg_url if race else None,
+        track_image_url=race.track_image_url if race else None,
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
         default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
         is_storing_racefiles_in_db=current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name],
         suggested_next_name=suggested_next_name,
+
     )
 
 @blueprint.route("/<int:race_id>/abandon", methods=["GET", "POST"])
@@ -691,6 +696,8 @@ def edit_track(track_id):
         delete_form=delete_form,
         form=form,
         track=track,
+        track_svg_url=track.track_svg_url if track else None,
+        track_image_url=track.track_image_url if track else None,
         is_storing_race_assets=is_storing_race_assets,
     )
 

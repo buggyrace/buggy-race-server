@@ -141,6 +141,19 @@
             lap-length data into the race.
           </div>
         </div>
+
+        <div class="row bg-white py-2 m-1 track-picker-control hidden-without-js">
+          <div class="col-sm-3">
+            Preview
+          </div>
+          <div class="col-sm-4">
+            <img id="racetrack-preview-image" src="{% if race is not none %}{{ race.track_image_url }}{% endif %}"
+            class="card-img-top" style="max-height:50%">
+          </div>
+          <div class="col-sm-5">
+          </div>
+        </div>
+
         <div class="row bg-white py-2 m-1 track-picker-control">
           <div class="col-sm-3">
             {{ form.track_image_url.label }}
@@ -183,6 +196,7 @@
               this value already, you can see it by viewing the racetrack in
               the racetrack gallery.
             </p>
+            <p class="hidden-without-js" id="update-lap-length-btn-container"></p>
           </div>
         </div>
         <div class="row bg-white py-2 m-1 track-picker-control">

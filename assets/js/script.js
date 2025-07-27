@@ -643,12 +643,13 @@ $(function() {
     const TRACK_EDIT_VIEW_BTNS = document.getElementsByClassName("track-view-edit-btns");
     const TRACK_PICKER_BTN_ROW = document.getElementById("track-picker-btn-row");
     const TRACK_PICKER_CONTROLS = document.getElementsByClassName("track-picker-control");
+    const TRACK_PREVIEW_IMG = document.getElementById("racetrack-preview-image");
 
     const RACE_TRACK_INPUTS = {
       "track_image_url": document.querySelector('input[name="track_image_url"]'),
       "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
       "svg_path_length": document.querySelector('input[name="svg_path_length"]'),
-      "lap_length": document.querySelector('input[name="lap_length"]')
+      "lap_length": document.querySelector('input[name="lap_length"]'),
     }
 
     var selected_card = null;
@@ -692,6 +693,7 @@ $(function() {
           RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
           RACE_TRACK_INPUTS["svg_path_length"].value = selected_card.dataset.svgPathLength;
           RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;
+          TRACK_PREVIEW_IMG.setAttribute("src", selected_card.dataset.trackImageUrl);
         } else {
           console.error("unexpected: no racetrack selected")
         }

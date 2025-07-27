@@ -48,12 +48,16 @@
         </div>
         {% if track.track_image_url %}
           <!-- display existing image, if URL is already set -->
-          <div class="row bg-white py-2 m-1">
+          <div class="row bg-white py-2 m-1 hidden-without-js">
             <div class="col-sm-3">
+              Preview
             </div>
             <div class="col-sm-4">
               <img src="{{ track.track_image_url }}"
               class="card-img-top" style="max-height:50%">
+            </div>
+            <div class="col-sm-5">
+              See <a href="#racetrack-svg-preview">full preview</a> below.
             </div>
           </div>
         {% endif %}
@@ -69,13 +73,15 @@
               <p>
                 Upload a custom 2:1 background image for the racetrack.
               </p>
-              <p>
-                {% if track.image_media_type %}
-                  Current image is <code>{{ track.image_media_type }}</code>
-                {% else %}
-                  This racetrack does not contain its own custom image.
-                {% endif %}
-              </p>
+              {% if track is not none %}
+                <p>
+                  {% if track.image_media_type %}
+                    Current image is <code>{{ track.image_media_type }}</code>
+                  {% else %}
+                    This racetrack does not contain its own custom image.
+                  {% endif %}
+                </p>
+              {% endif %}
             </div>
           </div>
           {% if track.track_image %}
@@ -127,13 +133,15 @@
               <p>
                 Upload a custom SVG file containing the racetrack's path.
               </p>
-              <p>
-                {% if track.track_svg %}
-                  Current SVG is {{ track.track_svg | length }} chars.
-                {% else %}
-                  This racetrack does not contain its own custom SVG.
-                {% endif %}
-              </p>
+              {% if track is not none %}
+                <p>
+                  {% if track.track_svg %}
+                    Current SVG is {{ track.track_svg | length }} chars.
+                  {% else %}
+                    This racetrack does not contain its own custom SVG.
+                  {% endif %}
+                </p>
+              {% endif %}
             </div>
           </div>
           {% if track.track_svg %}
@@ -188,6 +196,14 @@
               length of the <code>path</code> in the SVG found at
               the URL provided above.
             </p>
+            {% if track is none %}
+              <p>
+                If you don't know the length, leave it blank and the race server
+                will suggest a value for you.
+              </p>
+            {% endif %}
+            <p class="hidden-without-js" id="update-lap-length-btn-container">
+            </p>
           </div>
         </div>
         <div class="row bg-white py-2 m-1">
@@ -217,6 +233,10 @@
       </form>
     </div>
   </div>
+
+  {% if track_svg_url or track_image_url %}
+    {% include "admin/_racetrack_svg.html" %}
+  {% endif %}
 
   {% if track %}
     <div class="row">

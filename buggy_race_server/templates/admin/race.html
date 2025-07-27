@@ -287,6 +287,16 @@
             </td>
           </tr>
           <tr>
+            <td>SVG path length</td>
+            <td>
+              {% if race.svg_path_length is number %}
+                {{ race.svg_path_length }}
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <td>Lap length</td>
             <td>
               {% if race.lap_length is number %}

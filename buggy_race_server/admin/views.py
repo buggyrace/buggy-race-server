@@ -941,6 +941,7 @@ def show_user(user_id):
         ext_id_name=current_app.config[ConfigSettingNames.EXT_ID_NAME.name],
         ext_username_name=current_app.config[ConfigSettingNames.EXT_USERNAME_NAME.name],
         ext_username_example=current_app.config[ConfigSettingNames.EXT_USERNAME_EXAMPLE.name],
+        is_edit_disabled=not current_user.is_administrator and user.is_administrator,
         is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
         student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
         upload_text_form=UploadTaskTextsForm(),

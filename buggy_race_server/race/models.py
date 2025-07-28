@@ -394,14 +394,12 @@ class Race(SurrogatePK, Model):
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
             self.max_laps = max_laps
-            if results_data.get("race_file_url"):
-                if self.race_file_url:
-                    if is_overwriting_urls:
-                        self.race_file_url = results_data.get("race_file_url")
-                    else:
-                        warnings.append("Did not overwrite race result log URL")
-                else:
+            if results_data.get("race_file_url") and self.race_file_url and \
+               results_data.get("race_file_url") != self.race_file_url:
+                if is_overwriting_urls:
                     self.race_file_url = results_data.get("race_file_url")
+                else:
+                    warnings.append("Did not overwrite race result log URL (you must explicitly allow this)")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 

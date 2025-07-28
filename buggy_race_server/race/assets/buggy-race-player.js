@@ -46,8 +46,10 @@ const RACE_INFO = {
 const RACETRACK_DATA = {
   path: null,
   lap_length: null,
+  svg_path_length: null,
   start_point: null,
-  transform: null
+  transform: null,
+  delta_ratio: 1
 };
 
 function half_str(w, h){
@@ -284,7 +286,18 @@ function set_up_race(){
     racetrack_path.setAttribute("stroke", "none");
   }
   RACETRACK_SVG.append(racetrack_path);
-  RACETRACK_DATA.lap_length = Math.round(racetrack_path.getTotalLength());
+  RACETRACK_DATA.svg_path_length = Math.round(racetrack_path.getTotalLength());
+  RACETRACK_DATA.lap_length = race_json.lap_length;
+  if (parseInt(race_json.svg_path_length)){
+    if (parseInt(race_json.svg_path_length) != parseInt(RACETRACK_DATA.svg_path_length)) {
+      report("race file data doesn't match SVG, ignoring discrepency", CSS_SYSTEM);
+    }
+  }
+  if (! parseInt(race_json.lap_length)){
+    RACETRACK_DATA.lap_length = RACETRACK_DATA.svg_path_length
+    report("race file data missing lap length, snapping to SVG path", CSS_ALERT);
+  }
+  RACETRACK_DATA.delta_ratio = RACETRACK_DATA.svg_path_length / RACETRACK_DATA.lap_length;
   RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(0);
   RACETRACK_DATA.transform = racetrack_path.attributes["transform"]?
     racetrack_path.attributes["transform"].value : "translate(0,0)";
@@ -410,6 +423,7 @@ async function pause_1_second() {
 }
 
 function step_move(buggy, distance_to_move){
+  distance_to_move = distance_to_move * RACETRACK_DATA.delta_ratio;
   if (buggy.track_data == undefined) {
     init_track_data(buggy)
   }
@@ -419,7 +433,7 @@ function step_move(buggy, distance_to_move){
     buggy.track_data.distance + distance_to_move
   );
   lap_count = Math.max(
-    lap_count, Math.ceil(buggy.track_data.distance/RACETRACK_DATA.lap_length)
+    lap_count, Math.ceil(buggy.track_data.distance/RACETRACK_DATA.svg_path_length)
   );
   return gsap.timeline().to(
     buggy.track_data,
@@ -430,7 +444,7 @@ function step_move(buggy, distance_to_move){
       duration: 1 * ff_multiplier(),
       onUpdate: () => {
         const point = RACETRACK_DATA.path.getPointAtLength(
-          buggy.track_data.distance % RACETRACK_DATA.lap_length
+          buggy.track_data.distance % RACETRACK_DATA.svg_path_length
         );
         point.x += buggy.track_data.jitter;
         point.y += buggy.track_data.jitter;
@@ -471,7 +485,7 @@ function track_with_crosshairs(buggy_id, want_tracking){
     if (want_tracking && svg_buggies[buggy_id]){
       crosshairs_tracking_id = buggy_id;
       let point = RACETRACK_DATA.path.getPointAtLength(
-        svg_buggies[buggy_id].track_data.distance % RACETRACK_DATA.lap_length
+        svg_buggies[buggy_id].track_data.distance % RACETRACK_DATA.svg_path_length
       );
       crosshairs.setAttribute("x", point.x);
       crosshairs.setAttribute("y", point.y);
@@ -535,7 +549,7 @@ function do_step(){
         } else if (event_type[0] == EVENT_TYPE_ATTACK_PREFIX) {
           if (ATTACK_GRAPHICS[event_type]) {
             const point = RACETRACK_DATA.path.getPointAtLength(
-              buggy.track_data.distance % RACETRACK_DATA.lap_length
+              buggy.track_data.distance % RACETRACK_DATA.svg_path_length
             );
             create_svg_graphic(
               ATTACK_GRAPHICS[event_type],

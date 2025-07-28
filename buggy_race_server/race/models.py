@@ -424,6 +424,7 @@ class Race(SurrogatePK, Model):
             "race_file_url": self.race_file_url,
             "title": self.title,
             "description": self.desc,
+            "cost_limit": self.cost_limit,
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
             "svg_path_length": self.svg_path_length,

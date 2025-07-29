@@ -75,6 +75,18 @@
             {% endif %}
           </td>
         </tr>
+        <tr>
+          <td>
+            Start offset
+          </td>
+          <td>
+            {% if track.start_offset is none %}
+              <em class="empty-setting">none</em>
+            {% else %}
+              <code>{{ track.start_offset }}</code>
+            {% endif %}
+          </td>
+        </tr>
       </table>
     </div>
   </div>

@@ -165,6 +165,8 @@ def view_race(race_id):
         server_protocol=server_protocol,
         track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
+        lap_length=race.lap_length,
+        start_offset=race.start_offset,
         urls_with_different_protocol_dict=race.urls_with_different_protocol_dict(server_protocol),
     )
 
@@ -218,6 +220,7 @@ def edit_race(race_id=None):
                   track_svg_url=form.track_svg_url.data,
                   svg_path_length=form.svg_path_length.data,
                   lap_length=form.lap_length.data,
+                  start_offset=form.start_offset.data,
                   max_laps=form.max_laps.data,
                   is_dnf_position=form.is_dnf_position.data,
                 )
@@ -239,6 +242,7 @@ def edit_race(race_id=None):
                 race.track_svg_url = form.track_svg_url.data
                 race.svg_path_length = form.svg_path_length.data
                 race.lap_length = form.lap_length.data
+                race.start_offset = form.start_offset.data
                 race.max_laps = form.max_laps.data
                 race.is_dnf_position = form.is_dnf_position.data
                 race.save()
@@ -556,6 +560,8 @@ def view_track(track_id):
         track=track,
         track_image_url=track.track_image_url, # separated for SVG include file
         track_svg_url=track.track_svg_url, # separated for SVG include file
+        lap_length=track.lap_length,
+        start_offset=track.start_offset,
     )
 
 @blueprint.route("tracks/<track_id>/delete", methods=["POST"])
@@ -674,10 +680,11 @@ def edit_track(track_id):
                 else:
                     track.track_svg_url = custom_svg_url
                     flash("Uploaded custom racetrack path SVG", "info")
-            track.lap_length=form.lap_length.data
-            track.svg_path_length=form.svg_path_length.data
+            track.lap_length = form.lap_length.data
+            track.svg_path_length = form.svg_path_length.data
+            track.start_offset = form.start_offset.data
             track.save()
-            pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
+            pretty_title = f"\"{track.title}\"" if track.title else "untitled track"
             if is_new_racetrack:
                 success_msg = f"OK, created {pretty_title}"
             else:

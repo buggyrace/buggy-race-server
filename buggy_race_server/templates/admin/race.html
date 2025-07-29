@@ -307,6 +307,16 @@
             </td>
           </tr>
           <tr>
+            <td>Start offset</td>
+            <td>
+              {% if race.start_offset is number %}
+                <code>{{ race.start_offset }}</code>
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <td>Number of laps</td>
             <td>
               {% if race.max_laps is number %}

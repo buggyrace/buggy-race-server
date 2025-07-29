@@ -66,6 +66,10 @@ class RaceForm(FlaskForm):
         "Lap length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
+    start_offset = IntegerField(
+        "Start offset",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
     svg_path_length = IntegerField(
         "SVG path length",
         validators=[Optional(), NumberRange(min=0, max=None)]
@@ -151,6 +155,10 @@ class RacetrackForm(FlaskForm):
     )
     lap_length = IntegerField(
         "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    start_offset = IntegerField(
+        "Start offset",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
     svg_path_length = IntegerField(

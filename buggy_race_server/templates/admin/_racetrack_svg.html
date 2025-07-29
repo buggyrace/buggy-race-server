@@ -35,7 +35,9 @@
   <div class="row">
     <div class="col">
       <div id="race-canvas">
-        <svg id="racetrack-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" text-rendering="geometricPrecision" shape-rendering="geometricPrecision"></svg>
+        <svg id="racetrack-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">
+          <circle cx="0" cy="0" r="2" stroke="transparent" fill="transparent" stroke-width="1" id="start-point-circle"/>
+        </svg>
       </div>
     </div>
   </div>
@@ -78,6 +80,8 @@
     <script>
       //--------------------------------------------------------------------
       const PATH_SVG_URL = "{{ track_svg_url }}";
+      const RACETRACK_LAP_LENGTH = parseInt("{{ lap_length }}");
+      const RACETRACK_START_OFFSET = parseInt("{{ start_offset }}");
       //--------------------------------------------------------------------
       const SVG_REPORT = document.getElementById("svg-report");
       const UPDATE_LENGTH_CONTAINER = document.getElementById("update-lap-length-btn-container");
@@ -86,11 +90,10 @@
       const RACETRACK_PATH_ID = "race-path";
       const SVG_VIEWBOX_CHECK = document.getElementById("svg-viewbox-check");
       const SVG_VIEWBOX_CHECK_MSG = document.getElementById("svg-viewbox-check-msg");
-
       const SVG_HELPER = document.getElementById("svg-helper");
       const REQUIRED_RACETRACK_WIDTH = 200;
       const REQUIRED_RACETRACK_HEIGHT = 100;
-
+ 
       function check_viewbox_values(viewbox_str) {
         let is_ok = true;
         let err_msg = "";
@@ -175,11 +178,25 @@
               say("Error in racetrack (expected single path in SVG, found none — check it's a valid SVG file)", is_ok);
             }
           } else {
-            SVG_HELPER.classList.remove("hidden");
             let racetrack_path = paths[0];
             racetrack_path.setAttribute("id", RACETRACK_PATH_ID);
             racetrack_path.setAttribute("stroke-width", 0);
+            let start_offset = 0;
+            if (RACETRACK_LAP_LENGTH && RACETRACK_START_OFFSET){
+                start_offset = (RACETRACK_START_OFFSET / RACETRACK_LAP_LENGTH) * racetrack_path.getTotalLength();
+            };
+
+            say("OK, got SVG from URL and loaded the path", is_ok);
+            let actual_svg_path_length = Math.round(racetrack_path.getTotalLength());
+            document.getElementById("path-lap-length").innerText = actual_svg_path_length;
             RACETRACK_SVG.append(racetrack_path);
+
+            let start_point_circle = RACETRACK_SVG.getElementById("start-point-circle");
+            start_point_circle.setAttribute("transform", racetrack_path.getAttribute("transform"));
+            let start_point = racetrack_path.getPointAtLength(start_offset);
+            start_point_circle.setAttribute("cx", start_point.x);
+            start_point_circle.setAttribute("cy", start_point.y);
+
             for (let label of document.querySelectorAll("#svg-btns label")){
               let for_input = label.firstElementChild;
               label.addEventListener(
@@ -190,24 +207,24 @@
                   let width = stroke_color? 1 : 0;
                   racetrack_path.setAttribute("stroke-width", width);
                   racetrack_path.setAttribute("stroke", stroke_color || "none");
+                  start_point_circle.setAttribute("fill", stroke_color || "none");
                 }
               )
             }
-            say("OK, got SVG from URL and loaded the path", is_ok);
-            let lap_length = Math.round(racetrack_path.getTotalLength());
-            document.getElementById("path-lap-length").innerText = lap_length;
-            if (UPDATE_LENGTH_CONTAINER && SVG_LENGTH_INPUT && lap_length){
-              if (lap_length != SVG_LENGTH_INPUT.value){
+            SVG_HELPER.classList.remove("hidden");
+
+            if (UPDATE_LENGTH_CONTAINER && SVG_LENGTH_INPUT && actual_svg_path_length){
+              if (actual_svg_path_length != SVG_LENGTH_INPUT.value){
                 const update_svg_length_btn = document.createElement("BUTTON");
-                update_svg_length_btn.innerHTML = "Update to " + lap_length;
+                update_svg_length_btn.innerHTML = "Update to " + actual_svg_path_length;
                 update_svg_length_btn.classList.add("btn-sm", "btn-primary");
                 update_svg_length_btn.addEventListener("click", function(e){
                   e.preventDefault();
-                  SVG_LENGTH_INPUT.value = lap_length;
+                  SVG_LENGTH_INPUT.value = actual_svg_path_length;
                 });
                 UPDATE_LENGTH_CONTAINER.appendChild(update_svg_length_btn);
               } else {
-                UPDATE_LENGTH_CONTAINER.innerText = "Calculated length (shown below) is " + lap_length + ".";
+                UPDATE_LENGTH_CONTAINER.innerText = "Calculated length (shown below) is " + actual_svg_path_length + ".";
               }
             }
           }

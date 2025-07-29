@@ -60,6 +60,8 @@ class Racetrack(SurrogatePK, Model):
     track_svg = Column(db.Text(), unique=False, nullable=True)
     svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
+    start_offset = Column(db.Integer, nullable=True)
+    finish_offset = Column(db.Integer, nullable=True)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -95,6 +97,8 @@ class Race(SurrogatePK, Model):
     max_laps = db.Column(db.Integer(),  nullable=True)
     svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
+    start_offset = Column(db.Integer, nullable=True)
+    finish_offset = Column(db.Integer, nullable=True)
     is_dnf_position = Column(db.Boolean(), nullable=False, default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name]))
     is_abandoned = Column(db.Boolean(), nullable=False, default=False)
 
@@ -427,6 +431,8 @@ class Race(SurrogatePK, Model):
             "track_svg_url": self.track_svg_url,
             "svg_path_length": self.svg_path_length,
             "lap_length": self.lap_length,
+            "start_offset": self.start_offset,
+            "finish_offset": self.finish_offset,
             "max_laps": self.max_laps,
             "is_dnf_position": self.is_dnf_position,
             "start_at": servertime_str(

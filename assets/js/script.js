@@ -650,6 +650,7 @@ $(function() {
       "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
       "svg_path_length": document.querySelector('input[name="svg_path_length"]'),
       "lap_length": document.querySelector('input[name="lap_length"]'),
+      "start_offset": document.querySelector('input[name="start_offset"]')
     }
 
     var selected_card = null;
@@ -693,6 +694,7 @@ $(function() {
           RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
           RACE_TRACK_INPUTS["svg_path_length"].value = selected_card.dataset.svgPathLength;
           RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;
+          RACE_TRACK_INPUTS["start_offset"].value = selected_card.dataset.startOffset;
           TRACK_PREVIEW_IMG.setAttribute("src", selected_card.dataset.trackImageUrl);
         } else {
           console.error("unexpected: no racetrack selected")

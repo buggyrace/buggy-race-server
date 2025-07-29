@@ -49,7 +49,9 @@ const RACETRACK_DATA = {
   svg_path_length: null,
   start_point: null,
   transform: null,
-  delta_ratio: 1
+  delta_ratio: 1,
+  start_offset: 0,
+  finish_offset: 0
 };
 
 function half_str(w, h){
@@ -298,7 +300,11 @@ function set_up_race(){
     report("race file data missing lap length, snapping to SVG path", CSS_ALERT);
   }
   RACETRACK_DATA.delta_ratio = RACETRACK_DATA.svg_path_length / RACETRACK_DATA.lap_length;
-  RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(0);
+  if (parseInt(race_json.lap_length.start_offset)) {
+    RACETRACK_DATA.start_offset = race_json.lap_length.start_offset;
+  }
+  // note: currently ignoring finish_offset, as currently all laps are loops
+  RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(RACETRACK_DATA.start_offset);
   RACETRACK_DATA.transform = racetrack_path.attributes["transform"]?
     racetrack_path.attributes["transform"].value : "translate(0,0)";
   RACETRACK_DATA.path = racetrack_path;

@@ -212,6 +212,34 @@
             </p>
           </div>
         </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.start_offset.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.start_offset(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The offset of the start line (in "game length", i.e., relative to
+              lap length) along the track. If you leave this blank, it's
+              <code>0</code>: the start of the SVG path.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.lap_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.lap_length(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Length of one lap.
+            </p>
+          </div>
+        </div>
         <div class="row bg-white py-2 m-1">
           <div class="col-sm-3">
             {{ form.max_laps.label }}

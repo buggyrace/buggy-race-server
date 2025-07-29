@@ -51,7 +51,8 @@ const RACETRACK_DATA = {
   transform: null,
   delta_ratio: 1,
   start_offset: 0,
-  finish_offset: 0
+  finish_offset: 0,
+  svg_start_offset: 0,
 };
 
 function half_str(w, h){
@@ -83,8 +84,7 @@ const FF_BTN_NORMAL = "ACTUAL";
 const IMG_ASSET_PATH = "/races/assets/img/";
 const INFO_PANEL = document.getElementById("info-panel");
 const IS_INVISIBLE_PATH = true; // force path stroke to be none? (CDC prevention)
-const IS_JITTERED = false; // experimental bumpiness off the path
-const IS_RANDOMISED_FOR_DEV = false; // only true pending real race data
+const IS_JITTERED = true; // experimental bumpiness off the path
 const MAX_STEPS = 100; // used by random race generator, pending real events
 const NAMESPACE_SVG = "http://www.w3.org/2000/svg";
 const NAMESPACE_XLINK = "http://www.w3.org/1999/xlink";
@@ -300,11 +300,13 @@ function set_up_race(){
     report("race file data missing lap length, snapping to SVG path", CSS_ALERT);
   }
   RACETRACK_DATA.delta_ratio = RACETRACK_DATA.svg_path_length / RACETRACK_DATA.lap_length;
-  if (parseInt(race_json.lap_length.start_offset)) {
-    RACETRACK_DATA.start_offset = race_json.lap_length.start_offset;
+
+  if (parseInt(race_json.start_offset)) {
+    RACETRACK_DATA.start_offset = race_json.start_offset;
+    RACETRACK_DATA.svg_start_offset = RACETRACK_DATA.start_offset * RACETRACK_DATA.delta_ratio;
   }
-  // note: currently ignoring finish_offset, as currently all laps are loops
-  RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(RACETRACK_DATA.start_offset);
+  // ignoring finish_offset, as all laps are loops (for now)
+  RACETRACK_DATA.start_point = racetrack_path.getPointAtLength(RACETRACK_DATA.svg_start_offset);
   RACETRACK_DATA.transform = racetrack_path.attributes["transform"]?
     racetrack_path.attributes["transform"].value : "translate(0,0)";
   RACETRACK_DATA.path = racetrack_path;
@@ -392,7 +394,7 @@ function reset_replay(){
     buggy.setAttribute("x", RACETRACK_DATA.start_point.x);
     buggy.setAttribute("y", RACETRACK_DATA.start_point.y);
     buggy.track_data = {
-      distance: 0, // current distance along the (modular) track
+      distance: RACETRACK_DATA.svg_start_offset, // current distance along the (modular) track
       jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
     };
   }
@@ -412,7 +414,7 @@ function reset_replay(){
 
 function init_track_data(buggy){
   buggy.track_data = {
-    distance: 0, // current distance along the (modular) track
+    distance: RACETRACK_DATA.svg_start_offset,
     jitter: IS_JITTERED? (get_random(20)-10)/10 : 0
   };
 }
@@ -439,7 +441,7 @@ function step_move(buggy, distance_to_move){
     buggy.track_data.distance + distance_to_move
   );
   lap_count = Math.max(
-    lap_count, Math.ceil(buggy.track_data.distance/RACETRACK_DATA.svg_path_length)
+    lap_count, Math.ceil((buggy.track_data.distance - RACETRACK_DATA.svg_start_offset)/RACETRACK_DATA.svg_path_length)
   );
   return gsap.timeline().to(
     buggy.track_data,
@@ -531,44 +533,34 @@ function do_step(){
     end_race("Race ended: no more events in log");
     return;
   }
-  if (IS_RANDOMISED_FOR_DEV){
-    for (let buggy_id in svg_buggies){
-      if (IS_RANDOMISED_FOR_DEV){
-        step_promises.push(
-          step_move(svg_buggies[buggy_id], get_random(30, 4))
-        );
-      }
+  for (let event of RACE_INFO.events[step_count]) {
+    let buggy_id = event[EVENT_BUGGY];
+    let buggy = svg_buggies[BUGGY_ID_PREFIX + buggy_id];
+    let delta = event[EVENT_DELTA]; // TODO parseFloat
+    let event_type = event[EVENT_TYPE];
+    if (buggy && delta){
+        step_promises.push(step_move(buggy, delta));
     }
-  } else {
-    for (let event of RACE_INFO.events[step_count]) {
-      let buggy_id = event[EVENT_BUGGY];
-      let buggy = svg_buggies[BUGGY_ID_PREFIX + buggy_id];
-      let delta = event[EVENT_DELTA]; // TODO parseFloat
-      let event_type = event[EVENT_TYPE];
-      if (buggy && delta){
-          step_promises.push(step_move(buggy, delta));
-      }
-      if (event_type) {
-        if (event_type == EVENT_TYPE_FINISH) {
-          qty_finish_events += 1;
-          // TODO finish line wave chequered flag/confetti?
-        } else if (event_type[0] == EVENT_TYPE_ATTACK_PREFIX) {
-          if (ATTACK_GRAPHICS[event_type]) {
-            const point = RACETRACK_DATA.path.getPointAtLength(
-              buggy.track_data.distance % RACETRACK_DATA.svg_path_length
-            );
-            create_svg_graphic(
-              ATTACK_GRAPHICS[event_type],
-              point.x,
-              point.y,
-              1000
-            );
-          }
+    if (event_type) {
+      if (event_type == EVENT_TYPE_FINISH) {
+        qty_finish_events += 1;
+        // TODO finish line wave chequered flag/confetti?
+      } else if (event_type[0] == EVENT_TYPE_ATTACK_PREFIX) {
+        if (ATTACK_GRAPHICS[event_type]) {
+          const point = RACETRACK_DATA.path.getPointAtLength(
+            buggy.track_data.distance % RACETRACK_DATA.svg_path_length
+          );
+          create_svg_graphic(
+            ATTACK_GRAPHICS[event_type],
+            point.x,
+            point.y,
+            1000
+          );
         }
       }
-      if (event[EVENT_STRING]) {
-        report_event(event[EVENT_STRING], BUGGY_ID_PREFIX+buggy_id)
-      }
+    }
+    if (event[EVENT_STRING]) {
+      report_event(event[EVENT_STRING], BUGGY_ID_PREFIX+buggy_id)
     }
   }
   if (step_promises.length === 0) {
@@ -634,9 +626,9 @@ function create_svg_buggy(buggy_data){
   // returns the SVG buggy (flag) after adding it to the track SVG
   let custom_pattern = document.createElementNS(NAMESPACE_SVG, 'pattern');
   let attribs = {
+    x: "0", y: "0",
     id: "pat-" + buggy_data[BUGGY_ID_SOURCE],
     width: BUGGY_RECT_WIDTH, height: BUGGY_RECT_HEIGHT,
-    x: "0", y: "0",
   }
   for (let k in attribs){
     custom_pattern.setAttribute(k, attribs[k]);

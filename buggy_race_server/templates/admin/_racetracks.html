@@ -15,16 +15,13 @@
         <h5 class="card-title">{{ track.title }}</h5>
         <p class="card-text">
           Lap:
-          {% if track.svg_path_length is none %}
-            <em>—</em>
+          {% if track.lap_length is none and track.svg_path_length is none %}
+            <em>—</em>          
           {% else %}
-            {% if track.svg_path_length > 0 %}
-                <code>{{ track.svg_path_length }}</code>
-                {% if track.lap_length %}
-                  {% if track.lap_length > 0 and track.lap_length != track.svg_path_length %}
-                      <code>({{ track.lap_length }})</code>
-                  {% endif %}
-                {% endif %}
+            {% if track.lap_length is not none %}
+              <code>{{ track.lap_length }}</code>
+            {% else %}
+              <code>{{ track.svg_path_length }}</code>
             {% endif %}
           {% endif %}
           <br>

@@ -672,7 +672,7 @@ $(function() {
           }
           e.preventDefault();
           selected_card = card;
-          CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
+          CONFIRM_MSG.innerText = `Insert URLs and track data from "${card.dataset.title}" into race?`;
           if (isNaN(parseInt(card.dataset.svgPathLength))) {
             SVG_LENGTH_WARNING_MSG.classList.remove("hidden")
           } else {

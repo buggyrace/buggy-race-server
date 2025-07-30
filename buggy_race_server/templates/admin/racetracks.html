@@ -24,6 +24,9 @@
       <div class="col-md-6 p-3">
         There are some example racetracks already on this server. If you
         don't see them here, you can automatically add them.
+        To hide this button,
+        <a href="{{ url_for('admin.settings', group_name='races')}}">change
+        config setting</a> <code>IS_SHOWING_EXAMPLE_RACETRACKS</code>.
       </div>
       <div class="col-md-6 p-3">
         <form action="{{ url_for('admin_race.autofill_tracks') }}" method="POST">

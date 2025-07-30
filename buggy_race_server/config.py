@@ -1170,9 +1170,10 @@ class ConfigSettings:
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name:
           """Do you want the admin interface to include the example racetracks?
           If you are certain you only want to use your own custom racetracks,
-          you can choose `No` to hide the button that adds the pre-built
-          examples. Unless you've already built your racetracks, you should
-          almost certainly choose `Yes`.""",
+          you can choose `No` to hide the "Add missing racetracks" button that
+          adds the pre-built examples. Unless you've already built your
+          racetracks, choose `Yes` (and then switch this to `No` after you've
+          clicked the button it provides).""",
 
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name:
           """It can be helpful for students to have a summary of the workflow

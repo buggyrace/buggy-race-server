@@ -635,6 +635,7 @@ $(function() {
     const $TRACK_PICKER_MODAL = $("#track-picker-modal"); // needed to dismiss, sigh
     const $CONFIRM_MODAL = $("#confirm-modal");
     const CONFIRM_MSG = document.getElementById("confirm-msg");
+    const SVG_LENGTH_WARNING_MSG = document.getElementById("missing-data-warning-msg");
     const INSERT_CONFIRM_BTN = document.getElementById("confirm-track-insert");
     const RACE_SUBMIT_BTN = document.getElementById("race-submit-btn");
     const REMINDER_BTN_TXT  = document.getElementById("reminder-btn-text");
@@ -642,11 +643,14 @@ $(function() {
     const TRACK_EDIT_VIEW_BTNS = document.getElementsByClassName("track-view-edit-btns");
     const TRACK_PICKER_BTN_ROW = document.getElementById("track-picker-btn-row");
     const TRACK_PICKER_CONTROLS = document.getElementsByClassName("track-picker-control");
+    const TRACK_PREVIEW_IMG = document.getElementById("racetrack-preview-image");
 
     const RACE_TRACK_INPUTS = {
       "track_image_url": document.querySelector('input[name="track_image_url"]'),
       "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
-      "lap_length": document.querySelector('input[name="lap_length"]')
+      "svg_path_length": document.querySelector('input[name="svg_path_length"]'),
+      "lap_length": document.querySelector('input[name="lap_length"]'),
+      "start_offset": document.querySelector('input[name="start_offset"]')
     }
 
     var selected_card = null;
@@ -668,7 +672,12 @@ $(function() {
           }
           e.preventDefault();
           selected_card = card;
-          CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
+          CONFIRM_MSG.innerText = `Insert URLs and track data from "${card.dataset.title}" into race?`;
+          if (isNaN(parseInt(card.dataset.svgPathLength))) {
+            SVG_LENGTH_WARNING_MSG.classList.remove("hidden")
+          } else {
+            SVG_LENGTH_WARNING_MSG.classList.add("hidden")
+          }
           REMINDER_BTN_TXT.innerText = RACE_SUBMIT_BTN.value;
           // non-trivial to dismiss bootstrap modal without jQuery :-(
           $TRACK_PICKER_MODAL.modal("hide");
@@ -683,7 +692,10 @@ $(function() {
         if (selected_card){
           RACE_TRACK_INPUTS["track_image_url"].value = selected_card.dataset.trackImageUrl;
           RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
-          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;  
+          RACE_TRACK_INPUTS["svg_path_length"].value = selected_card.dataset.svgPathLength;
+          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;
+          RACE_TRACK_INPUTS["start_offset"].value = selected_card.dataset.startOffset;
+          TRACK_PREVIEW_IMG.setAttribute("src", selected_card.dataset.trackImageUrl);
         } else {
           console.error("unexpected: no racetrack selected")
         }
@@ -701,27 +713,29 @@ $(function() {
   const SHOW_RACES_BTN = document.getElementById("show-used-by-races-btn");
   // used on admin/_racetracks.html (which is both for managing racetracks and
   // in the select-a-racetrack dialogue when editing/making a new race)
-  if (SHOW_RACES_BTN) {
+  // (checking for .card.racetrack because if none... don't show the button)
+  if (SHOW_RACES_BTN && document.querySelector(".card.racetrack")) {
     SHOW_RACES_BTN.innerText = "Show used-by races";
     SHOW_RACES_BTN.classList.remove("hidden");
     SHOW_RACES_BTN.addEventListener("click", function(e){
       e.preventDefault();
       let want_to_show = SHOW_RACES_BTN.innerText.indexOf("Show") === 0;
-      for (const used_by_race_link of document.getElementsByClassName("used-by-races")){
+      const used_by_races_divs = document.getElementsByClassName("used-by-races");
+      for (const used_by_race_link of used_by_races_divs){
         if (want_to_show){
           used_by_race_link.classList.remove("hidden");
         } else {
           used_by_race_link.classList.add("hidden");
         }
       }
+      const qty_used_racetracks = used_by_races_divs.length;
       if (want_to_show){
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Show", "Hide", 1)
+        SHOW_RACES_BTN.innerText = "Hide used-by races (" + qty_used_racetracks + ")"
       } else {
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Hide", "Show", 1)
+        SHOW_RACES_BTN.innerText = "Show used-by races (" + qty_used_racetracks + ")"
       }
     })
   }
-
 })
 
 $(function() {

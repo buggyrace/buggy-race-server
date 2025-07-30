@@ -11,89 +11,95 @@
     </div>
   </div>
   <div class="row">
-    <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
-      <thead>
-        <tr>
-          {% if current_user.is_administrator %}
-            <th rowspan="2"></th>
-          {% endif %}
-          <th rowspan="2">Race<br>shown?</th>
-          <th rowspan="2">Results<br>shown?</th>
-          <th rowspan="2">Race start<br>(upload deadline)</th>
-          <th rowspan="2">Title</th>
-          <th rowspan="2">Cost<br>limit</th>
-          <th colspan="3" class="text-center">Buggies</th>
-        </tr>
-        <tr>
-          <th>Entered</th>
-          <th>Started</th>
-          <th>Finished</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for race in races %}
-          {% if race.start_at.date() == date_today %}
-            <tr class="">
-              <td colspan="9" class="text-center alert-success">
-                &darr; This race is today! &darr;
-              </td>
-            </tr>
-            {% endif %}
-          <tr class="race-visible-{{ race.is_visible }}">
+    {% if races %}
+      <table class="col table table-striped table-bordered table-hover table-responsive bg-white">
+        <thead>
+          <tr>
             {% if current_user.is_administrator %}
-              <td class="btn-collection">
-                <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin_race.view_race', race_id=race.id) }}">Details</a>
-                {% if race.race_file_url %}
-                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}{{ replay_anchor }}">Replay</a>
+              <th rowspan="2"></th>
+            {% endif %}
+            <th rowspan="2">Race<br>shown?</th>
+            <th rowspan="2">Results<br>shown?</th>
+            <th rowspan="2">Race start<br>(upload deadline)</th>
+            <th rowspan="2">Title</th>
+            <th rowspan="2">Cost<br>limit</th>
+            <th colspan="3" class="text-center">Buggies</th>
+          </tr>
+          <tr>
+            <th>Entered</th>
+            <th>Started</th>
+            <th>Finished</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for race in races %}
+            {% if race.start_at.date() == date_today %}
+              <tr class="">
+                <td colspan="9" class="text-center alert-success">
+                  &darr; This race is today! &darr;
+                </td>
+              </tr>
+              {% endif %}
+            <tr class="race-visible-{{ race.is_visible }}">
+              {% if current_user.is_administrator %}
+                <td class="btn-collection">
+                  <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('admin_race.view_race', race_id=race.id) }}">Details</a>
+                  {% if race.race_file_url %}
+                    <a class="btn btn-outline-secondary btn-admin btn-sm btn-jump" href="{{ url_for('race.replay_race', race_id=race.id) }}{{ replay_anchor }}">Replay</a>
+                  {% endif %}
+                </td>
+              {% endif %}
+              <td class="bool-{{ race.is_visible | lower }}">
+                {% if race.is_visible %}
+                  Yes
+                {% else %}
+                  No
                 {% endif %}
               </td>
-            {% endif %}
-            <td class="bool-{{ race.is_visible | lower }}">
-              {% if race.is_visible %}
-                Yes
+              <td class="bool-{{ race.is_result_visible | lower }}">
+                {% if race.is_result_visible %}
+                  Yes
+                {% else %}
+                  No
+                {% endif %}
+              </td>
+              <td>
+                {{ race.start_at | servertime }}
+              </td>
+              <td>
+                {% if race.title %}<strong>{{ race.title }}</strong>{% else %}<em>Untitled</em>{% endif %}
+              </td>
+              <td class="text-right">
+                {{ race.cost_limit }}
+              </td>
+              {% if race.is_abandoned %}
+                <td colspan="3" class="text-center">
+                  <em>Race abandoned</em>
+                </td>
+              {% elif race.results_uploaded_at %}
+                <td class="text-right">
+                  {{ race.buggies_entered }}
+                </td>
+                <td class="text-right">
+                  {{ race.buggies_started }}
+                </td>
+                <td class="text-right">
+                  {{ race.buggies_finished }}
+                </td>
               {% else %}
-                No
+                <td colspan="3" class="text-right">
+                  <a href="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">Upload results</a>
+                </td>
               {% endif %}
-            </td>
-            <td class="bool-{{ race.is_result_visible | lower }}">
-              {% if race.is_result_visible %}
-                Yes
-              {% else %}
-                No
-              {% endif %}
-            </td>
-            <td>
-              {{ race.start_at | servertime }}
-            </td>
-            <td>
-              {% if race.title %}<strong>{{ race.title }}</strong>{% else %}<em>Untitled</em>{% endif %}
-            </td>
-            <td class="text-right">
-              {{ race.cost_limit }}
-            </td>
-            {% if race.is_abandoned %}
-              <td colspan="3" class="text-center">
-                <em>Race abandoned</em>
-              </td>
-            {% elif race.results_uploaded_at %}
-              <td class="text-right">
-                {{ race.buggies_entered }}
-              </td>
-              <td class="text-right">
-                {{ race.buggies_started }}
-              </td>
-              <td class="text-right">
-                {{ race.buggies_finished }}
-              </td>
-            {% else %}
-              <td colspan="3" class="text-right">
-                <a href="{{ url_for('admin_race.upload_race_file', race_id=race.id) }}" class="btn btn-outline-secondary btn-admin btn-sm btn-jump">Upload results</a>
-              </td>
-            {% endif %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="col">
+        <p>No races available.</p>
+      </div>
+    {% endif %}
   </div>
   {% if current_user.is_administrator %}
     <div class="row">

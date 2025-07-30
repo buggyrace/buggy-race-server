@@ -5,7 +5,6 @@ import os
 import re
 import json
 import roman
-
 from sqlalchemy.inspection import inspect
 
 from flask import (
@@ -47,6 +46,7 @@ from buggy_race_server.utils import (
     get_url_protocol,
     get_alien_server_url,
     join_to_project_root,
+    make_race_server_url,
     staff_only,
 )
 
@@ -165,6 +165,8 @@ def view_race(race_id):
         server_protocol=server_protocol,
         track_image_url=race.track_image_url, # separated for image file
         track_svg_url=race.track_svg_url, # separated for SVG include file
+        lap_length=race.lap_length,
+        start_offset=race.start_offset,
         urls_with_different_protocol_dict=race.urls_with_different_protocol_dict(server_protocol),
     )
 
@@ -216,7 +218,9 @@ def edit_race(race_id=None):
                   is_abandoned=form.is_abandoned.data,
                   track_image_url=form.track_image_url.data,
                   track_svg_url=form.track_svg_url.data,
+                  svg_path_length=form.svg_path_length.data,
                   lap_length=form.lap_length.data,
+                  start_offset=form.start_offset.data,
                   max_laps=form.max_laps.data,
                   is_dnf_position=form.is_dnf_position.data,
                 )
@@ -236,7 +240,9 @@ def edit_race(race_id=None):
                 race.race_file_url = form.race_file_url.data.strip() or None
                 race.track_image_url = form.track_image_url.data
                 race.track_svg_url = form.track_svg_url.data
+                race.svg_path_length = form.svg_path_length.data
                 race.lap_length = form.lap_length.data
+                race.start_offset = form.start_offset.data
                 race.max_laps = form.max_laps.data
                 race.is_dnf_position = form.is_dnf_position.data
                 race.save()
@@ -261,12 +267,15 @@ def edit_race(race_id=None):
             racetracks,
             Race.query.all()
         ),
+        track_svg_url=race.track_svg_url if race else None,
+        track_image_url=race.track_image_url if race else None,
         default_race_cost_limit=current_app.config[ConfigSettingNames.DEFAULT_RACE_COST_LIMIT.name],
         default_is_dnf_position=current_app.config[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name],
         default_is_race_visible=current_app.config[ConfigSettingNames.IS_RACE_VISIBLE_BY_DEFAULT.name],
         delete_form=delete_form,
         is_storing_racefiles_in_db=current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name],
         suggested_next_name=suggested_next_name,
+
     )
 
 @blueprint.route("/<int:race_id>/abandon", methods=["GET", "POST"])
@@ -360,10 +369,13 @@ def upload_race_file(race_id):
                             if not warnings or is_ignoring_warnings:
                                 if current_app.config[ConfigSettingNames.IS_STORING_RACE_FILES_IN_DB.name]:
                                     race.store_race_file(result_data)
-                                    url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name] \
-                                        + url_for("race.serve_race_file", race_id=race.id)
-                                    race.race_file_url = url
-                                    flash(f"Stored race file on this server for use in replay (at {url})", "success")
+                                    race.race_file_url = make_race_server_url(
+                                        url_for("race.serve_race_file", race_id=race.id)
+                                    )
+                                    flash("Stored race file on this server for use in replay "
+                                          f"(at {race.race_file_url})",
+                                          "success"
+                                    )
                                 race.results_uploaded_at = datetime.now(timezone.utc) 
                                 race.save()
                                 flash("OK, updated race results", "success")
@@ -441,6 +453,10 @@ def autofill_tracks():
     they are not already there. Specifically, it scans the track assets
     dir, matching the image and SVG files together (so consistent naming
     in those files is important) — this avoids explicit lists in config."""
+
+    # the image filenames look like "racetrack-01.jpg"
+    # the corresponsing SVG filenames look like "racetrack-01-path-460.svg"
+
     racetracks = Racetrack.query.order_by(
           Racetrack.title.asc(),
         ).all()
@@ -453,46 +469,65 @@ def autofill_tracks():
         current_app.config[ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name]
     )
     img_filenames_by_number = {}
-    dir_filenames = os.listdir(track_dir)
+    dir_filenames = sorted(os.listdir(track_dir))
     for filename in dir_filenames:
         if m := re.match(TRACK_IMAGE_FILE_RE, filename):
             url = Racetrack.get_local_url_for_asset(filename)
             if url not in tracks_by_img_url:
                 img_filenames_by_number[f"{ m.group(1) }"] = {
-                    "track_image_url": Racetrack.get_local_url_for_asset(filename)
+                    "track_image_url": make_race_server_url(Racetrack.get_local_url_for_asset(filename))
                 }
     if img_filenames_by_number:
         for filename in dir_filenames:
             if m := re.match(TRACK_PATH_FILE_RE, filename):
                 if proto_track := img_filenames_by_number.get(m.group(1)):
-                    proto_track['track_svg_url'] = Racetrack.get_local_url_for_asset(filename)
-                    if lap_length := m.group(2):
+                    proto_track['track_svg_url'] = make_race_server_url(Racetrack.get_local_url_for_asset(filename))
+                    if lap_length := m.group(2): # extract the length from the filename
+                        proto_track['svg_path_length'] = lap_length
                         proto_track['lap_length'] = lap_length
     if request.method == "POST":
         new_tracks = [ ]
         if img_filenames_by_number:
-            for number in img_filenames_by_number:
+            track_numbers = sorted(img_filenames_by_number)
+            for number in track_numbers:
                 proto_track = img_filenames_by_number[number]
-                if proto_track.get('track_svg_url'):
+                # check to see if racetracks read from database have matching
+                # image *and* SVG URLs: if they don't, then add it
+                qty_matching_tracks = len([t for t in racetracks if (
+                    t.track_image_url == proto_track['track_image_url']
+                    and
+                    t.track_svg_url == proto_track['track_svg_url']
+                )])
+                if qty_matching_tracks == 0:
                     new_tracks.append(
                         {
                             "title": f"Racetrack {number}",
                             "desc": "",
                             "track_image_url": proto_track["track_image_url"],
                             "track_svg_url": proto_track["track_svg_url"],
+                            "svg_path_length": proto_track.get("lap_length"),
                             "lap_length": proto_track.get("lap_length") # may be none
                         }
                     )
-                    flash(f"Added racetrack {number} to database", "success")
+                    flash(f"Adding racetrack {number} to database", "info")
         if new_tracks:
             db.session.execute(insert(Racetrack.__table__), new_tracks)
             db.session.commit()
+            if len(new_tracks) == 1:
+                success_msg = "Added one new racetrack"
+            else:
+                success_msg = f"Added {len(new_tracks)} new racetracks"
+            flash(success_msg, "success")
             racetracks = Racetrack.query.order_by(Racetrack.title.asc(),).all()
         else:
             flash("No new racetracks found to add", "warning")
     return render_template(
         "admin/racetracks.html",
         racetracks=racetracks,
+        racetrack_races = get_races_keyed_by_racetrack_id(
+            racetracks,
+            Race.query.all()
+        ),
         form=GeneralSubmitForm(),
     )
 
@@ -525,6 +560,8 @@ def view_track(track_id):
         track=track,
         track_image_url=track.track_image_url, # separated for SVG include file
         track_svg_url=track.track_svg_url, # separated for SVG include file
+        lap_length=track.lap_length,
+        start_offset=track.start_offset,
     )
 
 @blueprint.route("tracks/<track_id>/delete", methods=["POST"])
@@ -558,6 +595,7 @@ def new_track():
 @login_required
 @admin_only
 def edit_track(track_id):
+    is_storing_race_assets = current_app.config[ConfigSettingNames.IS_STORING_RACE_ASSETS_IN_DB.name]
     if track_id is None:
         track = None
         delete_form = None
@@ -570,25 +608,88 @@ def edit_track(track_id):
     form = RacetrackForm(request.form, obj=track)
     if request.method == "POST":
         if form.is_submitted() and form.validate():
+            # For custom image:
+            # if a file was uploaded, update the image, URL, and type
+            # otherwise, just update what was sent (but be careful
+            # not to destroy the image data if it exists!)
+            #=========================================================
+            is_uploading_new_image = False
+            new_image_media_type = None
+            new_track_image_bytes = None
+            is_uploading_new_svg = False
+            new_svg_contents = None
+            if is_storing_race_assets:
+                if "track_image_file" in request.files:
+                    track_image_file = request.files['track_image_file']
+                    new_track_image_bytes = track_image_file.read()
+                    is_uploading_new_image = len(new_track_image_bytes) > 0
+                    if is_uploading_new_image:
+                        # infer the media type from uploaded file's extension
+                        filename = track_image_file.filename.lower()
+                        if filename.endswith(".png"):
+                            new_image_media_type = "image/png"
+                        elif (filename.endswith(".jpg") or filename.endswith(".jpeg")):
+                            new_image_media_type = "image/jpeg"
+                if form.is_deleting_track_image_file and form.is_deleting_track_image_file.data:
+                    if is_uploading_new_image:
+                        flash("Ignoring 'delete custom image' because you uploaded a file", "info")
+                    else:
+                        is_uploading_new_image = True
+                        new_track_image_bytes = None
+                if "track_svg_file" in request.files:
+                    track_svg_file = request.files['track_svg_file']
+                    new_svg_contents = track_svg_file.read().decode('utf-8')
+                    is_uploading_new_svg = len(new_svg_contents) > 0
+                if form.is_deleting_track_svg and form.is_deleting_track_svg.data:
+                    if is_uploading_new_svg:
+                        flash("Ignoring 'delete custom SVG' because you uploaded a file", "info")
+                    else:
+                        is_uploading_new_svg = True
+                        new_svg_contents = None
+            is_new_racetrack = False
             if track is None:
-                track = Racetrack.create(
-                  title=form.title.data.strip(),
-                  desc=form.desc.data.strip(),
-                  track_image_url=form.track_image_url.data.strip(),
-                  track_svg_url=form.track_svg_url.data.strip(),
-                  lap_length=form.lap_length.data
+                track = Racetrack.create()
+                is_new_racetrack = True
+            track.title = form.title.data.strip()
+            track.desc = form.desc.data.strip()
+            if is_uploading_new_image:
+                custom_img_url = make_race_server_url(
+                    url_for("race.serve_racetrack_custom_image", track_id=track.id)
                 )
-                success_msg = f"OK, created new racetrack"
+                track.track_image = new_track_image_bytes
+                if new_track_image_bytes is None: # actually deleting it
+                    track.image_media_type = None
+                    if track.track_image_url and track.track_image_url == custom_img_url:
+                        track.track_image_url = None
+                    flash("Removed custom racetrack image", "info")
+                else:
+                    track.image_media_type = new_image_media_type
+                    track.track_image_url = custom_img_url
+                    flash("Uploaded custom racetrack image and set media type and image URL", "info")
             else:
-                track.title = form.title.data.strip()
-                track.desc = form.desc.data.strip()
                 track.track_image_url=form.track_image_url.data.strip()
-                track.track_svg_url=form.track_svg_url.data.strip()
-                track.lap_length=form.lap_length.data
-                track.save()
-                pretty_title =  f"\"{track.title}\"" if track.title else "untitled track"
-                success_msg = f"OK, updated {pretty_title}" 
-            flash(success_msg, "success")
+            if is_uploading_new_svg:
+                custom_svg_url = make_race_server_url(
+                    url_for("race.serve_racetrack_custom_svg", track_id=track.id)
+                )
+                track.track_svg = new_svg_contents
+                if new_svg_contents is None: # actually deleting it
+                    if track.track_svg_url and track.track_svg_url == custom_svg_url:
+                        track.track_svg_url = None
+                    flash("Removed custom racetrack path SVG", "info")
+                else:
+                    track.track_svg_url = custom_svg_url
+                    flash("Uploaded custom racetrack path SVG", "info")
+            track.lap_length = form.lap_length.data
+            track.svg_path_length = form.svg_path_length.data
+            track.start_offset = form.start_offset.data
+            track.save()
+            pretty_title = f"\"{track.title}\"" if track.title else "untitled track"
+            if is_new_racetrack:
+                success_msg = f"OK, created {pretty_title}"
+            else:
+                success_msg = f"OK, updated {pretty_title}"
+            flash(success_msg.replace("%title%", pretty_title), "success")
             return redirect(url_for("admin_race.show_tracks"))
         else:
             if track:
@@ -602,6 +703,9 @@ def edit_track(track_id):
         delete_form=delete_form,
         form=form,
         track=track,
+        track_svg_url=track.track_svg_url if track else None,
+        track_image_url=track.track_image_url if track else None,
+        is_storing_race_assets=is_storing_race_assets,
     )
 
 @blueprint.route("/replay-preview", methods=["GET", "POST"])

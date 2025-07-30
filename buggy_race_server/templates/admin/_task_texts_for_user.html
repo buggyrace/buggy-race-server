@@ -113,17 +113,35 @@
             {% if texts_by_task_id[task.id] %}
               <pre class="p-3 mb-4 mt-3 mr-3 task-text ">{{ texts_by_task_id[task.id].text }}</pre>
             {% endif %}
-            {% if is_own_text %}
-              <p class="btn-collection">
-                <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">
-                  {% if texts_by_task_id[task.id] %}
-                    Edit text
-                  {% else %}
-                    Create text
+            <div class="row">
+              <div class="col-sm-4">
+                {% if is_own_text %}
+                  <p class="btn-collection">
+                    <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">
+                      {% if texts_by_task_id[task.id] %}
+                        Edit text
+                      {% else %}
+                        Create text
+                      {% endif %}
+                    </a>
+                  </p>
+                {% endif %}
+              </div>
+              <div class="col-sm 8">
+                {% if current_user.is_administrator and texts_by_task_id[task.id] %}
+                  {% if texts_by_task_id[task.id].created_at %}
+                    <p class="text-right my-0 mr-3">
+                      <em>Created:</em>: {{ texts_by_task_id[task.id].created_at | servertime | time_span | safe }}
+                    </p>
                   {% endif %}
-                </a>
-              </p>
-            {% endif %}
+                  {% if texts_by_task_id[task.id].modified_at %}
+                    <p class="text-right my-0 mr-3">
+                      <em>Updated:</em>: {{ texts_by_task_id[task.id].modified_at | servertime | time_span | safe }}
+                    </p>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
       </div>

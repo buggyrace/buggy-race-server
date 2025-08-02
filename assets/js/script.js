@@ -454,6 +454,62 @@ $(function() {
     });
   }
 
+  function get_date(date_str){ // date_str get YYYY-MM-DD
+    let date_found = date_str.match(/(\b\d\d\d\d-\d\d-\d\d\b)/);
+    if (date_found) {
+      return Date.parse(date_found[1]);
+    }
+  }
+
+  const DAY_IN_MS = 1000 * 60 * 60 * 24;
+  function get_ago_str(today, date) {
+    let dur = (today - date) / DAY_IN_MS;
+    if (dur === 0) {
+      return "today"
+    } else if (dur === 1) {
+      return "yesterday"
+    } else if (dur < 0) {
+      if (dur === -1) {
+         return "tomorrow"
+      } else {
+        return dur + " days hence"
+      }
+    } else {
+      return dur + " days ago"
+    }
+  }
+
+  let time_delta_toggle_btn = document.getElementById("time-delta-toggle-btn");
+  if (time_delta_toggle_btn){
+    time_delta_toggle_btn.addEventListener("click", function(e){
+      let today = get_date(new Date().toISOString().slice(0, 10));
+      let datetime_spans = document.getElementsByClassName("datetime");
+      for (let datetime_span of datetime_spans){
+        let datetime = get_date(datetime_span.dataset['datetime']);
+        let span_ago = datetime_span.getElementsByClassName("time-ago");
+        let date_span = datetime_span.getElementsByClassName("date-span");
+        let time_span = datetime_span.getElementsByClassName("time-span");
+        if (span_ago) { span_ago = span_ago[0]; }
+        if (date_span) { date_span = date_span[0]; }
+        if (time_span) { time_span = time_span[0]; }
+        if (span_ago && date_span && time_span) {
+          if (span_ago.classList.contains("hidden")) {
+            span_ago.innerText = get_ago_str(today, datetime);
+            span_ago.classList.remove("hidden");
+            date_span.classList.add("hidden");
+            time_span.classList.add("hidden");
+          } else {
+            span_ago.classList.add("hidden");
+            date_span.classList.remove("hidden");
+            time_span.classList.remove("hidden");
+          }
+        }
+      }
+    })
+  } else {
+    console.log("FIXME didn't find id=time-delta-toggle-btn")
+  }
+  
   let $task_counts = $(".task-count");
   if ($task_counts){
 

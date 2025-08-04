@@ -77,7 +77,7 @@
       <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as plain&nbsp;text</a>
     </p>
     {% if not is_empty %}
-      <button id="time-delta-toggle-btn" class="btn-sm">FIXME ago</button>
+      <button id="time-ago-toggle-btn" class="btn btn-outline-secondary btn-sm"><span class="icon-clock"></span> ago</button>
     {% endif %}
   </div>
 </div>

@@ -377,6 +377,9 @@ $(function() {
 
   function show_or_hide_col_by_button(btn, want_to_hide, want_slow_fade){
     let css_class = btn.dataset.itemHidden;
+    if (! css_class){
+      return;
+    }
     localStorage.setItem(css_class, want_to_hide);
     let $elements = $("."+css_class);
     if (want_to_hide) {
@@ -399,12 +402,19 @@ $(function() {
     if (css_class === ALL_COLUMNS) {
       $user_column_toggle_div.find("button").each(function(){
         let this_col = $(this)[0].dataset.itemHidden;
-        if (this_col != ALL_COLUMNS && this_col != SHOW_HIDE_TIMES) {
+        if (this_col && this_col != ALL_COLUMNS && this_col != SHOW_HIDE_TIMES) {
           show_or_hide_col_by_button($(this)[0], want_to_hide, false)
         }
       });
     } else if (css_class === SHOW_HIDE_TIMES) {
-      // pass: not a true column button
+      // pass: not a true column button but does affect the "ago" button
+      let time_ago_toggle_btn = document.getElementById("time-ago-toggle-btn");
+      if (time_ago_toggle_btn) {
+        console.log("FIXME found ago button");
+        update_ago_timestamps(false, time_ago_toggle_btn);
+      }
+      console.log("FIXME css_class === SHOW_HIDE_TIMES ********* want_to_hide=" + want_to_hide, btn);
+      // check for ago button, which needs to be hidden if this is clicked
     } else if (want_to_hide && btn_all_columns){
       // "All columns" not marked as "shown" if any cols are hidden
       btn_all_columns.classList.remove(CSS_BTN_COLUMN_SHOWN);
@@ -461,6 +471,49 @@ $(function() {
     }
   }
 
+  var is_updating_ago = false;
+  function update_ago_timestamps(want_to_show_ago, button){
+    console.log("FIXME is_updating_ago(" + want_to_show_ago + ")", button);
+    if (is_updating_ago){
+      return;
+    }
+    is_updating_ago = true;
+    if (button){
+      if (want_to_show_ago){
+        button.classList.add("btn-dark");
+        button.classList.remove("btn-outline-secondary");
+      } else {
+        button.classList.remove("btn-dark");
+        button.classList.add("btn-outline-secondary");
+      }
+    }
+    let datetime_spans = document.getElementsByClassName("datetime");
+    let today = get_date(new Date().toISOString().slice(0, 10));
+    for (let datetime_span of datetime_spans){
+      let datetime = get_date(datetime_span.dataset['datetime']);
+      let span_ago = datetime_span.getElementsByClassName("time-ago");
+      let date_span = datetime_span.getElementsByClassName("date-span");
+      let time_span = datetime_span.getElementsByClassName("time-span");
+      if (span_ago) { span_ago = span_ago[0]; }
+      if (date_span) { date_span = date_span[0]; }
+      if (time_span) { time_span = time_span[0]; }
+      if (span_ago && date_span && time_span) {
+        if (want_to_show_ago) {
+          span_ago.innerText = get_ago_str(today, datetime);
+          span_ago.classList.remove("hidden");
+          date_span.classList.add("hidden");
+          time_span.classList.add("hidden");
+        } else {
+          span_ago.classList.add("hidden");
+          date_span.classList.remove("hidden");
+          time_span.classList.remove("hidden");
+        }
+      }
+    };
+    localStorage.setItem("show-ago", `${want_to_show_ago}`);
+    is_updating_ago = false;
+  }
+
   const DAY_IN_MS = 1000 * 60 * 60 * 24;
   function get_ago_str(today, date) {
     let dur = (today - date) / DAY_IN_MS;
@@ -479,35 +532,20 @@ $(function() {
     }
   }
 
-  let time_delta_toggle_btn = document.getElementById("time-delta-toggle-btn");
-  if (time_delta_toggle_btn){
-    time_delta_toggle_btn.addEventListener("click", function(e){
-      let today = get_date(new Date().toISOString().slice(0, 10));
-      let datetime_spans = document.getElementsByClassName("datetime");
-      for (let datetime_span of datetime_spans){
-        let datetime = get_date(datetime_span.dataset['datetime']);
-        let span_ago = datetime_span.getElementsByClassName("time-ago");
-        let date_span = datetime_span.getElementsByClassName("date-span");
-        let time_span = datetime_span.getElementsByClassName("time-span");
-        if (span_ago) { span_ago = span_ago[0]; }
-        if (date_span) { date_span = date_span[0]; }
-        if (time_span) { time_span = time_span[0]; }
-        if (span_ago && date_span && time_span) {
-          if (span_ago.classList.contains("hidden")) {
-            span_ago.innerText = get_ago_str(today, datetime);
-            span_ago.classList.remove("hidden");
-            date_span.classList.add("hidden");
-            time_span.classList.add("hidden");
-          } else {
-            span_ago.classList.add("hidden");
-            date_span.classList.remove("hidden");
-            time_span.classList.remove("hidden");
-          }
-        }
-      }
-    })
+  let time_ago_toggle_btn = document.getElementById("time-ago-toggle-btn");
+  if (time_ago_toggle_btn){
+    time_ago_toggle_btn.addEventListener("click", function(e){
+      update_ago_timestamps(
+        ! time_ago_toggle_btn.classList.contains("btn-dark"),
+        time_ago_toggle_btn
+      );
+    });
+    let is_showing_ago = localStorage.getItem("show-ago")=="true";
+    if (is_showing_ago) {
+      update_ago_timestamps(is_showing_ago, time_ago_toggle_btn);
+    }
   } else {
-    console.log("FIXME didn't find id=time-delta-toggle-btn")
+    console.log("FIXME didn't find id=time-ago-toggle-btn")
   }
   
   let $task_counts = $(".task-count");

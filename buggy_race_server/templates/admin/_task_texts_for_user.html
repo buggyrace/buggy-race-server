@@ -76,6 +76,9 @@
       <a href="{{ url_for('user.download_texts', username=user.username, format='md2html') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as&nbsp;HTML (using&nbsp;markdown)</a>
       <a href="{{ url_for('user.download_texts', username=user.username, format='txt') }}" class="btn btn-download {% if is_own_text %}btn-primary{% else %}btn-admin btn-outline-secondary{% endif %} {% if is_empty %}disabled{% endif %}">Download as plain&nbsp;text</a>
     </p>
+    {% if current_user.is_administrator and not is_empty %}
+      <button id="time-ago-toggle-btn" class="btn btn-outline-secondary btn-sm"><span class="icon-clock"></span> ago</button>
+    {% endif %}
   </div>
 </div>
 {% for phase in tasks_by_phase %}
@@ -131,12 +134,12 @@
                 {% if current_user.is_administrator and texts_by_task_id[task.id] %}
                   {% if texts_by_task_id[task.id].created_at %}
                     <p class="text-right my-0 mr-3">
-                      <em>Created:</em>: {{ texts_by_task_id[task.id].created_at | servertime | time_span | safe }}
+                      <em>Created:</em> {{ texts_by_task_id[task.id].created_at | servertime | time_span | safe }}
                     </p>
                   {% endif %}
                   {% if texts_by_task_id[task.id].modified_at %}
                     <p class="text-right my-0 mr-3">
-                      <em>Updated:</em>: {{ texts_by_task_id[task.id].modified_at | servertime | time_span | safe }}
+                      <em>Updated:</em> {{ texts_by_task_id[task.id].modified_at | servertime | time_span | safe }}
                     </p>
                   {% endif %}
                 {% endif %}

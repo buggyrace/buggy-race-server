@@ -960,3 +960,6 @@ span.icon-eye-blocked, span.icon-eye {
   cursor:pointer;
   color:#333333;
 }
+.date-span, .time-span, .time-ago {
+  text-wrap: nowrap;
+}

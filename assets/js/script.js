@@ -518,7 +518,7 @@ $(function() {
       if (dur === -1) {
          return "tomorrow"
       } else {
-        return dur + " days hence"
+        return dur + " days to go"
       }
     } else {
       return dur + " days ago"

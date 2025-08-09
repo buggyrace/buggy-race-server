@@ -141,6 +141,19 @@
             lap-length data into the race.
           </div>
         </div>
+
+        <div class="row bg-white py-2 m-1 track-picker-control hidden-without-js">
+          <div class="col-sm-3">
+            Preview
+          </div>
+          <div class="col-sm-4">
+            <img id="racetrack-preview-image" src="{% if race is not none %}{{ race.track_image_url }}{% endif %}"
+            class="card-img-top" style="max-height:50%">
+          </div>
+          <div class="col-sm-5">
+          </div>
+        </div>
+
         <div class="row bg-white py-2 m-1 track-picker-control">
           <div class="col-sm-3">
             {{ form.track_image_url.label }}
@@ -171,6 +184,23 @@
         </div>
         <div class="row bg-white py-2 m-1 track-picker-control">
           <div class="col-sm-3">
+            {{ form.svg_path_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.svg_path_length(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Length of the SVG path. Specifically, this is the length of the
+              path in the SVG file you nominate for the track. If you don't know
+              this value already, you can see it by viewing the racetrack in
+              the racetrack gallery.
+            </p>
+            <p class="hidden-without-js" id="update-lap-length-btn-container"></p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
             {{ form.lap_length.label }}
           </div>
           <div class="col-sm-4">
@@ -178,10 +208,35 @@
           </div>
           <div class="col-sm-5">
             <p>
-              Length of one lap. Specifically, this is the length of the path
-              in the SVG file you nominate for the track. If you don't know
-              this value already, you can see it by viewing the racetrack in
-              the racetrack gallery.
+              Length of one lap.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.start_offset.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.start_offset(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              The offset of the start line (in "game length", i.e., relative to
+              lap length) along the track. If you leave this blank, it's
+              <code>0</code>: the start of the SVG path.
+            </p>
+          </div>
+        </div>
+        <div class="row bg-white py-2 m-1 track-picker-control">
+          <div class="col-sm-3">
+            {{ form.lap_length.label }}
+          </div>
+          <div class="col-sm-4">
+            {{ form.lap_length(class_="form-control mr-sm-1") }}
+          </div>
+          <div class="col-sm-5">
+            <p>
+              Length of one lap.
             </p>
           </div>
         </div>
@@ -440,6 +495,11 @@
         <div class="col">
           <p id="confirm-msg">
             Insert URLs and lap length into race?
+          </p>
+          <p id="missing-data-warning-msg" class="alert-danger p-2 hidden">
+            <strong>Warning!</strong> This racetrack is missing
+            SVG path length data: you'll need to add it yourself.
+            (Better still: cancel this and fix up the racetrack now!)
           </p>
           <p>
             Remember you'll still need to click 

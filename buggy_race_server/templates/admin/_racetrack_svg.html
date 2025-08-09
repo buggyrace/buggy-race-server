@@ -14,198 +14,232 @@
     overflow:hidden; /* otherwise SVG pushes div a bit wider */
     flex-shrink: 0;
   }
-  </style>
+</style>
+<div id="racetrack-svg-preview">
   {% if track_svg_url %}
-  <div class="row mt-3">
-    <div class="col">
-      <p id="svg-report" class="p-3"></p>
-    </div>
-  </div>
-  <div id="svg-viewbox-check" class="row hidden">
-    <div class="col">
-      <div class="alert alert-danger">
-        <h2 class="alert-title">ViewBox (from SVG)</h2>
-        <p id="svg-viewbox-check-msg" class="mx-3">
-        </p>
+    <div class="row mt-3">
+      <div class="col">
+        <p id="svg-report" class="p-3"></p>
       </div>
     </div>
-  </div>  
-{% endif %}
-<div class="row">
-<div class="col">
-  <div id="race-canvas">
-    <svg id="racetrack-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" text-rendering="geometricPrecision" shape-rendering="geometricPrecision"></svg>
+    <div id="svg-viewbox-check" class="row hidden">
+      <div class="col">
+        <div class="alert alert-danger">
+          <h2 class="alert-title">ViewBox (from SVG)</h2>
+          <p id="svg-viewbox-check-msg" class="mx-3">
+          </p>
+        </div>
+      </div>
+    </div>  
+  {% endif %}
+  <div class="row">
+    <div class="col">
+      <div id="race-canvas">
+        <svg id="racetrack-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">
+          <circle cx="0" cy="0" r="2" stroke="transparent" fill="transparent" stroke-width="1" id="start-point-circle"/>
+        </svg>
+      </div>
+    </div>
   </div>
-</div>
-</div>
-{% if track_svg_url %}
-<!-- SVG helper requires JavaScript, which will remove the "hidden" -->
-<div id="svg-helper" class="row hidden">
-  <div class="col">
-    <div class="alert alert-info">
-      <h2 class="alert-title">Path (from SVG)</h2>
-      <div class="container">
-        <div class="row">
-          <div class="col-md-6">
-            <p>
-              Calculated lap length is <code id="path-lap-length">?</code>
-              <button id="btn-copy-lap-length" class="hidden btn btn-primary">Copy</button>
-            </p>
-          </div>
-          <div class="col-md-6 text-right">
-            <div id="svg-btns" class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-primary active">
-                <input type="radio" name="options" id="btn-hide-path" autocomplete="off" value="" checked>Hide
-              </label>
-              <label class="btn btn-secondary active">
-                <input type="radio" name="options" autocomplete="off" value="white">Show
-              </label>
-              <label class="btn btn-outline-secondary btn-white" style="color:black">
-                <input type="radio" name="options" autocomplete="off" value="black"> Show
-              </label>
-              <label class="btn btn-danger">
-                <input type="radio" name="options"  autocomplete="off" value="red"> Show
-              </label>
+  {% if track_svg_url %}
+    <!-- SVG helper requires JavaScript, which will remove the "hidden" -->
+    <div id="svg-helper" class="row hidden">
+      <div class="col">
+        <div class="alert alert-info">
+          <h2 class="alert-title">Path (from SVG)</h2>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <p>
+                  Calculated lap length is <code id="path-lap-length">?</code>
+                  <button id="btn-copy-lap-length" class="hidden btn btn-primary">Copy</button>
+                </p>
+              </div>
+              <div class="col-md-6 text-right">
+                <div id="svg-btns" class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="options" id="btn-hide-path" autocomplete="off" value="" checked>Hide
+                  </label>
+                  <label class="btn btn-secondary active">
+                    <input type="radio" name="options" autocomplete="off" value="white">Show
+                  </label>
+                  <label class="btn btn-outline-secondary btn-white" style="color:black">
+                    <input type="radio" name="options" autocomplete="off" value="black"> Show
+                  </label>
+                  <label class="btn btn-danger">
+                    <input type="radio" name="options"  autocomplete="off" value="red"> Show
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-  //--------------------------------------------------------------------
-  const PATH_SVG_URL = "{{ track_svg_url }}";
-  //--------------------------------------------------------------------
-  const SVG_REPORT = document.getElementById("svg-report");
-  const COPY_BTN = document.getElementById("btn-copy-lap-length");
-  const RACETRACK_SVG = document.getElementById("racetrack-svg");
-  const RACETRACK_PATH_ID = "race-path";
-  const SVG_VIEWBOX_CHECK = document.getElementById("svg-viewbox-check");
-  const SVG_VIEWBOX_CHECK_MSG = document.getElementById("svg-viewbox-check-msg");
-
-  const SVG_HELPER = document.getElementById("svg-helper");
-  const REQUIRED_RACETRACK_WIDTH = 200;
-  const REQUIRED_RACETRACK_HEIGHT = 100;
-
-  function check_viewbox_values(viewbox_str) {
-    let is_ok = true;
-    let err_msg = "";
-    let values = viewbox_str.split(/\s+/);
-    if (values.length === 4) {
-      for (let i=0; i<values.length; i++) {
-        values[i] = parseInt(values[i]);
-        if (isNaN(values[i])) {
-          is_ok = false;
-          err_msg = "bad value in viewBox at position " + i + ": " + values[i];
-          break;
-        }
-      }
-      if (is_ok) {
-        let width = Math.abs(values[2] - values[0]);
-        let height = Math.abs(values[3] - values[1]);
-        if (width != REQUIRED_RACETRACK_WIDTH || height != REQUIRED_RACETRACK_HEIGHT) {
-          is_ok = false;
-          err_msg = "racetrack SVG viewBox must be " + REQUIRED_RACETRACK_WIDTH +
-           " × " + REQUIRED_RACETRACK_HEIGHT + ", but this one is " + width +
-           " × " + height;
-        }
-      } 
-    } else {
-      is_ok = false;
-      err_msg = ("could not find 4 values in viewBox attribute");
-    }
-    console.log(err_msg);
-    if (! is_ok) {
-      SVG_VIEWBOX_CHECK_MSG.innerText = "Problem: " + err_msg;
-      SVG_VIEWBOX_CHECK.classList.remove("hidden");
-    } else {
-      // don't reveal this (success isn't important) but set the message
-      // to avoid confustion if devs look at the source HTML in the browser
-      SVG_VIEWBOX_CHECK_MSG.innerText = "SVG viewBox dimension check " +
-        "passed OK:" + " \"" + viewbox_str + "\"";
-    }
-  }
-
-  function say(msg, is_ok){
-    SVG_REPORT.innerText = msg;;
-    SVG_REPORT.classList.add(is_ok? "alert-success" : "alert-danger");
-  }
-
-  // get the SVG
-  fetch(PATH_SVG_URL).then((response) => {
-    if (! response.ok){
-        throw new Error(`Failed to fetch the SVG: ${response.status}`);
-    }
-    return response.text()
-  }).then((svg_source) => {
-    is_ok = true;
-    try {
-      var parser = new DOMParser();
-      downloaded_svg = parser.parseFromString(svg_source, "image/svg+xml");
-    } catch (error) {
-      is_ok = false;
-      say("Fetched SVG OK, but failed to parse the data inside it", is_ok)
-    }
-    if (is_ok){
-      let svg_tag = downloaded_svg.getElementsByTagName('svg');
-      for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
-        let attib_val = undefined;
-        try {
-          attib_val = svg_tag[0].attributes[attrib_name].value;
-          if (attib_val != undefined) {
-            RACETRACK_SVG.setAttribute(attrib_name, attib_val);
-          }
-        } catch (error) {
-          console.log("failed to find " + attrib_name, error); // probably not fatal, so carry on
-        }
-        if (attrib_name === "viewBox" && attib_val) {
-          check_viewbox_values(attib_val);
-        }
-      }
-      let paths = downloaded_svg.getElementsByTagName("path");
-      if (paths.length != 1) {
-        is_ok = false;
-        if (paths.length) {
-          say("Error in racetrack (expected single path in SVG, found " + paths.length + ")", is_ok);
-        } else {
-          say("Error in racetrack (expected single path in SVG, found none — check it's a valid SVG file)", is_ok);
-        }
-      } else {
-        SVG_HELPER.classList.remove("hidden");
-        let racetrack_path = paths[0];
-        racetrack_path.setAttribute("id", RACETRACK_PATH_ID);
-        racetrack_path.setAttribute("stroke-width", 0);
-        RACETRACK_SVG.append(racetrack_path);
-        for (let label of document.querySelectorAll("#svg-btns label")){
-          let for_input = label.firstElementChild;
-          label.addEventListener(
-            "click",
-            function(e){
-              e.preventDefault();
-              let stroke_color = label.firstElementChild.value;
-              let width = stroke_color? 1 : 0;
-              racetrack_path.setAttribute("stroke-width", width);
-              racetrack_path.setAttribute("stroke", stroke_color || "none");
+    <script>
+      //--------------------------------------------------------------------
+      const PATH_SVG_URL = "{{ track_svg_url }}";
+      const RACETRACK_LAP_LENGTH = parseInt("{{ lap_length }}");
+      const RACETRACK_START_OFFSET = parseInt("{{ start_offset }}");
+      //--------------------------------------------------------------------
+      const SVG_REPORT = document.getElementById("svg-report");
+      const UPDATE_LENGTH_CONTAINER = document.getElementById("update-lap-length-btn-container");
+      const SVG_LENGTH_INPUT = document.getElementById("svg_path_length");
+      const RACETRACK_SVG = document.getElementById("racetrack-svg");
+      const RACETRACK_PATH_ID = "race-path";
+      const SVG_VIEWBOX_CHECK = document.getElementById("svg-viewbox-check");
+      const SVG_VIEWBOX_CHECK_MSG = document.getElementById("svg-viewbox-check-msg");
+      const SVG_HELPER = document.getElementById("svg-helper");
+      const REQUIRED_RACETRACK_WIDTH = 200;
+      const REQUIRED_RACETRACK_HEIGHT = 100;
+ 
+      function check_viewbox_values(viewbox_str) {
+        let is_ok = true;
+        let err_msg = "";
+        let values = viewbox_str.split(/\s+/);
+        if (values.length === 4) {
+          for (let i=0; i<values.length; i++) {
+            values[i] = parseInt(values[i]);
+            if (isNaN(values[i])) {
+              is_ok = false;
+              err_msg = "bad value in viewBox at position " + i + ": " + values[i];
+              break;
             }
-          )
+          }
+          if (is_ok) {
+            let width = Math.abs(values[2] - values[0]);
+            let height = Math.abs(values[3] - values[1]);
+            if (width != REQUIRED_RACETRACK_WIDTH || height != REQUIRED_RACETRACK_HEIGHT) {
+              is_ok = false;
+              err_msg = "racetrack SVG viewBox must be " + REQUIRED_RACETRACK_WIDTH +
+              " × " + REQUIRED_RACETRACK_HEIGHT + ", but this one is " + width +
+              " × " + height;
+            }
+          } 
+        } else {
+          is_ok = false;
+          err_msg = ("could not find 4 values in viewBox attribute");
         }
-        say("OK, got SVG from URL and loaded the path", is_ok);
-        let lap_length = Math.round(racetrack_path.getTotalLength());
-        document.getElementById("path-lap-length").innerText = lap_length;
+        console.log(err_msg);
+        if (! is_ok) {
+          SVG_VIEWBOX_CHECK_MSG.innerText = "Problem: " + err_msg;
+          SVG_VIEWBOX_CHECK.classList.remove("hidden");
+        } else {
+          // don't reveal this (success isn't important) but set the message
+          // to avoid confustion if devs look at the source HTML in the browser
+          SVG_VIEWBOX_CHECK_MSG.innerText = "SVG viewBox dimension check " +
+            "passed OK:" + " \"" + viewbox_str + "\"";
+        }
       }
-    }
-  }).catch(function(error) {
-      say("Problem getting SVG: " + error.message, false);
-  });
-</script>
-{% else %}
-<div class="row">
-  <div class="col p-3">
-    <div class="alert alert-warning">
-      No SVG path available: you'll need to supply an SVG path before you can use this racetrack.
+
+      function say(msg, is_ok){
+        SVG_REPORT.innerText = msg;;
+        SVG_REPORT.classList.add(is_ok? "alert-success" : "alert-danger");
+      }
+
+      // get the SVG
+      fetch(PATH_SVG_URL).then((response) => {
+        if (! response.ok){
+            throw new Error(`Failed to fetch the SVG: ${response.status}`);
+        }
+        return response.text()
+      }).then((svg_source) => {
+        is_ok = true;
+        try {
+          var parser = new DOMParser();
+          downloaded_svg = parser.parseFromString(svg_source, "image/svg+xml");
+        } catch (error) {
+          is_ok = false;
+          say("Fetched SVG OK, but failed to parse the data inside it", is_ok)
+        }
+        if (is_ok){
+          let svg_tag = downloaded_svg.getElementsByTagName('svg');
+          for (let attrib_name of ["viewBox"]) { // only 1 we care about (for now?)
+            let attib_val = undefined;
+            try {
+              attib_val = svg_tag[0].attributes[attrib_name].value;
+              if (attib_val != undefined) {
+                RACETRACK_SVG.setAttribute(attrib_name, attib_val);
+              }
+            } catch (error) {
+              console.log("failed to find " + attrib_name, error); // probably not fatal, so carry on
+            }
+            if (attrib_name === "viewBox" && attib_val) {
+              check_viewbox_values(attib_val);
+            }
+          }
+          let paths = downloaded_svg.getElementsByTagName("path");
+          if (paths.length != 1) {
+            is_ok = false;
+            if (paths.length) {
+              say("Error in racetrack (expected single path in SVG, found " + paths.length + ")", is_ok);
+            } else {
+              say("Error in racetrack (expected single path in SVG, found none — check it's a valid SVG file)", is_ok);
+            }
+          } else {
+            let racetrack_path = paths[0];
+            racetrack_path.setAttribute("id", RACETRACK_PATH_ID);
+            racetrack_path.setAttribute("stroke-width", 0);
+            let start_offset = 0;
+            if (RACETRACK_LAP_LENGTH && RACETRACK_START_OFFSET){
+                start_offset = (RACETRACK_START_OFFSET / RACETRACK_LAP_LENGTH) * racetrack_path.getTotalLength();
+            };
+
+            say("OK, got SVG from URL and loaded the path", is_ok);
+            let actual_svg_path_length = Math.round(racetrack_path.getTotalLength());
+            document.getElementById("path-lap-length").innerText = actual_svg_path_length;
+            RACETRACK_SVG.append(racetrack_path);
+
+            let start_point_circle = RACETRACK_SVG.getElementById("start-point-circle");
+            start_point_circle.setAttribute("transform", racetrack_path.getAttribute("transform"));
+            let start_point = racetrack_path.getPointAtLength(start_offset);
+            start_point_circle.setAttribute("cx", start_point.x);
+            start_point_circle.setAttribute("cy", start_point.y);
+
+            for (let label of document.querySelectorAll("#svg-btns label")){
+              let for_input = label.firstElementChild;
+              label.addEventListener(
+                "click",
+                function(e){
+                  e.preventDefault();
+                  let stroke_color = label.firstElementChild.value;
+                  let width = stroke_color? 1 : 0;
+                  racetrack_path.setAttribute("stroke-width", width);
+                  racetrack_path.setAttribute("stroke", stroke_color || "none");
+                  start_point_circle.setAttribute("fill", stroke_color || "none");
+                }
+              )
+            }
+            SVG_HELPER.classList.remove("hidden");
+
+            if (UPDATE_LENGTH_CONTAINER && SVG_LENGTH_INPUT && actual_svg_path_length){
+              if (actual_svg_path_length != SVG_LENGTH_INPUT.value){
+                const update_svg_length_btn = document.createElement("BUTTON");
+                update_svg_length_btn.innerHTML = "Update to " + actual_svg_path_length;
+                update_svg_length_btn.classList.add("btn-sm", "btn-primary");
+                update_svg_length_btn.addEventListener("click", function(e){
+                  e.preventDefault();
+                  SVG_LENGTH_INPUT.value = actual_svg_path_length;
+                });
+                UPDATE_LENGTH_CONTAINER.appendChild(update_svg_length_btn);
+              } else {
+                UPDATE_LENGTH_CONTAINER.innerText = "Calculated length (shown below) is " + actual_svg_path_length + ".";
+              }
+            }
+          }
+        }
+      }).catch(function(error) {
+          say("Problem getting SVG: " + error.message, false);
+      });
+    </script>
+    {% else %}
+    <div class="row">
+      <div class="col p-3">
+        <div class="alert alert-warning">
+          No SVG path available: you'll need to supply an SVG path before you can use this racetrack.
+        </div>
+      </div>
     </div>
-  </div>
+  {% endif %}  
 </div>
-{% endif %}  

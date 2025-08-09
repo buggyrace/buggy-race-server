@@ -178,6 +178,26 @@
         After that, if you need to change tasks, you should edit them
         (above, on this page) rather than generating them.
       </p>
+    </div>
+  </div>
+  <div class="row">
+    <h2 class="col my-3" id="download-markdown">
+      Download tasks as single Markdown file
+    </h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <p class="btn-collection mb-4">
+        <a href="{{ url_for('admin.download_tasks', type='default', format='md') }}"
+        class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>default</strong>
+        tasks as Markdown</a>
+        <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
+          class="btn btn-outline-secondary btn-admin btn-download {% if qty_tasks == 0 %}disabled{% endif %}">Download&nbsp;<strong>current</strong>
+          tasks as Markdown</a>
+      </p>
+      {%include "admin/_task_markdown_aside.html" %}
+    </div>
+    <div class="col-md-6">
       <p>
         If you want to load your own customised tasks, download
         the default tasks and edit them (look inside that file
@@ -195,23 +215,10 @@
         that choice, and then download the <em>current</em> tasks.
       </p>
     </div>
-    <div class="col-md-6">
-      <p class="btn-collection mb-4">
-        <a href="{{ url_for('admin.download_tasks', type='default', format='md') }}"
-        class="btn btn-outline-secondary btn-admin btn-download">Download&nbsp;<strong>default</strong>
-        tasks as Markdown</a>
-        <a href="{{ url_for('admin.download_tasks', type='current', format='md') }}"
-          class="btn btn-outline-secondary btn-admin btn-download {% if qty_tasks == 0 %}disabled{% endif %}">Download&nbsp;<strong>current</strong>
-          tasks as Markdown</a>
-      </p>
-      {%include "admin/_task_markdown_aside.html" %}
-    </div>
   </div>
-
   <p class="btn-collection">
     <a href="{{ url_for('admin.tasks_admin') }}" class="btn btn-outline-secondary btn-admin btn-jump">Tasks admin</a>
   </p>
-
   <div class="row">
     <div class="col my-3 text-right btn-collection">
       {{ macros.docs_btn("Creating tasks", "/customising/creating-tasks") }}

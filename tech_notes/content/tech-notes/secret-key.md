@@ -74,9 +74,10 @@ How does that work?
 It turns out there are a number of way to implement sessions but the most
 common is by using [cookies](https://en.wikipedia.org/wiki/HTTP_cookie).
 
-![cookies](assets/img/cookie.png) ![cookies](assets/img/cookie.png)
- ![cookies](assets/img/cookie.png)
-  ![cookies](assets/img/cookie.png)
+![cookies]({{ BUGGY_RACE_SERVER_URL }}/assets/img/cookie.png)
+![cookies]({{ BUGGY_RACE_SERVER_URL }}/assets/img/cookie.png)
+![cookies]({{ BUGGY_RACE_SERVER_URL }}/assets/img/cookie.png)
+![cookies]({{ BUGGY_RACE_SERVER_URL }}/assets/img/cookie.png)
 
 For this project you might not need to worry about cookies because if you need
 sessions, Flask handles them for you (that is, although it implements sessions

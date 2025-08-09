@@ -4,12 +4,19 @@
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField
 from wtforms.validators import DataRequired, Length
+from buggy_race_server.config import ConfigSettings
 
 class BuggyJsonForm(FlaskForm):
     """Buggy (JSON) form."""
 
     buggy_json = TextAreaField(
-        "JSON data", validators=[DataRequired(), Length(min=1, max=2048)]
+        "JSON data", validators=[
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_BUGGY_JSON_LENGTH,
+                max=ConfigSettings.MAX_BUGGY_JSON_LENGTH
+            )
+        ]
     )
 
     def __init__(self, *args, **kwargs):

@@ -21,14 +21,20 @@ class RaceForm(FlaskForm):
     id = HiddenField()
 
     title = StringField(
-        "Title", validators=[Optional(), Length(max=80)]
+        "Title", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_TITLE_LENGTH)]
     )
     desc = TextAreaField(
-        "Description", validators=[Optional(), Length(max=255)]
+        "Description", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_DESC_LENGTH)]
     )
     cost_limit = IntegerField(
         "Cost limit",
-        validators=[Optional(), NumberRange(min=10, max=None)]
+        validators=[
+            Optional(),
+            NumberRange(
+                min=ConfigSettings.MIN_RACE_COST_LIMIT,
+                max=None
+            )
+        ]
     )
     start_at = DateTimeField(
         "Race start time",
@@ -44,13 +50,13 @@ class RaceForm(FlaskForm):
     )
     is_abandoned = BooleanField("Is abandoned?")
     race_file_url = StringField(
-        "URL of results JSON", validators=[Optional(), Length(max=255)]
+        "URL of results JSON", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     track_image_url = StringField(
-        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+        "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     track_svg_url = StringField(
-        "URL of path SVG", validators=[Optional(), Length(max=255)]
+        "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
     )
     max_laps = IntegerField(
         "Number of laps",
@@ -58,6 +64,14 @@ class RaceForm(FlaskForm):
     )
     lap_length = IntegerField(
         "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    start_offset = IntegerField(
+        "Start offset",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    svg_path_length = IntegerField(
+        "SVG path length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )
     is_dnf_position = BooleanField("Is Did-Not-Finish a position?")
@@ -111,18 +125,43 @@ class RaceResultsForm(FlaskForm):
 
 class RacetrackForm(FlaskForm):
     title = StringField(
-        "Title", validators=[Optional(), Length(max=80)]
+        "Title", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_TITLE_LENGTH)]
     )
     desc = TextAreaField(
-        "Description", validators=[Optional(), Length(max=255)]
+        "Description", validators=[Optional(), Length(max=ConfigSettings.MAX_RACE_DESC_LENGTH)]
     )
     track_image_url = StringField(
-        "URL of racetrack image", validators=[Optional(), Length(max=255)]
+        "URL of racetrack image", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
+    )
+    track_image_file = FileField(
+        "Custom racetrack image", validators=[Optional()]
+    )
+    # allow form to specifiy _removal_ of (existing) image data
+    is_deleting_track_image_file = BooleanField(
+        "Delete racetrack image?",
+        default=False,
+        render_kw ={'checked':''},
+        validators=[Optional()]
     )
     track_svg_url = StringField(
-        "URL of path SVG", validators=[Optional(), Length(max=255)]
+        "URL of path SVG", validators=[Optional(), Length(max=ConfigSettings.MAX_URL_LENGTH)]
+    )
+    track_svg_file = FileField(
+        "Custom racetrack path SVG", validators=[Optional()]
+    )
+    # allow form to specifiy _removal_ of (existing) SVG
+    is_deleting_track_svg = BooleanField(
+        "Delete custom SVG?", validators=[Optional()]
     )
     lap_length = IntegerField(
         "Lap length",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    start_offset = IntegerField(
+        "Start offset",
+        validators=[Optional(), NumberRange(min=0, max=None)]
+    )
+    svg_path_length = IntegerField(
+        "SVG path length",
         validators=[Optional(), NumberRange(min=0, max=None)]
     )

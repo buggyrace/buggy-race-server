@@ -999,7 +999,6 @@ def get_races_keyed_by_racetrack_id(racetracks, races):
     """
     racetrack_races = {}
     for track in racetracks:
-        print(f"FIXME {track.id} url:{track.track_image_url}")
         racetrack_races[track.id] = [
             race for race in races if (
                 race.track_image_url and race.track_svg_url and
@@ -1008,3 +1007,22 @@ def get_races_keyed_by_racetrack_id(racetracks, races):
             )
         ]
     return racetrack_races
+
+def get_alien_server_url(alien_url):
+    """ return URL of server (domain) if it is not the race server's, otherwise None.
+        If it doesn't start with http, assume relative URL, so return None.
+    """
+    alien_url = str(alien_url)
+    if (alien_url.lower().startswith("http") and
+         not alien_url.startswith(current_app.config.get(
+            ConfigSettingNames.BUGGY_RACE_SERVER_URL.name
+        ).lower())
+    ):
+        return re.sub(r"(?<=\w)/.*", "", alien_url)
+    return None
+
+def make_race_server_url(abs_path):
+    url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
+    if url.endswith("/"):
+        url = url[:-1]
+    return url + abs_path

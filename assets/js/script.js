@@ -377,63 +377,67 @@ $(function() {
 
   function show_or_hide_col_by_button(btn, want_to_hide, want_slow_fade){
     let css_class = btn.dataset.itemHidden;
-    localStorage.setItem(css_class, want_to_hide);
-    let $elements = $("."+css_class);
-    if (want_to_hide) {
-      btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
-      btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
-      if (want_slow_fade) {
-        $elements.fadeOut("slow");
-      } else {
-        $elements.hide();
-      }
-    } else {
-      btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
-      btn.classList.add(CSS_BTN_COLUMN_SHOWN);
-      if (want_slow_fade) {
-        $elements.fadeIn("slow");
-      } else {
-        $elements.show();
-      }
+    if (! css_class){
+      return;
     }
+    localStorage.setItem(css_class, want_to_hide);
     if (css_class === ALL_COLUMNS) {
-      $user_column_toggle_div.find("button").each(function(){
-        let this_col = $(this)[0].dataset.itemHidden;
-        if (this_col != ALL_COLUMNS && this_col != SHOW_HIDE_TIMES) {
-          show_or_hide_col_by_button($(this)[0], want_to_hide, false)
+      for (let el of user_column_toggle_div.getElementsByTagName("button")){
+        let this_col = el.dataset.itemHidden;
+        if (this_col && this_col != ALL_COLUMNS && this_col != SHOW_HIDE_TIMES) {
+          show_or_hide_col_by_button(el, want_to_hide, false)
         }
-      });
+      }
     } else if (css_class === SHOW_HIDE_TIMES) {
-      // pass: not a true column button
+      // pass: not a true column button but does affect the "ago" button
+      let time_ago_toggle_btn = document.getElementById("time-ago-toggle-btn");
+      if (time_ago_toggle_btn) {
+        update_ago_timestamps(false, time_ago_toggle_btn);
+      }
     } else if (want_to_hide && btn_all_columns){
       // "All columns" not marked as "shown" if any cols are hidden
       btn_all_columns.classList.remove(CSS_BTN_COLUMN_SHOWN);
       btn_all_columns.classList.add(CSS_BTN_COLUMN_HIDDEN);
     }
+    let dom_elements = document.getElementsByClassName(css_class);
+    if (want_to_hide) {
+      btn.classList.remove(CSS_BTN_COLUMN_SHOWN);
+      btn.classList.add(CSS_BTN_COLUMN_HIDDEN);
+      for (el of dom_elements){
+        el.classList.add("hidden")
+      }
+    } else {
+      btn.classList.remove(CSS_BTN_COLUMN_HIDDEN);
+      btn.classList.add(CSS_BTN_COLUMN_SHOWN);
+      for (el of dom_elements){
+        el.classList.remove("hidden")
+      }
+    }
   }
-  let $user_column_toggle_div = $("#user-column-toggles");
-  if ($user_column_toggle_div){
-    $user_column_toggle_div.find("button").each(function(){
-      if ($(this)[0].dataset.itemHidden != SHOW_HIDE_TIMES) {
-        $(this).on("click", function(e){
+
+  let user_column_toggle_div = document.getElementById("user-column-toggles");
+  if (user_column_toggle_div){
+    for (let element of user_column_toggle_div.getElementsByTagName("button")){
+      if (element.dataset.itemHidden != SHOW_HIDE_TIMES) {
+        element.addEventListener("click", function(e){
           show_or_hide_col_by_button(
             e.target,
             e.target.classList.contains(CSS_BTN_COLUMN_SHOWN),
             true
           )
         });
-        let want_to_hide = localStorage.getItem(this.dataset.itemHidden)=="true";
-        if ($(this)[0].dataset.itemHidden == ALL_COLUMNS) {
-          btn_all_columns = this;
+        let want_to_hide = localStorage.getItem(element.dataset.itemHidden)=="true";
+        if (element.itemHidden == ALL_COLUMNS) {
+          btn_all_columns = element;
         } else {
           show_or_hide_col_by_button(
-            $(this)[0],
+            element,
             want_to_hide,
             false
           );
         }
       }
-    });
+    }
   }
 
   let long_short_time_btn = document.getElementById("long-short-time-chooser-btn");
@@ -454,6 +458,87 @@ $(function() {
     });
   }
 
+  function get_date(date_str){ // date_str get YYYY-MM-DD
+    let date_found = date_str.match(/(\b\d\d\d\d-\d\d-\d\d\b)/);
+    if (date_found) {
+      return Date.parse(date_found[1]);
+    }
+  }
+
+  var is_updating_ago = false;
+  function update_ago_timestamps(want_to_show_ago, button){
+    if (is_updating_ago){
+      return;
+    }
+    is_updating_ago = true;
+    if (button){
+      if (want_to_show_ago){
+        button.classList.add("btn-dark");
+        button.classList.remove("btn-outline-secondary");
+      } else {
+        button.classList.remove("btn-dark");
+        button.classList.add("btn-outline-secondary");
+      }
+    }
+    let datetime_spans = document.getElementsByClassName("datetime");
+    let today = get_date(new Date().toISOString().slice(0, 10));
+    for (let datetime_span of datetime_spans){
+      let datetime = get_date(datetime_span.dataset['datetime']);
+      let span_ago = datetime_span.getElementsByClassName("time-ago");
+      let date_span = datetime_span.getElementsByClassName("date-span");
+      let time_span = datetime_span.getElementsByClassName("time-span");
+      if (span_ago) { span_ago = span_ago[0]; }
+      if (date_span) { date_span = date_span[0]; }
+      if (time_span) { time_span = time_span[0]; }
+      if (span_ago && date_span && time_span) {
+        if (want_to_show_ago) {
+          span_ago.innerText = get_ago_str(today, datetime);
+          span_ago.classList.remove("hidden");
+          date_span.classList.add("hidden");
+          time_span.classList.add("hidden");
+        } else {
+          span_ago.classList.add("hidden");
+          date_span.classList.remove("hidden");
+          time_span.classList.remove("hidden");
+        }
+      }
+    };
+    localStorage.setItem("show-ago", `${want_to_show_ago}`);
+    is_updating_ago = false;
+  }
+
+  const DAY_IN_MS = 1000 * 60 * 60 * 24;
+  function get_ago_str(today, date) {
+    let dur = (today - date) / DAY_IN_MS;
+    if (dur === 0) {
+      return "today"
+    } else if (dur === 1) {
+      return "yesterday"
+    } else if (dur < 0) {
+      if (dur === -1) {
+         return "tomorrow"
+      } else {
+        return dur + " days to go"
+      }
+    } else {
+      return dur + " days ago"
+    }
+  }
+
+  let time_ago_toggle_btn = document.getElementById("time-ago-toggle-btn");
+  if (time_ago_toggle_btn){
+    time_ago_toggle_btn.addEventListener("click", function(e){
+      update_ago_timestamps(
+        ! time_ago_toggle_btn.classList.contains("btn-dark"),
+        time_ago_toggle_btn
+      );
+    });
+    let is_showing_ago = localStorage.getItem("show-ago")=="true";
+    if (is_showing_ago) {
+      update_ago_timestamps(is_showing_ago, time_ago_toggle_btn);
+    }
+  } 
+  
   let $task_counts = $(".task-count");
   if ($task_counts){
 
@@ -635,6 +720,7 @@ $(function() {
     const $TRACK_PICKER_MODAL = $("#track-picker-modal"); // needed to dismiss, sigh
     const $CONFIRM_MODAL = $("#confirm-modal");
     const CONFIRM_MSG = document.getElementById("confirm-msg");
+    const SVG_LENGTH_WARNING_MSG = document.getElementById("missing-data-warning-msg");
     const INSERT_CONFIRM_BTN = document.getElementById("confirm-track-insert");
     const RACE_SUBMIT_BTN = document.getElementById("race-submit-btn");
     const REMINDER_BTN_TXT  = document.getElementById("reminder-btn-text");
@@ -642,11 +728,14 @@ $(function() {
     const TRACK_EDIT_VIEW_BTNS = document.getElementsByClassName("track-view-edit-btns");
     const TRACK_PICKER_BTN_ROW = document.getElementById("track-picker-btn-row");
     const TRACK_PICKER_CONTROLS = document.getElementsByClassName("track-picker-control");
+    const TRACK_PREVIEW_IMG = document.getElementById("racetrack-preview-image");
 
     const RACE_TRACK_INPUTS = {
       "track_image_url": document.querySelector('input[name="track_image_url"]'),
       "track_svg_url": document.querySelector('input[name="track_svg_url"]'),
-      "lap_length": document.querySelector('input[name="lap_length"]')
+      "svg_path_length": document.querySelector('input[name="svg_path_length"]'),
+      "lap_length": document.querySelector('input[name="lap_length"]'),
+      "start_offset": document.querySelector('input[name="start_offset"]')
     }
 
     var selected_card = null;
@@ -668,7 +757,12 @@ $(function() {
           }
           e.preventDefault();
           selected_card = card;
-          CONFIRM_MSG.innerText = `Insert URLs and lap length from "${card.dataset.title}" into race?`;
+          CONFIRM_MSG.innerText = `Insert URLs and track data from "${card.dataset.title}" into race?`;
+          if (isNaN(parseInt(card.dataset.svgPathLength))) {
+            SVG_LENGTH_WARNING_MSG.classList.remove("hidden")
+          } else {
+            SVG_LENGTH_WARNING_MSG.classList.add("hidden")
+          }
           REMINDER_BTN_TXT.innerText = RACE_SUBMIT_BTN.value;
           // non-trivial to dismiss bootstrap modal without jQuery :-(
           $TRACK_PICKER_MODAL.modal("hide");
@@ -683,7 +777,10 @@ $(function() {
         if (selected_card){
           RACE_TRACK_INPUTS["track_image_url"].value = selected_card.dataset.trackImageUrl;
           RACE_TRACK_INPUTS["track_svg_url"].value = selected_card.dataset.trackSvgUrl;
-          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;  
+          RACE_TRACK_INPUTS["svg_path_length"].value = selected_card.dataset.svgPathLength;
+          RACE_TRACK_INPUTS["lap_length"].value = selected_card.dataset.lapLength;
+          RACE_TRACK_INPUTS["start_offset"].value = selected_card.dataset.startOffset;
+          TRACK_PREVIEW_IMG.setAttribute("src", selected_card.dataset.trackImageUrl);
         } else {
           console.error("unexpected: no racetrack selected")
         }
@@ -701,27 +798,29 @@ $(function() {
   const SHOW_RACES_BTN = document.getElementById("show-used-by-races-btn");
   // used on admin/_racetracks.html (which is both for managing racetracks and
   // in the select-a-racetrack dialogue when editing/making a new race)
-  if (SHOW_RACES_BTN) {
+  // (checking for .card.racetrack because if none... don't show the button)
+  if (SHOW_RACES_BTN && document.querySelector(".card.racetrack")) {
     SHOW_RACES_BTN.innerText = "Show used-by races";
     SHOW_RACES_BTN.classList.remove("hidden");
     SHOW_RACES_BTN.addEventListener("click", function(e){
       e.preventDefault();
       let want_to_show = SHOW_RACES_BTN.innerText.indexOf("Show") === 0;
-      for (const used_by_race_link of document.getElementsByClassName("used-by-races")){
+      const used_by_races_divs = document.getElementsByClassName("used-by-races");
+      for (const used_by_race_link of used_by_races_divs){
         if (want_to_show){
           used_by_race_link.classList.remove("hidden");
         } else {
           used_by_race_link.classList.add("hidden");
         }
       }
+      const qty_used_racetracks = used_by_races_divs.length;
       if (want_to_show){
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Show", "Hide", 1)
+        SHOW_RACES_BTN.innerText = "Hide used-by races (" + qty_used_racetracks + ")"
       } else {
-        SHOW_RACES_BTN.innerText = SHOW_RACES_BTN.innerText.replace("Hide", "Show", 1)
+        SHOW_RACES_BTN.innerText = "Show used-by races (" + qty_used_racetracks + ")"
       }
     })
   }
-
 })
 
 $(function() {

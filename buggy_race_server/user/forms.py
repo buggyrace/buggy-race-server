@@ -14,7 +14,12 @@ class UserForm(FlaskForm):
     """User form (for editing user details)."""
     id = HiddenField(DataRequired())
     username = StringField(
-        "Username", validators=[DataRequired(), Length(min=3, max=80)]
+        "Username", validators=[
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_USERNAME_LENGTH,
+                max=ConfigSettings.MAX_USERNAME_LENGTH
+            )]
     )
 
     # fields that aren't being used (because config says so)
@@ -31,7 +36,12 @@ class UserForm(FlaskForm):
     is_active = BooleanField("Is active?")
     is_login_enabled = BooleanField("Is login enabled?")
     is_demo_user = BooleanField("Is demo user?")
-    comment = TextAreaField("Comment", validators=[Optional(), Length(max=1024)])
+    comment = TextAreaField(
+        "Comment", validators=[
+            Optional(),
+            Length(max=ConfigSettings.MAX_COMMENT_LENGTH)
+        ]
+    )
     access_level = IntegerField("Staff role", validators=[Optional()])
     auth_code = PasswordField("Authorisation code",  [is_authorised])
 
@@ -54,13 +64,19 @@ class UserForm(FlaskForm):
     def validate_ext_username(self, field):
         value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
-            UserForm.check_length(field.name, value, min=3, max=32)
+            UserForm.check_length(field.name, value,
+                min=ConfigSettings.MIN_EXT_USERNAME_LENGTH,
+                max=ConfigSettings.MAX_EXT_USERNAME_LENGTH
+            )
         return value
 
     def validate_email(self, field):
         value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
-            UserForm.check_length(field.name, value, min=3, max=80)
+            UserForm.check_length(field.name, value,
+                min=ConfigSettings.MIN_EMAIL_LENGTH,
+                max=ConfigSettings.MAX_EMAIL_LENGTH
+            )
             if not '@' in value:
                 raise ValidationError("Email must contain @-sign")
         return value
@@ -68,13 +84,19 @@ class UserForm(FlaskForm):
     def validate_first_name(self, field):
         value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
-            UserForm.check_length(field.name, value, min=3, max=32)
+            UserForm.check_length(field.name, value,
+                min=ConfigSettings.MIN_FIRST_NAME_LENGTH,
+                max=ConfigSettings.MAX_FIRST_NAME_LENGTH
+            )
         return value
 
     def validate_last_name(self, field):
         value = field.data.strip() if field.data is not None else None
         if UserForm.is_mandatory_by_config(current_app, field.name, value):
-            UserForm.check_length(field.name, value, min=3, max=32)
+            UserForm.check_length(field.name, value,
+                min=ConfigSettings.MIN_LAST_NAME_LENGTH,
+                max=ConfigSettings.MAX_LAST_NAME_LENGTH
+            )
         return value
 
     def validate_access_level(self, field):
@@ -103,7 +125,13 @@ class UserForm(FlaskForm):
 class RegisterForm(UserForm):
     """Register form."""
     password = PasswordField(
-        "Password", validators=[DataRequired(), Length(min=4, max=40)]
+        "Password", validators=[
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_PASSWORD_LENGTH,
+                max=ConfigSettings.MAX_PASSWORD_LENGTH
+            )
+        ]
     )
     confirm = PasswordField(
         "Verify password",
@@ -137,7 +165,13 @@ class ChangePasswordForm(FlaskForm):
         "Username", validators=[Optional()], choices=[], validate_choice=False
     )
     password = PasswordField(
-        "New password", validators=[DataRequired(), Length(min=4, max=40)]
+        "New password", validators=[
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_PASSWORD_LENGTH,
+                max=ConfigSettings.MAX_PASSWORD_LENGTH
+            )
+        ]
     )
     confirm = PasswordField(
         "Verify new password",
@@ -148,7 +182,13 @@ class ChangePasswordForm(FlaskForm):
 
     auth_code = PasswordField(
         """Authorisation code""",
-        validators=[Optional(), Length(min=4, max=40)]
+        validators=[
+            Optional(),
+            Length(
+                min=ConfigSettings.MIN_PASSWORD_LENGTH,
+                max=ConfigSettings.MAX_PASSWORD_LENGTH
+            )
+        ]
     )
 
     def __init__(self, *args, **kwargs):
@@ -171,7 +211,13 @@ class ChangePasswordForm(FlaskForm):
 class ApiSecretForm(FlaskForm):
     """API secret form."""
     api_secret = StringField(
-        "API secret", validators=[DataRequired(), Length(min=4, max=40)]
+        "API secret", validators=[
+            DataRequired(),
+            Length(
+                min=ConfigSettings.MIN_API_SECRET_LENGTH,
+                max=ConfigSettings.MAX_API_SECRET_LENGTH
+            )
+        ]
     )
     is_one_time_password = BooleanField(
         "Is one-time password?", validators=[Optional()]
@@ -192,7 +238,7 @@ class ApiSecretForm(FlaskForm):
 class UserCommentForm(FlaskForm):
     comment = TextAreaField(
         "Comment",
-        validators=[Optional(), Length(max=1024)]
+        validators=[Optional(), Length(max=ConfigSettings.MAX_COMMENT_LENGTH)]
     )
 
     def __init__(self, *args, **kwargs):

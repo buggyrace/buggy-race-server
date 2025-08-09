@@ -592,9 +592,14 @@ def run_race(race_data):
     lap_length = input_integer(
         "lap length",
         minimum=1,
-        default=race_data.get("lap_length") or DEFAULT_LAP_LENGTH,
+        default=race_data.get("lap_length") or race_data.get("svg_path_length") or DEFAULT_LAP_LENGTH,
     )
-    dnf_default = race_data.get("is_dnfx_position") 
+    svg_path_length = input_integer(
+        "SVG path length",
+        minimum=1,
+        default=race_data.get("svg_path_length") or race_data.get("svg_path_length") or DEFAULT_LAP_LENGTH,
+    )
+    dnf_default = race_data.get("is_dnf_position") 
     if dnf_default is None:
         print("[!] !!! caution: \"is DNF a position?\" is not in the race file: ")
         print("[!]     maybe check what's up on the server for this race")
@@ -629,7 +634,7 @@ def run_race(race_data):
     finishers = []
     non_finishers = []
     if len(buggies) == 0:
-        print("[!] look like this race may need to be abandoned because nobody entered it")
+        print("[!] looks like this race may need to be abandoned because nobody entered it")
     else:
         if not (
             input_boolean(
@@ -650,14 +655,14 @@ def run_race(race_data):
             steps += 1
             print(f"------------------------ step {steps} ------------------------")
 
-            if steps > 2: # no fighting on the start line, it's unsporting
+            if steps > 1: # no fighting on the start line, it's unsporting
                 # calculate attacks:
                 # doing this before anyone has moved: now we calculate
                 # proximity (caculating attacks during the move loop is unfair
                 # on buggies early/late in the move cycle)
-                # TODO randomise the order of the buggies to prevent advantage
-                # to earlier (because a parked buggy won't attack so the order
-                # of attack matters )
+                # Shufffle the order of the buggies to prevent advantage to
+                # earlier (because a parked buggy won't attack so the order of
+                # attack matters )
                 shuffle(buggies)
                 for buggy in [b for b in buggies if b.qty_attacks > 0 and not b.is_parked]:
                     if buggy.attack is None or buggy.attack == 'none':
@@ -823,9 +828,10 @@ def run_race(race_data):
             key=lambda buggy: buggy.d,
             reverse=True
         )
-        for buggy in non_finishers:
-            buggy.position = next_finisher_position
-            next_finisher_position += 1
+        if is_dnf_a_position:
+            for buggy in non_finishers:
+                buggy.position = next_finisher_position
+                next_finisher_position += 1
 
     top_dogs = finishers.copy()
     if is_dnf_a_position:
@@ -866,6 +872,7 @@ def run_race(race_data):
       "max_laps": max_laps,
       "track_image_url": race_data.get("track_image_url") or "",
       "track_svg_url": race_data.get("track_svg_url") or "",
+      "svg_path_length": svg_path_length,
       "lap_length": lap_length,
       "league": race_data.get("league"),
       "start_at": race_data.get("start_at") or "",

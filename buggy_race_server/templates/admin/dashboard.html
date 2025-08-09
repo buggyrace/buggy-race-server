@@ -343,6 +343,7 @@
     <div class="row">
       <div class="col mt-5">
         <p class="btn-collection">
+          <a href="{{ url_for('admin.download_dashboard_summary_json') }}" class="btn btn-primary btn-download">Download data snapshot</a>
           <a href="{{ url_for('admin.show_system_info') }}" class="btn btn-outline-secondary btn-admin btn-jump">System info</a>
           <a href="{{ url_for('admin.setup') }}" class="btn btn-outline-secondary btn-admin btn-jump">Setup summary</a>
         </p>

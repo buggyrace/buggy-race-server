@@ -580,8 +580,12 @@ span.btn.disabled{
   background-color:#ffffff;
   margin: 0 0 0 0;
 }
-.hidden{
+.hidden {
   display: none; /* bootstrap's d-none too heavy-handed: has !important */
+}
+
+.no-js .hidden-without-js {
+  display: none;
 }
 
 .task-text {
@@ -955,4 +959,7 @@ label.radio-chooser input {
 span.icon-eye-blocked, span.icon-eye {
   cursor:pointer;
   color:#333333;
+}
+.date-span, .time-span, .time-ago {
+  text-wrap: nowrap;
 }

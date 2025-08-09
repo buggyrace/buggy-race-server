@@ -243,14 +243,36 @@ def report():
           </a>
         </h2>
         <div class="alert alert-danger border border-danger">
-          This section describes the <em>empty HTML code</em> you can use in
-          your <code>{{report_type}}.html</code> template.
-          <strong>If you create "task texts" as described above, you don't
-          have to do this!</strong> It's what you get when you download
-          <a href="{{ url_for('user.list_task_texts') }}">your texts</a>:
-          choose the <strong>download as HTML</strong> button (with markdown,
-          if you want).
+          <p>
+            This section shows you the <em>empty HTML code</em> you can use in
+            your <code>{{report_type}}.html</code> template for individual task
+            texts.
+            {% if is_storing_texts %}
+              <strong>If you create "task texts" as described above, you don't
+              have to do this</strong>, because it's what the server automatically
+              does when you <a href="{{ url_for('user.list_task_texts') }}">download
+              your texts as HTML</a>.
+            {% endif %}
+          </p>
+          {% if is_storing_texts %}
+            <p>Check the box to see the HTML:</p>
+            <form class="row">
+              <div class="col-2 text-right">
+                <input type="checkbox" value="1" id="i-understand" name="i-understand">
+              </div>
+              <div class="col-10">
+                <label for="i-understand">
+                  I understand that I don't need to use this if I
+                  <em>download my texts as HTML</em>.
+                </label>
+              </div>
+            </p>
+          {% endif %}
         </div>
+      </div>
+    </div>
+    <div class="row reveal-only-if-confirmed">
+      <div class="col-lg-8">
         <p>
           For each task you attempted, take this HTML and add it to your
           report (in the <code>tasks</code> <code>section</code>).
@@ -260,9 +282,9 @@ def report():
         <p>
           You'll need one of these for each task you attempted:
         </p>
-      </div>
+      </div>      
     </div>
-    <div class="row">
+    <div class="row reveal-only-if-confirmed">
       <div class="col example-report copy-to-clipboard" data-target="general-task-html">
         <pre id="general-task-html" class="border border-secondary p-3">&lt;div class="task"&gt;
   &lt;h2&gt;<span id="task-html-task-id">TASK-NAME TASK-TITLE</span>&lt;/h2&gt;
@@ -276,6 +298,26 @@ def report():
       </div>
     </div>
     <script>
+      const USER_CONSENT_CHECKBOX = document.getElementById("i-understand");
+      if (USER_CONSENT_CHECKBOX){ // will not be found if server not storing task texts
+        const HIDDEN_UNTIL_APPROVED = document.getElementsByClassName("reveal-only-if-confirmed");
+        for (const elem of HIDDEN_UNTIL_APPROVED){
+          elem.classList.add("hidden");
+        }
+        document.getElementById("i-understand").addEventListener(
+          "change",
+          function(event){
+            event.preventDefault();
+            for (const elem of HIDDEN_UNTIL_APPROVED){
+              if(event.target.checked) {
+                elem.classList.remove("hidden");
+              } else {
+                elem.classList.add("hidden");
+              }
+            }          
+          }
+        )
+      }
       const TASK_HTML_PRE = document.getElementById("general-task-html");
       const TASK_ID_SPAN = document.getElementById("task-html-task-id");
       if (TASK_HTML_PRE && TASK_ID_SPAN){

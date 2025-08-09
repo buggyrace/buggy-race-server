@@ -37,9 +37,7 @@ class Racetrack(SurrogatePK, Model):
 
     @staticmethod
     def get_local_url_for_asset(filename):
-        server_url = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name]
-        path_url = url_for("race.serve_racetrack_asset", filename=filename)
-        return f"{server_url}/{path_url}"
+        return url_for("race.serve_racetrack_asset", filename=filename)
 
 
     """ Racetrack used to populate race-construction pages
@@ -57,7 +55,13 @@ class Racetrack(SurrogatePK, Model):
     desc = Column(db.Text(), unique=False, nullable=False, default="")
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
+    track_image = Column(db.LargeBinary(length=None), nullable=True)
+    image_media_type = Column(db.String(32), nullable=True)
+    track_svg = Column(db.Text(), unique=False, nullable=True)
+    svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
+    start_offset = Column(db.Integer, nullable=True)
+    finish_offset = Column(db.Integer, nullable=True)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -91,7 +95,10 @@ class Race(SurrogatePK, Model):
     track_image_url = Column(db.String(255), unique=False, nullable=True)
     track_svg_url = Column(db.String(255), unique=False, nullable=True)
     max_laps = db.Column(db.Integer(),  nullable=True)
+    svg_path_length = Column(db.Integer, nullable=True)
     lap_length = Column(db.Integer, nullable=True)
+    start_offset = Column(db.Integer, nullable=True)
+    finish_offset = Column(db.Integer, nullable=True)
     is_dnf_position = Column(db.Boolean(), nullable=False, default=bool(ConfigSettings.DEFAULTS[ConfigSettingNames.IS_DNF_POSITION_DEFAULT.name]))
     is_abandoned = Column(db.Boolean(), nullable=False, default=False)
 
@@ -391,14 +398,12 @@ class Race(SurrogatePK, Model):
             self.buggies_started = qty_buggies_started
             self.buggies_finished = qty_buggies_finished
             self.max_laps = max_laps
-            if results_data.get("race_file_url"):
-                if self.race_file_url:
-                    if is_overwriting_urls:
-                        self.race_file_url = results_data.get("race_file_url")
-                    else:
-                        warnings.append("Did not overwrite race result log URL")
-                else:
+            if results_data.get("race_file_url") and self.race_file_url and \
+               results_data.get("race_file_url") != self.race_file_url:
+                if is_overwriting_urls:
                     self.race_file_url = results_data.get("race_file_url")
+                else:
+                    warnings.append("Did not overwrite race result log URL (you must explicitly allow this)")
             db.session.commit()
         return [ f"Warning: {warning}" for warning in warnings ]
 
@@ -421,9 +426,13 @@ class Race(SurrogatePK, Model):
             "race_file_url": self.race_file_url,
             "title": self.title,
             "description": self.desc,
+            "cost_limit": self.cost_limit,
             "track_image_url": self.track_image_url,
             "track_svg_url": self.track_svg_url,
+            "svg_path_length": self.svg_path_length,
             "lap_length": self.lap_length,
+            "start_offset": self.start_offset,
+            "finish_offset": self.finish_offset,
             "max_laps": self.max_laps,
             "is_dnf_position": self.is_dnf_position,
             "start_at": servertime_str(

@@ -2,6 +2,12 @@
 # race.log used for report of race
 buggies.csv
 race.log
+# common/useful to have race files in the project root directory
+# when running races locally, so any such JSON file with "race"
+# in the name (NB there are system config JSON files we are tracking!)
+/*race*.json
+/*results*.json
+/*buggies*.csv
 
 published/tech_notes/
 published/_task_list.html

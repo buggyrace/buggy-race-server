@@ -115,7 +115,15 @@ def create_app():
                 return int(diff.total_seconds())
             
     def wrap_datetime_in_spans(time_str):
-        return re.sub(r'(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d(:\d\d)?)$', r'<span class="datetime" data-datetime="\1 \2"><span class="date-span">\1</span> <span class="time-span">\2</span><span class="time-ago hidden"></span></span>', time_str)
+        if time_str is None:
+            return ""
+        return re.sub(
+            r'(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d(:\d\d)?)$',
+            r'<span class="datetime" data-datetime="\1 \2">'
+            r'<span class="date-span">\1</span> <span class="time-span">\2</span>'
+            r'<span class="time-ago hidden"></span></span>',
+            time_str
+        )
 
     def add_word_break_hints(config_name_str):
         """Insert <wbr/> (HTML word break hint) after each underscore"""

@@ -182,6 +182,48 @@
               {% endif %}
             </td>  
           </tr>
+          {% if is_showing_project_notices %}
+            <tr>
+              <td>
+                Project note
+              </td>
+              <td>
+                {% if user.project_notice is not none %}
+                  {{ user.project_notice }}
+                {% else %}
+                  <em class="empty-setting">none</em>
+                {% endif %}
+              </td>  
+            </tr>
+          {% endif %}
+          {% if is_submission_deadline_customisable %}
+            <tr>
+              <td>
+                Submission deadline
+              </td>
+              <td>
+                {% if user.submission_deadline %}
+                  {{ user.submission_deadline | servertime | time_span | safe }}
+                {% else %}
+                  <em class="empty-setting">Project&nbsp;default</em>
+                {% endif %}
+              </td>  
+            </tr>
+          {% endif %}
+          {% if is_submission_link_customisable %}
+            <tr>
+              <td>
+                Submission link
+              </td>
+              <td>
+                {% if user.submission_link %}
+                  <a href="{{ user.submission_link }}">{{ user.submission_link }}</a>
+                {% else %}
+                  <em class="empty-setting">Project&nbsp;default</em>
+                {% endif %}
+              </td>  
+            </tr>
+          {% endif %}
           <tr>
             <td>
               API secret
@@ -218,6 +260,7 @@
         </tbody>
       </table>
     </div>
+
     <div class="col-md-6">
       <div class="border mb-3">
         <div class="alert-secondary p-3 ">

@@ -109,6 +109,9 @@ class User(UserMixin, SurrogatePK, Model):
     api_key = Column(db.String(30), nullable=True)
     comment = Column(db.Text(), default=False)
     is_demo_user = Column(db.Boolean(), default=False)
+    project_notice = Column(db.Text(), nullable=True)
+    submission_deadline = Column(db.DateTime(timezone=True), nullable=True)
+    submission_link = Column(db.String(128), nullable=True)
     buggies = db.relationship("Buggy", backref="users", cascade="all, delete", lazy=True)
     tasktexts = db.relationship('TaskText', backref='users', cascade="all, delete")
 
@@ -183,6 +186,8 @@ class User(UserMixin, SurrogatePK, Model):
             'github_username': self.github_username,
             'github_repo': repo,
             'comment': self.comment,
+            'sub_deadline': self.sub_deadline,
+            'sub_url': self.sub_url,
         }
         mandatory_fieldnames = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
         for fieldname in mandatory_fieldnames:

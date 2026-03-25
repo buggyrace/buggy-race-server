@@ -278,9 +278,6 @@
           {% if is_showing_workflow %}
             <a class="btn btn-outline-secondary btn-white btn-jump" href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
           {% endif %}
-          {% if submission_link %}
-            <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-white btn-jump">Submission</a>
-          {% endif %}
         </p>
         {% include "public/project/_project_links.html" %}
       </div>

@@ -664,6 +664,13 @@ def get_admin_dashboard_data_response(want_json=False):
         response.headers["Content-type"] = "application/json"
         response.headers["Content-Disposition"] = f"attachment; filename={filename}"
         return response
+    project_customisable_details_dict = {}
+    if current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name]:
+        project_customisable_details_dict["deadlines"] = sum([1 for s in students_active if s.submission_deadline])
+    if current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name]:
+        project_customisable_details_dict["links"] = sum([1 for s in students_active if s.submission_link])
+    if current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]:
+        project_customisable_details_dict["notes"] = sum([1 for s in students_active if s.project_notice])
     return render_template(
         "admin/dashboard.html",
         form=GeneralSubmitForm(), # for publish submit buttons
@@ -680,6 +687,7 @@ def get_admin_dashboard_data_response(want_json=False):
           current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name]
         ),
         other_users=other_users,
+        project_customisable_details_dict=project_customisable_details_dict,
         purge_form = GeneralSubmitForm(),
         qty_buggies=qty_buggies,
         qty_other_users=qty_other_users,
@@ -704,7 +712,7 @@ def get_admin_dashboard_data_response(want_json=False):
         students_logged_in_ever=students_logged_in_ever,
         students_never_logged_in=students_never_logged_in,
         submission_deadline=submission_deadline,
-        submit_deadline_day=get_day_of_week(submission_deadline),
+        submission_deadline_day=get_day_of_week(submission_deadline),
         tasks=tasks,
         task_list_updated_timestamp=current_app.config[ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name],
         tech_notes_generated_at=current_app.config[ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name],
@@ -946,6 +954,11 @@ def show_user(user_id):
         student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
         upload_text_form=UploadTaskTextsForm(),
         vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
+        is_showing_project_notices=current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name],
+        is_submission_deadline_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name],
+        project_submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+        is_submission_link_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name],
+        project_submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
     )
 
 def manage_user(user_id):
@@ -990,6 +1003,12 @@ def manage_user(user_id):
               user.ext_username = form.ext_username.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_EXT_ID.name]:
               user.ext_id = form.ext_id.data
+          if current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]:
+              user.project_notice = form.project_notice.data
+          if current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name]:
+              user.submission_deadline = form.submission_deadline.data
+          if current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name]:
+              user.submission_link = form.submission_link.data
           if not is_registering_new_user:
               if form.access_level.data > user.access_level:
                   flash(f"Promoted user to {User.ROLE_NAMES[form.access_level.data]}", "info")
@@ -1032,6 +1051,12 @@ def manage_user(user_id):
       is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
       is_registration_allowed=current_app.config[ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name],
       student_editor_repo_domain=current_app.config[ConfigSettingNames.STUDENT_EDITOR_REPO_URL.name],
+      is_showing_project_notices=current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name],
+      is_html_enabled_in_project_notices=current_app.config[ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name],
+      is_submission_deadline_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name],
+      project_submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
+      is_submission_link_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name],
+      project_submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
       user=user,
       vcs_name=current_app.config[ConfigSettingNames.VCS_NAME.name],
   )

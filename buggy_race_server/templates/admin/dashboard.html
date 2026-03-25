@@ -272,8 +272,9 @@
               Project customisations
             </td>
             <td colspan="3">
+              <span class="empty-setting">active&nbsp;students:</span><br>
               {% for detail_name in project_customisable_details_dict %}
-                {{ detail_name }} ({{ project_customisable_details_dict[detail_name] }})
+                {{ detail_name }}&nbsp;&times;&nbsp;{{ project_customisable_details_dict[detail_name] }}
                 {%- if not loop.last %}, {% endif %}
               {% endfor %}
             </td>

@@ -670,7 +670,7 @@ def get_admin_dashboard_data_response(want_json=False):
     if current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name]:
         project_customisable_details_dict["links"] = sum([1 for s in students_active if s.submission_link])
     if current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]:
-        project_customisable_details_dict["notes"] = sum([1 for s in students_active if s.project_notice])
+        project_customisable_details_dict["notices"] = sum([1 for s in students_active if s.project_notice])
     return render_template(
         "admin/dashboard.html",
         form=GeneralSubmitForm(), # for publish submit buttons
@@ -767,6 +767,15 @@ def list_users(data_format=None, want_detail=True):
         ):
             current_user_can_edit = True
             edit_method = "admin.edit_user_comment"
+
+        is_project_notice_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]
+        is_project_submission_deadline_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name]
+        is_project_submission_link_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name]
+        is_project_detail_customisable_per_user = (
+            is_project_notice_per_user
+            or is_project_submission_deadline_per_user
+            or is_project_submission_link_per_user
+        )
         return render_template("admin/users.html",
             admin_usernames=admin_usernames,
             current_user_can_edit=current_user_can_edit,
@@ -777,6 +786,10 @@ def list_users(data_format=None, want_detail=True):
             is_allowing_bulk_user_delete=User.is_allowing_bulk_user_delete(current_app),
             is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
             is_password_change_by_any_staff=current_app.config[ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name],
+            is_project_detail_customisable_per_user=is_project_detail_customisable_per_user,
+            is_project_notice_per_user=is_project_notice_per_user,
+            is_project_submission_deadline_per_user=is_project_submission_deadline_per_user,
+            is_project_submission_link_per_user=is_project_submission_link_per_user,
             is_showing_github_column=current_app.config[ConfigSettingNames.USERS_HAVE_VCS_USERNAME.name],
             qty_admins=qty_admins,
             qty_students_login_enabled=len([s for s in students if s.is_login_enabled]),

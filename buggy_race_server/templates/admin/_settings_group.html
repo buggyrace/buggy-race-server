@@ -20,7 +20,7 @@
       <div class="col-lg-7 col-md-6">
           <div class="row">
             <div class="col-lg-6">
-              <label for="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name"><code>{{ name }}</code></label>
+              <label for="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name"><code>{{ name | with_word_break_hints | safe }}</code></label>
             </div>
             <div class="col-lg-6 mb-3">
               <input type="hidden" name="{{ SETTING_PREFIX }}-{{ loop.index0 }}-name" value="{{ name }}"/>

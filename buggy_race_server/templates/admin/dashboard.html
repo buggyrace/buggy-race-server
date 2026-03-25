@@ -256,16 +256,30 @@
       <table class="table table-striped table-bordered table-hover">
         <tr>
           <td>Project deadline</td>
-          <!-- "dedaline-container" is magic: js enhanced -->
+          <!-- "deadline-container" is magic: js enhanced -->
           <td id="deadline-container" colspan="3">
             {% if submission_deadline %}
-              <span style="display:inline-block;margin-right:1em;">{{ submit_deadline_day }} {{ submission_deadline | replace("T", " ") }}</span>
+              <span style="display:inline-block;margin-right:1em;">{{ submission_deadline_day }} {{ submission_deadline | replace("T", " ") }}</span>
               <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submission_deadline }}"></span>
             {% else %}
               not set
             {% endif %}
           </td>
         </tr>
+        {% if project_customisable_details_dict %}
+          <tr>
+            <td>
+              Project customisations
+            </td>
+            <td colspan="3">
+              <span class="empty-setting">active&nbsp;students:</span><br>
+              {% for detail_name in project_customisable_details_dict %}
+                {{ detail_name }}&nbsp;&times;&nbsp;{{ project_customisable_details_dict[detail_name] }}
+                {%- if not loop.last %}, {% endif %}
+              {% endfor %}
+            </td>
+          </tr>
+        {% endif %}
         <tr>
           <td>Report?</td>
           <td>

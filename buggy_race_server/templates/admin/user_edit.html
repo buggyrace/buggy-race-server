@@ -264,6 +264,68 @@
           </div>
         </div>
 
+        {% if is_showing_project_notices %}
+        <div class="row bg-white py-2 m-1">
+          <div class="col-sm-3">
+            {{form.project_notice.label}}
+          </div>
+          <div class="col-sm-4">
+            {{form.project_notice(class_="form-control mr-sm-1")}}
+          </div>
+          <div class="col-sm-5">
+            Note for this user displayed on the Project page.
+            {% if is_html_enabled_in_project_notices %}
+              <em>Be careful!</em> HTML is supported (so make sure you close
+              your tags, etc.).
+            {% else %}
+              Only use plain text: HTML is not supported in project notes.
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if is_submission_deadline_customisable %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.submission_deadline.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.submission_deadline(class_="form-control mr-sm-1", type="datetime-local")}}
+            </div>
+            <div class="col-sm-5">
+              {% if project_submission_deadline %}
+                The submission deadline for this project is
+                <code>{{ project_submission_deadline }}</code>.
+              {% else %}
+                There is no submission deadline for this project.
+              {% endif %}
+              The date and time here, if set, overrides the project deadline
+              specifically for this user.
+            </div>
+          </div>
+        {% endif %}
+
+        {% if is_submission_link_customisable %}
+          <div class="row bg-white py-2 m-1">
+            <div class="col-sm-3">
+              {{form.submission_link.label}}
+            </div>
+            <div class="col-sm-4">
+              {{form.submission_link(class_="form-control mr-sm-1")}}
+            </div>
+            <div class="col-sm-5">
+              {% if project_submission_link %}
+                The URL for project submission is
+                <code><a href="{{ project_submission_link }}">{{ project_submission_link }}</a></code>.
+              {% else %}
+                There is no URL for project submission.
+              {% endif %}
+              The URL here, if any, overrides the project link specifically for
+              this user.
+            </div>
+          </div>
+        {% endif %}
+
         {% if user %}
           <div class="row py-2 m-1 {% if user and not user.is_active %}alert-danger{% else %}bg-white{% endif %}">
             <div class="col-sm-3">

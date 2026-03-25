@@ -27,7 +27,7 @@
         {% if is_showing_project_workflow %}
           <a class="btn btn-outline-secondary btn-jump" href="{{ workflow_url or url_for('public.serve_project_page', page='workflow') }}">Workflow</a>
         {% endif %}
-        {% if submission_link %}
+        {% if submission_link and not is_project_detail_customisable_per_user %}
             <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-jump">Submission</a>
         {% endif %}
       </p>
@@ -74,92 +74,126 @@
       </div>
     </div>
   {% endif %}
-  {% if submit_deadline %}
-    <div class="row">
-      <div class="col-md-6 p-3 alert">
-        <h2 id="submission-deadline">
-          <a class="toclink" href="#submission-deadline">Submission deadline</a>
-        </h2>
-        <!-- "deadline-container" is magic: js enhanced -->
-        <div id="deadline-container" class="alert alert-danger">
-            <span style="display:inline-block;margin-right:1em;">{{ submit_deadline_day}} {{ submit_deadline | replace("T", " ") }}</span>
-            <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submit_deadline }}"></span>
-        </div>
-        <p>
-          That's the submission we'll be assessing (and running) to see how you got on
-          with your Python and webserver skills.
-        </p>
-      </div>
-      <div class="col-md-6 p-3 alert">
-        <p>
-          <br>
-          You can submit your project before the deadline. Don't leave it until the
-          very last minute. Programmers know (which means: <em>you</em> know) that IT
-          systems sometimes go down, disks fail, and chumps spill coffee over laptops.
-          Build contingency into your planning so if this happens to you it's merely a
-          problem and not a disaster.
-        </p>
-      </div>
-    </div>
-  {% endif %}
 
-  {% if submission_link or is_zip_info_displayed %}
-    <div class="row">
-      <div class="col-md-12 p-3">
-        <h2 id="submitting-your-project">
-          <a class="toclink" href="#submitting-your-project">Submitting your project</a>
-        </h2>
+  {% if is_project_detail_customisable_per_user and current_user and not current_user.is_authenticated %}
+      {#
+         if _any_ one of project notice, submission deadline, or submission link
+         is customisable, do not display _any_ of them without login.
+      #}
+
+      <div class="row">
+        <div class="col-md-12 p-3 alert-info">
+          <a href="{{ url_for('public.login') }}">Log in</a> to access all project details.
+        </div>
       </div>
-      {% if submission_link %}
-        <div class="col-md-6 p-3">
-          <p>
-            To submit your project, follow these instructions:
-          </p>
-          <p>
-            <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-jump">Submission instructions</a>
-          </p>
-        </div>
-      {% endif %}
-      
-      {% if is_zip_info_displayed %}
-        <div class="col-md-6 p-3">
-          <h3 id="about-your-zip-file">
-            <a class="toclink" href="#about-your-zip-file">About your zip file</a>
-          </h3>
-          <p>
-            Make a zip file that contains your webserver and submit that
-            (it'll look a lot like your repo did when you cloned it: for
-            example, it should contain <code>app.py</code> in the root level).
-          </p>
-          <p class="alert alert-info">
-            Make or rename your zip file to be your
-            <strong>{{ zip_filename_type_name }}</strong>
-            with a <code>.zip</code> extension.
-            {% if is_personalsed_example %}
-              That is, <em>you</em> should submit a file called
-              <code>{{ zip_filename_example }}.zip</code>
-            {% else %}
-              For example, if your {{ zip_filename_type_name }} is 
-              <code>{{ zip_filename_example }}</code>, you should submit
-              a file called <code>{{ zip_filename_example }}.zip</code>.
+
+  {% else %}
+
+    {% if project_notice %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alert alert-info">
+            {% if project_notice_title %}
+              <h2 class="alert-title">{{ project_notice_title }}</h2>
             {% endif %}
-          </p>
+            {% if is_project_notice_html_safe %}
+              {{ project_notice | safe }}
+            {% else %}
+              {{ project_notice }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if submission_deadline %}
+      <div class="row">
+        <div class="col-md-6 p-3 alert">
+          <h2 id="submission-deadline">
+            <a class="toclink" href="#submission-deadline">Submission deadline</a>
+          </h2>
+          <!-- "deadline-container" is magic: js enhanced -->
+          <div id="deadline-container" class="alert alert-danger">
+              <span style="display:inline-block;margin-right:1em;">{{ submission_deadline_day}} {{ submission_deadline | replace("T", " ") }}</span>
+              <span id="deadline-countdown" style="display:inline-block" data-deadline="{{ submission_deadline }}"></span>
+          </div>
           <p>
-            Please do <strong>not</strong> include the <code>venv</code> or
-            <code>__pycache__</code> directories (if you have them) because they
-            might be huge and we don't need them in the zip. If you haven't been
-            using Git, we don't need the <code>.git</code> directory either.
-            But don't worry if theses files get in anyway, we'll cope.
-          </p>
-          <p>
-            It's a <strong>very good</strong> idea to check that your zip file
-            contains what you think it does. Does it seem like a reasonable size
-            (not almost zero bytes, or not 1Gb)? If you unzip it somewhere else
-            do you get the files you expect?
+            That's the submission we'll be assessing (and running) to see how you got on
+            with your Python and webserver skills.
           </p>
         </div>
-      {% endif %}
-    </div>
+        <div class="col-md-6 p-3 alert">
+          <p>
+            <br>
+            You can submit your project before the deadline. Don't leave it until the
+            very last minute. Programmers know (which means: <em>you</em> know) that IT
+            systems sometimes go down, disks fail, and chumps spill coffee over laptops.
+            Build contingency into your planning so if this happens to you it's merely a
+            problem and not a disaster.
+          </p>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if submission_link or is_zip_info_displayed %}
+      <div class="row">
+        <div class="col-md-12 p-3">
+          <h2 id="submitting-your-project">
+            <a class="toclink" href="#submitting-your-project">Submitting your project</a>
+          </h2>
+        </div>
+        {% if submission_link %}
+          <div class="col-md-6 p-3">
+            <p>
+              To submit your project, follow these instructions:
+            </p>
+            <p>
+              <a href="{{ submission_link }}" class="btn btn-outline-secondary btn-jump">Submission instructions</a>
+            </p>
+          </div>
+        {% endif %}
+        
+        {% if is_zip_info_displayed %}
+          <div class="col-md-6 p-3">
+            <h3 id="about-your-zip-file">
+              <a class="toclink" href="#about-your-zip-file">About your zip file</a>
+            </h3>
+            <p>
+              Make a zip file that contains your webserver and submit that
+              (it'll look a lot like your repo did when you cloned it: for
+              example, it should contain <code>app.py</code> in the root level).
+            </p>
+            <p class="alert alert-info">
+              Make or rename your zip file to be your
+              <strong>{{ zip_filename_type_name }}</strong>
+              with a <code>.zip</code> extension.
+              {% if is_personalsed_example %}
+                That is, <em>you</em> should submit a file called
+                <code>{{ zip_filename_example }}.zip</code>
+              {% else %}
+                For example, if your {{ zip_filename_type_name }} is 
+                <code>{{ zip_filename_example }}</code>, you should submit
+                a file called <code>{{ zip_filename_example }}.zip</code>.
+              {% endif %}
+            </p>
+            <p>
+              Please do <strong>not</strong> include the <code>venv</code> or
+              <code>__pycache__</code> directories (if you have them) because they
+              might be huge and we don't need them in the zip. If you haven't been
+              using Git, we don't need the <code>.git</code> directory either.
+              But don't worry if theses files get in anyway, we'll cope.
+            </p>
+            <p>
+              It's a <strong>very good</strong> idea to check that your zip file
+              contains what you think it does. Does it seem like a reasonable size
+              (not almost zero bytes, or not 1Gb)? If you unzip it somewhere else
+              do you get the files you expect?
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
   {% endif %}
 </div>
 {% endblock %}

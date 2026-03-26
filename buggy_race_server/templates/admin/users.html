@@ -56,6 +56,12 @@
         {% if config['USERS_HAVE_EXT_ID'] %}
           <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-ext-id">{{ ext_id_name }}</button>
         {% endif %}
+        {% if is_project_notice_per_user or is_project_submission_link_per_user %}
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-project-notice-link">Custom&nbsp;notince/link</button>
+        {% endif %}
+        {% if is_project_submission_deadline_per_user %}
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-project-deadline">Custom&nbsp;deadline</button>
+        {% endif %}
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-created-at">Created</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-active">Active?</button>
         <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-is-login-enabled">Login enabled?</button>
@@ -95,6 +101,12 @@
             {% if config['USERS_HAVE_EXT_ID'] %}
               <th  class="u-ext-id">{{ ext_id_name | title }}</th>
             {% endif %}
+            {% if is_project_notice_per_user or is_project_submission_link_per_user %}
+              <th class="u-project-notice-link">Custom project notice&nbsp;(<span class="icon-clipboard"></span>) &amp; link</th>
+            {% endif %}
+            {% if is_project_submission_deadline_per_user %}
+              <th class="u-project-deadline">Custom project deadline</th>
+            {% endif %}
             <th  class="u-created-at">Created</th>
             <th  class="u-is-active">Active?</th>
             <th  class="u-is-login-enabled">Login enabled?</th>
@@ -130,6 +142,12 @@
               {% endif %}
               {% if config['USERS_HAVE_EXT_ID'] %}
                 <td class="u-ext-id"></td>
+              {% endif %}
+              {% if is_project_notice_per_user or is_project_submission_link_per_user %}
+                <td class="u-project-notice-link"></td>
+              {% endif %}
+              {% if is_project_submission_deadline_per_user %}
+                <td class="u-project-deadline"></td>
               {% endif %}
               <td class="u-created-at"></td>
               <td class="u-is-active">{{ qty_students_enabled }}   ({{ "%d" | format(100 * qty_students_enabled/qty_students) }}%) </td>
@@ -180,6 +198,15 @@
                 {% endif %}
                 {% if config['USERS_HAVE_EXT_ID'] %}
                   <td class="u-ext-id">{% if u.ext_id is not none %}<code>{{ u.ext_id }}</code>{% endif %}</td>
+                {% endif %}
+                {% if  is_project_notice_per_user or is_project_submission_link_per_user %}
+                  <td class="u-project-notice-link">
+                    {% if is_project_notice_per_user and u.project_notice %} <span class="icon-clipboard"></span> {% endif %}
+                    {% if is_project_submission_link_per_user and u.submission_link %} <a href="{{ u.submission_link }}" target="_blank">link</a> {% endif %}
+                  </td>
+                {% endif %}
+                {% if is_project_submission_deadline_per_user %}
+                  <td class="u-project-deadline">{{ u.submission_deadline | servertime | time_span | safe }}</td>
                 {% endif %}
                 <td class="u-created-at">
                     {% if u.created_at %}

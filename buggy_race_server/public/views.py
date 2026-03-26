@@ -39,6 +39,7 @@ from buggy_race_server.utils import (
     load_config_setting,
     get_flag_color_css_defs,
     is_poster,
+    servertime_str,
 )
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
@@ -355,7 +356,34 @@ def serve_project_page(page=None):
         if is_personalsed_example:
             zip_filename_example = current_user.username
 
-    submit_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
+    server_timezone = current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]
+    submission_deadline = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name]
+    submission_link = current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name]
+    project_notice = current_app.config[ConfigSettingNames.PROJECT_NOTICE.name]
+    project_notice_title = None
+    is_project_notice_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]
+    is_project_submission_deadline_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name]
+    is_project_submission_link_per_user = current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name]
+    is_project_detail_customisable_per_user = (
+        is_project_notice_per_user
+        or is_project_submission_deadline_per_user
+        or is_project_submission_link_per_user
+    )
+
+    if is_project_detail_customisable_per_user and not current_user.is_anonymous:
+        # override appropriate details: notice, deadline, or link:
+        if is_project_notice_per_user and current_user.project_notice:
+            project_notice = current_user.project_notice
+            project_notice_title = f"Project information for {current_user.pretty_username}"
+        if is_project_submission_deadline_per_user and current_user.submission_deadline:
+            # using servertime here because JS on page expects specific format
+            # TODO cannot currently replace default with no-deadline-for-this-user
+            submission_deadline = servertime_str(
+                server_timezone,
+                current_user.submission_deadline
+            )
+        if is_project_submission_link_per_user and current_user.submission_link:
+            submission_link = current_user.submission_link
 
     return render_template(
         template,
@@ -364,6 +392,8 @@ def serve_project_page(page=None):
         expected_phase_completion=current_app.config[ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name],
         is_personalsed_example=is_personalsed_example,
         is_poster=is_a_poster,
+        is_project_detail_customisable_per_user=is_project_detail_customisable_per_user,
+        is_project_notice_html_safe=current_app.config[ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name],
         is_report=is_report,
         is_showing_project_workflow=current_app.config[ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name],
         is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
@@ -373,16 +403,18 @@ def serve_project_page(page=None):
         is_using_github_api_to_inject_issues=current_app.config[ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name],
         is_using_remote_vs_workspace=current_app.config[ConfigSettingNames.IS_USING_REMOTE_VS_WORKSPACE.name],
         is_zip_info_displayed=is_zip_info_displayed,
+        project_notice=project_notice,
+        project_notice_title=project_notice_title,
         poster_type=poster_type,
         project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
         project_remote_server_app_url=current_app.config[ConfigSettingNames.PROJECT_REMOTE_SERVER_APP_URL.name],
-        report_type=report_type,
         report_link_text=report_link_text,
-        suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
+        report_type=report_type,
         site_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-        submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
-        submit_deadline=submit_deadline,
-        submit_deadline_day=get_day_of_week(submit_deadline),
+        submission_deadline_day=get_day_of_week(submission_deadline),
+        submission_deadline=submission_deadline,
+        submission_link=submission_link,
+        suggested_text_size=current_app.config[ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name],
         superbasics_url=current_app.config[ConfigSettingNames.SUPERBASICS_URL.name],
         tasks=tasks,
         validation_task=current_app.config[ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name],

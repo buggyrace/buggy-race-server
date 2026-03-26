@@ -693,6 +693,7 @@ def purge_task_list(app=current_app, is_storing_task_list_in_db=None):
 # custom CSS and SVG masks
 FLAG_COLOR_NAME_RE = re.compile(r"\W+")
 FLAG_COLOR_VALUE_RE = re.compile(r"[^-a-zA-Z0-9_().,#]+")
+LEN_YYYY_MM_DD = len("YYYY-MM-DD")
 
 def _get_flag_color(flag, want_secondary=False):
     try:
@@ -741,7 +742,10 @@ def get_pretty_approx_duration(secs):
 def get_day_of_week(datestr):
     """ doing this silently-robustly (e.g. deadline dates might not exist)"""
     try:
-        return datetime.strptime(datestr, "%Y-%m-%dT%H:%M").strftime("%A")
+        return datetime.strptime(
+            str(datestr)[:LEN_YYYY_MM_DD], # ignore time (by truncating string)
+            "%Y-%m-%d"
+        ).strftime("%A")
     except ValueError:
         return ""
 

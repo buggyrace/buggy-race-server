@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.0"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.1"
 #
 # ----------------------------------------------------------------------------
 
@@ -222,9 +222,13 @@ class ConfigSettingNames(Enum):
     IS_ENCOURAGING_TEXT_ON_EVERY_TASK = auto()
     IS_ENCOURAGING_VCS_ON_EVERY_TASK = auto()
     IS_FAKE_LATEX_CHOICE_ENABLED = auto()
+    IS_HTML_ENABLED_IN_PROJECT_NOTICES = auto()
     IS_ISSUES_CSV_CRLF_TERMINATED = auto()
     IS_ISSUES_CSV_IN_REVERSE_ORDER = auto()
     IS_PRETTY_USERNAME_TITLECASE = auto()
+    IS_PROJECT_NOTICE_PER_USER = auto()
+    IS_PROJECT_SUBMISSION_DEADLINE_PER_USER = auto()
+    IS_PROJECT_SUBMISSION_LINK_PER_USER = auto()
     IS_PROJECT_ZIP_INFO_DISPLAYED = auto()
     IS_PUBLIC_REGISTRATION_ALLOWED = auto()
     IS_RACE_FILE_DATE_STAMPED = auto()
@@ -258,6 +262,7 @@ class ConfigSettingNames(Enum):
     IS_WRITING_PORT_IN_EDITOR = auto()
     IS_WRITING_SERVER_URL_IN_EDITOR = auto()
     PROJECT_CODE = auto()
+    PROJECT_NOTICE = auto()
     PROJECT_PHASE_MIN_TARGET = auto()
     PROJECT_POSTER_TYPE = auto()
     PROJECT_POSTER_URL = auto()
@@ -410,12 +415,17 @@ class ConfigSettings:
         ConfigSettingNames.PROJECT_REPORT_URL.name,
         ConfigSettingNames.PROJECT_POSTER_TYPE.name,
         ConfigSettingNames.PROJECT_POSTER_URL.name,
-        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
         ConfigSettingNames.PROJECT_CODE.name,
         ConfigSettingNames.PROJECT_SLUG.name,
+        ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name,
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name,
+        ConfigSettingNames.PROJECT_NOTICE.name,
+        ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name,
         ConfigSettingNames.PROJECT_ZIP_NAME_TYPE.name,
+        ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name,
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name,
       ),
@@ -586,9 +596,12 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: 1,
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name: 0,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: 0,
+        ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: 0,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: 0,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: 1,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name: 0,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name: 0,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: 1,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: 0,
         ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name: 0,
@@ -597,6 +610,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: 0,
         ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: 1,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: 1,
+        ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name: 0,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: 0,
         ConfigSettingNames.IS_SHOWING_TECH_NOTES.name: 1,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: 0,
@@ -622,6 +636,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name: 1,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: 1,
         ConfigSettingNames.PROJECT_CODE.name: "",
+        ConfigSettingNames.PROJECT_NOTICE.name: "",
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: 3,
         ConfigSettingNames.PROJECT_POSTER_TYPE.name: "in editor",
         ConfigSettingNames.PROJECT_POSTER_URL.name: "",
@@ -737,9 +752,12 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_FAKE_LATEX_CHOICE_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_CRLF_TERMINATED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PRETTY_USERNAME_TITLECASE.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_PUBLIC_REGISTRATION_ALLOWED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_RACE_FILE_DATE_STAMPED.name: ConfigTypes.BOOLEAN,
@@ -748,6 +766,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_REDIRECT_HTTP_TO_HTTPS_FORCED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_CONFIG_WARNINGS.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_EXAMPLE_RACETRACKS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_TECH_NOTES.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_SHOWING_RESTART_SUGGESTION.name: ConfigTypes.BOOLEAN,
@@ -773,6 +792,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_WRITING_PORT_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_WRITING_SERVER_URL_IN_EDITOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.PROJECT_CODE.name: ConfigTypes.STRING,
+        ConfigSettingNames.PROJECT_NOTICE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name: ConfigTypes.INT,
         ConfigSettingNames.PROJECT_POSTER_TYPE.name: ConfigTypes.STRING,
         ConfigSettingNames.PROJECT_POSTER_URL.name: ConfigTypes.URL,
@@ -842,6 +862,11 @@ class ConfigSettings:
       ConfigGroupNames.REMOTE.name,
       ConfigGroupNames.TECH_NOTES.name,
     ]
+
+    _PER_USER_DESCRIPTION_NOTE = """  \n_Note:_ If you set this (or _any_ of the
+      `IS_PROJECT_*_PER_USER` settings) to `Yes`, the public project page will
+      hide **all** of those items, even if they are not explicitly customisable,
+      unless the user is logged-in."""
 
     DESCRIPTIONS = {
 
@@ -1102,6 +1127,28 @@ class ConfigSettings:
           this only affects how usernames are displayed, not what users need to
           type.""",
 
+        ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name:
+          """Do you want to be able to override the `PROJECT_NOTICE` (even if it
+          is empty) so a customised text is displayed to specific students? This
+          is probably most useful if you've also enabled the
+          `IS_PROJECT_SUBMISSION_DEADLINE_PER_USER` or
+          `IS_PROJECT_SUBMISSION_LINK_PER_USER` settings, so you can (if
+          necessary) explain to the student why their deadline or link
+          is what it is.""" + _PER_USER_DESCRIPTION_NOTE,
+
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_DEADLINE_PER_USER.name:
+          """If the project has a submission deadline (which you set with
+          `PROJECT_SUBMISSION_DEADLINE`), and it applies to all students, choose
+          `No`. Setting this to `Yes` allows administrators to override or set
+          that deadline for specific students, which might be handy if you need
+          to handle extensions or resits.""" + _PER_USER_DESCRIPTION_NOTE,
+
+        ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name:
+          """If the project has a submission link (which you set with
+          `PROJECT_SUBMISSION_LINK`), and it applies to all students, choose
+          `No`.  Setting this to `Yes` allows administrators to override or set
+          that URL for specific students.""" + _PER_USER_DESCRIPTION_NOTE,
+
         ConfigSettingNames.IS_PROJECT_ZIP_INFO_DISPLAYED.name:
           """Typically, students are expected to submit their projects as a zip
           file containing the buggy editor web app (including a report/poster,
@@ -1174,6 +1221,12 @@ class ConfigSettings:
           adds the pre-built examples. Unless you've already built your
           racetracks, choose `Yes` (and then switch this to `No` after you've
           clicked the button it provides).""",
+
+        ConfigSettingNames.IS_HTML_ENABLED_IN_PROJECT_NOTICES.name:
+        """Can the project notice (and any custom notices, if
+        `IS_PROJECT_NOTICE_PER_USER` is `Yes`) contain HTML? If you don't need
+        it to be, it's best to set it to `No` (the default), so there's no
+        risk of accidentally breaking the project page with bad HTML.""",
 
         ConfigSettingNames.IS_SHOWING_PROJECT_WORKFLOW.name:
           """It can be helpful for students to have a summary of the workflow
@@ -1358,11 +1411,20 @@ class ConfigSettings:
 
         ConfigSettingNames.PROJECT_CODE.name:
           """If this project is known by a course or module code, use it (for
-          example, when we ran it at Royal Holloway, it was CS1999). See also
-          `PROJECT_SLUG` which is how this code may appear in filenames of any
-          downloaded files, if you need it to be different. The full name of
-          the project is \"the `PROJECT_CODE` Buggy Racing project\", so if you
-          don't have or need a course code, it's fine to leave it blank.""",
+          example, when we ran it at Royal Holloway, it was CS1999 or CS0001).
+          See also `PROJECT_SLUG` which is how this code may appear in filenames
+          of any downloaded files, if you need it to be different. The full name
+          of the project is \"the `PROJECT_CODE` Buggy Racing project\", so if
+          you don't have or need a course code, it's fine to leave it blank.""",
+
+        ConfigSettingNames.PROJECT_NOTICE.name:
+          """An optional text that, if set, will be displayed on the project
+          page. You can override this notice (even if it is empty) for specific
+          users by setting `IS_PROJECT_NOTICE_PER_USER` to `Yes`, and then
+          editing the individual users. Set `IS_HTML_ENABLED_IN_PROJECT_NOTICES`
+          to `Yes` if you want project notices (this one, and any per-user ones
+          too) to contain HTML, but be careful because you _can_ break the
+          project page layout if the notice contains bad HTML.""",
 
         ConfigSettingNames.PROJECT_PHASE_MIN_TARGET.name:
           """This is the minimum phase you'd expect an inexperienced programmer
@@ -1440,12 +1502,15 @@ class ConfigSettings:
 
         ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name:
           """If you require all students to submit their projects on a specific
-          deadline, set it here. This is displayed prominently (if the project
-          is enabled) on the project page, but isn't currently used by the
-          server for anything else. Avoid using 00:00 as a time because it
-          confuses students — 23:59 is clearer (and 16:00 is healthier). Leave
-          blank if you don't want to display a deadline at all (remember you
-          can also use Announcements).""",
+          deadline, set it here. This is displayed prominently (if set) on the
+          on the project page, but isn't currently used by the server for
+          anything else. Avoid using 00:00 as a time because it confuses
+          students — 23:59 is clearer (and 16:00 is healthier). Leave blank if
+          you don't want to display a deadline at all (remember you can also
+          use Announcements). You can override this deadline (even if it is
+          empty) for specific users by setting
+          `IS_PROJECT_SUBMISSION_DEADLINE_PER_USER` to `Yes`, and then editing
+          the individual users.""",
 
         ConfigSettingNames.PROJECT_SUBMISSION_LINK.name:
           """Provide a link to either the web page where you'll be accepting
@@ -1453,7 +1518,10 @@ class ConfigSettings:
           instructions for the students to follow. The buggy race server does
           not handle submissions itself. By default, no submission information
           is provided (because it's very dependent on each institution), which
-          means no link is displayed: so you must supply one yourself.""",
+          means no link is displayed: so you must supply one yourself.
+          You can override this link (even if it is empty) for specific users
+          by setting `IS_PROJECT_SUBMISSION_LINK_PER_USER` to `Yes`, and then
+          editing the individual users.""",
 
         ConfigSettingNames.PROJECT_WORKFLOW_URL.name:
           """You can replace the default workflow page with a redirection to

@@ -3,7 +3,7 @@
 
 from flask import current_app
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField, IntegerField
+from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField, IntegerField, DateTimeField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional, ValidationError
 
 from buggy_race_server.utils import is_authorised, prettify_form_field_name
@@ -36,6 +36,19 @@ class UserForm(FlaskForm):
     is_active = BooleanField("Is active?")
     is_login_enabled = BooleanField("Is login enabled?")
     is_demo_user = BooleanField("Is demo user?")
+    project_notice = TextAreaField(
+        "Custom project note",
+        validators=[
+            Optional(),
+            Length(max=ConfigSettings.MAX_COMMENT_LENGTH)
+        ]
+    )
+    submission_deadline = DateTimeField(
+        "Project submission deadline",
+        format='%Y-%m-%dT%H:%M', # note: T is important!
+        validators=[Optional()]
+    )
+    submission_link = StringField("Project submission link")
     comment = TextAreaField(
         "Comment", validators=[
             Optional(),

@@ -1,4 +1,4 @@
-# buggy-race-server
+# cs0001-buggy-race-server
 
 This is the central repo in the _Buggy Racing_ project.
 

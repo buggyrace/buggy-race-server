@@ -57,7 +57,17 @@
           <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-ext-id">{{ ext_id_name }}</button>
         {% endif %}
         {% if is_project_notice_per_user or is_project_submission_link_per_user %}
-          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-project-notice-link">Custom&nbsp;notince/link</button>
+          <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-project-notice-link">Custom&nbsp;
+            {%- if is_project_notice_per_user -%}
+              notice
+            {%- endif -%}
+            {%- if is_project_submission_link_per_user -%}
+              {%- if is_project_notice_per_user -%}
+                /
+              {%- endif -%}
+              link
+            {%- endif -%}
+          </button>
         {% endif %}
         {% if is_project_submission_deadline_per_user %}
           <button class="btn btn-outline-secondary btn-sm" data-item-hidden="u-project-deadline">Custom&nbsp;deadline</button>
@@ -102,7 +112,17 @@
               <th  class="u-ext-id">{{ ext_id_name | title }}</th>
             {% endif %}
             {% if is_project_notice_per_user or is_project_submission_link_per_user %}
-              <th class="u-project-notice-link">Custom project notice&nbsp;(<span class="icon-clipboard"></span>) &amp; link</th>
+              <th class="u-project-notice-link">Custom project
+                {% if is_project_notice_per_user %}
+                  notice&nbsp;(<span class="icon-clipboard"></span>)
+                {% endif %}
+                {% if is_project_submission_link_per_user %}
+                  {% if is_project_notice_per_user %}
+                    &amp;
+                  {% endif %}
+                  link
+                {% endif %}
+              </th>
             {% endif %}
             {% if is_project_submission_deadline_per_user %}
               <th class="u-project-deadline">Custom project deadline</th>

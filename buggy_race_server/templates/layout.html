@@ -26,7 +26,7 @@
       </style>
     {% endif %}
   </head>
-  <body class="{% block body_class %}{% endblock %}">
+  <body class="{% block body_class %}{% endblock %}" {% block body_dataset %}{% endblock %}>
     {% block body %}
       {% with form=form %} 
         {% include "nav.html" %} 

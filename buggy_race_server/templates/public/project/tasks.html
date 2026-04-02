@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
 {% block page_title %} Task list {% endblock %}
 {% block body_class%}task-list-page{% endblock %}
+{% block body_dataset -%}
+  {% if is_task_hint_levels_enabled -%}
+   data-task-hint-css-class-prefix="{{ task_hint_css_class_prefix }}" data-task-hint-max-level="{{ task_hint_max_level }}"
+  {%- endif %}
+{%- endblock %}
 {% block content %}
 
 {# ---------------------------------------------------------------------------

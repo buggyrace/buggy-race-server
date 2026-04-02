@@ -286,7 +286,10 @@ def serve_project_page(page=None):
                 abort(500)
         return render_template(
             "public/project/tasks.html",
-            task_html=task_html
+            task_html=task_html,
+            is_task_hint_levels_enabled=current_app.config[ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name],
+            task_hint_css_class_prefix=current_app.config[ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name],
+            task_hint_max_level=current_app.config[ConfigSettingNames._TASK_HINT_MAX_LEVEL.name],
         )
     elif page is None or page == "index":
         template = "public/project/index.html"

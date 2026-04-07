@@ -134,6 +134,12 @@ class ConfigSettingNames(Enum):
     # Filename for temporary race file (for use in previews: not preserved)
     _TASK_TEMP_RACE_FILE_FILENAME = auto()
 
+    # CSS class prefix for task hint levels
+    _TASK_HINT_CSS_CLASS_PREFIX = auto()
+
+    # highest hint hint level CSS classes (created when the tasks are made)
+    _TASK_HINT_MAX_LEVEL = auto()
+
     # Tech notes are managed by Pelcian: we don't anticipate the tech notes
     # dir being changed (it's in version control) but  putting them in config
     # to allow future tech notes to come from a different source
@@ -250,6 +256,7 @@ class ConfigSettingNames(Enum):
     IS_TA_EDIT_COMMENT_ENABLED = auto()
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TA_SET_API_KEY_ENABLED = auto()
+    IS_TASK_HINT_LEVELS_ENABLED = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
@@ -476,6 +483,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
         ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
+        ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -547,6 +555,8 @@ class ConfigSettings:
         ConfigSettingNames._RACE_ASSETS_PATH.name: path.join("buggy_race_server", "race", "assets"),
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
+        ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name: "task-hint-level-",
+        ConfigSettingNames._TASK_HINT_MAX_LEVEL.name: 3, # > 3 will need new CSS classes
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: "_temporary_race_file.json",
@@ -624,6 +634,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
+        ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: 0,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
@@ -780,6 +791,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_EDIT_COMMENT_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
@@ -1323,6 +1335,15 @@ class ConfigSettings:
           """Do you want your Teaching Assistants to be able to set (or clear)
           student's API keys? If you're using the default tasks, students don't
           need these until they are in phase 4.
+          """,
+
+        ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name:
+          """If you want to associate hints in the task list with levels, and
+          have students interact with the list to hide/reveal hints depending
+          on level, set this to `Yes`. The level of a hint is indicated by the
+          hint's first token being `<!>` or `<!!>`. Regardless of whether hint
+          levels are enabled or not, this mechanism always removes the tokens
+          when the task list is published.
           """,
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
@@ -1986,6 +2007,8 @@ class ConfigSettings:
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name,
         ConfigSettingNames._PUBLISHED_PATH.name,
         ConfigSettingNames._SETUP_STATUS.name,
+        ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name,
+        ConfigSettingNames._TASK_HINT_MAX_LEVEL.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
         ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name,

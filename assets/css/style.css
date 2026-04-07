@@ -124,20 +124,31 @@ textarea {
   background:#fff9e9;
   color:black;
 }
-.buggy-project .task .item p, .buggy-project .task .item ul {
-  margin:1em 1em 0.5em 2em;
-  padding-bottom:0.5em;
+.buggy-project .task .item p {
+  margin:1em 1em 0.5em 1em;
+  padding:0 0 0.5em 1em;
 }
-.buggy-project .task .item blockquote {
-  margin-left: 3rem;
+.buggy-project .task .item ul {
+  margin:1em 1em 0.5em 1em;
+  padding:0 0 0.5em 0;
+}
+.buggy-project .task .item ul {
+  list-style-position: outside;
 }
 .buggy-project .task .hints ul li {
-  margin: 0.5em 0;
+  padding:0 0 0 0;
+  margin: 0.5em 0 0.5em 1em;
+}
+.buggy-project .task .item ul li p {
+  margin:0 0.5em 0 0;
+}
+.buggy-project .task .item blockquote {
+  margin-left: 2rem;
 }
 .buggy-project .task .item:before {
   display:block;
   font-weight:bold;
-  padding:0.5em 1em 0.5em 2em;
+  padding:0.5em 1em 0.5em 1em;
   background:inherit;
 }
 .task .item code {
@@ -160,9 +171,57 @@ textarea {
   background:#eee6d6;
   color:black;
 }
+.buggy-project .task .hints .task-hint-btns {
+  background-color: #ffe18b;
+  padding: 0.25em 0.5em;
+  display: flex;
+  align-content: center;
+  justify-content: flex-end;
+  align-content: flex-start;
+  text-wrap: balance;
+}
+.buggy-project .task .hints .task-hint-level-1 {
+  background-color: #fff0c6;
+}
+.buggy-project .task .hints .task-hint-level-1:before {
+  content: "★-hint";
+  background:#ffe18b;
+  display:block;
+  text-align:right;
+  color: #666;
+  padding:0.2em 1em 0.2em 0;
+}
+.buggy-project .task .hints .task-hint-level-2 {
+  background-color: #ffe18b;
+}
+.buggy-project .task .hints .task-hint-level-2:before {
+  content: "★★-hint";
+  background:#ffd661;
+  display:block;
+  text-align:right;
+  color: #666;
+  padding:0.2em 1em 0.2em 0;
+}
+.buggy-project .task .hints .task-hint-level-3 {
+  background-color: #ffd661;
+}
+.buggy-project .task .hints .task-hint-level-3:before {
+  content: "★★★-hint";
+  background:#ffce44;
+  display:block;
+  text-align:right;
+  color: #666;
+  padding:0.2em 1em 0.2em 0;
+}
+.buggy-project .task .hints p.task-hint-level-1:before,
+.buggy-project .task .hints p.task-hint-level-2:before,
+.buggy-project .task .hints p.task-hint-level-3:before {
+  margin-left:-1em;
+}
+
 .buggy-project .task .solution .encourage-text {
   background-color: #afd6b1;
-  padding: 0.5em 2em;
+  padding: 0.5em 1em;
   margin: 0em 0em -0.5em 0em;
 }
 .buggy-project .task .solution .encourage-text:has(+ div) {
@@ -223,7 +282,12 @@ textarea {
   #main-content-block {
     max-width:99vw;
   }
+  .buggy-project .task .item {
+    margin-left:0.5em;
+    margin-right:0.5em;
+  }
 }
+
 
 .buggy-project .phase-0 .task:before{ background: repeating-linear-gradient(-45deg, #ffff00, #ffff00 1em, black 1em, black 2em);}
 .buggy-project .phase-6 .task .task-heading,

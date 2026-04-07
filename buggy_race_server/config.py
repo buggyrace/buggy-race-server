@@ -556,7 +556,7 @@ class ConfigSettings:
         ConfigSettingNames._RACE_ASSETS_RACETRACK_PATH.name: path.join("buggy_race_server", "race", "assets", "tracks"),
         ConfigSettingNames._SETUP_STATUS.name: 1, # by default, we're setting up!
         ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name: "task-hint-level-",
-        ConfigSettingNames._TASK_HINT_MAX_LEVEL.name: 2, # is set when tasks are published
+        ConfigSettingNames._TASK_HINT_MAX_LEVEL.name: 3, # > 3 will need new CSS classes
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name: "",
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name: "_task_list.html",
         ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name: "_temporary_race_file.json",
@@ -2008,7 +2008,7 @@ class ConfigSettings:
         ConfigSettingNames._PUBLISHED_PATH.name,
         ConfigSettingNames._SETUP_STATUS.name,
         ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name,
-        ConfigSettingNames._TASK_HINT_CSS_CLASSES.name,
+        ConfigSettingNames._TASK_HINT_MAX_LEVEL.name,
         ConfigSettingNames._TASK_LIST_GENERATED_DATETIME.name,
         ConfigSettingNames._TASK_LIST_HTML_FILENAME.name,
         ConfigSettingNames._TASK_TEMP_RACE_FILE_FILENAME.name,

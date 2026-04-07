@@ -853,8 +853,22 @@ $(function() {
     // hint reveal/hide mechanism
     const TASK_HINT_CLASS_PREFIX = document.body.dataset.taskHintCssClassPrefix;
     const TASK_HINT_MAX_LEVEL = document.body.dataset.taskHintMaxLevel;
+    const TASK_HINT_BUTTON_CONTAINER = "task-hint-btns";
+    const BUTTON_PREFIX = "btn-";
+
     if (TASK_HINT_MAX_LEVEL) {
       document.body.classList.add("task-hint-levels-enabled");
+
+      function render_button(btn, is_for_showing) {
+        let qty = btn.dataset.qtyhints;
+        let noun = qty == "1"? "hint" : "hints";
+        let level = "★".repeat(parseInt(btn.dataset.tasklevel));
+        if (is_for_showing) {
+          btn.innerText = `Show ${qty} more ${level}-${noun}`;
+        } else {
+          btn.innerText = `Hide the ${qty} ${level}-${noun}`;
+        }
+      }
 
       function toggle_hints(e){
          let button_pressed = e.target;
@@ -863,55 +877,64 @@ $(function() {
          if (task_container){
             let hint_class = button_pressed.dataset.hintclass;
             let hints = task_container.getElementsByClassName(hint_class);
+            let is_showing = true;
             for (let hint of hints){
                let $hint = $(hint);
                if ($hint.is(":visible")) {
                   $hint.slideUp();
                } else {
                   $hint.slideDown();
+                  is_showing = false;
                }
             }
+            render_button(button_pressed, is_showing);
          }
       }
    
-      let qty_hints_by_task_id = {};
       // hints of hint level 0 have no special handling: start at 1
       for (let i=1; i<=TASK_HINT_MAX_LEVEL; i++){
-         let hint_class = TASK_HINT_CLASS_PREFIX + i;
-         const BUTTON_PREFIX = "btn-";
-         let qty_hints = 0;
-         let hints_for_this_level = document.getElementsByClassName(hint_class);
-         for (let hint of hints_for_this_level){
-            let task_container = hint.closest('div.task');
-            if (task_container){
-               let hints_container = task_container.getElementsByClassName("hints");
-               if (hints_container.length==1){
-                  hints_container = hints_container[0];
-                  let task_id = task_container.id;
-                  let task_specific_hints_class = task_id + "-level-" + i;
-                  let btn_id = BUTTON_PREFIX + task_specific_hints_class;
-                  if (! document.getElementById(btn_id)) {
-                     let btn = document.createElement("button");
-                     btn.classList.add(
-                        "btn", "btn-sm", "btn-white", "btn-outline-secondary",
-                        "float-right", "mx-2", "mb-2", "btn-hints-toggle"
-                     );
-                     btn.id = btn_id;
-                     btn.dataset.hintclass = task_specific_hints_class;
-                     btn.dataset.taskid = task_container.id;
-                     btn.innerText = "show " + i;
-                     hints_container.insertBefore(btn, hints_container.firstChild);
-                     btn.addEventListener("click", toggle_hints);
-                  }
-                  hint.classList.add(task_specific_hints_class, "hidden");
-                  if (qty_hints_by_task_id[task_specific_hints_class]){
-                     qty_hints_by_task_id[task_specific_hints_class] += 1
-                  } else {
-                     qty_hints_by_task_id[task_specific_hints_class] = 1
-                  }
-               }
+        let hint_class = TASK_HINT_CLASS_PREFIX + i;
+        let qty_hints = 0;
+        let hints_for_this_level = document.getElementsByClassName(hint_class);
+        for (let hint of hints_for_this_level){
+          let task_container = hint.closest('div.task');
+          if (task_container){
+            let hints_container = task_container.getElementsByClassName("hints");
+            if (hints_container.length > 0){
+              hints_container = hints_container[0];
+              let btn_container = hints_container.getElementsByClassName(TASK_HINT_BUTTON_CONTAINER);
+              if (btn_container.length == 0) {
+                btn_container = document.createElement("div");
+                btn_container.classList.add(TASK_HINT_BUTTON_CONTAINER);
+                hints_container.insertBefore(btn_container, hints_container.firstChild);
+              } else {
+                btn_container = btn_container[0];
+              }
+              let task_id = task_container.id;
+              let task_specific_hints_class = task_id + "-level-" + i;
+              let btn_id = BUTTON_PREFIX + task_specific_hints_class;
+              let btn = document.getElementById(btn_id)
+              if (! btn) {
+                  btn = document.createElement("button");
+                  btn.classList.add(
+                    "btn", "btn-sm", "btn-white", "btn-outline-secondary",
+                    "m-1", "btn-hints-toggle"
+                  );
+                  btn.id = btn_id;
+                  btn.dataset.hintclass = task_specific_hints_class;
+                  btn.dataset.taskid = task_container.id;
+                  btn.dataset.tasklevel = i;
+                  btn_container.appendChild(btn);
+                  btn.addEventListener("click", toggle_hints);
+                  btn.innerText = "show hints";
+                  btn.dataset.qtyhints = 0;
+              }
+              btn.dataset.qtyhints = parseInt(btn.dataset.qtyhints) + 1;
+              render_button(btn, true);
+              hint.classList.add(task_specific_hints_class, "hidden");
             }
-         }
+          }
+        }
       }
     }
   }

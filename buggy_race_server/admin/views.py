@@ -2048,6 +2048,8 @@ def edit_task(task_id=None):
       "admin/task_edit.html",
       form=form,
       task=task,
+      is_task_hint_levels_enabled=current_app.config[ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name],
+      task_hint_max_level=int(current_app.config[ConfigSettingNames._TASK_HINT_MAX_LEVEL.name]),
     )
 
 @blueprint.route("/tasks/check-tech-notes", methods=["GET"])

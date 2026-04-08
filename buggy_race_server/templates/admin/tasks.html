@@ -68,8 +68,20 @@
           in the database because <code>IS_STORING_TASK_LIST_IN_DB</code> is set
           to <code>Yes</code>.
         </p>
-        <a href="{{ url_for('admin.settings', group_name='tasks') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Tasks</span></a>
       {% endif %}
+      {% if config['IS_TASK_HINT_LEVELS_ENABLED'] %}
+        <p>
+          <code>IS_TASK_HINT_LEVELS_ENABLED</code> is set to <code>Yes</code>
+          so some details in the hints may be hidden until the student actively
+          reveals them.
+        </p>
+      {% else %}
+        <p>
+          <code>IS_TASK_HINT_LEVELS_ENABLED</code> is set to <code>No</code>
+          so no hint details are being hidden.
+        </p>
+      {% endif %}
+      <a href="{{ url_for('admin.settings', group_name='tasks') }}" class="btn btn-outline-secondary btn-config-group btn-white"><span>Tasks</span></a>
     </div>
   </div>
 

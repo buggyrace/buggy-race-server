@@ -28,7 +28,7 @@
         </div>
         {# don't show user details if the _only_ details are: "you are a student" #}
         {% 
-          if (not current_user.is_student or not current_user.is_active) or
+          if current_user.is_staff or (not current_user.is_student or not current_user.is_active) or
           (users_have_first_name or users_have_last_name or users_have_ext_username or users_have_ext_id or users_have_email)
         %}
           <div class="col-md">

@@ -588,6 +588,28 @@ def parse_task_markdown(task_source_filename):
 
 def publish_task_list(app=current_app):
     # render the tasklist template and save it as _task_list.html
+    class_prefix = app.config[ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name]
+    hint_level_regex = re.compile(r'(<li>\s*)?(<p>\s*)(&lt; ?\!+ ?&gt;)')
+    # group 1: <li>, group 2: <p>, group 3: <!!> token
+
+    def replace_hint_level_marker(hint_match):
+        ret_val = hint_match.group(0)
+        hint_class = f"{class_prefix}{hint_match.group(3).count('!')}"
+        if hint_match.group(1):
+            ret_val = (
+                hint_match.group(1).replace("<li>", f'<li class="{hint_class}">')
+                + hint_match.group(2)
+            )
+            print("hinted <li>")
+        elif hint_match.group(2):
+            ret_val = (
+                hint_match.group(2).replace("<p>", f'<p class="{hint_class}">')
+            )
+            print("hinted <p>")
+        else:
+            print("no hint")
+        return ret_val
+
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
     created_at = datetime.now(timezone.utc)
@@ -617,6 +639,8 @@ def publish_task_list(app=current_app):
         task_encourage_vcs_message=task_encourage_vcs_message,
         vcs_name=vcs_name,
     )
+    html = re.sub(hint_level_regex, replace_hint_level_marker, html)
+
     if app.config[ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name]:
         generated_task_list_in_db = DbFile.query.filter_by(
             type=DbFile.TASK_LIST

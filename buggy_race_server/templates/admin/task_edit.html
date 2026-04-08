@@ -62,7 +62,7 @@
             <div class="col my-2">
               <div class="form-group">
                 {{ form.problem_text.label}}
-                {{ form.problem_text(class="form-control mr-sm-1")}}
+                {{ form.problem_text(class="form-control mr-sm-1", rows=4)}}
               </div>
             </div>
           </div>
@@ -70,7 +70,7 @@
             <div class="col my-2">
               <div class="form-group">
                 {{ form.solution_text.label}}
-                {{ form.solution_text(class="form-control mr-sm-1")}}
+                {{ form.solution_text(class="form-control mr-sm-1", rows=4)}}
               </div>
             </div>
           </div>
@@ -78,7 +78,27 @@
             <div class="col my-2">
               <div class="form-group">
                 {{ form.hints_text.label}}
-                {{ form.hints_text(class="form-control mr-sm-1")}}
+                {% if is_task_hint_levels_enabled %}
+                  <div class="alert-info p-3">
+                    <strong>Hint levels</strong>:
+                    If you want to hide "extra" hints (for example, suggestions
+                    relating to increasingly complex solutions), you can
+                    indicate a hint level up to {{ task_hint_max_level }}. Put
+                    {% for i in range(task_hint_max_level) %}
+                      {% if not loop.first -%}
+                        {% if loop.last %} or {% else -%}, {% endif %}
+                      {% endif %}
+                      <code>&lt;{{ "!"*loop.index }}&gt;</code>
+                    {% endfor %}
+                    as the <em>very first item</em> in each paragraph or list
+                    item that you don't want to be shown until the student
+                    actively chooses to reveal it.
+                  </div>
+                  <div class="my-1 text-right btn-collection">
+                    {{ macros.docs_btn("Setting hint levels", "/customising/creating-tasks#setting-hint-levels") }}
+                  </div>
+                {% endif %}
+                {{ form.hints_text(class="form-control mr-sm-1", rows=8)}}
               </div>
             </div>
           </div>

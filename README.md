@@ -1,11 +1,10 @@
-# cs0001-buggy-race-server
+# buggy-race-server
 
 This is the central repo in the _Buggy Racing_ project.
 
-> **WORK-IN-PROGRESS** _May 2023_  
-> We're currently running the Buggy Racing project (for the fourth year) at
+> **WORK-IN-PROGRESS** _May 2026_  
+> We're currently running the Buggy Racing project (for the sixth year) at
 > Royal Holloway, Department of Computer Science  
-> **We're aiming for a public release in June!**
 
 
 ## About the project
@@ -27,7 +26,7 @@ students who are relatively new to programming as well as those who are
 already confident programmers.
 
 > If you're running a Buggy Race project, you will need to fork and customise
-> the editor repo before sharing it with your students. 
+> the editor repo before sharing it with your students.
 
 ### Structure of the project software
 
@@ -41,8 +40,8 @@ There are three repos:
   "tech notes").
 
 * [buggy-race-editor](https://github.com/buggyrace/buggy-race-editor)  
-  Contains the skeleton Flask web app that runs the Buggy editor that
-  every student is given, and which they must develop according to the tasks.
+  Contains the skeleton Flask web app that runs the Buggy editor that every
+  student is given, and which they must develop according to the tasks.
 
 * [buggy-race-about](https://github.com/buggyrace/buggy-race-about)  
   Contains full documentation both for the server software and how to run the
@@ -50,7 +49,6 @@ There are three repos:
 
 ## History
 
-We first ran this project for the CS1999 (CompSci Foundation year at RHUL)
-in term 3, 2020. Now we're working on making it configurable and customisable
-for other institutions to use.
-
+We first ran this project for the CS1999 (CompSci Foundation year at RHUL) in
+term 3, 2020. We've tried to make it configurable and customisable for other
+institutions to use.

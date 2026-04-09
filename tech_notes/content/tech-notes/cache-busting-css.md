@@ -134,7 +134,7 @@ That last one is what happens after the time-to-live has expired _or_ if you
 force the browser to make a request anyway. That might happen if you 
 do a hard refresh (shift-Crl-F5 maybe)
 or _explicitly_ make a request for it by hitting 
-[http://localhost:5000/static/app.css](http://localhost:5000/static/app.css).
+[http://localhost:{{ EDITOR_PORT }}/static/app.css](http://localhost:{{ EDITOR_PORT }}/static/app.css).
 
 
 ## How to beat the cache

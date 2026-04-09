@@ -47,12 +47,12 @@ The route `/` matches _no path_, so `http://example.com/` (or
 `http://example.com`) would respond with "Hello world!" (and a
 status of
 [`200` — _success_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200)),
-but  `http://localhost:5000/something` would not, because there's no
+but  `http://localhost:{{ EDITOR_PORT }}/something` would not, because there's no
 route for `something`. (In that case, Flask's would send a response with the status code 
 [`404` — _not found_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404)).
 
 > Your Flask app isn't running on `example.com`: depending on how you're running it,
-> it's probably something like `http://localhost:5000` or some other number — the port
+> it's probably something like `http://localhost:{{ EDITOR_PORT }}` or some other number — the port
 > number is after the colon (`:`). See more about [localhost](localhost).
 
 Typically, it's more complicated than that, and the method involves some form of

@@ -1,7 +1,7 @@
 Title: 1-ADD database structure
 
 
-# know what's in the database
+# Know what's in the database
 
 * Task [1-ADD add more data to the form]({{ BUGGY_RACE_SERVER_URL }}/project/tasks/#task-1-add)
 
@@ -11,7 +11,8 @@ When the buggy editor is correctly initialised, the database contains one
 record: that's the buggy which your are updating when you submit the "Make
 buggy" form.
 
-But it's not a mystery how it got there. After you cloned your editor, you ran:
+But it's not a mystery how it got there. After you cloned your editor, you ran
+(maybe `python` instead of `python3`):
 
 ```
 python3 init_db.py
@@ -96,12 +97,21 @@ exist, and thereby create the database.
 
 ### Why can't you look inside `database.db`?
 
-It's stored as a binary file, which means it's not arranged as text characters
-that you can simply read. If you try to read it in a text editor, for example,
-you'll see it doesn't make any sense.
+It's stored as a [binary file]({{ SUPERBASICS_URL }}/text-files/binary-files/),
+which means it's not arranged as text characters that you can simply read. If
+you try to read it in a text editor, for example, you'll see it doesn't make
+any sense.
 
-One way to view the contents of the SQLite database is by
-installing the [SQLite Viewer for VSCode](https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer).
+One way to investigate the contents of and SQLite database is by installing and
+running [SQLite](https://sqlite.org/index.html) itself. You can also access
+it through the `sqlite3` Python module (that is part of the standard library
+now)... which is how your buggy editor is doing it.
+
+If you're using VS Code, we recommend you install an SQLite extension, such as
+[SQLite Viewer for VSCode](https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer).
+When you open the database file (`database.db`), the extension will read the
+database and show you the table(s) and their contents without needing to issue
+any SQL commands.
 
 ### Why don't all the columns have default values?
 
@@ -109,16 +119,42 @@ They could do! You could add them if you think you know what they are.
 But _maybe_ the database is the wrong place to be enforcing that. What
 happens if they change? Is that likely?
 
-### How can I find out why my database insert is failing?
+### How can I find out why my database operation is failing?
 
-Change the code in `app.py` to the following:
+When your Python code calls the SQLite3 `execute` function — which is how your
+buggy editor is reading and writing the database, it's passing the SQL command
+(a string) and its arguments (a tuple), if any, over to SQLite. If that goes
+wrong — maybe you've got an SQL syntax error in that string, or there's
+something with the arguments SQLite can't make sense of — it will throw an
+exception. Python isn't the problem here — it's passed this bit of work over to
+SQLite — but the problem comes back through Python because it was Python that
+called it.
+
+The way that problem comes back is as an Exception — specifically it will be
+an SQLite3 `OperationalError`. Your Python code can catch it using a `try`...
+`except` block. There is an example of this already in the `app.py` we gave you:
+it's in the `create_buggy()` function, so investigate that to see how it's being
+used. The mechanism looks like this:
+
+```python
+    try:
+        # do something to the database with sql and cursor
+    except sql.OperationalError as e:
+        # ...and maybe handle the error in some way...
 ```
-        except Exception as e: 
-            print(e) 
-            con.rollback()
-            msg = "error in update operation"
+
+While you are debugging, you might want to print the exception out to the
+console:
+
 ```
-This will log any database errors to the Flask output terminal.
+        print(e)
+```
+
+For a slightly better way of printing that out, maybe you should also use the
+word "FIXME": see the tech note about
+[Printing debug, and Why "FIXME"?](print-debug#why-fixme).
+
+* For technical details, see [Python's Errors & Exceptions](https://docs.python.org/3/tutorial/errors.html)
 
 <br><br>
 

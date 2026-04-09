@@ -108,7 +108,7 @@ console.log(greeting); // writes "hello" to the console
 ### SQL
 
 Comments in SQL are preceded with two hyphens. Most of the SQL in your project
-is actually being quoted by Python (with the sqlite `execute()` function)
+is actually being quoted by Python (with the sqlite3 `execute()` function)
 so you might not come across a need for this:
 
 ```sql

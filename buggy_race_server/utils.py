@@ -4,6 +4,8 @@ import json
 import os # for path
 import re
 import csv
+from collections import defaultdict
+
 from flask import abort, flash, request, redirect, url_for, current_app, render_template, make_response
 from wtforms import ValidationError
 from functools import wraps, update_wrapper
@@ -588,27 +590,41 @@ def parse_task_markdown(task_source_filename):
 
 def publish_task_list(app=current_app):
     # render the tasklist template and save it as _task_list.html
+    # returns a message reporting on hints processed (maybe none)
+    is_task_hint_levels_enabled = app.config[ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name]
     class_prefix = app.config[ConfigSettingNames._TASK_HINT_CSS_CLASS_PREFIX.name]
     hint_level_regex = re.compile(r'(<li>\s*)?(<p>\s*)(&lt; ?\!+ ?&gt;)')
     # group 1: <li>, group 2: <p>, group 3: <!!> token
 
+    hint_counts_by_level = defaultdict(int)
+
     def replace_hint_level_marker(hint_match):
-        ret_val = hint_match.group(0)
-        hint_class = f"{class_prefix}{hint_match.group(3).count('!')}"
+        """ Takes match object from hint_level_regex and inserts CSS class:
+            a little fiddly because markdown may have generated <p> nested in
+            the <li> (but never the other way around), so need to make sure the
+            outer <li> is shown/hidden rather than the <p> inside it.
+            This is... OK but not very general.
+        """
+        replacement_html_str = ""
+        hint_level = hint_match.group(3).count('!')
+        if is_task_hint_levels_enabled:
+            hint_class_attr = f" class=\"{class_prefix}{hint_level}\""
+        else:
+            hint_class_attr = "" # nothing: just stripping tokens <!> out
         if hint_match.group(1):
-            ret_val = (
-                hint_match.group(1).replace("<li>", f'<li class="{hint_class}">')
+            replacement_html_str = (
+                hint_match.group(1).replace("<li>", f'<li{hint_class_attr}>')
                 + hint_match.group(2)
             )
-            print("hinted <li>")
+            hint_counts_by_level[hint_level] += 1
         elif hint_match.group(2):
-            ret_val = (
-                hint_match.group(2).replace("<p>", f'<p class="{hint_class}">')
+            replacement_html_str = (
+                hint_match.group(2).replace("<p>", f'<p{hint_class_attr}>')
             )
-            print("hinted <p>")
-        else:
-            print("no hint")
-        return ret_val
+            hint_counts_by_level[hint_level] += 1
+        else: # unexpected (replace_hint_level_marker only called on regex match)
+            replacement_html_str = hint_match.group(0)
+        return replacement_html_str
 
     tasks_by_phase = Task.get_dict_tasks_by_phase(want_hidden=False)
     qty_tasks = sum(len(tasks_by_phase[phase]) for phase in tasks_by_phase)
@@ -664,6 +680,16 @@ def publish_task_list(app=current_app):
         value=stringify_datetime(created_at) if qty_tasks else "",
     )
     purge_task_list(app=app)
+    hint_msg = "Found hints in task list: "
+    if hint_counts_by_level:
+        hint_msg += ", ".join([f"{hint_counts_by_level.get(i)} × {'★'*i}" for i in hint_counts_by_level])
+        if is_task_hint_levels_enabled:
+            hint_msg += " — enabled, hidden until clicked"
+        else:
+            hint_msg += " — not enabled, hint-tokens stripped out"
+    else:
+        hint_msg += "none"
+    return hint_msg
 
 def publish_tasks_as_issues_csv(app=current_app):
     generated_issuefile = join_to_project_root(

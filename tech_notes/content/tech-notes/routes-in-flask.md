@@ -14,7 +14,7 @@ Your webserver effectively has three jobs:
 3. find the right [HTML template](jinja-templates) to render (and send back)
 
 Flask takes care of 1. for you. When you tell Python to run `app.py`, it's
-listening on [localhost:5000](http://localhost:5000/) (there's a
+listening on [localhost:{{ EDITOR_PORT }}](http://localhost:{{ EDITOR_PORT }}/) (there's a
 [tech note about localhost](localhost)) and leaps into action as soon as a
 request comes in.
 
@@ -88,7 +88,7 @@ There's nothing there about what method this needs to be, so Flask will run
 this in response to any request for the route `/` regardless of what method
 it was sent with.
 
-That's why if you run your buggy editor and hit [`localhost:5000`](http://localhost:5000/),
+That's why if you run your buggy editor and hit [`localhost:{{ EDITOR_PORT }}`](http://localhost:{{ EDITOR_PORT }}/),
 you've made a `GET` request with no route (just `/`) — and you get back the
 home page that's effectively described in `/templates/index.html`.
 
@@ -99,7 +99,7 @@ home page that's effectively described in `/templates/index.html`.
 ### A slightly more complex example: `GET /new`
 
 If you click on the "Make buggy" button, the URL your browser will try to load
-is [`localhost:5000/new`](http://localhost:5000/new).
+is [`localhost:{{ EDITOR_PORT }}/new`](http://localhost:{{ EDITOR_PORT }}/new).
 
 Now the incoming request is:
 

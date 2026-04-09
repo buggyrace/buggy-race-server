@@ -1774,11 +1774,13 @@ def tasks_generate():
     if form.is_submitted() and form.validate():
         # render the template and save it as _task_list.html
         try:
-            publish_task_list(current_app)
+            hints_msg = publish_task_list(current_app)
             publish_tasks_as_issues_csv(current_app)
         except IOError as e:
             flash(f"Failed to create task list: problem with file: {e}", "danger")
         else:
+            if hints_msg:
+                flash(hints_msg, "info")
             qty_tasks = Task.query.filter_by(is_enabled=True).count()
             if qty_tasks == 0:
                 flash("Task list page has been generated but there are no unhidden tasks in the project yet!", "danger")

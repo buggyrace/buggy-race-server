@@ -9,15 +9,15 @@ Title: using localhost
 
 When you run the buggy editor, you'll see its output includes this line:
 
-    * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+    * Running on http://0.0.0.0:{{ EDITOR_PORT }}/ (Press CTRL+C to quit)
 
-If you go to [http://0.0.0.0:5000/](http://0.0.0.0:5000/) in your browser, you
+If you go to [http://0.0.0.0:{{ EDITOR_PORT }}/](http://0.0.0.0:{{ EDITOR_PORT }}/) in your browser, you
 _might_ see the buggy editor web page. But you might not — see the rest of
 this tech note to understand why.
 
 If `0.0.0.0` doesn't work for you, try
-[`http://localhost:5000/`](http://localhost:5000/) or
-[`http://127.0.0.0:5000/`](http://127.0.0.0:5000/) instead.
+[`http://localhost:{{ EDITOR_PORT }}/`](http://localhost:{{ EDITOR_PORT }}/) or
+[`http://127.0.0.0:{{ EDITOR_PORT }}/`](http://127.0.0.0:{{ EDITOR_PORT }}/) instead.
 
 ## Explanation of IP lookups
 
@@ -104,10 +104,10 @@ your browser can find. On some systems that `0.0.0.0` might work, but as you've
 seen, on some it won't.
 
 
-## The port number (:5000) isn't part of this!
+## The port number (:{{ EDITOR_PORT }}) isn't part of this!
 
 The IP address is used to find the right server on the internet. The number
-after the colon is the port number (in your case, 5000). This is declaring
+after the colon is the port number (in your case, {{ EDITOR_PORT }}). This is declaring
 what port number to use **once the server has been found** (it's like an
 apartment number of a building in a postal address). So although you do need
 the port number — try different port numbers and see what happens (it's safe!):

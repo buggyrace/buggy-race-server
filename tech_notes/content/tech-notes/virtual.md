@@ -109,11 +109,20 @@ from version control, so its name should appear in the repo's `.gitignore` file.
 Your buggy editor repo's `.gitignore`  already has `venv` and `.venv` (and some
 others) in anticipation of you using one of the conventional names.
 
+### How to activate a virtual environment
+
+The directory you just created (and probably called `venv`) contains a script to
+run which activates it. In fact it contains more than one: _which_ script you
+use, and how to run it, depends what operating system you're on:
+
+* Linux/MacOS: `source venv/bin/activate`
+* Windows: `venv\Scripts\activate`
+
 ### How to deactivate a virtual environment
 
 Often, you'll deactivate a virtual environment by ending the session it's
 running in (by closing the terminal window, for example). But you can also use
-the `deactivate` command (which was set up when you activated it).
+the `deactivate` command (which was set up for you when you activated it).
 
 ## Instructions for VSCode
 
@@ -133,33 +142,33 @@ new environment, and offer to use it: you should accept this recommendation.
 ### Unix or Mac users:
 
 * Open a new Terminal in VSCode using the menu **Terminal → New Terminal**. Run
-  `pwd` and confirm you are in the `buggy-editor` folder. If not, change
-  directory into it with `cd`.
+  `pwd` and confirm you are in the `{{ BUGGY_EDITOR_DIR_NAME }}` folder. If not,
+  change directory into it with `cd`.
 
 * Run `python3 -m venv venv` and select "Yes" when the popup says "We noted a
   new environment has been created. Do you want to select it for the workspace
   folder?". You now have a virtual environment called `venv`.
 
-* Run `source buggy-env/bin/activate` - this will activate the new virtual
-  environment.
+* Run `source {{ BUGGY_EDITOR_DIR_NAME }}/bin/activate` - this will activate the
+  new virtual environment.
 
 * To confirm you are using the virtual environment, run `which python`. This
-  should return a directory ending in `buggy-editor/venv/bin/python`.
+  should return a directory ending in `{{ BUGGY_EDITOR_DIR_NAME }}/venv/bin/python`.
 
 ### Instructions for Windows users:
 
 * Open a new Powershell Terminal in VSCode using the menu
   **Terminal → New Terminal**. Run `pwd` and confirm you are in the
-  `buggy-editor` folder, if not, change directory into it.
+  `{{ BUGGY_EDITOR_DIR_NAME }}` folder, if not, change directory into it.
 
-* Run `python -m venv buggy-env` and if it appears, select "Yes" when the popup
+* Run `python -m venv venv` and if it appears, select "Yes" when the popup
   says "We noted a new environment has been created. Do you want to select it
   for the workspace folder?". You now have a virtual environment called `venv`.
 
 * Run `venv\Scripts\activate` - this will activate the new virtual environment.
 
 * To confirm you are using the virtual environment, run `where python`. This
-  should return a directory ending in `buggy-editor/venv/bin/python`.
+  should return a directory ending in `{{ BUGGY_EDITOR_DIR_NAME }}/venv/bin/python`.
 
 ## "Module not found"?
 

@@ -43,6 +43,7 @@ CACHE_CONTENT = False
 # values with the live (i.e., current config) values: so leave these here
 # as a template (even though they mostly contain defaults/empty strings).
 JINJA_GLOBALS={
+  "BUGGY_EDITOR_DIR_NAME": "buggy-race-editor",
   "BUGGY_RACE_SERVER_URL": "http://localhost:8000",
   "BUGGY_EDITOR_REPO_URL": "https://github.com/buggyrace/buggy-race-editor",
   "BUGGY_EDITOR_REPO_NAME": "buggy-race-editor",

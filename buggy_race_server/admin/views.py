@@ -1749,6 +1749,7 @@ def tech_notes_admin():
     is_showing_tech_notes=current_app.config[ConfigSettingNames.IS_SHOWING_TECH_NOTES.name],
     is_publishing_enabled=current_app.config[ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name],
     key_settings=[
+        ConfigSettingNames.BUGGY_EDITOR_DIR_NAME.name,
         ConfigSettingNames.BUGGY_EDITOR_REPO_URL.name,
         ConfigSettingNames.BUGGY_RACE_SERVER_URL.name,
         ConfigSettingNames.PROJECT_CODE.name,

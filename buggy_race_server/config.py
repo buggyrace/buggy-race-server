@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.2+dev"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.3+dev"
 #
 # ----------------------------------------------------------------------------
 
@@ -195,6 +195,7 @@ class ConfigSettingNames(Enum):
     # and a type.
     API_SECRET_TIME_TO_LIVE = auto()
     AUTHORISATION_CODE = auto()
+    BUGGY_EDITOR_DIR_NAME = auto()
     BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW = auto()
     BUGGY_EDITOR_REPO_NAME = auto()
     BUGGY_EDITOR_REPO_OWNER = auto()
@@ -390,6 +391,7 @@ class ConfigSettings:
       ConfigGroupNames.EDITOR.name: (
         ConfigSettingNames.EDITOR_DOWNLOAD_URL.name,
         ConfigSettingNames.EDITOR_ZIPFILE_NAME.name,
+        ConfigSettingNames.BUGGY_EDITOR_DIR_NAME.name,
         ConfigSettingNames.EDITOR_HOST.name,
         ConfigSettingNames.EDITOR_PORT.name,
         ConfigSettingNames.IS_WRITING_HOST_IN_EDITOR.name,
@@ -572,6 +574,7 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: "tech_notes",
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: 60*60, # (in seconds) 1 hour
         ConfigSettingNames.AUTHORISATION_CODE.name: bcrypt.generate_password_hash("CHANGEME").decode('utf8'),
+        ConfigSettingNames.BUGGY_EDITOR_DIR_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: "title, description",
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: "buggy-race-editor",
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: "buggyrace",
@@ -731,6 +734,7 @@ class ConfigSettings:
         ConfigSettingNames._TECH_NOTES_PATH.name: ConfigTypes.STRING,
         ConfigSettingNames.API_SECRET_TIME_TO_LIVE.name: ConfigTypes.INT,
         ConfigSettingNames.AUTHORISATION_CODE.name: ConfigTypes.PASSWORD,
+        ConfigSettingNames.BUGGY_EDITOR_DIR_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name: ConfigTypes.STRING,
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name: ConfigTypes.STRING,
@@ -887,6 +891,15 @@ class ConfigSettings:
           other-user data, including registering students. See also
           `IS_PUBLIC_REGISTRATION_ALLOWED` for an exception.""",
 
+        ConfigSettingNames.BUGGY_EDITOR_DIR_NAME.name:
+          """This is the name of the directory the students' buggy editor source
+          code is found in. If you're distributing the source code in a zip file          
+          it is probably the name of that zipIf you're using a VCS (like Git)
+          then this is usually the same as the `BUGGY_EDITOR_REPO_NAME` setting
+          in the VCS config settings. This setting is available in templates, so 
+          (for example) so you can refer to the project directory by name in
+          tasks or tech notes.""",
+
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name:
           """The header row that should appear in the task issues CSV file.
           If you leave it empty, no header row will be included. You only need
@@ -902,7 +915,11 @@ class ConfigSettings:
           """This should match the name in the `BUGGY_EDITOR_REPO_URL` and is
           used in some of the GitHub API calls: if you've forked the repo and
           not changed its name, you won't need to change this. If
-          `IS_USING_VCS` is `No`, this setting is ignored.""",
+          `IS_USING_VCS` is `No`, this setting is ignored. If you've changed
+          this setting and you're using a VCS (like Git), see also
+          `BUGGY_EDITOR_DIR_NAME` in the Editor group of config settings,
+          which should probably be the same: it's the name of the directory
+          the student's repo is cloned into.""",
 
         ConfigSettingNames.BUGGY_EDITOR_REPO_OWNER.name:
           """The `BUGGY_EDITOR_REPO_URL` is public and owned by `buggyrace`.

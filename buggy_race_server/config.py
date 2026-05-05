@@ -258,6 +258,7 @@ class ConfigSettingNames(Enum):
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TA_SET_API_KEY_ENABLED = auto()
     IS_TASK_HINT_LEVELS_ENABLED = auto()
+    IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
@@ -486,6 +487,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
         ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -638,6 +640,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: 0,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name: 0,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
@@ -796,6 +799,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
@@ -1316,7 +1320,9 @@ class ConfigSettings:
           some visibility of their progress (which is why we implemented it).
           If you choose `No`, this feature will be hidden. Note that you _can_
           choose `Yes`, letting students store task texts, even if the project
-          doesn't require a report.""",
+          doesn't require a report. If you are storing task texts and
+          `PROJECT_REPORT_TYPE` is `document`, consider setting
+          `IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE` to `Yes` too.""",
 
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name:
           """Can individual students choose to set their own API secret to be
@@ -1361,6 +1367,16 @@ class ConfigSettings:
           hint's first token being `<!>` or `<!!>`. Regardless of whether hint
           levels are enabled or not, this mechanism always removes the tokens
           when the task list is published.
+          """,
+
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name:
+          """When students download their task texts in HTML format, is the file
+          they get a whole HTML page (with doctype, head, and body)? If not, it
+          will be an HTML fragment for inserting into another page. This setting
+          only applies if `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`. If you want
+          students to submit their report as a standalone document (so
+          `PROJECT_REPORT_TYPE` is `document`) then it's probably most helpful
+          to set this to `Yes`, otherwise leave it as `No`.
           """,
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:

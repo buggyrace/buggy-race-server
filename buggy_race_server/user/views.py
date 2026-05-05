@@ -549,6 +549,7 @@ def download_texts(username, format):
             render_template(
                 f"user/task_texts_download.{format}",
                 username=user.username,
+                is_whole_html_page=current_app.config[ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name],
                 task_ids_in_order=task_ids_in_order,
                 texts_by_task_id=texts_by_task_id,
                 tasks_by_id=tasks_by_id,

@@ -305,6 +305,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
+    TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE = auto()
     TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USER_ACTVITY_PERIOD_S = auto()
@@ -488,6 +489,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name,
         ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name,
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -688,6 +690,10 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: """
+<h1>%PROJECT_CODE% Buggy Editor Project</h1>
+<h2>Task texts by %PRETTY_USERNAME%</h2>
+""",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: 1, # (in days) 1 day
@@ -846,6 +852,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: ConfigTypes.INT,
@@ -1688,6 +1695,14 @@ class ConfigSettings:
           This applies to task texts in the report (i.e., if
           `PROJECT_REPORT_TYPE` is not `No report`) or on the race server if
           `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`, and is only advisory.""",
+
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name:
+          """If `IS_STORING_STUDENT_TASK_TEXTS` and
+          `IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE` are both `Yes`, you can add
+          a short preamble in the body of that page. This might be helpful if
+          your project requires students to submit a report as a standalone
+          document (see `PROJECT_REPORT_TYPE`). Three replacements are
+          available: `%USERNAME%`, `%PRETTY_USERNAME%`, and `%PROJECT_CODE%`.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on

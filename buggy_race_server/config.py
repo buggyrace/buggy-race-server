@@ -41,7 +41,7 @@ MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.4+dev"
 # manually because we're _not_ using Git submodules)
 # This is from https://github.com/buggyrace/buggy-race-editor/
 #
-MANUAL_EDITOR_COMMIT = "660bf1e6a246ed0232912e4a9d5b54a6d5d96fd9"
+MANUAL_EDITOR_COMMIT = "2efd59a78f63c664b88ae8f0325aea23ba55be50"
 #
 # ----------------------------------------------------------------------------
 

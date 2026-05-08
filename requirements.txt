@@ -52,7 +52,7 @@ mdurl==0.1.2
 ordered-set==4.1.0
 packaging==24.2
 python-dateutil==2.9.0.post0
-python-dotenv==1.1.0
+python-dotenv==1.2.2
 pytz==2025.2
 rich==13.9.4
 roman==5.0

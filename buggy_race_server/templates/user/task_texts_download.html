@@ -25,13 +25,10 @@
   </style>
 </head>
 <body>
-  <h1>{{ project_code }} Buggy Editor Project report</h1>
-  <p>
-    Username: <code>{{ username }}</code>
-  </p>
+{{ report_html_preamble | safe }}
 {% endif -%}
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  {{ project_code }} Buggy Editor Project texts by {{ username }}
+  {{ project_code }} Buggy Editor Project texts by {{ pretty_username }}
   Downloaded from the race server: {{ downloaded_at | servertime }}
 {% if report_type %}
   For more about your report, see

@@ -545,20 +545,32 @@ def download_texts(username, format):
               Task.sort_position.asc()
             ).all()
         ]
-        response = make_response(
-            render_template(
-                f"user/task_texts_download.{format}",
-                username=user.username,
-                is_whole_html_page=current_app.config[ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name],
-                task_ids_in_order=task_ids_in_order,
-                texts_by_task_id=texts_by_task_id,
-                tasks_by_id=tasks_by_id,
-                project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
-                report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
-                downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
-                buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
-            )
+    report_html_preamble = current_app.config[ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name]
+    if format == "html" and report_html_preamble:
+        project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+        for (placeholder, value) in {
+            "%USERNAME%": user.username,
+            "%PRETTY_USERNAME%": user.pretty_username,
+            "%PROJECT_CODE%": project_code,
+        }.items():
+            report_html_preamble = report_html_preamble.replace(placeholder, value)
+    response = make_response(
+        render_template(
+            f"user/task_texts_download.{format}",
+            user=user,
+            username=user.username,
+            pretty_username=user.pretty_username,
+            is_whole_html_page=current_app.config[ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name],
+            report_html_preamble=report_html_preamble,
+            task_ids_in_order=task_ids_in_order,
+            texts_by_task_id=texts_by_task_id,
+            tasks_by_id=tasks_by_id,
+            project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+            report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
+            downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
+            buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],
         )
+    )
     response.headers['content-disposition'] = f"attachment; filename=\"{filename}\""
     return response
 

@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.4"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.5"
 #
 # ----------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.4"
 # manually because we're _not_ using Git submodules)
 # This is from https://github.com/buggyrace/buggy-race-editor/
 #
-MANUAL_EDITOR_COMMIT = "660bf1e6a246ed0232912e4a9d5b54a6d5d96fd9"
+MANUAL_EDITOR_COMMIT = "2efd59a78f63c664b88ae8f0325aea23ba55be50"
 #
 # ----------------------------------------------------------------------------
 
@@ -258,6 +258,7 @@ class ConfigSettingNames(Enum):
     IS_TA_PASSWORD_CHANGE_ENABLED = auto()
     IS_TA_SET_API_KEY_ENABLED = auto()
     IS_TASK_HINT_LEVELS_ENABLED = auto()
+    IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE = auto()
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
@@ -304,6 +305,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_ENV_VARS = auto()
     TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
+    TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE = auto()
     TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USER_ACTVITY_PERIOD_S = auto()
@@ -486,6 +488,8 @@ class ConfigSettings:
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
         ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name,
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name,
         ConfigSettingNames.BUGGY_EDITOR_ISSUES_CSV_HEADER_ROW.name,
         ConfigSettingNames.IS_ISSUES_CSV_IN_REVERSE_ORDER.name,
@@ -638,6 +642,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: 1,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: 1,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: 0,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name: 0,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
@@ -685,6 +690,10 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: """
+<h1>%PROJECT_CODE% Buggy Editor Project</h1>
+<h2>Task texts by %PRETTY_USERNAME%</h2>
+""",
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: "",
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: 60 * 5,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: 1, # (in days) 1 day
@@ -796,6 +805,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_PASSWORD_CHANGE_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_HINT_LEVELS_ENABLED.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
@@ -842,6 +852,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name: ConfigTypes.INT,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name: ConfigTypes.INT,
@@ -1316,7 +1327,9 @@ class ConfigSettings:
           some visibility of their progress (which is why we implemented it).
           If you choose `No`, this feature will be hidden. Note that you _can_
           choose `Yes`, letting students store task texts, even if the project
-          doesn't require a report.""",
+          doesn't require a report. If you are storing task texts and
+          `PROJECT_REPORT_TYPE` is `document`, consider setting
+          `IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE` to `Yes` too.""",
 
         ConfigSettingNames.IS_STUDENT_API_OTP_ALLOWED.name:
           """Can individual students choose to set their own API secret to be
@@ -1361,6 +1374,16 @@ class ConfigSettings:
           hint's first token being `<!>` or `<!!>`. Regardless of whether hint
           levels are enabled or not, this mechanism always removes the tokens
           when the task list is published.
+          """,
+
+        ConfigSettingNames.IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE.name:
+          """When students download their task texts in HTML format, is the file
+          they get a whole HTML page (with doctype, head, and body)? If not, it
+          will be an HTML fragment for inserting into another page. This setting
+          only applies if `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`. If you want
+          students to submit their report as a standalone document (so
+          `PROJECT_REPORT_TYPE` is `document`) then it's probably most helpful
+          to set this to `Yes`, otherwise leave it as `No`.
           """,
 
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name:
@@ -1672,6 +1695,14 @@ class ConfigSettings:
           This applies to task texts in the report (i.e., if
           `PROJECT_REPORT_TYPE` is not `No report`) or on the race server if
           `IS_STORING_STUDENT_TASK_TEXTS` is `Yes`, and is only advisory.""",
+
+        ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name:
+          """If `IS_STORING_STUDENT_TASK_TEXTS` and
+          `IS_TASK_TEXT_HTML_DOWNLOAD_WHOLE_PAGE` are both `Yes`, you can add
+          a short preamble in the body of that page. This might be helpful if
+          your project requires students to submit a report as a standalone
+          document (see `PROJECT_REPORT_TYPE`). Three replacements are
+          available: `%USERNAME%`, `%PRETTY_USERNAME%`, and `%PROJECT_CODE%`.""",
 
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name:
           """Full URL to the tech notes pages if they are *not* being hosted on

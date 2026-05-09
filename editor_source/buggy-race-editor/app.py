@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template, request, send_file
-from os import environ
+import os
 import sqlite3 as sql
 
 # the flask application: uses the webserver imported from the flask module:
@@ -17,7 +17,6 @@ BUGGY_RACE_SERVER_URL = "https://RACE-SERVER-URL"
 def home():
     return render_template("index.html", server_url=BUGGY_RACE_SERVER_URL)
 
-
 #-----------------------------------------------------------------------------
 # creating a new buggy:
 #  * if it's a GET request, just show the form
@@ -34,11 +33,12 @@ def create_buggy():
             with sql.connect(DATABASE_FILE) as db_connection:
                 cur = db_connection.cursor()
                 cur.execute(
-                    "UPDATE buggies set qty_wheels=? WHERE id=?",
+                    "UPDATE buggies SET qty_wheels=? WHERE id=?",
                     (qty_wheels, DEFAULT_BUGGY_ID)
                 )
                 db_connection.commit()
         except sql.OperationalError as e:
+            print(e)
             message = f"Error in update operation: {e}"
             db_connection.rollback()
         else:
@@ -46,7 +46,6 @@ def create_buggy():
         finally:
             db_connection.close()
         return render_template("updated.html", msg=message)
-
 
 #-----------------------------------------------------------------------------
 # a page for displaying the buggy
@@ -60,7 +59,6 @@ def show_buggies():
     record = cur.fetchone(); 
     return render_template("buggy.html", buggy=record)
 
-
 #-----------------------------------------------------------------------------
 # get the JSON data that describes the buggy:
 #  This reads the buggy record from the database, turns it into JSON format
@@ -72,14 +70,13 @@ def send_buggy_json():
     db_connection = sql.connect(DATABASE_FILE)
     db_connection.row_factory = sql.Row
     cur = db_connection.cursor()
-    cur.execute("SELECT * FROM buggies WHERE id=? LIMIT 1", (DEFAULT_BUGGY_ID))
+    cur.execute("SELECT * FROM buggies WHERE id=? LIMIT 1", (DEFAULT_BUGGY_ID,))
     buggies = dict(
       zip([column[0] for column in cur.description], cur.fetchone())
     ).items() 
     return jsonify(
         {key: val for key, val in buggies if not (val == "" or val is None)}
     )
-
 
 #-----------------------------------------------------------------------------
 # send the favicon for the buggy editor:
@@ -97,16 +94,16 @@ def send_favicon():
         max_age=60*60*24
     )
 
-
-#------------------------------------------------------------
+#-----------------------------------------------------------------------------
 # finally, after all the set-up above, run the app:
 # This listens to the port for incoming HTTP requests, and sends a response
 # back for each one. Unless something goes wrong, or you interrupt it (maybe
 # with control-C), it will run forever... so any code you put _after_ app.run
 # here won't normally be run.
+#-----------------------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(
-        debug=True,
-        host=environ.get("BUGGY_EDITOR_HOST") or "0.0.0.0",
-        port=environ.get("BUGGY_EDITOR_PORT") or 5000
-    )
+-    app.run(
+-        debug=True,
+-        host=environ.get("BUGGY_EDITOR_HOST") or "0.0.0.0",
+-        port=environ.get("BUGGY_EDITOR_PORT") or 5000
+-    )

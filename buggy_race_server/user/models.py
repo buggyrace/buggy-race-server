@@ -329,3 +329,19 @@ class User(UserMixin, SurrogatePK, Model):
             }, "https://api.github.com")
 
         return self._github
+
+    @property
+    def custom_project_code(self):
+        # a workaround for RHUL that looks for a course code of the form
+        # CS1234 in the "project notice" field of a user. We used this to
+        # override the course code in the "report" download for a resit
+        # student as a pragmatic way to minimise risk of confusion.
+        project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+        if (current_app.config[ConfigSettingNames._CUSTOM_IMPLEMENTATION.name] == "rhul"
+          and current_app.config[ConfigSettingNames.IS_PROJECT_NOTICE_PER_USER.name]
+          and self.project_notice
+        ):
+            if match := re.search(r'\b(CS\d{4})\b', self.project_notice):
+                # note: case-sensitive search for (e.g.) CS1999
+                project_code = match.group(1)
+        return project_code

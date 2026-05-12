@@ -190,6 +190,13 @@ class ConfigSettingNames(Enum):
     # secure by the time the Flask app sees them):
     _IS_REQUEST_TLS_EXPECTED = auto()
 
+    # We were doing a Git dance maintaining non-standard customisations in the
+    # Royal Holloway implementation, so added a universal way of putting code
+    # into the core app that is only enabled with a value here of "rhul".
+    # This is a pragmatic way of aniticiapting future, uh, hacks, while keeping
+    # the buggy racing server's business logic mostly universal.
+    _CUSTOM_IMPLEMENTATION = auto()
+
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
@@ -545,6 +552,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: "https://www.buggyrace.net/docs",
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name: "",
         ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: "editor",
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
@@ -715,6 +723,7 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: ConfigTypes.URL,
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
@@ -2042,6 +2051,7 @@ class ConfigSettings:
         ConfigSettings.CACHEBUSTER_KEY,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name,
         ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,

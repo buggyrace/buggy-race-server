@@ -536,6 +536,15 @@ def download_texts(username, format):
             )
         format = "html"
     filename = get_download_filename(f"texts-{user.username}.{format}", want_datestamp=True)
+    # RHUL customisation: resit students might have different project code
+    # for task text download, which might be submitted as the project report
+    global_project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name]
+    project_code = user.custom_project_code
+    if (
+        global_project_code != project_code and
+        filename.startswith(global_project_code.lower())
+    ):
+        filename = project_code.lower() + filename[len(global_project_code):]
     if format == "json":
         response = jsonify(get_user_task_texts_as_list(user.username))
     else:
@@ -547,7 +556,6 @@ def download_texts(username, format):
         ]
     report_html_preamble = current_app.config[ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name]
     if format == "html" and report_html_preamble:
-        project_code = current_app.config[ConfigSettingNames.PROJECT_CODE.name]
         for (placeholder, value) in {
             "%USERNAME%": user.username,
             "%PRETTY_USERNAME%": user.pretty_username,
@@ -565,7 +573,7 @@ def download_texts(username, format):
             task_ids_in_order=task_ids_in_order,
             texts_by_task_id=texts_by_task_id,
             tasks_by_id=tasks_by_id,
-            project_code=current_app.config[ConfigSettingNames.PROJECT_CODE.name],
+            project_code=project_code,
             report_type=current_app.config[ConfigSettingNames.PROJECT_REPORT_TYPE.name],
             downloaded_at=datetime.now(current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_TIMEZONE.name]).strftime("%Y-%m-%d %H:%M"),
             buggy_race_server_url=current_app.config[ConfigSettingNames.BUGGY_RACE_SERVER_URL.name],

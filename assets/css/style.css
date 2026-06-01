@@ -1027,3 +1027,34 @@ span.icon-eye-blocked, span.icon-eye {
 .date-span, .time-span, .time-ago {
   text-wrap: nowrap;
 }
+
+.admin-tint-blue,
+a.sm-item-link.admin-tint-blue,
+span.sm-item-link.admin-tint-blue {
+  background-color: #85C1E9;
+}
+.admin-tint-green,
+a.sm-item-link.admin-tint-green,
+span.sm-item-link.admin-tint-green {
+  background-color: #82E0AA;
+}
+.admin-tint-orange,
+a.sm-item-link.admin-tint-orange,
+span.sm-item-link.admin-tint-orange {
+  background-color: #F5B97A;
+}
+.admin-tint-red,
+a.sm-item-link.admin-tint-red,
+span.sm-item-link.admin-tint-red {
+  background-color: #EC7063;
+}
+.admin-tint-yellow,
+a.sm-item-link.admin-tint-yellow,
+span.sm-item-link.admin-tint-yellow {
+  background-color: #F7DC6F;
+}
+.admin-tint-violet,
+a.sm-item-link.admin-tint-violet,
+span.sm-item-link.admin-tint-violet {
+  background-color: #C39BD3;
+}

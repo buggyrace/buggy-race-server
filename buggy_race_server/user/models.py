@@ -79,6 +79,10 @@ class User(UserMixin, SurrogatePK, Model):
         ADMINISTRATOR: "Administrator",
     }
 
+    ADMIN_TINTS = {
+        "blue", "green", "orange", "red", "yellow", "violet"
+    }
+
     """A user of the app."""
 
     __tablename__ = "users"
@@ -112,6 +116,7 @@ class User(UserMixin, SurrogatePK, Model):
     project_notice = Column(db.Text(), nullable=True)
     submission_deadline = Column(db.DateTime(timezone=True), nullable=True)
     submission_link = Column(db.String(128), nullable=True)
+    admin_tint = Column(db.String(16), nullable=True)
     buggies = db.relationship("Buggy", backref="users", cascade="all, delete", lazy=True)
     tasktexts = db.relationship('TaskText', backref='users', cascade="all, delete")
 
@@ -164,6 +169,7 @@ class User(UserMixin, SurrogatePK, Model):
             'latest_json': self.latest_json,
             'is_student': self.is_student,
             'comment': self.comment,
+            'admin_tint': self.admin_tint,
         }
 
     def get_fields_as_dict_for_csv(self):
@@ -188,6 +194,7 @@ class User(UserMixin, SurrogatePK, Model):
             'comment': self.comment,
             'sub_deadline': self.sub_deadline,
             'sub_url': self.sub_url,
+            'admin_tint': self.admin_tint,
         }
         mandatory_fieldnames = ConfigSettings.users_additional_fieldnames_is_enabled_dict(current_app)
         for fieldname in mandatory_fieldnames:
@@ -261,6 +268,18 @@ class User(UserMixin, SurrogatePK, Model):
             self.is_demo_user and
             current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name]
         )
+
+    @property
+    def admin_tint_css(self):
+        css_class_str = self.admin_tint
+        if not self.admin_tint:
+            if current_app.config[ConfigSettingNames.IS_USER_AUTO_ADMIN_TINTED.name]:
+                if self.comment:
+                    css_class_str = current_app.config[ConfigSettingNames._DEFAULT_AUTO_USER_ADMIN_TINT.name]
+        if css_class_str in User.ADMIN_TINTS:
+            return f"admin-tint-{css_class_str}"
+        else:
+            return ""
 
     @property
     def editor_repo_url(self):

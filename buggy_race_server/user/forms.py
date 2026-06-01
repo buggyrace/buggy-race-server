@@ -4,7 +4,7 @@
 from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, TextAreaField, PasswordField, StringField, BooleanField, SelectField, IntegerField, DateTimeField
-from wtforms.validators import DataRequired, EqualTo, Length, Optional, ValidationError
+from wtforms.validators import AnyOf, DataRequired, EqualTo, Length, Optional, ValidationError
 
 from buggy_race_server.utils import is_authorised, prettify_form_field_name
 from buggy_race_server.user.models import User
@@ -55,6 +55,15 @@ class UserForm(FlaskForm):
             Length(max=ConfigSettings.MAX_COMMENT_LENGTH)
         ]
     )
+    admin_tint = StringField(
+        "Admin tint",
+        validators=[
+            AnyOf(
+                values=User.ADMIN_TINTS,
+                message="invalid admin tint"
+            ),
+        ]
+    ) # TODO admin tint validator
     access_level = IntegerField("Staff role", validators=[Optional()])
     auth_code = PasswordField("Authorisation code",  [is_authorised])
 

@@ -1004,6 +1004,7 @@ def manage_user(user_id):
           user.is_active = form.is_active.data
           user.is_login_enabled = form.is_login_enabled.data
           user.is_demo_user = form.is_demo_user.data if form.is_demo_user is not None else False
+          user.admin_tint = form.admin_tint.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_FIRST_NAME.name]:
               user.first_name = form.first_name.data
           if current_app.config[ConfigSettingNames.USERS_HAVE_LAST_NAME.name]:

@@ -226,6 +226,24 @@
           {% endif %}
           <tr>
             <td>
+              Admin tint
+            </td>
+            <td>
+              {% if user.admin_tint_css %}
+                <span class="sm-item-link {{ user.admin_tint_css }}">
+                  {% if user.admin_tint %}
+                    <code>{{ user.admin_tint}}</code>
+                  {% else %}
+                    <em class="empty-setting">auto</em>
+                  {% endif %}
+                </span>
+              {% else %}
+                <em class="empty-setting">none</em>
+              {% endif %}
+            </td>  
+          </tr> 
+          <tr>
+            <td>
               API secret
             </td>
             <td>

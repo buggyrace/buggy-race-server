@@ -32,7 +32,7 @@ from time import time
 #  When you do a release, [try to remember to] bump the release details here!
 # ----------------------------------------------------------------------------
 #
-MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.5"
+MANUAL_LATEST_VERSION_IN_SOURCE = "v3.1.6"
 #
 # ----------------------------------------------------------------------------
 
@@ -190,6 +190,19 @@ class ConfigSettingNames(Enum):
     # secure by the time the Flask app sees them):
     _IS_REQUEST_TLS_EXPECTED = auto()
 
+    # If IS_USER_AUTO_ADMIN_TINTED is set, this is the default admin tint that
+    # will be used if the user has no admin tint set, and the automatic criteria
+    # apply (currently that's only: user has comments)
+    # See User.ADMIN_TINTS for valid values
+    _DEFAULT_AUTO_USER_ADMIN_TINT = auto()
+
+    # We were doing a Git dance maintaining non-standard customisations in the
+    # Royal Holloway implementation, so added a universal way of putting code
+    # into the core app that is only enabled with a value here of "rhul".
+    # This is a pragmatic way of aniticiapting future, uh, hacks, while keeping
+    # the buggy racing server's business logic mostly universal.
+    _CUSTOM_IMPLEMENTATION = auto()
+
     # User-editable config settings: presented in the settings/config.
     # Each one should also exist in a settings group, and have a description
     # and a type.
@@ -262,6 +275,7 @@ class ConfigSettingNames(Enum):
     IS_TASK_URL_WITH_ANCHOR = auto()
     IS_TECH_NOTE_PUBLISHING_ENABLED = auto()
     IS_USERNAME_PUBLIC_IN_RESULTS = auto()
+    IS_USER_AUTO_ADMIN_TINTED = auto()
     IS_USER_TOLD_TO_CHANGE_PASSWORD = auto()
     IS_USING_GITHUB_API_TO_FORK = auto()
     IS_USING_GITHUB_API_TO_INJECT_ISSUES = auto()
@@ -520,6 +534,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TA_SET_API_KEY_ENABLED.name,
         ConfigSettingNames.USER_ACTVITY_PERIOD_S.name,
         ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name,
+        ConfigSettingNames.IS_USER_AUTO_ADMIN_TINTED.name,
         ConfigSettingNames.USER_BULK_DELETE_TIMEOUT_DAYS.name,
       ),
       ConfigGroupNames.VCS.name: (
@@ -545,6 +560,8 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ORIGIN_GITHUB_URL.name: "https://github.com/buggyrace/buggy-race-editor",
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: MANUAL_EDITOR_COMMIT,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: "https://www.buggyrace.net/docs",
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name: "",
+        ConfigSettingNames._DEFAULT_AUTO_USER_ADMIN_TINT.name: "yellow",
         ConfigSettingNames._EDITOR_INPUT_DIR.name: "editor_source",
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: "editor",
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: "app.py",
@@ -646,6 +663,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: 0,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: 1,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: 1,
+        ConfigSettingNames.IS_USER_AUTO_ADMIN_TINTED.name: 1,
         ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: 0,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: 1,
@@ -715,6 +733,8 @@ class ConfigSettings:
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_EDITOR_SOURCE_COMMIT.name: ConfigTypes.STRING,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name: ConfigTypes.URL,
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name: ConfigTypes.STRING,
+        ConfigSettingNames._DEFAULT_AUTO_USER_ADMIN_TINT.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_INPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_OUTPUT_DIR.name: ConfigTypes.STRING,
         ConfigSettingNames._EDITOR_PYTHON_FILENAME.name: ConfigTypes.STRING,
@@ -809,6 +829,7 @@ class ConfigSettings:
         ConfigSettingNames.IS_TASK_URL_WITH_ANCHOR.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_TECH_NOTE_PUBLISHING_ENABLED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USERNAME_PUBLIC_IN_RESULTS.name: ConfigTypes.BOOLEAN,
+        ConfigSettingNames.IS_USER_AUTO_ADMIN_TINTED.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_FORK.name: ConfigTypes.BOOLEAN,
         ConfigSettingNames.IS_USING_GITHUB_API_TO_INJECT_ISSUES.name: ConfigTypes.BOOLEAN,
@@ -1408,6 +1429,12 @@ class ConfigSettings:
           """When you publish race results, are usernames (as well as the
           buggies' pennants) shown?""",
 
+        ConfigSettingNames.IS_USER_AUTO_ADMIN_TINTED.name:
+          """The admin interface will automatically tint users' buttons in some
+          places based on some hard-coded criteria: for example, if the user has
+          comments. Tints assigned by admin always override auto settings. Set
+          this to `No` if you don't want this behaviour.""",
+          
         ConfigSettingNames.IS_USER_TOLD_TO_CHANGE_PASSWORD.name:
           """Do you want users to see a message reminding them to change their
           password when they very first log in? This can be helpful if you have
@@ -2042,6 +2069,7 @@ class ConfigSettings:
         ConfigSettings.CACHEBUSTER_KEY,
         ConfigSettingNames._BUGGY_EDITOR_ISSUES_CSV_FILE.name,
         ConfigSettingNames._BUGGY_RACE_DOCS_URL.name,
+        ConfigSettingNames._CUSTOM_IMPLEMENTATION.name,
         ConfigSettingNames._CURRENT_ANNOUNCEMENTS.name,
         ConfigSettingNames._IS_DEMO_SERVER.name,
         ConfigSettingNames._IS_DOCS_HELPER_PAGE_ENABLED.name,

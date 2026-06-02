@@ -193,7 +193,7 @@
                 <span>{% if u.is_student %}&Sopf;{% endif %}{% if u.is_administrator %}&starf;{% if current_user.is_administrator and not current_user.is_demo_user and u.is_demo_user %}d{%endif %}{% elif u.is_teaching_assistant %}&star;{% endif %}</span>
               </td>
               <td class="u-username">
-                <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
+                <a class="sm-item-link {{ u.admin_tint_css }}" href="{{ url_for('admin.show_user', user_id=u.id) }}">{{ u.pretty_username }}</a>
                 {% if u.comment %}
                  {% set user_comment = u.comment|replace('"', '\\"')|replace("\\n", "\\n") %}
                  <a class="show-comment btn btn-outline-secondary btn-admin btn-sm p-1 ml-1 float-right" href="#"

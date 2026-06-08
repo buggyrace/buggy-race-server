@@ -50,6 +50,7 @@
                 data-buggy="1"
                 data-un="{{ student.pretty_username}}"
                 data-uid="{{ student.id }}"
+                data-timestamp="{{ student.uploaded_at | servertime }}"
                 ><span class="icon-wrench"></span></a>
               {% endif %}
             </td>
@@ -63,6 +64,8 @@
                     {% else %}
                       class="bg-success"
                     {% endif %}
+                    data-created-at="{{ texts_by_username[student.username][task.id].created_at | servertime }}"
+                    data-timestamp="{{ (texts_by_username[student.username][task.id].modified_at or texts_by_username[student.username][task.id].created_at) | servertime }}"
                     data-toggle="modal" data-target="#texts-modal"
                     data-textid="{{ texts_by_username[student.username][task.id].id }}"
                     data-un="{{ student.pretty_username }}" data-tn="{{task.fullname}}"

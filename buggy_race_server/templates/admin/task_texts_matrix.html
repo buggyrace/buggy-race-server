@@ -51,6 +51,7 @@
                 data-un="{{ student.pretty_username}}"
                 data-uid="{{ student.id }}"
                 data-timestamp="{{ student.uploaded_at | servertime }}"
+                data-text-length="{{ student.latest_json | length }}"
                 ><span class="icon-wrench"></span></a>
               {% endif %}
             </td>
@@ -59,11 +60,12 @@
               <td class="status {% if even_phase_class %}even-phase{% endif %}">
                 {% if texts_by_username[student.username][task.id] %}
                   <a href="{{ url_for('admin.show_user', user_id=student.id) }}#{{ task.anchor }}"
-                    {% if texts_by_username[student.username][task.id].text | length < 16 %}
+                    {% if texts_by_username[student.username][task.id].text | length < initial_min_ok_length %}
                       class="bg-warning"
                     {% else %}
                       class="bg-success"
                     {% endif %}
+                    data-text-length="{{ texts_by_username[student.username][task.id].text | length }}"
                     data-created-at="{{ texts_by_username[student.username][task.id].created_at | servertime }}"
                     data-timestamp="{{ (texts_by_username[student.username][task.id].modified_at or texts_by_username[student.username][task.id].created_at) | servertime }}"
                     data-toggle="modal" data-target="#texts-modal"

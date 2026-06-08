@@ -2174,6 +2174,7 @@ def task_texts():
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
+       initial_min_ok_length=current_app.config[ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name],
     )
 
 @blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)

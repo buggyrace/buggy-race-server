@@ -320,7 +320,7 @@ class ConfigSettingNames(Enum):
     TASK_NAME_FOR_GET_CODE = auto()
     TASK_NAME_FOR_VALIDATION = auto()
     TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE = auto()
-    TASK_TEXT_MIN_OK_LENGTH = auto()
+    TASK_TEXT_MIN_OK_WORD_COUNT = auto()
     TASK_TEXT_SIZE_SUGGESTION = auto()
     TECH_NOTES_EXTERNAL_URL = auto()
     USER_ACTVITY_PERIOD_S = auto()
@@ -499,7 +499,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name,
         ConfigSettingNames.TASK_NAME_FOR_API.name,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name,
-        ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name,
+        ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name,
         ConfigSettingNames.IS_ENCOURAGING_TEXT_ON_EVERY_TASK.name,
         ConfigSettingNames.IS_ENCOURAGING_VCS_ON_EVERY_TASK.name,
         ConfigSettingNames.TASK_ENCOURAGE_VCS_MESSAGE.name,
@@ -709,7 +709,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: "3-ENV",
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: "0-GET",
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: "1-VALID",
-        ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name: 64,
+        ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name: 64,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: "a couple of sentences.",
         ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: """
 <h1>%PROJECT_CODE% Buggy Editor Project</h1>
@@ -875,7 +875,7 @@ class ConfigSettings:
         ConfigSettingNames.TASK_NAME_FOR_ENV_VARS.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_GET_CODE.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_NAME_FOR_VALIDATION.name: ConfigTypes.STRING,
-        ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name: ConfigTypes.INT,
+        ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name: ConfigTypes.INT,
         ConfigSettingNames.TASK_TEXT_SIZE_SUGGESTION.name: ConfigTypes.STRING,
         ConfigSettingNames.TASK_TEXTS_HTML_DOWNLOAD_PREAMBLE.name: ConfigTypes.STRING,
         ConfigSettingNames.TECH_NOTES_EXTERNAL_URL.name: ConfigTypes.URL,
@@ -1718,9 +1718,9 @@ class ConfigSettings:
           page. If you haven't customised the task list, you don't need to
           change this.""",
 
-        ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name:
+        ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name:
           """On the staff/admin task text matrix, any texts with fewer than this
-          many characters is marked with a warning colour to indicate "possibly
+          number of words is marked with a warning colour to indicate "possibly
           too short". This is used as the initial value when the page loads: you
           can change it dynamically on the matrix. This setting is ignored if
           `IS_STORING_STUDENT_TASK_TEXTS` is `No`.""",

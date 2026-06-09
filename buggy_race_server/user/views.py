@@ -458,6 +458,7 @@ def task_text(task_fullname):
             abort(400)
         if form.is_submitted() and form.validate():
             tasktext.text = form.text.data
+            tasktext.refresh_word_count()
             if not is_new_text:
                 tasktext.modified_at = datetime.now(timezone.utc)
             tasktext.save()

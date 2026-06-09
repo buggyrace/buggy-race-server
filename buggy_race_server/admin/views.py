@@ -953,6 +953,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        word_count_form=GeneralSubmitForm(),
         editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
@@ -2174,7 +2175,7 @@ def task_texts():
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
-       initial_min_ok_length=current_app.config[ConfigSettingNames.TASK_TEXT_MIN_OK_LENGTH.name],
+       initial_min_ok_word_count=current_app.config[ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name],
     )
 
 @blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
@@ -2212,6 +2213,32 @@ def task_texts_details():
     )
 
 
+@blueprint.route("/task-texts/word-count/<user_id>", methods=["POST"], strict_slashes=False)
+def count_task_text_words(user_id=None):
+    if user_id is None:
+        flash(f"Sorry, updating all task texts' word counts not implemented yet", "warning")
+        return redirect(url_for("admin.task_texts"))
+    else:
+        if str(user_id).isdigit():
+            user = User.get_by_id(int(user_id))
+        else:
+            user = User.query.filter_by(username=user_id).first()
+        if user is None:
+            abort(404)
+        task_texts = TaskText.query.filter_by(user_id=user.id).all()
+        qty_tasks = len(task_texts)
+        if qty_tasks == 0:
+            msg = f"User {user.pretty_username} has no task texts to update"
+        else:
+            for task_text in task_texts:
+                task_text.refresh_word_count()
+            if qty_tasks == 1:
+                msg = f"Updated word count for {user.pretty_username}'s only task text"
+            else:
+                msg = f"Updated word counts for {user.pretty_username}'s {qty_tasks} task texts"
+            db.session.commit()
+        flash(msg, "success")
+        return redirect(url_for("admin.show_user", user_id=user_id))
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
 @login_required

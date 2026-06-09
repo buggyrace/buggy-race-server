@@ -60,12 +60,12 @@
               <td class="status {% if even_phase_class %}even-phase{% endif %}">
                 {% if texts_by_username[student.username][task.id] %}
                   <a href="{{ url_for('admin.show_user', user_id=student.id) }}#{{ task.anchor }}"
-                    {% if texts_by_username[student.username][task.id].text | length < initial_min_ok_length %}
+                    {% if texts_by_username[student.username][task.id].text | length < initial_min_ok_word_count %}
                       class="bg-warning"
                     {% else %}
                       class="bg-success"
                     {% endif %}
-                    data-text-length="{{ texts_by_username[student.username][task.id].text | length }}"
+                    data-text-wc="{{ texts_by_username[student.username][task.id].text.word_count }}"
                     data-created-at="{{ texts_by_username[student.username][task.id].created_at | servertime }}"
                     data-timestamp="{{ (texts_by_username[student.username][task.id].modified_at or texts_by_username[student.username][task.id].created_at) | servertime }}"
                     data-toggle="modal" data-target="#texts-modal"

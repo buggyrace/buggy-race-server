@@ -134,6 +134,16 @@
                     </a>
                   </p>
                 {% endif %}
+                {% if current_user.is_administrator and texts_by_task_id[task.id] %}
+                  <p>
+                    <em>Word count:</em>
+                      {% if texts_by_task_id[task.id].word_count is none %}
+                        <em class="empty-setting">not&nbsp;counted</em>
+                      {% else %}
+                        {{ texts_by_task_id[task.id].word_count }}
+                      {% endif %}
+                  </p>
+                {% endif %}
               </div>
               <div class="col-sm 8">
                 {% if current_user.is_administrator and texts_by_task_id[task.id] %}

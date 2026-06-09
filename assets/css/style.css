@@ -1082,3 +1082,6 @@ span.sm-item-link.admin-tint-violet {
 #matrix-word-count-control datalist option {
   padding: 0;
 }
+#all-student-texts .tt-cell {
+  transition: background-color 0.3s;
+}

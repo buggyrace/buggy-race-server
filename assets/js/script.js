@@ -680,15 +680,14 @@ $(function() {
   if (word_count_slider){
     let tt_matrix = document.getElementById("all-student-texts");
     let tt_cells = tt_matrix.getElementsByClassName("tt-cell");
-    console.log("FIXME found " + tt_cells.length + " tt_cells");
     let current_value_span = document.getElementById("wc-current-threshold");
     word_count_slider.addEventListener("change", function(e){
-      let threshold_value = word_count_slider.value;
+      let threshold_value = parseInt(word_count_slider.value);
       current_value_span.innerText = threshold_value;
       for (let tt_cell of tt_cells) {
         let wc = tt_cell.dataset.wc;
         if (wc !== undefined) {
-          if (wc < threshold_value) {
+          if (parseInt(wc) < threshold_value) {
             tt_cell.classList.add("bg-warning");
             tt_cell.classList.remove("bg-success");
           } else {

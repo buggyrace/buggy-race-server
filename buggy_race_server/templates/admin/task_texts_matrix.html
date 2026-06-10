@@ -84,7 +84,9 @@
     <div class="col-lg-12 hidden-without-js">
       <div id="matrix-word-count-control">
         <label for="word-count-threshold">
-          Text word count threshold: <span id="wc-current-threshold">{{ initial_min_ok_word_count }}</span>
+          Text word count threshold:
+          <input id="wc-current-threshold" type="number" min="0" max="2000"
+            value="{{ initial_min_ok_word_count }}" class="form-control mr-sm-1"/>
         </label>
         <input type="range" id="word-count-threshold" name="word-count-threshold"
             value="{{ initial_min_ok_word_count }}" min="0" max="2000" step="1" list="word-count-ticks"/>
@@ -102,6 +104,10 @@
       </div>
       <p class="btn-collection">
         <a href="{{ url_for('admin.task_texts_details')}}" class="btn btn-outline-secondary btn-admin btn-jump">Task text authors</a>
+        <form action="{{ url_for('admin.count_task_text_words')}}" method="POST">
+          <input type="submit" class="btn btn-primary" value="Update all task texts' word counts"/>
+          {{ word_count_form.csrf_token }}
+        </form>
       </p>
     </div>
   </div>
@@ -124,7 +130,10 @@
       </div>
       <div>
         <pre id="modal-text-body" class="m-3 p-2 task-text"></pre>
-        <p id="modal-timestamp" class="mx-3 my-1 font-weight-light"></p>
+        <div class="modal-text-info">
+          <p id="modal-word-count" class="mx-3 my-1 font-weight-light">Word count</p>
+          <p id="modal-timestamp" class="mx-3 my-1 font-weight-light text-right"></p>
+        </div>
       </div>
       <div class="modal-footer">
         <a href="#" id="btn-to-user-texts" class="btn btn-outline-secondary btn-jump">User's texts</a>

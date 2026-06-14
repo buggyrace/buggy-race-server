@@ -280,8 +280,12 @@ class TaskText(SurrogatePK, Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
     text = Column(db.Text(), unique=False, nullable=False, default="")
+    word_count = Column(db.Integer, nullable=True)
 
     __tablename__ = "tasktexts"
+
+    def refresh_word_count(self):
+       self.word_count = len(self.text.split())
 
     def __init__(self, **kwargs):
        """Create instance."""

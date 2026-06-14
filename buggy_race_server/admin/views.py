@@ -953,6 +953,7 @@ def show_user(user_id):
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        word_count_form=GeneralSubmitForm(),
         editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
         is_own_text=user.id == current_user.id,
@@ -2139,6 +2140,7 @@ def get_text_for_user_task(text_id):
               "user_id": text.user_id,
               "task_id": text.task_id,
               "text": text.text,
+              "word_count": text.word_count,
             }
   else:
       status = 403
@@ -2174,6 +2176,8 @@ def task_texts():
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
+       initial_min_ok_word_count=current_app.config[ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name],
+       word_count_form=GeneralSubmitForm(),
     )
 
 @blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
@@ -2210,7 +2214,44 @@ def task_texts_details():
       texts_by_task_id=texts_by_task_id,
     )
 
-
+@blueprint.route("/task-texts/word-count/", methods=["POST"], strict_slashes=False)
+@blueprint.route("/task-texts/word-count/<user_id>", methods=["POST"], strict_slashes=False)
+def count_task_text_words(user_id=None):
+    task_texts = None
+    qty_task_texts = 0
+    qty_changes = 0
+    user = None
+    if user_id is None:
+        task_texts = TaskText.query.all()
+    else:
+        if str(user_id).isdigit():
+            user = User.get_by_id(int(user_id))
+        else:
+            user = User.query.filter_by(username=user_id).first()
+        if user is None:
+            abort(404)
+        task_texts = TaskText.query.filter_by(user_id=user.id).all()
+    if qty_task_texts := len(task_texts):
+        for task_text in task_texts:
+            old_wc = task_text.word_count
+            task_text.refresh_word_count()
+            if task_text.word_count != old_wc:
+                qty_changes += 1
+        db.session.commit()
+        if not qty_changes:
+            if qty_task_texts == 1:
+                flash(f"Only found one tast text, did not change it (already up-to-date)", "info")
+            else:
+                flash(f"Checked {qty_task_texts} task texts' word counts, changed none (all up-to-date)", "info")
+        else:
+            if qty_task_texts == 1:
+                flash("Only found one task text, and updated its word count", "success")
+            else:
+                flash(f"Checked {qty_task_texts} task texts, updated {qty_changes}", "success")
+    if user is None:
+        return redirect(url_for("admin.task_texts"))
+    else:
+        return redirect(url_for("admin.show_user", user_id=user_id))
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
 @login_required

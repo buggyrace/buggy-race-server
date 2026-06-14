@@ -123,6 +123,16 @@
             {% endif %}
             <div class="row">
               <div class="col-sm-4">
+                {% if current_user.is_administrator and texts_by_task_id[task.id] %}
+                  <p>
+                    <em>Word count:</em>
+                      {% if texts_by_task_id[task.id].word_count is none %}
+                        <em class="empty-setting">not&nbsp;counted</em>
+                      {% else %}
+                        {{ texts_by_task_id[task.id].word_count }}
+                      {% endif %}
+                  </p>
+                {% endif %}
                 {% if is_own_text %}
                   <p class="btn-collection">
                     <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">

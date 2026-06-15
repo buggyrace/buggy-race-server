@@ -314,12 +314,44 @@
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col my-3">
-      <h3 id="task-texts">{{ user.pretty_username }}'s task texts</h3>
+  {% if is_storing_task_texts %}
+    <div class="row">
+      <div class="col my-3">
+        <h3 id="task-texts">{{ user.pretty_username }}'s task texts</h3>
+      </div>
     </div>
-  </div>
-  {% include "admin/_task_texts_for_user.html" %}
+    {% include "admin/_task_texts_for_user.html" %}
+    <div class="row">
+      <table class="m-3 col table table-striped table-bordered table-hover table-responsive-md bg-white">
+        <tr>
+          <th colspan="2">{{ user.pretty_username }}'s text word count summary</td>
+        </tr>
+        <tr>
+          <td>Total task texts:</td><td class="text-right">{{ qty_texts }}</td>
+        </tr>
+        <tr>
+          <td>Total word count:</td><td class="text-right">{{ total_word_count }}</td>
+        </tr>
+        <tr>
+          <td>Average (non-empty) word count:</td><td class="text-right">{{ average_nonempty_word_count }}</td>
+        </tr>
+        <tr>
+          <td>Texts with zero words:</td><td class="text-right">{{ qty_wordless_texts }}</td>
+        </tr>
+        <tr>
+          <td>Texts missing word counts:</td><td class="text-right">{{ qty_texts_missing_word_count }}</td>
+        </tr>
+        <tr>
+          <td colspan="2" class="text-right">
+            <form action="{{ url_for('admin.count_task_text_words', user_id=user.id) }}" method="POST">
+              <input type="submit" class="btn btn-primary" value="Update {{ user.pretty_username }}'s task texts' word counts"/>
+              {{ word_count_form.csrf_token }}
+            </form>
+          </td>
+        </tr>
+      </table>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col my-3 btn-collection">
       <p class="btn-collection">
@@ -332,14 +364,6 @@
         {% endif %}
         <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
        </p>
-      {% if current_user.is_administrator %}
-        <p class="btn-collection">
-          <form action="{{ url_for('admin.count_task_text_words', user_id=user.id) }}" method="POST">
-            <input type="submit" class="btn btn-primary" value="Update task texts' word counts"/>
-            {{ word_count_form.csrf_token }}
-          </form>
-        </p>
-      {% endif %}
     </div>
   </div>
   <div class="row">

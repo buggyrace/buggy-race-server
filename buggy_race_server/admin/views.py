@@ -948,7 +948,28 @@ def show_user(user_id):
         user = User.query.filter_by(username=user_id).first()
     if user is None:
         abort(404)
+    if is_storing_task_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        pass # FIXME
+
     texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    qty_texts = len(texts_by_task_id)
+    total_word_count = 0
+    qty_wordless_texts = 0
+    qty_texts_missing_word_count = 0
+    average_word_count = None
+    for task_text in texts_by_task_id.values():
+        word_count = task_text.word_count
+        if word_count is None: # hasn't been counted
+            qty_texts_missing_word_count += 1
+        elif word_count == 0:
+            qty_wordless_texts += 1
+        else:
+            total_word_count += word_count
+    if qty_texts:
+        qty_nonempty_texts = qty_texts - qty_wordless_texts - qty_texts_missing_word_count
+        qty_nonempty_texts = qty_texts - qty_wordless_texts - qty_texts_missing_word_count
+        if qty_nonempty_texts > 0:
+            average_nonempty_word_count = int(0.5 + total_word_count/qty_nonempty_texts)
     return  render_template(
         "admin/user.html",
         user=user,
@@ -956,6 +977,7 @@ def show_user(user_id):
         word_count_form=GeneralSubmitForm(),
         editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
+        is_storing_task_texts=is_storing_task_texts,
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
         texts_by_task_id=texts_by_task_id,
@@ -973,6 +995,10 @@ def show_user(user_id):
         project_submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
         is_submission_link_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name],
         project_submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        qty_texts_missing_word_count=qty_texts_missing_word_count,
+        qty_wordless_texts=qty_wordless_texts,
+        average_nonempty_word_count=average_nonempty_word_count,
+        total_word_count=total_word_count,
     )
 
 def manage_user(user_id):
@@ -2216,6 +2242,8 @@ def task_texts_details():
 
 @blueprint.route("/task-texts/word-count/", methods=["POST"], strict_slashes=False)
 @blueprint.route("/task-texts/word-count/<user_id>", methods=["POST"], strict_slashes=False)
+@login_required
+@staff_only
 def count_task_text_words(user_id=None):
     task_texts = None
     qty_task_texts = 0

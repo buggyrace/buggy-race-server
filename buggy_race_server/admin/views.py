@@ -956,7 +956,7 @@ def show_user(user_id):
     total_word_count = 0
     qty_wordless_texts = 0
     qty_texts_missing_word_count = 0
-    average_word_count = None
+    average_nonempty_word_count = None
     for task_text in texts_by_task_id.values():
         word_count = task_text.word_count
         if word_count is None: # hasn't been counted

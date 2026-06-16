@@ -340,13 +340,31 @@
             <td>Total word count</td><td class="text-right">{{ total_word_count }}</td>
           </tr>
           <tr>
-            <td>Average (non-empty) word count</td><td class="text-right">{{ average_nonempty_word_count }}</td>
+            <td>Average (non-empty) word count</td><td class="text-right">
+              {% if average_nonempty_word_count is none %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ average_nonempty_word_count }}
+              {% endif %}
+            </td>
           </tr>
           <tr>
-            <td>Texts with zero words</td><td class="text-right">{{ qty_wordless_texts }}</td>
+            <td>Texts with zero words</td><td class="text-right">
+              {% if not qty_texts %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ qty_wordless_texts }}
+              {% endif %}
+            </td>
           </tr>
           <tr>
-            <td>Texts missing word counts</td><td class="text-right">{{ qty_texts_missing_word_count }}</td>
+            <td>Texts missing word counts</td><td class="text-right">
+              {% if not qty_texts %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ qty_texts_missing_word_count }}
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td colspan="2" class="text-right">

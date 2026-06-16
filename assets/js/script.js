@@ -539,8 +539,27 @@ $(function() {
     }
   } 
   
+  const HIDE_PREFIX = "Hide";
+  const SHOW_PREFIX = "Show";
   let $task_counts = $(".task-count");
   if ($task_counts){
+    const $user_wc_stats = $("#user-wc-stats");
+    function user_wc_toggle(e){
+      let btn = e.target;
+      let btn_text = btn.innerText;
+      if (btn_text.startsWith(HIDE_PREFIX)){
+        $user_wc_stats.slideUp("slow");
+        btn.innerText = SHOW_PREFIX + btn_text.slice(HIDE_PREFIX.length);
+      } else if (btn_text.startsWith(SHOW_PREFIX)){
+        $user_wc_stats.slideDown("slow");
+        btn.innerText = HIDE_PREFIX + btn_text.slice(SHOW_PREFIX.length);
+      }
+    }
+    $user_wc_stats.slideUp();
+    const btn_toggle_user_wc_stats = document.getElementById("toggle-user-wc-stats");
+    if (btn_toggle_user_wc_stats){
+      btn_toggle_user_wc_stats.addEventListener("click", user_wc_toggle);
+    }
 
     function toggle_task_display(){
       let $tasks_box = $(".phase-tasks-"+this.dataset.phase);

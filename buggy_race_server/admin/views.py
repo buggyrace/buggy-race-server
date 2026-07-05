@@ -2214,28 +2214,27 @@ def task_texts_details():
     if not tasks:
         flash("Cannot display texts because there are no tasks — maybe you need to load them into the database?", "warning")
         return redirect(url_for("admin.admin"))
-    students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
-    pretty_usernames_by_id = {student.id: student.pretty_username for student in students}
-    texts_by_task_id=TaskText.get_dict_texts_by_task_id(None) # no specific user
+    all_students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
+    students_by_id = {student.id: student for student in all_students}
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(None) # all students
     tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False)
     nonauthors_by_task_id = defaultdict(list)
     for phase in tasks_by_phase:
         for task in tasks_by_phase[phase]:
             texts_by_task_id[task.id] = sorted(
                 texts_by_task_id.get(task.id) or [],
-                key=lambda text: pretty_usernames_by_id.get(text.user_id)
+                key=lambda text: students_by_id.get(text.user_id).pretty_username
             )
             author_ids = [ text.user_id for text in texts_by_task_id[task.id] ]
             nonauthors_by_task_id[task.id] = [
-                student.id for student in students
+                student.id for student in all_students
                 if student.id not in author_ids
             ]
     return render_template(
       "admin/task_texts_details.html",
       nonauthors_by_task_id=nonauthors_by_task_id,
-      pretty_usernames_by_id=pretty_usernames_by_id,
-      qty_students=len(students),
-      students=students,
+      students_by_id=students_by_id,
+      qty_students=len(all_students),
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       texts_by_task_id=texts_by_task_id,
     )

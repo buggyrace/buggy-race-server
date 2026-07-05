@@ -948,13 +948,36 @@ def show_user(user_id):
         user = User.query.filter_by(username=user_id).first()
     if user is None:
         abort(404)
+    if is_storing_task_texts := current_app.config[ConfigSettingNames.IS_STORING_STUDENT_TASK_TEXTS.name]:
+        pass # FIXME
+
     texts_by_task_id=TaskText.get_dict_texts_by_task_id(user.id)
+    qty_texts = len(texts_by_task_id)
+    total_word_count = 0
+    qty_wordless_texts = 0
+    qty_texts_missing_word_count = 0
+    average_nonempty_word_count = None
+    for task_text in texts_by_task_id.values():
+        word_count = task_text.word_count
+        if word_count is None: # hasn't been counted
+            qty_texts_missing_word_count += 1
+        elif word_count == 0:
+            qty_wordless_texts += 1
+        else:
+            total_word_count += word_count
+    if qty_texts:
+        qty_nonempty_texts = qty_texts - qty_wordless_texts - qty_texts_missing_word_count
+        qty_nonempty_texts = qty_texts - qty_wordless_texts - qty_texts_missing_word_count
+        if qty_nonempty_texts > 0:
+            average_nonempty_word_count = int(0.5 + total_word_count/qty_nonempty_texts)
     return  render_template(
         "admin/user.html",
         user=user,
         api_form=ApiKeyForm(),
+        word_count_form=GeneralSubmitForm(),
         editor_repo_name=current_app.config[ConfigSettingNames.BUGGY_EDITOR_REPO_NAME.name],
         is_demo_server=current_app.config[ConfigSettingNames._IS_DEMO_SERVER.name],
+        is_storing_task_texts=is_storing_task_texts,
         is_own_text=user.id == current_user.id,
         tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
         texts_by_task_id=texts_by_task_id,
@@ -972,6 +995,10 @@ def show_user(user_id):
         project_submission_deadline=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_DEADLINE.name],
         is_submission_link_customisable=current_app.config[ConfigSettingNames.IS_PROJECT_SUBMISSION_LINK_PER_USER.name],
         project_submission_link=current_app.config[ConfigSettingNames.PROJECT_SUBMISSION_LINK.name],
+        qty_texts_missing_word_count=qty_texts_missing_word_count,
+        qty_wordless_texts=qty_wordless_texts,
+        average_nonempty_word_count=average_nonempty_word_count,
+        total_word_count=total_word_count,
     )
 
 def manage_user(user_id):
@@ -2139,6 +2166,7 @@ def get_text_for_user_task(text_id):
               "user_id": text.user_id,
               "task_id": text.task_id,
               "text": text.text,
+              "word_count": text.word_count,
             }
   else:
       status = 403
@@ -2174,6 +2202,8 @@ def task_texts():
        students=students,
        tasks=tasks,
        texts_by_username=texts_by_username,
+       initial_min_ok_word_count=current_app.config[ConfigSettingNames.TASK_TEXT_MIN_OK_WORD_COUNT.name],
+       word_count_form=GeneralSubmitForm(),
     )
 
 @blueprint.route("/task-texts", methods=["GET"], strict_slashes=False)
@@ -2184,33 +2214,71 @@ def task_texts_details():
     if not tasks:
         flash("Cannot display texts because there are no tasks — maybe you need to load them into the database?", "warning")
         return redirect(url_for("admin.admin"))
-    students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
-    pretty_usernames_by_id = {student.id: student.pretty_username for student in students}
-    texts_by_task_id=TaskText.get_dict_texts_by_task_id(None) # no specific user
+    all_students = User.query.filter_by(is_active=True, is_student=True).order_by(User.username.asc()).all()
+    students_by_id = {student.id: student for student in all_students}
+    texts_by_task_id=TaskText.get_dict_texts_by_task_id(None) # all students
     tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False)
     nonauthors_by_task_id = defaultdict(list)
     for phase in tasks_by_phase:
         for task in tasks_by_phase[phase]:
             texts_by_task_id[task.id] = sorted(
                 texts_by_task_id.get(task.id) or [],
-                key=lambda text: pretty_usernames_by_id.get(text.user_id)
+                key=lambda text: students_by_id.get(text.user_id).pretty_username
             )
             author_ids = [ text.user_id for text in texts_by_task_id[task.id] ]
             nonauthors_by_task_id[task.id] = [
-                student.id for student in students
+                student.id for student in all_students
                 if student.id not in author_ids
             ]
     return render_template(
       "admin/task_texts_details.html",
       nonauthors_by_task_id=nonauthors_by_task_id,
-      pretty_usernames_by_id=pretty_usernames_by_id,
-      qty_students=len(students),
-      students=students,
+      students_by_id=students_by_id,
+      qty_students=len(all_students),
       tasks_by_phase=Task.get_dict_tasks_by_phase(want_hidden=False),
       texts_by_task_id=texts_by_task_id,
     )
 
-
+@blueprint.route("/task-texts/word-count/", methods=["POST"], strict_slashes=False)
+@blueprint.route("/task-texts/word-count/<user_id>", methods=["POST"], strict_slashes=False)
+@login_required
+@staff_only
+def count_task_text_words(user_id=None):
+    task_texts = None
+    qty_task_texts = 0
+    qty_changes = 0
+    user = None
+    if user_id is None:
+        task_texts = TaskText.query.all()
+    else:
+        if str(user_id).isdigit():
+            user = User.get_by_id(int(user_id))
+        else:
+            user = User.query.filter_by(username=user_id).first()
+        if user is None:
+            abort(404)
+        task_texts = TaskText.query.filter_by(user_id=user.id).all()
+    if qty_task_texts := len(task_texts):
+        for task_text in task_texts:
+            old_wc = task_text.word_count
+            task_text.refresh_word_count()
+            if task_text.word_count != old_wc:
+                qty_changes += 1
+        db.session.commit()
+        if not qty_changes:
+            if qty_task_texts == 1:
+                flash(f"Only found one tast text, did not change it (already up-to-date)", "info")
+            else:
+                flash(f"Checked {qty_task_texts} task texts' word counts, changed none (all up-to-date)", "info")
+        else:
+            if qty_task_texts == 1:
+                flash("Only found one task text, and updated its word count", "success")
+            else:
+                flash(f"Checked {qty_task_texts} task texts, updated {qty_changes}", "success")
+    if user is None:
+        return redirect(url_for("admin.task_texts"))
+    else:
+        return redirect(url_for("admin.show_user", user_id=user_id))
 
 @blueprint.route("/settings/<setting_name>/delete", methods=["POST"])
 @login_required

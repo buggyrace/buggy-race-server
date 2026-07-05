@@ -539,8 +539,27 @@ $(function() {
     }
   } 
   
+  const HIDE_PREFIX = "Hide";
+  const SHOW_PREFIX = "Show";
   let $task_counts = $(".task-count");
   if ($task_counts){
+    const $user_wc_stats = $("#user-wc-stats");
+    function user_wc_toggle(e){
+      let btn = e.target;
+      let btn_text = btn.innerText;
+      if (btn_text.startsWith(HIDE_PREFIX)){
+        $user_wc_stats.slideUp("slow");
+        btn.innerText = SHOW_PREFIX + btn_text.slice(HIDE_PREFIX.length);
+      } else if (btn_text.startsWith(SHOW_PREFIX)){
+        $user_wc_stats.slideDown("slow");
+        btn.innerText = HIDE_PREFIX + btn_text.slice(SHOW_PREFIX.length);
+      }
+    }
+    $user_wc_stats.slideUp();
+    const btn_toggle_user_wc_stats = document.getElementById("toggle-user-wc-stats");
+    if (btn_toggle_user_wc_stats){
+      btn_toggle_user_wc_stats.addEventListener("click", user_wc_toggle);
+    }
 
     function toggle_task_display(){
       let $tasks_box = $(".phase-tasks-"+this.dataset.phase);
@@ -624,9 +643,11 @@ $(function() {
     const modal_title = document.getElementById("texts-modal-label");
     const modal_text_body = document.getElementById("modal-text-body");
     const modal_timestamp = document.getElementById("modal-timestamp");
+    const modal_word_count = document.getElementById("modal-word-count");
     $('#texts-modal').on('show.bs.modal', function (event) {
       modal_text_body.innerText = "";
       modal_timestamp.innerText = "";
+      modal_word_count.innerText = "";
       let $button = $(event.relatedTarget); // Button that triggered the modal
       let text_id = $button.data("textid");
       let user_id = $button.data("uid");
@@ -659,6 +680,11 @@ $(function() {
             } else if (json_data.created_at){
               modal_timestamp.innerHTML="<em>Created:</em>: " + json_data.created_at;
             }
+            if (json_data.word_count === undefined){
+              modal_word_count.innerHTML="<em>Word count:</em>: not counted";
+            } else {
+              modal_word_count.innerHTML="<em>Word count:</em>: " + json_data.word_count;
+            }
           })
         .fail(function(response) {
           modal_text_body.classList.add("alert-danger");
@@ -674,6 +700,37 @@ $(function() {
         modal_user_button.classList.add("hidden");
       }
     });
+  }
+
+  let word_count_slider = document.getElementById("word-count-threshold");
+  if (word_count_slider){
+    function update_wc_matrix(e){
+      let threshold_value = e.target.value;
+      if (word_count_slider.value != threshold_value){
+        word_count_slider.value = threshold_value;
+      }
+      if (current_value_input.value != threshold_value){
+        current_value_input.value = threshold_value;
+      }
+      threshold_value = parseInt(threshold_value);
+      for (let tt_cell of tt_cells) {
+        let wc = tt_cell.dataset.wc;
+        if (wc !== undefined) {
+          if (parseInt(wc) < threshold_value) {
+            tt_cell.classList.add("bg-warning");
+            tt_cell.classList.remove("bg-success");
+          } else {
+            tt_cell.classList.add("bg-success");
+            tt_cell.classList.remove("bg-warning");
+          }
+        }
+      }
+    }
+    let tt_matrix = document.getElementById("all-student-texts");
+    let tt_cells = tt_matrix.getElementsByClassName("tt-cell");
+    let current_value_input = document.getElementById("wc-current-threshold");
+    word_count_slider.addEventListener("change", update_wc_matrix);
+    current_value_input.addEventListener("change", update_wc_matrix);
   }
 
   const CSS_INNER_BTN = "inner-btn";

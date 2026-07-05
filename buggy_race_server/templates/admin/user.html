@@ -314,22 +314,83 @@
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col my-3">
-      <h3 id="task-texts">{{ user.pretty_username }}'s task texts</h3>
+  {% if is_storing_task_texts %}
+    <div class="row">
+      <div class="col my-3">
+        <h3 id="task-texts">{{ user.pretty_username }}'s task texts</h3>
+      </div>
     </div>
-  </div>
-  {% include "admin/_task_texts_for_user.html" %}
+    {% include "admin/_task_texts_for_user.html" %}
+    <div class="row">
+      <div class="col m-3">
+        <p class="btn-collection mx-0 text-right">
+          <button id="toggle-user-wc-stats" data-target="user-wc-stats" class="btn btn-outline-primary btn-white hidden-without-js">
+            Show {{ user.pretty_username }}'s text word count summary
+          </button>
+        </p>
+        <div id="user-wc-stats">
+        <table class="my-3 table table-striped table-bordered table-hover table-responsive-md bg-white">
+          <tr>
+            <th colspan="2">{{ user.pretty_username }}'s text word count summary</td>
+          </tr>
+          <tr>
+            <td>Total task texts</td><td class="text-right">{{ qty_texts }}</td>
+          </tr>
+          <tr>
+            <td>Total word count</td><td class="text-right">{{ total_word_count }}</td>
+          </tr>
+          <tr>
+            <td>Average (non-empty) word count</td><td class="text-right">
+              {% if average_nonempty_word_count is none %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ average_nonempty_word_count }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Texts with zero words</td><td class="text-right">
+              {% if not qty_texts %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ qty_wordless_texts }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Texts missing word counts</td><td class="text-right">
+              {% if not qty_texts %}
+                <em class="empty-setting">no value</em>
+              {% else %}
+                {{ qty_texts_missing_word_count }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" class="text-right">
+              <form action="{{ url_for('admin.count_task_text_words', user_id=user.id) }}" method="POST">
+                <input type="submit" class="btn btn-primary" value="Update {{ user.pretty_username }}'s task texts' word counts"/>
+                {{ word_count_form.csrf_token }}
+              </form>
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
   <div class="row">
     <div class="col my-3 btn-collection">
-      {% if current_user.is_administrator %}
-        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
-        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.user_upload_texts',  user_id=user.id)}}">Load {{ user.pretty_username }}'s text as JSON</a>
+      <p class="btn-collection">
+        {% if current_user.is_administrator %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit user {{ user.pretty_username }}</a>
+          <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.user_upload_texts',  user_id=user.id)}}">Load {{ user.pretty_username }}'s text as JSON</a>
+          {% endif %}
+        {% if current_user.is_administrator or is_password_change_by_any_staff %}
+          <a class="btn btn-outline-secondary btn-admin btn-jump {% if is_edit_disabled %}disabled{% endif %}" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
         {% endif %}
-      {% if current_user.is_administrator or is_password_change_by_any_staff %}
-        <a class="btn btn-outline-secondary btn-admin btn-jump {% if is_edit_disabled %}disabled{% endif %}" href="{{ url_for('user.change_password', username=user.username) }}">Change {{ user.pretty_username}}'s password</a>
-      {% endif %}
-      <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+        <a class="btn btn-outline-secondary btn-admin btn-jump" href="{{ url_for('admin.list_users')}}">Users</a>
+       </p>
     </div>
   </div>
   <div class="row">

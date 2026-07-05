@@ -80,7 +80,7 @@ class User(UserMixin, SurrogatePK, Model):
     }
 
     ADMIN_TINTS = {
-        "blue", "green", "orange", "red", "yellow", "violet"
+        "", "blue", "green", "orange", "red", "yellow", "violet"
     }
 
     """A user of the app."""

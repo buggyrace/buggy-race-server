@@ -47,11 +47,16 @@
       {% if is_own_text %}
         <p>
           Write your task texts as you go along, and save them here on the race
-          server. You can download them all as a single text or HTML file, to
-          copy-and-paste into your report.
-          <br>
-          Not sure how? Follow
-          <a href="{{ url_for('public.serve_project_page', page='report') }}#how-to-set-it-up">these instructions</a>.
+          server. 
+          {% if report_type == "in editor" %}
+            You can download them all as a single HTML or text file, to
+            copy-and-paste into your report.
+            <br>
+            Not sure how? Follow
+            <a href="{{ url_for('public.serve_project_page', page='report') }}#how-to-set-it-up">these instructions</a>.
+          {% else %}
+            You can download them all as a single HTML or text file.
+          {% endif %}
         </p>
       {% endif %}
     {% endif %}
@@ -118,6 +123,16 @@
             {% endif %}
             <div class="row">
               <div class="col-sm-4">
+                {% if current_user.is_administrator and texts_by_task_id[task.id] %}
+                  <p>
+                    <em>Word count:</em>
+                      {% if texts_by_task_id[task.id].word_count is none %}
+                        <em class="empty-setting">not&nbsp;counted</em>
+                      {% else %}
+                        {{ texts_by_task_id[task.id].word_count }}
+                      {% endif %}
+                  </p>
+                {% endif %}
                 {% if is_own_text %}
                   <p class="btn-collection">
                     <a href="{{ url_for('user.task_text', task_fullname=task.fullname) }}" class="btn btn-outline-secondary btn-jump">

@@ -1058,3 +1058,41 @@ a.sm-item-link.admin-tint-violet,
 span.sm-item-link.admin-tint-violet {
   background-color: #C39BD3;
 }
+#matrix-word-count-control {
+  padding:1em;
+}
+#matrix-word-count-control label {
+  display: block;
+}
+#word-count-slider {
+  margin:0;
+  padding:0.5em;
+  border: 1px solid #999999;
+}
+#word-count-threshold { /* is input[type=range] */
+  width:100%;
+}
+#matrix-word-count-control datalist {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  writing-mode: sideways-rl;
+  transform: rotateZ(180deg);
+  width: 100%;
+}
+#matrix-word-count-control datalist option {
+  padding: 0;
+}
+#all-student-texts .tt-cell {
+  transition: background-color 0.3s;
+}
+.modal-text-info {
+  display: flex;
+}
+.modal-text-info p {
+  width:48%;
+}
+#wc-current-threshold {
+  width: 6em;
+  display:inline-block;
+}

@@ -19,7 +19,7 @@
     <div class="col btn-collection">
       <a href="{{ url_for('public.serve_project_page', page='tasks') }}" class="btn btn-outline-secondary btn-jump">Task list</a>
       {% if report_type %}
-        <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page=report_type ) }}">{{ report_type | title }} details</a>
+        <a class="btn btn-outline-secondary btn-jump" href="{{ url_for( 'public.serve_project_page', page='report' ) }}">Report details</a>
       {% endif %}
     </div>
   </div>

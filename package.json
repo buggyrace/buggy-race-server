@@ -31,12 +31,19 @@
   },
   "homepage": "https://github.com/buggyrace/buggy_race_server#readme",
   "dependencies": {
+    "@babel/plugin-transform-modules-systemjs": "^7.29.7",
     "bootstrap": "4.3.1",
+    "flatted": "^3.4.2",
     "jquery": "3.7.1",
-    "popper.js": "1.15.0"
+    "js-yaml": "^5.2.1",
+    "lodash": "^4.18.1",
+    "minimatch": "^10.2.5",
+    "popper.js": "1.15.0",
+    "postcss": "^8.5.16",
+    "serialize-javascript": "^7.0.7"
   },
   "devDependencies": {
-    "@babel/core": "7.23.2",
+    "@babel/core": "^7.23.2",
     "@babel/eslint-parser": "7.19.1",
     "@babel/preset-env": "7.7.7",
     "babel-loader": "9.1.3",
@@ -52,7 +59,7 @@
     "raw-loader": "4.0.0",
     "run-script-os": "^1.0.7",
     "url-loader": "4.0.0",
-    "webpack": "5.88.1",
+    "webpack": "^5.88.1",
     "webpack-cli": "5.1.4"
   }
 }

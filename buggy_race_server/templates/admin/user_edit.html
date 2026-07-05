@@ -270,19 +270,19 @@
           </div>
           <div class="col-sm-4">
             <select name="admin_tint" class="form-control mr-sm-1">
-              <option value="" {% if user and not user.admin_tint %}selected{% endif %}>None</option>
-              <option value="blue" {% if not user or user.admin_tint == "blue" %}selected{% endif %}>blue</option>
-              <option value="green" {% if not user or user.admin_tint == "green" %}selected{% endif %}>green</option>
-              <option value="orange" {% if not user or user.admin_tint == "orange" %}selected{% endif %}>orange</option>
-              <option value="red" {% if not user or user.admin_tint == "red" %}selected{% endif %}>red</option>
-              <option value="yellow" {% if not user or user.admin_tint == "yellow" %}selected{% endif %}>yellow</option>
-              <option value="violet" {% if not user or user.admin_tint == "violet" %}selected{% endif %}>violet</option>
+              <option value="" {% if user and not user.admin_tint %}selected{% endif %}>none</option>
+              <option value="blue" {% if user and user.admin_tint == "blue" %}selected{% endif %}>blue</option>
+              <option value="green" {% if user and user.admin_tint == "green" %}selected{% endif %}>green</option>
+              <option value="orange" {% if user and user.admin_tint == "orange" %}selected{% endif %}>orange</option>
+              <option value="red" {% if user and user.admin_tint == "red" %}selected{% endif %}>red</option>
+              <option value="yellow" {% if user and user.admin_tint == "yellow" %}selected{% endif %}>yellow</option>
+              <option value="violet" {% if user and user.admin_tint == "violet" %}selected{% endif %}>violet</option>
             </select>
           </div>
           <div class="col-sm-5">
             Admin tint changes the display of buttons for this user,
             which can be helpful to distinguish groups of students on
-            some admin page.
+            some admin pages.
           </div>
         </div>
 

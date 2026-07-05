@@ -15,7 +15,7 @@
       <div class="alert alert-warning">
         Currently only texts belonging to <em>active students</em> are shown on this page.
       </div>
-      {% if not students %}
+      {% if qty_students == 0 %}
         <div class="alert alert-danger">
           No active students found.
         </div>
@@ -57,11 +57,11 @@
               <div class="row">
                 <div class="col p-3">
                   {% for text in texts_by_task_id[task.id] %}
-                      <a class="sm-item-link"
+                      <a class="sm-item-link {{ students_by_id[text.user_id].admin_tint_css }}"
                       href="{{ url_for('admin.show_user', user_id=text.user_id) }}#task-{{ task.fullname | lower }}"
                       data-created-at="{{ text.created_at }}" data-modified-at="{{ text.created_at }}"
                       data-length="{{ text.text | length }}"
-                      >{{ pretty_usernames_by_id[text.user_id] }}</a>
+                      >{{ students_by_id[text.user_id].pretty_username }}</a>
                   {% endfor %}
                 </div>
               </div>
@@ -76,7 +76,8 @@
                     </h2>
                     <div class="mt-2 pb-2" id="detail-nonauthor-{{ task.fullname | lower }}">
                       {% for user_id in nonauthors_by_task_id[task.id] %}
-                        <a class="sm-item-link" href="{{ url_for('admin.show_user', user_id=user_id) }}">{{ pretty_usernames_by_id[user_id] }}</a>
+                        <a class="sm-item-link {{ students_by_id[user_id].admin_tint_css }}"
+                          href="{{ url_for('admin.show_user', user_id=user_id) }}">{{ students_by_id[user_id].pretty_username }}</a>
                       {% endfor %}
                     </div>
                   </div>

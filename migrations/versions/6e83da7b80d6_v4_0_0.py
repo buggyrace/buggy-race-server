@@ -1,8 +1,8 @@
-"""v2.0.2 with timestamps
+"""empty message
 
-Revision ID: 8541b7aad85a
+Revision ID: 6e83da7b80d6
 Revises: 
-Create Date: 2023-07-19 11:47:54.262126
+Create Date: 2026-10-07 22:35:55.857257
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8541b7aad85a'
+revision = '6e83da7b80d6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,7 +45,10 @@ def upgrade():
     sa.Column('track_image_url', sa.String(length=255), nullable=True),
     sa.Column('track_svg_url', sa.String(length=255), nullable=True),
     sa.Column('max_laps', sa.Integer(), nullable=True),
+    sa.Column('svg_path_length', sa.Integer(), nullable=True),
     sa.Column('lap_length', sa.Integer(), nullable=True),
+    sa.Column('start_offset', sa.Integer(), nullable=True),
+    sa.Column('finish_offset', sa.Integer(), nullable=True),
     sa.Column('is_dnf_position', sa.Boolean(), nullable=False),
     sa.Column('is_abandoned', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -57,7 +60,13 @@ def upgrade():
     sa.Column('desc', sa.Text(), nullable=False),
     sa.Column('track_image_url', sa.String(length=255), nullable=True),
     sa.Column('track_svg_url', sa.String(length=255), nullable=True),
+    sa.Column('track_image', sa.LargeBinary(), nullable=True),
+    sa.Column('image_media_type', sa.String(length=32), nullable=True),
+    sa.Column('track_svg', sa.Text(), nullable=True),
+    sa.Column('svg_path_length', sa.Integer(), nullable=True),
     sa.Column('lap_length', sa.Integer(), nullable=True),
+    sa.Column('start_offset', sa.Integer(), nullable=True),
+    sa.Column('finish_offset', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('settings',
@@ -97,6 +106,8 @@ def upgrade():
     sa.Column('github_access_token', sa.Text(), nullable=True),
     sa.Column('is_student', sa.Boolean(), nullable=True),
     sa.Column('logged_in_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('first_logged_in_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_login_enabled', sa.Boolean(), nullable=False),
     sa.Column('uploaded_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('api_secret', sa.String(length=30), nullable=True),
     sa.Column('api_secret_at', sa.DateTime(timezone=True), nullable=True),
@@ -105,6 +116,10 @@ def upgrade():
     sa.Column('api_key', sa.String(length=30), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('is_demo_user', sa.Boolean(), nullable=True),
+    sa.Column('project_notice', sa.Text(), nullable=True),
+    sa.Column('submission_deadline', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('submission_link', sa.String(length=128), nullable=True),
+    sa.Column('admin_tint', sa.String(length=16), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
@@ -179,6 +194,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('task_id', sa.Integer(), nullable=False),
     sa.Column('text', sa.Text(), nullable=False),
+    sa.Column('word_count', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['task_id'], ['tasks.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

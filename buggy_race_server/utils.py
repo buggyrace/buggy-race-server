@@ -149,6 +149,8 @@ def load_settings_from_db(app):
 
         Also, this includes non-persistent config settings
     """
+    db_url = current_app.config.get("DATABASE_URL")
+    print(f"* database URL: {redact_password_in_database_url(db_url)}")
     settings = Setting.query.all()
     names_found_in_db = [setting.id for setting in settings if ConfigSettings.is_valid_name(setting.id)]
     missing_settings = []
@@ -244,6 +246,8 @@ def redact_password_in_database_url(database_url):
             redacted_database_url = f"{match[1]}******{match[2]}"
         elif match := re.match(DATABASE_RE_WITH_PARAM, database_url):
             redacted_database_url = f"{match[1]}******{match[2] or ''}"
+        elif database_url.startswith('sqlite:'):
+            redacted_database_url = database_url
     return redacted_database_url
 
 def prettify_form_field_name(name):

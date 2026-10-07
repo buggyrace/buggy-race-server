@@ -89,7 +89,7 @@ def create_app():
                   need to run migrations first, or schema.sql?"""
 
         except OperationalError as e:
-            print(f"* ERROR: database problem: {e}", file=sys.stderr)
+            print(f" * ERROR: database problem: {e}", file=sys.stderr)
             app.config['INIT_ERROR_MESSAGE'] = """Database error — probably
               a failure to connect: check DATABASE_URL and error logs"""
 
@@ -149,9 +149,9 @@ def create_app():
                 )
                 is_storing_task_link_in_db = app.config.get(ConfigSettingNames.IS_STORING_TASK_LIST_IN_DB.name)
                 if not is_storing_task_link_in_db and not path.exists(generated_task_file):
-                    print(f"* publishing task list (for {server_url})", flush=True)
+                    print(f" * publishing task list (for {server_url})", flush=True)
                     publish_task_list(app)
-                    print(f"* published task list", flush=True)
+                    print(f" * published task list", flush=True)
                 purge_task_list(app, is_storing_task_list_in_db=is_storing_task_link_in_db)
                 generated_issue_file = join_to_project_root(
                     app.config[ConfigSettingNames._PUBLISHED_PATH.name],
@@ -159,7 +159,7 @@ def create_app():
                 )
                 if not path.exists(generated_issue_file):
                     publish_tasks_as_issues_csv(app)
-                    print(f"* published task issues CSV", flush=True)
+                    print(f" * published task issues CSV", flush=True)
 
             if app.config.get(ConfigSettingNames._TECH_NOTES_GENERATED_DATETIME.name):
                 tech_notes_sample_file = join_to_project_root(
@@ -169,9 +169,9 @@ def create_app():
                     "index.html"
                 )
                 if not path.exists(tech_notes_sample_file):
-                    print(f"* publishing tech notes (for {server_url})", flush=True)
+                    print(f" * publishing tech notes (for {server_url})", flush=True)
                     publish_tech_notes(app)
-                    print(f"* published tech notes", flush=True)
+                    print(f" * published tech notes", flush=True)
 
             if (
                 app.config.get(ConfigSettingNames._EDITOR_ZIP_GENERATED_DATETIME.name)
@@ -183,9 +183,9 @@ def create_app():
                     app.config[ConfigSettingNames.EDITOR_ZIPFILE_NAME.name]
                 )
                 if not path.exists(target_zipfile):
-                    print(f"* publishing buggy editor zipfile", flush=True)
+                    print(f" * publishing buggy editor zipfile", flush=True)
                     create_editor_zipfile(None, app=app)
-                    print(f"* published buggy editor zipfile", flush=True)
+                    print(f" * published buggy editor zipfile", flush=True)
 
     @app.before_request
     def force_setup_on_new_installs():

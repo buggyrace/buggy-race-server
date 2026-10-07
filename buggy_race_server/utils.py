@@ -136,7 +136,7 @@ def save_config_env_overrides_to_db(app):
             value = app.config.get(name) # expecting a value here
             if value is not None:
                 set_and_save_config_setting(app, name, value)
-                print(f"* written {name} config setting (from ENV) into database", flush=True)
+                print(f" * written {name} config setting (from ENV) into database", flush=True)
 
 def load_settings_from_db(app):
     """ Read settings from db and set the app's config appropriately.
@@ -150,7 +150,7 @@ def load_settings_from_db(app):
         Also, this includes non-persistent config settings
     """
     db_url = current_app.config.get("DATABASE_URL")
-    print(f"* database URL: {redact_password_in_database_url(db_url)}")
+    print(f" * database URL: {redact_password_in_database_url(db_url)}")
     settings = Setting.query.all()
     names_found_in_db = [setting.id for setting in settings if ConfigSettings.is_valid_name(setting.id)]
     missing_settings = []
@@ -168,7 +168,7 @@ def load_settings_from_db(app):
     if missing_settings:
         db.session.execute(insert(Setting.__table__), missing_settings)
         db.session.commit()
-        print(f"* inserted {len(missing_settings)} config settings (with default values) into database", flush=True)
+        print(f" * inserted {len(missing_settings)} config settings (with default values) into database", flush=True)
         # now reload settings: this time it won't have any missing
         settings = Setting.query.all()
 
@@ -733,15 +733,15 @@ def purge_task_list(app=current_app, is_storing_task_list_in_db=None):
             app.config[ConfigSettingNames._TASK_LIST_HTML_FILENAME.name]
         )
         if os.path.exists(generated_task_file):
-            print("* purging unwanted task file (using database instead)", flush=True)
+            print(" * purging unwanted task file (using database instead)", flush=True)
             try:
                 os.unlink(generated_task_file)
             except os.error as e:
-                print(f"* problem deleting uploaded file: {e}", flush=True)
+                print(f" * problem deleting uploaded file: {e}", flush=True)
     else: # we're not using the database, so don't want old task_list in there
         if task_list_dbfile := DbFile.query.filter_by(type=DbFile.TASK_LIST).first():
             task_list_dbfile.delete()
-            print("* purged task list from database (using file instead)", flush=True)
+            print(" * purged task list from database (using file instead)", flush=True)
 
 # get_flag_color_defs for handling pennant/flag display with 
 # custom CSS and SVG masks

@@ -2031,7 +2031,7 @@ class ConfigSettings:
                app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY] = [name]
             elif name not in unexpecteds:
                app.config[ConfigSettings.UNEXPECTED_SETTINGS_KEY].append(name)
-            print(f"* ignoring unknown config setting: {name}, not set", flush=True)
+            print(f" * ignoring unknown config setting: {name}, not set", flush=True)
             return
         type = ConfigSettings.TYPES.get(name) or ConfigTypes.STRING
         if type == ConfigTypes.BOOLEAN:
@@ -2042,7 +2042,7 @@ class ConfigSettings:
             try:
                value = pytz.timezone(str_value)
             except:
-               print(f"* unrecognised timezone: {str_value}")
+               print(f" * unrecognised timezone: {str_value}")
                value = pytz.utc
         app.config[name] = value
 
